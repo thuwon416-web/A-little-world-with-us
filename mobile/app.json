@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "Our Forever",
+    "slug": "our-forever",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "scheme": "ourforever",
+    "description": "A relationship-first companion app for couples to chat, plan, share moments, and stay connected.",
+    "privacy": "public",
+    "githubUrl": "https://github.com/your-org/our-forever",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f0f12"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ourforever.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Allow live location sharing with your partner.",
+        "NSCameraUsageDescription": "Allow video calls and media capture.",
+        "NSMicrophoneUsageDescription": "Allow voice notes and audio calls."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f0f12"
+      },
+      "package": "com.ourforever.app",
+      "versionCode": 1,
+      "permissions": [
+        "INTERNET",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "POST_NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "our-forever-mobile"
+      }
+    }
+  }
+}

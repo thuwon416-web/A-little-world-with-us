@@ -1,0 +1,78 @@
+'use client'
+
+import Link from 'next/link'
+import { Calendar, Cake, Gamepad2, Gift, Heart, Image, Leaf, List } from 'lucide-react'
+import DaysCounter from '@/features/dashboard/DaysCounter'
+import Countdown from '@/features/dashboard/Countdown'
+import MusicPlayer from '@/features/dashboard/MusicPlayer'
+import MemoryOfTheDay from '@/features/memories/MemoryOfTheDay'
+import MiniCareCheck from '@/features/cycle/MiniCareCheck'
+
+const BIRTHDAY_HER = process.env.NEXT_PUBLIC_BIRTHDAY_HER || '2000-09-10'
+const BIRTHDAY_ME = process.env.NEXT_PUBLIC_BIRTHDAY_ME || '2000-09-10'
+const quickActions = [
+  { href: '/chat', title: 'Chat', description: 'Send a little love note', icon: Heart },
+  { href: '/memories', title: 'Memories', description: 'Revisit moments together', icon: Image },
+  { href: '/wellness', title: 'Wellness', description: 'Care for your connection', icon: Leaf },
+  { href: '/calendar', title: 'Calendar', description: 'Plan your next moment', icon: Calendar },
+  { href: '/games', title: 'Games', description: 'Play something together', icon: Gamepad2 },
+  { href: '/planning', title: 'Planning', description: 'Shape your future plans', icon: List },
+]
+
+export default function DashboardPage() {
+  return (
+    <main className="relative min-h-screen">
+      <div className="cinematic-bg" />
+      <div className="mx-auto max-w-6xl px-4 py-8 relative z-10">
+        <section className="mb-8 rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-xl backdrop-blur-xl">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">Welcome home</p>
+          <h1 className="mt-2 text-5xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
+            Our Forever
+          </h1>
+          <p className="mt-3 text-sm text-[var(--text-secondary)]">Our little corner of the universe.</p>
+        </section>
+
+        <section className="mb-6">
+          <DaysCounter />
+        </section>
+
+        <section className="mb-8 grid gap-4 md:grid-cols-2">
+          <Countdown targetDate={BIRTHDAY_HER} label="Her Birthday" icon={<Cake className="h-6 w-6" />} />
+          <Countdown targetDate={BIRTHDAY_ME} label="My Birthday" icon={<Gift className="h-6 w-6" />} />
+        </section>
+
+        <section className="mb-8 grid gap-6 lg:grid-cols-2">
+          <div className="glass-card p-5">
+            <MemoryOfTheDay />
+          </div>
+          <div className="glass-card p-5">
+            <MiniCareCheck />
+          </div>
+        </section>
+
+        <section className="mb-8 rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/60 p-5">
+          <h2 className="text-2xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
+            Quick Actions
+          </h2>
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-3">
+            {quickActions.map(({ href, title, description, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className="group rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4 transition hover:-translate-y-1 hover:border-[var(--accent-1)]/50 hover:bg-[var(--accent-1)]/10"
+              >
+                <Icon className="h-5 w-5 text-[var(--accent-1)] transition group-hover:scale-110" />
+                <h3 className="mt-3 font-medium text-[var(--text-primary)]">{title}</h3>
+                <p className="mt-1 text-xs text-[var(--text-secondary)]">{description}</p>
+              </Link>
+            ))}
+          </div>
+        </section>
+
+        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
+          <MusicPlayer />
+        </section>
+      </div>
+    </main>
+  )
+}

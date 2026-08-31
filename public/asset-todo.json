@@ -1,0 +1,20 @@
+{
+  "status": "pending",
+  "items": [
+    {
+      "type": "icons",
+      "required": ["/public/icon-192x192.png", "/public/icon-512x512.png"],
+      "note": "Replace the current placeholder app icons with final brand icons before production launch."
+    },
+    {
+      "type": "sounds",
+      "required": ["/public/sounds/pop.wav"],
+      "note": "Replace the placeholder chat sound with the final message notification asset."
+    },
+    {
+      "type": "images",
+      "required": ["/public/hero-*.png", "/public/cover-*.png", "/public/gallery-*.jpg"],
+      "note": "Add final imagery for the landing page, memories, and relationship gallery once the real media set is ready."
+    }
+  ]
+}

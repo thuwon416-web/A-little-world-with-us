@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Our Forever icon">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#2d1b4e" />
+      <stop offset="55%" stop-color="#ff6b9d" />
+      <stop offset="100%" stop-color="#ffd700" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)" />
+  <circle cx="256" cy="180" r="58" fill="#fff0f5" opacity="0.9" />
+  <path d="M120 220c0-54 44-98 98-98 44 0 80 28 94 66 14-38 50-66 94-66 54 0 98 44 98 98v42c0 94-78 170-192 214C198 432 120 356 120 262v-42Z" fill="#fff0f5" opacity="0.88"/>
+  <path d="M192 190c-28 0-50 24-50 52 0 58 54 90 114 138 60-48 114-80 114-138 0-28-22-52-50-52-24 0-42 14-56 34-14-20-32-34-56-34Z" fill="#ff5ea8" opacity="0.9"/>
+  <text x="256" y="400" text-anchor="middle" font-size="64" font-family="Georgia, serif" fill="#2d1b4e" font-weight="700">∞</text>
+</svg>
