@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native'
+
 import { designTokens } from '@/design-tokens'
 
 interface InputProps extends TextInputProps {

@@ -6,7 +6,7 @@ const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error(
-    'Missing Supabase environment variables. Please copy .env.example to .env and fill in your values.',
+    'Missing Supabase environment variables. Please copy .env.example to .env and fill in your values.'
   )
 }
 
@@ -14,7 +14,7 @@ export const isSupabaseConfigured = true
 
 export let networkStatus = { isConnected: true }
 
-export const queuedRequests: Array<() => Promise<unknown>> = []
+export const queuedRequests: (() => Promise<unknown>)[] = []
 
 export const setNetworkStatus = (connected: boolean) => {
   networkStatus = { isConnected: connected }
@@ -24,7 +24,9 @@ export const queueFailedRequest = (task: () => Promise<unknown>) => {
   queuedRequests.push(task)
 }
 
-export const safeSupabaseRequest = async <T>(request: () => Promise<{ data: T | null; error: { message: string } | null }>) => {
+export const safeSupabaseRequest = async <T>(
+  request: () => Promise<{ data: T | null; error: { message: string } | null }>
+) => {
   if (!networkStatus.isConnected) {
     queueFailedRequest(() => request())
     return { data: null, error: { message: 'Offline. Request queued for sync.' } }

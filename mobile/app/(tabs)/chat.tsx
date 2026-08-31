@@ -1,14 +1,15 @@
 import { Q } from '@nozbe/watermelondb'
+import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { useRouter } from 'expo-router'
-import { ChatBubble } from '@/components/ChatBubble'
+
 import { Button } from '@/components/Button'
+import { ChatBubble } from '@/components/ChatBubble'
 import { Input } from '@/components/Input'
 import { database } from '@/database'
-import { useAuth } from '@/lib/auth'
 import { useCall } from '@/hooks/useCall'
 import { useSync } from '@/hooks/useSync'
+import { useAuth } from '@/lib/auth'
 
 function formatMessageTime(value: string) {
   const date = new Date(value)
@@ -50,7 +51,7 @@ export default function ChatScreen() {
               text: rawRecord._get('content') ?? '',
               time: formatMessageTime(rawRecord._get('created_at') ?? new Date().toISOString()),
             }
-          }),
+          })
         )
       })
 
@@ -82,7 +83,13 @@ export default function ChatScreen() {
     await refresh()
   }
 
-  const statusLabel = isOffline ? 'Offline' : status === 'syncing' ? 'Syncing...' : status === 'error' ? 'Sync error' : 'Synced'
+  const statusLabel = isOffline
+    ? 'Offline'
+    : status === 'syncing'
+      ? 'Syncing...'
+      : status === 'error'
+        ? 'Sync error'
+        : 'Synced'
 
   return (
     <View style={styles.container}>
@@ -100,10 +107,16 @@ export default function ChatScreen() {
       </ScrollView>
 
       <View style={styles.callRow}>
-        <TouchableOpacity style={styles.callButton} onPress={() => void placeCall('partner-user-id', 'audio')}>
+        <TouchableOpacity
+          style={styles.callButton}
+          onPress={() => void placeCall('partner-user-id', 'audio')}
+        >
           <Text style={styles.callButtonText}>Audio call</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.callButtonVideo} onPress={() => void placeCall('partner-user-id', 'video')}>
+        <TouchableOpacity
+          style={styles.callButtonVideo}
+          onPress={() => void placeCall('partner-user-id', 'video')}
+        >
           <Text style={styles.callButtonText}>Video call</Text>
         </TouchableOpacity>
       </View>

@@ -1,5 +1,6 @@
-import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+
 import { useLocation } from '@/hooks/useLocation'
 
 const DEFAULT_REGION = {
@@ -10,7 +11,16 @@ const DEFAULT_REGION = {
 }
 
 export default function LocationScreen() {
-  const { currentLocation, partnerLocation, distanceKm, isSharing, loading, error, lastUpdated, toggleSharing } = useLocation()
+  const {
+    currentLocation,
+    partnerLocation,
+    distanceKm,
+    isSharing,
+    loading,
+    error,
+    lastUpdated,
+    toggleSharing,
+  } = useLocation()
 
   const region = currentLocation
     ? {
@@ -44,7 +54,10 @@ export default function LocationScreen() {
       >
         {currentLocation ? (
           <Marker
-            coordinate={{ latitude: currentLocation.latitude, longitude: currentLocation.longitude }}
+            coordinate={{
+              latitude: currentLocation.latitude,
+              longitude: currentLocation.longitude,
+            }}
             title="You"
             pinColor="#ff6b81"
           />
@@ -52,7 +65,10 @@ export default function LocationScreen() {
 
         {partnerLocation ? (
           <Marker
-            coordinate={{ latitude: partnerLocation.latitude, longitude: partnerLocation.longitude }}
+            coordinate={{
+              latitude: partnerLocation.latitude,
+              longitude: partnerLocation.longitude,
+            }}
             title="Partner"
             pinColor="#b88ae5"
           />
@@ -64,7 +80,9 @@ export default function LocationScreen() {
         <Text style={styles.value}>{isSharing ? 'Live sharing active' : 'Opt-in only'}</Text>
 
         <Text style={styles.label}>Last updated</Text>
-        <Text style={styles.value}>{lastUpdated ? new Date(lastUpdated).toLocaleString() : 'Waiting for GPS'}</Text>
+        <Text style={styles.value}>
+          {lastUpdated ? new Date(lastUpdated).toLocaleString() : 'Waiting for GPS'}
+        </Text>
 
         {distanceKm !== null ? (
           <>
@@ -73,7 +91,10 @@ export default function LocationScreen() {
           </>
         ) : null}
 
-        <TouchableOpacity style={[styles.button, isSharing ? styles.buttonStop : styles.buttonShare]} onPress={() => void handleToggle()}>
+        <TouchableOpacity
+          style={[styles.button, isSharing ? styles.buttonStop : styles.buttonShare]}
+          onPress={() => void handleToggle()}
+        >
           <Text style={styles.buttonText}>{isSharing ? 'Stop sharing' : 'Share my location'}</Text>
         </TouchableOpacity>
 

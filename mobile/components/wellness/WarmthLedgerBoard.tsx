@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type WarmthItem = {
@@ -11,11 +12,24 @@ type WarmthItem = {
 
 const starterItems: WarmthItem[] = [
   { id: 'warmth-1', title: 'The room felt easier once you were in it', kind: 'steady', done: true },
-  { id: 'warmth-2', title: 'One sweet sentence that softened the whole evening', kind: 'spark', done: false },
-  { id: 'warmth-3', title: 'A quiet moment of comfort without needing to explain everything', kind: 'quiet', done: true },
+  {
+    id: 'warmth-2',
+    title: 'One sweet sentence that softened the whole evening',
+    kind: 'spark',
+    done: false,
+  },
+  {
+    id: 'warmth-3',
+    title: 'A quiet moment of comfort without needing to explain everything',
+    kind: 'quiet',
+    done: true,
+  },
 ]
 
-const kindMeta: Record<WarmthItem['kind'], { label: string; style: { backgroundColor: string; borderColor: string } }> = {
+const kindMeta: Record<
+  WarmthItem['kind'],
+  { label: string; style: { backgroundColor: string; borderColor: string } }
+> = {
   steady: { label: 'steady', style: { backgroundColor: '#2d2234', borderColor: '#d8b9c8' } },
   spark: { label: 'spark', style: { backgroundColor: '#171d29', borderColor: '#b7c3f0' } },
   quiet: { label: 'quiet', style: { backgroundColor: '#1c2129', borderColor: '#b0d8c5' } },
@@ -48,7 +62,10 @@ export default function WarmthLedgerBoard() {
     const value = title.trim()
     if (!value) return
 
-    setItems((current) => [...current, { id: `warmth-${Date.now()}`, title: value, kind, done: false }])
+    setItems((current) => [
+      ...current,
+      { id: `warmth-${Date.now()}`, title: value, kind, done: false },
+    ])
     setTitle('')
   }
 
@@ -66,7 +83,9 @@ export default function WarmthLedgerBoard() {
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.count}>{doneCount}/{items.length}</Text>
+        <Text style={styles.count}>
+          {doneCount}/{items.length}
+        </Text>
       </View>
 
       <View style={styles.list}>
@@ -95,7 +114,9 @@ export default function WarmthLedgerBoard() {
               onPress={() => setKind(option)}
               style={[styles.option, option === kind && styles.optionSelected]}
             >
-              <Text style={[styles.optionText, option === kind && styles.optionTextSelected]}>{option}</Text>
+              <Text style={[styles.optionText, option === kind && styles.optionTextSelected]}>
+                {option}
+              </Text>
             </Pressable>
           ))}
         </View>

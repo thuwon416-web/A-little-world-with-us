@@ -1,18 +1,18 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native'
 
 export type ChatMessage = {
-  id: string;
-  sender: 'me' | 'them';
-  text: string;
-  time: string;
-};
+  id: string
+  sender: 'me' | 'them'
+  text: string
+  time: string
+}
 
 interface ChatBubbleProps {
-  message: ChatMessage;
+  message: ChatMessage
 }
 
 export function ChatBubble({ message }: ChatBubbleProps) {
-  const isMe = message.sender === 'me';
+  const isMe = message.sender === 'me'
 
   return (
     <View style={[styles.row, isMe ? styles.rowMe : styles.rowThem]}>
@@ -21,7 +21,7 @@ export function ChatBubble({ message }: ChatBubbleProps) {
       </View>
       <Text style={styles.time}>{message.time}</Text>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -61,4 +61,4 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
-});
+})

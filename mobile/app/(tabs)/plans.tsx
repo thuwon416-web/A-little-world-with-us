@@ -1,6 +1,15 @@
-import { useState } from 'react'
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useState } from 'react'
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+
 import { Button } from '@/components/Button'
 import { PlanCard } from '@/components/PlanCard'
 import { usePlans } from '@/hooks/usePlans'
@@ -44,7 +53,9 @@ export default function PlansScreen() {
       onPress={() => setType(value)}
       style={[styles.typeButton, type === value && styles.typeButtonActive]}
     >
-      <Text style={[styles.typeButtonText, type === value && styles.typeButtonTextActive]}>{value}</Text>
+      <Text style={[styles.typeButtonText, type === value && styles.typeButtonTextActive]}>
+        {value}
+      </Text>
     </TouchableOpacity>
   )
 
@@ -55,7 +66,10 @@ export default function PlansScreen() {
 
       <View style={styles.toolbar}>
         <Button title="New plan" onPress={() => setShowComposer((current) => !current)} />
-        <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push('/bucket-list')}>
+        <TouchableOpacity
+          style={styles.secondaryButton}
+          onPress={() => router.push('/bucket-list')}
+        >
           <Text style={styles.secondaryButtonText}>Bucket list</Text>
         </TouchableOpacity>
       </View>
@@ -77,7 +91,9 @@ export default function PlansScreen() {
             style={[styles.input, styles.textArea]}
             multiline
           />
-          <View style={styles.typeRow}>{(['date', 'trip', 'goal', 'life', 'other'] as const).map(renderTypeButton)}</View>
+          <View style={styles.typeRow}>
+            {(['date', 'trip', 'goal', 'life', 'other'] as const).map(renderTypeButton)}
+          </View>
           <Button title="Save plan" onPress={() => void handleCreate()} />
         </View>
       ) : null}
@@ -86,7 +102,9 @@ export default function PlansScreen() {
       {loading ? <Text style={styles.loading}>Loading plans…</Text> : null}
 
       {plans.length === 0 ? (
-        <Text style={styles.empty}>No plans yet. Start with a little dream for the two of you.</Text>
+        <Text style={styles.empty}>
+          No plans yet. Start with a little dream for the two of you.
+        </Text>
       ) : (
         plans.map((plan) => (
           <View key={plan.id}>

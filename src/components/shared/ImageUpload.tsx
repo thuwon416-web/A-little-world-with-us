@@ -1,6 +1,6 @@
 'use client'
 
-import { ChangeEvent, useRef, useState } from 'react'
+import { type ChangeEvent, useRef, useState } from 'react'
 import { uploadGalleryImage } from '@/lib/storage'
 
 export type UploadImageResult = Awaited<ReturnType<typeof uploadGalleryImage>>

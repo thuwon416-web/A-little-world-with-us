@@ -1,5 +1,6 @@
 import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
+
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 Notifications.setNotificationHandler({
@@ -41,7 +42,9 @@ export async function registerForPushNotifications() {
   return token
 }
 
-export async function scheduleReminder(reminder: Omit<Reminder, 'id' | 'user_id'> & { user_id?: string }) {
+export async function scheduleReminder(
+  reminder: Omit<Reminder, 'id' | 'user_id'> & { user_id?: string }
+) {
   if (!isSupabaseConfigured) {
     return null
   }

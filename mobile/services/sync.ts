@@ -1,4 +1,5 @@
 import { Q } from '@nozbe/watermelondb'
+
 import { database } from '@/database'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
@@ -97,13 +98,9 @@ export function subscribeToChanges(onChange: () => void) {
 
   const channel = supabase
     .channel('mobile-chat-sync')
-    .on(
-      'postgres_changes',
-      { event: '*', schema: 'public', table: 'chat_messages' },
-      () => {
-        onChange()
-      },
-    )
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
+      onChange()
+    })
     .subscribe()
 
   return {

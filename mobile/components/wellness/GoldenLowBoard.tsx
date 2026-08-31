@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type GoldenItem = {
@@ -10,12 +11,30 @@ type GoldenItem = {
 }
 
 const starterItems: GoldenItem[] = [
-  { id: 'golden-1', title: 'Let the evening choose gentleness over urgency', tone: 'gold', done: true },
-  { id: 'golden-2', title: 'Choose a calm enough rhythm to feel safe together', tone: 'calm', done: false },
-  { id: 'golden-3', title: 'Let warmth arrive softly enough to be trusted', tone: 'warm', done: true },
+  {
+    id: 'golden-1',
+    title: 'Let the evening choose gentleness over urgency',
+    tone: 'gold',
+    done: true,
+  },
+  {
+    id: 'golden-2',
+    title: 'Choose a calm enough rhythm to feel safe together',
+    tone: 'calm',
+    done: false,
+  },
+  {
+    id: 'golden-3',
+    title: 'Let warmth arrive softly enough to be trusted',
+    tone: 'warm',
+    done: true,
+  },
 ]
 
-const toneMeta: Record<GoldenItem['tone'], { label: string; style: { backgroundColor: string; borderColor: string } }> = {
+const toneMeta: Record<
+  GoldenItem['tone'],
+  { label: string; style: { backgroundColor: string; borderColor: string } }
+> = {
   gold: { label: 'gold', style: { backgroundColor: '#2d2234', borderColor: '#d8b9c8' } },
   calm: { label: 'calm', style: { backgroundColor: '#171d29', borderColor: '#b7c3f0' } },
   warm: { label: 'warm', style: { backgroundColor: '#271d22', borderColor: '#f4c7a5' } },
@@ -48,7 +67,10 @@ export default function GoldenLowBoard() {
     const value = title.trim()
     if (!value) return
 
-    setItems((current) => [...current, { id: `golden-${Date.now()}`, title: value, tone, done: false }])
+    setItems((current) => [
+      ...current,
+      { id: `golden-${Date.now()}`, title: value, tone, done: false },
+    ])
     setTitle('')
   }
 
@@ -66,7 +88,9 @@ export default function GoldenLowBoard() {
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.count}>{doneCount}/{items.length}</Text>
+        <Text style={styles.count}>
+          {doneCount}/{items.length}
+        </Text>
       </View>
 
       <View style={styles.list}>
@@ -95,7 +119,9 @@ export default function GoldenLowBoard() {
               onPress={() => setTone(option)}
               style={[styles.option, option === tone && styles.optionSelected]}
             >
-              <Text style={[styles.optionText, option === tone && styles.optionTextSelected]}>{option}</Text>
+              <Text style={[styles.optionText, option === tone && styles.optionTextSelected]}>
+                {option}
+              </Text>
             </Pressable>
           ))}
         </View>

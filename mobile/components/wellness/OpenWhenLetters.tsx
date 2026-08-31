@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type Letter = {
@@ -66,7 +67,11 @@ export default function OpenWhenLetters() {
             <Pressable
               key={letter.id}
               onPress={() => toggleLetter(letter.id)}
-              style={[styles.letterCard, letter.opened && styles.letterOpen, isActive && styles.letterActive]}
+              style={[
+                styles.letterCard,
+                letter.opened && styles.letterOpen,
+                isActive && styles.letterActive,
+              ]}
             >
               <Text style={styles.letterTitle}>{letter.title}</Text>
               <Text style={styles.letterHint}>{letter.hint}</Text>

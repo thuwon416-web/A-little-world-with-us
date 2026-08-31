@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
-import { syncMessages, type SyncStatus } from '@/services/sync'
+
 import { useNetwork } from './useNetwork'
+
+import { syncMessages, type SyncStatus } from '@/services/sync'
 
 export function useSync() {
   const { isConnected } = useNetwork()

@@ -1,39 +1,24 @@
-﻿# Launch Checklist
+# Launch Checklist
 
 ## Pre-Launch
-
 - [ ] Environment variables configured
 - [ ] Supabase project setup
-- [ ] SQL migrations run
-- [ ] TypeScript checks pass
-- [ ] Lint checks pass
-- [ ] Tests pass (if any)
+- [ ] RLS policies deployed
+- [ ] Domain configured
 
-## Web App
+## Testing
+- [ ] Web app tested
+- [ ] Mobile app tested
+- [ ] All features working
+- [ ] No console errors
 
-- [ ] Build succeeds (`npm run build`)
-- [ ] Deploy to production
-- [ ] Custom domain configured
+## Deployment
+- [ ] Vercel deployed
+- [ ] Production build successful
 - [ ] SSL certificate active
-- [ ] Analytics configured
-
-## Mobile App
-
-- [ ] Build succeeds (`eas build`)
-- [ ] Test on Android device
-- [ ] Test on iOS device (if applicable)
-- [ ] Submit to Google Play Store
-- [ ] Submit to Apple App Store (if applicable)
+- [ ] Monitoring setup
 
 ## Post-Launch
-
-- [ ] Monitor errors/logs
-- [ ] Collect user feedback
-- [ ] Fix critical bugs
-- [ ] Plan next release
-
-## Success Metrics
-
-- [ ] X users signed up
-- [ ] Y% retention rate
-- [ ] Z app store rating
+- [ ] Analytics tracking
+- [ ] Error monitoring
+- [ ] User feedback collected

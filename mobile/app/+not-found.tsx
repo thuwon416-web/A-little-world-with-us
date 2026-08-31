@@ -1,5 +1,5 @@
-import { Link } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Link } from 'expo-router'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 export default function NotFoundScreen() {
   return (
@@ -12,7 +12,7 @@ export default function NotFoundScreen() {
         </Pressable>
       </Link>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -44,4 +44,4 @@ const styles = StyleSheet.create({
     color: '#101317',
     fontWeight: '700',
   },
-});
+})

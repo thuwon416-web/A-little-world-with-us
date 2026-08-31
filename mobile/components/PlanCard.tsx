@@ -1,7 +1,8 @@
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { ProgressBar } from '@/components/ProgressBar'
+
 import { PlanItem } from '@/components/PlanItem'
+import { ProgressBar } from '@/components/ProgressBar'
 import type { PlanRecord } from '@/services/plans'
 
 interface PlanCardProps {
@@ -42,21 +43,25 @@ export function PlanCard({ plan, onPress, onToggleItem }: PlanCardProps) {
 
       <View style={styles.metaRow}>
         <Text style={styles.meta}>{getDaysUntil(plan.due_date)}</Text>
-        <Text style={styles.meta}>{doneCount}/{items.length || 0} done</Text>
+        <Text style={styles.meta}>
+          {doneCount}/{items.length || 0} done
+        </Text>
       </View>
 
       <ProgressBar progress={progress} />
 
       <View style={styles.itemList}>
         {items.length > 0 ? (
-          items.slice(0, 3).map((item) => (
-            <PlanItem
-              key={item.id}
-              title={item.title}
-              completed={item.completed}
-              onToggle={() => onToggleItem?.(item.id, !item.completed)}
-            />
-          ))
+          items
+            .slice(0, 3)
+            .map((item) => (
+              <PlanItem
+                key={item.id}
+                title={item.title}
+                completed={item.completed}
+                onToggle={() => onToggleItem?.(item.id, !item.completed)}
+              />
+            ))
         ) : (
           <Text style={styles.empty}>No checklist items yet.</Text>
         )}

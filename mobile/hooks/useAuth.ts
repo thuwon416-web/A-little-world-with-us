@@ -1,25 +1,26 @@
-import { useEffect, useState } from 'react';
-import { getAuthToken } from '@/lib/auth';
+import { useEffect, useState } from 'react'
+
+import { getAuthToken } from '@/lib/auth'
 
 export function useAuth() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
-    let mounted = true;
+    let mounted = true
 
     async function load() {
-      const token = await getAuthToken();
+      const token = await getAuthToken()
       if (mounted) {
-        setIsAuthenticated(Boolean(token));
+        setIsAuthenticated(Boolean(token))
       }
     }
 
-    load();
+    load()
 
     return () => {
-      mounted = false;
-    };
-  }, []);
+      mounted = false
+    }
+  }, [])
 
-  return { isAuthenticated };
+  return { isAuthenticated }
 }

@@ -83,7 +83,7 @@ export function subscribeToCallSignals(onSignal: (signal: CallSignal) => void) {
       (payload) => {
         const signal = payload.new as CallSignal
         onSignal(signal)
-      },
+      }
     )
     .subscribe()
 

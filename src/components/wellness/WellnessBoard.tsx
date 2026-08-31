@@ -1,7 +1,7 @@
 // src/components/wellness/WellnessBoard.tsx
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { WellnessBoard as BoardData } from '@/types/wellness'
+import { type WellnessBoard as BoardData } from '@/types/wellness'
 
 interface WellnessBoardProps {
   board: BoardData

@@ -53,6 +53,12 @@ The project combines a Next.js web app with a React Native / Expo mobile app. To
 - Radix UI
 - Lucide icons
 
+## Documentation
+
+- [ENVIRONMENT_SETUP.md](./ENVIRONMENT_SETUP.md) - How to set up environment variables
+- [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md) - Complete deployment instructions
+- [PRODUCTION_CHECKLIST.md](./PRODUCTION_CHECKLIST.md) - Pre-launch checklist
+
 ## Setup
 
 ### Prerequisites

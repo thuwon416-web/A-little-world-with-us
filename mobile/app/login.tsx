@@ -1,6 +1,7 @@
+import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-import { useRouter } from 'expo-router'
+
 import { supabase } from '@/lib/supabase'
 
 export default function LoginScreen() {
@@ -38,7 +39,9 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <Text style={styles.eyebrow}>A Little World for Us</Text>
       <Text style={styles.title}>Welcome back</Text>
-      <Text style={styles.subtitle}>Keep the love close, the memories safe, and the moments together.</Text>
+      <Text style={styles.subtitle}>
+        Keep the love close, the memories safe, and the moments together.
+      </Text>
 
       <View style={styles.form}>
         <TextInput
@@ -61,7 +64,11 @@ export default function LoginScreen() {
         />
       </View>
 
-      <Pressable style={[styles.primaryButton, isLoggingIn && styles.primaryButtonDisabled]} onPress={() => void handleLogin()} disabled={isLoggingIn}>
+      <Pressable
+        style={[styles.primaryButton, isLoggingIn && styles.primaryButtonDisabled]}
+        onPress={() => void handleLogin()}
+        disabled={isLoggingIn}
+      >
         <Text style={styles.primaryButtonText}>{isLoggingIn ? 'Logging in...' : 'Login'}</Text>
       </Pressable>
     </View>

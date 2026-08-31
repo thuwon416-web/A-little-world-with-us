@@ -1,6 +1,7 @@
+import * as Clipboard from 'expo-clipboard'
 import { useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import * as Clipboard from 'expo-clipboard'
+
 import { useAI } from '@/hooks/useAI'
 
 export default function AIAssistantScreen() {
@@ -41,14 +42,18 @@ export default function AIAssistantScreen() {
       </View>
 
       <TouchableOpacity style={styles.refreshButton} onPress={() => void handleRefresh()}>
-        <Text style={styles.refreshText}>{state === 'loading' ? 'Generating...' : 'Refresh ideas'}</Text>
+        <Text style={styles.refreshText}>
+          {state === 'loading' ? 'Generating...' : 'Refresh ideas'}
+        </Text>
       </TouchableOpacity>
 
       {error ? <Text style={styles.error}>{error}</Text> : null}
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {filteredItems.length === 0 ? (
-          <Text style={styles.empty}>No suggestions yet. Tap refresh to generate something sweet.</Text>
+          <Text style={styles.empty}>
+            No suggestions yet. Tap refresh to generate something sweet.
+          </Text>
         ) : (
           filteredItems.map((item) => (
             <View key={item.id} style={styles.card}>
@@ -56,10 +61,16 @@ export default function AIAssistantScreen() {
               <Text style={styles.content}>{item.content}</Text>
 
               <View style={styles.actions}>
-                <TouchableOpacity style={styles.actionButton} onPress={() => void copyText(item.content)}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => void copyText(item.content)}
+                >
                   <Text style={styles.actionText}>Copy</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.actionButton} onPress={() => saveFavorite(item.content)}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => saveFavorite(item.content)}
+                >
                   <Text style={styles.actionText}>Save</Text>
                 </TouchableOpacity>
               </View>

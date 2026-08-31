@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type NoteMood = 'sweet' | 'deep' | 'playful' | 'thankful'
@@ -12,8 +13,18 @@ type Note = {
 }
 
 const starterNotes: Note[] = [
-  { id: 'm1', title: 'For today', text: 'You make ordinary moments feel like magic.', mood: 'sweet' },
-  { id: 'm2', title: 'Why I adore you', text: 'Your kindness softly changes the room for the better.', mood: 'deep' },
+  {
+    id: 'm1',
+    title: 'For today',
+    text: 'You make ordinary moments feel like magic.',
+    mood: 'sweet',
+  },
+  {
+    id: 'm2',
+    title: 'Why I adore you',
+    text: 'Your kindness softly changes the room for the better.',
+    mood: 'deep',
+  },
 ]
 
 const moodStyles: Record<NoteMood, { backgroundColor: string; borderColor: string }> = {
@@ -72,8 +83,22 @@ export default function LoveNotesBoard() {
       </View>
 
       <View style={styles.form}>
-        <TextInput value={title} onChangeText={setTitle} placeholder="Title" placeholderTextColor="#8f8393" style={styles.input} />
-        <TextInput value={text} onChangeText={setText} placeholder="Write a note for your favorite person..." placeholderTextColor="#8f8393" multiline numberOfLines={3} style={[styles.input, styles.textArea]} />
+        <TextInput
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Title"
+          placeholderTextColor="#8f8393"
+          style={styles.input}
+        />
+        <TextInput
+          value={text}
+          onChangeText={setText}
+          placeholder="Write a note for your favorite person..."
+          placeholderTextColor="#8f8393"
+          multiline
+          numberOfLines={3}
+          style={[styles.input, styles.textArea]}
+        />
         <View style={styles.row}>
           <View style={styles.selectWrap}>
             <Text style={styles.selectLabel}>{mood}</Text>

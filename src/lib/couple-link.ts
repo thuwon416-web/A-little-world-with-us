@@ -18,7 +18,6 @@ export async function getPairStatus(): Promise<{ status: CoupleLinkStatus } | nu
     .maybeSingle()
 
   if (error && error.code !== 'PGRST116') {
-    console.warn('Could not load couple link status:', error.message)
     return null
   }
 

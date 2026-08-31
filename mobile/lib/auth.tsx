@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useRouter } from 'expo-router'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+
 import { supabase } from './supabase'
 
 type AuthContextType = {

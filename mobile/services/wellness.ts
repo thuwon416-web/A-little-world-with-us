@@ -36,7 +36,12 @@ export async function logMood(mood: MoodValue, note?: string) {
 
   const { data, error } = await supabase
     .from('mood_logs')
-    .insert({ user_id: localUserId, mood, note: note ?? null, created_at: new Date().toISOString() })
+    .insert({
+      user_id: localUserId,
+      mood,
+      note: note ?? null,
+      created_at: new Date().toISOString(),
+    })
     .select('*')
     .single()
 
@@ -114,7 +119,12 @@ export async function logCycle(startDate: string, endDate?: string, cycleLength?
 
   const { data, error } = await supabase
     .from('cycle_logs')
-    .insert({ user_id: localUserId, start_date: startDate, end_date: endDate ?? null, cycle_length: cycleLength ?? null })
+    .insert({
+      user_id: localUserId,
+      start_date: startDate,
+      end_date: endDate ?? null,
+      cycle_length: cycleLength ?? null,
+    })
     .select('*')
     .single()
 

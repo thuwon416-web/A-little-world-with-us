@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import { Button } from '@/components/Button'
+
 import { BucketListItem } from '@/components/BucketListItem'
+import { Button } from '@/components/Button'
 import { usePlans } from '@/hooks/usePlans'
 
 export default function BucketListScreen() {

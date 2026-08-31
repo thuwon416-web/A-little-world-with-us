@@ -11,7 +11,11 @@ export function CycleTracker({ prediction, cycleLength }: CycleTrackerProps) {
     <View style={styles.card}>
       <Text style={styles.title}>Cycle track</Text>
       <Text style={styles.value}>{cycleLength ? `${cycleLength} day cycle` : 'Tracking soon'}</Text>
-      <Text style={styles.subtext}>{prediction ? `Next predicted start: ${new Date(prediction).toLocaleDateString()}` : 'Cycle predictions will appear after more data.'}</Text>
+      <Text style={styles.subtext}>
+        {prediction
+          ? `Next predicted start: ${new Date(prediction).toLocaleDateString()}`
+          : 'Cycle predictions will appear after more data.'}
+      </Text>
     </View>
   )
 }

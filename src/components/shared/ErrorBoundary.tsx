@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
+import { logError } from '@/lib/errorLogger'
 
 interface Props {
   children: ReactNode
@@ -23,7 +24,10 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Uncaught error:', error, errorInfo)
+    logError(error, {
+      component: 'ErrorBoundary',
+      componentStack: errorInfo.componentStack ?? '',
+    })
   }
 
   public render() {

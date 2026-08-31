@@ -1,13 +1,20 @@
-import { useState } from 'react'
 import * as ImagePicker from 'expo-image-picker'
+import { useState } from 'react'
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
+
 import { supabase } from '@/lib/supabase'
 
 export default function ImageUpload({
   onUpload,
   folder = 'gallery',
 }: {
-  onUpload?: (image: { id: string; path: string; url: string; name: string; created_at: string }) => void
+  onUpload?: (image: {
+    id: string
+    path: string
+    url: string
+    name: string
+    created_at: string
+  }) => void
   folder?: string
 }) {
   const [preview, setPreview] = useState<string | null>(null)
@@ -49,10 +56,12 @@ export default function ImageUpload({
       const blob = await response.blob()
       const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
 
-      const { data, error: uploadError } = await supabase.storage.from('gallery').upload(path, blob, {
-        contentType: 'image/jpeg',
-        upsert: false,
-      })
+      const { data, error: uploadError } = await supabase.storage
+        .from('gallery')
+        .upload(path, blob, {
+          contentType: 'image/jpeg',
+          upsert: false,
+        })
 
       if (uploadError) {
         throw uploadError
@@ -97,7 +106,9 @@ export default function ImageUpload({
         onPress={() => void handleUpload()}
         disabled={!preview || isUploading}
       >
-        <Text style={styles.uploadButtonText}>{isUploading ? 'Uploading...' : 'Upload to gallery'}</Text>
+        <Text style={styles.uploadButtonText}>
+          {isUploading ? 'Uploading...' : 'Upload to gallery'}
+        </Text>
       </Pressable>
     </View>
   )

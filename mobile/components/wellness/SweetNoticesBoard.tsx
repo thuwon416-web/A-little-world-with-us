@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type Notice = {
@@ -10,7 +11,12 @@ type Notice = {
 }
 
 const starterNotices: Notice[] = [
-  { id: 'n1', title: 'Morning thought', message: 'You make my whole day feel softer.', pinned: true },
+  {
+    id: 'n1',
+    title: 'Morning thought',
+    message: 'You make my whole day feel softer.',
+    pinned: true,
+  },
   { id: 'n2', title: 'Little reminder', message: 'I am proud of the way you care.', pinned: false },
 ]
 
@@ -62,8 +68,22 @@ export default function SweetNoticesBoard() {
       </View>
 
       <View style={styles.form}>
-        <TextInput value={title} onChangeText={setTitle} placeholder="Title" placeholderTextColor="#8f8393" style={styles.input} />
-        <TextInput value={message} onChangeText={setMessage} placeholder="Leave a sweet little reminder..." placeholderTextColor="#8f8393" multiline numberOfLines={2} style={[styles.input, styles.textArea]} />
+        <TextInput
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Title"
+          placeholderTextColor="#8f8393"
+          style={styles.input}
+        />
+        <TextInput
+          value={message}
+          onChangeText={setMessage}
+          placeholder="Leave a sweet little reminder..."
+          placeholderTextColor="#8f8393"
+          multiline
+          numberOfLines={2}
+          style={[styles.input, styles.textArea]}
+        />
         <Pressable onPress={addNotice} style={styles.button}>
           <Text style={styles.buttonText}>Add notice</Text>
         </Pressable>

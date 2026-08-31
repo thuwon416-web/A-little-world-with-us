@@ -21,7 +21,9 @@ export async function getDateIdeas(mood: string = 'romantic'): Promise<AISuggest
   return getAIResponse('date', [mood])
 }
 
-export async function getMessageSuggestions(context: string = 'love note'): Promise<AISuggestion[]> {
+export async function getMessageSuggestions(
+  context: string = 'love note'
+): Promise<AISuggestion[]> {
   return getAIResponse('message', [context])
 }
 
@@ -70,7 +72,7 @@ async function getAIResponse(type: SuggestionType, context: string[]): Promise<A
     id: `${type}-${index}-${Date.now()}`,
     user_id: user.id,
     suggestion_type: type,
-    content: typeof entry === 'string' ? entry : entry?.content ?? `AI idea ${index + 1}`,
+    content: typeof entry === 'string' ? entry : (entry?.content ?? `AI idea ${index + 1}`),
     created_at: new Date().toISOString(),
   }))
 

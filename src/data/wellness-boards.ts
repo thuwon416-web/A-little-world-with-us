@@ -1,4 +1,4 @@
-import { WellnessBoard } from '@/types/wellness'
+import { type WellnessBoard } from '@/types/wellness'
 
 export const wellnessBoards: WellnessBoard[] = [
   {

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type EnergyItem = {
@@ -10,12 +11,25 @@ type EnergyItem = {
 }
 
 const starterItems: EnergyItem[] = [
-  { id: 'energy-1', title: 'Open the curtains and let the room wake up', mood: 'bright', done: true },
+  {
+    id: 'energy-1',
+    title: 'Open the curtains and let the room wake up',
+    mood: 'bright',
+    done: true,
+  },
   { id: 'energy-2', title: 'Dim the lights and choose a slower pace', mood: 'calm', done: false },
-  { id: 'energy-3', title: 'Make the space feel like a soft landing place', mood: 'cozy', done: true },
+  {
+    id: 'energy-3',
+    title: 'Make the space feel like a soft landing place',
+    mood: 'cozy',
+    done: true,
+  },
 ]
 
-const moodMeta: Record<EnergyItem['mood'], { label: string; style: { backgroundColor: string; borderColor: string } }> = {
+const moodMeta: Record<
+  EnergyItem['mood'],
+  { label: string; style: { backgroundColor: string; borderColor: string } }
+> = {
   bright: { label: 'bright', style: { backgroundColor: '#2d2234', borderColor: '#d8b9c8' } },
   calm: { label: 'calm', style: { backgroundColor: '#171d29', borderColor: '#b7c3f0' } },
   cozy: { label: 'cozy', style: { backgroundColor: '#271d22', borderColor: '#f4c7a5' } },
@@ -47,7 +61,10 @@ export default function HomeEnergyBoard() {
     const value = title.trim()
     if (!value) return
 
-    setItems((current) => [...current, { id: `home-${Date.now()}`, title: value, mood, done: false }])
+    setItems((current) => [
+      ...current,
+      { id: `home-${Date.now()}`, title: value, mood, done: false },
+    ])
     setTitle('')
   }
 
@@ -65,7 +82,9 @@ export default function HomeEnergyBoard() {
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.count}>{doneCount}/{items.length}</Text>
+        <Text style={styles.count}>
+          {doneCount}/{items.length}
+        </Text>
       </View>
 
       <View style={styles.list}>
@@ -94,7 +113,9 @@ export default function HomeEnergyBoard() {
               onPress={() => setMood(option)}
               style={[styles.option, option === mood && styles.optionSelected]}
             >
-              <Text style={[styles.optionText, option === mood && styles.optionTextSelected]}>{option}</Text>
+              <Text style={[styles.optionText, option === mood && styles.optionTextSelected]}>
+                {option}
+              </Text>
             </Pressable>
           ))}
         </View>

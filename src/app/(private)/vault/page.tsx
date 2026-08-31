@@ -7,7 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Lock, Eye, Plus, X, Save, Heart, Sparkles } from 'lucide-react'
 import VaultCard from '@/features/vault/VaultCard'
 import { setVaultUnlocked } from '@/lib/auth'
-import { insertRow, readRows, SecretLetter } from '@/lib/supabase'
+import { insertRow, readRows, type SecretLetter } from '@/lib/supabase'
 
 // TODO: Use Supabase Auth instead
 type VaultCategory = 'all' | 'private' | 'celebration' | 'ritual' | 'travel'
@@ -187,9 +187,6 @@ function VaultPageContent() {
             Unlock Vault
           </motion.button>
 
-          <p className="mt-4 text-xs uppercase tracking-[0.18em] text-[var(--text-secondary)]">
-            Hint: forever
-          </p>
         </motion.div>
       </div>
     )

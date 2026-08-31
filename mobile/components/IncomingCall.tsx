@@ -1,9 +1,20 @@
+import { Audio } from 'expo-av'
 import { useEffect, useState } from 'react'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
-import { Audio } from 'expo-av'
+
 import { type CallSignal } from '@/services/call'
 
-export function IncomingCall({ visible, signal, onAccept, onReject }: { visible: boolean; signal: CallSignal | null; onAccept: () => void; onReject: () => void }) {
+export function IncomingCall({
+  visible,
+  signal,
+  onAccept,
+  onReject,
+}: {
+  visible: boolean
+  signal: CallSignal | null
+  onAccept: () => void
+  onReject: () => void
+}) {
   const [sound, setSound] = useState<Audio.Sound | null>(null)
 
   useEffect(() => {
@@ -36,7 +47,9 @@ export function IncomingCall({ visible, signal, onAccept, onReject }: { visible:
       <View style={styles.overlay}>
         <View style={styles.card}>
           <Text style={styles.title}>Incoming call</Text>
-          <Text style={styles.subtitle}>{signal?.type === 'video' ? 'Video call' : 'Audio call'}</Text>
+          <Text style={styles.subtitle}>
+            {signal?.type === 'video' ? 'Video call' : 'Audio call'}
+          </Text>
           <Text style={styles.caller}>{signal?.caller_id ?? 'Partner'}</Text>
 
           <View style={styles.actions}>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type Letter = {
@@ -11,7 +12,12 @@ type Letter = {
 
 const starterLetters: Letter[] = [
   { id: 'l1', title: 'For the hard days', content: 'You are still my safe place.', unlocked: true },
-  { id: 'l2', title: 'For the good days', content: 'I hope you feel how deeply I cherish you.', unlocked: false },
+  {
+    id: 'l2',
+    title: 'For the good days',
+    content: 'I hope you feel how deeply I cherish you.',
+    unlocked: false,
+  },
 ]
 
 export default function SecretLetterTray() {
@@ -21,7 +27,9 @@ export default function SecretLetterTray() {
 
   const toggleUnlock = (id: string) => {
     setLetters((current) =>
-      current.map((letter) => (letter.id === id ? { ...letter, unlocked: !letter.unlocked } : letter))
+      current.map((letter) =>
+        letter.id === id ? { ...letter, unlocked: !letter.unlocked } : letter
+      )
     )
   }
 
@@ -61,8 +69,22 @@ export default function SecretLetterTray() {
       </View>
 
       <View style={styles.form}>
-        <TextInput value={title} onChangeText={setTitle} placeholder="Letter title" placeholderTextColor="#8f8393" style={styles.input} />
-        <TextInput value={content} onChangeText={setContent} placeholder="Write a private note..." placeholderTextColor="#8f8393" multiline numberOfLines={3} style={[styles.input, styles.textArea]} />
+        <TextInput
+          value={title}
+          onChangeText={setTitle}
+          placeholder="Letter title"
+          placeholderTextColor="#8f8393"
+          style={styles.input}
+        />
+        <TextInput
+          value={content}
+          onChangeText={setContent}
+          placeholder="Write a private note..."
+          placeholderTextColor="#8f8393"
+          multiline
+          numberOfLines={3}
+          style={[styles.input, styles.textArea]}
+        />
         <Pressable onPress={addLetter} style={styles.button}>
           <Text style={styles.buttonText}>Add letter</Text>
         </Pressable>

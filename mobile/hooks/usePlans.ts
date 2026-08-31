@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+
 import {
   addBucketItem,
   addPlanItem,
@@ -53,19 +54,25 @@ export function usePlans() {
     }
   }, [])
 
-  const handleUpdatePlan = useCallback(async (planId: string, updates: Parameters<typeof updatePlan>[1]) => {
-    try {
-      const result = await updatePlan(planId, updates)
-      if (result) {
-        setPlans((current) => current.map((plan) => (plan.id === planId ? { ...plan, ...result } : plan)))
+  const handleUpdatePlan = useCallback(
+    async (planId: string, updates: Parameters<typeof updatePlan>[1]) => {
+      try {
+        const result = await updatePlan(planId, updates)
+        if (result) {
+          setPlans((current) =>
+            current.map((plan) => (plan.id === planId ? { ...plan, ...result } : plan))
+          )
+        }
+        return result
+      } catch (caughtError) {
+        const message =
+          caughtError instanceof Error ? caughtError.message : 'Unable to update plan.'
+        setError(message)
+        return null
       }
-      return result
-    } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : 'Unable to update plan.'
-      setError(message)
-      return null
-    }
-  }, [])
+    },
+    []
+  )
 
   const handleDeletePlan = useCallback(async (planId: string) => {
     try {
@@ -85,40 +92,49 @@ export function usePlans() {
       if (result) {
         setPlans((current) =>
           current.map((plan) =>
-            plan.id === planId ? { ...plan, plan_items: [...(plan.plan_items ?? []), result] } : plan,
-          ),
+            plan.id === planId
+              ? { ...plan, plan_items: [...(plan.plan_items ?? []), result] }
+              : plan
+          )
         )
       }
       return result
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : 'Unable to add plan item.'
+      const message =
+        caughtError instanceof Error ? caughtError.message : 'Unable to add plan item.'
       setError(message)
       return null
     }
   }, [])
 
-  const handleTogglePlanItem = useCallback(async (planId: string, itemId: string, completed: boolean) => {
-    try {
-      const result = await togglePlanItem(planId, itemId, completed)
-      if (result) {
-        setPlans((current) =>
-          current.map((plan) =>
-            plan.id === planId
-              ? {
-                  ...plan,
-                  plan_items: (plan.plan_items ?? []).map((item) => (item.id === itemId ? { ...item, completed } : item)),
-                }
-              : plan,
-          ),
-        )
+  const handleTogglePlanItem = useCallback(
+    async (planId: string, itemId: string, completed: boolean) => {
+      try {
+        const result = await togglePlanItem(planId, itemId, completed)
+        if (result) {
+          setPlans((current) =>
+            current.map((plan) =>
+              plan.id === planId
+                ? {
+                    ...plan,
+                    plan_items: (plan.plan_items ?? []).map((item) =>
+                      item.id === itemId ? { ...item, completed } : item
+                    ),
+                  }
+                : plan
+            )
+          )
+        }
+        return result
+      } catch (caughtError) {
+        const message =
+          caughtError instanceof Error ? caughtError.message : 'Unable to update plan item.'
+        setError(message)
+        return null
       }
-      return result
-    } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : 'Unable to update plan item.'
-      setError(message)
-      return null
-    }
-  }, [])
+    },
+    []
+  )
 
   const handleAddBucketItem = useCallback(async (item: string) => {
     try {
@@ -128,7 +144,8 @@ export function usePlans() {
       }
       return result
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : 'Unable to add bucket list item.'
+      const message =
+        caughtError instanceof Error ? caughtError.message : 'Unable to add bucket list item.'
       setError(message)
       return null
     }
@@ -142,7 +159,8 @@ export function usePlans() {
       }
       return result
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : 'Unable to update bucket item.'
+      const message =
+        caughtError instanceof Error ? caughtError.message : 'Unable to update bucket item.'
       setError(message)
       return null
     }

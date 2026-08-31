@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, TextInputProps } from 'react-native';
+import { StyleSheet, TextInput, TextInputProps } from 'react-native'
 
 export function Input(props: TextInputProps) {
   return (
@@ -9,7 +9,7 @@ export function Input(props: TextInputProps) {
       autoCapitalize="sentences"
       autoCorrect={false}
     />
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -23,4 +23,4 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 15,
   },
-});
+})

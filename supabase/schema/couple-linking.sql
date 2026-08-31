@@ -67,6 +67,7 @@ alter table public.profiles enable row level security;
 alter table public.couple_links enable row level security;
 alter table public.memories enable row level security;
 alter table public.chat_messages enable row level security;
+alter table public.chat_presence enable row level security;
 alter table public.vault_items enable row level security;
 
 create policy "profiles_own_data_only" on public.profiles
@@ -105,7 +106,7 @@ using (
   or auth.uid() = accepted_by
 );
 
-create policy "memories_visible_to_owner_or_shared_couple" on public.memories
+create policy "memories_select_visible_to_owner_or_shared_couple" on public.memories
 for select
 using (
   auth.uid() = user_id
@@ -119,6 +120,27 @@ using (
     )
   )
 );
+
+create policy "memories_insert_own_records" on public.memories
+for insert
+with check (
+  auth.uid() = user_id
+  and exists (
+    select 1 from public.couple_links cl
+    where cl.id = memories.couple_id
+      and cl.status = 'accepted'
+      and (cl.inviter_id = auth.uid() or cl.accepted_by = auth.uid())
+  )
+);
+
+create policy "memories_update_own_records" on public.memories
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "memories_delete_own_records" on public.memories
+for delete
+using (auth.uid() = user_id);
 
 create policy "chat_visible_to_connected_couple" on public.chat_messages
 for select
@@ -144,6 +166,15 @@ with check (
   )
 );
 
+create policy "chat_update_own_message" on public.chat_messages
+for update
+using (auth.uid() = sender_id)
+with check (auth.uid() = sender_id);
+
+create policy "chat_delete_own_message" on public.chat_messages
+for delete
+using (auth.uid() = sender_id);
+
 create policy "chat_presence_visible_to_couple" on public.chat_presence
 for select
 using (
@@ -156,26 +187,26 @@ using (
   )
 );
 
-create policy "chat_presence_insert_update_own_presence" on public.chat_presence
+create policy "chat_presence_insert_own_presence" on public.chat_presence
 for insert
 with check (
   auth.uid() = user_id
+  and exists (
+    select 1 from public.couple_links cl
+    where cl.id = chat_presence.couple_id
+      and cl.status = 'accepted'
+      and (cl.inviter_id = auth.uid() or cl.accepted_by = auth.uid())
+  )
 );
 
 create policy "chat_presence_update_own_presence" on public.chat_presence
 for update
-using (
-  auth.uid() = user_id
-)
-with check (
-  auth.uid() = user_id
-);
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
 
 create policy "chat_presence_delete_own_presence" on public.chat_presence
 for delete
-using (
-  auth.uid() = user_id
-);
+using (auth.uid() = user_id);
 
 create policy "vault_visible_to_owner_or_shared_couple" on public.vault_items
 for select
@@ -191,3 +222,24 @@ using (
     )
   )
 );
+
+create policy "vault_insert_own_records" on public.vault_items
+for insert
+with check (
+  auth.uid() = user_id
+  and exists (
+    select 1 from public.couple_links cl
+    where cl.id = vault_items.couple_id
+      and cl.status = 'accepted'
+      and (cl.inviter_id = auth.uid() or cl.accepted_by = auth.uid())
+  )
+);
+
+create policy "vault_update_own_records" on public.vault_items
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "vault_delete_own_records" on public.vault_items
+for delete
+using (auth.uid() = user_id);

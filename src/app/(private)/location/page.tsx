@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { MapPin, Navigation, ShieldCheck, Users } from 'lucide-react'
+import LocationHistory from '@/components/location/LocationHistory'
+import SafeZones from '@/components/location/SafeZones'
 
 const partnerLocation = { lat: 13.7563, lng: 100.5018 }
 const currentLocation = { lat: 13.7588, lng: 100.4945 }
@@ -86,6 +88,11 @@ export default function LocationPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        <LocationHistory coupleId="demo-couple-id" />
+        <SafeZones coupleId="demo-couple-id" />
       </div>
     </div>
   )

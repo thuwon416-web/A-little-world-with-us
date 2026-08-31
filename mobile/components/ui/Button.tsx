@@ -1,5 +1,13 @@
 import React from 'react'
-import { Pressable, StyleSheet, Text, type StyleProp, type TextStyle, type ViewStyle } from 'react-native'
+import {
+  Pressable,
+  StyleSheet,
+  Text,
+  type StyleProp,
+  type TextStyle,
+  type ViewStyle,
+} from 'react-native'
+
 import { designTokens } from '@/design-tokens'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline'

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type WindowItem = {
@@ -10,12 +11,30 @@ type WindowItem = {
 }
 
 const starterItems: WindowItem[] = [
-  { id: 'window-1', title: 'Let the warm light in before the day gets crowded', view: 'sun', done: true },
-  { id: 'window-2', title: 'Let a little fresh air soften the heaviness in the room', view: 'air', done: false },
-  { id: 'window-3', title: 'Choose the kind of home that feels welcoming when we are tired', view: 'home', done: true },
+  {
+    id: 'window-1',
+    title: 'Let the warm light in before the day gets crowded',
+    view: 'sun',
+    done: true,
+  },
+  {
+    id: 'window-2',
+    title: 'Let a little fresh air soften the heaviness in the room',
+    view: 'air',
+    done: false,
+  },
+  {
+    id: 'window-3',
+    title: 'Choose the kind of home that feels welcoming when we are tired',
+    view: 'home',
+    done: true,
+  },
 ]
 
-const viewMeta: Record<WindowItem['view'], { label: string; style: { backgroundColor: string; borderColor: string } }> = {
+const viewMeta: Record<
+  WindowItem['view'],
+  { label: string; style: { backgroundColor: string; borderColor: string } }
+> = {
   sun: { label: 'sun', style: { backgroundColor: '#2d2234', borderColor: '#d8b9c8' } },
   air: { label: 'air', style: { backgroundColor: '#171d29', borderColor: '#b7c3f0' } },
   rain: { label: 'rain', style: { backgroundColor: '#1c2129', borderColor: '#b0d8c5' } },
@@ -48,7 +67,10 @@ export default function WarmWindowBoard() {
     const value = title.trim()
     if (!value) return
 
-    setItems((current) => [...current, { id: `window-${Date.now()}`, title: value, view, done: false }])
+    setItems((current) => [
+      ...current,
+      { id: `window-${Date.now()}`, title: value, view, done: false },
+    ])
     setTitle('')
   }
 
@@ -66,7 +88,9 @@ export default function WarmWindowBoard() {
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.count}>{doneCount}/{items.length}</Text>
+        <Text style={styles.count}>
+          {doneCount}/{items.length}
+        </Text>
       </View>
 
       <View style={styles.list}>
@@ -95,7 +119,9 @@ export default function WarmWindowBoard() {
               onPress={() => setView(option)}
               style={[styles.option, option === view && styles.optionSelected]}
             >
-              <Text style={[styles.optionText, option === view && styles.optionTextSelected]}>{option}</Text>
+              <Text style={[styles.optionText, option === view && styles.optionTextSelected]}>
+                {option}
+              </Text>
             </Pressable>
           ))}
         </View>

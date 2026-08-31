@@ -1,4 +1,5 @@
 import * as Location from 'expo-location'
+
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 export type LocationPoint = {
@@ -29,7 +30,7 @@ export async function getCurrentLocation(): Promise<LocationPoint> {
 }
 
 export async function startLocationTracking(
-  onUpdate?: (point: LocationPoint) => void,
+  onUpdate?: (point: LocationPoint) => void
 ): Promise<Location.LocationSubscription | null> {
   const { status } = await Location.requestForegroundPermissionsAsync()
   if (status !== 'granted') {
@@ -58,7 +59,7 @@ export async function startLocationTracking(
 
       onUpdate?.(nextPoint)
       void shareLocation(nextPoint)
-    },
+    }
   )
 
   return subscription
@@ -93,7 +94,7 @@ export async function shareLocation(point?: LocationPoint): Promise<boolean> {
       accuracy: point.accuracy ?? 0,
       updated_at: point.timestamp,
     },
-    { onConflict: 'user_id' },
+    { onConflict: 'user_id' }
   )
 
   return !error

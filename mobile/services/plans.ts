@@ -89,13 +89,18 @@ export async function createPlan(payload: {
 
 export async function updatePlan(
   planId: string,
-  updates: Partial<Pick<PlanRecord, 'title' | 'description' | 'type' | 'due_date' | 'status'>>,
+  updates: Partial<Pick<PlanRecord, 'title' | 'description' | 'type' | 'due_date' | 'status'>>
 ) {
   if (!isSupabaseConfigured) {
     return null
   }
 
-  const { data, error } = await supabase.from('plans').update(updates).eq('id', planId).select('*').single()
+  const { data, error } = await supabase
+    .from('plans')
+    .update(updates)
+    .eq('id', planId)
+    .select('*')
+    .single()
 
   if (error) {
     throw new Error(error.message)

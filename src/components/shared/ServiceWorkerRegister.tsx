@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { logError } from '@/lib/errorLogger'
 
 /**
  * Registers the custom service worker for PWA support.
@@ -9,11 +10,9 @@ import { useEffect } from 'react'
 export default function ServiceWorkerRegister() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .catch((err) => {
-          // Service worker registration failed - silently fail in production
-        })
+      navigator.serviceWorker.register('/sw.js').catch((error) => {
+        logError(error, { source: 'service-worker-registration' })
+      })
     }
   }, [])
 

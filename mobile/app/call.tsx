@@ -1,6 +1,7 @@
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
 import { useCall } from '@/hooks/useCall'
 
 function formatCallDuration(seconds: number) {
@@ -10,7 +11,16 @@ function formatCallDuration(seconds: number) {
 }
 
 export default function CallScreen() {
-  const { state, callType, callDuration, isMuted, cameraFacing, endCall, toggleMute, toggleCamera } = useCall()
+  const {
+    state,
+    callType,
+    callDuration,
+    isMuted,
+    cameraFacing,
+    endCall,
+    toggleMute,
+    toggleCamera,
+  } = useCall()
   const [permission, requestPermission] = useCameraPermissions()
   const [showLocalCamera, setShowLocalCamera] = useState(callType === 'video')
 
@@ -26,14 +36,24 @@ export default function CallScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.status}>{state === 'calling' ? 'Calling...' : state === 'in_call' ? 'In call' : state === 'ended' ? 'Call ended' : 'Call'}</Text>
+      <Text style={styles.status}>
+        {state === 'calling'
+          ? 'Calling...'
+          : state === 'in_call'
+            ? 'In call'
+            : state === 'ended'
+              ? 'Call ended'
+              : 'Call'}
+      </Text>
       <Text style={styles.time}>{formatCallDuration(callDuration)}</Text>
 
       {callType === 'video' && showLocalCamera ? (
         <CameraView style={styles.camera} facing={cameraFacing} />
       ) : (
         <View style={styles.placeholder}>
-          <Text style={styles.placeholderTitle}>{callType === 'video' ? 'Video call' : 'Audio call'}</Text>
+          <Text style={styles.placeholderTitle}>
+            {callType === 'video' ? 'Video call' : 'Audio call'}
+          </Text>
           <Text style={styles.placeholderSubtitle}>Connection quality: strong</Text>
         </View>
       )}

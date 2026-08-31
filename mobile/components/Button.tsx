@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, StyleSheet, Text } from 'react-native'
 
 interface ButtonProps {
-  title: string;
-  onPress: () => void;
+  title: string
+  onPress: () => void
 }
 
 export function Button({ title, onPress }: ButtonProps) {
@@ -10,7 +10,7 @@ export function Button({ title, onPress }: ButtonProps) {
     <Pressable onPress={onPress} style={styles.button}>
       <Text style={styles.text}>{title}</Text>
     </Pressable>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -25,4 +25,4 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 14,
   },
-});
+})

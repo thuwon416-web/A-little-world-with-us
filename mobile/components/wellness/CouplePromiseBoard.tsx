@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type PromiseItem = {
@@ -23,22 +24,26 @@ const starterPromises: PromiseItem[] = [
 const dreamDates: DreamDateIdea[] = [
   {
     title: 'Moonlit Picnic',
-    detail: 'Pack a blanket, warm drinks, and let the evening become a little slower and softer than usual.',
+    detail:
+      'Pack a blanket, warm drinks, and let the evening become a little slower and softer than usual.',
     mood: ['cozy', 'soft', 'romantic'],
   },
   {
     title: 'Hidden Cafe Date',
-    detail: 'Find a tiny neighborhood place with good music and stay way longer than the plan allows.',
+    detail:
+      'Find a tiny neighborhood place with good music and stay way longer than the plan allows.',
     mood: ['playful', 'easy', 'quiet'],
   },
   {
     title: 'Sunset Photo Walk',
-    detail: 'Take a few minutes to wander, laugh, and notice all the tiny details in the world around you.',
+    detail:
+      'Take a few minutes to wander, laugh, and notice all the tiny details in the world around you.',
     mood: ['adventurous', 'sweet', 'present'],
   },
   {
     title: 'At-Home Cinema Night',
-    detail: 'Make the blanket nest, choose a comfort movie, and make the room feel like a tiny planet of love.',
+    detail:
+      'Make the blanket nest, choose a comfort movie, and make the room feel like a tiny planet of love.',
     mood: ['cozy', 'gentle', 'unhurried'],
   },
 ]
@@ -62,7 +67,10 @@ export default function CouplePromiseBoard() {
     const value = draft.trim()
     if (!value) return
 
-    setPromises((current) => [...current, { id: `promise-${Date.now()}`, label: value, done: false }])
+    setPromises((current) => [
+      ...current,
+      { id: `promise-${Date.now()}`, label: value, done: false },
+    ])
     setDraft('')
   }
 
@@ -80,7 +88,9 @@ export default function CouplePromiseBoard() {
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.count}>{doneCount}/{promises.length} kept</Text>
+        <Text style={styles.count}>
+          {doneCount}/{promises.length} kept
+        </Text>
       </View>
 
       <View style={styles.list}>
@@ -90,7 +100,9 @@ export default function CouplePromiseBoard() {
             onPress={() => togglePromise(promise.id)}
             style={[styles.promiseItem, promise.done && styles.promiseDone]}
           >
-            <Text style={[styles.promiseText, promise.done && styles.promiseTextDone]}>{promise.label}</Text>
+            <Text style={[styles.promiseText, promise.done && styles.promiseTextDone]}>
+              {promise.label}
+            </Text>
             <Text style={styles.promiseState}>{promise.done ? 'done' : 'later'}</Text>
           </Pressable>
         ))}

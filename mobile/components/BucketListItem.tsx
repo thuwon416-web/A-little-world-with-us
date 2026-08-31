@@ -16,7 +16,9 @@ export function BucketListItem({ item, completed, completedAt, onToggle }: Bucke
       </View>
       <View style={styles.meta}>
         <Text style={[styles.title, completed && styles.doneTitle]}>{item}</Text>
-        {completedAt ? <Text style={styles.date}>Done {new Date(completedAt).toLocaleDateString()}</Text> : null}
+        {completedAt ? (
+          <Text style={styles.date}>Done {new Date(completedAt).toLocaleDateString()}</Text>
+        ) : null}
       </View>
     </TouchableOpacity>
   )

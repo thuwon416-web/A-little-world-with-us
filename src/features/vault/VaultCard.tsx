@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Lock, Unlock, ChevronDown, Heart } from 'lucide-react'
-import { SecretLetter } from '@/lib/supabase'
+import { type SecretLetter } from '@/lib/supabase'
 
 interface VaultCardProps {
   letter: SecretLetter

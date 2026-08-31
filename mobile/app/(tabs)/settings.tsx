@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native'
 import { Bell, Heart, MessageSquareText, Sparkles } from 'lucide-react-native'
+import { useEffect, useState } from 'react'
+import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native'
+
 import { registerForPushNotifications, sendLocalNotification } from '@/services/notifications'
 
 type NotificationChannel = 'reminders' | 'messages' | 'milestones' | 'wellness'
@@ -22,15 +23,30 @@ const defaultSettings: NotificationSettings = {
   wellness: true,
 }
 
-const toggleItems: Array<{
+const toggleItems: {
   key: NotificationChannel
   label: string
   description: string
   icon: typeof Bell
-}> = [
-  { key: 'reminders', label: 'Reminders', description: 'Gentle nudges for dates and rituals.', icon: Bell },
-  { key: 'messages', label: 'Messages', description: 'Chat and reply alerts.', icon: MessageSquareText },
-  { key: 'milestones', label: 'Milestones', description: 'Anniversaries and special moments.', icon: Sparkles },
+}[] = [
+  {
+    key: 'reminders',
+    label: 'Reminders',
+    description: 'Gentle nudges for dates and rituals.',
+    icon: Bell,
+  },
+  {
+    key: 'messages',
+    label: 'Messages',
+    description: 'Chat and reply alerts.',
+    icon: MessageSquareText,
+  },
+  {
+    key: 'milestones',
+    label: 'Milestones',
+    description: 'Anniversaries and special moments.',
+    icon: Sparkles,
+  },
   { key: 'wellness', label: 'Wellness', description: 'Daily care prompts.', icon: Heart },
 ]
 
@@ -76,7 +92,10 @@ export default function SettingsScreen() {
 
       setSettings((current) => ({ ...current, pushEnabled: true }))
       Alert.alert('Notifications', 'Push notifications are active.')
-      await sendLocalNotification('Love reminders ready', 'Your gentle connection nudges are now enabled.')
+      await sendLocalNotification(
+        'Love reminders ready',
+        'Your gentle connection nudges are now enabled.'
+      )
     } catch {
       Alert.alert('Notifications', 'Unable to enable notifications right now.')
     }
@@ -95,7 +114,9 @@ export default function SettingsScreen() {
             <Text style={styles.cardValue}>{settings.pushEnabled ? 'Enabled' : 'Off'}</Text>
           </View>
           <TouchableOpacity style={styles.primaryButton} onPress={() => void handleEnable()}>
-            <Text style={styles.primaryButtonText}>{settings.pushEnabled ? 'Refresh' : 'Enable'}</Text>
+            <Text style={styles.primaryButtonText}>
+              {settings.pushEnabled ? 'Refresh' : 'Enable'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

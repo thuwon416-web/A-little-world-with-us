@@ -159,8 +159,7 @@ function ChatPageContent() {
 
       const { data: publicData } = supabase.storage.from('chat-media').getPublicUrl(data?.path ?? storagePath)
       return publicData.publicUrl
-    } catch (error) {
-      console.warn('Chat media upload failed:', error)
+    } catch {
       return null
     }
   }
@@ -205,7 +204,7 @@ function ChatPageContent() {
     })
 
     if (error) {
-      console.warn('Supabase message insert failed:', error.message)
+      setRecordingError('We could not send your message. Please try again.')
     }
 
     setReplyTo(null)
@@ -280,7 +279,6 @@ function ChatPageContent() {
         })
 
         if (error) {
-          console.warn('Voice note insert failed:', error.message)
           setRecordingError('We could not save your voice note. Please try again.')
         }
 

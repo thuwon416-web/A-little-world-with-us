@@ -1,22 +1,26 @@
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 const dashboardCards = [
   { title: 'Days together', value: '387', tone: '#d9bfd7' },
   { title: 'Today', value: 'A quiet ritual', tone: '#8ed0c4' },
   { title: 'Memory', value: 'Sunset picnic', tone: '#8cb4ff' },
   { title: 'Care check', value: 'Feeling grounded', tone: '#ffd7a8' },
-];
+]
 
 export default function DashboardScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.eyebrow}>Love dashboard</Text>
       <Text style={styles.title}>Good evening, KoKo × Pu Tuu</Text>
-      <Text style={styles.subtitle}>Today’s focus: rest, breathe, and celebrate the little things.</Text>
+      <Text style={styles.subtitle}>
+        Today’s focus: rest, breathe, and celebrate the little things.
+      </Text>
 
       <View style={styles.heroCard}>
         <Text style={styles.heroLabel}>Little ritual</Text>
-        <Text style={styles.heroText}>Send a voice note and remind each other what felt beautiful today.</Text>
+        <Text style={styles.heroText}>
+          Send a voice note and remind each other what felt beautiful today.
+        </Text>
       </View>
 
       <View style={styles.grid}>
@@ -28,7 +32,7 @@ export default function DashboardScreen() {
         ))}
       </View>
     </ScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -102,4 +106,4 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '700',
   },
-});
+})

@@ -23,13 +23,11 @@ export async function getCurrentUserId(): Promise<string | null> {
     } = await supabase.auth.getUser()
 
     if (error) {
-      console.warn('Unable to read current user from Supabase:', error.message)
       return null
     }
 
     return user?.id ?? null
-  } catch (error) {
-    console.warn('Supabase user lookup failed:', error)
+  } catch {
     return null
   }
 }
@@ -66,13 +64,11 @@ export async function readRows<T>(
 
     const { data, error } = await request
     if (error) {
-      console.warn(`Supabase read failed for ${table}:`, error.message)
       return []
     }
 
     return (data ?? []) as T[]
-  } catch (error) {
-    console.warn(`Supabase read error for ${table}:`, error)
+  } catch {
     return []
   }
 }
@@ -86,13 +82,11 @@ export async function insertRow<T>(
   try {
     const { data, error } = await supabase.from(table).insert(payload).select()
     if (error) {
-      console.warn(`Supabase insert failed for ${table}:`, error.message)
       return null
     }
 
     return (data?.[0] ?? null) as T | null
-  } catch (error) {
-    console.warn(`Supabase insert error for ${table}:`, error)
+  } catch {
     return null
   }
 }

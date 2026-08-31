@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+
 import {
   getCareStats,
   getMoodHistory,
@@ -22,12 +23,17 @@ export function useWellness() {
     setError(null)
 
     try {
-      const [history, stats, nextPrediction] = await Promise.all([getMoodHistory(7), getCareStats(), predictCycle()])
+      const [history, stats, nextPrediction] = await Promise.all([
+        getMoodHistory(7),
+        getCareStats(),
+        predictCycle(),
+      ])
       setMoodHistory(history)
       setCareStats(stats)
       setPrediction(nextPrediction)
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : 'Unable to load wellness data.'
+      const message =
+        caughtError instanceof Error ? caughtError.message : 'Unable to load wellness data.'
       setError(message)
     } finally {
       setLoading(false)
@@ -61,26 +67,30 @@ export function useWellness() {
       }
       return result
     } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : 'Unable to log care item.'
+      const message =
+        caughtError instanceof Error ? caughtError.message : 'Unable to log care item.'
       setError(message)
       return null
     }
   }, [])
 
-  const logCycleEntry = useCallback(async (startDate: string, endDate?: string, cycleLength?: number) => {
-    try {
-      const result = await logCycle(startDate, endDate, cycleLength)
-      if (result) {
-        const nextPrediction = await predictCycle()
-        setPrediction(nextPrediction)
+  const logCycleEntry = useCallback(
+    async (startDate: string, endDate?: string, cycleLength?: number) => {
+      try {
+        const result = await logCycle(startDate, endDate, cycleLength)
+        if (result) {
+          const nextPrediction = await predictCycle()
+          setPrediction(nextPrediction)
+        }
+        return result
+      } catch (caughtError) {
+        const message = caughtError instanceof Error ? caughtError.message : 'Unable to log cycle.'
+        setError(message)
+        return null
       }
-      return result
-    } catch (caughtError) {
-      const message = caughtError instanceof Error ? caughtError.message : 'Unable to log cycle.'
-      setError(message)
-      return null
-    }
-  }, [])
+    },
+    []
+  )
 
   return {
     moodHistory,

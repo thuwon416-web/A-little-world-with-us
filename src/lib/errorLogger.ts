@@ -47,10 +47,6 @@ export function logError(error: unknown, context?: ErrorContext) {
   const nextErrors = [entry, ...readStoredErrors()]
   writeStoredErrors(nextErrors)
 
-  if (typeof console !== 'undefined') {
-    console.error('Our Forever error report:', entry)
-  }
-
   return entry
 }
 

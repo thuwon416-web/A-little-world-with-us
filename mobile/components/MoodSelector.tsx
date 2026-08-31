@@ -25,7 +25,9 @@ export function MoodSelector({ value, onSelect }: MoodSelectorProps) {
           style={[styles.pill, value === mood.value && styles.pillActive]}
         >
           <Text style={styles.emoji}>{mood.emoji}</Text>
-          <Text style={[styles.label, value === mood.value && styles.labelActive]}>{mood.label}</Text>
+          <Text style={[styles.label, value === mood.value && styles.labelActive]}>
+            {mood.label}
+          </Text>
         </TouchableOpacity>
       ))}
     </View>

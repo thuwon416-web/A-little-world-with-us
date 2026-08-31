@@ -1,9 +1,14 @@
 import React from 'react'
 import { StyleSheet, View, type ViewProps } from 'react-native'
+
 import { designTokens } from '@/design-tokens'
 
 export function Card({ style, children, ...props }: ViewProps) {
-  return <View {...props} style={[styles.card, style]}>{children}</View>
+  return (
+    <View {...props} style={[styles.card, style]}>
+      {children}
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({

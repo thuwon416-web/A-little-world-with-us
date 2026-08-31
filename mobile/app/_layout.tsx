@@ -1,6 +1,7 @@
-import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { AuthProvider } from '@/lib/auth';
+import { Stack } from 'expo-router'
+import { StatusBar } from 'expo-status-bar'
+
+import { AuthProvider } from '@/lib/auth'
 
 export default function RootLayout() {
   return (
@@ -12,5 +13,5 @@ export default function RootLayout() {
         <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
       </Stack>
     </AuthProvider>
-  );
+  )
 }

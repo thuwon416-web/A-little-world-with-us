@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type Tone = 'warm' | 'deep' | 'playful' | 'grounded'
@@ -54,7 +55,9 @@ export default function AffirmationDeck() {
 
       <View style={styles.featureCard}>
         <Text style={styles.featureLabel}>Today’s reminder</Text>
-        <Text style={styles.featureText}>{active?.text ?? 'You are loved, even in the quiet moments.'}</Text>
+        <Text style={styles.featureText}>
+          {active?.text ?? 'You are loved, even in the quiet moments.'}
+        </Text>
       </View>
     </WellnessBoardShell>
   )

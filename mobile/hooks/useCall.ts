@@ -1,9 +1,18 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Audio } from 'expo-av'
 import { Camera, CameraType } from 'expo-camera'
 import { useRouter } from 'expo-router'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
 import { useAuth } from '@/lib/auth'
-import { acceptCall, endCall, initiateCall, rejectCall, subscribeToCallSignals, type CallSignal, type CallType } from '@/services/call'
+import {
+  acceptCall,
+  endCall,
+  initiateCall,
+  rejectCall,
+  subscribeToCallSignals,
+  type CallSignal,
+  type CallType,
+} from '@/services/call'
 
 export type CallState = 'idle' | 'calling' | 'ringing' | 'in_call' | 'ended' | 'rejected'
 
@@ -79,7 +88,7 @@ export function useCall() {
         setError(caughtError instanceof Error ? caughtError.message : 'Unable to start call')
       }
     },
-    [requestPermissions, router],
+    [requestPermissions, router]
   )
 
   const handleAccept = useCallback(async () => {
@@ -140,6 +149,20 @@ export function useCall() {
       toggleMute,
       toggleCamera,
     }),
-    [callDuration, callId, callType, error, handleAccept, handleEnd, handleReject, isMuted, placeCall, state, toggleCamera, toggleMute, cameraFacing],
+    [
+      callDuration,
+      callId,
+      callType,
+      error,
+      handleAccept,
+      handleEnd,
+      handleReject,
+      isMuted,
+      placeCall,
+      state,
+      toggleCamera,
+      toggleMute,
+      cameraFacing,
+    ]
   )
 }

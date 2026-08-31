@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
 import { useNotifications } from '@/hooks/useNotifications'
 
 export default function RemindersScreen() {
@@ -13,7 +14,11 @@ export default function RemindersScreen() {
       return
     }
 
-    await addReminder(draftTitle.trim(), draftMessage.trim(), new Date(Date.now() + 3600000).toISOString())
+    await addReminder(
+      draftTitle.trim(),
+      draftMessage.trim(),
+      new Date(Date.now() + 3600000).toISOString()
+    )
     setDraftTitle('')
     setDraftMessage('')
   }
@@ -31,7 +36,9 @@ export default function RemindersScreen() {
         <Text style={styles.label}>Title</Text>
         <Text style={styles.input}>{draftTitle || 'Daily check-in'}</Text>
         <Text style={styles.label}>Message</Text>
-        <Text style={styles.input}>{draftMessage || 'Take a moment to check in with each other.'}</Text>
+        <Text style={styles.input}>
+          {draftMessage || 'Take a moment to check in with each other.'}
+        </Text>
       </View>
 
       <TouchableOpacity style={styles.secondaryButton} onPress={() => void handleAddReminder()}>
@@ -46,7 +53,9 @@ export default function RemindersScreen() {
             <View key={reminder.id} style={styles.card}>
               <Text style={styles.cardTitle}>{reminder.title}</Text>
               <Text style={styles.cardMessage}>{reminder.message}</Text>
-              <Text style={styles.cardTime}>{new Date(reminder.scheduled_at).toLocaleString()}</Text>
+              <Text style={styles.cardTime}>
+                {new Date(reminder.scheduled_at).toLocaleString()}
+              </Text>
             </View>
           ))
         )}

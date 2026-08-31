@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyleSheet, Text, View, type ViewProps } from 'react-native'
+
 import { designTokens } from '@/design-tokens'
 
 interface BadgeProps extends ViewProps {

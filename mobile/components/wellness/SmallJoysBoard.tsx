@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type JoyItem = {
@@ -11,11 +12,24 @@ type JoyItem = {
 
 const starterItems: JoyItem[] = [
   { id: 'joy-1', title: 'A quiet laugh at the exact right moment', kind: 'quiet', done: true },
-  { id: 'joy-2', title: 'A tiny gesture that made the whole room feel softer', kind: 'cozy', done: false },
-  { id: 'joy-3', title: 'A silly little inside joke that came back at the perfect time', kind: 'playful', done: true },
+  {
+    id: 'joy-2',
+    title: 'A tiny gesture that made the whole room feel softer',
+    kind: 'cozy',
+    done: false,
+  },
+  {
+    id: 'joy-3',
+    title: 'A silly little inside joke that came back at the perfect time',
+    kind: 'playful',
+    done: true,
+  },
 ]
 
-const kindMeta: Record<JoyItem['kind'], { label: string; style: { backgroundColor: string; borderColor: string } }> = {
+const kindMeta: Record<
+  JoyItem['kind'],
+  { label: string; style: { backgroundColor: string; borderColor: string } }
+> = {
   cozy: { label: 'cozy', style: { backgroundColor: '#2d2234', borderColor: '#d8b9c8' } },
   playful: { label: 'playful', style: { backgroundColor: '#271d22', borderColor: '#f4c7a5' } },
   quiet: { label: 'quiet', style: { backgroundColor: '#171d29', borderColor: '#b7c3f0' } },
@@ -48,7 +62,10 @@ export default function SmallJoysBoard() {
     const value = title.trim()
     if (!value) return
 
-    setItems((current) => [...current, { id: `joy-${Date.now()}`, title: value, kind, done: false }])
+    setItems((current) => [
+      ...current,
+      { id: `joy-${Date.now()}`, title: value, kind, done: false },
+    ])
     setTitle('')
   }
 
@@ -66,7 +83,9 @@ export default function SmallJoysBoard() {
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.count}>{doneCount}/{items.length}</Text>
+        <Text style={styles.count}>
+          {doneCount}/{items.length}
+        </Text>
       </View>
 
       <View style={styles.list}>
@@ -95,7 +114,9 @@ export default function SmallJoysBoard() {
               onPress={() => setKind(option)}
               style={[styles.option, option === kind && styles.optionSelected]}
             >
-              <Text style={[styles.optionText, option === kind && styles.optionTextSelected]}>{option}</Text>
+              <Text style={[styles.optionText, option === kind && styles.optionTextSelected]}>
+                {option}
+              </Text>
             </Pressable>
           ))}
         </View>

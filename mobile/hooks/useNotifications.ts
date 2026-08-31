@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react'
 import * as Notifications from 'expo-notifications'
-import { registerForPushNotifications, scheduleReminder, sendLocalNotification, type Reminder } from '@/services/notifications'
+import { useEffect, useState } from 'react'
+
+import {
+  registerForPushNotifications,
+  scheduleReminder,
+  sendLocalNotification,
+  type Reminder,
+} from '@/services/notifications'
 
 export function useNotifications() {
   const [permissionStatus, setPermissionStatus] = useState<string>('unknown')

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type DriftItem = {
@@ -10,12 +11,30 @@ type DriftItem = {
 }
 
 const starterItems: DriftItem[] = [
-  { id: 'drift-1', title: 'Let the next moment arrive without insisting on perfection', tone: 'gentle', done: true },
-  { id: 'drift-2', title: 'Choose one slow kindness to carry into the evening', tone: 'warm', done: false },
-  { id: 'drift-3', title: 'Stay spacious enough for both softness and clarity', tone: 'steady', done: true },
+  {
+    id: 'drift-1',
+    title: 'Let the next moment arrive without insisting on perfection',
+    tone: 'gentle',
+    done: true,
+  },
+  {
+    id: 'drift-2',
+    title: 'Choose one slow kindness to carry into the evening',
+    tone: 'warm',
+    done: false,
+  },
+  {
+    id: 'drift-3',
+    title: 'Stay spacious enough for both softness and clarity',
+    tone: 'steady',
+    done: true,
+  },
 ]
 
-const toneMeta: Record<DriftItem['tone'], { label: string; style: { backgroundColor: string; borderColor: string } }> = {
+const toneMeta: Record<
+  DriftItem['tone'],
+  { label: string; style: { backgroundColor: string; borderColor: string } }
+> = {
   gentle: { label: 'gentle', style: { backgroundColor: '#171d29', borderColor: '#b7c3f0' } },
   warm: { label: 'warm', style: { backgroundColor: '#2d2234', borderColor: '#d8b9c8' } },
   float: { label: 'float', style: { backgroundColor: '#1c2129', borderColor: '#b0d8c5' } },
@@ -48,7 +67,10 @@ export default function SweetDriftBoard() {
     const value = title.trim()
     if (!value) return
 
-    setItems((current) => [...current, { id: `drift-${Date.now()}`, title: value, tone, done: false }])
+    setItems((current) => [
+      ...current,
+      { id: `drift-${Date.now()}`, title: value, tone, done: false },
+    ])
     setTitle('')
   }
 
@@ -66,7 +88,9 @@ export default function SweetDriftBoard() {
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.count}>{doneCount}/{items.length}</Text>
+        <Text style={styles.count}>
+          {doneCount}/{items.length}
+        </Text>
       </View>
 
       <View style={styles.list}>
@@ -95,7 +119,9 @@ export default function SweetDriftBoard() {
               onPress={() => setTone(option)}
               style={[styles.option, option === tone && styles.optionSelected]}
             >
-              <Text style={[styles.optionText, option === tone && styles.optionTextSelected]}>{option}</Text>
+              <Text style={[styles.optionText, option === tone && styles.optionTextSelected]}>
+                {option}
+              </Text>
             </Pressable>
           ))}
         </View>

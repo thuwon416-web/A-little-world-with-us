@@ -1,5 +1,6 @@
 import { Database } from '@nozbe/watermelondb'
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite'
+
 import schema, { MessageModel, UserModel } from './schema'
 
 const adapter = new SQLiteAdapter({

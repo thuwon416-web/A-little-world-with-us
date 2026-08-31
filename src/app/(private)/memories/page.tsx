@@ -1,8 +1,8 @@
 'use client'
 
-import { Suspense, ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { Suspense, type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
-import { isSupabaseConfigured, Memory, supabase } from '@/lib/supabase'
+import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
 
 const PAGE_SIZE = 6
 

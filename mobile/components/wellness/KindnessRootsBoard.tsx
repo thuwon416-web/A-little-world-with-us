@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type RootItem = {
@@ -10,12 +11,20 @@ type RootItem = {
 }
 
 const starterItems: RootItem[] = [
-  { id: 'root-1', title: 'Speak one gentle truth before correcting anything', kind: 'root', done: true },
+  {
+    id: 'root-1',
+    title: 'Speak one gentle truth before correcting anything',
+    kind: 'root',
+    done: true,
+  },
   { id: 'root-2', title: 'Notice one evidence of care in the room', kind: 'warmth', done: false },
   { id: 'root-3', title: 'Return to the simplest version of love', kind: 'ground', done: true },
 ]
 
-const kindMeta: Record<RootItem['kind'], { label: string; style: { backgroundColor: string; borderColor: string } }> = {
+const kindMeta: Record<
+  RootItem['kind'],
+  { label: string; style: { backgroundColor: string; borderColor: string } }
+> = {
   root: { label: 'root', style: { backgroundColor: '#2d2234', borderColor: '#d8b9c8' } },
   warmth: { label: 'warmth', style: { backgroundColor: '#171d29', borderColor: '#b7c3f0' } },
   care: { label: 'care', style: { backgroundColor: '#271d22', borderColor: '#f4c7a5' } },
@@ -48,7 +57,10 @@ export default function KindnessRootsBoard() {
     const value = title.trim()
     if (!value) return
 
-    setItems((current) => [...current, { id: `root-${Date.now()}`, title: value, kind, done: false }])
+    setItems((current) => [
+      ...current,
+      { id: `root-${Date.now()}`, title: value, kind, done: false },
+    ])
     setTitle('')
   }
 
@@ -66,7 +78,9 @@ export default function KindnessRootsBoard() {
         <View style={styles.barTrack}>
           <View style={[styles.barFill, { width: `${progress}%` }]} />
         </View>
-        <Text style={styles.count}>{doneCount}/{items.length}</Text>
+        <Text style={styles.count}>
+          {doneCount}/{items.length}
+        </Text>
       </View>
 
       <View style={styles.list}>
@@ -95,7 +109,9 @@ export default function KindnessRootsBoard() {
               onPress={() => setKind(option)}
               style={[styles.option, option === kind && styles.optionSelected]}
             >
-              <Text style={[styles.optionText, option === kind && styles.optionTextSelected]}>{option}</Text>
+              <Text style={[styles.optionText, option === kind && styles.optionTextSelected]}>
+                {option}
+              </Text>
             </Pressable>
           ))}
         </View>

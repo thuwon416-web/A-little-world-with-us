@@ -1,5 +1,6 @@
 import React from 'react'
 import { Modal as RNModal, Pressable, StyleSheet, Text, View } from 'react-native'
+
 import { designTokens } from '@/design-tokens'
 
 interface ModalProps {

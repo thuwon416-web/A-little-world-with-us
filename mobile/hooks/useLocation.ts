@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useMemo, useState } from 'react'
+
 import { useAuth } from '@/lib/auth'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 import {
@@ -7,7 +9,6 @@ import {
   stopLocationTracking,
   type LocationPoint,
 } from '@/services/location'
-import { useCallback, useEffect, useMemo, useState } from 'react'
 
 export function getDistanceKm(from: LocationPoint, to: LocationPoint) {
   const toRadians = (value: number) => (value * Math.PI) / 180
@@ -51,33 +52,30 @@ export function useLocation() {
     }
   }, [isSharing])
 
-  const toggleSharing = useCallback(
-    async (share: boolean) => {
-      try {
-        if (!share) {
-          await stopLocationTracking()
-          setIsSharing(false)
-          return
-        }
-
-        const nextPoint = await getCurrentLocation()
-        setCurrentLocation(nextPoint)
-        setLastUpdated(nextPoint.timestamp)
-        setIsSharing(true)
-        setError(null)
-        await shareLocation(nextPoint)
-
-        await startLocationTracking((updatedPoint) => {
-          setCurrentLocation(updatedPoint)
-          setLastUpdated(updatedPoint.timestamp)
-          setError(null)
-        })
-      } catch (caughtError) {
-        setError(caughtError instanceof Error ? caughtError.message : 'Sharing failed')
+  const toggleSharing = useCallback(async (share: boolean) => {
+    try {
+      if (!share) {
+        await stopLocationTracking()
+        setIsSharing(false)
+        return
       }
-    },
-    [],
-  )
+
+      const nextPoint = await getCurrentLocation()
+      setCurrentLocation(nextPoint)
+      setLastUpdated(nextPoint.timestamp)
+      setIsSharing(true)
+      setError(null)
+      await shareLocation(nextPoint)
+
+      await startLocationTracking((updatedPoint) => {
+        setCurrentLocation(updatedPoint)
+        setLastUpdated(updatedPoint.timestamp)
+        setError(null)
+      })
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Sharing failed')
+    }
+  }, [])
 
   useEffect(() => {
     void refreshCurrentLocation()

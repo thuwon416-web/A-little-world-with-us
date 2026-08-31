@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type Appreciation = {
@@ -25,7 +26,11 @@ export default function AppreciationJar() {
   }
 
   return (
-    <WellnessBoardShell title="Appreciation Jar" subtitle="Gratitude for the little things" badge="jar">
+    <WellnessBoardShell
+      title="Appreciation Jar"
+      subtitle="Gratitude for the little things"
+      badge="jar"
+    >
       <View style={styles.list}>
         {items.map((item) => (
           <View key={item.id} style={styles.entry}>
@@ -49,7 +54,9 @@ export default function AppreciationJar() {
 
       <View style={styles.noteCard}>
         <Text style={styles.noteLabel}>Reminder</Text>
-        <Text style={styles.noteText}>A gratitude note can turn a good day into a beautiful one.</Text>
+        <Text style={styles.noteText}>
+          A gratitude note can turn a good day into a beautiful one.
+        </Text>
       </View>
     </WellnessBoardShell>
   )
