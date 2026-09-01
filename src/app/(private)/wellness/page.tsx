@@ -300,6 +300,14 @@ const StillHushBoard = dynamic(() => import('@/features/wellness/StillHushBoard'
   loading: BoardLoading,
   ssr: false,
 })
+const CycleTrackerWidget = dynamic(() => import('@/features/wellness/CycleTrackerWidget'), {
+  loading: BoardLoading,
+  ssr: false,
+})
+const AstrologyWidget = dynamic(() => import('@/features/wellness/AstrologyWidget'), {
+  loading: BoardLoading,
+  ssr: false,
+})
 
 type WellnessTabId =
   | 'affirmations'
@@ -363,6 +371,8 @@ const tabs: WellnessTab[] = [
       SoftSignalBoard,
       SteadyLandingBoard,
       TenderDuskBoard,
+      CycleTrackerWidget,
+      AstrologyWidget,
     ],
   },
   {

@@ -8,8 +8,8 @@ import { Lock, Eye, Plus, X, Save, Heart, Sparkles } from 'lucide-react'
 import VaultCard from '@/features/vault/VaultCard'
 import { setVaultUnlocked } from '@/lib/auth'
 import { insertRow, readRows, type SecretLetter } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 
-// TODO: Use Supabase Auth instead
 type VaultCategory = 'all' | 'private' | 'celebration' | 'ritual' | 'travel'
 
 const fallbackLetters: SecretLetter[] = [
@@ -42,10 +42,8 @@ export default function VaultPage() {
 }
 
 function VaultPageContent() {
-  const envPass = process.env.NEXT_PUBLIC_APP_PASSWORD
   const [isUnlocked, setIsUnlocked] = useState(false)
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState(false)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [letters, setLetters] = useState<SecretLetter[]>(fallbackLetters)
   const [showForm, setShowForm] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -68,17 +66,24 @@ function VaultPageContent() {
   )
 
   useEffect(() => {
-    const vaultUnlocked =
-      typeof window !== 'undefined' && localStorage.getItem('our-forever-vault') === 'true'
-    if (vaultUnlocked) {
-      setIsUnlocked(true)
-    }
-  }, [envPass])
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        window.location.href = '/login'
+        return
+      }
+      setIsAuthenticated(true)
 
-  useEffect(() => {
-    if (!isUnlocked) return
-    fetchLetters()
-  }, [isUnlocked])
+      const vaultUnlocked =
+        typeof window !== 'undefined' && localStorage.getItem('a-little-world-with-us-vault') === 'true'
+      if (vaultUnlocked) {
+        setIsUnlocked(true)
+        fetchLetters()
+      }
+    }
+
+    checkAuth()
+  }, [])
 
   const fetchLetters = async () => {
     const data = await readRows<SecretLetter>('secret_letters', '*', {
@@ -89,15 +94,9 @@ function VaultPageContent() {
   }
 
   const handleUnlock = () => {
-    if (envPass && password === envPass) {
-      setVaultUnlocked(true)
-      setIsUnlocked(true)
-      setError(false)
-      return
-    }
-
-    setError(true)
-    setTimeout(() => setError(false), 800)
+    setVaultUnlocked(true)
+    setIsUnlocked(true)
+    fetchLetters()
   }
 
   const handleCreate = async () => {
@@ -136,6 +135,16 @@ function VaultPageContent() {
     setShowForm(false)
   }
 
+  if (!isAuthenticated) {
+    return (
+      <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-10">
+        <div className="text-center">
+          <p className="text-sm text-[var(--text-secondary)]">Checking authentication...</p>
+        </div>
+      </div>
+    )
+  }
+
   if (!isUnlocked) {
     return (
       <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-10">
@@ -163,19 +172,8 @@ function VaultPageContent() {
             Love Vault
           </h1>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
-            Enter the magic word to open the letters meant only for you two.
+            Your private letters and memories, sealed until the right moment.
           </p>
-
-          <motion.div animate={error ? { x: [-7, 7, -7, 0] } : {}} className="mt-6">
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
-              placeholder="Password"
-              className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-center text-sm tracking-[0.28em] text-[var(--text-primary)] outline-none ring-0 placeholder:text-[var(--text-secondary)]/70 focus:border-[var(--accent-1)]"
-            />
-          </motion.div>
 
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -211,7 +209,7 @@ function VaultPageContent() {
           <div>
             <h1
               className="text-3xl font-bold text-[var(--text-primary)] mb-1"
-              style={{ fontFamily: "'Playfair Display',serif" }}
+              style={{ fontFamily: "'Playfair Display',serif'" }}
             >
               Love Vault
             </h1>
@@ -243,7 +241,7 @@ function VaultPageContent() {
               </div>
               <div
                 className="text-xl font-semibold text-[var(--text-primary)]"
-                style={{ fontFamily: "'Playfair Display',serif" }}
+                style={{ fontFamily: "'Playfair Display',serif'" }}
               >
                 Some words are worth the wait.
               </div>
@@ -281,7 +279,7 @@ function VaultPageContent() {
               </p>
               <p
                 className="mt-2 text-2xl text-[var(--text-primary)]"
-                style={{ fontFamily: "'Playfair Display',serif" }}
+                style={{ fontFamily: "'Playfair Display',serif'" }}
               >
                 {stats.total}
               </p>
@@ -292,7 +290,7 @@ function VaultPageContent() {
               </p>
               <p
                 className="mt-2 text-2xl text-[var(--text-primary)]"
-                style={{ fontFamily: "'Playfair Display',serif" }}
+                style={{ fontFamily: "'Playfair Display',serif'" }}
               >
                 {stats.sealed}
               </p>
@@ -303,7 +301,7 @@ function VaultPageContent() {
               </p>
               <p
                 className="mt-2 text-base text-[var(--text-primary)]"
-                style={{ fontFamily: "'Playfair Display',serif" }}
+                style={{ fontFamily: "'Playfair Display',serif'" }}
               >
                 {stats.newest}
               </p>
@@ -380,7 +378,7 @@ function VaultPageContent() {
              </div>
            </div>
          </motion.div>
-       )}
+      )}
       </AnimatePresence>
 
       <div className="mb-6 flex flex-wrap gap-2">

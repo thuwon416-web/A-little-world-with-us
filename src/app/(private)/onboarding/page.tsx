@@ -34,7 +34,7 @@ export default function OnboardingPage() {
   const [finished, setFinished] = useState(false)
 
   useEffect(() => {
-    const stored = window.localStorage.getItem('our-forever-onboarding')
+    const stored = window.localStorage.getItem('a-little-world-with-us-onboarding')
     if (stored === 'complete') {
       setFinished(true)
     }
@@ -43,7 +43,7 @@ export default function OnboardingPage() {
   const currentStep = steps[step]
 
   const completeOnboarding = () => {
-    window.localStorage.setItem('our-forever-onboarding', 'complete')
+    window.localStorage.setItem('a-little-world-with-us-onboarding', 'complete')
     setFinished(true)
   }
 

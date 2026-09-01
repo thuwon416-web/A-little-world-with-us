@@ -18,7 +18,7 @@ export default function MemoryOfTheDay() {
 
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('our-forever-memory-of-day')
+      const stored = localStorage.getItem('a-little-world-with-us-memory-of-day')
       if (stored) {
         setMemory(stored)
         setIsLoading(false)
@@ -37,7 +37,7 @@ export default function MemoryOfTheDay() {
 
   useEffect(() => {
     if (!memory) return
-    localStorage.setItem('our-forever-memory-of-day', memory)
+    localStorage.setItem('a-little-world-with-us-memory-of-day', memory)
   }, [memory])
 
   const todayLabel = useMemo(() => {

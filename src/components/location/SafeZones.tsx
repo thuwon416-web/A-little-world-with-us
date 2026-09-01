@@ -16,7 +16,7 @@ interface SafeZone {
   isActive: boolean
 }
 
-export default function SafeZones({ coupleId }: SafeZonesProps) {
+export default function SafeZones({ _coupleId }: SafeZonesProps) {
   const [zones, setZones] = useState<SafeZone[]>([
     {
       id: '1',

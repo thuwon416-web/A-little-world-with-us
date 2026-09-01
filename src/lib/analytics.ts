@@ -11,7 +11,7 @@ type AnalyticsEvent = {
   data?: AnalyticsPayload
 }
 
-const ANALYTICS_KEY = 'our-forever-analytics-events'
+const ANALYTICS_KEY = 'a-little-world-with-us-analytics-events'
 
 function readStoredEvents() {
   if (typeof window === 'undefined') return [] as AnalyticsEvent[]
@@ -55,7 +55,7 @@ export function trackPageView(path = typeof window !== 'undefined' ? window.loca
   writeStoredEvents(nextEvents)
 
   if (typeof window.gtag === 'function') {
-    window.gtag('config', process.env.NEXT_PUBLIC_GA_ID ?? 'our-forever', {
+    window.gtag('config', process.env.NEXT_PUBLIC_GA_ID ?? 'a-little-world-with-us', {
       page_path: path,
     })
   }

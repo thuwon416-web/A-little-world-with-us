@@ -12,8 +12,8 @@ export default function MoodSyncPanel() {
   const [syncScore, setSyncScore] = useState(84)
 
   useEffect(() => {
-    const storedMood = localStorage.getItem('our-forever-mood') as (typeof moods)[number] | null
-    const storedPartnerMood = localStorage.getItem('our-forever-partner-mood') as
+    const storedMood = localStorage.getItem('a-little-world-with-us-mood') as (typeof moods)[number] | null
+    const storedPartnerMood = localStorage.getItem('a-little-world-with-us-partner-mood') as
       | (typeof moods)[number]
       | null
     if (storedMood) setSelectedMood(storedMood)
@@ -21,8 +21,8 @@ export default function MoodSyncPanel() {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('our-forever-mood', selectedMood)
-    localStorage.setItem('our-forever-partner-mood', partnerMood)
+    localStorage.setItem('a-little-world-with-us-mood', selectedMood)
+    localStorage.setItem('a-little-world-with-us-partner-mood', partnerMood)
 
     const moodMap = {
       '😊 Happy': 3,

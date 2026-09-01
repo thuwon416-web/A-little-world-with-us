@@ -5,7 +5,7 @@ import schema, { MessageModel, UserModel } from './schema'
 
 const adapter = new SQLiteAdapter({
   schema,
-  dbName: 'our-forever-mobile-db',
+  dbName: 'a-little-world-with-us-mobile-db',
 })
 
 export const database = new Database({

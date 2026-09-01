@@ -41,7 +41,7 @@ export default function LoveCalendar() {
   useEffect(() => {
     try {
       const raw =
-        localStorage.getItem('love-calendar') || localStorage.getItem('our-forever-calendar')
+        localStorage.getItem('love-calendar') || localStorage.getItem('a-little-world-with-us-calendar')
       if (raw) {
         const parsed = JSON.parse(raw)
         if (Array.isArray(parsed) && parsed.length) {

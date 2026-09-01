@@ -9,7 +9,7 @@ type LoggedError = {
   timestamp: string
 }
 
-const ERROR_LOG_KEY = 'our-forever-error-log'
+const ERROR_LOG_KEY = 'a-little-world-with-us-error-log'
 
 function readStoredErrors() {
   if (typeof window === 'undefined') return [] as LoggedError[]

@@ -48,12 +48,12 @@ export default function SharedWishlist() {
   const [secret, setSecret] = useState(false)
 
   useEffect(() => {
-    const stored = localStorage.getItem('our-forever-wishlist')
+    const stored = localStorage.getItem('a-little-world-with-us-wishlist')
     if (stored) setItems(JSON.parse(stored))
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('our-forever-wishlist', JSON.stringify(items))
+    localStorage.setItem('a-little-world-with-us-wishlist', JSON.stringify(items))
   }, [items])
 
   const reserveItem = (id: number, partner: string) => {

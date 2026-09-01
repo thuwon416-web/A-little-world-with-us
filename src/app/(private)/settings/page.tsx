@@ -2,10 +2,15 @@
 
 import { BellRing, NotebookPen, ShieldCheck, Sparkles, Wand2 } from 'lucide-react'
 import { useState } from 'react'
+import dynamic from 'next/dynamic'
 
 import ErrorReport from '@/components/shared/ErrorReport'
 import PWAInstall from '@/components/shared/PWAInstall'
 import ThemeToggle from '@/components/shared/ThemeToggle'
+
+const CoupleSettings = dynamic(() => import('@/features/settings/CoupleSettings'), {
+  ssr: false,
+})
 
 const settingCards = [
   { icon: BellRing, title: 'Notices', description: 'Daily reminders and gentle nudges' },
@@ -94,16 +99,8 @@ export default function SettingsPage() {
         <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Account</p>
         <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">Manage your couple space</h2>
 
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button type="button" className="rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-[var(--bg-color)]">
-            Update profile
-          </button>
-          <button type="button" className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-primary)]">
-            Security center
-          </button>
-          <button type="button" className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-primary)]">
-            Invite partner
-          </button>
+        <div className="mt-4">
+          <CoupleSettings />
         </div>
       </section>
 

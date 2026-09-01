@@ -10,7 +10,7 @@ export function middleware(req: NextRequest) {
 
   // Protect only dashboard routes and API routes that are client-facing
   if (pathname.startsWith('/dashboard')) {
-    const auth = cookies.get('our-forever-auth')?.value
+    const auth = cookies.get('a-little-world-with-us-auth')?.value
     if (auth !== 'true') {
       const url = new URL('/login', req.url)
       return NextResponse.redirect(url)

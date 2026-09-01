@@ -1,6 +1,6 @@
-export const AUTH_STORAGE_KEY = 'our-forever-auth'
-export const VAULT_STORAGE_KEY = 'our-forever-vault'
-const COOKIE_NAME = 'our-forever-auth'
+export const AUTH_STORAGE_KEY = 'a-little-world-with-us-auth'
+export const VAULT_STORAGE_KEY = 'a-little-world-with-us-vault'
+const COOKIE_NAME = 'a-little-world-with-us-auth'
 
 export function isAuthenticated(): boolean {
   if (typeof window === 'undefined') return false

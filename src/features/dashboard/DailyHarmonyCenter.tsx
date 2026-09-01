@@ -56,11 +56,11 @@ export default function DailyHarmonyCenter() {
   })
 
   useEffect(() => {
-    const storedAccess = localStorage.getItem('our-forever-access') as AccessLevel | null
-    const storedMode = localStorage.getItem('our-forever-incognito')
-    const storedNotifications = localStorage.getItem('our-forever-notifications')
-    const storedOccasion = localStorage.getItem('our-forever-occasion') as OccasionMode | null
-    const storedLanguageCounts = localStorage.getItem('our-forever-love-language')
+    const storedAccess = localStorage.getItem('a-little-world-with-us-access') as AccessLevel | null
+    const storedMode = localStorage.getItem('a-little-world-with-us-incognito')
+    const storedNotifications = localStorage.getItem('a-little-world-with-us-notifications')
+    const storedOccasion = localStorage.getItem('a-little-world-with-us-occasion') as OccasionMode | null
+    const storedLanguageCounts = localStorage.getItem('a-little-world-with-us-love-language')
 
     if (storedAccess) setAccessLevel(storedAccess)
     if (storedMode) setIncognitoMode(storedMode === 'true')
@@ -70,11 +70,11 @@ export default function DailyHarmonyCenter() {
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('our-forever-access', accessLevel)
-    localStorage.setItem('our-forever-incognito', String(incognitoMode))
-    localStorage.setItem('our-forever-notifications', JSON.stringify(notifications))
-    localStorage.setItem('our-forever-occasion', occasionMode)
-    localStorage.setItem('our-forever-love-language', JSON.stringify(languageCounts))
+    localStorage.setItem('a-little-world-with-us-access', accessLevel)
+    localStorage.setItem('a-little-world-with-us-incognito', String(incognitoMode))
+    localStorage.setItem('a-little-world-with-us-notifications', JSON.stringify(notifications))
+    localStorage.setItem('a-little-world-with-us-occasion', occasionMode)
+    localStorage.setItem('a-little-world-with-us-love-language', JSON.stringify(languageCounts))
   }, [accessLevel, incognitoMode, notifications, occasionMode, languageCounts])
 
   const todayWidgets = useMemo(

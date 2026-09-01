@@ -27,7 +27,7 @@ export default function DashboardPage() {
         <section className="mb-8 rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-xl backdrop-blur-xl">
           <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">Welcome home</p>
           <h1 className="mt-2 text-5xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>
-            Our Forever
+            A Little World With Us
           </h1>
           <p className="mt-3 text-sm text-[var(--text-secondary)]">Our little corner of the universe.</p>
         </section>

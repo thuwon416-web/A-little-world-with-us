@@ -2,7 +2,7 @@
 
 ## Quick Setup
 
-This guide will help you set up the environment variables for both web and mobile versions of Our Forever App.
+This guide will help you set up the environment variables for both web and mobile versions of A Little World With Us.
 
 ---
 

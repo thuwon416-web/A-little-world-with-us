@@ -32,12 +32,12 @@ export default function InsideJokeDictionary() {
   const [meaning, setMeaning] = useState('')
 
   useEffect(() => {
-    const stored = localStorage.getItem('our-forever-jokes')
+    const stored = localStorage.getItem('a-little-world-with-us-jokes')
     if (stored) setEntries(JSON.parse(stored))
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('our-forever-jokes', JSON.stringify(entries))
+    localStorage.setItem('a-little-world-with-us-jokes', JSON.stringify(entries))
   }, [entries])
 
   const addEntry = () => {

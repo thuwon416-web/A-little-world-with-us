@@ -1,15 +1,15 @@
 {
   "expo": {
-    "name": "Our Forever",
-    "slug": "our-forever",
+    "name": "A Little World With Us",
+    "slug": "a-little-world-with-us",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "scheme": "ourforever",
+    "scheme": "alittleworldwithus",
     "description": "A relationship-first companion app for couples to chat, plan, share moments, and stay connected.",
     "privacy": "public",
-    "githubUrl": "https://github.com/your-org/our-forever",
+    "githubUrl": "https://github.com/your-org/a-little-world-with-us",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -21,7 +21,7 @@
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ourforever.app",
+      "bundleIdentifier": "com.alittleworldwithus.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Allow live location sharing with your partner.",
         "NSCameraUsageDescription": "Allow video calls and media capture.",
@@ -33,7 +33,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f0f12"
       },
-      "package": "com.ourforever.app",
+      "package": "com.alittleworldwithus.app",
       "versionCode": 1,
       "permissions": [
         "INTERNET",
@@ -51,7 +51,7 @@
     "plugins": ["expo-router", "expo-secure-store"],
     "extra": {
       "eas": {
-        "projectId": "our-forever-mobile"
+        "projectId": "a-little-world-with-us-mobile"
       }
     }
   }

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'our-forever-v1'
+const CACHE_NAME = 'a-little-world-with-us-v1'
 const STATIC_ASSETS = [
   '/',
   '/dashboard',

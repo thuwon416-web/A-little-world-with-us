@@ -14,12 +14,12 @@ export default function GratitudeWall() {
   const [draft, setDraft] = useState('')
 
   useEffect(() => {
-    const stored = localStorage.getItem('our-forever-gratitude')
+    const stored = localStorage.getItem('a-little-world-with-us-gratitude')
     if (stored) setEntries(JSON.parse(stored))
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('our-forever-gratitude', JSON.stringify(entries))
+    localStorage.setItem('a-little-world-with-us-gratitude', JSON.stringify(entries))
   }, [entries])
 
   const addEntry = () => {

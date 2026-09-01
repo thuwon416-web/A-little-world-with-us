@@ -42,7 +42,7 @@ export default function BucketList() {
 
   useEffect(() => {
     const stored =
-      localStorage.getItem('shared-bucket-list') || localStorage.getItem('our-forever-bucket-list')
+      localStorage.getItem('shared-bucket-list') || localStorage.getItem('a-little-world-with-us-bucket-list')
     if (stored) {
       const parsed = JSON.parse(stored)
       if (Array.isArray(parsed)) {

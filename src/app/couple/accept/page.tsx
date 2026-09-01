@@ -197,7 +197,7 @@ function SuccessState() {
       </div>
       <h2 className="mb-2 text-2xl font-bold text-white">Connected!</h2>
       <p className="mb-6 text-[#c9bdcf]">
-        You&apos;re now linked with your partner. Welcome to Our Forever!
+        You&apos;re now linked with your partner. Welcome to A Little World With Us!
       </p>
       <button
         onClick={() => window.location.href = '/couple-linking'}

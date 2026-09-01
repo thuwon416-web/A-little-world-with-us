@@ -8,7 +8,7 @@ import AmbientBackground from '@/components/effects/ambient-background'
 import { Toaster } from '@/components/ui/sonner'
 
 export const metadata: Metadata = {
-  title: 'A Little World for Us',
+  title: 'A Little World With Us',
   description:
     'A private little world for KoKo and Pu Tuu — memories, love, and every day in between.',
   manifest: '/manifest.json',

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { MapPin, Clock } from 'lucide-react'
 
 interface LocationHistoryProps {
-  coupleId: string
+  _coupleId: string
 }
 
 interface LocationEntry {
@@ -15,7 +15,7 @@ interface LocationEntry {
   address?: string
 }
 
-export default function LocationHistory({ coupleId }: LocationHistoryProps) {
+export default function LocationHistory({ _coupleId }: LocationHistoryProps) {
   const [history, setHistory] = useState<LocationEntry[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -40,7 +40,7 @@ export default function LocationHistory({ coupleId }: LocationHistoryProps) {
     
     setHistory(mockHistory)
     setIsLoading(false)
-  }, [coupleId])
+  }, [_coupleId])
 
   const formatTimestamp = (iso: string) => {
     const date = new Date(iso)

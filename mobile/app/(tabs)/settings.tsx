@@ -50,7 +50,7 @@ const toggleItems: {
   { key: 'wellness', label: 'Wellness', description: 'Daily care prompts.', icon: Heart },
 ]
 
-const STORAGE_KEY = 'our-forever-mobile-notification-settings'
+const STORAGE_KEY = 'a-little-world-with-us-mobile-notification-settings'
 
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<NotificationSettings>(defaultSettings)

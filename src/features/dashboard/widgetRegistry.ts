@@ -18,7 +18,7 @@ export type DashboardLayout = {
   visibility: Record<DashboardWidgetId, boolean>
 }
 
-const STORAGE_KEY = 'our-forever-dashboard-layout-v1'
+const STORAGE_KEY = 'a-little-world-with-us-dashboard-layout-v1'
 
 export function loadDashboardLayout(): DashboardLayout | null {
   if (typeof window === 'undefined') return null

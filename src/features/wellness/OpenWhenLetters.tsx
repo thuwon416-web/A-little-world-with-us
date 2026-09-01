@@ -44,12 +44,12 @@ export default function OpenWhenLetters() {
   const [activeId, setActiveId] = useState<string | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('our-forever-letters')
+    const stored = localStorage.getItem('a-little-world-with-us-letters')
     if (stored) setLetters(JSON.parse(stored))
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('our-forever-letters', JSON.stringify(letters))
+    localStorage.setItem('a-little-world-with-us-letters', JSON.stringify(letters))
   }, [letters])
 
   const toggleLetter = (id: string) => {

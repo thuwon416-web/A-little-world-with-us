@@ -91,8 +91,8 @@ export default function LocationPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <LocationHistory coupleId="demo-couple-id" />
-        <SafeZones coupleId="demo-couple-id" />
+        <LocationHistory _coupleId="demo-couple-id" />
+        <SafeZones _coupleId="demo-couple-id" />
       </div>
     </div>
   )

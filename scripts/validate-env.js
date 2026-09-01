@@ -26,7 +26,6 @@ loadEnvFile(path.join(__dirname, '..', '.env'))
 const requiredEnv = [
   'NEXT_PUBLIC_SUPABASE_URL',
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
-  'NEXT_PUBLIC_APP_PASSWORD',
 ]
 
 const optionalEnv = [

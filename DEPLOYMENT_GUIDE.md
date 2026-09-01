@@ -1,4 +1,4 @@
-# Deployment Guide - Our Forever App
+# Deployment Guide - A Little World With Us
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Before deploying, ensure you have:
 1. Go to [supabase.com](https://supabase.com)
 2. Sign up/log in
 3. Click "New Project"
-4. Name your project (e.g., "our-forever-app")
+4. Name your project (e.g., "a-little-world-with-us-app")
 5. Choose a region closest to your users
 6. Set a strong database password (save this!)
 7. Wait for project to be created (~2 minutes)
@@ -115,7 +115,7 @@ vercel --prod
 This will:
 - Build your Next.js app
 - Deploy to Vercel
-- Provide a URL (e.g., `https://our-forever.vercel.app`)
+- Provide a URL (e.g., `https://a-little-world-with-us.vercel.app`)
 
 ### 3.4 Add Environment Variables in Vercel
 1. Go to [vercel.com](https://vercel.com)

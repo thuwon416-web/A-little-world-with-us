@@ -37,12 +37,12 @@ export default function DateArchive() {
   const [note, setNote] = useState('')
 
   useEffect(() => {
-    const stored = localStorage.getItem('our-forever-date-archive')
+    const stored = localStorage.getItem('a-little-world-with-us-date-archive')
     if (stored) setEntries(JSON.parse(stored))
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('our-forever-date-archive', JSON.stringify(entries))
+    localStorage.setItem('a-little-world-with-us-date-archive', JSON.stringify(entries))
   }, [entries])
 
   const addEntry = () => {

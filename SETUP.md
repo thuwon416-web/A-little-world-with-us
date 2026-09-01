@@ -4,7 +4,7 @@
 
 ```bash
 git clone <repo-url>
-cd our-forever
+cd a-little-world-with-us
 ```
 
 ## 2. Install dependencies

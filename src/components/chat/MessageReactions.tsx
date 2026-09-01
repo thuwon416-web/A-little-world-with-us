@@ -13,7 +13,7 @@ const REACTIONS = [
 ]
 
 interface MessageReactionsProps {
-  messageId: string
+  _messageId: string
   onReactionAdd: (emoji: string) => void
   onReactionRemove: (emoji: string) => void
   currentReactions?: string[]

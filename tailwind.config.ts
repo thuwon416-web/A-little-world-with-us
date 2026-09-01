@@ -3,12 +3,18 @@ import type { Config } from 'tailwindcss'
 const config: Config = {
   darkMode: ['class'],
   content: [
-    './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/components/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/app/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/features/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/hooks/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/lib/**/*.{js,ts,jsx,tsx,mdx}',
+    './src/**/*.{js,ts,jsx,tsx,mdx}',
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  safelist: [
+    'glass-card',
+    'font-dancing',
+    'font-display',
+    'font-body',
+    { pattern: /^(bg|text|border|from|via|to|ring|shadow)-/ },
+    { pattern: /^(grid|flex|col|row|gap|p|m|w|h|max|min)-/ },
+    { pattern: /^animate-/ },
   ],
   theme: {
     extend: {

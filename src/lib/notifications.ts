@@ -26,7 +26,7 @@ export function getNotificationSettings(): NotificationSettings {
   if (typeof window === 'undefined') return defaultNotificationSettings
 
   try {
-    const stored = window.localStorage.getItem('our-forever-notification-settings')
+    const stored = window.localStorage.getItem('a-little-world-with-us-notification-settings')
     if (!stored) {
       return defaultNotificationSettings
     }
@@ -48,7 +48,7 @@ export function updateNotificationSettings(nextSettings: Partial<NotificationSet
     ...nextSettings,
   }
 
-  window.localStorage.setItem('our-forever-notification-settings', JSON.stringify(merged))
+  window.localStorage.setItem('a-little-world-with-us-notification-settings', JSON.stringify(merged))
   return merged
 }
 

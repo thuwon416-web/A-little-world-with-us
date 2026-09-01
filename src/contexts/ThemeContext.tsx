@@ -34,8 +34,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     setMounted(true)
 
-    const storedMode = localStorage.getItem('our-forever-theme-mode') as ThemeMode | null
-    const storedAuto = localStorage.getItem('our-forever-theme-auto')
+    const storedMode = localStorage.getItem('a-little-world-with-us-theme-mode') as ThemeMode | null
+    const storedAuto = localStorage.getItem('a-little-world-with-us-theme-auto')
 
     if (storedMode && themeMap[storedMode]) {
       setModeState(storedMode)
@@ -56,8 +56,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.style.colorScheme =
       mode === 'midnight' || mode === 'monochrome' ? 'dark' : 'light'
 
-    localStorage.setItem('our-forever-theme-mode', mode)
-    localStorage.setItem('our-forever-theme-auto', String(autoMode))
+    localStorage.setItem('a-little-world-with-us-theme-mode', mode)
+    localStorage.setItem('a-little-world-with-us-theme-auto', String(autoMode))
   }, [mode, autoMode, mounted])
 
   useEffect(() => {

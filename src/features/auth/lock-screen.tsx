@@ -90,7 +90,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             transition={{ delay: 0.4, duration: 0.8 }}
             className="font-script text-6xl md:text-7xl gold-text mb-3 animate-gold-glow"
           >
-            Our Forever
+            A Little World With Us
           </motion.h1>
           <motion.p
             initial={{ opacity: 0 }}

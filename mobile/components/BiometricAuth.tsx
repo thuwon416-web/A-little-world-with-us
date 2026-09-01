@@ -53,7 +53,7 @@ export default function BiometricAuth({ onSuccess, onCancel }: BiometricAuthProp
 
     try {
       const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: 'Authenticate to access Our Forever',
+        promptMessage: 'Authenticate to access A Little World With Us',
         fallbackLabel: 'Use passcode',
         cancelLabel: 'Cancel',
         disableDeviceFallback: false,

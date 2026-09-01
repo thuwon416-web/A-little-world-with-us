@@ -1,6 +1,6 @@
-﻿# Our Forever
+﻿# A Little World With Us
 
-Our Forever is a private relationship companion for couples, built to help partners share memories, messages, plans, reminders, wellness check-ins, and location-aware experiences in one secure place.
+A Little World With Us is a private relationship companion for couples, built to help partners share memories, messages, plans, reminders, wellness check-ins, and location-aware experiences in one secure place.
 
 ## Overview
 
@@ -72,7 +72,7 @@ The project combines a Next.js web app with a React Native / Expo mobile app. To
 
 ```bash
 git clone <repository-url>
-cd our-forever
+cd a-little-world-with-us
 npm install
 cd mobile && npm install && cd ..
 ```
@@ -93,7 +93,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 # App Configuration
-NEXT_PUBLIC_APP_NAME=Our Forever
+NEXT_PUBLIC_APP_NAME=A Little World With Us
 NEXT_PUBLIC_APP_URL=https://ourforever.app
 
 # Auth (for demo/testing)

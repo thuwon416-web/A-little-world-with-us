@@ -116,7 +116,7 @@ export default function PinLock({
           <Heart className="w-20 h-20 text-[var(--accent-1)] mx-auto mb-6 fill-current drop-shadow-lg" />
         </motion.div>
         <h1 className="font-dancing text-5xl text-[var(--accent-2)] mb-3 drop-shadow-sm">
-          Our Forever
+          A Little World With Us
         </h1>
         <p className="text-sm opacity-70 tracking-wide">Enter PIN to unlock our world</p>
       </motion.div>
