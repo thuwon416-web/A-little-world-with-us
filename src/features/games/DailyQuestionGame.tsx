@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
 import { MessageSquareQuote, Sparkles } from 'lucide-react'
 
 const questions = [

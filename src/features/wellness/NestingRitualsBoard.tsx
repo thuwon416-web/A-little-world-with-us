@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Home, Heart, Plus, Sparkles, SunMedium } from 'lucide-react'
+import { Home, Heart, Plus, Sparkles } from 'lucide-react'
 
 type NestItem = {
   id: string

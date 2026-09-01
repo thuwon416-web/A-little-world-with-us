@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { BellRing, Plus, Sparkles } from 'lucide-react'
+import { BellRing, Sparkles } from 'lucide-react'
 
 type Notice = {
   id: string

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, Plus, Sparkles, SunMedium, Waves } from 'lucide-react'
+import { Plus, Sparkles, SunMedium, Waves } from 'lucide-react'
 
 type EchoItem = {
   id: string

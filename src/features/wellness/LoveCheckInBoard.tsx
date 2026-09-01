@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, MessageCircleHeart, Plus, Sparkles } from 'lucide-react'
+import { Heart, MessageCircleHeart, Plus } from 'lucide-react'
 
 type CheckInItem = {
   id: string

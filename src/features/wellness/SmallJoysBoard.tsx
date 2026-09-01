@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Gift, Heart, Plus, Sparkles, Star } from 'lucide-react'
+import { Gift, Plus, Sparkles, Star } from 'lucide-react'
 
 type JoyItem = {
   id: string

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { HeartHandshake, MoonStar, Plus, Sparkles, Wind } from 'lucide-react'
+import { HeartHandshake, MoonStar, Plus, Wind } from 'lucide-react'
 
 type RepairItem = {
   id: string

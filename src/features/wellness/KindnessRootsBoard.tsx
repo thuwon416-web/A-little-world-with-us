@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Flower2, Heart, Plus, Sparkles, Trees } from 'lucide-react'
+import { Flower2, Plus, Sparkles, Trees } from 'lucide-react'
 
 type RootItem = {
   id: string

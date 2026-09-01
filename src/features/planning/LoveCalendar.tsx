@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
-import { CalendarDays, CheckCircle2, Sparkles } from 'lucide-react'
+import { CalendarDays, Sparkles } from 'lucide-react'
 
 type Entry = {
   id: string

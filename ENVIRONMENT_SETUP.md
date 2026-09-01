@@ -17,7 +17,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
 # App Configuration (REQUIRED)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_APP_PASSWORD=your-secure-password
 
 # Optional Features
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-key
@@ -36,7 +35,6 @@ EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 
 # App Configuration (REQUIRED)
 EXPO_PUBLIC_APP_URL=http://localhost:3000
-EXPO_PUBLIC_APP_PASSWORD=your-secure-password
 
 # Optional Features
 EXPO_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-key
@@ -133,7 +131,7 @@ When deploying to production:
 - Ensure you're using the anon key, not the service role key
 
 ### "Authentication failed" error
-- Check that `NEXT_PUBLIC_APP_PASSWORD` matches between web and mobile
+- Ensure `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` match between web and mobile
 - Verify the password is set in both `.env.local` files
 
 ### Build fails

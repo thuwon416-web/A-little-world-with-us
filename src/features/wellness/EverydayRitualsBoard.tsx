@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Clock3, Heart, MoonStar, Plus, Sparkles, SunMedium } from 'lucide-react'
+import { Clock3, MoonStar, Plus, Sparkles } from 'lucide-react'
 
 type RitualItem = {
   id: string

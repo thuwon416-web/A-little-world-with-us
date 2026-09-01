@@ -77,7 +77,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-actual-anon-key-here
 
 # App (REQUIRED)
 NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
-NEXT_PUBLIC_APP_PASSWORD=your-secure-password
 
 # Optional Features
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-key
@@ -125,7 +124,6 @@ This will:
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
    - `NEXT_PUBLIC_APP_URL`
-   - `NEXT_PUBLIC_APP_PASSWORD`
    - (Optional) `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`
    - (Optional) `NEXT_PUBLIC_AI_SERVICE_KEY`
 
@@ -188,6 +186,18 @@ eas build --platform ios
 - Monitor performance
 - Set up error tracking (optional)
 
+### 6.3 Supabase Auto-Pause (Free Tier)
+Supabase free projects automatically pause after 1 week of inactivity:
+- Check pause status: Supabase dashboard → Settings → Database
+- If paused, the app will not function until manually resumed
+- To prevent auto-pause:
+  - **Option 1**: Upgrade to Pro tier ($25/month) for always-on database
+  - **Option 2**: Set up an uptime monitoring service (e.g., UptimeRobot) to ping your app weekly
+    - Create a free UptimeRobot account
+    - Add monitor for your production URL
+    - Set check interval to 5 minutes or weekly
+    - This keeps your app active and prevents Supabase from pausing
+
 ---
 
 ## Troubleshooting
@@ -200,7 +210,6 @@ eas build --platform ios
 ### Auth Not Working
 - Verify Supabase URL and keys
 - Check RLS policies in Supabase
-- Ensure `NEXT_PUBLIC_APP_PASSWORD` is set
 
 ### Features Not Loading
 - Check browser console for errors
@@ -220,13 +229,49 @@ eas build --platform ios
 
 ---
 
+## Step 7: Custom Domain Setup (Recommended for Myanmar Access)
+
+### 7.1 Why Custom Domain?
+The default `*.vercel.app` domains may be blocked in Myanmar without VPN. Setting up a custom domain ensures reliable access.
+
+### 7.2 Purchase a Domain
+1. Choose a domain registrar (e.g., Namecheap, GoDaddy, Cloudflare)
+2. Purchase a domain for your app (e.g., `alittleworldwithus.com`)
+3. Save your registrar login credentials
+
+### 7.3 Add Domain in Vercel
+1. Go to Vercel dashboard → Your project → Settings → Domains
+2. Click "Add Domain"
+3. Enter your domain (e.g., `alittleworldwithus.com`)
+4. Vercel will provide DNS records to configure
+
+### 7.4 Configure DNS Records
+In your domain registrar's DNS settings:
+1. Add an **A record** pointing to Vercel's provided IP address
+2. Or add a **CNAME record** pointing to Vercel's provided hostname
+3. Wait for DNS propagation (typically 5-30 minutes)
+
+### 7.5 Verify SSL
+Vercel automatically provisions SSL certificates. Once DNS propagates:
+1. Your domain will show "Valid Configuration" in Vercel
+2. HTTPS will be enabled automatically
+3. Redirect your root domain to `www` if desired
+
+### 7.6 Test Custom Domain
+1. Visit your custom domain in a browser
+2. Verify the app loads correctly
+3. Test all features
+4. Test access from Myanmar if applicable
+
+---
+
 ## Next Steps
 
 After successful deployment:
 1. Share the app with your partner
 2. Customize the theme and colors
 3. Add your own content (photos, memories)
-4. Set up custom domain (optional)
+4. Set up custom domain (recommended for Myanmar access)
 5. Configure analytics (optional)
 
 ---

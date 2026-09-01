@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'framer-motion'
 import { Heart, PencilLine, Plus, Sparkles } from 'lucide-react'
 
 type Note = {

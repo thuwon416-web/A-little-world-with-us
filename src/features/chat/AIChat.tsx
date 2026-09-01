@@ -1,8 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
-import { motion } from 'framer-motion'
-import { supabase } from '@/lib/supabase'
+import { useEffect, useState } from 'react'
 
 interface Msg {
   id?: string

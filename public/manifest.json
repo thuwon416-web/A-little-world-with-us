@@ -1,8 +1,8 @@
 {
   "name": "A Little World With Us",
-  "short_name": "Our Little World",
-  "description": "A private home for couple memories, rituals, and daily love.",
-  "start_url": "/",
+  "short_name": "ALWWU",
+  "description": "A private space for couples",
+  "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#1a0b2e",
   "theme_color": "#FFB6C1",
@@ -19,6 +19,24 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Chat",
+      "url": "/chat",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Wellness",
+      "url": "/wellness",
+      "icons": [{ "src": "/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

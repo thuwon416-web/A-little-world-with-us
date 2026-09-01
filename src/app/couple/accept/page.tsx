@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useState, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Heart, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react'
 import { acceptPairInvite } from '@/lib/couple-link'
@@ -9,23 +9,13 @@ import { acceptPairInvite } from '@/lib/couple-link'
 type PageState = 'loading' | 'input' | 'accepting' | 'success' | 'error'
 
 export default function AcceptCoupleLinkPage() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const [state, setState] = useState<PageState>('input')
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    // If code is provided in URL, auto-fill and attempt to accept
-    const urlCode = searchParams.get('code')
-    if (urlCode) {
-      setCode(urlCode.toUpperCase())
-      handleAccept(urlCode)
-    }
-  }, [searchParams])
-
-  const handleAccept = async (codeToAccept?: string) => {
+  const handleAccept = useCallback(async (codeToAccept?: string) => {
     const finalCode = (codeToAccept || code).trim().toUpperCase()
     
     if (!finalCode) {
@@ -47,7 +37,16 @@ export default function AcceptCoupleLinkPage() {
     } finally {
       setIsSubmitting(false)
     }
-  }
+  }, [code])
+
+  useEffect(() => {
+    // If code is provided in URL, auto-fill and attempt to accept
+    const urlCode = searchParams.get('code')
+    if (urlCode) {
+      setCode(urlCode.toUpperCase())
+      handleAccept(urlCode)
+    }
+  }, [searchParams, handleAccept])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

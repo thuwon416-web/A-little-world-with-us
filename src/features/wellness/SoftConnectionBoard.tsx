@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, MoonStar, Plus, Sparkles, Waves } from 'lucide-react'
+import { Heart, Plus, Sparkles, Waves } from 'lucide-react'
 
 type ConnectionItem = {
   id: string

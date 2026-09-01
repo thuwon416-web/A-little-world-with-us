@@ -459,6 +459,7 @@ export default function WellnessPage() {
           <button
             key={tab.id}
             type="button"
+            role="tab"
             onClick={() => setActiveTab(tab.id)}
             className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${
               activeTab === tab.id

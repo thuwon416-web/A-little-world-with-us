@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Flame, Heart, Plus, Sparkles, SunMedium } from 'lucide-react'
+import { Flame, Plus, Sparkles, SunMedium } from 'lucide-react'
 
 type WarmthItem = {
   id: string

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ShieldCheck, Heart, Plus, Sparkles, Waves } from 'lucide-react'
+import { ShieldCheck, Plus, Sparkles, Waves } from 'lucide-react'
 
 type SafeBasisItem = {
   id: string

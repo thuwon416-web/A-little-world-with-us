@@ -95,9 +95,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 # App Configuration
 NEXT_PUBLIC_APP_NAME=A Little World With Us
 NEXT_PUBLIC_APP_URL=https://ourforever.app
-
-# Auth (for demo/testing)
-NEXT_PUBLIC_APP_PASSWORD=your-app-password
 ```
 
 The same pattern applies to the mobile app using `mobile/.env.example`.

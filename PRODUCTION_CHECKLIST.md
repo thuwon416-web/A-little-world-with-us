@@ -7,7 +7,6 @@
 - [ ] `mobile/.env.local` exists with real Supabase credentials
 - [ ] `NEXT_PUBLIC_SUPABASE_URL` is set to actual project URL
 - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` is set to actual anon key
-- [ ] `NEXT_PUBLIC_APP_PASSWORD` is set (secure password)
 - [ ] `NEXT_PUBLIC_APP_URL` is set to production URL
 - [ ] Optional variables set (Google Maps, AI, etc.)
 
@@ -60,7 +59,7 @@
 - [ ] Logged into Vercel
 - [ ] Project linked to Vercel
 - [ ] Environment variables added in Vercel dashboard
-- [ ] Custom domain configured (optional)
+- [ ] Custom domain configured (recommended for Myanmar access)
 - [ ] Production build successful
 
 ### Post-Deployment Testing
@@ -107,6 +106,7 @@
 - [ ] Backup strategy in place
 - [ ] Update schedule planned
 - [ ] Support contact defined
+- [ ] Supabase auto-pause prevention configured (uptime monitor or Pro tier)
 
 ---
 

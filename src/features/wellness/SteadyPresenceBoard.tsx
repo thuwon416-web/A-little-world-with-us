@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Compass, Heart, MoonStar, Plus, Sparkles } from 'lucide-react'
+import { Compass, MoonStar, Plus, Sparkles } from 'lucide-react'
 
 type PresenceItem = {
   id: string

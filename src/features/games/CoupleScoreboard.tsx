@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Award, Heart, Sparkles } from 'lucide-react'
+import { Award, Sparkles } from 'lucide-react'
 
 const initialStats = [
   { label: 'Arguments won', me: 8, her: 6 },

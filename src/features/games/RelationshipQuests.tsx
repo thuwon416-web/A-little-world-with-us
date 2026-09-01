@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Gift, HeartHandshake, Star } from 'lucide-react'
+import { Gift } from 'lucide-react'
 
 type Quest = {
   id: string

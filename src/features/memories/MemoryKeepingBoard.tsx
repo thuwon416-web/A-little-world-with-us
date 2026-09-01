@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { BookHeart, Heart, MoonStar, Plus, Sparkles } from 'lucide-react'
+import { BookHeart, Heart, Plus, Sparkles } from 'lucide-react'
 
 type MemoryItem = {
   id: string

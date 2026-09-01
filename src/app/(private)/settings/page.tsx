@@ -1,6 +1,6 @@
 'use client'
 
-import { BellRing, NotebookPen, ShieldCheck, Sparkles, Wand2 } from 'lucide-react'
+import { BellRing, NotebookPen, ShieldCheck, Wand2 } from 'lucide-react'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 
@@ -9,6 +9,14 @@ import PWAInstall from '@/components/shared/PWAInstall'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 
 const CoupleSettings = dynamic(() => import('@/features/settings/CoupleSettings'), {
+  ssr: false,
+})
+
+const HealthProfileWidget = dynamic(() => import('@/features/settings/HealthProfileWidget'), {
+  ssr: false,
+})
+
+const FavoritesWidget = dynamic(() => import('@/features/settings/FavoritesWidget'), {
   ssr: false,
 })
 
@@ -99,8 +107,10 @@ export default function SettingsPage() {
         <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Account</p>
         <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">Manage your couple space</h2>
 
-        <div className="mt-4">
+        <div className="mt-4 space-y-4">
           <CoupleSettings />
+          <HealthProfileWidget />
+          <FavoritesWidget />
         </div>
       </section>
 

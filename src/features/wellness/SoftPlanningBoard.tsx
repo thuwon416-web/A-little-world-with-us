@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { CalendarClock, Heart, Plus, Sparkles, SunMedium } from 'lucide-react'
+import { CalendarClock, Heart, SunMedium } from 'lucide-react'
 
 type PlanItem = {
   id: string

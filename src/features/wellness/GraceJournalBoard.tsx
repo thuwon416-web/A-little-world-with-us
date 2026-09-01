@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { BookOpenText, Heart, Plus, Sparkles, SunMedium } from 'lucide-react'
+import { BookOpenText, Plus, Sparkles, SunMedium } from 'lucide-react'
 
 type JournalItem = {
   id: string

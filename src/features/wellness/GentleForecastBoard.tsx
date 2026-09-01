@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { CloudRain, Heart, Plus, Sparkles, SunMedium } from 'lucide-react'
+import { CloudRain, Plus, Sparkles, SunMedium } from 'lucide-react'
 
 type ForecastItem = {
   id: string

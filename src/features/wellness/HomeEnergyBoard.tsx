@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { House, Lightbulb, MoonStar, Plus, Sparkles, SunMedium } from 'lucide-react'
+import { House, Lightbulb, Plus, SunMedium } from 'lucide-react'
 
 type EnergyItem = {
   id: string

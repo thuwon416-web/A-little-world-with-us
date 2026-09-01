@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowDownToLine, Heart, MoonStar, Plus, Sparkles } from 'lucide-react'
+import { ArrowDownToLine, MoonStar, Plus, Sparkles } from 'lucide-react'
 
 type ReentryItem = {
   id: string
