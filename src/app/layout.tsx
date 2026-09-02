@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { LanguageProvider } from '@/contexts/LanguageContext'
 import ServiceWorkerRegister from '@/components/shared/ServiceWorkerRegister'
 import InteractiveCursor from '@/components/effects/InteractiveCursor'
 import AmbientBackground from '@/components/effects/ambient-background'
@@ -25,18 +26,20 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="en"
+      lang="my"
       suppressHydrationWarning
       data-theme-mode="midnight"
     >
       <body className="min-h-screen font-sans antialiased">
-        <ThemeProvider>
-          <AmbientBackground density="medium" />
-          <InteractiveCursor />
-          <ServiceWorkerRegister />
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <LanguageProvider>
+          <ThemeProvider>
+            <AmbientBackground density="medium" />
+            <InteractiveCursor />
+            <ServiceWorkerRegister />
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </LanguageProvider>
       </body>
     </html>
   )

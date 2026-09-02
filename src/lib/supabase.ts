@@ -73,6 +73,33 @@ export async function readRows<T>(
   }
 }
 
+export async function readUserRows<T>(
+  table: string,
+  query = '*',
+  order?: { column: string; ascending?: boolean }
+): Promise<T[]> {
+  if (!isSupabaseConfigured) return []
+
+  try {
+    const userId = await getCurrentUserId()
+    if (!userId) return []
+
+    let request = supabase.from(table).select(query).eq('user_id', userId)
+    if (order) {
+      request = request.order(order.column, { ascending: order.ascending ?? true })
+    }
+
+    const { data, error } = await request
+    if (error) {
+      return []
+    }
+
+    return (data ?? []) as T[]
+  } catch {
+    return []
+  }
+}
+
 export async function insertRow<T>(
   table: string,
   payload: Record<string, unknown>
@@ -80,6 +107,11 @@ export async function insertRow<T>(
   if (!isSupabaseConfigured) return null
 
   try {
+    const userId = await getCurrentUserId()
+    if (userId && !payload.user_id) {
+      payload.user_id = userId
+    }
+
     const { data, error } = await supabase.from(table).insert(payload).select()
     if (error) {
       return null
@@ -88,6 +120,21 @@ export async function insertRow<T>(
     return (data?.[0] ?? null) as T | null
   } catch {
     return null
+  }
+}
+
+export async function deleteRow(table: string, id: string): Promise<boolean> {
+  if (!isSupabaseConfigured) return false
+
+  try {
+    const { error } = await supabase.from(table).delete().eq('id', id)
+    if (error) {
+      return false
+    }
+
+    return true
+  } catch {
+    return false
   }
 }
 
@@ -124,4 +171,17 @@ export type SecretLetter = {
   is_locked: boolean
   category?: string | null
   reveal_at?: string | null
+}
+
+export type Reminder = {
+  id: string
+  user_id: string
+  couple_id?: string | null
+  title: string
+  description?: string | null
+  reminder_date: string
+  reminder_type: 'custom' | 'anniversary' | 'birthday' | 'cycle' | 'medication'
+  repeat_interval?: 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly' | null
+  notified: boolean
+  created_at: string
 }

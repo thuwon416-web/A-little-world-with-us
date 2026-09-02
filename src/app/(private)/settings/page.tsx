@@ -20,6 +20,26 @@ const FavoritesWidget = dynamic(() => import('@/features/settings/FavoritesWidge
   ssr: false,
 })
 
+const RemindersWidget = dynamic(() => import('@/features/settings/RemindersWidget'), {
+  ssr: false,
+})
+
+const PINLockWidget = dynamic(() => import('@/features/settings/PINLockWidget'), {
+  ssr: false,
+})
+
+const SecuritySettings = dynamic(() => import('@/features/settings/SecuritySettings'), {
+  ssr: false,
+})
+
+const LanguageSwitcher = dynamic(() => import('@/features/settings/LanguageSwitcher'), {
+  ssr: false,
+})
+
+const TwoFactorAuthWidget = dynamic(() => import('@/features/settings/TwoFactorAuthWidget'), {
+  ssr: false,
+})
+
 const settingCards = [
   { icon: BellRing, title: 'Notices', description: 'Daily reminders and gentle nudges' },
   { icon: NotebookPen, title: 'Rituals', description: 'Saved habits and shared memories' },
@@ -33,7 +53,7 @@ export default function SettingsPage() {
   const [privateMode, setPrivateMode] = useState(true)
 
   return (
-    <main className="space-y-6 p-4 md:p-6">
+    <main className="space-y-6 p-4 md:p-6 animate-fade-in">
       <section className="rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Settings</p>
         <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">Your little world</h1>
@@ -111,6 +131,11 @@ export default function SettingsPage() {
           <CoupleSettings />
           <HealthProfileWidget />
           <FavoritesWidget />
+          <RemindersWidget />
+          <PINLockWidget />
+          <SecuritySettings />
+          <LanguageSwitcher />
+          <TwoFactorAuthWidget />
         </div>
       </section>
 

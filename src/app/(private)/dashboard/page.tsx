@@ -182,7 +182,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="dashboard-shell">
+    <main className="dashboard-shell animate-fade-in">
       <section className="dashboard-hero">
         <div className="dashboard-hero__glow" />
         <div className="dashboard-hero__content">

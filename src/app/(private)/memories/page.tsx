@@ -2,6 +2,7 @@
 
 import { Suspense, type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
+import PhotoExport from '@/features/memories/PhotoExport'
 import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
 
 const PAGE_SIZE = 6
@@ -369,6 +370,13 @@ function MemoriesPageContent() {
           </select>
         </div>
       </section>
+
+      <PhotoExport photos={memories.map(memory => ({
+        id: memory.id.toString(),
+        url: memory.displayUrl,
+        filename: memory.caption || 'memory.jpg',
+        created_at: memory.created_at
+      }))} />
 
       {isLoading && <p className="text-sm text-[var(--text-secondary)]">Loading memories...</p>}
       <section className="grid gap-4 md:grid-cols-2">
