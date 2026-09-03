@@ -14,6 +14,7 @@ import {
   MessageCircleHeart,
   PhoneCall,
   Sparkles,
+  Star,
   Shield,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
@@ -26,6 +27,7 @@ const baseNavItems = [
   { href: '/plans', label: 'Plans', icon: CalendarDays },
   { href: '/location', label: 'Location', icon: MapPin },
   { href: '/care', label: 'Care', icon: Heart },
+  { href: '/astrology', label: 'Astrology', icon: Star },
   { href: '/calls', label: 'Calls', icon: PhoneCall },
   { href: '/ai', label: 'AI', icon: Sparkles },
   { href: '/reminders', label: 'Reminders', icon: Bell },
