@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -13,10 +14,12 @@ import {
   MessageCircleHeart,
   PhoneCall,
   Sparkles,
+  Shield,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
+import { supabase } from '@/lib/supabase'
 
-const navItems = [
+const baseNavItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/memories', label: 'Memories', icon: Heart },
   { href: '/chat', label: 'Whispers', icon: MessageCircleHeart },
@@ -30,8 +33,53 @@ const navItems = [
   { href: '/vault', label: 'Vault', icon: LockKeyhole },
 ]
 
+const adminNavItems = [
+  { href: '/admin/locations', label: 'Admin Location', icon: Shield },
+]
+
 export default function Sidebar() {
   const pathname = usePathname()
+  const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    checkUserRole()
+  }, [])
+
+  const checkUserRole = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setUserRole(null)
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      setUserRole(profile?.role || 'user')
+    } catch (error) {
+      console.error('Failed to check user role:', error)
+      setUserRole('user')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const navItems = userRole === 'admin' ? [...baseNavItems, ...adminNavItems] : baseNavItems
+
+  if (isLoading) {
+    return (
+      <aside className="flex h-full w-full flex-col rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-6 shadow-lg backdrop-blur-xl">
+        <div className="flex h-full items-center justify-center">
+          <div className="text-sm text-[var(--text-secondary)]">Loading...</div>
+        </div>
+      </aside>
+    )
+  }
 
   return (
     <aside className="flex h-full w-full flex-col rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-6 shadow-lg backdrop-blur-xl">
