@@ -25,6 +25,7 @@ const baseNavItems = [
   { href: '/chat', label: 'Whispers', icon: MessageCircleHeart },
   { href: '/plans', label: 'Plans', icon: CalendarDays },
   { href: '/location', label: 'Location', icon: MapPin },
+  { href: '/care', label: 'Care', icon: Heart },
   { href: '/calls', label: 'Calls', icon: PhoneCall },
   { href: '/ai', label: 'AI', icon: Sparkles },
   { href: '/reminders', label: 'Reminders', icon: Bell },
