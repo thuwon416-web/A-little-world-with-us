@@ -18,23 +18,29 @@ export default function WellnessBoard({ board }: WellnessBoardProps) {
         <CardDescription className="text-rose-700">{board.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {board.content.map((item, index) => (
-          <div
-            key={index}
-            className="border-l-4 border-rose-300 pl-4 py-2 bg-rose-50/50 rounded-r-lg"
-          >
-            <p className="text-stone-800 italic font-medium">“{item.text}”</p>
-            {item.action && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="mt-2 text-rose-600 hover:text-rose-800 hover:bg-rose-100"
-              >
-                ✨ {item.action}
-              </Button>
-            )}
+        {board.content && board.content.length > 0 ? (
+          board.content.map((item, index) => (
+            <div
+              key={index}
+              className="border-l-4 border-rose-300 pl-4 py-2 bg-rose-50/50 rounded-r-lg"
+            >
+              <p className="text-stone-800 italic font-medium">&ldquo;{item.text}&rdquo;</p>
+              {item.action && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="mt-2 text-rose-600 hover:text-rose-800 hover:bg-rose-100"
+                >
+                  ✨ {item.action}
+                </Button>
+              )}
+            </div>
+          ))
+        ) : (
+          <div className="text-center py-8 text-rose-600">
+            <p className="text-sm">Coming soon...</p>
           </div>
-        ))}
+        )}
       </CardContent>
     </Card>
   )

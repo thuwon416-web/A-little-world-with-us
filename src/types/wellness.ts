@@ -1,14 +1,5 @@
 // src/types/wellness.ts
-export type WellnessCategory =
-  | 'affirmation'
-  | 'gratitude'
-  | 'apology'
-  | 'kindness'
-  | 'calm'
-  | 'love'
-  | 'routine'
-  | 'ritual'
-  | 'wellness'
+export type WellnessCategory = 'physical' | 'mental' | 'relationship'
 
 export interface WellnessContent {
   text: string
@@ -18,8 +9,11 @@ export interface WellnessContent {
 export interface WellnessBoard {
   id: string
   title: string
+  titleMy?: string // Myanmar translation
   description: string
+  descriptionMy?: string // Myanmar translation
   category: WellnessCategory
   icon: string // Lucide icon name or emoji
-  content: WellnessContent[]
+  content?: WellnessContent[]
+  isCurated?: boolean // Flag for curated boards
 }
