@@ -25,7 +25,6 @@ const baseNavItems = [
   { href: '/memories', label: 'Memories', icon: Heart },
   { href: '/chat', label: 'Whispers', icon: MessageCircleHeart },
   { href: '/plans', label: 'Plans', icon: CalendarDays },
-  { href: '/location', label: 'Location', icon: MapPin },
   { href: '/care', label: 'Care', icon: Heart },
   { href: '/astrology', label: 'Astrology', icon: Star },
   { href: '/calls', label: 'Calls', icon: PhoneCall },
@@ -37,6 +36,7 @@ const baseNavItems = [
 ]
 
 const adminNavItems = [
+  { href: '/locations', label: 'Location', icon: MapPin },
   { href: '/admin/locations', label: 'Admin Location', icon: Shield },
 ]
 

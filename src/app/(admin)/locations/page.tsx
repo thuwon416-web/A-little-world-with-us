@@ -1,8 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MapPin, Navigation, Shield, Users, Clock, RefreshCw } from 'lucide-react'
+import { MapPin, Navigation, Shield, Users, Clock, RefreshCw, History, Bell, Battery, Heart, AlertTriangle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import LiveLocationMap from '@/features/location/LiveLocationMap'
+import LocationHistory from '@/features/location/LocationHistory'
+import GeofenceAlerts from '@/features/location/GeofenceAlerts'
+import BatteryStatus from '@/features/location/BatteryStatus'
+import EmergencySOS from '@/features/location/EmergencySOS'
+import MemoryMap from '@/features/location/MemoryMap'
 
 interface Location {
   id: string
@@ -29,6 +35,7 @@ export default function AdminLocationsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isAdmin, setIsAdmin] = useState(false)
   const [userLocations, setUserLocations] = useState<Record<string, Location[]>>({})
+  const [activeTab, setActiveTab] = useState<'map' | 'history' | 'geofence' | 'battery' | 'sos' | 'memories'>('map')
 
   useEffect(() => {
     checkAdminAccess()
@@ -151,47 +158,79 @@ export default function AdminLocationsPage() {
         </button>
       </div>
 
+      {/* Feature Tabs */}
+      <div className="flex gap-2 overflow-x-auto pb-2">
+        {[
+          { id: 'map' as const, label: 'Live Map', icon: MapPin },
+          { id: 'history' as const, label: 'History', icon: History },
+          { id: 'geofence' as const, label: 'Geofence', icon: Bell },
+          { id: 'battery' as const, label: 'Battery', icon: Battery },
+          { id: 'sos' as const, label: 'SOS', icon: AlertTriangle },
+          { id: 'memories' as const, label: 'Memories', icon: Heart },
+        ].map((tab) => {
+          const Icon = tab.icon
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
+                activeTab === tab.id
+                  ? 'border-[var(--accent-1)]/40 bg-[var(--accent-1)]/20 text-[var(--accent-1)]'
+                  : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {tab.label}
+            </button>
+          )
+        })}
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
-        {/* Map View */}
+        {/* Feature Content */}
         <div className="overflow-hidden rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
-          <div className="relative h-[500px] w-full overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(255,107,157,0.2),_rgba(0,0,0,0)_48%),linear-gradient(135deg,_#21162e,_#15263d_55%,_#201437)]">
-            <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-
-            {/* Map placeholder - would integrate with real map library */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="text-center">
-                <MapPin className="mx-auto h-12 w-12 text-[var(--accent-1)]" />
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">Map Integration Required</p>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]/60">Integrate with Google Maps or Mapbox</p>
-              </div>
+          {activeTab === 'map' && (
+            <div className="relative h-[500px] w-full overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(255,107,157,0.2),_rgba(0,0,0,0)_48%),linear-gradient(135deg,_#21162e,_#15263d_55%,_#201437)]">
+              <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+              
+              <LiveLocationMap
+                adminLocation={{ latitude: 16.8661, longitude: 96.1951 }}
+                userLocation={lastLocation ? { latitude: lastLocation.latitude, longitude: lastLocation.longitude } : null}
+                userName={selectedProfile?.full_name || selectedProfile?.email}
+              />
             </div>
+          )}
 
-            {/* User markers */}
-            {selectedUserLocations.length > 0 && (
-              <>
-                <div className="absolute left-[50%] top-[50%] flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full border border-white/20 bg-[var(--card-bg-strong)] px-3 py-2 text-xs text-[var(--text-primary)]">
-                  <Users className="h-4 w-4 text-[var(--accent-1)]" />
-                  {selectedProfile?.full_name || selectedProfile?.email}
-                </div>
-                <div className="absolute left-[50%] top-[50%] h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-[var(--accent-1)] bg-white/90 shadow-[0_0_22px_rgba(255,107,157,0.8)]" />
-              </>
-            )}
+          {activeTab === 'history' && (
+            <div className="p-6">
+              <LocationHistory locations={selectedUserLocations} userId={selectedUser || ''} />
+            </div>
+          )}
 
-            {/* Last update info */}
-            {lastLocation && (
-              <div className="absolute bottom-6 left-6 rounded-2xl border border-white/10 bg-[var(--card-bg-strong)]/80 px-4 py-3 backdrop-blur-xl">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Last update</p>
-                <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">
-                  {new Date(lastLocation.timestamp).toLocaleString()}
-                </p>
-                {lastLocation.accuracy && (
-                  <p className="mt-1 text-xs text-[var(--text-secondary)]">
-                    Accuracy: ±{lastLocation.accuracy.toFixed(0)}m
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+          {activeTab === 'geofence' && (
+            <div className="p-6">
+              <GeofenceAlerts userLocation={lastLocation ? { latitude: lastLocation.latitude, longitude: lastLocation.longitude } : undefined} />
+            </div>
+          )}
+
+          {activeTab === 'battery' && (
+            <div className="p-6">
+              <BatteryStatus userId={selectedUser || undefined} />
+            </div>
+          )}
+
+          {activeTab === 'sos' && (
+            <div className="p-6">
+              <EmergencySOS userId={selectedUser || undefined} />
+            </div>
+          )}
+
+          {activeTab === 'memories' && (
+            <div className="p-6">
+              <MemoryMap />
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -281,43 +320,6 @@ export default function AdminLocationsPage() {
           </div>
         </div>
       </div>
-
-      {/* Location history table */}
-      {selectedUserLocations.length > 0 && (
-        <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
-          <h2 className="mb-4 text-lg font-serif text-[var(--text-primary)]">Location History</h2>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--accent-1)]/20">
-                  <th className="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Timestamp</th>
-                  <th className="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Latitude</th>
-                  <th className="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Longitude</th>
-                  <th className="px-4 py-2 text-left text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Accuracy</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selectedUserLocations.slice(0, 20).map((location) => (
-                  <tr key={location.id} className="border-b border-[var(--accent-1)]/10">
-                    <td className="px-4 py-2 text-[var(--text-primary)]">
-                      {new Date(location.timestamp).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-2 text-[var(--text-primary)]">
-                      {location.latitude.toFixed(6)}
-                    </td>
-                    <td className="px-4 py-2 text-[var(--text-primary)]">
-                      {location.longitude.toFixed(6)}
-                    </td>
-                    <td className="px-4 py-2 text-[var(--text-primary)]">
-                      {location.accuracy ? `±${location.accuracy.toFixed(0)}m` : 'N/A'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
