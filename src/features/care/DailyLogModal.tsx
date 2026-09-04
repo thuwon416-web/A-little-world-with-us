@@ -2,14 +2,17 @@
 
 import { useState } from 'react'
 import { X, Check, Droplets, Thermometer, Scale, Activity, Coffee } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
+import { saveDailyLog, type DailyLog } from '@/lib/care-data'
 
 interface DailyLogModalProps {
   isOpen: boolean
   onClose: () => void
   selectedDate?: Date | null
+  onLogSaved?: () => void
 }
 
-export default function DailyLogModal({ isOpen, onClose, selectedDate }: DailyLogModalProps) {
+export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSaved }: DailyLogModalProps) {
   const [mood, setMood] = useState('')
   const [symptoms, setSymptoms] = useState<string[]>([])
   const [sex, setSex] = useState<string[]>([])
@@ -21,6 +24,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate }: DailyLo
   const [activities, setActivities] = useState<string[]>([])
   const [other, setOther] = useState<string[]>([])
   const [medicationTaken, setMedicationTaken] = useState<boolean | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
 
   const moodOptions = [
     { emoji: '😐', label: 'Calm', labelMy: 'ငြိမ်သက်' },
@@ -76,23 +80,50 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate }: DailyLo
     }
   }
 
-  const handleSave = () => {
-    // In production, this would save to Supabase
-    // console.log({
-    //   date: selectedDate || new Date(),
-    //   mood,
-    //   symptoms,
-    //   sex,
-    //   water,
-    //   weight,
-    //   temp,
-    //   notes,
-    //   ovulationTest,
-    //   activities,
-    //   other,
-    //   medicationTaken,
-    // })
-    onClose()
+  const handleSave = async () => {
+    try {
+      setIsSaving(true)
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        alert('Please log in to save logs')
+        return
+      }
+
+      // Prepare log data
+      const logData: DailyLog = {
+        user_id: user.id,
+        log_date: (selectedDate || new Date()).toISOString().split('T')[0],
+        mood: mood || undefined,
+        symptoms: symptoms.length > 0 ? symptoms : undefined,
+        sex: sex.length > 0 ? sex : undefined,
+        medication_taken: medicationTaken ?? undefined,
+        water_intake: water,
+        weight: weight ? parseFloat(weight) : undefined,
+        temperature: temp ? parseFloat(temp) : undefined,
+        notes: notes || undefined,
+        ovulation_test: ovulationTest || undefined,
+        activities: activities.length > 0 ? activities : undefined,
+        other_tags: other.length > 0 ? other : undefined,
+      }
+
+      // Save to Supabase
+      await saveDailyLog(logData)
+
+      // Show success
+      alert('Daily log saved successfully! 💜')
+
+      // Close modal and refresh data
+      onClose()
+      onLogSaved?.() // Callback to refresh parent data
+
+    } catch (error) {
+      console.error('Error saving log:', error)
+      alert('Failed to save log. Please try again.')
+    } finally {
+      setIsSaving(false)
+    }
   }
 
   if (!isOpen) return null
@@ -363,9 +394,17 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate }: DailyLo
           <button
             type="button"
             onClick={handleSave}
-            className="w-full rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-4 text-base font-medium text-white transition hover:opacity-90"
+            disabled={isSaving}
+            className="w-full rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-4 text-base font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
-            Save Log
+            {isSaving ? (
+              <>
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-r-transparent" />
+                Saving...
+              </>
+            ) : (
+              'Save Log'
+            )}
           </button>
         </div>
       </div>

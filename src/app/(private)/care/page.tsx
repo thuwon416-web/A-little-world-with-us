@@ -16,10 +16,20 @@ export default function CarePage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('dashboard')
   const [isDailyLogOpen, setIsDailyLogOpen] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     setNotificationsEnabled(areNotificationsEnabled())
   }, [])
+
+  const handleLogSaved = () => {
+    // Refresh cycle data, calendar, insights, etc.
+    setRefreshKey(prev => prev + 1)
+  }
+
+  const handleOpenDailyLog = () => {
+    setIsDailyLogOpen(true)
+  }
 
   const handleRemindersClick = async () => {
     if (!notificationsEnabled) {
@@ -47,7 +57,7 @@ export default function CarePage() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => setIsDailyLogOpen(true)}
+            onClick={handleOpenDailyLog}
             className="flex items-center gap-2 rounded-full bg-[var(--accent-2)] px-4 py-2 text-sm font-medium text-[var(--bg-color)] transition hover:opacity-90"
           >
             <Plus className="h-4 w-4" />
@@ -88,14 +98,19 @@ export default function CarePage() {
 
       {/* Tab Content */}
       <div className="min-h-[400px]">
-        {activeTab === 'dashboard' && <CycleDashboard />}
-        {activeTab === 'calendar' && <PeriodCalendar />}
-        {activeTab === 'insights' && <InsightsTrends />}
+        {activeTab === 'dashboard' && <CycleDashboard key={refreshKey} onOpenDailyLog={handleOpenDailyLog} />}
+        {activeTab === 'calendar' && <PeriodCalendar key={refreshKey} />}
+        {activeTab === 'insights' && <InsightsTrends key={refreshKey} />}
         {/* {activeTab === 'reminders' && <SmartReminders />} */}
       </div>
 
       {/* Daily Log Modal */}
-      <DailyLogModal isOpen={isDailyLogOpen} onClose={() => setIsDailyLogOpen(false)} selectedDate={selectedDate} />
+      <DailyLogModal
+        isOpen={isDailyLogOpen}
+        onClose={() => setIsDailyLogOpen(false)}
+        selectedDate={selectedDate}
+        onLogSaved={handleLogSaved}
+      />
     </div>
   )
 }

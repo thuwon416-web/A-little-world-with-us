@@ -1,0 +1,217 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Bell, BellOff, Clock, Sparkles, Heart, Activity, Check } from 'lucide-react'
+
+interface CycleData {
+  lastPeriodStart?: Date
+  cycleLength?: number
+}
+
+interface SmartRemindersProps {
+  cycleData?: CycleData
+}
+
+interface Reminder {
+  id: string
+  label: string
+  labelMy: string
+  icon: any
+  enabled: boolean
+  timing: string
+  color: string
+}
+
+export default function SmartReminders({ cycleData }: SmartRemindersProps) {
+  const [enabled, setEnabled] = useState(true)
+  const [daysUntilPeriod, setDaysUntilPeriod] = useState(9)
+  const [isFertileWindow, setIsFertileWindow] = useState(false)
+
+  const [reminders, setReminders] = useState<Reminder[]>([
+    {
+      id: 'pms',
+      label: 'PMS Reminder',
+      labelMy: 'PMS သတိပေးချက်',
+      icon: Heart,
+      enabled: true,
+      timing: '5-7 days before period',
+      color: 'purple',
+    },
+    {
+      id: 'period',
+      label: 'Period Reminder',
+      labelMy: 'ရာသီလာလ သတိပေးချက်',
+      icon: Clock,
+      enabled: true,
+      timing: '1 day before period',
+      color: 'rose',
+    },
+    {
+      id: 'fertile',
+      label: 'Fertile Day Alert',
+      labelMy: 'သားဖောက်ချိန် သတိပေးချက်',
+      icon: Sparkles,
+      enabled: true,
+      timing: 'During fertile window',
+      color: 'emerald',
+    },
+    {
+      id: 'symptoms',
+      label: 'Symptom Check-in',
+      labelMy: 'လက္ခဏာ စစ်ဆေးချက်',
+      icon: Activity,
+      enabled: true,
+      timing: 'Daily at 9:00 AM',
+      color: 'blue',
+    },
+  ])
+
+  useEffect(() => {
+    if (cycleData?.lastPeriodStart && cycleData?.cycleLength) {
+      const lastPeriod = new Date(cycleData.lastPeriodStart)
+      const nextPeriod = new Date(lastPeriod.getTime() + cycleData.cycleLength * 24 * 60 * 60 * 1000)
+      const today = new Date()
+      const diff = Math.ceil((nextPeriod.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      setDaysUntilPeriod(Math.max(0, diff))
+    }
+
+    const cycleDay = new Date().getDate()
+    setIsFertileWindow(cycleDay >= 10 && cycleDay <= 16)
+  }, [cycleData])
+
+  const toggleReminder = (id: string) => {
+    setReminders(reminders.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)))
+  }
+
+  const getColorClass = (color: string) => {
+    switch (color) {
+      case 'purple':
+        return 'text-purple-500 bg-purple-500/10 border-purple-500/30'
+      case 'rose':
+        return 'text-rose-500 bg-rose-500/10 border-rose-500/30'
+      case 'emerald':
+        return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/30'
+      case 'blue':
+        return 'text-blue-500 bg-blue-500/10 border-blue-500/30'
+      default:
+        return 'text-[var(--accent-1)] bg-[var(--accent-1)]/10 border-[var(--accent-1)]/30'
+    }
+  }
+
+  const getNextReminder = () => {
+    if (daysUntilPeriod <= 7 && reminders.find((r) => r.id === 'pms')?.enabled) {
+      return 'PMS reminder may trigger soon'
+    }
+    if (daysUntilPeriod === 1 && reminders.find((r) => r.id === 'period')?.enabled) {
+      return 'Period reminder tomorrow'
+    }
+    if (isFertileWindow && reminders.find((r) => r.id === 'fertile')?.enabled) {
+      return 'Fertile window active'
+    }
+    return 'Next reminder in ' + Math.max(1, daysUntilPeriod - 7) + ' days'
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`rounded-xl p-2 ${enabled ? 'bg-[var(--accent-1)]/15 text-[var(--accent-1)]' : 'bg-[var(--accent-1)]/5 text-[var(--text-secondary)]'}`}>
+              {enabled ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
+            </div>
+            <div>
+              <p className="text-sm font-medium text-[var(--text-primary)]">Smart Reminders</p>
+              <p className="text-xs text-[var(--text-secondary)]">{enabled ? 'Notifications enabled' : 'Notifications disabled'}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setEnabled(!enabled)}
+            className={`relative w-14 h-8 rounded-full transition-colors ${
+              enabled ? 'bg-[var(--accent-1)]' : 'bg-[var(--accent-1)]/20'
+            }`}
+          >
+            <span
+              className={`absolute top-1 left-1 w-6 h-6 rounded-full bg-white transition-transform ${
+                enabled ? 'translate-x-6' : 'translate-x-0'
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {enabled && (
+        <>
+          <div className="rounded-2xl border border-[var(--accent-2)]/20 bg-[var(--accent-2)]/5 p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="h-4 w-4 text-[var(--accent-2)]" />
+              <p className="text-xs font-medium text-[var(--text-primary)]">Next Reminder</p>
+            </div>
+            <p className="text-sm text-[var(--text-secondary)]">{getNextReminder()}</p>
+          </div>
+
+          <div className="space-y-3">
+            {reminders.map((reminder) => {
+              const Icon = reminder.icon
+              return (
+                <div
+                  key={reminder.id}
+                  className={`rounded-2xl border-2 p-4 transition ${
+                    reminder.enabled
+                      ? `${getColorClass(reminder.color)}`
+                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] opacity-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`rounded-xl p-2 ${reminder.enabled ? getColorClass(reminder.color) : 'bg-[var(--accent-1)]/10'}`}>
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-[var(--text-primary)]">{reminder.label}</p>
+                        <p className="text-xs text-[var(--text-secondary)]">{reminder.labelMy}</p>
+                        <p className="text-[10px] text-[var(--text-secondary)]/80 mt-1">{reminder.timing}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleReminder(reminder.id)}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition ${
+                        reminder.enabled
+                          ? 'bg-white/20 hover:bg-white/30'
+                          : 'bg-[var(--accent-1)]/10 hover:bg-[var(--accent-1)]/20'
+                      }`}
+                    >
+                      {reminder.enabled ? <Check className="h-5 w-5" : <div className="w-5 h-5" />}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <button
+            type="button"
+            className="w-full p-4 rounded-2xl border-2 border-dashed border-[var(--accent-1)]/30 bg-[var(--card-bg-strong)] text-[var(--text-secondary)] hover:border-[var(--accent-1)]/50 hover:text-[var(--accent-1)] transition flex items-center justify-center gap-2"
+          >
+            <Bell className="h-4 w-4" />
+            <span className="text-sm font-medium">Add Custom Reminder</span>
+          </button>
+
+          <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4">
+            <div className="flex items-start gap-3">
+              <Sparkles className="h-4 w-4 text-[var(--accent-1)] flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-medium text-[var(--text-primary)]">About Notifications</p>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Notifications will appear on your device at the scheduled times. Make sure you have granted
+                  notification permissions for this app.
+                </p>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}

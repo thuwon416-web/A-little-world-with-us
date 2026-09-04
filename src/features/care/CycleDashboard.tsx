@@ -1,205 +1,163 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Calendar, TrendingUp, Heart, Activity } from 'lucide-react'
-
-interface CycleData {
-  lastPeriodStart?: Date
-  cycleLength?: number
-  periodLength?: number
-}
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { getDailyLogs, calculateCycleData, type CycleData } from '@/lib/care-data'
 
 interface CycleDashboardProps {
-  cycleData?: CycleData
+  onOpenDailyLog?: () => void
 }
 
-interface Insight {
-  id: string
-  text: string
-  textMy: string
-  icon: React.ReactNode
-}
-
-export default function CycleDashboard({ cycleData }: CycleDashboardProps) {
-  const [daysUntilPeriod, setDaysUntilPeriod] = useState(9)
+export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) {
+  const [loading, setLoading] = useState(true)
+  const [cycleData, setCycleData] = useState<CycleData | null>(null)
+  const [daysUntilPeriod, setDaysUntilPeriod] = useState<number>(9)
   const [riskLevel, setRiskLevel] = useState<'Low' | 'Medium' | 'High'>('Low')
-  const [currentInsightIndex, setCurrentInsightIndex] = useState(0)
-
-  const insights: Insight[] = [
-    {
-      id: '1',
-      text: 'Stay hydrated during your cycle to reduce bloating and fatigue.',
-      textMy: 'ရာသီလာလအတွင်း ဖောရောင်မှုနှင့် ပင်နိုင်းကို လျော့နည်းစေရန် ရေများသောက်ပါ။',
-      icon: <Heart className="h-5 w-5" />,
-    },
-    {
-      id: '2',
-      text: 'Light exercise like yoga can help relieve period cramps.',
-      textMy: 'ယောဂသည့်ကဲ့သို့ နုပ်ပြီးရွေ့လှုပ်ခန်းသည် ရာသီလာလကိုက်ခဲမှုကို လျော့နည်းစေပါသည်။',
-      icon: <Activity className="h-5 w-5" />,
-    },
-    {
-      id: '3',
-      text: 'Track your cycle regularly for better predictions.',
-      textMy: 'ပိုကောင်းသောခန့်မှန်းချက်များအတွက် လစဉ်စက်ဝန်းကို ပုံမှန်စောင့်ကြည့်ပါ။',
-      icon: <TrendingUp className="h-5 w-5" />,
-    },
-  ]
 
   useEffect(() => {
-    // Calculate days until period (simplified logic)
-    if (cycleData?.lastPeriodStart && cycleData?.cycleLength) {
-      const lastPeriod = new Date(cycleData.lastPeriodStart)
-      const nextPeriod = new Date(lastPeriod.getTime() + cycleData.cycleLength * 24 * 60 * 60 * 1000)
-      const today = new Date()
-      const diff = Math.ceil((nextPeriod.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
-      setDaysUntilPeriod(Math.max(0, diff))
-    }
+    loadCycleData()
+  }, [])
 
-    // Calculate risk level based on cycle day
-    const cycleDay = new Date().getDate()
-    if (cycleDay >= 10 && cycleDay <= 16) {
-      setRiskLevel('High')
-    } else if (cycleDay >= 8 && cycleDay <= 9 || cycleDay >= 17 && cycleDay <= 18) {
-      setRiskLevel('Medium')
-    } else {
-      setRiskLevel('Low')
-    }
-  }, [cycleData])
+  const loadCycleData = async () => {
+    try {
+      setLoading(true)
 
-  // Auto-scroll insights
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentInsightIndex((prev) => (prev + 1) % insights.length)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [insights.length])
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
 
-  const getRiskLevelColor = () => {
-    switch (riskLevel) {
-      case 'Low':
-        return 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
-      case 'Medium':
-        return 'bg-amber-500/10 border-amber-500/30 text-amber-500'
-      case 'High':
-        return 'bg-rose-500/10 border-rose-500/30 text-rose-500'
+      // Fetch daily logs
+      const logs = await getDailyLogs(user.id)
+
+      // Calculate cycle data
+      const calculated = calculateCycleData(logs)
+      setCycleData(calculated)
+
+      // Calculate days until period
+      if (calculated.next_period_start) {
+        const days = Math.floor(
+          (new Date(calculated.next_period_start).getTime() - new Date().getTime()) /
+          (1000 * 60 * 60 * 24)
+        )
+        setDaysUntilPeriod(Math.max(0, days))
+      }
+
+      // Calculate risk level based on fertile window
+      const today = new Date().toISOString().split('T')[0]
+      const isFertile =
+        calculated.fertile_window_start &&
+        calculated.fertile_window_end &&
+        today >= calculated.fertile_window_start &&
+        today <= calculated.fertile_window_end
+
+      if (isFertile) {
+        setRiskLevel('High')
+      } else if (calculated.ovulation_date && today === calculated.ovulation_date) {
+        setRiskLevel('High')
+      } else {
+        setRiskLevel('Low')
+      }
+
+    } catch (error) {
+      console.error('Error loading cycle data:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getRiskLevelBg = () => {
-    switch (riskLevel) {
-      case 'Low':
-        return 'from-emerald-500/20 to-emerald-600/20'
-      case 'Medium':
-        return 'from-amber-500/20 to-amber-600/20'
-      case 'High':
-        return 'from-rose-500/20 to-rose-600/20'
-    }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-6">
       {/* Period Countdown */}
-      <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 text-center">
-        <div className="flex items-center justify-center gap-2 mb-3">
-          <Calendar className="h-5 w-5 text-[var(--accent-1)]" />
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Next Period</p>
-        </div>
-        <h2 className="text-4xl font-bold text-[var(--text-primary)] mb-2">
+      <div className="text-center p-6 bg-gradient-to-r from-rose-600 to-pink-600 rounded-xl">
+        <h2 className="text-4xl font-bold text-white">
           Period in {daysUntilPeriod} days
         </h2>
-        <p className="text-sm text-[var(--text-secondary)]">
-          {daysUntilPeriod <= 3 ? 'Prepare for your period soon!' : 'You have time to prepare'}
+        <p className="text-white/80 mt-2">
+          {cycleData?.last_period_start
+            ? `Last period: ${new Date(cycleData.last_period_start).toLocaleDateString()}`
+            : 'No period data yet'}
         </p>
       </div>
 
       {/* Risk Level */}
-      <div className={`rounded-2xl border-2 p-5 bg-gradient-to-r ${getRiskLevelBg()}`}>
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-sm font-medium text-[var(--text-primary)]">Pregnancy Risk Level</p>
-          <div className={`px-3 py-1 rounded-full text-xs font-medium border ${getRiskLevelColor()}`}>
-            {riskLevel}
+      <div className={`p-4 rounded-lg ${
+        riskLevel === 'Low' ? 'bg-green-600/20 border border-green-600' :
+        riskLevel === 'Medium' ? 'bg-yellow-600/20 border border-yellow-600' :
+        'bg-red-600/20 border border-red-600'
+      }`}>
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">
+            {riskLevel === 'Low' ? '🟢' : riskLevel === 'Medium' ? '🟡' : '🔴'}
+          </span>
+          <div>
+            <p className="font-semibold">
+              {riskLevel === 'Low' ? 'Low' : riskLevel === 'Medium' ? 'Medium' : 'High'} chances of getting pregnant
+            </p>
+            <p className="text-xs mt-1 opacity-80">
+              * This is an estimate based on your cycle data, not medical advice.
+              <br />
+              Always use contraception if you want to prevent pregnancy.
+            </p>
           </div>
         </div>
-        <p className="text-sm text-[var(--text-secondary)]">
-          {riskLevel === 'High' && 'High chances of getting pregnant'}
-          {riskLevel === 'Medium' && 'Medium chances of getting pregnant'}
-          {riskLevel === 'Low' && 'Low chances of getting pregnant'}
-        </p>
-        <p className="text-xs text-[var(--text-secondary)]/60 mt-2">
-          * This is an estimate, not medical advice
-        </p>
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="flex justify-center gap-4">
         <button
-          type="button"
-          className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-rose-500/30 bg-rose-500/10 hover:bg-rose-500/20 transition"
+          onClick={() => onOpenDailyLog?.()}
+          className="w-20 h-20 rounded-full bg-rose-600 hover:bg-rose-700 flex flex-col items-center justify-center text-white transition"
         >
-          <div className="w-16 h-16 rounded-full bg-rose-500 flex items-center justify-center text-2xl">
-            🩸
-          </div>
-          <span className="text-xs font-medium text-rose-500">Log Period</span>
+          <span className="text-2xl">🩸</span>
+          <span className="text-xs mt-1">Log Period</span>
         </button>
         <button
-          type="button"
-          className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 transition"
+          onClick={() => onOpenDailyLog?.()}
+          className="w-20 h-20 rounded-full bg-purple-600 hover:bg-purple-700 flex flex-col items-center justify-center text-white transition"
         >
-          <div className="w-16 h-16 rounded-full bg-purple-500 flex items-center justify-center text-2xl">
-            ➕
-          </div>
-          <span className="text-xs font-medium text-purple-500">Symptoms</span>
+          <span className="text-2xl">➕</span>
+          <span className="text-xs mt-1">Symptoms</span>
         </button>
         <button
-          type="button"
-          className="flex flex-col items-center gap-2 p-4 rounded-2xl border-2 border-pink-500/30 bg-pink-500/10 hover:bg-pink-500/20 transition"
+          onClick={() => onOpenDailyLog?.()}
+          className="w-20 h-20 rounded-full bg-pink-600 hover:bg-pink-700 flex flex-col items-center justify-center text-white transition"
         >
-          <div className="w-16 h-16 rounded-full bg-pink-500 flex items-center justify-center text-2xl">
-            ❤️
-          </div>
-          <span className="text-xs font-medium text-pink-500">Sex</span>
+          <span className="text-2xl">❤️</span>
+          <span className="text-xs mt-1">Sex</span>
         </button>
       </div>
 
       {/* Insights Carousel */}
-      <div className="space-y-3">
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Daily Insights</p>
-        <div className="relative overflow-hidden">
-          <div
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${currentInsightIndex * 100}%)` }}
-          >
-            {insights.map((insight) => (
-              <div
-                key={insight.id}
-                className="w-full flex-shrink-0 rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 p-5"
-              >
-                <div className="flex items-start gap-3">
-                  <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)] flex-shrink-0">
-                    {insight.icon}
-                  </div>
-                  <div>
-                    <p className="text-sm text-[var(--text-primary)]">{insight.text}</p>
-                    <p className="text-xs text-[var(--text-secondary)]/80 mt-1">{insight.textMy}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="flex overflow-x-auto gap-4 pb-2">
+        <div className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg min-w-[200px] text-white">
+          <p className="font-semibold">Cycle Length</p>
+          <p className="text-2xl font-bold mt-1">
+            {cycleData?.average_cycle_length || 28} days
+          </p>
         </div>
-        {/* Carousel Dots */}
-        <div className="flex justify-center gap-2">
-          {insights.map((_, index) => (
-            <button
-              key={index}
-              type="button"
-              onClick={() => setCurrentInsightIndex(index)}
-              className={`h-2 w-2 rounded-full transition ${
-                index === currentInsightIndex ? 'bg-[var(--accent-1)]' : 'bg-[var(--accent-1)]/30'
-              }`}
-            />
-          ))}
+        <div className="p-4 bg-gradient-to-r from-rose-600 to-orange-600 rounded-lg min-w-[200px] text-white">
+          <p className="font-semibold">Next Period</p>
+          <p className="text-2xl font-bold mt-1">
+            {cycleData?.next_period_start
+              ? new Date(cycleData.next_period_start).toLocaleDateString()
+              : 'Unknown'}
+          </p>
+        </div>
+        <div className="p-4 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg min-w-[200px] text-white">
+          <p className="font-semibold">Fertile Window</p>
+          <p className="text-sm font-bold mt-1">
+            {cycleData?.fertile_window_start && cycleData?.fertile_window_end
+              ? `${new Date(cycleData.fertile_window_start).toLocaleDateString()} - ${new Date(cycleData.fertile_window_end).toLocaleDateString()}`
+              : 'Calculating...'}
+          </p>
         </div>
       </div>
     </div>
