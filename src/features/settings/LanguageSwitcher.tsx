@@ -15,9 +15,10 @@ export default function LanguageSwitcher() {
 
       <div className="flex gap-2">
         <button
-          onClick={() => setLanguage('my')}
+          type="button"
+          onClick={() => setLanguage('mm')}
           className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium ${
-            language === 'my'
+            language === 'mm'
               ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
               : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
           }`}
@@ -25,6 +26,7 @@ export default function LanguageSwitcher() {
           မြန်မာ
         </button>
         <button
+          type="button"
           onClick={() => setLanguage('en')}
           className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium ${
             language === 'en'

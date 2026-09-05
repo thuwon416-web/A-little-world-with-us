@@ -7,6 +7,8 @@ import dynamic from 'next/dynamic'
 import ErrorReport from '@/components/shared/ErrorReport'
 import PWAInstall from '@/components/shared/PWAInstall'
 import ThemeToggle from '@/components/shared/ThemeToggle'
+import ExportData from '@/features/care/ExportData'
+import MoodChart from '@/features/care/MoodChart'
 
 const CoupleSettings = dynamic(() => import('@/features/settings/CoupleSettings'), {
   ssr: false,
@@ -136,6 +138,16 @@ export default function SettingsPage() {
           <SecuritySettings />
           <LanguageSwitcher />
           <TwoFactorAuthWidget />
+        </div>
+      </section>
+
+      <section className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Care Data</p>
+        <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">Your wellness information</h2>
+
+        <div className="mt-4 space-y-4">
+          <MoodChart />
+          <ExportData />
         </div>
       </section>
 

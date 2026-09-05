@@ -1,0 +1,22 @@
+{
+  "Chat": {
+    "title": "Chat",
+    "placeholder": "Type a message...",
+    "send": "Send"
+  },
+  "Care": {
+    "title": "Care",
+    "dailyLog": "Daily Log",
+    "mood": "Mood",
+    "symptoms": "Symptoms"
+  },
+  "Settings": {
+    "title": "Settings",
+    "language": "Language"
+  },
+  "Nav": {
+    "chat": "Chat",
+    "care": "Care",
+    "settings": "Settings"
+  }
+}

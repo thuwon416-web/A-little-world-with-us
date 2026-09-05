@@ -1,8 +1,10 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react'
+import en from '@/i18n/locales/en.json'
+import mm from '@/i18n/locales/mm.json'
 
-type Language = 'my' | 'en'
+type Language = 'mm' | 'en'
 
 interface LanguageContextType {
   language: Language
@@ -10,75 +12,16 @@ interface LanguageContextType {
   t: (key: string) => string
 }
 
-const translations = {
-  my: {
-    // Navigation
-    'nav.dashboard': 'Dashboard',
-    'nav.wellness': 'Wellness',
-    'nav.chat': 'Chat',
-    'nav.memories': 'Memories',
-    'nav.calendar': 'Calendar',
-    'nav.settings': 'Settings',
-    
-    // Common
-    'common.save': 'သိမ်းမည်',
-    'common.cancel': 'ပယ်ဖျက်မည်',
-    'common.delete': 'ဖျက်မည်',
-    'common.edit': 'ပြင်မည်',
-    'common.loading': 'ဖွင့်နေသည်...',
-    
-    // Auth
-    'auth.login': 'ဝင်မည်',
-    'auth.logout': 'ထွက်မည်',
-    'auth.email': 'အီးမေးလ်',
-    'auth.password': 'စကားဝှက်',
-    
-    // Settings
-    'settings.profile': 'ပရိုဖိုင်း',
-    'settings.account': 'အကောင့်',
-    'settings.privacy': 'လုံခြုံရေး',
-    'settings.notifications': 'အကြောင်းကြားချက်များ',
-  },
-  en: {
-    // Navigation
-    'nav.dashboard': 'Dashboard',
-    'nav.wellness': 'Wellness',
-    'nav.chat': 'Chat',
-    'nav.memories': 'Memories',
-    'nav.calendar': 'Calendar',
-    'nav.settings': 'Settings',
-    
-    // Common
-    'common.save': 'Save',
-    'common.cancel': 'Cancel',
-    'common.delete': 'Delete',
-    'common.edit': 'Edit',
-    'common.loading': 'Loading...',
-    
-    // Auth
-    'auth.login': 'Login',
-    'auth.logout': 'Logout',
-    'auth.email': 'Email',
-    'auth.password': 'Password',
-    
-    // Settings
-    'settings.profile': 'Profile',
-    'settings.account': 'Account',
-    'settings.privacy': 'Privacy',
-    'settings.notifications': 'Notifications',
-  },
-}
-
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('my')
+  const [language, setLanguageState] = useState<Language>('mm')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
     
     const saved = localStorage.getItem('a-little-world-with-us-lang') as Language
-    if (saved && (saved === 'my' || saved === 'en')) {
+    if (saved && (saved === 'mm' || saved === 'en')) {
       setLanguageState(saved)
     }
   }, [])
@@ -91,7 +34,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   const t = (key: string): string => {
-    return translations[language][key as keyof typeof translations.my] || key
+    const keys = key.split('.')
+    let value: any = language === 'en' ? en : mm
+
+    for (const k of keys) {
+      value = value?.[k]
+    }
+
+    return value || key
   }
 
   return (
