@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="80%">
+      <stop offset="0%" stop-color="#0a0810"/>
+      <stop offset="100%" stop-color="#000000"/>
+    </radialGradient>
+    <linearGradient id="goldR" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD700"/>
+      <stop offset="100%" stop-color="#FFE57F"/>
+    </linearGradient>
+    <linearGradient id="roseR" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF6B9D"/>
+      <stop offset="100%" stop-color="#FFD700"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="1024" rx="200" fill="url(#bg)"/>
+
+  <!-- Silken Ribbons forming an abstract knot (Premium abstract geometry) -->
+  <g transform="translate(512,512)" filter="url(#glow)">
+    <!-- Gold ribbon (smooth curve) -->
+    <path d="M -180,-20 C -80,-180 80,-180 180,-20 C 240,60 120,160 0,160 C -120,160 -240,60 -180,-20" fill="none" stroke="url(#goldR)" stroke-width="18" stroke-linecap="round"/>
+    
+    <!-- Rose ribbon (intertwining reverse curve) -->
+    <path d="M 180,-20 C 80,180 -80,180 -180,-20 C -240,-60 -120,-160 0,-160 C 120,-160 240,-60 180,-20" fill="none" stroke="url(#roseR)" stroke-width="18" stroke-linecap="round"/>
+    
+    <!-- Add subtle inner shadow/shimmer to mimic liquid metal -->
+    <path d="M -180,-20 C -80,-180 80,-180 180,-20 C 240,60 120,160 0,160 C -120,160 -240,60 -180,-20" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.3"/>
+    <path d="M 180,-20 C 80,180 -80,180 -180,-20 C -240,-60 -120,-160 0,-160 C 120,-160 240,-60 180,-20" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.2"/>
+  </g>
+</svg>

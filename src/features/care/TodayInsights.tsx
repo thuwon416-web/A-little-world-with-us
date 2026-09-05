@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Heart, Clock, Sparkles, Activity } from 'lucide-react'
+import { Heart, Clock, Sparkles } from 'lucide-react'
 
 interface TodayInsightsProps {
   selectedDate?: Date | null
@@ -9,9 +9,7 @@ interface TodayInsightsProps {
 
 export default function TodayInsights({ selectedDate }: TodayInsightsProps) {
   const [cycleDay, setCycleDay] = useState(14)
-  const [daysUntilPeriod, setDaysUntilPeriod] = useState(11)
   const [isFertile, setIsFertile] = useState(false)
-  const [fertileWindow, setFertileWindow] = useState({ start: 10, end: 16 })
 
   useEffect(() => {
     if (selectedDate) {
@@ -36,17 +34,6 @@ export default function TodayInsights({ selectedDate }: TodayInsightsProps) {
         return 'text-emerald-500 bg-emerald-500/10'
       default:
         return 'text-[var(--accent-1)] bg-[var(--accent-1)]/10'
-    }
-  }
-
-  const getPhaseIcon = () => {
-    switch (cyclePhase) {
-      case 'Period':
-        return <Heart className="h-5 w-5" />
-      case 'Fertile':
-        return <Sparkles className="h-5 w-5" />
-      default:
-        return <Activity className="h-5 w-5" />
     }
   }
 
@@ -83,7 +70,7 @@ export default function TodayInsights({ selectedDate }: TodayInsightsProps) {
           <p className="text-xs text-[var(--text-secondary)]">Next Period</p>
         </div>
         <p className="text-lg font-semibold text-[var(--text-primary)]">
-          {daysUntilPeriod} days
+          11 days
         </p>
         <p className="text-xs text-[var(--text-secondary)] mt-1">until expected period</p>
       </div>
@@ -95,7 +82,7 @@ export default function TodayInsights({ selectedDate }: TodayInsightsProps) {
           <p className="text-xs text-[var(--text-secondary)]">Fertile Window</p>
         </div>
         <p className="text-sm font-medium text-[var(--text-primary)]">
-          Days {fertileWindow.start} - {fertileWindow.end}
+          Days 10 - 16
         </p>
         <p className="text-xs text-[var(--text-secondary)] mt-1">
           {isFertile ? 'You are in fertile window' : 'Coming up soon'}

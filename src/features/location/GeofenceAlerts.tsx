@@ -58,7 +58,6 @@ export default function GeofenceAlerts({ userLocation, onZoneAdd, onZoneDelete }
       const distance = calculateDistance(userLoc, zone)
       if (distance <= zone.radius / 1000) {
         // In production, this would send a notification
-        // console.log(`Arrived at ${zone.name}`)
       }
     })
   }

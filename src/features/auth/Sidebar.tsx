@@ -96,7 +96,7 @@ export default function Sidebar() {
             className="text-lg text-[var(--text-primary)]"
             style={{ fontFamily: 'var(--font-display)' }}
           >
-            A Little World for Us
+            A Little World with Us
           </p>
           <p className="text-[10px] text-[var(--text-secondary)]">KoKo × Pu Tuu</p>
         </div>

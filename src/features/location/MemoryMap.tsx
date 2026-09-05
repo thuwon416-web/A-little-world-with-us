@@ -30,11 +30,6 @@ export default function MemoryMap({ memories = [], onAddMemory }: MemoryMapProps
   })
 
   const handleAddMemory = () => {
-    const memory: Memory = {
-      id: Date.now().toString(),
-      ...newMemory,
-      created_at: new Date().toISOString(),
-    }
     onAddMemory?.(newMemory)
     setShowAddForm(false)
     setNewMemory({

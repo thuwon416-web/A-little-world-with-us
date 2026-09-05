@@ -192,7 +192,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="dashboard-hero__title-wrap">
-            <h1 className="dashboard-hero__title">A Little World for Us</h1>
+            <h1 className="dashboard-hero__title">A Little World with Us</h1>
             <span className="dashboard-hero__badge">∞</span>
           </div>
 

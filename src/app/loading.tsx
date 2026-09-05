@@ -17,7 +17,7 @@ export default function Loading() {
 
         <div className="space-y-3">
           <p className="text-[10px] uppercase tracking-[0.34em] text-rose-500">A Little World</p>
-          <h1 className="text-2xl font-serif text-rose-900">for Us</h1>
+          <h1 className="text-2xl font-serif text-rose-900">with Us</h1>
           <div className="mx-auto h-2 w-32 overflow-hidden rounded-full bg-rose-100">
             <div className="h-full w-1/2 animate-pulse rounded-full bg-gradient-to-r from-rose-300 via-rose-500 to-rose-300" />
           </div>

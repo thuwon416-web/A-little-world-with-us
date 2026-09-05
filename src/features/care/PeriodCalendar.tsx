@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Calendar } from '@/components/ui/calendar'
 import { supabase } from '@/lib/supabase'
-import { getDailyLogs, calculateCycleData, type CycleData } from '@/lib/care-data'
+import { getDailyLogs, calculateCycleData } from '@/lib/care-data'
 
 interface PeriodCalendarProps {
   onDateSelect?: (date: Date) => void
@@ -12,7 +12,6 @@ interface PeriodCalendarProps {
 export default function PeriodCalendar({ onDateSelect }: PeriodCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [loading, setLoading] = useState(true)
-  const [cycleData, setCycleData] = useState<CycleData | null>(null)
   const [periodDates, setPeriodDates] = useState<Set<string>>(new Set())
   const [fertileDates, setFertileDates] = useState<Set<string>>(new Set())
 
@@ -33,7 +32,6 @@ export default function PeriodCalendar({ onDateSelect }: PeriodCalendarProps) {
 
       // Calculate cycle data
       const calculated = calculateCycleData(logs)
-      setCycleData(calculated)
 
       // Extract period dates from logs
       const periodDatesSet = new Set<string>()
@@ -66,22 +64,6 @@ export default function PeriodCalendar({ onDateSelect }: PeriodCalendarProps) {
     } finally {
       setLoading(false)
     }
-  }
-
-  const getDayClass = (date: Date) => {
-    const dateStr = date.toISOString().split('T')[0]
-    const today = new Date().toISOString().split('T')[0]
-
-    if (periodDates.has(dateStr)) {
-      return 'bg-pink-600 text-white rounded-full'
-    }
-    if (fertileDates.has(dateStr)) {
-      return 'bg-green-600/30 border-2 border-green-600 rounded-full'
-    }
-    if (dateStr === today) {
-      return 'bg-red-600 text-white rounded-full font-bold'
-    }
-    return ''
   }
 
   const handleDateClick = (date: Date | undefined) => {

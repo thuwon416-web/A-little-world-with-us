@@ -12,7 +12,7 @@ import { requestNotificationPermission, areNotificationsEnabled } from '@/lib/ca
 type TabType = 'dashboard' | 'calendar' | 'insights' | 'reminders'
 
 export default function CarePage() {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+  const [_selectedDate, _setSelectedDate] = useState<Date | null>(null)
   const [notificationsEnabled, setNotificationsEnabled] = useState(false)
   const [activeTab, setActiveTab] = useState<TabType>('dashboard')
   const [isDailyLogOpen, setIsDailyLogOpen] = useState(false)
@@ -108,7 +108,7 @@ export default function CarePage() {
       <DailyLogModal
         isOpen={isDailyLogOpen}
         onClose={() => setIsDailyLogOpen(false)}
-        selectedDate={selectedDate}
+        selectedDate={_selectedDate}
         onLogSaved={handleLogSaved}
       />
     </div>

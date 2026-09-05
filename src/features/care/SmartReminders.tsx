@@ -5,15 +5,6 @@ import { supabase } from '@/lib/supabase'
 import { requestNotificationPermission, scheduleReminder } from '@/lib/care-notifications'
 import { Switch } from '@/components/ui/switch'
 
-interface Reminder {
-  id?: string
-  user_id: string
-  reminder_type: 'pms' | 'period' | 'fertile' | 'symptom'
-  enabled: boolean
-  scheduled_date?: string
-  last_sent_at?: string
-}
-
 export default function SmartReminders() {
   const [loading, setLoading] = useState(true)
   const [permissionGranted, setPermissionGranted] = useState(false)

@@ -1,6 +1,7 @@
 {
   "name": "a-little-world-with-us",
   "version": "1.0.0",
+  "description": "A premium minimalist app for two lives gracefully becoming one",
   "private": true,
   "scripts": {
     "dev": "next dev",

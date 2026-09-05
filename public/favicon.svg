@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <rect width="1024" height="1024" rx="200" fill="#000000"/>
+  <g transform="translate(512,512)">
+    <path d="M -180,-20 C -80,-180 80,-180 180,-20 C 240,60 120,160 0,160 C -120,160 -240,60 -180,-20" fill="none" stroke="#FFD700" stroke-width="18" stroke-linecap="round"/>
+    <path d="M 180,-20 C 80,180 -80,180 -180,-20 C -240,-60 -120,-160 0,-160 C 120,-160 240,-60 180,-20" fill="none" stroke="#FF6B9D" stroke-width="18" stroke-linecap="round"/>
+  </g>
+</svg>

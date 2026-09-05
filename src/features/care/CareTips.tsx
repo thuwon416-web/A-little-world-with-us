@@ -1,14 +1,13 @@
 'use client'
 
 import { Lightbulb, Heart, Sparkles, Shield, Coffee } from 'lucide-react'
-import { type ComponentType } from 'react'
 
 interface CareTipsProps {
   selectedDate?: Date | null
 }
 
 interface Tip {
-  icon: React.ComponentType<{ className?: string }>
+  icon: any
   title: string
   titleMy: string
   description: string
