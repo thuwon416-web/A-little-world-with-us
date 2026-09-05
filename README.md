@@ -85,7 +85,7 @@ Copy the example environment file and update values for your deployment:
 cp .env.example .env.local
 ```
 
-Example values:
+Required variables:
 
 ```env
 # Supabase Configuration
@@ -96,6 +96,21 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 NEXT_PUBLIC_APP_NAME=A Little World With Us
 NEXT_PUBLIC_APP_URL=https://ourforever.app
 ```
+
+Optional variables:
+
+```env
+# Giphy API (for GIF picker in chat)
+NEXT_PUBLIC_GIPHY_API_KEY=your_giphy_api_key_here
+
+# Google Maps API (for location features)
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your-google-maps-key
+
+# AI Service (for AI features)
+NEXT_PUBLIC_AI_SERVICE_KEY=your-ai-service-key
+```
+
+Get your Giphy API key at https://developers.giphy.com/
 
 The same pattern applies to the mobile app using `mobile/.env.example`.
 

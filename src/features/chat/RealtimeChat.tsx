@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, Share2 } from 'lucide-react'
+import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon } from 'lucide-react'
 import { supabase, insertRow } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
@@ -11,13 +11,12 @@ import StickerPicker from './StickerPicker'
 import GIFPicker from './GIFPicker'
 import FileUpload from './FileUpload'
 import ReplyThread from './ReplyThread'
-import ForwardMessage from './ForwardMessage'
 
 interface Message {
   id: string
   sender_id: string
   content: string | null
-  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file'
+  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio'
   media_url: string | null
   media_duration: number | null
   encrypted: boolean
@@ -36,7 +35,6 @@ export default function RealtimeChat() {
   const [showGIFPicker, setShowGIFPicker] = useState(false)
   const [showFileUpload, setShowFileUpload] = useState(false)
   const [showReplyThread, setShowReplyThread] = useState(false)
-  const [showForwardMessage, setShowForwardMessage] = useState(false)
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -198,22 +196,40 @@ export default function RealtimeChat() {
     setShowGIFPicker(false)
   }
 
-  const handleFileUpload = async (fileData: { url: string; type: string; name: string; size: number }) => {
-    if (!coupleId || !currentUserId) return
+  const handleFileUpload = async (fileInfo: {
+    url: string
+    type: string
+    name: string
+    size: number
+    path?: string
+  }) => {
+    try {
+      if (!coupleId || !currentUserId) return
 
-    const message = await insertRow<{ id: string }>('messages', {
-      couple_id: coupleId,
-      sender_id: currentUserId,
-      content: fileData.name,
-      message_type: 'file',
-      encrypted: false,
-    })
+      // Determine message type
+      let messageType: 'photo' | 'video' | 'audio' | 'file' = 'file'
+      if (fileInfo.type.startsWith('image/')) messageType = 'photo'
+      else if (fileInfo.type.startsWith('video/')) messageType = 'video'
+      else if (fileInfo.type.startsWith('audio/')) messageType = 'audio'
 
-    if (!message) return
+      // Save message to database
+      const { error } = await supabase.from('messages').insert({
+        couple_id: coupleId,
+        sender_id: currentUserId,
+        content: fileInfo.name,
+        media_url: fileInfo.url,
+        message_type: messageType,
+        encrypted: false,
+      })
 
-    await supabase.from('messages').update({ media_url: fileData.url }).eq('id', message.id)
+      if (error) throw error
 
-    setShowFileUpload(false)
+      setShowFileUpload(false)
+
+    } catch (error) {
+      console.error('Error sending file message:', error)
+      alert('Failed to send file. Please try again.')
+    }
   }
 
   const handleReply = async (replyData: { text: string; replyTo: string }) => {
@@ -230,11 +246,6 @@ export default function RealtimeChat() {
       reply_to: replyData.replyTo,
       encrypted: true,
     })
-  }
-
-  const handleForward = (forwardData: { to: string; message: Message; caption: string }) => {
-    console.log('Forwarding message:', forwardData)
-    setShowForwardMessage(false)
   }
 
   const handleMessageLongPress = (message: Message) => {
@@ -297,6 +308,12 @@ export default function RealtimeChat() {
                   {message.message_type === 'photo' && message.media_url && (
                     <img src={message.media_url} alt="Chat photo" className="rounded-lg max-w-full" />
                   )}
+                  {message.message_type === 'video' && message.media_url && (
+                    <video controls src={message.media_url} className="rounded-lg max-w-full" />
+                  )}
+                  {message.message_type === 'audio' && message.media_url && (
+                    <audio controls src={message.media_url} className="h-8" />
+                  )}
                   {message.message_type === 'sticker' && (
                     <span className="text-4xl">{message.content}</span>
                   )}
@@ -323,16 +340,6 @@ export default function RealtimeChat() {
                     className="p-1 rounded-full bg-[var(--accent-1)]/10 hover:bg-[var(--accent-1)]/20 text-[var(--accent-1)]"
                   >
                     <ReplyIcon className="h-3 w-3" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedMessage(message)
-                      setShowForwardMessage(true)
-                    }}
-                    className="p-1 rounded-full bg-[var(--accent-1)]/10 hover:bg-[var(--accent-1)]/20 text-[var(--accent-1)]"
-                  >
-                    <Share2 className="h-3 w-3" />
                   </button>
                 </div>
               </div>
@@ -429,17 +436,6 @@ export default function RealtimeChat() {
           onReply={handleReply}
           onClose={() => {
             setShowReplyThread(false)
-            setSelectedMessage(null)
-          }}
-        />
-      )}
-      {showForwardMessage && selectedMessage && (
-        <ForwardMessage
-          message={selectedMessage}
-          contacts={[]}
-          onForward={handleForward}
-          onClose={() => {
-            setShowForwardMessage(false)
             setSelectedMessage(null)
           }}
         />

@@ -1,6 +1,8 @@
 // src/lib/care-notifications.ts
 // Care page notification utilities for period tracking
 
+import { supabase } from './supabase'
+
 export interface CareNotification {
   id: string
   type: 'period-reminder' | 'fertile-alert' | 'symptom-checkin'
@@ -107,4 +109,60 @@ export function getNotificationPermission(): NotificationPermission {
     return 'denied'
   }
   return Notification.permission
+}
+
+// Schedule a reminder notification
+export async function scheduleReminder(type: 'pms' | 'period' | 'fertile' | 'symptom') {
+  if (!('Notification' in window) || Notification.permission !== 'granted') {
+    console.warn('Notifications not supported or permission not granted')
+    return
+  }
+
+  let title: string
+  let body: string
+  let delay: number
+
+  switch (type) {
+    case 'pms':
+      title = 'PMS Reminder 💜'
+      body = 'Your period may start soon. Take care of yourself!'
+      delay = 5 * 60 * 1000 // 5 minutes for demo (in production, calculate based on cycle)
+      break
+    case 'period':
+      title = 'Period Reminder 🩸'
+      body = 'Your period may start tomorrow. Be prepared!'
+      delay = 5 * 60 * 1000 // 5 minutes for demo
+      break
+    case 'fertile':
+      title = 'Fertile Day Alert 🌸'
+      body = "You're in your fertile window!"
+      delay = 5 * 60 * 1000 // 5 minutes for demo
+      break
+    case 'symptom':
+      title = 'Symptom Check-in 📝'
+      body = 'Time to log your daily symptoms!'
+      delay = 5 * 60 * 1000 // 5 minutes for demo
+      break
+    default:
+      return
+  }
+
+  // Schedule notification (in production, use service workers for background)
+  setTimeout(() => {
+    new Notification(title, {
+      body,
+      icon: '/icon-192x192.png',
+      badge: '/icon-192x192.png',
+    })
+  }, delay)
+
+  // Save last_sent_at to database
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    await supabase
+      .from('care_reminders')
+      .update({ last_sent_at: new Date().toISOString() })
+      .eq('user_id', user.id)
+      .eq('reminder_type', type)
+  }
 }

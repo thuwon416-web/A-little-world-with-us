@@ -1,31 +1,15 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { TrendingUp, BarChart3, Activity, Heart, Sparkles, Calendar } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
+import { getDailyLogs, getCurrentMonthLogs } from '@/lib/care-data'
 
-interface CycleData {
-  logs?: Array<{
-    date: Date
-    mood: string
-    symptoms: string[]
-  }>
-  periods?: Array<{
-    startDate: Date
-    endDate: Date
-  }>
-}
-
-interface InsightsTrendsProps {
-  cycleData?: CycleData
-}
-
-interface MoodData {
-  date: string
+interface MoodDataPoint {
   mood: string
   count: number
 }
 
-interface SymptomData {
+interface SymptomDataPoint {
   symptom: string
   count: number
 }
@@ -34,275 +18,199 @@ interface CycleLengthData {
   average: number
   shortest: number
   longest: number
-  cycleLengths: number[]
+  cycles: number[]
 }
 
-export default function InsightsTrends({ cycleData }: InsightsTrendsProps) {
-  const [selectedTab, setSelectedTab] = useState<'mood' | 'symptoms' | 'cycle'>('mood')
-
-  // Mock data for demo - in production this would come from actual cycleData
-  const moodData: MoodData[] = useMemo(() => [
-    { date: 'Jan 1', mood: 'Happy', count: 8 },
-    { date: 'Jan 2', mood: 'Calm', count: 12 },
-    { date: 'Jan 3', mood: 'Energetic', count: 5 },
-    { date: 'Jan 4', mood: 'Sad', count: 3 },
-    { date: 'Jan 5', mood: 'Irritated', count: 2 },
-    { date: 'Jan 6', mood: 'Happy', count: 10 },
-    { date: 'Jan 7', mood: 'Calm', count: 9 },
-  ], [])
-
-  const symptomData: SymptomData[] = useMemo(() => [
-    { symptom: 'Cramps', count: 15 },
-    { symptom: 'Bloating', count: 12 },
-    { symptom: 'Headache', count: 8 },
-    { symptom: 'Fatigue', count: 18 },
-    { symptom: 'Mood Changes', count: 14 },
-    { symptom: 'Acne', count: 5 },
-  ], [])
-
-  const cycleLengthData: CycleLengthData = useMemo(() => ({
+export default function InsightsTrends() {
+  const [loading, setLoading] = useState(true)
+  const [moodData, setMoodData] = useState<MoodDataPoint[]>([])
+  const [symptomData, setSymptomData] = useState<SymptomDataPoint[]>([])
+  const [cycleLengthData, setCycleLengthData] = useState<CycleLengthData>({
     average: 28,
-    shortest: 26,
-    longest: 31,
-    cycleLengths: [28, 27, 29, 28, 26, 30, 31, 28],
-  }), [])
+    shortest: 28,
+    longest: 28,
+    cycles: [],
+  })
 
-  const getMoodColor = (mood: string) => {
-    switch (mood) {
-      case 'Happy':
-        return 'bg-emerald-500'
-      case 'Calm':
-        return 'bg-blue-500'
-      case 'Energetic':
-        return 'bg-amber-500'
-      case 'Sad':
-        return 'bg-purple-500'
-      case 'Irritated':
-        return 'bg-rose-500'
-      default:
-        return 'bg-gray-500'
+  useEffect(() => {
+    loadInsightsData()
+  }, [])
+
+  const loadInsightsData = async () => {
+    try {
+      setLoading(true)
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+
+      // Fetch all logs
+      const allLogs = await getDailyLogs(user.id)
+      const currentMonthLogs = await getCurrentMonthLogs(user.id)
+
+      // Calculate mood trends
+      const moodCounts: Record<string, number> = {}
+      currentMonthLogs.forEach(log => {
+        if (log.mood) {
+          moodCounts[log.mood] = (moodCounts[log.mood] || 0) + 1
+        }
+      })
+
+      const moodTrends = Object.entries(moodCounts).map(([mood, count]) => ({
+        mood,
+        count,
+      })).sort((a, b) => b.count - a.count)
+
+      setMoodData(moodTrends)
+
+      // Calculate symptom patterns
+      const symptomCounts: Record<string, number> = {}
+      allLogs.forEach(log => {
+        if (log.symptoms) {
+          log.symptoms.forEach((symptom: string) => {
+            symptomCounts[symptom] = (symptomCounts[symptom] || 0) + 1
+          })
+        }
+      })
+
+      const symptomPatterns = Object.entries(symptomCounts).map(([symptom, count]) => ({
+        symptom,
+        count,
+      })).sort((a, b) => b.count - a.count).slice(0, 10) // Top 10
+
+      setSymptomData(symptomPatterns)
+
+      // Calculate cycle lengths
+      const periodLogs = allLogs.filter(log =>
+        log.symptoms?.includes('Period started') ||
+        log.other_tags?.includes('Period start')
+      )
+
+      periodLogs.sort((a, b) =>
+        new Date(b.log_date).getTime() - new Date(a.log_date).getTime()
+      )
+
+      const cycleLengths: number[] = []
+      for (let i = 1; i < Math.min(periodLogs.length, 6); i++) {
+        const daysBetween = Math.floor(
+          (new Date(periodLogs[i - 1].log_date).getTime() -
+           new Date(periodLogs[i].log_date).getTime()) /
+          (1000 * 60 * 60 * 24)
+        )
+        if (daysBetween > 0 && daysBetween < 60) {
+          cycleLengths.push(daysBetween)
+        }
+      }
+
+      const average = cycleLengths.length > 0
+        ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length)
+        : 28
+
+      const shortest = cycleLengths.length > 0 ? Math.min(...cycleLengths) : 28
+      const longest = cycleLengths.length > 0 ? Math.max(...cycleLengths) : 28
+
+      setCycleLengthData({
+        average,
+        shortest,
+        longest,
+        cycles: cycleLengths,
+      })
+
+    } catch (error) {
+      console.error('Error loading insights data:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  const getMoodEmoji = (mood: string) => {
-    switch (mood) {
-      case 'Happy':
-        return '😊'
-      case 'Calm':
-        return '😐'
-      case 'Energetic':
-        return '⚡'
-      case 'Sad':
-        return '🥺'
-      case 'Irritated':
-        return '😡'
-      default:
-        return '🙂'
-    }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+      </div>
+    )
   }
-
-  const maxCount = Math.max(...symptomData.map((s) => s.count))
 
   return (
-    <div className="space-y-6">
-      {/* Tab Navigation */}
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={() => setSelectedTab('mood')}
-          className={`flex-1 p-3 rounded-xl border-2 text-sm font-medium transition ${
-            selectedTab === 'mood'
-              ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/10 text-[var(--accent-1)]'
-              : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] text-[var(--text-secondary)] hover:border-[var(--accent-1)]/40'
-          }`}
-        >
-          <Heart className="h-4 w-4 mx-auto mb-1" />
-          Mood Trends
-        </button>
-        <button
-          type="button"
-          onClick={() => setSelectedTab('symptoms')}
-          className={`flex-1 p-3 rounded-xl border-2 text-sm font-medium transition ${
-            selectedTab === 'symptoms'
-              ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/10 text-[var(--accent-1)]'
-              : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] text-[var(--text-secondary)] hover:border-[var(--accent-1)]/40'
-          }`}
-        >
-          <Activity className="h-4 w-4 mx-auto mb-1" />
-          Symptoms
-        </button>
-        <button
-          type="button"
-          onClick={() => setSelectedTab('cycle')}
-          className={`flex-1 p-3 rounded-xl border-2 text-sm font-medium transition ${
-            selectedTab === 'cycle'
-              ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/10 text-[var(--accent-1)]'
-              : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] text-[var(--text-secondary)] hover:border-[var(--accent-1)]/40'
-          }`}
-        >
-          <Calendar className="h-4 w-4 mx-auto mb-1" />
-          Cycle Length
-        </button>
-      </div>
+    <div className="space-y-6 p-4">
+      <h2 className="text-2xl font-bold">Insights & Trends</h2>
 
       {/* Mood Trends */}
-      {selectedTab === 'mood' && (
-        <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
-              <Heart className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Mood Trends</p>
-              <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">This Month</p>
-            </div>
-          </div>
-
-          {/* Mood Chart */}
-          <div className="space-y-3">
-            {moodData.map((data) => (
-              <div key={data.date} className="flex items-center gap-3">
-                <span className="w-16 text-xs text-[var(--text-secondary)]">{data.date}</span>
-                <div className="flex-1 h-8 rounded-lg bg-[var(--card-bg-strong)] overflow-hidden">
+      <div className="p-4 bg-white/10 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">Mood This Month</h3>
+        {moodData.length > 0 ? (
+          <div className="space-y-2">
+            {moodData.map((item) => (
+              <div key={item.mood} className="flex items-center gap-3">
+                <span className="w-24 text-sm">{item.mood}</span>
+                <div className="flex-1 bg-gray-700 rounded-full h-4">
                   <div
-                    className={`h-full ${getMoodColor(data.mood)} transition-all duration-500`}
-                    style={{ width: `${(data.count / 15) * 100}%` }}
+                    className="bg-gradient-to-r from-rose-600 to-pink-600 h-4 rounded-full"
+                    style={{ width: `${(item.count / moodData.reduce((a, b) => a + b.count, 0)) * 100}%` }}
                   />
                 </div>
-                <span className="text-2xl">{getMoodEmoji(data.mood)}</span>
+                <span className="text-sm w-8">{item.count}</span>
               </div>
             ))}
           </div>
-
-          {/* Mood Summary */}
-          <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[var(--accent-1)]/20">
-            <div className="text-center p-3 rounded-xl bg-[var(--card-bg-strong)]">
-              <p className="text-2xl font-bold text-emerald-500">8</p>
-              <p className="text-xs text-[var(--text-secondary)]">Happy Days</p>
-            </div>
-            <div className="text-center p-3 rounded-xl bg-[var(--card-bg-strong)]">
-              <p className="text-2xl font-bold text-blue-500">12</p>
-              <p className="text-xs text-[var(--text-secondary)]">Calm Days</p>
-            </div>
-            <div className="text-center p-3 rounded-xl bg-[var(--card-bg-strong)]">
-              <p className="text-2xl font-bold text-rose-500">5</p>
-              <p className="text-xs text-[var(--text-secondary)]">Other</p>
-            </div>
-          </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-gray-400 text-sm">No mood data yet. Start logging your mood!</p>
+        )}
+      </div>
 
       {/* Symptom Patterns */}
-      {selectedTab === 'symptoms' && (
-        <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
-              <Activity className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Most Common Symptoms</p>
-              <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">This Month</p>
-            </div>
-          </div>
-
-          {/* Symptom Bar Chart */}
-          <div className="space-y-3">
-            {symptomData.map((data) => (
-              <div key={data.symptom} className="space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-[var(--text-primary)]">{data.symptom}</span>
-                  <span className="text-[var(--text-secondary)]">{data.count} days</span>
-                </div>
-                <div className="h-3 rounded-full bg-[var(--card-bg-strong)] overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-rose-500 to-pink-500 transition-all duration-500"
-                    style={{ width: `${(data.count / maxCount) * 100}%` }}
-                  />
-                </div>
+      <div className="p-4 bg-white/10 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">Most Common Symptoms</h3>
+        {symptomData.length > 0 ? (
+          <div className="space-y-2">
+            {symptomData.map((item, index) => (
+              <div key={item.symptom} className="flex items-center gap-3">
+                <span className="w-6 text-sm text-gray-400">{index + 1}</span>
+                <span className="flex-1 text-sm">{item.symptom}</span>
+                <span className="text-sm bg-rose-600/20 px-2 py-1 rounded">
+                  {item.count} times
+                </span>
               </div>
             ))}
           </div>
-
-          {/* Insight */}
-          <div className="p-4 rounded-xl border border-[var(--accent-2)]/20 bg-[var(--accent-2)]/5">
-            <div className="flex items-start gap-2">
-              <Sparkles className="h-4 w-4 text-[var(--accent-2)] flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Insight</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  Fatigue is your most common symptom. Consider getting more rest during your period.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+        ) : (
+          <p className="text-gray-400 text-sm">No symptom data yet. Start tracking!</p>
+        )}
+      </div>
 
       {/* Cycle Length */}
-      {selectedTab === 'cycle' && (
-        <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
-              <Calendar className="h-5 w-5" />
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Cycle Length</p>
-              <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">Stability Analysis</p>
-            </div>
+      <div className="p-4 bg-white/10 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">Cycle Length History</h3>
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          <div className="text-center">
+            <p className="text-sm text-gray-400">Average</p>
+            <p className="text-2xl font-bold text-rose-600">{cycleLengthData.average} days</p>
           </div>
-
-          {/* Cycle Stats */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="text-center p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/10">
-              <p className="text-3xl font-bold text-emerald-500">{cycleLengthData.average}</p>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">Average Days</p>
-            </div>
-            <div className="text-center p-4 rounded-xl border-2 border-amber-500/30 bg-amber-500/10">
-              <p className="text-3xl font-bold text-amber-500">{cycleLengthData.shortest}</p>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">Shortest</p>
-            </div>
-            <div className="text-center p-4 rounded-xl border-2 border-rose-500/30 bg-rose-500/10">
-              <p className="text-3xl font-bold text-rose-500">{cycleLengthData.longest}</p>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">Longest</p>
-            </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-400">Shortest</p>
+            <p className="text-2xl font-bold text-orange-600">{cycleLengthData.shortest} days</p>
           </div>
-
-          {/* Cycle History Chart */}
-          <div className="space-y-2">
-            <p className="text-xs text-[var(--text-secondary)]">Cycle History (Last 8 cycles)</p>
-            <div className="flex items-end gap-2 h-32">
-              {cycleLengthData.cycleLengths.map((length, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center gap-1">
-                  <div
-                    className="w-full rounded-t-lg bg-gradient-to-t from-purple-500 to-pink-500 transition-all duration-300 hover:opacity-80"
-                    style={{ height: `${(length / 35) * 100}%` }}
-                  />
-                  <span className="text-[10px] text-[var(--text-secondary)]">{length}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Stability Rating */}
-          <div className="p-4 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-[var(--text-primary)]">Cycle Stability</p>
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  Your cycle is{' '}
-                  {cycleLengthData.longest - cycleLengthData.shortest <= 3 ? 'very regular' : 'somewhat irregular'}
-                </p>
-              </div>
-              <div className="flex items-center gap-1">
-                <TrendingUp className="h-5 w-5 text-emerald-500" />
-                <span className="text-2xl font-bold text-emerald-500">
-                  {cycleLengthData.longest - cycleLengthData.shortest <= 3 ? 'High' : 'Medium'}
-                </span>
-              </div>
-            </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-400">Longest</p>
+            <p className="text-2xl font-bold text-purple-600">{cycleLengthData.longest} days</p>
           </div>
         </div>
-      )}
+        {cycleLengthData.cycles.length > 0 ? (
+          <div className="flex gap-2 overflow-x-auto">
+            {cycleLengthData.cycles.map((length, index) => (
+              <div
+                key={index}
+                className="bg-gradient-to-b from-rose-600 to-pink-600 rounded-lg p-3 min-w-[60px] text-center"
+              >
+                <p className="text-xs text-white/80">Cycle {index + 1}</p>
+                <p className="text-lg font-bold text-white">{length}d</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-400 text-sm">No cycle data yet. Log your period to see trends!</p>
+        )}
+      </div>
     </div>
   )
 }

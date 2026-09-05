@@ -102,9 +102,11 @@ export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) 
               {riskLevel === 'Low' ? 'Low' : riskLevel === 'Medium' ? 'Medium' : 'High'} chances of getting pregnant
             </p>
             <p className="text-xs mt-1 opacity-80">
-              * This is an estimate based on your cycle data, not medical advice.
+              ⚠️ <strong>Important:</strong> This is an estimate based on your logged cycle data.
               <br />
-              Always use contraception if you want to prevent pregnancy.
+              For pregnancy planning or contraception, please consult a healthcare provider.
+              <br />
+              Cycle predictions may vary due to stress, illness, or lifestyle changes.
             </p>
           </div>
         </div>

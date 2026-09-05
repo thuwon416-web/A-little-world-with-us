@@ -7,7 +7,7 @@ interface Message {
   id: string
   content: string | null
   sender_id: string
-  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file'
+  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio'
   media_url: string | null
   media_duration: number | null
   encrypted: boolean
@@ -52,6 +52,10 @@ export default function ReplyThread({ message, currentUserId, onReply, onClose }
         return '🎤 Voice message'
       case 'photo':
         return '📷 Photo'
+      case 'video':
+        return '🎬 Video'
+      case 'audio':
+        return '🎵 Audio'
       case 'sticker':
         return '😊 Sticker'
       case 'gif':

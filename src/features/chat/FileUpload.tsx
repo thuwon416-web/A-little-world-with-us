@@ -1,21 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { X, Upload, File as FileIcon, Image as ImageIcon, Film, Music, FileText, Check, AlertCircle } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 interface FileUploadProps {
-  onFileUpload: (fileData: { url: string; type: string; name: string; size: number }) => void
+  onFileUpload: (fileData: { url: string; type: string; name: string; size: number; path?: string }) => void
   onClose: () => void
 }
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
 export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -25,7 +26,7 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
 
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
-      setError('File size must be less than 10MB')
+      setError('File size must be less than 5MB')
       setSelectedFile(null)
       setPreview(null)
       return
@@ -60,64 +61,85 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
   }
 
   const handleUpload = async () => {
-    if (!selectedFile) return
+    if (!selectedFile) {
+      alert('Please select a file first')
+      return
+    }
 
-    setUploading(true)
-    setError(null)
-    setUploadProgress(0)
+    // Validate file size (5MB max)
+    const maxSize = 5 * 1024 * 1024 // 5MB
+    if (selectedFile.size > maxSize) {
+      alert('File size must be less than 5MB')
+      return
+    }
+
+    // Validate file type
+    const allowedTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'application/pdf',
+      'text/plain',
+    ]
+
+    if (!allowedTypes.includes(selectedFile.type)) {
+      alert('File type not allowed. Allowed: JPG, PNG, GIF, WebP, PDF, TXT')
+      return
+    }
 
     try {
-      // Simulate upload progress
-      const progressInterval = setInterval(() => {
-        setUploadProgress((prev) => {
-          if (prev >= 90) {
-            clearInterval(progressInterval)
-            return 90
-          }
-          return prev + 10
+      setUploading(true)
+      setError(null)
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        alert('Please log in to upload files')
+        return
+      }
+
+      // Generate unique filename
+      const fileExt = selectedFile.name.split('.').pop()
+      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
+      const filePath = `${user.id}/${fileName}`
+
+      // Upload to Supabase storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('chat_files')
+        .upload(filePath, selectedFile, {
+          cacheControl: '3600',
+          upsert: false,
         })
-      }, 200)
 
-      // In production, upload to Supabase storage
-      // const { data, error: uploadError } = await supabase.storage
-      //   .from('chat_files')
-      //   .upload(`/${Date.now()}_${selectedFile.name}`, selectedFile)
+      if (uploadError) throw uploadError
 
-      // if (uploadError) {
-      //   throw uploadError
-      // }
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('chat_files')
+        .getPublicUrl(filePath)
 
-      // Simulate upload delay
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      // Call parent callback with file info
+      onFileUpload({
+        url: publicUrl,
+        type: selectedFile.type,
+        name: selectedFile.name,
+        size: selectedFile.size,
+        path: filePath,
+      })
 
-      clearInterval(progressInterval)
-      setUploadProgress(100)
+      // Reset state
+      setSelectedFile(null)
+      setPreview(null)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
 
-      // Get public URL (in production)
-      // const { data: { publicUrl } } = supabase.storage
-      //   .from('chat_files')
-      //   .getPublicUrl(data.path)
-
-      // For demo, create a fake URL
-      const fakeUrl = URL.createObjectURL(selectedFile)
-
-      setTimeout(() => {
-        onFileUpload({
-          url: fakeUrl,
-          type: selectedFile.type,
-          name: selectedFile.name,
-          size: selectedFile.size,
-        })
-        setUploading(false)
-        setUploadProgress(0)
-        setSelectedFile(null)
-        setPreview(null)
-      }, 500)
-    } catch (err) {
-      console.error('Upload error:', err)
-      setError('Failed to upload file. Please try again.')
+    } catch (error) {
+      console.error('Error uploading file:', error)
+      alert('Failed to upload file. Please try again.')
+    } finally {
       setUploading(false)
-      setUploadProgress(0)
     }
   }
 
@@ -146,13 +168,14 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
               Select a file
             </label>
             <input
+              ref={fileInputRef}
               type="file"
               onChange={handleFileSelect}
-              accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt"
+              accept="image/*,application/pdf,.txt"
               className="w-full rounded-xl border-2 border-dashed border-[var(--accent-1)]/30 bg-[var(--card-bg-strong)] px-4 py-8 text-sm text-[var(--text-secondary)] hover:border-[var(--accent-1)]/50 transition cursor-pointer"
             />
             <p className="text-xs text-[var(--text-secondary)] mt-2">
-              Max file size: 10MB • Images, videos, audio, documents
+              Max file size: 5MB • Images, PDF, TXT
             </p>
           </div>
 
@@ -199,12 +222,12 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-[var(--text-secondary)]">Uploading...</span>
-                    <span className="text-[var(--accent-1)]">{uploadProgress}%</span>
+                    <span className="text-[var(--accent-1)]">Processing</span>
                   </div>
                   <div className="h-2 rounded-full bg-[var(--accent-1)]/20 overflow-hidden">
                     <div
-                      className="h-full bg-[var(--accent-1)] transition-all duration-300"
-                      style={{ width: `${uploadProgress}%` }}
+                      className="h-full bg-[var(--accent-1)] animate-pulse"
+                      style={{ width: '100%' }}
                     />
                   </div>
                 </div>

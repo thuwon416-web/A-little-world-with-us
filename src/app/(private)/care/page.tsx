@@ -6,7 +6,7 @@ import CycleDashboard from '@/features/care/CycleDashboard'
 import DailyLogModal from '@/features/care/DailyLogModal'
 import PeriodCalendar from '@/features/care/PeriodCalendar'
 import InsightsTrends from '@/features/care/InsightsTrends'
-// import SmartReminders from '@/features/care/SmartReminders'
+import SmartReminders from '@/features/care/SmartReminders'
 import { requestNotificationPermission, areNotificationsEnabled } from '@/lib/care-notifications'
 
 type TabType = 'dashboard' | 'calendar' | 'insights' | 'reminders'
@@ -44,7 +44,7 @@ export default function CarePage() {
     { id: 'dashboard' as TabType, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'calendar' as TabType, label: 'Calendar', icon: Calendar },
     { id: 'insights' as TabType, label: 'Insights', icon: TrendingUp },
-    // { id: 'reminders' as TabType, label: 'Reminders', icon: Settings },
+    { id: 'reminders' as TabType, label: 'Reminders', icon: Settings },
   ]
 
   return (
@@ -101,7 +101,7 @@ export default function CarePage() {
         {activeTab === 'dashboard' && <CycleDashboard key={refreshKey} onOpenDailyLog={handleOpenDailyLog} />}
         {activeTab === 'calendar' && <PeriodCalendar key={refreshKey} />}
         {activeTab === 'insights' && <InsightsTrends key={refreshKey} />}
-        {/* {activeTab === 'reminders' && <SmartReminders />} */}
+        {activeTab === 'reminders' && <SmartReminders key={refreshKey} />}
       </div>
 
       {/* Daily Log Modal */}
