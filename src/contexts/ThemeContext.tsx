@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-export type ThemeMode = 'romantic' | 'midnight' | 'sunset' | 'ocean' | 'monochrome'
+export type ThemeMode = 'midnight' | 'sunset' | 'ocean' | 'monochrome'
 
 export type ThemeContextType = {
   mode: ThemeMode
@@ -19,7 +19,6 @@ const ThemeContext = createContext<ThemeContextType>({
 })
 
 const themeMap: Record<ThemeMode, ThemeMode> = {
-  romantic: 'romantic',
   midnight: 'midnight',
   sunset: 'sunset',
   ocean: 'ocean',
@@ -44,7 +43,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     }
 
     const hour = new Date().getHours()
-    const detectedMode: ThemeMode = hour >= 6 && hour < 18 ? 'romantic' : 'midnight'
+    const detectedMode: ThemeMode = hour >= 6 && hour < 18 ? 'sunset' : 'midnight'
     setModeState(detectedMode)
     setAutoMode(true)
   }, [])
@@ -64,7 +63,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (!autoMode || !mounted) return
 
     const hour = new Date().getHours()
-    const nextMode: ThemeMode = hour >= 6 && hour < 18 ? 'romantic' : 'midnight'
+    const nextMode: ThemeMode = hour >= 6 && hour < 18 ? 'sunset' : 'midnight'
     setModeState(nextMode)
   }, [autoMode, mounted])
 

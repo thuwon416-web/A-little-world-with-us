@@ -1,101 +1,91 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { Copy, RefreshCcw, Sparkles } from 'lucide-react'
+import { useState } from 'react'
+import { Copy, Heart, Send, Sparkles } from 'lucide-react'
 
-const aiContent = {
-  gifts: [
-    'A handwritten memory jar with your favorite treats inside.',
-    'A cozy date-night basket with candles, snacks, and a tiny framed photo.',
-    'A custom playlist + a small keepsake box for your most meaningful moments.',
-  ],
-  dates: [
-    'Stargazing picnic with dessert and a quiet playlist in the park.',
-    'Slow morning brunch followed by a bookstore date and a photo walk.',
-    'Build a mini adventure: pick a neighborhood and make a playful challenge list.',
-  ],
-  messages: [
-    'I keep thinking about how safe and happy I feel with you. Thank you for being my person.',
-    'You make ordinary days feel extra lovely. Can we plan a little adventure this weekend?',
-    'I am so grateful for your patience, your laughter, and the way you see me. I love you.',
-  ],
-} as const
+type Tool = 'chat' | 'letter' | 'message' | 'date' | 'gift'
+
+const tools: Array<{ id: Tool; label: string; description: string }> = [
+  { id: 'chat', label: 'Love coach', description: 'Ask for caring, practical relationship advice.' },
+  { id: 'letter', label: 'Love letter', description: 'Turn a memory into a personal letter.' },
+  { id: 'message', label: 'Message helper', description: 'Draft a sweet, supportive, or repair message.' },
+  { id: 'date', label: 'Date planner', description: 'Plan a date around your budget and mood.' },
+  { id: 'gift', label: 'Gift ideas', description: 'Find thoughtful gifts for an occasion.' },
+]
+
+const prompts: Record<Tool, { label: string; placeholder: string; instruction: string }> = {
+  chat: { label: 'What would you like to talk through?', placeholder: 'For example: We have both been busy lately. How can we reconnect this weekend?', instruction: 'Give warm, practical relationship advice. Be concise, non-judgmental, and suggest small realistic next steps.' },
+  letter: { label: 'Share names, memories, and the tone you want', placeholder: 'Write a gentle anniversary letter for May. Mention our first rainy-day coffee date and how patient she is.', instruction: 'Write a heartfelt, specific love letter. Use a warm, sincere tone and return only the letter.' },
+  message: { label: 'What message do you need?', placeholder: 'A short apology after I forgot our call. I want it to feel honest, not dramatic.', instruction: 'Draft three short message options. Match the requested tone, avoid manipulative language, and label each option.' },
+  date: { label: 'Tell us the budget, location, and interests', placeholder: 'Budget $30, Yangon, quiet food and photo walks, 3 hours on Saturday.', instruction: 'Create three practical romantic date plans. Include estimated cost, time, and a simple first step for each.' },
+  gift: { label: 'Tell us the occasion and what they enjoy', placeholder: 'Birthday gift under $40. They love journaling, tea, and handmade things.', instruction: 'Suggest five thoughtful, realistic gift ideas. Include why each fits and a rough budget.' },
+}
 
 export default function AIFeaturePage() {
-  const [tab, setTab] = useState<keyof typeof aiContent>('gifts')
-  const [index, setIndex] = useState(0)
+  const [tool, setTool] = useState<Tool>('chat')
+  const [input, setInput] = useState('')
+  const [result, setResult] = useState('')
+  const [provider, setProvider] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
 
-  const suggestions = useMemo(() => aiContent[tab], [tab])
+  const current = prompts[tool]
 
-  const nextSuggestion = () => {
-    setIndex((prev) => (prev + 1) % suggestions.length)
+  const generate = async () => {
+    if (!input.trim() || loading) return
+    setLoading(true)
+    setError('')
+
+    try {
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: `${current.instruction}\n\nUser request: ${input.trim()}` }),
+      })
+      const data = await response.json()
+      if (!response.ok || !data.response) throw new Error(data.error || 'Unable to generate a response')
+      setResult(data.response)
+      setProvider(data.provider || '')
+    } catch (caughtError) {
+      setError(caughtError instanceof Error ? caughtError.message : 'Unable to generate a response')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const currentSuggestion = suggestions[index] ?? suggestions[0] ?? ''
-
-  const copySuggestion = async () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard && currentSuggestion) {
-      await navigator.clipboard.writeText(currentSuggestion)
-    }
+  const copyResult = async () => {
+    if (result) await navigator.clipboard.writeText(result)
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">AI companion</p>
           <h1 className="mt-2 text-3xl font-serif text-[var(--text-primary)]">Love assistant</h1>
+          <p className="mt-2 max-w-xl text-sm text-[var(--text-secondary)]">Private prompts for the moments when a little help finding the right words is welcome.</p>
         </div>
-        <div className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--accent-1)]">
-          <span className="inline-flex items-center gap-2"><Sparkles className="h-4 w-4" /> AI generated</span>
-        </div>
-      </div>
+        <div className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--accent-1)]"><Sparkles className="h-4 w-4" /> AI assisted</div>
+      </header>
 
-      <div className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4">
-        <div className="flex flex-wrap gap-2">
-          {Object.keys(aiContent).map((option) => {
-            const selected = tab === option
-            return (
-              <button
-                key={option}
-                type="button"
-                onClick={() => {
-                  setTab(option as keyof typeof aiContent)
-                  setIndex(0)
-                }}
-                className={`rounded-full px-4 py-2 text-sm capitalize transition ${
-                  selected
-                    ? 'bg-[var(--accent-1)] text-[var(--bg-color)]'
-                    : 'bg-[var(--card-bg-strong)] text-[var(--text-primary)]'
-                }`}
-              >
-                {option}
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="mt-6 rounded-[26px] border border-white/10 bg-[var(--card-bg-strong)] p-6">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Suggestion</p>
-          <p className="mt-4 text-lg leading-relaxed text-[var(--text-primary)]">{currentSuggestion}</p>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={nextSuggestion}
-              className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-4 py-2.5 text-sm font-medium text-[var(--bg-color)]"
-            >
-              <RefreshCcw className="h-4 w-4" /> Regenerate
+      <div className="grid gap-4 lg:grid-cols-[0.7fr_1.3fr]">
+        <aside className="space-y-2 rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3">
+          {tools.map((item) => (
+            <button key={item.id} type="button" onClick={() => { setTool(item.id); setInput(''); setResult(''); setError('') }} className={`w-full rounded-2xl p-4 text-left transition ${tool === item.id ? 'bg-[var(--accent-1)]/15 text-[var(--text-primary)]' : 'text-[var(--text-secondary)] hover:bg-[var(--card-bg-strong)]'}`}>
+              <span className="block font-semibold">{item.label}</span>
+              <span className="mt-1 block text-xs leading-relaxed opacity-75">{item.description}</span>
             </button>
-            <button
-              type="button"
-              onClick={copySuggestion}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[var(--card-bg)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)]"
-            >
-              <Copy className="h-4 w-4" /> Copy
-            </button>
-          </div>
-        </div>
+          ))}
+        </aside>
+
+        <section className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 sm:p-7">
+          <div className="flex items-center gap-2 text-[var(--accent-1)]"><Heart className="h-5 w-5" /><h2 className="text-xl font-semibold text-[var(--text-primary)]">{tools.find((item) => item.id === tool)?.label}</h2></div>
+          <label className="mt-6 block text-sm font-medium text-[var(--text-primary)]" htmlFor="ai-request">{current.label}</label>
+          <textarea id="ai-request" value={input} onChange={(event) => setInput(event.target.value)} placeholder={current.placeholder} maxLength={1000} className="mt-3 min-h-36 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4 text-sm leading-relaxed text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent-1)]" />
+          <div className="mt-3 flex items-center justify-between gap-3"><span className="text-xs text-[var(--text-secondary)]">{input.length}/1000</span><button type="button" disabled={!input.trim() || loading} onClick={() => void generate()} className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-5 py-2.5 text-sm font-semibold text-[var(--bg-color)] disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-4 w-4" />{loading ? 'Thinking…' : 'Generate'}</button></div>
+          {error ? <p className="mt-5 rounded-2xl bg-red-500/10 p-4 text-sm text-red-400">{error}</p> : null}
+          {result ? <div className="mt-6 rounded-3xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">Your result{provider ? ` · ${provider}` : ''}</p><button type="button" onClick={() => void copyResult()} className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]"><Copy className="h-3.5 w-3.5" />Copy</button></div><p className="mt-4 whitespace-pre-wrap leading-7 text-[var(--text-primary)]">{result}</p></div> : null}
+        </section>
       </div>
     </div>
   )

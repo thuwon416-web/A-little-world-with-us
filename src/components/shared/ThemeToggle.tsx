@@ -7,7 +7,6 @@ import type { ThemeMode } from '@/contexts/ThemeContext'
 
 const themeOptions = [
   { key: 'random', label: 'Random', icon: Shuffle },
-  { key: 'romantic', label: 'Emergent Airy', icon: Sparkles },
   { key: 'midnight', label: 'Midnight Romance', icon: MoonStar },
   { key: 'sunset', label: 'Sunset Glow', icon: SunMedium },
   { key: 'ocean', label: 'Ocean Breeze', icon: Sparkles },
@@ -43,7 +42,7 @@ export default function ThemeToggle() {
               type="button"
               onClick={() => {
                 if (key === 'random') {
-                  const themes: ThemeMode[] = ['romantic', 'midnight', 'sunset', 'ocean', 'monochrome']
+                  const themes: ThemeMode[] = ['midnight', 'sunset', 'ocean', 'monochrome']
                   const randomTheme = themes[Math.floor(Math.random() * themes.length)]
                   setMode(randomTheme)
                 } else {
