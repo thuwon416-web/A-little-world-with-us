@@ -59,7 +59,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Check onboarding completion from user metadata
-  const onboardingComplete = session?.user?.user_metadata?.onboarding_complete === true
+  const onboardingComplete = user?.user_metadata?.onboarding_complete === true
 
   // If authenticated but onboarding not complete, redirect to onboarding
   // Skip onboarding check for the onboarding page itself

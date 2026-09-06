@@ -37,6 +37,7 @@ export default function ChatScreen() {
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<any[]>([])
   const [partnerId, setPartnerId] = useState<string | null>(null)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   useEffect(() => {
     const subscription = database
@@ -60,20 +61,22 @@ export default function ChatScreen() {
     return () => subscription.unsubscribe()
   }, [user?.id])
 
-  // Fetch partner ID from relationship
+  // Fetch the accepted couple link and resolve the partner from its members.
   useEffect(() => {
     const fetchPartnerId = async () => {
       if (!user?.id) return
 
       try {
         const { data } = await supabase
-          .from('relationships')
-          .select('partner_id')
-          .eq('user_id', user.id)
+          .from('couple_links')
+          .select('id, inviter_id, accepted_by')
+          .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+          .eq('status', 'accepted')
           .single()
 
-        if (data?.partner_id) {
-          setPartnerId(data.partner_id)
+        if (data?.id && data.accepted_by) {
+          setCoupleId(data.id)
+          setPartnerId(data.inviter_id === user.id ? data.accepted_by : data.inviter_id)
         }
       } catch (error) {
         console.error('Error fetching partner ID:', error)
@@ -85,7 +88,7 @@ export default function ChatScreen() {
 
   const handleSend = async () => {
     const trimmed = draft.trim()
-    if (!trimmed) return
+    if (!trimmed || !user?.id || !coupleId) return
 
     const createdAt = new Date().toISOString()
 
@@ -93,7 +96,8 @@ export default function ChatScreen() {
       await database.get('messages').create((record) => {
         const rawRecord = record as any
         rawRecord.content = trimmed
-        rawRecord.sender_id = user?.id ?? 'local-user'
+        rawRecord.sender_id = user.id
+        rawRecord.couple_id = coupleId
         rawRecord.created_at = createdAt
         rawRecord.synced = !isOffline
       })

@@ -19,9 +19,10 @@ async function getCoupleId(): Promise<string | null> {
   try {
     const userId = await getUserId()
     const { data, error } = await supabase
-      .from('relationships')
+      .from('couple_links')
       .select('id')
-      .or(`user_id.eq.${userId},partner_id.eq.${userId}`)
+      .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+      .eq('status', 'accepted')
       .single()
     
     if (error || !data) {
@@ -44,6 +45,11 @@ export async function pushPendingMessages() {
   }
 
   const pending = await database.get('messages').query(Q.where('synced', false)).fetch()
+  const coupleId = await getCoupleId()
+
+  if (!coupleId) {
+    throw new Error('No accepted couple link found')
+  }
 
   for (const message of pending) {
     const rawMessage = message as any
@@ -51,6 +57,7 @@ export async function pushPendingMessages() {
       id: rawMessage.id,
       content: rawMessage._get('content'),
       sender_id: rawMessage._get('sender_id'),
+      couple_id: rawMessage._get('couple_id') || coupleId,
       created_at: rawMessage._get('created_at'),
     }
 
@@ -141,6 +148,7 @@ export async function syncMessages(lastSyncAt?: string) {
           await database.get('messages').create((record: any) => {
             record.content = remoteMessage.content ?? ''
             record.sender_id = remoteMessage.sender_id ?? 'unknown'
+            record.couple_id = remoteMessage.couple_id ?? ''
             record.created_at = remoteMessage.created_at ?? new Date().toISOString()
             record.synced = true
           })
@@ -149,9 +157,10 @@ export async function syncMessages(lastSyncAt?: string) {
           const localCreatedAt = localMessage._get('created_at') ?? ''
           if ((remoteMessage.created_at ?? '') > localCreatedAt) {
             await localMessage.update((record: any) => {
-              record.content = remoteMessage.content ?? record.content
-              record.sender_id = remoteMessage.sender_id ?? record.sender_id
-              record.created_at = remoteMessage.created_at ?? record.created_at
+            record.content = remoteMessage.content ?? record.content
+            record.sender_id = remoteMessage.sender_id ?? record.sender_id
+            record.couple_id = remoteMessage.couple_id ?? record.couple_id
+            record.created_at = remoteMessage.created_at ?? record.created_at
               record.synced = true
             })
           }

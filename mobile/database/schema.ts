@@ -9,6 +9,7 @@ export class MessageModel extends Model {
       columns: [
         { name: 'content', type: 'string' },
         { name: 'sender_id', type: 'string' },
+        { name: 'couple_id', type: 'string', isOptional: true },
         { name: 'created_at', type: 'string' },
         { name: 'synced', type: 'boolean' },
       ],
@@ -31,6 +32,6 @@ export class UserModel extends Model {
 }
 
 export default appSchema({
-  version: 1,
+  version: 2,
   tables: [MessageModel.createTableSchema(), UserModel.createTableSchema()],
 })

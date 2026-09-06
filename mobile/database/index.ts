@@ -1,10 +1,26 @@
 import { Database } from '@nozbe/watermelondb'
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite'
+import { addColumns, schemaMigrations } from '@nozbe/watermelondb/Schema/migrations'
 
 import schema, { MessageModel, UserModel } from './schema'
 
+const migrations = schemaMigrations({
+  migrations: [
+    {
+      toVersion: 2,
+      steps: [
+        addColumns({
+          table: 'messages',
+          columns: [{ name: 'couple_id', type: 'string', isOptional: true }],
+        }),
+      ],
+    },
+  ],
+})
+
 const adapter = new SQLiteAdapter({
   schema,
+  migrations,
   dbName: 'a-little-world-with-us-mobile-db',
 })
 

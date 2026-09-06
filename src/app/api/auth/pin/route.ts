@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import bcrypt from 'bcrypt'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const SALT_ROUNDS = 10
 
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { action, pin, currentPin } = body
+    const { action, pin } = body
 
     if (action === 'hash') {
       // Hash a new PIN
@@ -69,6 +70,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json(
           { error: 'PIN must be 4 digits' },
           { status: 400 }
+        )
+      }
+
+      const rateLimitResult = await checkRateLimit(`pin:${user.id}`, 5, 60000)
+      if (!rateLimitResult.allowed) {
+        return NextResponse.json(
+          { error: 'Too many PIN attempts. Try again later.' },
+          { status: 429 }
         )
       }
 
