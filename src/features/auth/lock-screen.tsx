@@ -10,12 +10,6 @@ interface LockScreenProps {
   onUnlock: () => void
 }
 
-// Simple hash function for PIN (use bcrypt in production)
-function hashPin(pin: string): string {
-  // Simple encoding for demonstration - use proper hashing in production
-  return btoa(pin)
-}
-
 export default function LockScreen({ onUnlock }: LockScreenProps) {
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
@@ -77,20 +71,17 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setError('User not authenticated')
+      const response = await fetch('/api/auth/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'hash', pin }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        setError(error.error || 'Failed to set PIN')
         return
       }
-
-      const pinHash = hashPin(pin)
-
-      await supabase
-        .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          lock_pin_hash: pinHash,
-        })
 
       setIsPinSet(true)
       setIsSettingPin(false)
@@ -110,19 +101,15 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setError('User not authenticated')
-        return
-      }
+      const response = await fetch('/api/auth/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'verify', pin }),
+      })
 
-      const { data } = await supabase
-        .from('user_settings')
-        .select('lock_pin_hash')
-        .eq('user_id', user.id)
-        .single()
+      const result = await response.json()
 
-      if (hashPin(pin) === data?.lock_pin_hash) {
+      if (result.valid) {
         // Explode particles
         const newParticles = Array.from({ length: 24 }, (_, i) => ({
           id: i,
