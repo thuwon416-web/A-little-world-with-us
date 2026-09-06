@@ -1,340 +1,97 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { MapPin, Navigation, Shield, Users, Clock, RefreshCw, History, Bell, Battery, Heart, AlertTriangle } from 'lucide-react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { AlertTriangle, Battery, Clock3, MapPin, Navigation, PhoneCall, RefreshCw, Route, ShieldCheck, Smartphone } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import LiveLocationMap from '@/features/location/LiveLocationMap'
-import LocationHistory from '@/features/location/LocationHistory'
-import GeofenceAlerts from '@/features/location/GeofenceAlerts'
-import BatteryStatus from '@/features/location/BatteryStatus'
-import EmergencySOS from '@/features/location/EmergencySOS'
-import MemoryMap from '@/features/location/MemoryMap'
 
-interface Location {
-  id: string
-  user_id: string
-  latitude: number
-  longitude: number
-  timestamp: string
-  accuracy: number | null
-  created_at: string
+type Profile = { id: string; email: string; full_name: string | null; avatar_url: string | null }
+type LocationRow = { user_id: string; couple_id: string; latitude: number; longitude: number; accuracy: number | null; updated_at: string; battery_level: number | null; is_charging: boolean | null; network_type: string | null; device_name: string | null; app_version: string | null }
+type HistoryRow = { id: string; user_id: string; latitude: number; longitude: number; accuracy: number | null; captured_at: string }
+type Tab = 'live' | 'timeline' | 'places' | 'device' | 'calls' | 'safety'
+
+const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
+
+function relativeTime(value: string) {
+  const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000))
+  if (seconds < 60) return `${seconds}s ago`
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
+  return `${Math.floor(seconds / 3600)}h ago`
 }
 
-interface Profile {
-  id: string
-  email: string
-  full_name: string | null
-  avatar_url: string | null
-  role: string
+function mapImageUrl(rows: LocationRow[]) {
+  if (!mapboxToken || rows.length === 0) return null
+  const markers = rows.map((row, index) => `pin-s-${index === 0 ? 'a' : 'b'}+${index === 0 ? 'ff6b9d' : 'ffd700'}(${row.longitude},${row.latitude})`).join(',')
+  return `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${markers}/auto/1100x620?padding=64&access_token=${mapboxToken}`
 }
 
 export default function AdminLocationsPage() {
-  const [locations, setLocations] = useState<Location[]>([])
+  const [tab, setTab] = useState<Tab>('live')
   const [profiles, setProfiles] = useState<Profile[]>([])
+  const [locations, setLocations] = useState<LocationRow[]>([])
+  const [history, setHistory] = useState<HistoryRow[]>([])
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [userLocations, setUserLocations] = useState<Record<string, Location[]>>({})
-  const [activeTab, setActiveTab] = useState<'map' | 'history' | 'geofence' | 'battery' | 'sos' | 'memories'>('map')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    checkAdminAccess()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  const load = useCallback(async () => {
+    setLoading(true); setError(null)
+    const { data: authData } = await supabase.auth.getUser()
+    const user = authData.user
+    if (!user) { window.location.assign('/login'); return }
+    const { data: profile } = await supabase.from('profiles').select('role, email').eq('id', user.id).maybeSingle()
+    if (profile?.role !== 'admin' || profile.email !== 'thuwon416@gmail.com') { window.location.assign('/dashboard'); return }
+
+    const { data: link, error: linkError } = await supabase.from('couple_links').select('inviter_id, accepted_by, couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').maybeSingle()
+    if (linkError || !link?.accepted_by || !link.couple_id) { setError('No accepted linked partner is available yet.'); setLoading(false); return }
+    const userIds = [link.inviter_id, link.accepted_by]
+    const [profilesResult, locationResult, historyResult] = await Promise.all([
+      supabase.from('profiles').select('id,email,full_name,avatar_url').in('id', userIds),
+      supabase.from('user_locations').select('*').eq('couple_id', link.couple_id).in('user_id', userIds),
+      supabase.from('location_history').select('id,user_id,latitude,longitude,accuracy,captured_at').eq('couple_id', link.couple_id).gte('captured_at', new Date(Date.now() - 7 * 86400000).toISOString()).order('captured_at', { ascending: false }).limit(1500),
+    ])
+    if (profilesResult.error || locationResult.error || historyResult.error) { setError(profilesResult.error?.message || locationResult.error?.message || historyResult.error?.message || 'Unable to load location data.'); setLoading(false); return }
+    setProfiles((profilesResult.data ?? []) as Profile[])
+    setLocations((locationResult.data ?? []) as LocationRow[])
+    setHistory((historyResult.data ?? []) as HistoryRow[])
+    setSelectedUser((current) => current && userIds.includes(current) ? current : user.id)
+    setLoading(false)
   }, [])
 
-  const checkAdminAccess = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        window.location.href = '/login'
-        return
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      if (!profile || profile.role !== 'admin') {
-        window.location.href = '/dashboard'
-        return
-      }
-
-      setIsAdmin(true)
-      loadAdminData()
-    } catch (error) {
-      console.error('Failed to check admin access:', error)
-      window.location.href = '/dashboard'
-    }
-  }
-
-  const loadAdminData = async () => {
-    try {
-      setIsLoading(true)
-
-      // Load all profiles
-      const { data: profilesData, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (profilesError) throw profilesError
-      setProfiles(profilesData || [])
-
-      // `user_locations` is the canonical latest GPS row written by mobile.
-      const { data: locationsData, error: locationsError } = await supabase
-        .from('user_locations')
-        .select('*')
-        .order('updated_at', { ascending: false })
-
-      if (locationsError) throw locationsError
-      const normalizedLocations = (locationsData || []).map((location) => ({
-        ...location,
-        timestamp: location.updated_at,
-        created_at: location.updated_at,
-      })) as Location[]
-      setLocations(normalizedLocations)
-
-      // Group locations by user
-      const grouped = normalizedLocations.reduce((acc, loc) => {
-        if (!acc[loc.user_id]) {
-          acc[loc.user_id] = []
-        }
-        acc[loc.user_id].push(loc)
-        return acc
-      }, {} as Record<string, Location[]>)
-
-      setUserLocations(grouped)
-
-      // Select first user by default
-      if (profilesData && profilesData.length > 0) {
-        setSelectedUser(profilesData[0].id)
-      }
-    } catch (error) {
-      console.error('Failed to load admin data:', error)
-      alert(error instanceof Error ? error.message : 'Failed to load data')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
+  useEffect(() => { void load() }, [load])
   useEffect(() => {
-    if (!isAdmin) return
-    const channel = supabase
-      .channel('admin-current-locations')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_locations' }, () => {
-        void loadAdminData()
-      })
-      .subscribe()
+    const channel = supabase.channel('pair-location-live').on('postgres_changes', { event: '*', schema: 'public', table: 'user_locations' }, () => { void load() }).subscribe()
     return () => { void supabase.removeChannel(channel) }
-  }, [isAdmin])
+  }, [load])
 
-  const selectedUserLocations = selectedUser ? userLocations[selectedUser] || [] : []
-  const selectedProfile = profiles.find(p => p.id === selectedUser)
-  const lastLocation = selectedUserLocations.length > 0 ? selectedUserLocations[0] : null
+  const selectedLocation = locations.find((row) => row.user_id === selectedUser) ?? null
+  const selectedProfile = profiles.find((row) => row.id === selectedUser) ?? null
+  const selectedHistory = useMemo(() => history.filter((row) => row.user_id === selectedUser), [history, selectedUser])
+  const imageUrl = useMemo(() => mapImageUrl(locations), [locations])
+  const tabs: { id: Tab; label: string; icon: typeof MapPin }[] = [
+    { id: 'live', label: 'Live Map', icon: MapPin }, { id: 'timeline', label: 'Timeline', icon: Route }, { id: 'places', label: 'Saved Places', icon: Navigation }, { id: 'device', label: 'Device Status', icon: Smartphone }, { id: 'calls', label: 'App Calls', icon: PhoneCall }, { id: 'safety', label: 'Safety / SOS', icon: ShieldCheck },
+  ]
 
-  if (!isAdmin) {
-    return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="mx-auto h-8 w-8 animate-spin text-[var(--accent-1)]" />
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">Checking access...</p>
-        </div>
-      </div>
-    )
-  }
+  if (loading) return <div className="flex min-h-[400px] items-center justify-center text-[var(--text-secondary)]"><RefreshCw className="mr-2 h-5 w-5 animate-spin" /> Loading paired location data…</div>
+  if (error) return <section className="glass-card mx-auto max-w-2xl p-6 text-center"><AlertTriangle className="mx-auto h-8 w-8 text-[var(--accent-1)]" /><h1 className="mt-3 text-2xl text-[var(--text-primary)]">Location is not ready</h1><p className="mt-2 text-sm text-[var(--text-secondary)]">{error}</p></section>
 
-  if (isLoading) {
-    return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <div className="text-center">
-          <RefreshCw className="mx-auto h-8 w-8 animate-spin text-[var(--accent-1)]" />
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">Loading location data...</p>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Admin Console</p>
-          <h1 className="mt-2 text-3xl font-serif text-[var(--text-primary)]">Location Tracking</h1>
-        </div>
-        <button
-          type="button"
-          onClick={loadAdminData}
-          className="flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-[var(--bg-color)] transition hover:opacity-90"
-        >
-          <RefreshCw className="h-4 w-4" />
-          Refresh
-        </button>
-      </div>
-
-      {/* Feature Tabs */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        {[
-          { id: 'map' as const, label: 'Live Map', icon: MapPin },
-          { id: 'history' as const, label: 'History', icon: History },
-          { id: 'geofence' as const, label: 'Geofence', icon: Bell },
-          { id: 'battery' as const, label: 'Battery', icon: Battery },
-          { id: 'sos' as const, label: 'SOS', icon: AlertTriangle },
-          { id: 'memories' as const, label: 'Memories', icon: Heart },
-        ].map((tab) => {
-          const Icon = tab.icon
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm transition ${
-                activeTab === tab.id
-                  ? 'border-[var(--accent-1)]/40 bg-[var(--accent-1)]/20 text-[var(--accent-1)]'
-                  : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10'
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              {tab.label}
-            </button>
-          )
-        })}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_350px]">
-        {/* Feature Content */}
-        <div className="overflow-hidden rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
-          {activeTab === 'map' && (
-            <div className="relative h-[500px] w-full overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(255,107,157,0.2),_rgba(0,0,0,0)_48%),linear-gradient(135deg,_#21162e,_#15263d_55%,_#201437)]">
-              <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-              
-              <LiveLocationMap
-                adminLocation={{ latitude: 16.8661, longitude: 96.1951 }}
-                userLocation={lastLocation ? { latitude: lastLocation.latitude, longitude: lastLocation.longitude } : null}
-                userName={selectedProfile?.full_name || selectedProfile?.email}
-              />
-            </div>
-          )}
-
-          {activeTab === 'history' && (
-            <div className="p-6">
-              <LocationHistory locations={selectedUserLocations} userId={selectedUser || ''} />
-            </div>
-          )}
-
-          {activeTab === 'geofence' && (
-            <div className="p-6">
-              <GeofenceAlerts userLocation={lastLocation ? { latitude: lastLocation.latitude, longitude: lastLocation.longitude } : undefined} />
-            </div>
-          )}
-
-          {activeTab === 'battery' && (
-            <div className="p-6">
-              <BatteryStatus userId={selectedUser || undefined} />
-            </div>
-          )}
-
-          {activeTab === 'sos' && (
-            <div className="p-6">
-              <EmergencySOS userId={selectedUser || undefined} />
-            </div>
-          )}
-
-          {activeTab === 'memories' && (
-            <div className="p-6">
-              <MemoryMap />
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar */}
-        <div className="space-y-4">
-          {/* User selector */}
-          <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
-                <Users className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Tracked Users</p>
-                <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{profiles.length} active</p>
-              </div>
-            </div>
-
-            <div className="space-y-2 max-h-[200px] overflow-y-auto">
-              {profiles.map((profile) => (
-                <button
-                  key={profile.id}
-                  type="button"
-                  onClick={() => setSelectedUser(profile.id)}
-                  className={`w-full rounded-xl px-3 py-2 text-left text-sm transition ${
-                    selectedUser === profile.id
-                      ? 'bg-[var(--accent-1)] text-[var(--bg-color)]'
-                      : 'bg-[var(--card-bg-strong)] text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-[var(--accent-2)]/20 flex items-center justify-center text-xs font-medium">
-                      {profile.full_name?.[0] || profile.email[0]}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{profile.full_name || profile.email}</p>
-                      <p className="text-xs opacity-70 truncate">{profile.email}</p>
-                    </div>
-                    {profile.role === 'admin' && (
-                      <Shield className="h-4 w-4 flex-shrink-0" />
-                    )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Location stats */}
-          {lastLocation && (
-            <div className="rounded-[24px] border border-[var(--accent-2)]/20 bg-[var(--card-bg)] p-5">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="rounded-xl bg-[var(--accent-2)]/15 p-2 text-[var(--accent-2)]">
-                  <Navigation className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Current Location</p>
-                  <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">
-                    {lastLocation.latitude.toFixed(6)}, {lastLocation.longitude.toFixed(6)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                  <Clock className="h-3 w-3" />
-                  <span>{new Date(lastLocation.timestamp).toLocaleString()}</span>
-                </div>
-                {lastLocation.accuracy && (
-                  <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-                    <MapPin className="h-3 w-3" />
-                    <span>Accuracy: ±{lastLocation.accuracy.toFixed(0)}m</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Total locations */}
-          <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-            <div className="flex items-center gap-3">
-              <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
-                <MapPin className="h-5 w-5" />
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Total Locations</p>
-                <p className="mt-1 text-2xl font-semibold text-[var(--text-primary)]">{locations.length}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  return <div className="space-y-6">
+    <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Pair safety dashboard</p><h1 className="mt-2 text-3xl font-serif text-[var(--text-primary)]">Location</h1></div><button type="button" onClick={() => void load()} className="glass-button inline-flex items-center gap-2 px-4 py-2 text-sm"><RefreshCw className="h-4 w-4" /> Refresh</button></header>
+    <nav className="flex gap-2 overflow-x-auto pb-1">{tabs.map(({ id, label, icon: Icon }) => <button key={id} type="button" onClick={() => setTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm ${tab === id ? 'border-[var(--accent-1)]/50 bg-[var(--accent-1)]/15 text-[var(--accent-1)]' : 'border-white/10 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}><Icon className="h-4 w-4" />{label}</button>)}</nav>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px]">
+      <section className="glass-card min-h-[520px] overflow-hidden p-4">
+        {tab === 'live' && <>{imageUrl ? <img src={imageUrl} alt="Live locations map" className="h-[430px] w-full rounded-2xl object-cover" /> : <div className="flex h-[430px] items-center justify-center rounded-2xl bg-[var(--bg-2)] p-6 text-center text-sm text-[var(--text-secondary)]">Add <code className="mx-1">NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN</code> to show the live Mapbox map. GPS status cards below remain available.</div>}<div className="mt-4 grid gap-3 sm:grid-cols-2">{locations.map((row) => { const person = profiles.find((item) => item.id === row.user_id); return <a key={row.user_id} href={`https://www.google.com/maps?q=${row.latitude},${row.longitude}`} target="_blank" rel="noreferrer" className="rounded-2xl border border-white/10 bg-[var(--bg-2)] p-4 hover:border-[var(--accent-1)]/40"><p className="font-medium text-[var(--text-primary)]">{person?.full_name || person?.email || 'Linked account'}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{row.latitude.toFixed(5)}, {row.longitude.toFixed(5)}</p><p className="mt-2 text-xs text-[var(--accent-2)]">Updated {relativeTime(row.updated_at)} · ±{Math.round(row.accuracy ?? 0)}m</p></a>})}</div></>}
+        {tab === 'timeline' && <Timeline rows={selectedHistory} />}
+        {tab === 'places' && <EmptyPanel title="Saved places" text="Saved Home, Work, Airport, and custom-place geofences will appear here after the mobile geofence setup is enabled." />}
+        {tab === 'device' && <DevicePanel location={selectedLocation} profile={selectedProfile} />}
+        {tab === 'calls' && <EmptyPanel title="App call history" text="Only calls made through this app will be listed here. Phone, Telegram, and other app call logs are not collected." />}
+        {tab === 'safety' && <EmptyPanel title="Safety / SOS" text="No active SOS alerts. This panel will show app-triggered SOS events and location-permission warnings." />}
+      </section>
+      <aside className="space-y-3">{profiles.map((profile) => { const location = locations.find((row) => row.user_id === profile.id); const stale = !location || Date.now() - new Date(location.updated_at).getTime() > 10 * 60000; return <button key={profile.id} type="button" onClick={() => setSelectedUser(profile.id)} className={`w-full rounded-2xl border p-4 text-left ${selectedUser === profile.id ? 'border-[var(--accent-1)]/50 bg-[var(--accent-1)]/10' : 'border-white/10 bg-[var(--card-bg)]'}`}><p className="font-medium text-[var(--text-primary)]">{profile.full_name || profile.email}</p><p className={`mt-1 text-xs ${stale ? 'text-amber-300' : 'text-emerald-300'}`}>{stale ? 'Location stale or offline' : `Live · ${relativeTime(location.updated_at)}`}</p><p className="mt-2 text-xs text-[var(--text-secondary)]">{location ? `Battery ${location.battery_level ?? '—'}% · ${location.is_charging ? 'Charging' : 'Not charging'} · ${location.network_type ?? 'Network unknown'}` : 'No GPS update yet'}</p></button>})}</aside>
     </div>
-  )
+  </div>
 }
+
+function Timeline({ rows }: { rows: HistoryRow[] }) { return <div className="space-y-3 p-2"><h2 className="text-xl text-[var(--text-primary)]">Last seven days</h2>{rows.length ? rows.slice(0, 80).map((row) => <a key={row.id} href={`https://www.google.com/maps?q=${row.latitude},${row.longitude}`} target="_blank" rel="noreferrer" className="flex items-center justify-between rounded-2xl bg-[var(--bg-2)] p-4"><div><p className="font-medium text-[var(--text-primary)]">{row.latitude.toFixed(5)}, {row.longitude.toFixed(5)}</p><p className="mt-1 text-xs text-[var(--text-secondary)]">±{Math.round(row.accuracy ?? 0)}m</p></div><span className="text-sm text-[var(--accent-2)]">{new Date(row.captured_at).toLocaleString()}</span></a>) : <EmptyPanel title="No route history yet" text="Background tracking will add points here once the mobile app has location permission." />}</div> }
+function DevicePanel({ location, profile }: { location: LocationRow | null; profile: Profile | null }) { return <div className="space-y-4 p-2"><h2 className="text-xl text-[var(--text-primary)]">{profile?.full_name || profile?.email || 'Device'} status</h2>{location ? <><Metric icon={Battery} label="Battery" value={location.battery_level === null ? 'Not reported' : `${location.battery_level}%${location.is_charging ? ' · Charging' : ''}`} /><Metric icon={Navigation} label="Network" value={location.network_type ?? 'Not reported'} /><Metric icon={Smartphone} label="Device" value={`${location.device_name ?? 'Not reported'} · app ${location.app_version ?? '—'}`} /><Metric icon={Clock3} label="Last sync" value={`${new Date(location.updated_at).toLocaleString()} · ±${Math.round(location.accuracy ?? 0)}m`} /></> : <EmptyPanel title="No device data" text="This device has not sent a location update yet." />}</div> }
+function Metric({ icon: Icon, label, value }: { icon: typeof Battery; label: string; value: string }) { return <div className="flex gap-3 rounded-2xl bg-[var(--bg-2)] p-4"><Icon className="h-5 w-5 text-[var(--accent-1)]" /><div><p className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">{label}</p><p className="mt-1 text-sm text-[var(--text-primary)]">{value}</p></div></div> }
+function EmptyPanel({ title, text }: { title: string; text: string }) { return <div className="flex min-h-[260px] flex-col items-center justify-center p-6 text-center"><h2 className="text-xl text-[var(--text-primary)]">{title}</h2><p className="mt-3 max-w-md text-sm leading-6 text-[var(--text-secondary)]">{text}</p></div> }

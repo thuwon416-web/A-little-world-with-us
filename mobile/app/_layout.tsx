@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar'
 import { View, Text, StyleSheet } from 'react-native'
 
 import { AuthProvider } from '@/lib/auth'
+import '@/services/location'
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<

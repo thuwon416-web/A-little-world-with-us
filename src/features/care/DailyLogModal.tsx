@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import { X, Check, Droplets, Thermometer, Scale, Activity, Coffee } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getActiveCareCoupleLinkId, saveDailyLog, type DailyLog } from '@/lib/care-data'
@@ -146,8 +147,8 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <motion.div initial={{ opacity: 0, scale: 0.96, y: 18 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.2 }} className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
         {/* Header */}
         <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
           <div>
@@ -428,7 +429,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
             )}
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }

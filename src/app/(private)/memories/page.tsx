@@ -1,6 +1,8 @@
 'use client'
 
 import { Suspense, type ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { motion } from 'framer-motion'
+import { Heart, X } from 'lucide-react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
 import PhotoExport from '@/features/memories/PhotoExport'
 import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
@@ -86,6 +88,7 @@ function MemoriesPageContent() {
     fallbackMemories.map((memory) => ({ ...memory, displayUrl: memory.image_url }))
   )
   const [caption, setCaption] = useState('')
+  const [memoryDate, setMemoryDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [memoryCategory, setMemoryCategory] = useState<MemoryCategory>('favorite')
   const [sortBy, setSortBy] = useState<MemorySort>('newest')
@@ -94,6 +97,8 @@ function MemoriesPageContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState('')
+  const [coupleLinkId, setCoupleLinkId] = useState<string | null>(null)
+  const [selectedMemory, setSelectedMemory] = useState<DisplayMemory | null>(null)
 
   const sortedMemories = useMemo(() => {
     const filtered = memories.filter((memory) => {
@@ -136,10 +141,11 @@ function MemoriesPageContent() {
       return
     }
 
+    const { data: link } = await supabase.from('couple_links').select('id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
+    setCoupleLinkId(link?.id ?? null)
     const { data, error: memoriesError } = await supabase
       .from('memories')
       .select('*')
-      .eq('user_id', userData.user.id)
       .order('date', { ascending: false })
 
     if (memoriesError) {
@@ -229,13 +235,15 @@ function MemoriesPageContent() {
         throw uploadError
       }
 
-      const today = new Date().toISOString().slice(0, 10)
+      if (!coupleLinkId) throw new Error('Link with your partner before adding a shared memory.')
       const { error: insertError } = await supabase.from('memories').insert({
         user_id: userData.user.id,
+        couple_id: coupleLinkId,
         image_url: path,
         caption: caption.trim() || 'A memory together',
-        date: today,
+        date: memoryDate,
         category: memoryCategory,
+        visibility: 'shared',
       })
 
       if (insertError) {
@@ -244,6 +252,7 @@ function MemoriesPageContent() {
       }
 
       setCaption('')
+      setMemoryDate(new Date().toISOString().slice(0, 10))
       setSelectedFile(null)
       setMemoryCategory('favorite')
       await loadMemories()
@@ -302,7 +311,7 @@ function MemoriesPageContent() {
 
       <section className="glass-card p-5">
         <h2 className="text-xl text-[var(--text-primary)]">Add a memory</h2>
-        <form className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr_0.8fr_auto]" onSubmit={handleUpload}>
+        <form className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr_0.8fr_0.7fr_auto]" onSubmit={handleUpload}>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -326,6 +335,7 @@ function MemoriesPageContent() {
             <option value="ritual">Ritual</option>
             <option value="journal">Journal</option>
           </select>
+          <input type="date" value={memoryDate} onChange={(event) => setMemoryDate(event.target.value)} className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" aria-label="Memory date" />
           <button
             type="submit"
             disabled={isUploading || !isSupabaseConfigured}
@@ -389,11 +399,10 @@ function MemoriesPageContent() {
                 caption={memory.caption ?? 'Memory'}
                 date={memory.date}
                 index={index}
+                onOpen={() => setSelectedMemory(memory)}
               />
             ) : (
-              <div className="glass-card p-5 text-sm text-[var(--text-secondary)]">
-                Image unavailable.
-              </div>
+              <button type="button" onClick={() => setSelectedMemory(memory)} className="glass-card w-full bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20 p-6 text-left"><p className="font-serif text-xl text-[var(--text-primary)]">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-[var(--text-secondary)]">{new Date(memory.date).toLocaleDateString()}</p></button>
             )}
             {memory.category && (
               <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-white">
@@ -424,8 +433,14 @@ function MemoriesPageContent() {
           </button>
         </div>
       )}
+      {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-[var(--accent-1)]" /><p className="mt-4 text-lg text-[var(--text-primary)]">No memories yet. Start creating your little world together!</p></section>}
+      {selectedMemory && <MemoryDetail memory={selectedMemory} onClose={() => setSelectedMemory(null)} />}
     </main>
   )
+}
+
+function MemoryDetail({ memory, onClose }: { memory: DisplayMemory; onClose: () => void }) {
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-white/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <img src={memory.displayUrl} alt={memory.caption || 'Memory'} className="max-h-[55vh] w-full rounded-2xl object-cover" /> : <div className="h-64 rounded-2xl bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20" />}<div className="p-3"><p className="text-xs uppercase tracking-[0.16em] text-[var(--accent-2)]">{memory.category || 'favorite'} · {new Date(memory.date).toLocaleDateString()}</p><h2 className="mt-2 text-3xl font-serif text-[var(--text-primary)]">{memory.caption || 'A moment together'}</h2></div></motion.section></div>
 }
 
 function MemoriesSkeleton() {

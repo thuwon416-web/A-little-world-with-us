@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon } from 'lucide-react'
+import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, MapPin } from 'lucide-react'
 import { supabase, insertRow } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
@@ -16,12 +16,13 @@ interface Message {
   id: string
   sender_id: string
   content: string | null
-  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio'
+  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location'
   media_url: string | null
   media_duration: number | null
   encrypted: boolean
   reply_to: string | null
   created_at: string
+  location_payload?: { latitude: number; longitude: number; accuracy?: number; label?: string } | null
 }
 
 export default function RealtimeChat() {
@@ -123,6 +124,23 @@ export default function RealtimeChat() {
     })
 
     setInput('')
+  }
+
+  const handleSendLocation = () => {
+    if (!coupleId || !currentUserId || !navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const latitude = position.coords.latitude
+      const longitude = position.coords.longitude
+      const accuracy = Math.round(position.coords.accuracy)
+      await insertRow('messages', {
+        couple_id: coupleId,
+        sender_id: currentUserId,
+        content: `Location pin · ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
+        message_type: 'location',
+        location_payload: { latitude, longitude, accuracy },
+        encrypted: false,
+      })
+    }, () => alert('Location permission is required to send a location pin.'), { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 })
   }
 
   const handleVoiceMessage = async (recording: { blob: Blob; duration: number }) => {
@@ -326,6 +344,9 @@ export default function RealtimeChat() {
                       <span className="text-sm">{message.content}</span>
                     </div>
                   )}
+                  {message.message_type === 'location' && message.location_payload && (
+                    <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl bg-[var(--bg-3)] p-3 text-sm hover:bg-[var(--accent-1)]/10"><MapPin className="h-5 w-5 text-[var(--accent-1)]" /><span><strong>Shared location</strong><br />{message.location_payload.latitude.toFixed(5)}, {message.location_payload.longitude.toFixed(5)} · ±{Math.round(message.location_payload.accuracy ?? 0)}m</span></a>
+                  )}
                   <p className="text-xs text-[var(--text-secondary)] mt-1">
                     {new Date(message.created_at).toLocaleTimeString()}
                   </p>
@@ -381,6 +402,7 @@ export default function RealtimeChat() {
           >
             <Paperclip className="h-5 w-5" />
           </button>
+          <button type="button" onClick={handleSendLocation} className="p-2 rounded-xl hover:bg-[var(--bg-2)] text-[var(--text-secondary)]" aria-label="Send current location"><MapPin className="h-5 w-5" /></button>
           <input
             type="text"
             value={input}

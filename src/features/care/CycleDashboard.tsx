@@ -74,14 +74,16 @@ export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) 
   }
 
   return (
-    <div className="space-y-5 rounded-[28px] bg-[#fff8f6] p-4 text-[#241d22] shadow-sm sm:p-6">
-      <section className="rounded-[24px] bg-[radial-gradient(circle_at_top_right,_#fde1db,_transparent_52%),linear-gradient(145deg,_#fffdfc,_#fff1ee)] px-5 py-8 text-center">
+    <div className="space-y-5 text-[var(--text-primary)]">
+      <section className="glass-card relative overflow-hidden px-5 py-10 text-center">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,215,0,0.14),_transparent_42%),radial-gradient(circle_at_bottom_left,_rgba(255,107,157,0.12),_transparent_45%)]" />
+        <div className="relative">
         <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b767b]">Today&apos;s cycle</p>
-        <p className="mt-3 text-lg font-semibold">Period in</p>
-        <h2 className="mt-1 text-5xl font-bold tracking-tight">{daysUntilPeriod} days</h2>
-        <p className="mt-4 text-sm text-[#62545a]">
+        <h2 className="gold-text mt-3 text-4xl font-serif sm:text-5xl">Period in {daysUntilPeriod} days</h2>
+        <p className="mt-4 text-sm text-[var(--text-secondary)]">
           {riskLevel} estimated chance of pregnancy · predictions are not medical advice
         </p>
+        </div>
       </section>
 
       <section className="grid grid-cols-3 gap-3 text-center">
@@ -90,34 +92,34 @@ export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) 
           ['＋', 'Symptoms'],
           ['♡', 'Intimacy'],
         ].map(([icon, label]) => (
-          <button key={label} type="button" onClick={() => onOpenDailyLog?.()} className="group flex flex-col items-center gap-2 rounded-3xl py-2 text-sm font-medium hover:bg-[#fff0f2]">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-2xl shadow-sm ring-1 ring-[#f2dddd] transition group-hover:scale-105">{icon}</span>
+          <button key={label} type="button" onClick={() => onOpenDailyLog?.()} className="group flex flex-col items-center gap-2 rounded-3xl py-2 text-sm font-medium text-white/60">
+            <span className="flex h-16 w-16 items-center justify-center rounded-full border border-[var(--accent-1)]/50 bg-[var(--card-bg)] text-2xl text-[var(--accent-1)] transition group-hover:scale-105 group-hover:glow-rose">{icon}</span>
             {label}
           </button>
         ))}
       </section>
 
-      <section className="overflow-hidden rounded-3xl border border-[#f0e5e2] bg-white">
-        <div className="flex items-center justify-between border-b border-[#f4ebea] px-5 py-4">
+      <section className="glass-card overflow-hidden">
+        <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
           <h3 className="text-lg font-bold">Cycle history</h3>
-          <span className="text-sm font-medium text-[#ef5d85]">Your data</span>
+          <span className="text-sm font-medium text-[var(--accent-1)]">Shared data</span>
         </div>
         <div className="space-y-4 px-5 py-4">
           <div>
             <div className="flex justify-between text-sm"><span className="font-semibold">Current cycle</span><span>Day {Math.max(1, (cycleData?.average_cycle_length || 28) - daysUntilPeriod)}</span></div>
-            <div className="mt-3 flex gap-1">{Array.from({ length: 28 }, (_, index) => <span key={index} className={`h-2 flex-1 rounded-full ${index < 5 ? 'bg-[#ff5d89]' : index < 15 ? 'bg-[#a9ddd8]' : 'bg-[#eee9e8]'}`} />)}</div>
+            <div className="mt-3 flex gap-1">{Array.from({ length: 28 }, (_, index) => <span key={index} className={`h-3 min-w-0 flex-1 rounded-full ${index < 5 ? 'bg-[var(--accent-1)]' : index < 15 ? 'bg-emerald-400' : 'bg-white/10'}`} />)}</div>
           </div>
-          <div className="grid grid-cols-2 gap-3 border-t border-[#f4ebea] pt-4 text-sm">
-            <div><p className="text-[#83757a]">Average cycle</p><p className="mt-1 text-xl font-bold">{cycleData?.average_cycle_length || 28} days</p></div>
-            <div><p className="text-[#83757a]">Next period</p><p className="mt-1 text-sm font-semibold">{cycleData?.next_period_start ? new Date(cycleData.next_period_start).toLocaleDateString() : 'Log a period to predict'}</p></div>
+          <div className="grid grid-cols-2 gap-3 border-t border-white/10 pt-4 text-sm">
+            <div><p className="text-[var(--text-secondary)]">Average cycle</p><p className="mt-1 text-xl font-bold">{cycleData?.average_cycle_length || 28} days</p></div>
+            <div><p className="text-[var(--text-secondary)]">Next period</p><p className="mt-1 text-sm font-semibold">{cycleData?.next_period_start ? new Date(cycleData.next_period_start).toLocaleDateString() : 'Log a period to predict'}</p></div>
           </div>
         </div>
       </section>
 
-      <section className="rounded-3xl border border-[#f0e5e2] bg-white p-5">
+      <section className="glass-card p-5">
         <h3 className="text-lg font-bold">Daily check-in</h3>
-        <p className="mt-1 text-sm text-[#75676d]">Log mood, symptoms, notes, and anything you would like to remember.</p>
-        <button type="button" onClick={() => onOpenDailyLog?.()} className="mt-4 w-full rounded-2xl bg-[#ff5d89] px-4 py-3 font-semibold text-white transition hover:bg-[#ed4e7a]">Open today&apos;s log</button>
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">Log mood, symptoms, intimacy, notes, and anything you would like to remember.</p>
+        <button type="button" onClick={() => onOpenDailyLog?.()} className="mt-4 w-full rounded-2xl bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] px-4 py-3 font-semibold text-white transition hover:brightness-110">Open today&apos;s log</button>
       </section>
     </div>
   )
