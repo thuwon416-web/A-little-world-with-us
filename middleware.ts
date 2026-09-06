@@ -1,12 +1,43 @@
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 // Middleware to protect dashboard routes and check onboarding status.
-// Uses cookies for auth and onboarding completion tracking.
+// Uses Supabase server session verification for secure authentication.
 
-export function middleware(req: NextRequest) {
-  const { nextUrl, cookies } = req
-  const pathname = nextUrl.pathname
+export async function middleware(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll()
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
+          supabaseResponse = NextResponse.next({
+            request,
+          })
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          )
+        },
+      },
+    }
+  )
+
+  // Get session
+  const { data: { session } } = await supabase.auth.getSession()
+
+  // Check if user is authenticated
+  const isAuthenticated = !!session
+
+  const pathname = request.nextUrl.pathname
 
   // Skip middleware for public routes
   if (
@@ -18,40 +49,30 @@ export function middleware(req: NextRequest) {
     pathname.startsWith('/static') ||
     pathname.includes('.')
   ) {
-    return NextResponse.next()
+    return supabaseResponse
   }
-
-  // Check authentication for protected routes
-  const auth = cookies.get('a-little-world-with-us-auth')?.value
-  const onboardingComplete = cookies.get('a-little-world-with-us-onboarding')?.value
 
   // If not authenticated, redirect to login
-  if (auth !== 'true') {
-    const url = new URL('/login', req.url)
+  if (!isAuthenticated) {
+    const url = new URL('/login', request.url)
     return NextResponse.redirect(url)
   }
+
+  // Check onboarding completion from user metadata
+  const onboardingComplete = session?.user?.user_metadata?.onboarding_complete === true
 
   // If authenticated but onboarding not complete, redirect to onboarding
   // Skip onboarding check for the onboarding page itself
-  if (onboardingComplete !== 'true' && !pathname.startsWith('/onboarding')) {
-    const url = new URL('/onboarding', req.url)
+  if (!onboardingComplete && !pathname.startsWith('/onboarding')) {
+    const url = new URL('/onboarding', request.url)
     return NextResponse.redirect(url)
   }
 
-  return NextResponse.next()
+  return supabaseResponse
 }
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/settings/:path*',
-    '/vault/:path*',
-    '/wellness/:path*',
-    '/chat/:path*',
-    '/gallery/:path*',
-    '/memories/:path*',
-    '/calendar/:path*',
-    '/cycle/:path*',
-    '/couple/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation'
 import {
   Bell,
   CalendarDays,
+  Calendar,
+  DollarSign,
   Gamepad2,
   Heart,
   HelpCircle,
@@ -36,6 +38,8 @@ const baseNavItems = [
   { href: '/wellness', label: 'Wellness', icon: Heart },
   { href: '/games', label: 'Play', icon: Gamepad2 },
   { href: '/vault', label: 'Vault', icon: LockKeyhole },
+  { href: '/calendar', label: 'Calendar', icon: Calendar },
+  { href: '/finance', label: 'Finance', icon: DollarSign },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 

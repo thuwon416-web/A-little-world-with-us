@@ -151,3 +151,39 @@ vite.config.ts.timestamp-*
 .expo/
 **/.expo/
 **/.expo-shared/
+
+# Audit reports
+project-tree.txt
+ts-files.txt
+large-files.txt
+todo-files.txt
+unused-imports.txt
+typescript-errors.txt
+eslint-errors.txt
+img-tags.txt
+any-type-files.txt
+console-statements.txt
+type-imports.txt
+large-files-source.txt
+ts-files-source.txt
+todo-comments.txt
+web-*.txt
+mobile-*.txt
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# Backup files
+*.bak
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

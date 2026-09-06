@@ -3,35 +3,126 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Sparkle } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 import AmbientBackground from '@/components/effects/ambient-background'
 
 interface LockScreenProps {
   onUnlock: () => void
 }
 
-const CORRECT_PIN = process.env.NEXT_PUBLIC_PIN_CODE || '0202'
+// Simple hash function for PIN (use bcrypt in production)
+function hashPin(pin: string): string {
+  // Simple encoding for demonstration - use proper hashing in production
+  return btoa(pin)
+}
 
 export default function LockScreen({ onUnlock }: LockScreenProps) {
   const [pin, setPin] = useState('')
-  const [error, setError] = useState(false)
+  const [confirmPin, setConfirmPin] = useState('')
+  const [error, setError] = useState('')
   const [unlocking, setUnlocking] = useState(false)
+  const [isSettingPin, setIsSettingPin] = useState(false)
+  const [isPinSet, setIsPinSet] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [particles, setParticles] = useState<
     { id: number; angle: number; distance: number; size: number }[]
   >([])
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    inputRef.current?.focus()
+    checkPinSet()
   }, [])
 
-  const handleInput = (digit: string) => {
-    if (pin.length >= 4 || unlocking) return
-    const newPin = pin + digit
-    setPin(newPin)
-    setError(false)
+  useEffect(() => {
+    if (!loading && !isSettingPin) {
+      inputRef.current?.focus()
+    }
+  }, [loading, isSettingPin])
 
-    if (newPin.length === 4) {
-      if (newPin === CORRECT_PIN) {
+  const checkPinSet = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setLoading(false)
+        return
+      }
+
+      const { data } = await supabase
+        .from('user_settings')
+        .select('lock_pin_hash')
+        .eq('user_id', user.id)
+        .single()
+
+      setIsPinSet(!!data?.lock_pin_hash)
+      if (!data?.lock_pin_hash) {
+        setIsSettingPin(true)
+      }
+    } catch (err) {
+      console.error('Error checking PIN status:', err)
+      setIsSettingPin(true)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSetPin = async () => {
+    if (pin.length !== 4) {
+      setError('PIN must be 4 digits')
+      return
+    }
+
+    if (pin !== confirmPin) {
+      setError('PINs do not match')
+      return
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setError('User not authenticated')
+        return
+      }
+
+      const pinHash = hashPin(pin)
+
+      await supabase
+        .from('user_settings')
+        .upsert({
+          user_id: user.id,
+          lock_pin_hash: pinHash,
+        })
+
+      setIsPinSet(true)
+      setIsSettingPin(false)
+      setPin('')
+      setConfirmPin('')
+      setError('')
+    } catch (err) {
+      console.error('Error setting PIN:', err)
+      setError('Failed to set PIN. Please try again.')
+    }
+  }
+
+  const handleUnlock = async () => {
+    if (pin.length !== 4) {
+      setError('Enter complete PIN')
+      return
+    }
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        setError('User not authenticated')
+        return
+      }
+
+      const { data } = await supabase
+        .from('user_settings')
+        .select('lock_pin_hash')
+        .eq('user_id', user.id)
+        .single()
+
+      if (hashPin(pin) === data?.lock_pin_hash) {
         // Explode particles
         const newParticles = Array.from({ length: 24 }, (_, i) => ({
           id: i,
@@ -43,18 +134,53 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
         setUnlocking(true)
         setTimeout(onUnlock, 1400)
       } else {
-        setError(true)
-        setTimeout(() => setPin(''), 600)
+        setError('Incorrect PIN')
+        setTimeout(() => {
+          setPin('')
+          setError('')
+        }, 1000)
       }
+    } catch (err) {
+      console.error('Error verifying PIN:', err)
+      setError('Error verifying PIN')
     }
   }
 
+  const handleInput = (digit: string) => {
+    const currentPin = isSettingPin && confirmPin ? confirmPin : pin
+    if (currentPin.length >= 4 || unlocking) return
+    
+    if (isSettingPin && pin.length === 4) {
+      setConfirmPin(confirmPin + digit)
+    } else {
+      setPin(pin + digit)
+    }
+    setError('')
+  }
+
   const handleBackspace = () => {
-    setPin(pin.slice(0, -1))
-    setError(false)
+    if (isSettingPin && confirmPin.length > 0) {
+      setConfirmPin(confirmPin.slice(0, -1))
+    } else {
+      setPin(pin.slice(0, -1))
+    }
+    setError('')
+  }
+
+  const getDisplayPin = () => {
+    if (isSettingPin && confirmPin) return confirmPin
+    return pin
   }
 
   const keypadButtons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫']
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div className="text-rose-blush">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <AnimatePresence>
@@ -96,10 +222,20 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-rose-blush/70 text-sm mb-12 font-sans tracking-wide"
+            className="text-rose-blush/70 text-sm mb-4 font-sans tracking-wide"
           >
-            Enter your secret code to unlock our world
+            {isSettingPin ? 'Set your secret code' : 'Enter your secret code to unlock our world'}
           </motion.p>
+
+          {isSettingPin && pin.length === 4 && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-rose-blush/70 text-sm mb-8 font-sans tracking-wide"
+            >
+              Confirm your PIN
+            </motion.p>
+          )}
 
           {/* PIN dots */}
           <motion.div
@@ -110,7 +246,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`pin-dot ${pin.length > i ? 'filled' : ''} ${
+                className={`pin-dot ${getDisplayPin().length > i ? 'filled' : ''} ${
                   error ? '!border-destructive !bg-destructive' : ''
                 }`}
               />
@@ -121,7 +257,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             ref={inputRef}
             type="text"
             inputMode="numeric"
-            value={pin}
+            value={getDisplayPin()}
             onChange={() => {}}
             className="sr-only"
             aria-label="PIN input"
@@ -150,17 +286,36 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             })}
           </motion.div>
 
+          {/* Action button */}
+          {isSettingPin && getDisplayPin().length === 4 && (
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={handleSetPin}
+              className="mt-6 px-8 py-3 bg-gold text-black rounded-full font-medium hover:bg-gold/90 transition-colors"
+            >
+              Set PIN
+            </motion.button>
+          )}
+
+          {!isSettingPin && getDisplayPin().length === 4 && (
+            <motion.button
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              onClick={handleUnlock}
+              className="mt-6 px-8 py-3 bg-gold text-black rounded-full font-medium hover:bg-gold/90 transition-colors"
+            >
+              Unlock
+            </motion.button>
+          )}
+
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: error ? 1 : 0 }}
             className="text-rose-deep text-sm mt-6 font-sans"
           >
-            {error ? 'Wrong code, my love. Try again 💕' : ''}
+            {error}
           </motion.p>
-
-          <p className="absolute bottom-8 text-xs text-rose-blush/40 font-sans">
-            Hint: our month together 💝
-          </p>
         </motion.div>
       )}
 

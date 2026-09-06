@@ -1,7 +1,7 @@
 import { Q } from '@nozbe/watermelondb'
 import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { Button } from '@/components/Button'
 import { ChatBubble } from '@/components/ChatBubble'
@@ -10,6 +10,7 @@ import { database } from '@/database'
 import { useCall } from '@/hooks/useCall'
 import { useSync } from '@/hooks/useSync'
 import { useAuth } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 function formatMessageTime(value: string) {
   const date = new Date(value)
@@ -35,6 +36,7 @@ export default function ChatScreen() {
   const { state: callState, placeCall } = useCall()
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<any[]>([])
+  const [partnerId, setPartnerId] = useState<string | null>(null)
 
   useEffect(() => {
     const subscription = database
@@ -56,6 +58,29 @@ export default function ChatScreen() {
       })
 
     return () => subscription.unsubscribe()
+  }, [user?.id])
+
+  // Fetch partner ID from relationship
+  useEffect(() => {
+    const fetchPartnerId = async () => {
+      if (!user?.id) return
+
+      try {
+        const { data } = await supabase
+          .from('relationships')
+          .select('partner_id')
+          .eq('user_id', user.id)
+          .single()
+
+        if (data?.partner_id) {
+          setPartnerId(data.partner_id)
+        }
+      } catch (error) {
+        console.error('Error fetching partner ID:', error)
+      }
+    }
+
+    fetchPartnerId()
   }, [user?.id])
 
   const handleSend = async () => {
@@ -83,6 +108,14 @@ export default function ChatScreen() {
     await refresh()
   }
 
+  const handleCall = (type: 'audio' | 'video') => {
+    if (!partnerId) {
+      console.error('Partner ID not found')
+      return
+    }
+    void placeCall(partnerId, type)
+  }
+
   const statusLabel = isOffline
     ? 'Offline'
     : status === 'syncing'
@@ -100,22 +133,27 @@ export default function ChatScreen() {
         {pendingCount > 0 && <Text style={styles.syncText}>• {pendingCount} pending</Text>}
       </View>
 
-      <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-        {messages.map((message) => (
-          <ChatBubble key={message.id} message={message} />
-        ))}
-      </ScrollView>
+      <FlatList
+        data={messages}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <ChatBubble message={item} />}
+        style={styles.list}
+        contentContainerStyle={styles.listContent}
+        numColumns={1}
+      />
 
       <View style={styles.callRow}>
         <TouchableOpacity
-          style={styles.callButton}
-          onPress={() => void placeCall('partner-user-id', 'audio')}
+          style={[styles.callButton, !partnerId && styles.callButtonDisabled]}
+          onPress={() => handleCall('audio')}
+          disabled={!partnerId}
         >
           <Text style={styles.callButtonText}>Audio call</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.callButtonVideo}
-          onPress={() => void placeCall('partner-user-id', 'video')}
+          style={[styles.callButtonVideo, !partnerId && styles.callButtonDisabled]}
+          onPress={() => handleCall('video')}
+          disabled={!partnerId}
         >
           <Text style={styles.callButtonText}>Video call</Text>
         </TouchableOpacity>
@@ -196,6 +234,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
+  },
+  callButtonDisabled: {
+    opacity: 0.5,
   },
   callButtonText: {
     color: '#f3f0f5',

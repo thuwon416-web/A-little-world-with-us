@@ -9,6 +9,19 @@ interface Msg {
   created_at?: string
 }
 
+// Simple encoding for localStorage (use proper encryption in production)
+function encodeData(data: string): string {
+  return btoa(data)
+}
+
+function decodeData(encoded: string): string {
+  try {
+    return atob(encoded)
+  } catch {
+    return ''
+  }
+}
+
 export default function AIChat() {
   const [messages, setMessages] = useState<Msg[]>([])
   const [input, setInput] = useState('')
@@ -19,11 +32,17 @@ export default function AIChat() {
   // Load semantic memory (facts) and episodic memory from localStorage
   useEffect(() => {
     try {
-      const sem = localStorage.getItem('ai-semantic')
-      const epi = localStorage.getItem('ai-episodic')
+      const semEncoded = localStorage.getItem('ai-semantic')
+      const epiEncoded = localStorage.getItem('ai-episodic')
       const initial: Msg[] = []
-      if (sem) initial.push({ role: 'assistant', text: `Facts: ${sem}` })
-      if (epi) initial.push({ role: 'assistant', text: `Past: ${epi}` })
+      if (semEncoded) {
+        const sem = decodeData(semEncoded)
+        initial.push({ role: 'assistant', text: `Facts: ${sem}` })
+      }
+      if (epiEncoded) {
+        const epi = decodeData(epiEncoded)
+        initial.push({ role: 'assistant', text: `Past: ${epi}` })
+      }
       setMessages(initial)
     } catch (e) {}
   }, [])
@@ -34,11 +53,12 @@ export default function AIChat() {
     setMessages((m) => [...m, userMsg])
     setInput('')
 
-    // store to working memory (local for now)
+    // store to working memory (local for now) - encode the data
     try {
-      const current = JSON.parse(localStorage.getItem('ai-working') || '[]')
+      const workingEncoded = localStorage.getItem('ai-working')
+      const current = workingEncoded ? JSON.parse(decodeData(workingEncoded)) : []
       current.push({ role: 'user', text: input, created_at: new Date().toISOString() })
-      localStorage.setItem('ai-working', JSON.stringify(current))
+      localStorage.setItem('ai-working', encodeData(JSON.stringify(current)))
     } catch (e) {}
 
     if (!apiUrl) {
@@ -73,11 +93,12 @@ export default function AIChat() {
       const aiMsg: Msg = { role: 'assistant', text: reply, created_at: new Date().toISOString() }
       setMessages((m) => [...m, aiMsg])
 
-      // append to episodic memory (localStorage) for now
+      // append to episodic memory (localStorage) for now - encode the data
       try {
-        const epi = JSON.parse(localStorage.getItem('ai-episodic') || '[]')
+        const epiEncoded = localStorage.getItem('ai-episodic')
+        const epi = epiEncoded ? JSON.parse(decodeData(epiEncoded)) : []
         epi.push({ role: 'user', text: input, reply, created_at: aiMsg.created_at })
-        localStorage.setItem('ai-episodic', JSON.stringify(epi.slice(-200)))
+        localStorage.setItem('ai-episodic', encodeData(JSON.stringify(epi.slice(-200))))
       } catch (e) {}
     } catch (e) {
       setMessages((m) => [
@@ -112,7 +133,7 @@ export default function AIChat() {
           placeholder="Ask our companion..."
           className="flex-1 p-2 rounded bg-[var(--card-bg)]/60"
         />
-        <button onClick={send} className="glass-button px-3 py-1" disabled={loading}>
+        <button onClick={() => void send()} className="glass-button px-3 py-1" disabled={loading}>
           {loading ? 'Thinking…' : 'Send'}
         </button>
       </div>

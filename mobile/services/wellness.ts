@@ -27,17 +27,26 @@ export interface CycleLog {
   created_at: string
 }
 
-const localUserId = 'local-user'
+// Helper function to get authenticated user ID
+async function getUserId(): Promise<string> {
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) {
+    throw new Error('User not authenticated')
+  }
+  return user.id
+}
 
 export async function logMood(mood: MoodValue, note?: string) {
   if (!isSupabaseConfigured) {
     return null
   }
 
+  const userId = await getUserId()
+
   const { data, error } = await supabase
     .from('mood_logs')
     .insert({
-      user_id: localUserId,
+      user_id: userId,
       mood,
       note: note ?? null,
       created_at: new Date().toISOString(),
@@ -57,11 +66,12 @@ export async function getMoodHistory(days = 7): Promise<MoodLog[]> {
     return []
   }
 
+  const userId = await getUserId()
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
   const { data, error } = await supabase
     .from('mood_logs')
     .select('*')
-    .eq('user_id', localUserId)
+    .eq('user_id', userId)
     .gte('created_at', cutoff)
     .order('created_at', { ascending: false })
 
@@ -77,9 +87,11 @@ export async function logCare(type: CareType) {
     return null
   }
 
+  const userId = await getUserId()
+
   const { data, error } = await supabase
     .from('care_logs')
-    .insert({ user_id: localUserId, type, completed_at: new Date().toISOString() })
+    .insert({ user_id: userId, type, completed_at: new Date().toISOString() })
     .select('*')
     .single()
 
@@ -95,7 +107,8 @@ export async function getCareStats() {
     return { total: 0, percentage: 0, completed: 0 }
   }
 
-  const { data, error } = await supabase.from('care_logs').select('*').eq('user_id', localUserId)
+  const userId = await getUserId()
+  const { data, error } = await supabase.from('care_logs').select('*').eq('user_id', userId)
 
   if (error) {
     throw new Error(error.message)
@@ -117,10 +130,12 @@ export async function logCycle(startDate: string, endDate?: string, cycleLength?
     return null
   }
 
+  const userId = await getUserId()
+
   const { data, error } = await supabase
     .from('cycle_logs')
     .insert({
-      user_id: localUserId,
+      user_id: userId,
       start_date: startDate,
       end_date: endDate ?? null,
       cycle_length: cycleLength ?? null,
@@ -140,10 +155,11 @@ export async function predictCycle() {
     return null
   }
 
+  const userId = await getUserId()
   const { data, error } = await supabase
     .from('cycle_logs')
     .select('*')
-    .eq('user_id', localUserId)
+    .eq('user_id', userId)
     .order('start_date', { ascending: false })
     .limit(3)
 

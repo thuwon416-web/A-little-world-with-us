@@ -1,8 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
+import { z } from 'zod'
+
+// Rate limiting store (use Redis in production)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
+
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now()
+  const userLimit = rateLimitStore.get(userId)
+  
+  if (!userLimit || now > userLimit.resetTime) {
+    rateLimitStore.set(userId, { count: 1, resetTime: now + 60000 }) // 1 min window
+    return true
+  }
+  
+  if (userLimit.count >= 10) { // 10 requests per minute
+    return false
+  }
+  
+  userLimit.count++
+  return true
+}
+
+// Validation schema
+const dateIdeasSchema = z.object({
+  budget: z.string().optional(),
+  location: z.string().optional(),
+  interests: z.string().optional(),
+})
 
 export async function POST(req: NextRequest) {
   try {
-    const { budget, location, interests } = await req.json()
+    // 1. Session verification
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return req.cookies.getAll()
+          },
+          setAll() {
+            // Handle cookie updates if needed
+          },
+        },
+      }
+    )
+
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const userId = session.user.id
+
+    // 2. Rate limiting
+    if (!checkRateLimit(userId)) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Try again later.' },
+        { status: 429 }
+      )
+    }
+
+    // 3. Parse and validate request
+    const body = await req.json()
+    const validated = dateIdeasSchema.parse(body)
 
     const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY
     
@@ -61,7 +127,7 @@ export async function POST(req: NextRequest) {
             },
             {
               role: 'user',
-              content: `Budget: ${budget}, Location: ${location}, Interests: ${interests}`,
+              content: `Budget: ${validated.budget}, Location: ${validated.location}, Interests: ${validated.interests}`,
             },
           ],
           max_tokens: 800,
@@ -74,11 +140,19 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           contents: [{ 
             parts: [{ 
-              text: `Generate 5 creative date ideas. Return JSON array with: title, description, estimatedCost, duration. Be romantic and practical. Budget: ${budget}, Location: ${location}, Interests: ${interests}` 
+              text: `Generate 5 creative date ideas. Return JSON array with: title, description, estimatedCost, duration. Be romantic and practical. Budget: ${validated.budget}, Location: ${validated.location}, Interests: ${validated.interests}` 
             }] 
           }],
         }),
       })
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}))
+      return NextResponse.json(
+        { error: 'AI service unavailable', details: errorData },
+        { status: response.status }
+      )
     }
 
     const data = await response.json()
@@ -103,6 +177,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ dateIdeas })
 
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: error.issues },
+        { status: 400 }
+      )
+    }
+
     console.error('Date Ideas error:', error)
     return NextResponse.json({ error: 'Failed to generate date ideas' }, { status: 500 })
   }

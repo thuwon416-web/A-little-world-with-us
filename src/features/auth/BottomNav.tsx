@@ -19,6 +19,7 @@ import {
   Calendar,
   Lock,
   Settings,
+  DollarSign,
   X
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -38,6 +39,8 @@ const morePages = [
   { name: 'Plans', href: '/plans', icon: Calendar },
   { name: 'Vault', href: '/vault', icon: Lock },
   { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'Calendar', href: '/calendar', icon: Calendar },
+  { name: 'Finance', href: '/finance', icon: DollarSign },
   { name: 'About', href: '/about', icon: Info },
   { name: 'Help', href: '/help', icon: HelpCircle },
 ]

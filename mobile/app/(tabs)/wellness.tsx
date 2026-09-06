@@ -1,5 +1,5 @@
 import React, { useState, type ComponentType } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import AffirmationDeck from '@/components/wellness/AffirmationDeck'
 import ApologyCorner from '@/components/wellness/ApologyCorner'
@@ -80,116 +80,122 @@ type WellnessTabId =
 type WellnessTab = {
   id: WellnessTabId
   label: string
-  boards: ComponentType[]
+  boards: Array<{ id: string; component: ComponentType }>
 }
 
 const tabs: WellnessTab[] = [
   {
     id: 'affirmations',
     label: 'Affirmations',
-    boards: [AffirmationDeck, LoveNotesBoard, OpenWhenLetters, SecretLetterTray, SweetNoticesBoard],
+    boards: [
+      { id: 'affirmation-deck', component: AffirmationDeck },
+      { id: 'love-notes', component: LoveNotesBoard },
+      { id: 'open-when-letters', component: OpenWhenLetters },
+      { id: 'secret-letter-tray', component: SecretLetterTray },
+      { id: 'sweet-notices', component: SweetNoticesBoard },
+    ],
   },
   {
     id: 'apology',
     label: 'Apology',
     boards: [
-      ApologyCorner,
-      GentleHoldBoard,
-      GraceJournalBoard,
-      KindPivotBoard,
-      ReassuranceCounter,
-      SoftComfortBoard,
-      SoftRepairBoard,
-      TenderWithinBoard,
+      { id: 'apology-corner', component: ApologyCorner },
+      { id: 'gentle-hold', component: GentleHoldBoard },
+      { id: 'grace-journal', component: GraceJournalBoard },
+      { id: 'kind-pivot', component: KindPivotBoard },
+      { id: 'reassurance-counter', component: ReassuranceCounter },
+      { id: 'soft-comfort', component: SoftComfortBoard },
+      { id: 'soft-repair', component: SoftRepairBoard },
+      { id: 'tender-within', component: TenderWithinBoard },
     ],
   },
   {
     id: 'gratitude',
     label: 'Gratitude',
     boards: [
-      AppreciationJar,
-      CouplePromiseBoard,
-      GoldenLowBoard,
-      GratitudeWall,
-      HomeEnergyBoard,
-      KindnessRootsBoard,
-      SmallJoysBoard,
-      SweetDriftBoard,
-      WarmthLedgerBoard,
-      WarmWindowBoard,
+      { id: 'appreciation-jar', component: AppreciationJar },
+      { id: 'couple-promise', component: CouplePromiseBoard },
+      { id: 'golden-low', component: GoldenLowBoard },
+      { id: 'gratitude-wall', component: GratitudeWall },
+      { id: 'home-energy', component: HomeEnergyBoard },
+      { id: 'kindness-roots', component: KindnessRootsBoard },
+      { id: 'small-joys', component: SmallJoysBoard },
+      { id: 'sweet-drift', component: SweetDriftBoard },
+      { id: 'warmth-ledger', component: WarmthLedgerBoard },
+      { id: 'warm-window', component: WarmWindowBoard },
     ],
   },
   {
     id: 'mood',
     label: 'Mood',
     boards: [
-      CoupleMoodMeter,
-      DayEchoBoard,
-      GentleForecastBoard,
-      LightEchoBoard,
-      LoveCheckInBoard,
-      MellowBloomBoard,
-      QuietEmberBoard,
-      QuietSignalBoard,
-      SoftCurrentBoard,
-      SoftSignalBoard,
-      SteadyLandingBoard,
-      TenderDuskBoard,
+      { id: 'couple-mood-meter', component: CoupleMoodMeter },
+      { id: 'day-echo', component: DayEchoBoard },
+      { id: 'gentle-forecast', component: GentleForecastBoard },
+      { id: 'light-echo', component: LightEchoBoard },
+      { id: 'love-check-in', component: LoveCheckInBoard },
+      { id: 'mellow-bloom', component: MellowBloomBoard },
+      { id: 'quiet-ember', component: QuietEmberBoard },
+      { id: 'quiet-signal', component: QuietSignalBoard },
+      { id: 'soft-current', component: SoftCurrentBoard },
+      { id: 'soft-signal', component: SoftSignalBoard },
+      { id: 'steady-landing', component: SteadyLandingBoard },
+      { id: 'tender-dusk', component: TenderDuskBoard },
     ],
   },
   {
     id: 'connection',
     label: 'Connection',
     boards: [
-      EverydayRitualsBoard,
-      KindLanternBoard,
-      KindThreadBoard,
-      NestingRitualsBoard,
-      OpenHandBoard,
-      OpenPaceBoard,
-      PlayfulRitualsBoard,
-      RelationshipRitualsBoard,
-      SoftArcBoard,
-      SoftConnectionBoard,
-      SoftSafeBasisBoard,
-      SoftShelterBoard,
-      SteadyPresenceBoard,
-      TenderCompassBoard,
-      TenderSignpostBoard,
+      { id: 'everyday-rituals', component: EverydayRitualsBoard },
+      { id: 'kind-lantern', component: KindLanternBoard },
+      { id: 'kind-thread', component: KindThreadBoard },
+      { id: 'nesting-rituals', component: NestingRitualsBoard },
+      { id: 'open-hand', component: OpenHandBoard },
+      { id: 'open-pace', component: OpenPaceBoard },
+      { id: 'playful-rituals', component: PlayfulRitualsBoard },
+      { id: 'relationship-rituals', component: RelationshipRitualsBoard },
+      { id: 'soft-arc', component: SoftArcBoard },
+      { id: 'soft-connection', component: SoftConnectionBoard },
+      { id: 'soft-safe-basis', component: SoftSafeBasisBoard },
+      { id: 'soft-shelter', component: SoftShelterBoard },
+      { id: 'steady-presence', component: SteadyPresenceBoard },
+      { id: 'tender-compass', component: TenderCompassBoard },
+      { id: 'tender-signpost', component: TenderSignpostBoard },
     ],
   },
   {
     id: 'reflection',
     label: 'Reflection',
     boards: [
-      ArmchairMomentBoard,
-      CarefulQuietBoard,
-      GentleHorizonBoard,
-      MurmurBridgeBoard,
-      QuietHarborBoard,
-      QuietReturnBoard,
-      ShadedQuietBoard,
-      SlowArrivalBoard,
-      SoftPlanningBoard,
-      TenderLandingBoard,
-      ThoughtfulReflection,
-      WarmResetBoard,
+      { id: 'armchair-moment', component: ArmchairMomentBoard },
+      { id: 'careful-quiet', component: CarefulQuietBoard },
+      { id: 'gentle-horizon', component: GentleHorizonBoard },
+      { id: 'murmur-bridge', component: MurmurBridgeBoard },
+      { id: 'quiet-harbor', component: QuietHarborBoard },
+      { id: 'quiet-return', component: QuietReturnBoard },
+      { id: 'shaded-quiet', component: ShadedQuietBoard },
+      { id: 'slow-arrival', component: SlowArrivalBoard },
+      { id: 'soft-planning', component: SoftPlanningBoard },
+      { id: 'tender-landing', component: TenderLandingBoard },
+      { id: 'thoughtful-reflection', component: ThoughtfulReflection },
+      { id: 'warm-reset', component: WarmResetBoard },
     ],
   },
   {
     id: 'calm',
     label: 'Calm',
     boards: [
-      CozyReentryBoard,
-      EasyBreathBoard,
-      HoneyBreatheBoard,
-      QuietAnchorBoard,
-      QuietBloomBoard,
-      RestQuietBoard,
-      SilverBreathBoard,
-      SlowGardenBoard,
-      SoftBloomingBoard,
-      StillHushBoard,
+      { id: 'cozy-reentry', component: CozyReentryBoard },
+      { id: 'easy-breath', component: EasyBreathBoard },
+      { id: 'honey-breathe', component: HoneyBreatheBoard },
+      { id: 'quiet-anchor', component: QuietAnchorBoard },
+      { id: 'quiet-bloom', component: QuietBloomBoard },
+      { id: 'rest-quiet', component: RestQuietBoard },
+      { id: 'silver-breath', component: SilverBreathBoard },
+      { id: 'slow-garden', component: SlowGardenBoard },
+      { id: 'soft-blooming', component: SoftBloomingBoard },
+      { id: 'still-hush', component: StillHushBoard },
     ],
   },
 ]
@@ -223,13 +229,18 @@ export default function WellnessScreen() {
         })}
       </ScrollView>
 
-      <View style={styles.grid}>
-        {active.boards.map((Board, index) => (
-          <View key={`${active.id}-${index}`} style={styles.boardWrap}>
-            <Board />
+      <FlatList
+        data={active.boards}
+        keyExtractor={(item) => item.id}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        renderItem={({ item }) => (
+          <View key={item.id} style={styles.boardWrap}>
+            <item.component />
           </View>
-        ))}
-      </View>
+        )}
+        contentContainerStyle={styles.grid}
+      />
     </ScrollView>
   )
 }
@@ -280,10 +291,10 @@ const styles = StyleSheet.create({
     color: '#f5d5e5',
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
     marginTop: 12,
+  },
+  row: {
+    justifyContent: 'space-between',
   },
   boardWrap: {
     width: '48%',

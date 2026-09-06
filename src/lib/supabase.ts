@@ -123,11 +123,23 @@ export async function insertRow<T>(
   }
 }
 
-export async function deleteRow(table: string, id: string): Promise<boolean> {
+export async function deleteRow(table: string, id: string, userId?: string): Promise<boolean> {
   if (!isSupabaseConfigured) return false
 
   try {
-    const { error } = await supabase.from(table).delete().eq('id', id)
+    // Get user ID if not provided
+    const effectiveUserId = userId ?? await getCurrentUserId()
+    if (!effectiveUserId) {
+      return false
+    }
+
+    // Delete with ownership check - only delete if user_id matches
+    const { error } = await supabase
+      .from(table)
+      .delete()
+      .eq('id', id)
+      .eq('user_id', effectiveUserId)
+    
     if (error) {
       return false
     }

@@ -20,6 +20,13 @@ A premium minimalist app for two lives gracefully becoming one.
 - 🔐 PIN Lock & Security Features
 - 📱 PWA Support for offline access
 
+### New Features (Phase B)
+- 📅 **Shared Calendar** - Plan dates, anniversaries, and important events together
+- 📸 **Memory Lane** - "On this day" memories from previous years
+- 💕 **Mood Tracker** - Track and share your daily mood with your partner
+- 💰 **Financial Goals** - Save together for shared dreams and milestones
+- 💪 **Workout Together** - Stay fit as a couple with guided workouts
+
 ### Technical Features
 - ✅ Supabase (Auth, Database, Storage, Realtime)
 - ✅ Next.js 14 (App Router)
@@ -86,6 +93,46 @@ npm run dev
 
 6. Open http://localhost:3000
 
+## Mobile App
+
+The project includes a React Native mobile app in the `mobile/` folder.
+
+```bash
+cd mobile
+npm install
+npm start
+```
+
+Scan the QR code with Expo Go on your mobile device.
+
+## Testing
+
+```bash
+# Manual testing
+# See TESTING_MANUAL.md for comprehensive checklist
+
+# E2E tests
+npm run test:e2e
+
+# E2E tests with UI
+npm run test:e2e:ui
+
+# Linting
+npm run lint
+
+# Build
+npm run build
+```
+
+## Documentation
+
+- [Testing Guide](TESTING_MANUAL.md) - Manual testing checklist
+- [Bug Report Template](BUG_REPORT.md) - Report bugs and issues
+- [API Documentation](docs/API.md) - API routes and database schema
+- [User Guide](docs/USER_GUIDE.md) - How to use the app
+- [Deployment Guide](DEPLOYMENT.md) - Detailed deployment instructions
+- [Audit Report](AUDIT_REPORT.md) - Project audit findings
+
 ## Deployment
 
 ### Vercel
@@ -146,6 +193,20 @@ src/
 - Authentication required for all private routes
 - File upload validation (5MB limit, specific MIME types)
 
+## Contributing
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
 ## License
 
 Private - For personal use only
+
+## 💕 Made With Love
+
+Built for couples who believe that every day together is worth celebrating.
