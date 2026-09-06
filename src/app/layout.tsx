@@ -19,8 +19,10 @@ const descriptions = [
 ]
 
 const randomDescription = descriptions[Math.floor(Math.random() * descriptions.length)]
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export const metadata: Metadata = {
+  metadataBase: new URL(appUrl),
   title: 'A little world with us',
   description: randomDescription,
   manifest: '/manifest.json',
@@ -39,8 +41,6 @@ export const viewport: Viewport = {
   themeColor: '#FFB6C1',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

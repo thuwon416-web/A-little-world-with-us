@@ -1,4 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -52,24 +53,22 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const validated = notificationSchema.parse(body)
 
-    // 4. Save notification to database (if table exists)
-    try {
-      const { error } = await supabase
-        .from('notifications')
-        .insert({
-          user_id: userId, // Use session user ID instead of arbitrary userId from request
-          title: validated.title,
-          body: validated.body,
-          scheduled_at: validated.scheduledAt || new Date().toISOString(),
-        })
+    // 4. Save notification to database. A success response must mean it was persisted.
+    const { error: insertError } = await supabase
+      .from('notifications')
+      .insert({
+        user_id: userId,
+        title: validated.title,
+        body: validated.body,
+        scheduled_at: validated.scheduledAt || new Date().toISOString(),
+      })
 
-      if (error) {
-        // If table doesn't exist, log but don't fail - this is an optional feature
-        console.log('Notifications table may not exist:', error.message)
-      }
-    } catch (dbError) {
-      // Database error is not critical for this optional feature
-      console.log('Database error (optional feature):', dbError)
+    if (insertError) {
+      console.error('Unable to save notification:', insertError)
+      return NextResponse.json(
+        { error: 'Failed to save notification' },
+        { status: 500 }
+      )
     }
 
     return NextResponse.json({ success: true })

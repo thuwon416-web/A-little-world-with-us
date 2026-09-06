@@ -65,7 +65,10 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 # App (REQUIRED)
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-APP_PASSWORD=your-password
+
+# Rate limiting (REQUIRED in production)
+UPSTASH_REDIS_REST_URL=https://your-redis-instance.upstash.io
+UPSTASH_REDIS_REST_TOKEN=your-upstash-redis-token
 
 # Giphy API (for chat)
 NEXT_PUBLIC_GIPHY_API_KEY=your_giphy_api_key
@@ -83,8 +86,10 @@ VOYAGE_API_KEY=your_voyage_api_key
 CLOUDFLARE_API_KEY=your_cloudflare_api_key
 ```
 
-4. Run Supabase migrations:
-- Run all SQL files in `supabase/migrations/` in Supabase SQL Editor
+4. Set up Supabase:
+- Run the base schema SQL files in `supabase/schema/` that your project has not already applied.
+- Then run every SQL file in `supabase/migrations/` in filename order, including `20260102_add_user_settings_and_notifications.sql`.
+- Configure the production Site URL, approved redirect URLs, and the mobile deep-link redirect URL in Supabase Auth before deploying.
 
 5. Start dev server:
 ```bash
@@ -154,6 +159,8 @@ git push origin main
 - `NEXT_PUBLIC_SUPABASE_URL` 
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` 
 - `NEXT_PUBLIC_GIPHY_API_KEY` 
+- `UPSTASH_REDIS_REST_URL` (server-side)
+- `UPSTASH_REDIS_REST_TOKEN` (server-side)
 - `GEMINI_API_KEY` (server-side)
 - `OPENROUTER_API_KEY` (server-side)
 - ... (other AI API keys)

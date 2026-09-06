@@ -1,9 +1,15 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import bcrypt from 'bcrypt'
+import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 const SALT_ROUNDS = 10
+const pinRequestSchema = z.object({
+  action: z.enum(['hash', 'verify']),
+  pin: z.string().regex(/^\d{4}$/, 'PIN must be 4 digits'),
+})
 
 export async function POST(req: NextRequest) {
   try {
@@ -31,18 +37,9 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const body = await req.json()
-    const { action, pin } = body
+    const { action, pin } = pinRequestSchema.parse(await req.json())
 
     if (action === 'hash') {
-      // Hash a new PIN
-      if (!pin || pin.length !== 4) {
-        return NextResponse.json(
-          { error: 'PIN must be 4 digits' },
-          { status: 400 }
-        )
-      }
-
       const hashedPin = await bcrypt.hash(pin, SALT_ROUNDS)
 
       // Store the hashed PIN in user_settings
@@ -65,14 +62,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'verify') {
-      // Verify a PIN against the stored hash
-      if (!pin || pin.length !== 4) {
-        return NextResponse.json(
-          { error: 'PIN must be 4 digits' },
-          { status: 400 }
-        )
-      }
-
       const rateLimitResult = await checkRateLimit(`pin:${user.id}`, 5, 60000)
       if (!rateLimitResult.allowed) {
         return NextResponse.json(
@@ -105,6 +94,13 @@ export async function POST(req: NextRequest) {
     )
 
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: error.issues },
+        { status: 400 }
+      )
+    }
+
     console.error('PIN API error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

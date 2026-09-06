@@ -16,7 +16,8 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run dev',
+    // Invoke Next directly so Playwright can reliably own and stop the server on Windows.
+    command: 'npx next dev --port 3000',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

@@ -16,7 +16,6 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
   const [error, setError] = useState('')
   const [unlocking, setUnlocking] = useState(false)
   const [isSettingPin, setIsSettingPin] = useState(false)
-  const [isPinSet, setIsPinSet] = useState(false)
   const [loading, setLoading] = useState(true)
   const [particles, setParticles] = useState<
     { id: number; angle: number; distance: number; size: number }[]
@@ -47,7 +46,6 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
         .eq('user_id', user.id)
         .single()
 
-      setIsPinSet(!!data?.lock_pin_hash)
       if (!data?.lock_pin_hash) {
         setIsSettingPin(true)
       }
@@ -83,7 +81,6 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
         return
       }
 
-      setIsPinSet(true)
       setIsSettingPin(false)
       setPin('')
       setConfirmPin('')
