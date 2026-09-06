@@ -48,7 +48,7 @@ const infoNavItems = [
 ]
 
 const adminNavItems = [
-  { href: '/admin/locations', label: 'Location', icon: MapPin },
+  { href: '/location', label: 'Location', icon: MapPin },
 ]
 
 export default function Sidebar() {

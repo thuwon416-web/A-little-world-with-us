@@ -114,6 +114,18 @@ export async function shareLocation(point?: LocationPoint): Promise<boolean> {
     },
     { onConflict: 'user_id' }
   )
+  if (error) return false
 
-  return !error
+  // Keep the detailed route separate from the single latest-location row.
+  // The database retention job removes entries older than seven days.
+  await supabase.from('location_history').insert({
+    user_id: user.id,
+    couple_id: coupleId,
+    latitude: point.latitude,
+    longitude: point.longitude,
+    accuracy: point.accuracy,
+    captured_at: point.timestamp,
+  })
+
+  return true
 }

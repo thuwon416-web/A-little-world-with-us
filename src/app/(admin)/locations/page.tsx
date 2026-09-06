@@ -82,18 +82,22 @@ export default function AdminLocationsPage() {
       if (profilesError) throw profilesError
       setProfiles(profilesData || [])
 
-      // Load all locations
+      // `user_locations` is the canonical latest GPS row written by mobile.
       const { data: locationsData, error: locationsError } = await supabase
-        .from('locations')
+        .from('user_locations')
         .select('*')
-        .order('timestamp', { ascending: false })
-        .limit(1000)
+        .order('updated_at', { ascending: false })
 
       if (locationsError) throw locationsError
-      setLocations(locationsData || [])
+      const normalizedLocations = (locationsData || []).map((location) => ({
+        ...location,
+        timestamp: location.updated_at,
+        created_at: location.updated_at,
+      })) as Location[]
+      setLocations(normalizedLocations)
 
       // Group locations by user
-      const grouped = (locationsData || []).reduce((acc, loc) => {
+      const grouped = normalizedLocations.reduce((acc, loc) => {
         if (!acc[loc.user_id]) {
           acc[loc.user_id] = []
         }
@@ -114,6 +118,17 @@ export default function AdminLocationsPage() {
       setIsLoading(false)
     }
   }
+
+  useEffect(() => {
+    if (!isAdmin) return
+    const channel = supabase
+      .channel('admin-current-locations')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'user_locations' }, () => {
+        void loadAdminData()
+      })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [isAdmin])
 
   const selectedUserLocations = selectedUser ? userLocations[selectedUser] || [] : []
   const selectedProfile = profiles.find(p => p.id === selectedUser)

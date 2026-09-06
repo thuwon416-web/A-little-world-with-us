@@ -24,6 +24,8 @@
       "bundleIdentifier": "com.alittleworldwithus.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Allow live location sharing with your partner.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow background location updates for the shared safety map.",
+        "UIBackgroundModes": ["location"],
         "NSCameraUsageDescription": "Allow video calls and media capture.",
         "NSMicrophoneUsageDescription": "Allow voice notes and audio calls."
       }
@@ -39,6 +41,9 @@
         "INTERNET",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
+        "ACCESS_BACKGROUND_LOCATION",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_LOCATION",
         "CAMERA",
         "RECORD_AUDIO",
         "POST_NOTIFICATIONS"
