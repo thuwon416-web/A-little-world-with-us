@@ -20,7 +20,6 @@ import {
   Settings,
   Sparkles,
   Star,
-  Shield,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { supabase } from '@/lib/supabase'
@@ -49,8 +48,7 @@ const infoNavItems = [
 ]
 
 const adminNavItems = [
-  { href: '/location', label: 'Location', icon: MapPin },
-  { href: '/admin/locations', label: 'Admin Location', icon: Shield },
+  { href: '/admin/locations', label: 'Location', icon: MapPin },
 ]
 
 export default function Sidebar() {
