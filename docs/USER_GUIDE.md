@@ -137,6 +137,36 @@ View memories from this day in previous years:
 3. Select workout
 4. Click "Complete Workout"
 
+### Wellness Boards
+
+**Mobile App:**
+- 20 wellness boards available
+- Scroll horizontally to select
+- Tap to open board
+- Only loads when selected (fast!)
+
+**Available Boards:**
+1. Affirmations ✨
+2. Apology Corner 🤝
+3. Appreciation Jar 🫙
+4. Couple Mood Meter 😊
+5. Promise Board 💍
+6. Everyday Rituals 🌅
+7. Easy Breath 🧘
+8. Gentle Hold 🤗
+9. Gentle Forecast 🌤️
+10. Careful Quiet 🤫
+11. Day Echo 🔊
+12. Cozy Reentry 🏠
+13. Armchair Moment 🪑
+14. Gratitude Wall 🙏
+15. Love Notes 💕
+16. Reassurance Counter 💚
+17. Golden Low 🌅
+18. Love Check-in ❤️
+19. Mellow Bloom 🌸
+20. Steady Landing 🛬
+
 ### AI Features
 
 #### Chat with AI
