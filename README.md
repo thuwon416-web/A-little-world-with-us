@@ -91,7 +91,7 @@ AI provider keys are server-side secrets. The AI chat endpoint automatically tri
 
 4. Set up Supabase:
 - Run the base schema SQL files in `supabase/schema/` that your project has not already applied.
-- Then run every SQL file in `supabase/migrations/` in filename order, including `20260102_add_user_settings_and_notifications.sql`.
+- Then run every SQL file in `supabase/migrations/` in filename order, including the location/admin/care migrations through `20260105_make_daily_care_logs_unique.sql`.
 - Configure the production Site URL, approved redirect URLs, and the mobile deep-link redirect URL in Supabase Auth before deploying.
 
 5. Start dev server:

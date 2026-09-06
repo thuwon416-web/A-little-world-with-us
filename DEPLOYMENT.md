@@ -70,10 +70,20 @@ In Vercel dashboard → Settings → Environment Variables, add:
 
 ## Step 4: Setup Database
 
-1. Go to your Supabase project
-2. Navigate to SQL Editor
-3. Run the migration file: `supabase/migrations/20260101_setup.sql`
-4. Verify tables are created
+1. Go to your Supabase project and open SQL Editor.
+2. Apply any required base schema files from `supabase/schema/` first. For the current features, this includes `couple-linking.sql` and `care-daily-logs-phase15.sql`.
+3. Run every migration below in filename order:
+
+   ```text
+   20260101_setup.sql
+   20260102_add_user_settings_and_notifications.sql
+   20260103_add_couple_location_sharing.sql
+   20260104_designate_thuwon_admin.sql
+   20260105_make_daily_care_logs_unique.sql
+   ```
+
+4. Sign out and sign back in as `thuwon416@gmail.com` after migration `20260104` to refresh its admin role.
+5. Verify the `profiles`, `couple_links`, `care_daily_logs`, `user_locations`, `user_settings`, and `notifications` tables exist before testing the app.
 
 ## Step 5: Custom Domain (Optional)
 
