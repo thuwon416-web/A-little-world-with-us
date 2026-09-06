@@ -90,8 +90,7 @@
 ## ✅ Documentation
 
 - [ ] README.md is comprehensive
-- [ ] DEPLOYMENT_GUIDE.md is complete
-- [ ] ENVIRONMENT_SETUP.md is complete
+- [ ] README.md and DEPLOYMENT.md setup steps are complete
 - [ ] PRODUCTION_CHECKLIST.md is complete
 - [ ] Known issues documented
 - [ ] Setup instructions clear

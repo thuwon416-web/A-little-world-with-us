@@ -132,11 +132,9 @@ npm run build
 ## Documentation
 
 - [Testing Guide](TESTING_MANUAL.md) - Manual testing checklist
-- [Bug Report Template](BUG_REPORT.md) - Report bugs and issues
 - [API Documentation](docs/API.md) - API routes and database schema
 - [User Guide](docs/USER_GUIDE.md) - How to use the app
 - [Deployment Guide](DEPLOYMENT.md) - Detailed deployment instructions
-- [Audit Report](AUDIT_REPORT.md) - Project audit findings
 
 ## Deployment
 

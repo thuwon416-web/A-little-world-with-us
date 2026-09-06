@@ -9,9 +9,9 @@
 
 ## Step 1: Prepare Environment Variables
 
-1. Copy `.env.production.example` to `.env.production`
-2. Fill in all required values with your production credentials
-3. **Do not commit `.env.production` to git**
+1. Copy `.env.example` to `.env.production` (or enter its values in your hosting dashboard).
+2. Fill in the required values with your production credentials, including the Upstash Redis variables.
+3. **Do not commit `.env.production` to git**.
 
 ## Step 2: Push to GitHub
 
