@@ -86,7 +86,6 @@ create table if not exists financial_goals (
 create index if not exists memories_user_id_idx on memories(user_id);
 create index if not exists goals_user_id_idx on goals(user_id);
 create index if not exists messages_sender_id_idx on messages(sender_id);
-create index if not exists messages_receiver_id_idx on messages(receiver_id);
 create index if not exists todos_user_id_idx on todos(user_id);
 create index if not exists calendar_events_user_id_idx on calendar_events(user_id);
 create index if not exists calendar_events_date_idx on calendar_events(date);
