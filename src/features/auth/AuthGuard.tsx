@@ -18,12 +18,12 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const syncSession = async () => {
       const {
-        data: { session },
-      } = await supabase.auth.getSession()
+        data: { user },
+      } = await supabase.auth.getUser()
 
       if (!mounted) return
 
-      if (!session) {
+      if (!user) {
         router.replace('/login')
         return
       }

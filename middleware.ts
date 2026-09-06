@@ -31,11 +31,11 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Get session
-  const { data: { session } } = await supabase.auth.getSession()
+  // Get user
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Check if user is authenticated
-  const isAuthenticated = !!session
+  const isAuthenticated = !!user
 
   const pathname = request.nextUrl.pathname
 
