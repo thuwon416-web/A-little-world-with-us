@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { X, Check, Droplets, Thermometer, Scale, Activity, Coffee } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { saveDailyLog, type DailyLog } from '@/lib/care-data'
+import { getActiveCareCoupleLinkId, saveDailyLog, type DailyLog } from '@/lib/care-data'
 
 interface DailyLogModalProps {
   isOpen: boolean
@@ -30,7 +30,10 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
     { emoji: '😐', label: 'Calm', labelMy: 'ငြိမ်သက်' },
     { emoji: '😊', label: 'Happy', labelMy: 'ပျော်ရွှင်' },
     { emoji: '⚡', label: 'Energetic', labelMy: 'စွမ်းအားတော်' },
+    { emoji: '😜', label: 'Frisky', labelMy: 'စိတ်လှုပ်ရှား' },
     { emoji: '🥺', label: 'Sad', labelMy: 'စိတ်ညစ်' },
+    { emoji: '😟', label: 'Anxious', labelMy: 'စိုးရိမ်' },
+    { emoji: '😶', label: 'Mood swings', labelMy: 'စိတ်အပြောင်းအလဲ' },
     { emoji: '😡', label: 'Irritated', labelMy: 'စိတ်ဒေါသ' },
   ]
 
@@ -42,17 +45,26 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
     { icon: '😴', label: 'Fatigue', labelMy: 'ပင်နိုင်း' },
     { icon: '🌙', label: 'Insomnia', labelMy: 'မအိပ်ရ' },
     { icon: '🎈', label: 'Bloating', labelMy: 'ဖောရောင်' },
+    { icon: '🩸', label: 'Spotting', labelMy: 'သွေးစက်' },
+    { icon: '🔥', label: 'Hot flashes', labelMy: 'ကိုယ်ပူ' },
+    { icon: '💧', label: 'Vaginal dryness', labelMy: 'ခြောက်သွေ့' },
+    { icon: '⚡', label: 'Abdominal pain', labelMy: 'ဗိုက်နာ' },
   ]
 
   const sexOptions = [
-    "Didn&apos;t have sex",
+    "Didn't have sex",
     'Protected sex',
     'Unprotected sex',
     'Oral sex',
     'Anal sex',
     'Masturbation',
+    'Sensual touch',
+    'Sex toys',
     'Orgasm',
+    'No orgasm',
     'High sex drive',
+    'Neutral sex drive',
+    'Low sex drive',
   ]
 
   const activityOptions = [
@@ -71,6 +83,10 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
     'Journaling',
     'Alcohol',
   ]
+
+  const dischargeOptions = ['No discharge', 'Creamy', 'Watery', 'Sticky', 'Egg white', 'Spotting', 'Unusual']
+  const digestionOptions = ['Nausea', 'Bloating', 'Constipation', 'Diarrhea']
+  const pregnancyTestOptions = ['Did not take test', 'Positive pregnancy test', 'Negative pregnancy test', 'Faint line']
 
   const toggleArray = (array: string[], value: string, setter: (arr: string[]) => void) => {
     if (array.includes(value)) {
@@ -94,6 +110,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
       // Prepare log data
       const logData: DailyLog = {
         user_id: user.id,
+        couple_id: await getActiveCareCoupleLinkId(user.id),
         log_date: (selectedDate || new Date()).toISOString().split('T')[0],
         mood: mood || undefined,
         symptoms: symptoms.length > 0 ? symptoms : undefined,
@@ -215,6 +232,10 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
               ))}
             </div>
           </div>
+
+          <TagSection title="Discharge" options={dischargeOptions} selected={other} onToggle={(value) => toggleArray(other, value, setOther)} prefix="Discharge: " />
+          <TagSection title="Digestion & stool" options={digestionOptions} selected={other} onToggle={(value) => toggleArray(other, value, setOther)} prefix="Digestion: " />
+          <TagSection title="Pregnancy test" options={pregnancyTestOptions} selected={other} onToggle={(value) => toggleArray(other, value, setOther)} prefix="Pregnancy test: " />
 
           {/* Medication (OC) */}
           <div>
@@ -407,6 +428,20 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
             )}
           </button>
         </div>
+      </div>
+    </div>
+  )
+}
+
+function TagSection({ title, options, selected, onToggle, prefix }: { title: string; options: string[]; selected: string[]; onToggle: (value: string) => void; prefix: string }) {
+  return (
+    <div>
+      <h3 className="mb-3 text-sm font-medium text-[var(--text-primary)]">{title}</h3>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => {
+          const value = `${prefix}${option}`
+          return <button key={option} type="button" onClick={() => onToggle(value)} className={`rounded-full border-2 px-4 py-2 text-sm transition ${selected.includes(value) ? 'border-violet-500 bg-violet-500/10 text-violet-600' : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'}`}>{option}</button>
+        })}
       </div>
     </div>
   )

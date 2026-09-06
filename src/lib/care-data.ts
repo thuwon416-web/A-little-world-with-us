@@ -18,6 +18,18 @@ export interface DailyLog {
   other_tags?: string[]
 }
 
+export async function getActiveCareCoupleLinkId(userId: string): Promise<string | undefined> {
+  const { data, error } = await supabase
+    .from('couple_links')
+    .select('id')
+    .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+    .eq('status', 'accepted')
+    .maybeSingle()
+
+  if (error) throw error
+  return data?.id
+}
+
 export interface CycleData {
   last_period_start: string | null
   average_cycle_length: number
@@ -39,7 +51,7 @@ export async function saveDailyLog(log: DailyLog) {
         ...log,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-      })
+      }, { onConflict: 'user_id,log_date' })
       .select()
       .single()
 
@@ -52,14 +64,14 @@ export async function saveDailyLog(log: DailyLog) {
 }
 
 /**
- * Fetch daily logs for a user
+ * Fetch every Care log visible to the signed-in account. RLS limits this to
+ * the account's own logs and its accepted partner's logs.
  */
-export async function getDailyLogs(userId: string, startDate?: string, endDate?: string) {
+export async function getDailyLogs(_userId: string, startDate?: string, endDate?: string) {
   try {
     let query = supabase
       .from('care_daily_logs')
       .select('*')
-      .eq('user_id', userId)
       .order('log_date', { ascending: false })
 
     if (startDate) {
