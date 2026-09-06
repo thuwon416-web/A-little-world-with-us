@@ -1,26 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
-
-// Rate limiting store (use Redis in production)
-const rateLimitStore = new Map<string, { count: number; resetTime: number }>()
-
-function checkRateLimit(userId: string): boolean {
-  const now = Date.now()
-  const userLimit = rateLimitStore.get(userId)
-  
-  if (!userLimit || now > userLimit.resetTime) {
-    rateLimitStore.set(userId, { count: 1, resetTime: now + 60000 }) // 1 min window
-    return true
-  }
-  
-  if (userLimit.count >= 10) { // 10 requests per minute
-    return false
-  }
-  
-  userLimit.count++
-  return true
-}
+import { checkRateLimit } from '@/lib/rate-limit'
 
 // Validation schema
 const chatSchema = z.object({
@@ -183,7 +164,8 @@ export async function POST(req: NextRequest) {
     const userId = user.id
 
     // 2. Rate limiting
-    if (!checkRateLimit(userId)) {
+    const rateLimitResult = await checkRateLimit(userId, 10, 60000)
+    if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Try again later.' },
         { status: 429 }
