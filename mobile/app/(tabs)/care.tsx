@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+import { saveTodayCareLog } from '@/services/care'
 
 const quickActions = [
   ['🩸', 'Log period'],
@@ -11,11 +13,24 @@ const symptoms = ['Cramps', 'Headache', 'Fatigue', 'Cravings', 'Mood swings', 'B
 
 export default function CareScreen() {
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
+  const [saving, setSaving] = useState(false)
 
   const toggleSymptom = (symptom: string) => {
     setSelectedSymptoms((current) => current.includes(symptom)
       ? current.filter((item) => item !== symptom)
       : [...current, symptom])
+  }
+
+  const saveCheckIn = async (periodStarted = false) => {
+    try {
+      setSaving(true)
+      await saveTodayCareLog(selectedSymptoms, periodStarted)
+      Alert.alert('Saved', 'Your private daily check-in has been saved.')
+    } catch (error) {
+      Alert.alert('Unable to save', error instanceof Error ? error.message : 'Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -32,7 +47,7 @@ export default function CareScreen() {
 
       <View style={styles.actions}>
         {quickActions.map(([icon, label]) => (
-          <TouchableOpacity key={label} style={styles.action} onPress={() => Alert.alert(label, 'Your daily log is ready to record this privately.')}>
+          <TouchableOpacity key={label} style={styles.action} onPress={() => void saveCheckIn(label === 'Log period')}>
             <View style={styles.actionIcon}><Text style={styles.actionEmoji}>{icon}</Text></View>
             <Text style={styles.actionLabel}>{label}</Text>
           </TouchableOpacity>
@@ -55,7 +70,7 @@ export default function CareScreen() {
             return <TouchableOpacity key={symptom} onPress={() => toggleSymptom(symptom)} style={[styles.chip, selected && styles.chipSelected]}><Text style={[styles.chipText, selected && styles.chipTextSelected]}>{symptom}</Text></TouchableOpacity>
           })}
         </View>
-        <TouchableOpacity style={styles.saveButton} onPress={() => Alert.alert('Saved', 'Your private daily check-in was saved.')}><Text style={styles.saveText}>Save today&apos;s check-in</Text></TouchableOpacity>
+        <TouchableOpacity disabled={saving} style={[styles.saveButton, saving && styles.saveButtonDisabled]} onPress={() => void saveCheckIn()}>{saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save today&apos;s check-in</Text>}</TouchableOpacity>
       </View>
     </ScrollView>
   )
@@ -67,5 +82,5 @@ const styles = StyleSheet.create({
   hero: { marginTop: 18, borderRadius: 28, padding: 28, alignItems: 'center', backgroundColor: '#fff0ed' }, heroLabel: { color: '#967d84', fontSize: 11, fontWeight: '800', letterSpacing: 1.5 }, days: { color: '#241d22', fontWeight: '800', fontSize: 46, marginTop: 8 }, heroNote: { color: '#4c3c42', fontSize: 15, fontWeight: '600', marginTop: 12 }, disclaimer: { color: '#85747a', fontSize: 11, marginTop: 8 },
   actions: { flexDirection: 'row', justifyContent: 'space-around', marginVertical: 24 }, action: { alignItems: 'center', width: 92 }, actionIcon: { width: 58, height: 58, alignItems: 'center', justifyContent: 'center', borderRadius: 29, backgroundColor: '#fff', shadowColor: '#dba9b3', shadowOpacity: .2, shadowRadius: 10, elevation: 2 }, actionEmoji: { fontSize: 25 }, actionLabel: { color: '#3a2a31', fontSize: 12, fontWeight: '600', marginTop: 9, textAlign: 'center' },
   card: { backgroundColor: '#fff', borderRadius: 22, padding: 18, marginBottom: 16, borderWidth: 1, borderColor: '#f0e4e2' }, cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }, cardTitle: { color: '#241d22', fontSize: 19, fontWeight: '800' }, link: { color: '#ef5d85', fontWeight: '700' }, currentCycle: { color: '#241d22', fontSize: 16, fontWeight: '700', marginTop: 18 }, muted: { color: '#8c7b80', fontSize: 13, marginTop: 5 }, dots: { flexDirection: 'row', gap: 4, marginTop: 16 }, dot: { flex: 1, height: 8, borderRadius: 5 }, periodDot: { backgroundColor: '#ff5d89' }, fertileDot: { backgroundColor: '#a9ddd8' }, neutralDot: { backgroundColor: '#eee9e8' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 }, chip: { borderRadius: 20, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: '#fff1f3' }, chipSelected: { backgroundColor: '#ff5d89' }, chipText: { color: '#6e5960', fontWeight: '600', fontSize: 13 }, chipTextSelected: { color: '#fff' }, saveButton: { marginTop: 18, alignItems: 'center', borderRadius: 16, backgroundColor: '#ff5d89', paddingVertical: 14 }, saveText: { color: '#fff', fontWeight: '800' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 }, chip: { borderRadius: 20, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: '#fff1f3' }, chipSelected: { backgroundColor: '#ff5d89' }, chipText: { color: '#6e5960', fontWeight: '600', fontSize: 13 }, chipTextSelected: { color: '#fff' }, saveButton: { marginTop: 18, alignItems: 'center', borderRadius: 16, backgroundColor: '#ff5d89', paddingVertical: 14 }, saveButtonDisabled: { opacity: .6 }, saveText: { color: '#fff', fontWeight: '800' },
 })
