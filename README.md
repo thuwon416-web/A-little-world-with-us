@@ -84,7 +84,10 @@ COHERE_API_KEY=your_cohere_api_key
 GROQ_API_KEY=your_groq_api_key
 VOYAGE_API_KEY=your_voyage_api_key
 CLOUDFLARE_API_KEY=your_cloudflare_api_key
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
 ```
+
+AI provider keys are server-side secrets. The AI chat endpoint automatically tries configured providers in this order: Groq, Gemini, OpenRouter, Mistral, Cohere, Cerebras, NVIDIA, Hugging Face, then Cloudflare Workers AI. Canva and Voyage are not used.
 
 4. Set up Supabase:
 - Run the base schema SQL files in `supabase/schema/` that your project has not already applied.
