@@ -2,11 +2,13 @@ import { Redirect, Tabs } from 'expo-router'
 import { Text } from 'react-native'
 
 import { useAuth } from '@/lib/auth'
+import { useAdmin } from '@/hooks/useAdmin'
 
 export default function TabsLayout() {
   const { user, loading } = useAuth()
+  const { isAdmin, loading: adminLoading } = useAdmin()
 
-  if (loading) {
+  if (loading || adminLoading) {
     return null
   }
 
@@ -48,7 +50,15 @@ export default function TabsLayout() {
         name="location"
         options={{
           title: 'Location',
+          href: isAdmin ? undefined : null,
           tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>📍</Text>,
+        }}
+      />
+      <Tabs.Screen
+        name="care"
+        options={{
+          title: 'Care',
+          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>🌷</Text>,
         }}
       />
       <Tabs.Screen

@@ -74,94 +74,51 @@ export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) 
   }
 
   return (
-    <div className="space-y-6">
-      {/* Period Countdown */}
-      <div className="text-center p-6 bg-gradient-to-r from-rose-600 to-pink-600 rounded-xl">
-        <h2 className="text-4xl font-bold text-white">
-          Period in {daysUntilPeriod} days
-        </h2>
-        <p className="text-white/80 mt-2">
-          {cycleData?.last_period_start
-            ? `Last period: ${new Date(cycleData.last_period_start).toLocaleDateString()}`
-            : 'No period data yet'}
+    <div className="space-y-5 rounded-[28px] bg-[#fff8f6] p-4 text-[#241d22] shadow-sm sm:p-6">
+      <section className="rounded-[24px] bg-[radial-gradient(circle_at_top_right,_#fde1db,_transparent_52%),linear-gradient(145deg,_#fffdfc,_#fff1ee)] px-5 py-8 text-center">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8b767b]">Today&apos;s cycle</p>
+        <p className="mt-3 text-lg font-semibold">Period in</p>
+        <h2 className="mt-1 text-5xl font-bold tracking-tight">{daysUntilPeriod} days</h2>
+        <p className="mt-4 text-sm text-[#62545a]">
+          {riskLevel} estimated chance of pregnancy · predictions are not medical advice
         </p>
-      </div>
+      </section>
 
-      {/* Risk Level */}
-      <div className={`p-4 rounded-lg ${
-        riskLevel === 'Low' ? 'bg-green-600/20 border border-green-600' :
-        riskLevel === 'Medium' ? 'bg-yellow-600/20 border border-yellow-600' :
-        'bg-red-600/20 border border-red-600'
-      }`}>
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">
-            {riskLevel === 'Low' ? '🟢' : riskLevel === 'Medium' ? '🟡' : '🔴'}
-          </span>
+      <section className="grid grid-cols-3 gap-3 text-center">
+        {[
+          ['🩸', 'Log period'],
+          ['＋', 'Symptoms'],
+          ['♡', 'Intimacy'],
+        ].map(([icon, label]) => (
+          <button key={label} type="button" onClick={() => onOpenDailyLog?.()} className="group flex flex-col items-center gap-2 rounded-3xl py-2 text-sm font-medium hover:bg-[#fff0f2]">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white text-2xl shadow-sm ring-1 ring-[#f2dddd] transition group-hover:scale-105">{icon}</span>
+            {label}
+          </button>
+        ))}
+      </section>
+
+      <section className="overflow-hidden rounded-3xl border border-[#f0e5e2] bg-white">
+        <div className="flex items-center justify-between border-b border-[#f4ebea] px-5 py-4">
+          <h3 className="text-lg font-bold">Cycle history</h3>
+          <span className="text-sm font-medium text-[#ef5d85]">Your data</span>
+        </div>
+        <div className="space-y-4 px-5 py-4">
           <div>
-            <p className="font-semibold">
-              {riskLevel === 'Low' ? 'Low' : riskLevel === 'Medium' ? 'Medium' : 'High'} chances of getting pregnant
-            </p>
-            <p className="text-xs mt-1 opacity-80">
-              ⚠️ <strong>Important:</strong> This is an estimate based on your logged cycle data.
-              <br />
-              For pregnancy planning or contraception, please consult a healthcare provider.
-              <br />
-              Cycle predictions may vary due to stress, illness, or lifestyle changes.
-            </p>
+            <div className="flex justify-between text-sm"><span className="font-semibold">Current cycle</span><span>Day {Math.max(1, (cycleData?.average_cycle_length || 28) - daysUntilPeriod)}</span></div>
+            <div className="mt-3 flex gap-1">{Array.from({ length: 28 }, (_, index) => <span key={index} className={`h-2 flex-1 rounded-full ${index < 5 ? 'bg-[#ff5d89]' : index < 15 ? 'bg-[#a9ddd8]' : 'bg-[#eee9e8]'}`} />)}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 border-t border-[#f4ebea] pt-4 text-sm">
+            <div><p className="text-[#83757a]">Average cycle</p><p className="mt-1 text-xl font-bold">{cycleData?.average_cycle_length || 28} days</p></div>
+            <div><p className="text-[#83757a]">Next period</p><p className="mt-1 text-sm font-semibold">{cycleData?.next_period_start ? new Date(cycleData.next_period_start).toLocaleDateString() : 'Log a period to predict'}</p></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Quick Actions */}
-      <div className="flex justify-center gap-4">
-        <button
-          onClick={() => onOpenDailyLog?.()}
-          className="w-20 h-20 rounded-full bg-rose-600 hover:bg-rose-700 flex flex-col items-center justify-center text-white transition"
-        >
-          <span className="text-2xl">🩸</span>
-          <span className="text-xs mt-1">Log Period</span>
-        </button>
-        <button
-          onClick={() => onOpenDailyLog?.()}
-          className="w-20 h-20 rounded-full bg-purple-600 hover:bg-purple-700 flex flex-col items-center justify-center text-white transition"
-        >
-          <span className="text-2xl">➕</span>
-          <span className="text-xs mt-1">Symptoms</span>
-        </button>
-        <button
-          onClick={() => onOpenDailyLog?.()}
-          className="w-20 h-20 rounded-full bg-pink-600 hover:bg-pink-700 flex flex-col items-center justify-center text-white transition"
-        >
-          <span className="text-2xl">❤️</span>
-          <span className="text-xs mt-1">Sex</span>
-        </button>
-      </div>
-
-      {/* Insights Carousel */}
-      <div className="flex overflow-x-auto gap-4 pb-2">
-        <div className="p-4 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg min-w-[200px] text-white">
-          <p className="font-semibold">Cycle Length</p>
-          <p className="text-2xl font-bold mt-1">
-            {cycleData?.average_cycle_length || 28} days
-          </p>
-        </div>
-        <div className="p-4 bg-gradient-to-r from-rose-600 to-orange-600 rounded-lg min-w-[200px] text-white">
-          <p className="font-semibold">Next Period</p>
-          <p className="text-2xl font-bold mt-1">
-            {cycleData?.next_period_start
-              ? new Date(cycleData.next_period_start).toLocaleDateString()
-              : 'Unknown'}
-          </p>
-        </div>
-        <div className="p-4 bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg min-w-[200px] text-white">
-          <p className="font-semibold">Fertile Window</p>
-          <p className="text-sm font-bold mt-1">
-            {cycleData?.fertile_window_start && cycleData?.fertile_window_end
-              ? `${new Date(cycleData.fertile_window_start).toLocaleDateString()} - ${new Date(cycleData.fertile_window_end).toLocaleDateString()}`
-              : 'Calculating...'}
-          </p>
-        </div>
-      </div>
+      <section className="rounded-3xl border border-[#f0e5e2] bg-white p-5">
+        <h3 className="text-lg font-bold">Daily check-in</h3>
+        <p className="mt-1 text-sm text-[#75676d]">Log mood, symptoms, notes, and anything you would like to remember.</p>
+        <button type="button" onClick={() => onOpenDailyLog?.()} className="mt-4 w-full rounded-2xl bg-[#ff5d89] px-4 py-3 font-semibold text-white transition hover:bg-[#ed4e7a]">Open today&apos;s log</button>
+      </section>
     </div>
   )
 }

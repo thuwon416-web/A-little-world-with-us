@@ -1,21 +1,51 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { MapPin, Navigation, ShieldCheck, Users } from 'lucide-react'
 import LocationHistory from '@/components/location/LocationHistory'
 import SafeZones from '@/components/location/SafeZones'
+import { supabase } from '@/lib/supabase'
 
 const partnerLocation = { lat: 13.7563, lng: 100.5018 }
 const currentLocation = { lat: 13.7588, lng: 100.4945 }
 
 export default function LocationPage() {
+  const router = useRouter()
   const [sharingEnabled, setSharingEnabled] = useState(true)
+  const [authorized, setAuthorized] = useState(false)
+
+  useEffect(() => {
+    const verifyAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.replace('/login')
+        return
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (profile?.role !== 'admin') {
+        router.replace('/dashboard')
+        return
+      }
+      setAuthorized(true)
+    }
+
+    void verifyAdmin()
+  }, [router])
 
   const distanceKm = useMemo(() => {
     const latDelta = Math.abs(currentLocation.lat - partnerLocation.lat)
     const lngDelta = Math.abs(currentLocation.lng - partnerLocation.lng)
     return (Math.sqrt(latDelta * latDelta + lngDelta * lngDelta) * 111.32).toFixed(1)
   }, [])
+
+  if (!authorized) return null
 
   return (
     <div className="space-y-6">

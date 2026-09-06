@@ -1,6 +1,8 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
+import { Redirect } from 'expo-router'
 
+import { useAdmin } from '@/hooks/useAdmin'
 import { useLocation } from '@/hooks/useLocation'
 
 const DEFAULT_REGION = {
@@ -11,6 +13,7 @@ const DEFAULT_REGION = {
 }
 
 export default function LocationScreen() {
+  const { isAdmin, loading: adminLoading } = useAdmin()
   const {
     currentLocation,
     partnerLocation,
@@ -34,6 +37,9 @@ export default function LocationScreen() {
   const handleToggle = async () => {
     await toggleSharing(!isSharing)
   }
+
+  if (adminLoading) return null
+  if (!isAdmin) return <Redirect href="/(tabs)" />
 
   return (
     <View style={styles.container}>
