@@ -7,6 +7,7 @@ import {
   sendLocalNotification,
   type Reminder,
 } from '@/services/notifications'
+import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 export function useNotifications() {
   const [permissionStatus, setPermissionStatus] = useState<string>('unknown')
@@ -21,6 +22,24 @@ export function useNotifications() {
       const nextToken = await registerForPushNotifications()
       if (nextToken) {
         setToken(nextToken)
+      }
+
+      if (isSupabaseConfigured) {
+        const { data: authData } = await supabase.auth.getUser()
+        const user = authData.user
+        if (user) {
+          const { data: link } = await supabase
+            .from('couple_links')
+            .select('couple_id')
+            .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+            .eq('status', 'accepted')
+            .not('couple_id', 'is', null)
+            .maybeSingle()
+          if (link?.couple_id) {
+            const { data } = await supabase.from('reminders').select('*').eq('couple_id', link.couple_id).order('scheduled_at', { ascending: true })
+            setReminders((data ?? []) as Reminder[])
+          }
+        }
       }
     }
 

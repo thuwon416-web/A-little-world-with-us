@@ -7,7 +7,7 @@ interface Message {
   id: string
   content: string | null
   sender_id: string
-  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location'
+  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location' | 'sos'
   media_url: string | null
   media_duration: number | null
   encrypted: boolean

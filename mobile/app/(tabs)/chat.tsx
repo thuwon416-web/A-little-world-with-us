@@ -1,7 +1,8 @@
 import { Q } from '@nozbe/watermelondb'
 import { useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import * as Location from 'expo-location'
+import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { Button } from '@/components/Button'
 import { ChatBubble } from '@/components/ChatBubble'
@@ -35,7 +36,7 @@ export default function ChatScreen() {
   const { status, isOffline, pendingCount, refresh } = useSync()
   const { state: callState, placeCall } = useCall()
   const [draft, setDraft] = useState('')
-  const [messages, setMessages] = useState<any[]>([])
+  const [messages, setMessages] = useState<Array<{ id: string; sender: 'me' | 'them'; text: string; time: string; type: 'text' | 'location' | 'sos'; location: { latitude: number; longitude: number; accuracy?: number } | null }>>([])
   const [partnerId, setPartnerId] = useState<string | null>(null)
   const [coupleId, setCoupleId] = useState<string | null>(null)
 
@@ -47,12 +48,22 @@ export default function ChatScreen() {
       .subscribe((records) => {
         setMessages(
           records.map((record) => {
-            const rawRecord = record as any
+            const rawRecord = record as unknown as { id: string; _get: (column: string) => unknown }
+            const serializedLocation = rawRecord._get('location_payload')
+            let location: { latitude: number; longitude: number; accuracy?: number } | null = null
+            if (typeof serializedLocation === 'string' && serializedLocation) {
+              try { location = JSON.parse(serializedLocation) as { latitude: number; longitude: number; accuracy?: number } } catch { location = null }
+            }
+            const content = rawRecord._get('content')
+            const createdAt = rawRecord._get('created_at')
+            const messageType = rawRecord._get('message_type')
             return {
               id: rawRecord.id,
               sender: rawRecord._get('sender_id') === user?.id ? 'me' : 'them',
-              text: rawRecord._get('content') ?? '',
-              time: formatMessageTime(rawRecord._get('created_at') ?? new Date().toISOString()),
+              text: typeof content === 'string' ? content : '',
+              time: formatMessageTime(typeof createdAt === 'string' ? createdAt : new Date().toISOString()),
+              type: messageType === 'location' || messageType === 'sos' ? messageType : 'text',
+              location,
             }
           })
         )
@@ -94,7 +105,7 @@ export default function ChatScreen() {
 
     await database.write(async () => {
       await database.get('messages').create((record) => {
-        const rawRecord = record as any
+        const rawRecord = record as unknown as { content: string; sender_id: string; couple_id: string; created_at: string; synced: boolean }
         rawRecord.content = trimmed
         rawRecord.sender_id = user.id
         rawRecord.couple_id = coupleId
@@ -110,6 +121,34 @@ export default function ChatScreen() {
     }
 
     await refresh()
+  }
+
+  const handleSendLocation = async () => {
+    if (!user?.id || !coupleId) return
+    const { status: permission } = await Location.requestForegroundPermissionsAsync()
+    if (permission !== 'granted') {
+      Alert.alert('Location permission needed', 'Allow location access to send your current map pin.')
+      return
+    }
+    try {
+      const point = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced })
+      const payload = { latitude: point.coords.latitude, longitude: point.coords.longitude, accuracy: point.coords.accuracy ?? undefined }
+      await database.write(async () => {
+        await database.get('messages').create((record) => {
+          const rawRecord = record as unknown as { content: string; sender_id: string; couple_id: string; created_at: string; synced: boolean; message_type: string; location_payload: string }
+          rawRecord.content = 'Shared a location'
+          rawRecord.sender_id = user.id
+          rawRecord.couple_id = coupleId
+          rawRecord.created_at = new Date().toISOString()
+          rawRecord.message_type = 'location'
+          rawRecord.location_payload = JSON.stringify(payload)
+          rawRecord.synced = !isOffline
+        })
+      })
+      if (!isOffline) await refresh()
+    } catch {
+      Alert.alert('Could not get location', 'Check GPS and try again.')
+    }
   }
 
   const handleCall = (type: 'audio' | 'video') => {
@@ -166,6 +205,9 @@ export default function ChatScreen() {
       {callState !== 'idle' && <Text style={styles.callStatus}>Call status: {callState}</Text>}
 
       <View style={styles.composer}>
+        <TouchableOpacity style={styles.locationButton} onPress={() => void handleSendLocation()} disabled={!coupleId} accessibilityLabel="Send current location">
+          <Text style={styles.locationButtonText}>📍</Text>
+        </TouchableOpacity>
         <Input
           value={draft}
           onChangeText={setDraft}
@@ -257,6 +299,8 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 16,
   },
+  locationButton: { width: 44, height: 44, borderRadius: 22, backgroundColor: '#2d2f43', alignItems: 'center', justifyContent: 'center' },
+  locationButtonText: { fontSize: 19 },
   input: {
     flex: 1,
   },

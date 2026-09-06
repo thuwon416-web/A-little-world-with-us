@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import { useNotifications } from '@/hooks/useNotifications'
 
@@ -34,11 +34,9 @@ export default function RemindersScreen() {
 
       <View style={styles.form}>
         <Text style={styles.label}>Title</Text>
-        <Text style={styles.input}>{draftTitle || 'Daily check-in'}</Text>
+        <TextInput value={draftTitle} onChangeText={setDraftTitle} placeholder="Daily check-in" placeholderTextColor="#8d8d99" style={styles.input} />
         <Text style={styles.label}>Message</Text>
-        <Text style={styles.input}>
-          {draftMessage || 'Take a moment to check in with each other.'}
-        </Text>
+        <TextInput value={draftMessage} onChangeText={setDraftMessage} placeholder="Take a moment to check in with each other." placeholderTextColor="#8d8d99" style={styles.input} />
       </View>
 
       <TouchableOpacity style={styles.secondaryButton} onPress={() => void handleAddReminder()}>

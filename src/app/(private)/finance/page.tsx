@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
 
 interface FinancialGoal {
@@ -14,22 +15,26 @@ export default function FinancialGoals() {
   const [goals, setGoals] = useState<FinancialGoal[]>([])
   const [newGoal, setNewGoal] = useState({ title: '', target: '', current: '' })
   const [userId, setUserId] = useState<string | null>(null)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   useEffect(() => {
-    void getCurrentUserId().then(setUserId)
+    void Promise.all([getCurrentUserId(), getCoupleStatus()]).then(([id, status]) => {
+      setUserId(id)
+      setCoupleId(status.status === 'accepted' ? status.couple?.id ?? null : null)
+    })
   }, [])
 
   useEffect(() => {
-    if (userId) void loadGoals()
-  }, [userId])
+    if (userId && coupleId) void loadGoals()
+  }, [userId, coupleId])
 
   const loadGoals = async () => {
-    if (!userId) return
+    if (!coupleId) return
 
     const { data } = await supabase
       .from('financial_goals')
       .select('*')
-      .eq('user_id', userId)
+      .eq('couple_id', coupleId)
       .order('created_at', { ascending: false })
 
     setGoals((data ?? []) as FinancialGoal[])
@@ -38,10 +43,11 @@ export default function FinancialGoals() {
   const addGoal = async () => {
     const targetAmount = Number(newGoal.target)
     const currentAmount = Number(newGoal.current || 0)
-    if (!userId || !newGoal.title.trim() || !Number.isFinite(targetAmount) || targetAmount <= 0 || currentAmount < 0) return
+    if (!userId || !coupleId || !newGoal.title.trim() || !Number.isFinite(targetAmount) || targetAmount <= 0 || currentAmount < 0) return
 
     const { error } = await supabase.from('financial_goals').insert({
       user_id: userId,
+      couple_id: coupleId,
       title: newGoal.title.trim(),
       target_amount: targetAmount,
       current_amount: currentAmount,
@@ -70,6 +76,8 @@ export default function FinancialGoals() {
         <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Goals</p>
         <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">💰 Financial Goals</h1>
       </section>
+
+      {!coupleId && <p className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100">Link and accept a partner before creating shared financial goals.</p>}
 
       <section className="grid gap-4 rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 md:grid-cols-4">
         <input value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} placeholder="Goal name (e.g., Vacation)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />

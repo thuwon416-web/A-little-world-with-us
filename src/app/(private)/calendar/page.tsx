@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getCurrentUserId } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
+import { getCoupleStatus } from '@/lib/couples'
 import LoveCalendar from '@/features/planning/LoveCalendar'
 import BucketList from '@/features/planning/BucketList'
 import SharedWishlist from '@/features/planning/SharedWishlist'
@@ -12,17 +13,20 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [showSharedCalendar, setShowSharedCalendar] = useState(false)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   useEffect(() => {
     const loadUserId = async () => {
       const id = await getCurrentUserId()
       setUserId(id)
+      const status = await getCoupleStatus()
+      setCoupleId(status.status === 'accepted' ? status.couple?.id ?? null : null)
     }
     loadUserId()
   }, [])
 
   const loadEvents = useCallback(async () => {
-    if (!userId) return
+    if (!coupleId) return
 
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
@@ -30,12 +34,13 @@ export default function CalendarPage() {
     const { data } = await supabase
       .from('calendar_events')
       .select('*')
+      .eq('couple_id', coupleId)
       .gte('date', startOfMonth.toISOString())
       .lte('date', endOfMonth.toISOString())
       .order('date', { ascending: true })
 
     setEvents(data || [])
-  }, [currentDate, userId])
+  }, [currentDate, coupleId])
 
   useEffect(() => {
     if (userId && showSharedCalendar) {
@@ -44,7 +49,7 @@ export default function CalendarPage() {
   }, [loadEvents, userId, showSharedCalendar])
 
   const addEvent = useCallback(async () => {
-    if (!selectedDate || !userId) return
+    if (!selectedDate || !userId || !coupleId) return
 
     const title = prompt('Event title:')
     if (!title) return
@@ -56,10 +61,11 @@ export default function CalendarPage() {
       title,
       type,
       user_id: userId,
+      couple_id: coupleId,
     })
 
     await loadEvents()
-  }, [selectedDate, userId, loadEvents])
+  }, [selectedDate, userId, coupleId, loadEvents])
 
   const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear()

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { AlertTriangle, Smartphone, MapPin, Clock } from 'lucide-react'
+import { supabase } from '@/lib/supabase'
 
 interface EmergencySOSProps {
   userId?: string
@@ -23,6 +24,7 @@ export default function EmergencySOS({ onSOS }: EmergencySOSProps) {
       if ('geolocation' in navigator) {
         navigator.geolocation.getCurrentPosition(
           async (position) => {
+            try {
             const currentLocation = {
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
@@ -32,14 +34,37 @@ export default function EmergencySOS({ onSOS }: EmergencySOSProps) {
             
             // Send to parent component
             onSOS?.(currentLocation)
-            
-            // In production, this would send to Supabase
-            // await supabase.from('emergency_alerts').insert({
-            //   user_id: userId,
-            //   latitude: currentLocation.latitude,
-            //   longitude: currentLocation.longitude,
-            //   timestamp: new Date().toISOString(),
-            // })
+
+            const { data: authData } = await supabase.auth.getUser()
+            const currentUser = authData.user
+            if (!currentUser) throw new Error('You must be signed in to send an SOS.')
+            const { data: link, error: linkError } = await supabase
+              .from('couple_links')
+              .select('couple_id')
+              .or(`inviter_id.eq.${currentUser.id},accepted_by.eq.${currentUser.id}`)
+              .eq('status', 'accepted')
+              .not('couple_id', 'is', null)
+              .maybeSingle()
+            if (linkError || !link?.couple_id) throw new Error('An accepted partner link is required for SOS.')
+
+            const accuracy = position.coords.accuracy
+            const [alertResult, messageResult] = await Promise.all([
+              supabase.from('emergency_alerts').insert({
+                couple_id: link.couple_id,
+                reporter_id: currentUser.id,
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
+                accuracy,
+              }),
+              supabase.from('messages').insert({
+                couple_id: link.couple_id,
+                sender_id: currentUser.id,
+                content: 'Emergency SOS — current location shared',
+                message_type: 'sos',
+                location_payload: { ...currentLocation, accuracy },
+              }),
+            ])
+            if (alertResult.error || messageResult.error) throw new Error(alertResult.error?.message || messageResult.error?.message || 'SOS could not be saved.')
             
             setLastSOS(new Date())
             setIsSending(false)
@@ -50,6 +75,11 @@ export default function EmergencySOS({ onSOS }: EmergencySOSProps) {
                 body: 'Your location has been shared with your partner',
                 icon: '/icon-192x192.png',
               })
+            }
+            } catch (error) {
+              console.error('SOS error:', error)
+              setIsSending(false)
+              alert(error instanceof Error ? error.message : 'Failed to send SOS. Please try again.')
             }
           },
           (error) => {

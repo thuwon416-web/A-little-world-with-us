@@ -37,8 +37,8 @@ export default function WellnessBoard({ board }: WellnessBoardProps) {
             </div>
           ))
         ) : (
-          <div className="text-center py-8 text-rose-600">
-            <p className="text-sm">Coming soon...</p>
+          <div className="rounded-xl border border-dashed border-rose-300/50 bg-rose-50/40 p-6 text-center text-rose-700">
+            <p className="text-sm">No entries yet. Add your first gentle check-in when you are ready.</p>
           </div>
         )}
       </CardContent>

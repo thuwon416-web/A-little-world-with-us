@@ -10,6 +10,8 @@ export class MessageModel extends Model {
         { name: 'content', type: 'string' },
         { name: 'sender_id', type: 'string' },
         { name: 'couple_id', type: 'string', isOptional: true },
+        { name: 'message_type', type: 'string', isOptional: true },
+        { name: 'location_payload', type: 'string', isOptional: true },
         { name: 'created_at', type: 'string' },
         { name: 'synced', type: 'boolean' },
       ],

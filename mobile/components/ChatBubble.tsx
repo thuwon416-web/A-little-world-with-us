@@ -1,10 +1,12 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 export type ChatMessage = {
   id: string
   sender: 'me' | 'them'
   text: string
   time: string
+  type?: 'text' | 'location' | 'sos'
+  location?: { latitude: number; longitude: number; accuracy?: number } | null
 }
 
 interface ChatBubbleProps {
@@ -17,7 +19,14 @@ export function ChatBubble({ message }: ChatBubbleProps) {
   return (
     <View style={[styles.row, isMe ? styles.rowMe : styles.rowThem]}>
       <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
-        <Text style={styles.text}>{message.text}</Text>
+        {message.type === 'location' && message.location ? (
+          <TouchableOpacity onPress={() => void Linking.openURL(`https://www.google.com/maps?q=${message.location?.latitude},${message.location?.longitude}`)}>
+            <Text style={styles.locationTitle}>📍 Shared location</Text>
+            <Text style={styles.text}>{message.location.latitude.toFixed(5)}, {message.location.longitude.toFixed(5)}</Text>
+          </TouchableOpacity>
+        ) : message.type === 'sos' ? (
+          <Text style={styles.sosText}>🆘 Emergency SOS — open location details</Text>
+        ) : <Text style={styles.text}>{message.text}</Text>}
       </View>
       <Text style={styles.time}>{message.time}</Text>
     </View>
@@ -54,6 +63,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     lineHeight: 21,
   },
+  locationTitle: { color: '#f3f0f5', fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  sosText: { color: '#ffd3dc', fontSize: 15, fontWeight: '700' },
   time: {
     color: '#8d8d99',
     fontSize: 10,

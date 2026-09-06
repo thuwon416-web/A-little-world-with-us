@@ -15,6 +15,18 @@ const migrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 3,
+      steps: [
+        addColumns({
+          table: 'messages',
+          columns: [
+            { name: 'message_type', type: 'string', isOptional: true },
+            { name: 'location_payload', type: 'string', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })
 

@@ -19,6 +19,18 @@ export type Reminder = {
   scheduled_at: string
   repeat: 'none' | 'daily' | 'weekly'
   active: boolean
+  couple_id?: string | null
+}
+
+async function getAcceptedCoupleId(userId: string) {
+  const { data } = await supabase
+    .from('couple_links')
+    .select('couple_id')
+    .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+    .eq('status', 'accepted')
+    .not('couple_id', 'is', null)
+    .maybeSingle()
+  return data?.couple_id ?? null
 }
 
 export async function registerForPushNotifications() {
@@ -61,6 +73,7 @@ export async function scheduleReminder(
   const payload = {
     id: crypto.randomUUID(),
     user_id: reminder.user_id ?? user.id,
+    couple_id: await getAcceptedCoupleId(reminder.user_id ?? user.id),
     title: reminder.title,
     message: reminder.message,
     scheduled_at: reminder.scheduled_at,

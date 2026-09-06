@@ -16,7 +16,7 @@ interface Message {
   id: string
   sender_id: string
   content: string | null
-  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location'
+  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location' | 'sos'
   media_url: string | null
   media_duration: number | null
   encrypted: boolean
@@ -346,6 +346,9 @@ export default function RealtimeChat() {
                   )}
                   {message.message_type === 'location' && message.location_payload && (
                     <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl bg-[var(--bg-3)] p-3 text-sm hover:bg-[var(--accent-1)]/10"><MapPin className="h-5 w-5 text-[var(--accent-1)]" /><span><strong>Shared location</strong><br />{message.location_payload.latitude.toFixed(5)}, {message.location_payload.longitude.toFixed(5)} · ±{Math.round(message.location_payload.accuracy ?? 0)}m</span></a>
+                  )}
+                  {message.message_type === 'sos' && message.location_payload && (
+                    <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 p-3 text-sm text-red-100 hover:bg-red-500/25"><MapPin className="h-5 w-5 text-red-300" /><span><strong>🆘 Emergency SOS</strong><br />Open the sender’s current location.</span></a>
                   )}
                   <p className="text-xs text-[var(--text-secondary)] mt-1">
                     {new Date(message.created_at).toLocaleTimeString()}

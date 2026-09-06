@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { CalendarDays, Sparkles } from 'lucide-react'
+import { getCoupleStatus } from '@/lib/couples'
+import { getCurrentUserId, supabase } from '@/lib/supabase'
 
 type Entry = {
   id: string
@@ -11,18 +13,6 @@ type Entry = {
   type: 'anniversary' | 'plan' | 'reminder'
 }
 
-const starterEntries: Entry[] = [
-  {
-    id: 'anniv',
-    date: '2026-09-12',
-    label: 'Our anniversary',
-    mood: 'special',
-    type: 'anniversary',
-  },
-  { id: 'movie', date: '2026-09-14', label: 'Movie night', mood: 'quiet', type: 'plan' },
-  { id: 'hike', date: '2026-09-18', label: 'Hike + coffee', mood: 'adventure', type: 'plan' },
-]
-
 const moodColors: Record<Entry['mood'], string> = {
   sweet: 'bg-[var(--accent-1)]/20 text-[var(--accent-1)]',
   adventure: 'bg-[var(--bg-2)] text-[var(--accent-1)]',
@@ -31,59 +21,57 @@ const moodColors: Record<Entry['mood'], string> = {
 }
 
 export default function LoveCalendar() {
-  const [entries, setEntries] = useState<Entry[]>(starterEntries)
+  const [entries, setEntries] = useState<Entry[]>([])
+  const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [label, setLabel] = useState('')
   const [mood, setMood] = useState<Entry['mood']>('sweet')
   const [type, setType] = useState<Entry['type']>('plan')
 
-  useEffect(() => {
-    try {
-      const raw =
-        localStorage.getItem('love-calendar') || localStorage.getItem('a-little-world-with-us-calendar')
-      if (raw) {
-        const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed) && parsed.length) {
-          setEntries(
-            parsed.map((entry) => ({
-              id: String(entry.id),
-              date: entry.date,
-              label: entry.label ?? entry.title,
-              mood: entry.mood ?? 'sweet',
-              type: entry.type ?? 'plan',
-            }))
-          )
-        }
-      }
-    } catch {
-      // ignore local storage issues gracefully
-    }
-  }, [])
+  const loadEntries = async (activeCoupleId: string) => {
+    const { data } = await supabase
+      .from('calendar_events')
+      .select('id,date,title,type')
+      .eq('couple_id', activeCoupleId)
+      .order('date', { ascending: true })
+    setEntries((data ?? []).map((entry) => ({
+      id: entry.id,
+      date: String(entry.date).slice(0, 10),
+      label: entry.title ?? 'Untitled plan',
+      mood: entry.type === 'anniversary' ? 'special' : entry.type === 'plan' ? 'adventure' : 'sweet',
+      type: entry.type === 'anniversary' || entry.type === 'plan' ? entry.type : 'reminder',
+    })))
+  }
 
   useEffect(() => {
-    localStorage.setItem('love-calendar', JSON.stringify(entries))
-  }, [entries])
+    void Promise.all([getCurrentUserId(), getCoupleStatus()]).then(([id, status]) => {
+      const activeCoupleId = status.status === 'accepted' ? status.couple?.id ?? null : null
+      setUserId(id)
+      setCoupleId(activeCoupleId)
+      if (activeCoupleId) void loadEntries(activeCoupleId)
+    })
+  }, [])
 
   const upcoming = useMemo(
     () => [...entries].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 4),
     [entries]
   )
 
-  const addEntry = () => {
+  const addEntry = async () => {
     const value = label.trim()
-    if (!value || !selectedDate) return
-
-    setEntries((current) => [
-      ...current,
-      {
-        id: `entry-${Date.now()}`,
-        date: selectedDate,
-        label: value,
-        mood,
-        type,
-      },
-    ])
-    setLabel('')
+    if (!value || !selectedDate || !coupleId || !userId) return
+    const { error } = await supabase.from('calendar_events').insert({
+      user_id: userId,
+      couple_id: coupleId,
+      date: new Date(`${selectedDate}T12:00:00`).toISOString(),
+      title: value,
+      type,
+    })
+    if (!error) {
+      setLabel('')
+      await loadEntries(coupleId)
+    }
   }
 
   return (
@@ -158,11 +146,13 @@ export default function LoveCalendar() {
             placeholder="Add a date idea"
             className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
           />
-          <button onClick={addEntry} className="glass-button px-3 py-2 text-sm">
+          <button onClick={() => void addEntry()} disabled={!coupleId} className="glass-button px-3 py-2 text-sm disabled:opacity-50">
             Add
           </button>
         </div>
       </div>
+
+      {!coupleId && <p className="text-sm text-amber-200">Accept a couple link to save plans shared by both accounts.</p>}
 
       <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80">
         <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">

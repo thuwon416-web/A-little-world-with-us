@@ -59,9 +59,14 @@ export async function pushPendingMessages() {
       sender_id: rawMessage._get('sender_id'),
       couple_id: rawMessage._get('couple_id') || coupleId,
       created_at: rawMessage._get('created_at'),
+      message_type: rawMessage._get('message_type') || 'text',
+      location_payload: (() => {
+        const value = rawMessage._get('location_payload')
+        try { return value ? JSON.parse(value) : null } catch { return null }
+      })(),
     }
 
-    const { error } = await supabase.from('chat_messages').upsert(payload).select()
+    const { error } = await supabase.from('messages').upsert(payload).select()
 
     if (!error) {
       await database.write(async () => {
@@ -94,7 +99,7 @@ export async function syncMessages(lastSyncAt?: string) {
 
   while (true) {
     let query = supabase
-      .from('chat_messages')
+      .from('messages')
       .select('*')
       .order('created_at', { ascending: true })
       .range(page * pageSize, (page + 1) * pageSize - 1)
@@ -150,6 +155,8 @@ export async function syncMessages(lastSyncAt?: string) {
             record.sender_id = remoteMessage.sender_id ?? 'unknown'
             record.couple_id = remoteMessage.couple_id ?? ''
             record.created_at = remoteMessage.created_at ?? new Date().toISOString()
+            record.message_type = remoteMessage.message_type ?? 'text'
+            record.location_payload = remoteMessage.location_payload ? JSON.stringify(remoteMessage.location_payload) : ''
             record.synced = true
           })
         } else {
@@ -161,6 +168,8 @@ export async function syncMessages(lastSyncAt?: string) {
             record.sender_id = remoteMessage.sender_id ?? record.sender_id
             record.couple_id = remoteMessage.couple_id ?? record.couple_id
             record.created_at = remoteMessage.created_at ?? record.created_at
+            record.message_type = remoteMessage.message_type ?? record.message_type
+            record.location_payload = remoteMessage.location_payload ? JSON.stringify(remoteMessage.location_payload) : record.location_payload
               record.synced = true
             })
           }
@@ -180,7 +189,7 @@ export function subscribeToChanges(onChange: () => void) {
 
   const channel = supabase
     .channel('mobile-chat-sync')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_messages' }, () => {
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
       onChange()
     })
     .subscribe()
