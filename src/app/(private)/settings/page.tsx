@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic'
 import ErrorReport from '@/components/shared/ErrorReport'
 import PWAInstall from '@/components/shared/PWAInstall'
 import ThemeToggle from '@/components/shared/ThemeToggle'
+import NotificationPermission from '@/components/NotificationPermission'
 import ExportData from '@/features/care/ExportData'
 import MoodChart from '@/features/care/MoodChart'
 
@@ -60,6 +61,8 @@ export default function SettingsPage() {
         <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Settings</p>
         <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">Your little world</h1>
       </section>
+
+      <NotificationPermission />
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <section className="space-y-5 rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
@@ -148,6 +151,36 @@ export default function SettingsPage() {
         <div className="mt-4 space-y-4">
           <MoodChart />
           <ExportData />
+        </div>
+      </section>
+
+      <section className="rounded-[28px] border border-red-500/20 bg-red-500/5 p-5">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-red-500">Danger Zone</p>
+        <h2 className="mt-1 text-xl font-semibold text-red-500">Data Management</h2>
+
+        <div className="mt-4 space-y-3">
+          <button
+            onClick={() => {
+              if (confirm('Export all your data? This will download all your memories, messages, and settings.')) {
+                // Export functionality is available in the Care Data section above
+                alert('Use the Export button in the Care Data section above to download your data.')
+              }
+            }}
+            className="w-full border border-red-500/30 text-red-500 py-3 rounded-lg font-medium hover:bg-red-500/10 transition"
+          >
+            📥 Export All My Data
+          </button>
+
+          <button
+            onClick={() => {
+              if (confirm('Are you sure? This will delete all your data permanently and cannot be undone.')) {
+                alert('Account deletion requires authentication. Please contact support for assistance.')
+              }
+            }}
+            className="w-full bg-red-500 text-white py-3 rounded-lg font-medium hover:bg-red-600 transition"
+          >
+            🗑️ Delete My Account
+          </button>
         </div>
       </section>
 

@@ -8,11 +8,14 @@ import {
   CalendarDays,
   Gamepad2,
   Heart,
+  HelpCircle,
   Home,
+  Info,
   LockKeyhole,
   MapPin,
   MessageCircleHeart,
   PhoneCall,
+  Settings,
   Sparkles,
   Star,
   Shield,
@@ -33,6 +36,12 @@ const baseNavItems = [
   { href: '/wellness', label: 'Wellness', icon: Heart },
   { href: '/games', label: 'Play', icon: Gamepad2 },
   { href: '/vault', label: 'Vault', icon: LockKeyhole },
+  { href: '/settings', label: 'Settings', icon: Settings },
+]
+
+const infoNavItems = [
+  { href: '/about', label: 'About', icon: Info },
+  { href: '/help', label: 'Help', icon: HelpCircle },
 ]
 
 const adminNavItems = [
@@ -72,7 +81,7 @@ export default function Sidebar() {
     }
   }
 
-  const navItems = userRole === 'admin' ? [...baseNavItems, ...adminNavItems] : baseNavItems
+  const navItems = userRole === 'admin' ? [...baseNavItems, ...adminNavItems, ...infoNavItems] : [...baseNavItems, ...infoNavItems]
 
   if (isLoading) {
     return (

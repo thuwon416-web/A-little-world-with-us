@@ -1,99 +1,143 @@
-export type NotificationPermissionState = 'granted' | 'denied' | 'default' | 'unsupported'
 export type NotificationChannel = 'reminders' | 'messages' | 'milestones' | 'wellness'
+export type NotificationPermissionState = 'granted' | 'denied' | 'unsupported' | 'default'
 
-export type NotificationSettings = {
-  pushEnabled: boolean
+export interface NotificationSettings {
   reminders: boolean
   messages: boolean
   milestones: boolean
   wellness: boolean
+  pushEnabled: boolean
 }
 
-export const defaultNotificationSettings: NotificationSettings = {
-  pushEnabled: false,
-  reminders: true,
-  messages: true,
-  milestones: true,
-  wellness: true,
-}
-
-export function supportsNotifications(): boolean {
-  if (typeof window === 'undefined') return false
-  return 'Notification' in window
-}
-
-export function getNotificationSettings(): NotificationSettings {
-  if (typeof window === 'undefined') return defaultNotificationSettings
-
-  try {
-    const stored = window.localStorage.getItem('a-little-world-with-us-notification-settings')
-    if (!stored) {
-      return defaultNotificationSettings
-    }
-
-    return {
-      ...defaultNotificationSettings,
-      ...JSON.parse(stored),
-    }
-  } catch {
-    return defaultNotificationSettings
+export async function requestNotificationPermission(): Promise<boolean> {
+  if (!('Notification' in window)) {
+    return false
   }
-}
-
-export function updateNotificationSettings(nextSettings: Partial<NotificationSettings>) {
-  if (typeof window === 'undefined') return defaultNotificationSettings
-
-  const merged = {
-    ...getNotificationSettings(),
-    ...nextSettings,
-  }
-
-  window.localStorage.setItem('a-little-world-with-us-notification-settings', JSON.stringify(merged))
-  return merged
-}
-
-export async function requestNotificationPermission(): Promise<NotificationPermissionState> {
-  if (!supportsNotifications()) return 'unsupported'
-
-  if (Notification.permission === 'granted') return 'granted'
 
   const permission = await Notification.requestPermission()
-  const nextPermission = permission === 'granted' ? 'granted' : permission === 'denied' ? 'denied' : 'default'
-
-  updateNotificationSettings({ pushEnabled: nextPermission === 'granted' })
-  return nextPermission
+  return permission === 'granted'
 }
 
 export function getNotificationPermission(): NotificationPermissionState {
-  if (!supportsNotifications()) return 'unsupported'
-  return Notification.permission === 'granted'
-    ? 'granted'
-    : Notification.permission === 'denied'
-      ? 'denied'
-      : 'default'
+  if (!('Notification' in window)) {
+    return 'unsupported'
+  }
+
+  return Notification.permission as NotificationPermissionState
 }
 
-export function showBrowserNotification(title: string, options: NotificationOptions = {}) {
-  if (!supportsNotifications() || Notification.permission !== 'granted') return null
+export function sendNotification(title: string, body?: string) {
+  if (!('Notification' in window)) {
+    return
+  }
 
-  return new Notification(title, {
-    silent: false,
-    ...options,
+  if (Notification.permission !== 'granted') {
+    return
+  }
+
+  new Notification(title, {
+    body,
+    icon: '/icon-192x192.png',
   })
 }
 
-export function scheduleBrowserReminder(
-  title: string,
-  message: string,
-  delayInMs = 1000,
-  options: NotificationOptions = {},
-) {
-  if (typeof window === 'undefined') return null
+export function getNotificationSettings(): NotificationSettings {
+  if (typeof window === 'undefined') {
+    return {
+      reminders: true,
+      messages: true,
+      milestones: true,
+      wellness: true,
+      pushEnabled: false,
+    }
+  }
 
-  return window.setTimeout(() => {
-    showBrowserNotification(title, {
-      body: message,
-      ...options,
+  const stored = localStorage.getItem('notificationSettings')
+  if (stored) {
+    try {
+      return JSON.parse(stored)
+    } catch {
+      return {
+        reminders: true,
+        messages: true,
+        milestones: true,
+        wellness: true,
+        pushEnabled: false,
+      }
+    }
+  }
+
+  return {
+    reminders: true,
+    messages: true,
+    milestones: true,
+    wellness: true,
+    pushEnabled: false,
+  }
+}
+
+export function updateNotificationSettings(settings: Partial<NotificationSettings>) {
+  const current = getNotificationSettings()
+  const updated = { ...current, ...settings }
+  localStorage.setItem('notificationSettings', JSON.stringify(updated))
+}
+
+export function scheduleBrowserReminder(title: string, time: string, delay?: number) {
+  if (!('Notification' in window)) {
+    return
+  }
+
+  if (Notification.permission !== 'granted') {
+    return
+  }
+
+  // If delay is provided, use it directly
+  if (delay !== undefined) {
+    setTimeout(() => {
+      sendNotification(title, time)
+    }, delay)
+    return
+  }
+
+  // Basic implementation - in a real app, you'd use more sophisticated scheduling
+  const [hours, minutes] = time.split(':').map(Number)
+  const now = new Date()
+  const scheduledTime = new Date()
+  scheduledTime.setHours(hours, minutes, 0, 0)
+
+  if (scheduledTime <= now) {
+    scheduledTime.setDate(scheduledTime.getDate() + 1)
+  }
+
+  const delayMs = scheduledTime.getTime() - now.getTime()
+
+  setTimeout(() => {
+    sendNotification(title, 'Reminder from your little world')
+  }, delayMs)
+}
+
+export function scheduleNotification(title: string, body?: string, delayMs: number = 5000) {
+  setTimeout(() => {
+    sendNotification(title, body)
+  }, delayMs)
+}
+
+export async function sendScheduledNotification(userId: string, title: string, body?: string, scheduledAt?: string) {
+  try {
+    const response = await fetch('/api/notifications/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId,
+        title,
+        body,
+        scheduledAt,
+      }),
     })
-  }, delayInMs)
+
+    return await response.json()
+  } catch (error) {
+    console.error('Scheduled notification error:', error)
+    return { error: 'Failed to schedule notification' }
+  }
 }

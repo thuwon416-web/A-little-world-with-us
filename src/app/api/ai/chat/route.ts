@@ -10,7 +10,7 @@ async function callGemini(message: string) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: message }] }],
+      contents: [{ parts: [{ text: `You are a helpful relationship assistant for "A Little World With Us" app. Help users with love advice, date ideas, and relationship tips. Be warm, supportive, and romantic. User says: ${message}` }] }],
     }),
   })
   const data = await response.json()
@@ -31,7 +31,13 @@ async function callOpenRouter(message: string) {
     },
     body: JSON.stringify({
       model: 'openai/gpt-3.5-turbo',
-      messages: [{ role: 'user', content: message }],
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful relationship assistant for "A Little World With Us" app. Help users with love advice, date ideas, and relationship tips. Be warm, supportive, and romantic.'
+        },
+        { role: 'user', content: message }
+      ],
     }),
   })
   const data = await response.json()
@@ -56,6 +62,38 @@ async function callHuggingFace(message: string) {
   return data?.generated_text || 'No response'
 }
 
+async function callGroq(message: string) {
+  const apiKey = process.env.GROQ_API_KEY
+  if (!apiKey) {
+    throw new Error('GROQ_API_KEY not configured')
+  }
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful relationship assistant for "A Little World With Us" app. Help users with love advice, date ideas, and relationship tips. Be warm, supportive, and romantic.',
+        },
+        {
+          role: 'user',
+          content: message,
+        },
+      ],
+      max_tokens: 500,
+    }),
+  })
+
+  const data = await response.json()
+  return data.choices?.[0]?.message?.content || 'No response'
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { message, provider } = await req.json()
@@ -76,17 +114,29 @@ export async function POST(req: NextRequest) {
       case 'huggingface':
         response = await callHuggingFace(message)
         break
+      case 'groq':
+        response = await callGroq(message)
+        break
       default:
-        response = await callGemini(message)
+        // Try Groq first, then fallback to Gemini
+        try {
+          response = await callGroq(message)
+        } catch {
+          try {
+            response = await callGemini(message)
+          } catch {
+            response = 'Sorry, I need an AI API key to function. Please configure GROQ_API_KEY or GEMINI_API_KEY in your environment.'
+          }
+        }
     }
 
     return NextResponse.json({
       response,
-      provider: provider || 'gemini',
+      provider: provider || 'groq',
     })
 
   } catch (error) {
     console.error('AI API error:', error)
-    return NextResponse.json({ error: 'Internal server error', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 })
+    return NextResponse.json({ response: 'Sorry, I encountered an error. Please try again.' })
   }
 }

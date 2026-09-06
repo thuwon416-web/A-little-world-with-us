@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 import ImageUpload from '@/components/shared/ImageUpload'
 import { LoadingState } from '@/components/shared/Loading'
 import { GallerySkeleton } from '@/components/shared/Skeleton'
@@ -70,7 +71,7 @@ export default function GalleryPage() {
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {images.map((image) => (
             <div key={image.id} className="overflow-hidden rounded-[24px] border border-white/10 bg-[var(--card-bg)] shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
-              <img src={image.url} alt={image.name} className="h-64 w-full object-cover" />
+              <Image src={image.url} alt={image.name} width={256} height={256} className="h-64 w-full object-cover" />
               <div className="flex items-center justify-between gap-3 p-4">
                 <span className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">
                   {new Date(image.created_at).toLocaleDateString()}

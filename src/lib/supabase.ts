@@ -185,3 +185,37 @@ export type Reminder = {
   notified: boolean
   created_at: string
 }
+
+// Add caching helper for performance optimization
+export async function cachedQuery<T>(
+  key: string,
+  queryFn: () => Promise<T>,
+  ttlSeconds: number = 300
+): Promise<T> {
+  if (typeof window === 'undefined') {
+    return await queryFn()
+  }
+
+  const cached = localStorage.getItem(`cache:${key}`)
+  if (cached) {
+    try {
+      const { data, timestamp } = JSON.parse(cached)
+      if (Date.now() - timestamp < ttlSeconds * 1000) {
+        return data
+      }
+    } catch {
+      // Invalid cache, ignore
+    }
+  }
+
+  const data = await queryFn()
+  try {
+    localStorage.setItem(`cache:${key}`, JSON.stringify({
+      data,
+      timestamp: Date.now(),
+    }))
+  } catch {
+    // localStorage might be full or disabled, ignore
+  }
+  return data
+}

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Offline - A Little World With Us</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      text-align: center;
+      padding: 50px 20px;
+      background: linear-gradient(135deg, #1a0b2e 0%, #2d1b4e 100%);
+      color: white;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      opacity: 0.8;
+    }
+    button {
+      background: #FFB6C1;
+      color: #1a0b2e;
+      border: none;
+      padding: 12px 24px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.2s, opacity 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <h1>📴 Offline</h1>
+  <p>You're currently offline. Please check your internet connection.</p>
+  <button onclick="location.reload()">Try Again</button>
+</body>
+</html>

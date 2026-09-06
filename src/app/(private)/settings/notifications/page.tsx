@@ -34,11 +34,11 @@ export default function NotificationSettingsPage() {
   }, [])
 
   const handlePermissionRequest = async () => {
-    const nextPermission = await requestNotificationPermission()
-    setPermission(nextPermission)
+    const granted = await requestNotificationPermission()
+    setPermission(granted ? 'granted' : 'denied')
     setSettings((current) => ({
       ...current,
-      pushEnabled: nextPermission === 'granted',
+      pushEnabled: granted,
     }))
   }
 

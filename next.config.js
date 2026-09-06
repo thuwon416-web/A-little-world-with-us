@@ -21,6 +21,10 @@ const withPWA = require('next-pwa')({
   ],
 })
 
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -98,4 +102,21 @@ const nextConfig = {
   },
 }
 
-module.exports = withPWA(nextConfig)
+const { withSentryConfig } = require('@sentry/nextjs')
+
+// Only apply Sentry configuration if DSN is provided
+const sentryOptions = {
+  org: process.env.SENTRY_ORG || 'your-org-name',
+  project: process.env.SENTRY_PROJECT || 'your-project-name',
+  silent: true,
+  // For all available options, see:
+  // https://github.com/getsentry/sentry-webpack-plugin#options
+}
+
+// Apply Sentry wrapper only if DSN is available
+const withSentry = process.env.NEXT_PUBLIC_SENTRY_DSN 
+  ? withSentryConfig(withPWA(nextConfig), sentryOptions)
+  : withPWA(nextConfig)
+
+// Apply bundle analyzer
+module.exports = withBundleAnalyzer(withSentry)

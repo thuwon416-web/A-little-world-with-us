@@ -7,6 +7,8 @@ import ServiceWorkerRegister from '@/components/shared/ServiceWorkerRegister'
 import InteractiveCursor from '@/components/effects/InteractiveCursor'
 import AmbientBackground from '@/components/effects/ambient-background'
 import { Toaster } from '@/components/ui/sonner'
+import PWAInstallPrompt from '@/components/PWAInstallPrompt'
+import AIChatWidget from '@/components/AIChatWidget'
 
 const descriptions = [
   'A private little world for KoKo and Pu Tuu — memories, love, and every day in between',
@@ -56,6 +58,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ServiceWorkerRegister />
             {children}
             <Toaster />
+            <PWAInstallPrompt />
+            <AIChatWidget />
           </ThemeProvider>
         </LanguageProvider>
       </body>

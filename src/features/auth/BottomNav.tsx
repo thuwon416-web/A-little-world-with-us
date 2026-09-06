@@ -5,7 +5,9 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
   Heart, 
+  HelpCircle,
   Home, 
+  Info,
   LogOut, 
   MessageCircleHeart, 
   MoreHorizontal, 
@@ -36,6 +38,8 @@ const morePages = [
   { name: 'Plans', href: '/plans', icon: Calendar },
   { name: 'Vault', href: '/vault', icon: Lock },
   { name: 'Settings', href: '/settings', icon: Settings },
+  { name: 'About', href: '/about', icon: Info },
+  { name: 'Help', href: '/help', icon: HelpCircle },
 ]
 
 export default function BottomNav() {

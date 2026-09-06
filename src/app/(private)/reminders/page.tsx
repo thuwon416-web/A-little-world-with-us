@@ -28,8 +28,8 @@ export default function RemindersPage() {
   }
 
   const enableNotifications = async () => {
-    const permission = await requestNotificationPermission()
-    if (permission === 'granted') {
+    const granted = await requestNotificationPermission()
+    if (granted) {
       scheduleBrowserReminder('Reminder ready', 'Your love reminders are active.', 500)
     }
   }

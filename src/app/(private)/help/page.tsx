@@ -28,6 +28,26 @@ const faqItems = [
     answer:
       'Open the Wellness tab from the home navigation, where the board collection is grouped in themed sections.',
   },
+  {
+    question: 'How do I add memories?',
+    answer:
+      'Go to the Memories page and click the upload button to add photos with captions and dates to your timeline.',
+  },
+  {
+    question: 'Is my data private?',
+    answer:
+      'Absolutely. All your memories, messages, and couple data are encrypted and only accessible to you and your partner.',
+  },
+  {
+    question: 'How do I export my data?',
+    answer:
+      'Go to Settings and use the Export button in the Care Data section to download all your memories and messages.',
+  },
+  {
+    question: 'How does the AI assistant work?',
+    answer:
+      'The AI assistant can help with relationship advice, date ideas, and love letters. Click the chat icon in the bottom right corner to start.',
+  },
 ]
 
 export default function HelpPage() {
@@ -126,10 +146,10 @@ export default function HelpPage() {
             </p>
 
             <a
-              href="mailto:support@ourforever.app"
+              href="mailto:support@alittleworldwithus.com"
               className="mt-4 inline-flex rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-[var(--bg-color)]"
             >
-              support@ourforever.app
+              support@alittleworldwithus.com
             </a>
           </div>
         </div>
