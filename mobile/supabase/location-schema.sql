@@ -1,5 +1,6 @@
 create table if not exists public.user_locations (
   user_id uuid primary key references auth.users (id) on delete cascade,
+  couple_id uuid,
   latitude double precision not null,
   longitude double precision not null,
   accuracy double precision default 0,
@@ -7,6 +8,7 @@ create table if not exists public.user_locations (
 );
 
 create index if not exists idx_user_locations_updated_at on public.user_locations(updated_at desc);
+create index if not exists idx_user_locations_couple_id on public.user_locations(couple_id);
 
 alter table public.user_locations enable row level security;
 

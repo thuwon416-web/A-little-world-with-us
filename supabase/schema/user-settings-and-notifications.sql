@@ -2,6 +2,7 @@
 CREATE TABLE IF NOT EXISTS public.user_settings (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  couple_id UUID,
   lock_pin_hash TEXT,
   theme TEXT DEFAULT 'light' CHECK (theme IN ('light', 'dark', 'system')),
   language TEXT DEFAULT 'en',
@@ -14,6 +15,7 @@ CREATE TABLE IF NOT EXISTS public.user_settings (
 CREATE TABLE IF NOT EXISTS public.notifications (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  couple_id UUID,
   title TEXT NOT NULL,
   body TEXT NOT NULL,
   type TEXT DEFAULT 'info' CHECK (type IN ('info', 'success', 'warning', 'error')),
@@ -25,7 +27,9 @@ CREATE TABLE IF NOT EXISTS public.notifications (
 
 -- Create indexes for performance
 CREATE INDEX IF NOT EXISTS user_settings_user_id_idx ON public.user_settings(user_id);
+CREATE INDEX IF NOT EXISTS user_settings_couple_id_idx ON public.user_settings(couple_id);
 CREATE INDEX IF NOT EXISTS notifications_user_id_idx ON public.notifications(user_id);
+CREATE INDEX IF NOT EXISTS notifications_couple_id_idx ON public.notifications(couple_id);
 CREATE INDEX IF NOT EXISTS notifications_scheduled_at_idx ON public.notifications(scheduled_at);
 CREATE INDEX IF NOT EXISTS notifications_read_at_idx ON public.notifications(read_at);
 

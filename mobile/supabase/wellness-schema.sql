@@ -1,6 +1,7 @@
 create table if not exists mood_logs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null,
+  couple_id uuid,
   mood text not null,
   note text,
   created_at timestamptz not null default now()
@@ -9,6 +10,7 @@ create table if not exists mood_logs (
 create table if not exists care_logs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null,
+  couple_id uuid,
   type text not null,
   completed_at timestamptz not null default now()
 );
@@ -16,6 +18,7 @@ create table if not exists care_logs (
 create table if not exists cycle_logs (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null,
+  couple_id uuid,
   start_date date not null,
   end_date date,
   cycle_length integer,
@@ -23,10 +26,13 @@ create table if not exists cycle_logs (
 );
 
 create index if not exists idx_mood_logs_user_id on mood_logs(user_id);
+create index if not exists idx_mood_logs_couple_id on mood_logs(couple_id);
 create index if not exists idx_mood_logs_created_at on mood_logs(created_at);
 create index if not exists idx_care_logs_user_id on care_logs(user_id);
+create index if not exists idx_care_logs_couple_id on care_logs(couple_id);
 create index if not exists idx_care_logs_completed_at on care_logs(completed_at);
 create index if not exists idx_cycle_logs_user_id on cycle_logs(user_id);
+create index if not exists idx_cycle_logs_couple_id on cycle_logs(couple_id);
 create index if not exists idx_cycle_logs_start_date on cycle_logs(start_date);
 
 alter table mood_logs enable row level security;

@@ -1,6 +1,7 @@
 create table if not exists public.ai_prompts (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
+  couple_id uuid,
   prompt_type text not null check (prompt_type in ('gift', 'date', 'message')),
   context jsonb not null default '[]'::jsonb,
   created_at timestamptz not null default now()
@@ -9,14 +10,17 @@ create table if not exists public.ai_prompts (
 create table if not exists public.ai_suggestions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users (id) on delete cascade,
+  couple_id uuid,
   suggestion_type text not null check (suggestion_type in ('gift', 'date', 'message')),
   content text not null,
   created_at timestamptz not null default now()
 );
 
 create index if not exists idx_ai_prompts_user_id on public.ai_prompts(user_id);
+create index if not exists idx_ai_prompts_couple_id on public.ai_prompts(couple_id);
 create index if not exists idx_ai_prompts_created_at on public.ai_prompts(created_at);
 create index if not exists idx_ai_suggestions_user_id on public.ai_suggestions(user_id);
+create index if not exists idx_ai_suggestions_couple_id on public.ai_suggestions(couple_id);
 create index if not exists idx_ai_suggestions_created_at on public.ai_suggestions(created_at);
 
 alter table public.ai_prompts enable row level security;
