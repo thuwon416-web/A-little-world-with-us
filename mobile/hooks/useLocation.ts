@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 import {
   getCurrentLocation,
+  getActiveCoupleId,
   shareLocation,
   startLocationTracking,
   stopLocationTracking,
@@ -93,9 +94,16 @@ export function useLocation() {
     }
 
     const loadPartnerLocation = async () => {
+      const coupleId = await getActiveCoupleId(user.id)
+      if (!coupleId) {
+        setPartnerLocation(null)
+        return
+      }
+
       const { data, error: partnerError } = await supabase
         .from('user_locations')
         .select('*')
+        .eq('couple_id', coupleId)
         .neq('user_id', user.id)
         .order('updated_at', { ascending: false })
         .limit(1)

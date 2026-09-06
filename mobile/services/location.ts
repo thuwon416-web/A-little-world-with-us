@@ -11,6 +11,18 @@ export type LocationPoint = {
 
 let subscription: Location.LocationSubscription | null = null
 
+export async function getActiveCoupleId(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('couple_links')
+    .select('couple_id')
+    .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+    .eq('status', 'accepted')
+    .not('couple_id', 'is', null)
+    .maybeSingle()
+
+  return data?.couple_id ?? null
+}
+
 export async function getCurrentLocation(): Promise<LocationPoint> {
   const { status } = await Location.requestForegroundPermissionsAsync()
   if (status !== 'granted') {
@@ -86,9 +98,15 @@ export async function shareLocation(point?: LocationPoint): Promise<boolean> {
     return false
   }
 
+  const coupleId = await getActiveCoupleId(user.id)
+  if (!coupleId) {
+    return false
+  }
+
   const { error } = await supabase.from('user_locations').upsert(
     {
       user_id: user.id,
+      couple_id: coupleId,
       latitude: point.latitude,
       longitude: point.longitude,
       accuracy: point.accuracy ?? 0,
