@@ -70,7 +70,8 @@ export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) 
       <section className="glass-card relative overflow-hidden px-5 py-10 text-center">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,215,0,0.14),_transparent_42%),radial-gradient(circle_at_bottom_left,_rgba(255,107,157,0.12),_transparent_45%)]" />
         <div className="relative">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">Today's cycle</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--text-secondary)]">Today&apos;s cycle</p>
+          <button type="button" onClick={() => onOpenDailyLog?.()} className="glass-button mt-4 w-full rounded-2xl px-4 py-3 font-semibold transition hover:brightness-110">Open today&apos;s log</button>
           <h2 className="gold-text mt-3 text-4xl font-serif sm:text-5xl">Period in {daysUntilPeriod} days</h2>
           <p className="mt-4 text-sm text-[var(--text-secondary)]">
             {riskLevel} estimated chance of pregnancy · predictions are not medical advice
@@ -156,7 +157,7 @@ export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) 
           onClick={() => onOpenDailyLog?.()}
           className="glass-button mt-4 w-full rounded-2xl px-4 py-3 font-semibold transition hover:brightness-110"
         >
-          Open today's log
+          Today&apos;s cycle
         </button>
       </section>
     </div>
