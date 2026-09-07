@@ -61,7 +61,7 @@ export default function MiniCareCheck() {
         </div>
       ) : hasError ? (
         <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/50 p-4">
-          <p className="text-sm text-[var(--text-primary)]">We couldn't load your care summary</p>
+          <p className="text-sm text-[var(--text-primary)]">We couldn&apos;t load your care summary</p>
           <button type="button" onClick={() => setHasError(false)} className="mt-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]">
             Retry <ArrowRight className="h-4 w-4" />
           </button>
