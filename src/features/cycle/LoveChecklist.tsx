@@ -4,11 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckSquare, Plus, Sparkles } from 'lucide-react'
 
-type ChecklistItem = {
-  id: string
-  label: string
-  done: boolean
-}
+type ChecklistItem = { id: string; label: string; done: boolean }
 
 const starterItems: ChecklistItem[] = [
   { id: 'c1', label: 'Say I love you today', done: true },
@@ -26,33 +22,21 @@ export default function LoveChecklist() {
       const raw = localStorage.getItem('love-checklist')
       if (raw) {
         const parsed = JSON.parse(raw)
-        if (Array.isArray(parsed) && parsed.length) {
-          setItems(parsed)
-        }
+        if (Array.isArray(parsed) && parsed.length) setItems(parsed)
       }
-    } catch {
-      // ignore gracefully
-    }
+    } catch { /* ignore */ }
   }, [])
 
-  useEffect(() => {
-    localStorage.setItem('love-checklist', JSON.stringify(items))
-  }, [items])
+  useEffect(() => { localStorage.setItem('love-checklist', JSON.stringify(items)) }, [items])
 
-  const doneCount = useMemo(() => items.filter((item) => item.done).length, [items])
+  const doneCount = useMemo(() => items.filter(item => item.done).length, [items])
   const ratio = items.length ? Math.round((doneCount / items.length) * 100) : 0
 
-  const toggleItem = (id: string) => {
-    setItems((current) =>
-      current.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
-    )
-  }
-
+  const toggleItem = (id: string) => setItems(current => current.map(item => item.id === id ? { ...item, done: !item.done } : item))
   const addItem = () => {
     const value = draft.trim()
     if (!value) return
-
-    setItems((current) => [...current, { id: `check-${Date.now()}`, label: value, done: false }])
+    setItems(current => [...current, { id: `check-${Date.now()}`, label: value, done: false }])
     setDraft('')
   }
 
@@ -75,7 +59,7 @@ export default function LoveChecklist() {
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-[var(--card-bg-strong)]">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-1)] to-[var(--accent-2)]"
+            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)]"
             initial={{ width: 0 }}
             animate={{ width: `${ratio}%` }}
             transition={{ duration: 0.45 }}
@@ -84,7 +68,7 @@ export default function LoveChecklist() {
       </div>
 
       <div className="space-y-2">
-        {items.map((item) => (
+        {items.map(item => (
           <motion.button
             key={item.id}
             whileTap={{ scale: 0.98 }}
@@ -99,9 +83,7 @@ export default function LoveChecklist() {
               <CheckSquare className={`h-4 w-4 ${item.done ? 'fill-current' : ''}`} />
               {item.label}
             </span>
-            <span className="text-[9px] uppercase tracking-[0.18em]">
-              {item.done ? 'yes' : 'not yet'}
-            </span>
+            <span className="text-[9px] uppercase tracking-[0.18em]">{item.done ? 'yes' : 'not yet'}</span>
           </motion.button>
         ))}
       </div>
@@ -111,13 +93,9 @@ export default function LoveChecklist() {
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Add a tiny act of love"
-          className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40 outline-none"
+          className="glass-input w-full rounded-2xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
         />
-        <button
-          onClick={addItem}
-          className="glass-button px-3 py-2 text-sm"
-          aria-label="Add checklist item"
-        >
+        <button onClick={addItem} className="glass-button px-3 py-2 text-sm" aria-label="Add checklist item">
           <Plus className="h-4 w-4" />
         </button>
       </div>
