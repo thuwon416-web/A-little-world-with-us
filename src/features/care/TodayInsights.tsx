@@ -26,7 +26,7 @@ export default function TodayInsights({ selectedDate }: TodayInsightsProps) {
       <div className="flex items-center gap-3">
         <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]"><Heart className="h-5 w-5" /></div>
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Today's Insights</p>
+          <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Today&apos;s Insights</p>
           <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">{selectedDate ? selectedDate.toLocaleDateString() : 'Today'}</p>
         </div>
       </div>
