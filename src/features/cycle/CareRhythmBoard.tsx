@@ -4,11 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HeartPulse, Plus, Sparkles } from 'lucide-react'
 
-type RhythmItem = {
-  id: string
-  label: string
-  done: boolean
-}
+type RhythmItem = { id: string; label: string; done: boolean }
 
 const starterItems: RhythmItem[] = [
   { id: 'r1', label: 'Morning check-in', done: true },
@@ -28,28 +24,19 @@ export default function CareRhythmBoard() {
         const parsed = JSON.parse(raw)
         if (Array.isArray(parsed) && parsed.length) setItems(parsed)
       }
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
   }, [])
 
-  useEffect(() => {
-    localStorage.setItem('care-rhythm-board', JSON.stringify(items))
-  }, [items])
+  useEffect(() => { localStorage.setItem('care-rhythm-board', JSON.stringify(items)) }, [items])
 
-  const doneCount = useMemo(() => items.filter((item) => item.done).length, [items])
+  const doneCount = useMemo(() => items.filter(item => item.done).length, [items])
   const progress = items.length ? Math.round((doneCount / items.length) * 100) : 0
 
-  const toggleItem = (id: string) => {
-    setItems((current) =>
-      current.map((item) => (item.id === id ? { ...item, done: !item.done } : item))
-    )
-  }
-
+  const toggleItem = (id: string) => setItems(current => current.map(item => item.id === id ? { ...item, done: !item.done } : item))
   const addItem = () => {
     const value = draft.trim()
     if (!value) return
-    setItems((current) => [...current, { id: `rhythm-${Date.now()}`, label: value, done: false }])
+    setItems(current => [...current, { id: `rhythm-${Date.now()}`, label: value, done: false }])
     setDraft('')
   }
 
@@ -72,7 +59,7 @@ export default function CareRhythmBoard() {
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-[var(--card-bg-strong)]">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-1)] to-[var(--accent-2)]"
+            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)]"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.45 }}
@@ -81,7 +68,7 @@ export default function CareRhythmBoard() {
       </div>
 
       <div className="space-y-2">
-        {items.map((item) => (
+        {items.map(item => (
           <motion.button
             key={item.id}
             whileTap={{ scale: 0.98 }}
@@ -93,9 +80,7 @@ export default function CareRhythmBoard() {
             }`}
           >
             <span>{item.label}</span>
-            <span className="text-[9px] uppercase tracking-[0.18em]">
-              {item.done ? 'done' : 'later'}
-            </span>
+            <span className="text-[9px] uppercase tracking-[0.18em]">{item.done ? 'done' : 'later'}</span>
           </motion.button>
         ))}
       </div>
@@ -105,13 +90,9 @@ export default function CareRhythmBoard() {
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Add a care habit"
-          className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
+          className="glass-input w-full rounded-2xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
         />
-        <button
-          onClick={addItem}
-          className="glass-button px-3 py-2 text-sm"
-          aria-label="Add care rhythm item"
-        >
+        <button onClick={addItem} className="glass-button px-3 py-2 text-sm" aria-label="Add care rhythm item">
           <Plus className="h-4 w-4" />
         </button>
       </div>
@@ -121,9 +102,7 @@ export default function CareRhythmBoard() {
           <Sparkles className="h-4 w-4" />
           Gentle note
         </div>
-        <p>
-          Care is not a performance. It is a rhythm of being gentle with yourself and each other.
-        </p>
+        <p>Care is not a performance. It is a rhythm of being gentle with yourself and each other.</p>
       </div>
     </div>
   )
