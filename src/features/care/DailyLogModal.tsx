@@ -247,7 +247,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
                 }`}
               >
                 <Activity className="h-4 w-4 mx-auto mb-1" />
-                <p className="text-xs font-medium">Yesterday's pill</p>
+                <p className="text-xs font-medium">Yesterday&apos;s pill</p>
               </button>
             </div>
           </div>
