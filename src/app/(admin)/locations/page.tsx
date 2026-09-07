@@ -4,14 +4,16 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { AlertTriangle, Battery, Clock3, MapPin, Navigation, PhoneCall, RefreshCw, Route, ShieldCheck, Smartphone } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import EmergencySOS from '@/features/location/EmergencySOS'
+import dynamic from 'next/dynamic'
+
+const PairLocationMap = dynamic(() => import('@/features/location/PairLocationMap'), { ssr: false, loading: () => <div className="flex h-[430px] items-center justify-center rounded-2xl bg-[var(--bg-2)] text-sm text-[var(--text-secondary)]">Loading map…</div> })
 
 type Profile = { id: string; email: string; full_name: string | null; avatar_url: string | null }
 type LocationRow = { user_id: string; couple_id: string; latitude: number; longitude: number; accuracy: number | null; updated_at: string; battery_level: number | null; is_charging: boolean | null; network_type: string | null; device_name: string | null; app_version: string | null }
 type HistoryRow = { id: string; user_id: string; latitude: number; longitude: number; accuracy: number | null; captured_at: string }
 type EmergencyAlert = { id: string; reporter_id: string; latitude: number; longitude: number; created_at: string; resolved_at: string | null }
+type SavedPlace = { id: string; name: string; latitude: number; longitude: number; radius_meters: number }
 type Tab = 'live' | 'timeline' | 'places' | 'device' | 'calls' | 'safety'
-
-const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
 function relativeTime(value: string) {
   const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000))
@@ -20,18 +22,13 @@ function relativeTime(value: string) {
   return `${Math.floor(seconds / 3600)}h ago`
 }
 
-function mapImageUrl(rows: LocationRow[]) {
-  if (!mapboxToken || rows.length === 0) return null
-  const markers = rows.map((row, index) => `pin-s-${index === 0 ? 'a' : 'b'}+${index === 0 ? 'ff6b9d' : 'ffd700'}(${row.longitude},${row.latitude})`).join(',')
-  return `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${markers}/auto/1100x620?padding=64&access_token=${mapboxToken}`
-}
-
 export default function AdminLocationsPage() {
   const [tab, setTab] = useState<Tab>('live')
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [locations, setLocations] = useState<LocationRow[]>([])
   const [history, setHistory] = useState<HistoryRow[]>([])
   const [alerts, setAlerts] = useState<EmergencyAlert[]>([])
+  const [places, setPlaces] = useState<SavedPlace[]>([])
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -47,17 +44,19 @@ export default function AdminLocationsPage() {
     const { data: link, error: linkError } = await supabase.from('couple_links').select('inviter_id, accepted_by, couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').maybeSingle()
     if (linkError || !link?.accepted_by || !link.couple_id) { setError('No accepted linked partner is available yet.'); setLoading(false); return }
     const userIds = [link.inviter_id, link.accepted_by]
-    const [profilesResult, locationResult, historyResult, alertsResult] = await Promise.all([
+    const [profilesResult, locationResult, historyResult, alertsResult, placesResult] = await Promise.all([
       supabase.from('profiles').select('id,email,full_name,avatar_url').in('id', userIds),
       supabase.from('user_locations').select('*').eq('couple_id', link.couple_id).in('user_id', userIds),
       supabase.from('location_history').select('id,user_id,latitude,longitude,accuracy,captured_at').eq('couple_id', link.couple_id).gte('captured_at', new Date(Date.now() - 7 * 86400000).toISOString()).order('captured_at', { ascending: false }).limit(1500),
       supabase.from('emergency_alerts').select('id,reporter_id,latitude,longitude,created_at,resolved_at').eq('couple_id', link.couple_id).order('created_at', { ascending: false }).limit(20),
+      supabase.from('saved_places').select('id,name,latitude,longitude,radius_meters').eq('couple_id', link.couple_id).order('created_at', { ascending: false }),
     ])
-    if (profilesResult.error || locationResult.error || historyResult.error || alertsResult.error) { setError(profilesResult.error?.message || locationResult.error?.message || historyResult.error?.message || alertsResult.error?.message || 'Unable to load location data.'); setLoading(false); return }
+    if (profilesResult.error || locationResult.error || historyResult.error || alertsResult.error || placesResult.error) { setError(profilesResult.error?.message || locationResult.error?.message || historyResult.error?.message || alertsResult.error?.message || placesResult.error?.message || 'Unable to load location data.'); setLoading(false); return }
     setProfiles((profilesResult.data ?? []) as Profile[])
     setLocations((locationResult.data ?? []) as LocationRow[])
     setHistory((historyResult.data ?? []) as HistoryRow[])
     setAlerts((alertsResult.data ?? []) as EmergencyAlert[])
+    setPlaces((placesResult.data ?? []) as SavedPlace[])
     setSelectedUser((current) => current && userIds.includes(current) ? current : user.id)
     setLoading(false)
   }, [])
@@ -71,7 +70,7 @@ export default function AdminLocationsPage() {
   const selectedLocation = locations.find((row) => row.user_id === selectedUser) ?? null
   const selectedProfile = profiles.find((row) => row.id === selectedUser) ?? null
   const selectedHistory = useMemo(() => history.filter((row) => row.user_id === selectedUser), [history, selectedUser])
-  const imageUrl = useMemo(() => mapImageUrl(locations), [locations])
+  const profileNames = useMemo(() => Object.fromEntries(profiles.map((profile) => [profile.id, profile.full_name || profile.email])), [profiles])
   const tabs: { id: Tab; label: string; icon: typeof MapPin }[] = [
     { id: 'live', label: 'Live Map', icon: MapPin }, { id: 'timeline', label: 'Timeline', icon: Route }, { id: 'places', label: 'Saved Places', icon: Navigation }, { id: 'device', label: 'Device Status', icon: Smartphone }, { id: 'calls', label: 'App Calls', icon: PhoneCall }, { id: 'safety', label: 'Safety / SOS', icon: ShieldCheck },
   ]
@@ -84,9 +83,9 @@ export default function AdminLocationsPage() {
     <nav className="flex gap-2 overflow-x-auto pb-1">{tabs.map(({ id, label, icon: Icon }) => <button key={id} type="button" onClick={() => setTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm ${tab === id ? 'border-[var(--accent-1)]/50 bg-[var(--accent-1)]/15 text-[var(--accent-1)]' : 'border-white/10 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}><Icon className="h-4 w-4" />{label}</button>)}</nav>
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px]">
       <section className="glass-card min-h-[520px] overflow-hidden p-4">
-        {tab === 'live' && <>{imageUrl ? <img src={imageUrl} alt="Live locations map" className="h-[430px] w-full rounded-2xl object-cover" /> : <div className="flex h-[430px] items-center justify-center rounded-2xl bg-[var(--bg-2)] p-6 text-center text-sm text-[var(--text-secondary)]">Add <code className="mx-1">NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN</code> to show the live Mapbox map. GPS status cards below remain available.</div>}<div className="mt-4 grid gap-3 sm:grid-cols-2">{locations.map((row) => { const person = profiles.find((item) => item.id === row.user_id); return <a key={row.user_id} href={`https://www.google.com/maps?q=${row.latitude},${row.longitude}`} target="_blank" rel="noreferrer" className="rounded-2xl border border-white/10 bg-[var(--bg-2)] p-4 hover:border-[var(--accent-1)]/40"><p className="font-medium text-[var(--text-primary)]">{person?.full_name || person?.email || 'Linked account'}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{row.latitude.toFixed(5)}, {row.longitude.toFixed(5)}</p><p className="mt-2 text-xs text-[var(--accent-2)]">Updated {relativeTime(row.updated_at)} · ±{Math.round(row.accuracy ?? 0)}m</p></a>})}</div></>}
+        {tab === 'live' && <><PairLocationMap locations={locations} history={history} selectedUser={selectedUser} names={profileNames} places={places} alerts={alerts} /><div className="mt-4 grid gap-3 sm:grid-cols-2">{locations.map((row) => { const person = profiles.find((item) => item.id === row.user_id); return <a key={row.user_id} href={`https://www.openstreetmap.org/?mlat=${row.latitude}&mlon=${row.longitude}#map=16/${row.latitude}/${row.longitude}`} target="_blank" rel="noreferrer" className="rounded-2xl border border-white/10 bg-[var(--bg-2)] p-4 hover:border-[var(--accent-1)]/40"><p className="font-medium text-[var(--text-primary)]">{person?.full_name || person?.email || 'Linked account'}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{row.latitude.toFixed(5)}, {row.longitude.toFixed(5)}</p><p className="mt-2 text-xs text-[var(--accent-2)]">Updated {relativeTime(row.updated_at)} · ±{Math.round(row.accuracy ?? 0)}m</p></a>})}</div></>}
         {tab === 'timeline' && <Timeline rows={selectedHistory} />}
-        {tab === 'places' && <EmptyPanel title="Saved places" text="Saved Home, Work, Airport, and custom-place geofences will appear here after the mobile geofence setup is enabled." />}
+        {tab === 'places' && (places.length ? <div className="space-y-3 p-2"><h2 className="text-xl text-[var(--text-primary)]">Saved places</h2>{places.map((place) => <div key={place.id} className="rounded-2xl bg-[var(--bg-2)] p-4"><p className="font-medium text-[var(--text-primary)]">{place.name}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{place.latitude.toFixed(5)}, {place.longitude.toFixed(5)} · {place.radius_meters}m radius</p></div>)}</div> : <EmptyPanel title="No saved places" text="Create Home, Work, Airport, or custom safe zones from the admin location dashboard." />)}
         {tab === 'device' && <DevicePanel location={selectedLocation} profile={selectedProfile} />}
         {tab === 'calls' && <EmptyPanel title="App call history" text="Only calls made through this app will be listed here. Phone, Telegram, and other app call logs are not collected." />}
         {tab === 'safety' && <SafetyPanel alerts={alerts} profiles={profiles} onChanged={load} />}

@@ -18,15 +18,15 @@ export type CareCheckIn = {
   periodStarted?: boolean
 }
 
-async function getActiveCareCoupleLinkId(userId: string): Promise<string | undefined> {
+async function getActiveCareCoupleId(userId: string): Promise<string | undefined> {
   const { data, error } = await supabase
     .from('couple_links')
-    .select('id')
+    .select('couple_id')
     .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
     .eq('status', 'accepted')
     .maybeSingle()
   if (error) throw error
-  return data?.id
+  return data?.couple_id ?? undefined
 }
 
 export async function saveTodayCareLog(checkIn: CareCheckIn) {
@@ -34,8 +34,7 @@ export async function saveTodayCareLog(checkIn: CareCheckIn) {
   if (authError || !user) throw new Error('Please sign in again to save your check-in.')
 
   const logDate = new Date().toISOString().slice(0, 10)
-  const nextSymptoms = checkIn.periodStarted ? [...new Set([...checkIn.symptoms, 'Period started'])] : checkIn.symptoms
-  const coupleId = await getActiveCareCoupleLinkId(user.id)
+  const coupleId = await getActiveCareCoupleId(user.id)
   if (!coupleId) throw new Error('Accept a partner link before saving shared Care data.')
   const { data: existing, error: readError } = await supabase
     .from('care_daily_logs')
@@ -51,7 +50,8 @@ export async function saveTodayCareLog(checkIn: CareCheckIn) {
       .from('care_daily_logs')
       .update({
         mood: checkIn.mood ?? null,
-        symptoms: nextSymptoms,
+        symptoms: checkIn.symptoms,
+        period_day: checkIn.periodStarted ?? false,
         sex: checkIn.sex ?? [],
         discharge: checkIn.discharge ?? [],
         digestion: checkIn.digestion ?? [],
@@ -76,7 +76,8 @@ export async function saveTodayCareLog(checkIn: CareCheckIn) {
     user_id: user.id,
     couple_id: coupleId ?? null,
     log_date: logDate,
-    symptoms: nextSymptoms,
+    symptoms: checkIn.symptoms,
+    period_day: checkIn.periodStarted ?? false,
     mood: checkIn.mood ?? null,
     sex: checkIn.sex ?? [],
     discharge: checkIn.discharge ?? [],

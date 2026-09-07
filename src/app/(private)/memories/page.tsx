@@ -141,8 +141,8 @@ function MemoriesPageContent() {
       return
     }
 
-    const { data: link } = await supabase.from('couple_links').select('id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
-    setCoupleLinkId(link?.id ?? null)
+    const { data: link } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
+    setCoupleLinkId(link?.couple_id ?? null)
     const { data, error: memoriesError } = await supabase
       .from('memories')
       .select('*')

@@ -32,10 +32,12 @@ export interface BucketListRecord {
   created_at: string
 }
 
-const defaultCoupleId = 'local-couple'
-
-function getCoupleId() {
-  return defaultCoupleId
+async function getCoupleId() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('User not authenticated')
+  const { data, error } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').not('couple_id', 'is', null).maybeSingle()
+  if (error || !data?.couple_id) throw new Error('No accepted couple is linked to this account.')
+  return data.couple_id
 }
 
 export async function getPlans(): Promise<PlanRecord[]> {
@@ -46,7 +48,7 @@ export async function getPlans(): Promise<PlanRecord[]> {
   const { data, error } = await supabase
     .from('plans')
     .select('*, plan_items(*)')
-    .eq('couple_id', getCoupleId())
+    .eq('couple_id', await getCoupleId())
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -67,10 +69,14 @@ export async function createPlan(payload: {
     return null
   }
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('User not authenticated')
+
   const { data, error } = await supabase
     .from('plans')
     .insert({
-      couple_id: getCoupleId(),
+      couple_id: await getCoupleId(),
+      user_id: user.id,
       title: payload.title,
       description: payload.description ?? null,
       type: payload.type ?? 'goal',
@@ -169,7 +175,7 @@ export async function getBucketList(): Promise<BucketListRecord[]> {
   const { data, error } = await supabase
     .from('bucket_list')
     .select('*')
-    .eq('couple_id', getCoupleId())
+    .eq('couple_id', await getCoupleId())
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -184,9 +190,12 @@ export async function addBucketItem(item: string) {
     return null
   }
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('User not authenticated')
+
   const { data, error } = await supabase
     .from('bucket_list')
-    .insert({ couple_id: getCoupleId(), item, completed: false, completed_at: null })
+    .insert({ couple_id: await getCoupleId(), user_id: user.id, item, completed: false, completed_at: null })
     .select('*')
     .single()
 

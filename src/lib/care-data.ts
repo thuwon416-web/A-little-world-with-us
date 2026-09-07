@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 export type CareLog = {
-  id: string; user_id: string; couple_id: string; log_date: string; mood: string | null; symptoms: string[]; sex: string[]; discharge: string[]; digestion: string[]; pregnancy_test: string[]; ovulation_test: string | null; contraceptives: string[]; other_pills: string[]; medication_taken: boolean | null; water_intake: number | null; weight: number | null; basal_temp: number | null; notes: string | null; activities: string[]; other_tags: string[]; updated_at: string; updated_by: string | null
+  id: string; user_id: string; couple_id: string; log_date: string; period_day: boolean; mood: string | null; symptoms: string[]; sex: string[]; discharge: string[]; digestion: string[]; pregnancy_test: string[]; ovulation_test: string | null; contraceptives: string[]; other_pills: string[]; medication_taken: boolean | null; water_intake: number | null; weight: number | null; basal_temp: number | null; notes: string | null; activities: string[]; other_tags: string[]; updated_at: string; updated_by: string | null
 }
 
 export type CycleSettings = { couple_id: string; cycle_length: number; period_length: number; last_period_start: string | null; updated_at: string }
@@ -16,9 +16,9 @@ const daysBetween = (start: string, end: string) => Math.round((new Date(`${end}
 export async function getAcceptedCareContext() {
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return null
-  const { data, error } = await supabase.from('couple_links').select('id').or(`inviter_id.eq.${auth.user.id},accepted_by.eq.${auth.user.id}`).eq('status', 'accepted').maybeSingle()
+  const { data, error } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${auth.user.id},accepted_by.eq.${auth.user.id}`).eq('status', 'accepted').maybeSingle()
   if (error) throw error
-  return data ? { userId: auth.user.id, coupleId: data.id } : null
+  return data?.couple_id ? { userId: auth.user.id, coupleId: data.couple_id } : null
 }
 
 export async function getCareLogs(coupleId: string) {
@@ -65,7 +65,10 @@ export async function saveCareLog(coupleId: string, userId: string, draft: CareD
   if (error) throw error
 }
 
-export function periodStarts(logs: CareLog[]) { return logs.filter((log) => log.symptoms?.includes('Period started')).map((log) => log.log_date).sort((a, b) => b.localeCompare(a)) }
+export function periodStarts(logs: CareLog[]) {
+  const days = logs.filter((log) => log.period_day).map((log) => log.log_date).sort()
+  return days.filter((day, index) => index === 0 || daysBetween(days[index - 1], day) > 1).reverse()
+}
 
 export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings): CycleSummary {
   const starts = periodStarts(logs)

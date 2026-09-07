@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import { getActiveCoupleId } from '@/services/location'
 
 export type MoodValue = 'happy' | 'calm' | 'stressed' | 'sad' | 'excited' | 'tired'
 export type CareType = 'water' | 'sleep' | 'meals' | 'exercise'
@@ -36,17 +37,25 @@ async function getUserId(): Promise<string> {
   return user.id
 }
 
+async function getSharedCoupleId(userId: string) {
+  const coupleId = await getActiveCoupleId(userId)
+  if (!coupleId) throw new Error('No accepted couple is linked to this account.')
+  return coupleId
+}
+
 export async function logMood(mood: MoodValue, note?: string) {
   if (!isSupabaseConfigured) {
     return null
   }
 
   const userId = await getUserId()
+  const coupleId = await getSharedCoupleId(userId)
 
   const { data, error } = await supabase
     .from('mood_logs')
     .insert({
       user_id: userId,
+      couple_id: coupleId,
       mood,
       note: note ?? null,
       created_at: new Date().toISOString(),
@@ -67,11 +76,12 @@ export async function getMoodHistory(days = 7): Promise<MoodLog[]> {
   }
 
   const userId = await getUserId()
+  const coupleId = await getSharedCoupleId(userId)
   const cutoff = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString()
   const { data, error } = await supabase
     .from('mood_logs')
     .select('*')
-    .eq('user_id', userId)
+    .eq('couple_id', coupleId)
     .gte('created_at', cutoff)
     .order('created_at', { ascending: false })
 
@@ -88,10 +98,11 @@ export async function logCare(type: CareType) {
   }
 
   const userId = await getUserId()
+  const coupleId = await getSharedCoupleId(userId)
 
   const { data, error } = await supabase
     .from('care_logs')
-    .insert({ user_id: userId, type, completed_at: new Date().toISOString() })
+    .insert({ user_id: userId, couple_id: coupleId, type, completed_at: new Date().toISOString() })
     .select('*')
     .single()
 
@@ -108,7 +119,8 @@ export async function getCareStats() {
   }
 
   const userId = await getUserId()
-  const { data, error } = await supabase.from('care_logs').select('*').eq('user_id', userId)
+  const coupleId = await getSharedCoupleId(userId)
+  const { data, error } = await supabase.from('care_logs').select('*').eq('couple_id', coupleId)
 
   if (error) {
     throw new Error(error.message)
@@ -131,11 +143,13 @@ export async function logCycle(startDate: string, endDate?: string, cycleLength?
   }
 
   const userId = await getUserId()
+  const coupleId = await getSharedCoupleId(userId)
 
   const { data, error } = await supabase
     .from('cycle_logs')
     .insert({
       user_id: userId,
+      couple_id: coupleId,
       start_date: startDate,
       end_date: endDate ?? null,
       cycle_length: cycleLength ?? null,
@@ -156,10 +170,11 @@ export async function predictCycle() {
   }
 
   const userId = await getUserId()
+  const coupleId = await getSharedCoupleId(userId)
   const { data, error } = await supabase
     .from('cycle_logs')
     .select('*')
-    .eq('user_id', userId)
+    .eq('couple_id', coupleId)
     .order('start_date', { ascending: false })
     .limit(3)
 

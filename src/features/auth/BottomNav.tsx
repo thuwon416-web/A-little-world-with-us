@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
@@ -49,6 +49,15 @@ export default function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
   const [moreMenuOpen, setMoreMenuOpen] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
+
+  useEffect(() => {
+    void supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data } = await supabase.from('profiles').select('role,email').eq('id', user.id).maybeSingle()
+      setIsAdmin(data?.role === 'admin' && data.email === 'thuwon416@gmail.com')
+    })
+  }, [])
 
   const handleExit = async () => {
     await supabase.auth.signOut()
@@ -115,7 +124,7 @@ export default function BottomNav() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {morePages.map((page) => (
+              {morePages.filter((page) => page.href !== '/location' || isAdmin).map((page) => (
                 <Link
                   key={page.name}
                   href={page.href}
