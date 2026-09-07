@@ -1,10 +1,99 @@
 import { supabase } from './supabase'
 
-export interface DailyLog {
+export type CareLog = {
+  id: string; user_id: string; couple_id: string; log_date: string; mood: string | null; symptoms: string[]; sex: string[]; discharge: string[]; digestion: string[]; pregnancy_test: string[]; ovulation_test: string | null; contraceptives: string[]; other_pills: string[]; medication_taken: boolean | null; water_intake: number | null; weight: number | null; basal_temp: number | null; notes: string | null; activities: string[]; other_tags: string[]; updated_at: string; updated_by: string | null
+}
+
+export type CycleSettings = { couple_id: string; cycle_length: number; period_length: number; last_period_start: string | null; updated_at: string }
+export type CareReminder = { id: string; couple_id: string; reminder_type: 'pms' | 'period' | 'fertile' | 'symptom'; enabled: boolean }
+export type CareDraft = Omit<Partial<CareLog>, 'id' | 'user_id' | 'couple_id' | 'updated_at' | 'updated_by'> & { log_date: string }
+export type CycleSummary = { cycleLength: number; periodLength: number; lastPeriodStart: string | null; nextPeriodStart: string | null; fertileStart: string | null; fertileEnd: string | null; ovulationDate: string | null; day: number | null; regular: boolean; estimateReady: boolean }
+
+const dateKey = (value: Date) => value.toISOString().slice(0, 10)
+const addDays = (date: string, amount: number) => { const result = new Date(`${date}T12:00:00`); result.setDate(result.getDate() + amount); return dateKey(result) }
+const daysBetween = (start: string, end: string) => Math.round((new Date(`${end}T12:00:00`).getTime() - new Date(`${start}T12:00:00`).getTime()) / 86400000)
+
+export async function getAcceptedCareContext() {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return null
+  const { data, error } = await supabase.from('couple_links').select('id').or(`inviter_id.eq.${auth.user.id},accepted_by.eq.${auth.user.id}`).eq('status', 'accepted').maybeSingle()
+  if (error) throw error
+  return data ? { userId: auth.user.id, coupleId: data.id } : null
+}
+
+export async function getCareLogs(coupleId: string) {
+  const { data, error } = await supabase.from('care_daily_logs').select('*').eq('couple_id', coupleId).order('log_date', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as CareLog[]
+}
+
+export async function getCycleSettings(coupleId: string): Promise<CycleSettings> {
+  const { data, error } = await supabase.from('care_cycle_settings').select('*').eq('couple_id', coupleId).maybeSingle()
+  if (error) throw error
+  return (data as CycleSettings | null) ?? { couple_id: coupleId, cycle_length: 28, period_length: 5, last_period_start: null, updated_at: '' }
+}
+
+export async function saveCycleSettings(settings: Omit<CycleSettings, 'updated_at'>) {
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) throw new Error('Sign in is required.')
+  const { error } = await supabase.from('care_cycle_settings').upsert({ ...settings, updated_by: auth.user.id, updated_at: new Date().toISOString() })
+  if (error) throw error
+}
+
+export async function getCareReminders(coupleId: string) {
+  const { data, error } = await supabase.from('care_reminders').select('id,couple_id,reminder_type,enabled').eq('couple_id', coupleId)
+  if (error) throw error
+  return (data ?? []) as CareReminder[]
+}
+
+export async function saveCareReminder(coupleId: string, userId: string, reminderType: CareReminder['reminder_type'], enabled: boolean) {
+  const { data: existing, error: lookupError } = await supabase.from('care_reminders').select('id').eq('couple_id', coupleId).eq('reminder_type', reminderType).maybeSingle()
+  if (lookupError) throw lookupError
+  const request = existing
+    ? supabase.from('care_reminders').update({ enabled }).eq('id', existing.id)
+    : supabase.from('care_reminders').insert({ couple_id: coupleId, user_id: userId, reminder_type: reminderType, enabled })
+  const { error } = await request
+  if (error) throw error
+}
+
+export async function saveCareLog(coupleId: string, userId: string, draft: CareDraft) {
+  const { data: existing, error: lookupError } = await supabase.from('care_daily_logs').select('id').eq('couple_id', coupleId).eq('log_date', draft.log_date).maybeSingle()
+  if (lookupError) throw lookupError
+  const payload = { ...draft, updated_at: new Date().toISOString(), updated_by: userId }
+  const request = existing ? supabase.from('care_daily_logs').update(payload).eq('id', existing.id) : supabase.from('care_daily_logs').insert({ ...payload, couple_id: coupleId, user_id: userId, created_by: userId })
+  const { error } = await request
+  if (error) throw error
+}
+
+export function periodStarts(logs: CareLog[]) { return logs.filter((log) => log.symptoms?.includes('Period started')).map((log) => log.log_date).sort((a, b) => b.localeCompare(a)) }
+
+export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings): CycleSummary {
+  const starts = periodStarts(logs)
+  const historicalLengths = starts.slice(0, 6).flatMap((start, index) => { const older = starts[index + 1]; const length = older ? daysBetween(older, start) : 0; return length >= 15 && length <= 60 ? [length] : [] })
+  const cycleLength = historicalLengths.length ? Math.round(historicalLengths.reduce((sum, value) => sum + value, 0) / historicalLengths.length) : settings.cycle_length
+  const lastPeriodStart = settings.last_period_start ?? starts[0] ?? null
+  const variation = historicalLengths.length > 1 ? Math.max(...historicalLengths) - Math.min(...historicalLengths) : 0
+  if (!lastPeriodStart) return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular: variation <= 7, estimateReady: false }
+  const nextPeriodStart = addDays(lastPeriodStart, cycleLength)
+  const ovulationDate = addDays(nextPeriodStart, -14)
+  const today = dateKey(new Date())
+  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, fertileStart: addDays(ovulationDate, -5), fertileEnd: addDays(ovulationDate, 1), ovulationDate, day: Math.max(1, daysBetween(lastPeriodStart, today) + 1), regular: variation <= 7, estimateReady: starts.length >= 2 || settings.last_period_start !== null }
+}
+
+export function getFertilityLabel(summary: CycleSummary) {
+  if (!summary.estimateReady || !summary.fertileStart || !summary.fertileEnd) return 'Fertility estimate unavailable'
+  const today = dateKey(new Date())
+  return today >= summary.fertileStart && today <= summary.fertileEnd ? 'Higher estimated fertility' : 'Lower estimated fertility'
+}
+
+// Backward-compatible exports retained while older Care widgets are retired.
+// These widgets are progressively being replaced by the shared Care experience;
+// their optional fields intentionally describe the older, smaller form.
+export type DailyLog = {
   id?: string
   user_id: string
   couple_id?: string
-  log_date: string // ISO date
+  log_date: string
   mood?: string
   symptoms?: string[]
   sex?: string[]
@@ -13,195 +102,32 @@ export interface DailyLog {
   weight?: number
   temperature?: number
   notes?: string
-  ovulation_test?: 'Positive' | 'Negative' | 'Did not take'
+  ovulation_test?: string
   activities?: string[]
   other_tags?: string[]
 }
-
-export async function getActiveCareCoupleLinkId(userId: string): Promise<string | undefined> {
-  const { data, error } = await supabase
-    .from('couple_links')
-    .select('id')
-    .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
-    .eq('status', 'accepted')
-    .maybeSingle()
-
-  if (error) throw error
-  return data?.id
-}
-
-export interface CycleData {
-  last_period_start: string | null
-  average_cycle_length: number
-  average_period_length: number
-  next_period_start: string | null
-  fertile_window_start: string | null
-  fertile_window_end: string | null
-  ovulation_date: string | null
-}
-
-/**
- * Save daily log to Supabase
- */
+export type CycleData = { last_period_start: string | null; average_cycle_length: number; average_period_length: number; next_period_start: string | null; fertile_window_start: string | null; fertile_window_end: string | null; ovulation_date: string | null }
+export async function getActiveCareCoupleLinkId(userId: string) { const context = await getAcceptedCareContext(); return context?.userId === userId ? context.coupleId : undefined }
+export async function getDailyLogs(_userId: string, startDate?: string, endDate?: string) { const context = await getAcceptedCareContext(); if (!context) return []; const logs = await getCareLogs(context.coupleId); return logs.filter((log) => (!startDate || log.log_date >= startDate) && (!endDate || log.log_date <= endDate)) }
+export async function getCurrentMonthLogs(userId: string) { const now = new Date(); return getDailyLogs(userId, new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10), new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10)) }
+export async function getLatestLog(userId: string) { const logs = await getDailyLogs(userId); return logs[0] ?? null }
+export async function getTodayLog(userId: string) { return (await getDailyLogs(userId, dateKey(new Date()), dateKey(new Date())))[0] ?? null }
+export function calculateCycleData(logs: CareLog[]): CycleData { const summary = calculateCycleSummary(logs, { couple_id: '', cycle_length: 28, period_length: 5, last_period_start: null, updated_at: '' }); return { last_period_start: summary.lastPeriodStart, average_cycle_length: summary.cycleLength, average_period_length: summary.periodLength, next_period_start: summary.nextPeriodStart, fertile_window_start: summary.fertileStart, fertile_window_end: summary.fertileEnd, ovulation_date: summary.ovulationDate } }
 export async function saveDailyLog(log: DailyLog) {
-  try {
-    const { data, error } = await supabase
-      .from('care_daily_logs')
-      .upsert({
-        ...log,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id,log_date' })
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  } catch (error) {
-    console.error('Error saving daily log:', error)
-    throw error
-  }
-}
-
-/**
- * Fetch every Care log visible to the signed-in account. RLS limits this to
- * the account's own logs and its accepted partner's logs.
- */
-export async function getDailyLogs(_userId: string, startDate?: string, endDate?: string) {
-  try {
-    let query = supabase
-      .from('care_daily_logs')
-      .select('*')
-      .order('log_date', { ascending: false })
-
-    if (startDate) {
-      query = query.gte('log_date', startDate)
-    }
-    if (endDate) {
-      query = query.lte('log_date', endDate)
-    }
-
-    const { data, error } = await query
-
-    if (error) throw error
-    return data || []
-  } catch (error) {
-    console.error('Error fetching daily logs:', error)
-    return []
-  }
-}
-
-/**
- * Get latest daily log for a user
- */
-export async function getLatestLog(userId: string) {
-  try {
-    const { data, error } = await supabase
-      .from('care_daily_logs')
-      .select('*')
-      .eq('user_id', userId)
-      .order('log_date', { ascending: false })
-      .limit(1)
-      .single()
-
-    if (error && error.code !== 'PGRST116') throw error // PGRST116 = no rows
-    return data || null
-  } catch (error) {
-    console.error('Error fetching latest log:', error)
-    return null
-  }
-}
-
-/**
- * Calculate cycle data from logs
- */
-export function calculateCycleData(logs: DailyLog[]): CycleData {
-  // Filter logs with period start
-  const periodLogs = logs.filter(log =>
-    log.symptoms?.includes('Period started') ||
-    log.other_tags?.includes('Period start')
-  )
-
-  if (periodLogs.length === 0) {
-    // No period data, return defaults
-    return {
-      last_period_start: null,
-      average_cycle_length: 28,
-      average_period_length: 5,
-      next_period_start: null,
-      fertile_window_start: null,
-      fertile_window_end: null,
-      ovulation_date: null,
-    }
-  }
-
-  // Sort by date
-  periodLogs.sort((a, b) =>
-    new Date(b.log_date).getTime() - new Date(a.log_date).getTime()
-  )
-
-  const lastPeriodStart = periodLogs[0].log_date
-
-  // Calculate average cycle length from last 3 cycles
-  const cycleLengths: number[] = []
-  for (let i = 1; i < Math.min(periodLogs.length, 4); i++) {
-    const daysBetween = Math.floor(
-      (new Date(periodLogs[i - 1].log_date).getTime() -
-       new Date(periodLogs[i].log_date).getTime()) /
-      (1000 * 60 * 60 * 24)
-    )
-    if (daysBetween > 0 && daysBetween < 60) {
-      cycleLengths.push(daysBetween)
-    }
-  }
-
-  const averageCycleLength = cycleLengths.length > 0
-    ? Math.round(cycleLengths.reduce((a, b) => a + b, 0) / cycleLengths.length)
-    : 28
-
-  const averagePeriodLength = 5 // Default
-
-  // Calculate next period
-  const lastPeriodDate = new Date(lastPeriodStart)
-  const nextPeriodDate = new Date(lastPeriodDate)
-  nextPeriodDate.setDate(nextPeriodDate.getDate() + averageCycleLength)
-
-  // Calculate fertile window (14 days before next period, 5-day window)
-  const ovulationDate = new Date(nextPeriodDate)
-  ovulationDate.setDate(ovulationDate.getDate() - 14)
-
-  const fertileWindowStart = new Date(ovulationDate)
-  fertileWindowStart.setDate(fertileWindowStart.getDate() - 2)
-
-  const fertileWindowEnd = new Date(ovulationDate)
-  fertileWindowEnd.setDate(fertileWindowEnd.getDate() + 2)
-
-  return {
-    last_period_start: lastPeriodStart,
-    average_cycle_length: averageCycleLength,
-    average_period_length: averagePeriodLength,
-    next_period_start: nextPeriodDate.toISOString().split('T')[0],
-    fertile_window_start: fertileWindowStart.toISOString().split('T')[0],
-    fertile_window_end: fertileWindowEnd.toISOString().split('T')[0],
-    ovulation_date: ovulationDate.toISOString().split('T')[0],
-  }
-}
-
-/**
- * Get today's log
- */
-export async function getTodayLog(userId: string) {
-  const today = new Date().toISOString().split('T')[0]
-  const logs = await getDailyLogs(userId, today, today)
-  return logs.length > 0 ? logs[0] : null
-}
-
-/**
- * Get logs for current month
- */
-export async function getCurrentMonthLogs(userId: string) {
-  const now = new Date()
-  const startDate = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0]
-  const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().split('T')[0]
-  return getDailyLogs(userId, startDate, endDate)
+  const coupleId = await getActiveCareCoupleLinkId(log.user_id)
+  if (!coupleId) throw new Error('An accepted partner link is required.')
+  return saveCareLog(coupleId, log.user_id, {
+    log_date: log.log_date,
+    mood: log.mood ?? null,
+    symptoms: log.symptoms ?? [],
+    sex: log.sex ?? [],
+    medication_taken: log.medication_taken ?? null,
+    water_intake: log.water_intake ?? null,
+    weight: log.weight ?? null,
+    basal_temp: log.temperature ?? null,
+    notes: log.notes ?? null,
+    ovulation_test: log.ovulation_test ?? null,
+    activities: log.activities ?? [],
+    other_tags: log.other_tags ?? [],
+  })
 }
