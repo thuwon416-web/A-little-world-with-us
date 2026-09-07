@@ -27,25 +27,25 @@ export default function CareTips({ selectedDate }: CareTipsProps) {
           {
             icon: Heart,
             title: 'Stay Hydrated',
-            titleMy: 'ရေအောင်သောင်းသောက်ပါ',
+            titleMy: 'ရေများများသောက်ပါ',
             description: 'Drink plenty of water to help reduce bloating and fatigue during your period.',
-            descriptionMy: 'ရာသီလာလအတွင်း ဖောရောင်မှုနှင့် ပင်နိုင်းကို လျော့နည်းစေရန် ရေများသောက်ပါ။',
+            descriptionMy: 'ရာသီလာချိန်အတွင်း ဖောရောင်မှုနှင့် ပင်ပန်းမှုကို လျော့ချရန် ရေများများသောက်ပါ။',
             category: 'self-care',
           },
           {
             icon: Coffee,
             title: 'Gentle Exercise',
-            titleMy: 'နုပ်ပြီးရွေ့လှုပ်ခန်း',
+            titleMy: 'နူးညံ့တဲ့ လေ့ကျင့်ခန်း',
             description: 'Light walking or yoga can help relieve cramps and improve mood.',
-            descriptionMy: 'လမ်းလျှောက်သောက်ခြင်း သို့ယောဂသည့်ကိုက်ခဲနှင့် စိတ်အနေအထားကောင်းစေရန် နုပ်ပြီးရွေ့လှုပ်ခန်းပါ။',
+            descriptionMy: 'လမ်းလျှောက်ခြင်း သို့မဟုတ် ယောဂသည် ကိုက်ခဲမှုကို သက်သာစေပြီး စိတ်ကို ကောင်းမွန်စေပါတယ်။',
             category: 'exercise',
           },
           {
             icon: Shield,
             title: 'Rest & Recovery',
-            titleMy: 'အနားယူမှု',
+            titleMy: 'အနားယူခြင်း',
             description: 'Get extra rest during your period. Your body needs more energy.',
-            descriptionMy: 'ရာသီလာလအတွင်း ပိုမိအနားယူပါ။ သင့ခန္တာကို ပိုအားလိုသိုပါ။',
+            descriptionMy: 'ရာသီလာချိန်အတွင်း ပိုပြီးအနားယူပါ။ သင့်ခန္ဓာကိုယ်က စွမ်းအင်ပိုလိုအပ်ပါတယ်။',
             category: 'self-care',
           },
         ]
@@ -54,25 +54,25 @@ export default function CareTips({ selectedDate }: CareTipsProps) {
           {
             icon: Sparkles,
             title: 'Track Your Cycle',
-            titleMy: 'လစဉ်စက်ဝန်းကို စောင့်ကြည့်ပါ',
+            titleMy: 'သင့်စက်ဝန်းကို ခြေရာခံပါ',
             description: 'Knowing your fertile window helps with family planning and understanding your body.',
-            descriptionMy: 'သားဖောက်ချိန်ကို သိသာသို့စောင့်ကြည့်ပါ။ မိသားလုပ်စီမှုနှင့် ကိုယ်တာကို နားလည်စေပါ။',
+            descriptionMy: 'သားဖောက်ချိန်ကို သိခြင်းက မိသားစုစီမံကိန်းနှင့် သင့်ခန္ဓာကိုယ်ကို နားလည်ရန် ကူညီပေးပါတယ်။',
             category: 'health',
           },
           {
             icon: Heart,
             title: 'Self-Care Time',
-            titleMy: 'မိမိကိုယ်အချိန်',
+            titleMy: 'မိမိကိုယ်ကို ဂရုစိုက်ချိန်',
             description: 'Focus on self-care activities that help you feel relaxed and confident.',
-            descriptionMy: 'သင့ခန္တာကို ကျေနပ်ပြီး ကိုယ်ချိန်များကို လုပ်ဆောင်ပါ။',
+            descriptionMy: 'သင့်ကို အနားယူစေပြီး ယုံကြည်မှုရှိစေမယ့် ကိုယ်ကိုယ်ကို ဂရုစိုက်မှုများကို အာရုံစိုက်ပါ။',
             category: 'self-care',
           },
           {
             icon: Lightbulb,
             title: 'Nutrition Focus',
-            titleMy: 'အစားအသွင်း',
+            titleMy: 'အာဟာရအာရုံစိုက်ပါ',
             description: 'Eat foods rich in iron and vitamins to support your body during this phase.',
-            descriptionMy: 'ဤရွှောင်းနှင့် ဗီတာမင်များပါသော အစားများကို စားပါ။ သင့ခန္တာကို ပံ့ပိုးပါ။',
+            descriptionMy: 'ဤအဆင့်အတွင်း သင့်ခန္ဓာကိုယ်ကို ကူညီရန် သံဓာတ်နှင့် ဗီတာမင်ကြွယ်ဝသော အစားအစာများကို စားပါ။',
             category: 'nutrition',
           },
         ]
@@ -81,25 +81,25 @@ export default function CareTips({ selectedDate }: CareTipsProps) {
           {
             icon: Lightbulb,
             title: 'Maintain Routine',
-            titleMy: 'နေ့ရက်အစဉ်အလေ့အထများ',
+            titleMy: 'နေ့စဉ်ပုံမှန်လုပ်ပါ',
             description: 'Keep your regular exercise routine and healthy eating habits.',
-            descriptionMy: 'နေ့ရက်ပုံမှန် ရွေ့လှုပ်ခန်းနှင့ ကျန်းသောအစားစားခြင်းများကို ဆက်ကျင်ထားပါ။',
+            descriptionMy: 'သင့်ပုံမှန်လေ့ကျင့်ခန်းနှင့် ကျန်းမာရေးနှင့်ညီညွတ်သော စားသောက်မှုကို ဆက်လက်ထိန်းသိမ်းပါ။',
             category: 'exercise',
           },
           {
             icon: Heart,
             title: 'Stress Management',
-            titleMy: 'စိတ်ဖိအားကို လျော့နည်းခြင်း',
+            titleMy: 'စိတ်ဖိအားကို စီမံပါ',
             description: 'Practice relaxation techniques to maintain hormonal balance.',
-            descriptionMy: 'ဟော်မုန်းများကို လက်တင်ပြီး ဟော်မုန်းချိန်းများကို လျော့နည်းစေပါ။',
+            descriptionMy: 'ဟော်မုန်းဟန်ချက်ကို ထိန်းသိမ်းရန် အပန်းဖြေနည်းများကို လေ့ကျင့်ပါ။',
             category: 'self-care',
           },
           {
             icon: Coffee,
             title: 'Sleep Well',
-            titleMy: 'ကောင်သောင်းစေပါ',
+            titleMy: 'ကောင်းကောင်းအိပ်ပါ',
             description: 'Aim for 7-8 hours of quality sleep to support your overall health.',
-            descriptionMy: 'ကျန်းသောကျန်းကောင်သောင်းရရန် ညက်နေ့ ၇-၈ နာရီကို ကောင်သောင်းပါ။',
+            descriptionMy: 'သင့်ကျန်းမာရေးကို ကူညီရန် အရည်အသွေးရှိသော အိပ်ချိန် ၇-၈ နာရီကို ရည်မှန်းပါ။',
             category: 'self-care',
           },
         ]
@@ -111,11 +111,11 @@ export default function CareTips({ selectedDate }: CareTipsProps) {
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'self-care':
-        return 'text-rose-500 bg-rose-500/10'
+        return 'text-[var(--accent-1)] bg-[var(--accent-1)]/10'
       case 'health':
         return 'text-emerald-500 bg-emerald-500/10'
       case 'nutrition':
-        return 'text-amber-500 bg-amber-500/10'
+        return 'text-[var(--accent-2)] bg-[var(--accent-2)]/10'
       case 'exercise':
         return 'text-blue-500 bg-blue-500/10'
       default:
@@ -126,7 +126,7 @@ export default function CareTips({ selectedDate }: CareTipsProps) {
   const getPhaseLabel = () => {
     switch (cyclePhase) {
       case 'period':
-        return 'ရာသီလာလက္ခဏာ (Period Phase)'
+        return 'ရာသီလာချိန် (Period Phase)'
       case 'fertile':
         return 'သားဖောက်ချိန် (Fertile Phase)'
       default:

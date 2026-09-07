@@ -15,29 +15,20 @@ export default function PeriodCalendar({ onDateSelect }: PeriodCalendarProps) {
   const [periodDates, setPeriodDates] = useState<Set<string>>(new Set())
   const [fertileDates, setFertileDates] = useState<Set<string>>(new Set())
 
-  useEffect(() => {
-    loadCalendarData()
-  }, [])
+  useEffect(() => { loadCalendarData() }, [])
 
   const loadCalendarData = async () => {
     try {
       setLoading(true)
-
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Fetch daily logs
       const logs = await getDailyLogs(user.id)
-
-      // Calculate cycle data
       const calculated = calculateCycleData(logs)
 
-      // Extract period dates from logs
       const periodDatesSet = new Set<string>()
       logs.forEach(log => {
         if (log.symptoms?.includes('Period started') || log.other_tags?.includes('Period start')) {
-          // Mark this date and next 4 days as period
           const startDate = new Date(log.log_date)
           for (let i = 0; i < 5; i++) {
             const date = new Date(startDate)
@@ -48,7 +39,6 @@ export default function PeriodCalendar({ onDateSelect }: PeriodCalendarProps) {
       })
       setPeriodDates(periodDatesSet)
 
-      // Calculate fertile window dates
       const fertileDatesSet = new Set<string>()
       if (calculated.fertile_window_start && calculated.fertile_window_end) {
         const startDate = new Date(calculated.fertile_window_start)
@@ -58,7 +48,6 @@ export default function PeriodCalendar({ onDateSelect }: PeriodCalendarProps) {
         }
       }
       setFertileDates(fertileDatesSet)
-
     } catch (error) {
       console.error('Error loading calendar data:', error)
     } finally {
@@ -74,83 +63,60 @@ export default function PeriodCalendar({ onDateSelect }: PeriodCalendarProps) {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-rose-600"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-[var(--accent-2)]"></div>
       </div>
     )
   }
 
   return (
     <div className="space-y-4 p-4">
-      <h2 className="text-2xl font-bold">Period Calendar</h2>
+      <h2 className="text-2xl font-serif text-[var(--text-primary)]">Period Calendar</h2>
 
       <Calendar
         mode="single"
         selected={selectedDate}
         onSelect={handleDateClick}
-        className="rounded-md border bg-white/10"
+        className="glass-card rounded-md border p-4"
         modifiers={{
           period: (date) => periodDates.has(date.toISOString().split('T')[0]),
           fertile: (date) => fertileDates.has(date.toISOString().split('T')[0]),
           today: (date) => date.toISOString().split('T')[0] === new Date().toISOString().split('T')[0],
         }}
         modifiersClassNames={{
-          period: 'bg-pink-600 text-white rounded-full',
-          fertile: 'bg-green-600/30 border-2 border-green-600 rounded-full',
-          today: 'bg-red-600 text-white rounded-full font-bold',
+          period: 'bg-[var(--accent-1)] text-white rounded-full',
+          fertile: 'bg-emerald-400/30 border-2 border-emerald-500 rounded-full',
+          today: 'bg-[var(--accent-2)] text-[var(--bg-color)] rounded-full font-bold',
         }}
       />
 
       {selectedDate && (
-        <div className="p-4 bg-white/10 rounded-lg">
-          <h3 className="font-semibold mb-2">
-            {selectedDate.toLocaleDateString(undefined, { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
+        <div className="glass-card p-4">
+          <h3 className="mb-2 font-semibold text-[var(--text-primary)]">
+            {selectedDate.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
           </h3>
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-sm text-[var(--text-primary)]">
             {periodDates.has(selectedDate.toISOString().split('T')[0]) && (
-              <p className="flex items-center gap-2">
-                <span>🩸</span>
-                <span>Period day</span>
-              </p>
+              <p className="flex items-center gap-2"><span>🩸</span><span>Period day</span></p>
             )}
             {fertileDates.has(selectedDate.toISOString().split('T')[0]) && (
-              <p className="flex items-center gap-2">
-                <span>🌸</span>
-                <span>Fertile day</span>
-              </p>
+              <p className="flex items-center gap-2"><span>🌸</span><span>Fertile day</span></p>
             )}
             {selectedDate.toISOString().split('T')[0] === new Date().toISOString().split('T')[0] && (
-              <p className="flex items-center gap-2">
-                <span>🔴</span>
-                <span>Today</span>
-              </p>
+              <p className="flex items-center gap-2"><span>🔴</span><span>Today</span></p>
             )}
             {!periodDates.has(selectedDate.toISOString().split('T')[0]) &&
              !fertileDates.has(selectedDate.toISOString().split('T')[0]) &&
              selectedDate.toISOString().split('T')[0] !== new Date().toISOString().split('T')[0] && (
-              <p className="text-gray-400">Regular day</p>
+              <p className="text-[var(--text-secondary)]">Regular day</p>
             )}
           </div>
         </div>
       )}
 
-      <div className="flex gap-4 text-xs">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-pink-600 rounded-full"></div>
-          <span>Period</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-600/30 border-2 border-green-600 rounded-full"></div>
-          <span>Fertile</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-600 rounded-full"></div>
-          <span>Today</span>
-        </div>
+      <div className="flex gap-4 text-xs text-[var(--text-secondary)]">
+        <div className="flex items-center gap-2"><div className="h-4 w-4 rounded-full bg-[var(--accent-1)]" /><span>Period</span></div>
+        <div className="flex items-center gap-2"><div className="h-4 w-4 rounded-full border-2 border-emerald-500 bg-emerald-500/30" /><span>Fertile</span></div>
+        <div className="flex items-center gap-2"><div className="h-4 w-4 rounded-full bg-[var(--accent-2)]" /><span>Today</span></div>
       </div>
     </div>
   )

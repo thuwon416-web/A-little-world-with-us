@@ -68,23 +68,8 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
     'Low sex drive',
   ]
 
-  const activityOptions = [
-    'Yoga',
-    'Gym',
-    'Swimming',
-    'Running',
-    'Cycling',
-    'Walking',
-  ]
-
-  const otherOptions = [
-    'Travel',
-    'Stress',
-    'Meditation',
-    'Journaling',
-    'Alcohol',
-  ]
-
+  const activityOptions = ['Yoga', 'Gym', 'Swimming', 'Running', 'Cycling', 'Walking']
+  const otherOptions = ['Travel', 'Stress', 'Meditation', 'Journaling', 'Alcohol']
   const dischargeOptions = ['No discharge', 'Creamy', 'Watery', 'Sticky', 'Egg white', 'Spotting', 'Unusual']
   const digestionOptions = ['Nausea', 'Bloating', 'Constipation', 'Diarrhea']
   const pregnancyTestOptions = ['Did not take test', 'Positive pregnancy test', 'Negative pregnancy test', 'Faint line']
@@ -101,14 +86,12 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
     try {
       setIsSaving(true)
 
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         alert('Please log in to save logs')
         return
       }
 
-      // Prepare log data
       const logData: DailyLog = {
         user_id: user.id,
         couple_id: await getActiveCareCoupleLinkId(user.id),
@@ -126,16 +109,10 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
         other_tags: other.length > 0 ? other : undefined,
       }
 
-      // Save to Supabase
       await saveDailyLog(logData)
-
-      // Show success
       alert('Daily log saved successfully! 💜')
-
-      // Close modal and refresh data
       onClose()
-      onLogSaved?.() // Callback to refresh parent data
-
+      onLogSaved?.()
     } catch (error) {
       console.error('Error saving log:', error)
       alert('Failed to save log. Please try again.')
@@ -147,12 +124,17 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-      <motion.div initial={{ opacity: 0, scale: 0.96, y: 18 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.2 }} className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-md">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 18 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+        className="glass-card-solid max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-[28px]"
+      >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
+        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-6">
           <div>
-            <h2 className="text-xl font-serif text-[var(--text-primary)]">Daily Log</h2>
+            <h2 className="font-serif text-xl text-[var(--text-primary)]">Daily Log</h2>
             <p className="text-sm text-[var(--text-secondary)]">
               {selectedDate ? selectedDate.toLocaleDateString() : new Date().toLocaleDateString()}
             </p>
@@ -160,7 +142,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10 hover:text-[var(--accent-1)] transition"
+            className="rounded-full p-2 text-[var(--text-secondary)] transition hover:bg-[var(--accent-1)]/10 hover:text-[var(--accent-1)]"
           >
             <X className="h-5 w-5" />
           </button>
@@ -169,21 +151,21 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
         <div className="space-y-6 p-6">
           {/* Mood */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Mood</h3>
+            <h3 className="mb-3 text-sm font-medium text-[var(--text-primary)]">Mood</h3>
             <div className="flex flex-wrap gap-2">
               {moodOptions.map((option) => (
                 <button
                   key={option.label}
                   type="button"
                   onClick={() => setMood(option.label)}
-                  className={`flex-1 min-w-[100px] p-3 rounded-xl border-2 transition ${
+                  className={`flex-1 min-w-[100px] rounded-xl border p-3 transition ${
                     mood === option.label
-                      ? 'border-purple-500 bg-purple-500/10 text-purple-500'
-                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'
+                      ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/15 text-[var(--accent-1)] shadow-[0_0_15px_rgba(255,107,157,0.3)]'
+                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/50'
                   }`}
                 >
                   <span className="text-2xl">{option.emoji}</span>
-                  <p className="text-xs font-medium mt-1">{option.label}</p>
+                  <p className="mt-1 text-xs font-medium">{option.label}</p>
                   <p className="text-[10px] text-[var(--text-secondary)]">{option.labelMy}</p>
                 </button>
               ))}
@@ -192,21 +174,21 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
 
           {/* Symptoms */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Symptoms</h3>
+            <h3 className="mb-3 text-sm font-medium text-[var(--text-primary)]">Symptoms</h3>
             <div className="flex flex-wrap gap-2">
               {symptomOptions.map((option) => (
                 <button
                   key={option.label}
                   type="button"
                   onClick={() => toggleArray(symptoms, option.label, setSymptoms)}
-                  className={`flex-1 min-w-[120px] p-3 rounded-xl border-2 transition ${
+                  className={`flex-1 min-w-[120px] rounded-xl border p-3 transition ${
                     symptoms.includes(option.label)
-                      ? 'border-rose-500 bg-rose-500/10 text-rose-500'
-                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'
+                      ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/15 text-[var(--accent-1)]'
+                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/50'
                   }`}
                 >
                   <span className="text-2xl">{option.icon}</span>
-                  <p className="text-xs font-medium mt-1">{option.label}</p>
+                  <p className="mt-1 text-xs font-medium">{option.label}</p>
                   <p className="text-[10px] text-[var(--text-secondary)]">{option.labelMy}</p>
                 </button>
               ))}
@@ -215,17 +197,17 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
 
           {/* Sex & Sex Drive */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Sex & Sex Drive</h3>
+            <h3 className="mb-3 text-sm font-medium text-[var(--text-primary)]">Sex & Sex Drive</h3>
             <div className="flex flex-wrap gap-2">
               {sexOptions.map((option) => (
                 <button
                   key={option}
                   type="button"
                   onClick={() => toggleArray(sex, option, setSex)}
-                  className={`px-4 py-2 rounded-full border-2 text-sm transition ${
+                  className={`rounded-full border px-4 py-2 text-sm transition ${
                     sex.includes(option)
-                      ? 'border-pink-500 bg-pink-500/10 text-pink-500'
-                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'
+                      ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/15 text-[var(--accent-1)]'
+                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/50'
                   }`}
                 >
                   {option}
@@ -234,21 +216,22 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
             </div>
           </div>
 
+          {/* Tag Sections */}
           <TagSection title="Discharge" options={dischargeOptions} selected={other} onToggle={(value) => toggleArray(other, value, setOther)} prefix="Discharge: " />
           <TagSection title="Digestion & stool" options={digestionOptions} selected={other} onToggle={(value) => toggleArray(other, value, setOther)} prefix="Digestion: " />
           <TagSection title="Pregnancy test" options={pregnancyTestOptions} selected={other} onToggle={(value) => toggleArray(other, value, setOther)} prefix="Pregnancy test: " />
 
           {/* Medication (OC) */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Medication (Birth Control)</h3>
+            <h3 className="mb-3 text-sm font-medium text-[var(--text-primary)]">Medication (Birth Control)</h3>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setMedicationTaken(true)}
-                className={`flex-1 p-3 rounded-xl border-2 transition ${
+                className={`flex-1 rounded-xl border p-3 transition ${
                   medicationTaken === true
-                    ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500'
-                    : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'
+                    ? 'border-emerald-500 bg-emerald-500/15 text-emerald-500'
+                    : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
                 }`}
               >
                 <Check className="h-4 w-4 mx-auto mb-1" />
@@ -257,10 +240,10 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
               <button
                 type="button"
                 onClick={() => setMedicationTaken(false)}
-                className={`flex-1 p-3 rounded-xl border-2 transition ${
+                className={`flex-1 rounded-xl border p-3 transition ${
                   medicationTaken === false
-                    ? 'border-amber-500 bg-amber-500/10 text-amber-500'
-                    : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'
+                    ? 'border-amber-500 bg-amber-500/15 text-amber-500'
+                    : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
                 }`}
               >
                 <Activity className="h-4 w-4 mx-auto mb-1" />
@@ -271,15 +254,15 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
 
           {/* Water Intake */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-2">
-              <Droplets className="h-4 w-4 text-blue-500" />
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+              <Droplets className="h-4 w-4 text-blue-400" />
               Water Intake
             </h3>
-            <div className="flex items-center gap-4 p-4 rounded-xl border-2 border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)]">
+            <div className="flex items-center gap-4 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4">
               <button
                 type="button"
                 onClick={() => setWater((w) => Math.max(0, w - 8))}
-                className="w-10 h-10 rounded-full bg-[var(--accent-1)]/10 hover:bg-[var(--accent-1)]/20 text-[var(--accent-1)] flex items-center justify-center text-xl font-bold transition"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-1)]/10 text-xl font-bold text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/20"
               >
                 -
               </button>
@@ -290,7 +273,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
               <button
                 type="button"
                 onClick={() => setWater((w) => w + 8)}
-                className="w-10 h-10 rounded-full bg-[var(--accent-1)]/10 hover:bg-[var(--accent-1)]/20 text-[var(--accent-1)] flex items-center justify-center text-xl font-bold transition"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-1)]/10 text-xl font-bold text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/20"
               >
                 +
               </button>
@@ -300,8 +283,8 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
           {/* Weight & Temperature */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-2">
-                <Scale className="h-4 w-4 text-purple-500" />
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+                <Scale className="h-4 w-4 text-purple-400" />
                 Weight
               </h3>
               <input
@@ -309,12 +292,12 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="Enter weight (lbs)"
-                className="w-full rounded-xl border-2 border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--accent-1)]/50"
+                className="glass-input w-full rounded-xl px-4 py-3 text-sm"
               />
             </div>
             <div>
-              <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-2">
-                <Thermometer className="h-4 w-4 text-rose-500" />
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
+                <Thermometer className="h-4 w-4 text-[var(--accent-1)]" />
                 Temperature
               </h3>
               <input
@@ -322,40 +305,40 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
                 value={temp}
                 onChange={(e) => setTemp(e.target.value)}
                 placeholder="Enter temp (°F)"
-                className="w-full rounded-xl border-2 border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--accent-1)]/50"
+                className="glass-input w-full rounded-xl px-4 py-3 text-sm"
               />
             </div>
           </div>
 
           {/* Notes */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Notes</h3>
+            <h3 className="mb-3 text-sm font-medium text-[var(--text-primary)]">Notes</h3>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Add any additional notes..."
-              className="w-full rounded-xl border-2 border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 resize-none focus:outline-none focus:ring-2 focus:ring-[var(--accent-1)]/50"
+              className="glass-input w-full resize-none rounded-xl px-4 py-3 text-sm"
               rows={3}
             />
           </div>
 
           {/* Ovulation Test */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3">Ovulation Test</h3>
+            <h3 className="mb-3 text-sm font-medium text-[var(--text-primary)]">Ovulation Test</h3>
             <div className="flex gap-2">
               {(['Positive', 'Negative', 'Did not take'] as const).map((option) => (
                 <button
                   key={option}
                   type="button"
                   onClick={() => setOvulationTest(option)}
-                  className={`flex-1 p-3 rounded-xl border-2 text-sm transition ${
+                  className={`flex-1 rounded-xl border p-3 text-sm transition ${
                     ovulationTest === option
                       ? option === 'Positive'
-                        ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500'
+                        ? 'border-emerald-500 bg-emerald-500/15 text-emerald-500'
                         : option === 'Negative'
-                        ? 'border-rose-500 bg-rose-500/10 text-rose-500'
-                        : 'border-[var(--accent-1)]/30 bg-[var(--accent-1)]/10 text-[var(--accent-1)]'
-                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'
+                          ? 'border-rose-500 bg-rose-500/15 text-rose-500'
+                          : 'border-[var(--accent-1)]/30 bg-[var(--accent-1)]/10 text-[var(--accent-1)]'
+                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
                   }`}
                 >
                   {option}
@@ -366,7 +349,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
 
           {/* Physical Activity */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-2">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
               <Activity className="h-4 w-4 text-emerald-500" />
               Physical Activity
             </h3>
@@ -376,10 +359,10 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
                   key={activity}
                   type="button"
                   onClick={() => toggleArray(activities, activity, setActivities)}
-                  className={`px-4 py-2 rounded-full border-2 text-sm transition ${
+                  className={`rounded-full border px-4 py-2 text-sm transition ${
                     activities.includes(activity)
-                      ? 'border-emerald-500 bg-emerald-500/10 text-emerald-500'
-                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'
+                      ? 'border-emerald-500 bg-emerald-500/15 text-emerald-500'
+                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
                   }`}
                 >
                   {activity}
@@ -390,7 +373,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
 
           {/* Other */}
           <div>
-            <h3 className="text-sm font-medium text-[var(--text-primary)] mb-3 flex items-center gap-2">
+            <h3 className="mb-3 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
               <Coffee className="h-4 w-4 text-amber-500" />
               Other
             </h3>
@@ -400,10 +383,10 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
                   key={item}
                   type="button"
                   onClick={() => toggleArray(other, item, setOther)}
-                  className={`px-4 py-2 rounded-full border-2 text-sm transition ${
+                  className={`rounded-full border px-4 py-2 text-sm transition ${
                     other.includes(item)
-                      ? 'border-amber-500 bg-amber-500/10 text-amber-500'
-                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'
+                      ? 'border-amber-500 bg-amber-500/15 text-amber-500'
+                      : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
                   }`}
                 >
                   {item}
@@ -417,7 +400,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
             type="button"
             onClick={handleSave}
             disabled={isSaving}
-            className="w-full rounded-xl bg-gradient-to-r from-rose-500 to-pink-500 px-6 py-4 text-base font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="glass-button flex w-full items-center justify-center gap-2 rounded-xl px-6 py-4 text-base font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isSaving ? (
               <>
@@ -441,7 +424,20 @@ function TagSection({ title, options, selected, onToggle, prefix }: { title: str
       <div className="flex flex-wrap gap-2">
         {options.map((option) => {
           const value = `${prefix}${option}`
-          return <button key={option} type="button" onClick={() => onToggle(value)} className={`rounded-full border-2 px-4 py-2 text-sm transition ${selected.includes(value) ? 'border-violet-500 bg-violet-500/10 text-violet-600' : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/40'}`}>{option}</button>
+          return (
+            <button
+              key={option}
+              type="button"
+              onClick={() => onToggle(value)}
+              className={`rounded-full border px-4 py-2 text-sm transition ${
+                selected.includes(value)
+                  ? 'border-violet-500 bg-violet-500/15 text-violet-500'
+                  : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
+              }`}
+            >
+              {option}
+            </button>
+          )
         })}
       </div>
     </div>

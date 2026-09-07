@@ -25,7 +25,7 @@ export default function MiniCareCheck() {
       if (raw) {
         const parsed = JSON.parse(raw)
         if (typeof parsed?.selected === 'string') {
-          const valid = options.some((item) => item.id === parsed.selected)
+          const valid = options.some(item => item.id === parsed.selected)
           if (valid) setSelected(parsed.selected as CareId)
         }
         if (typeof parsed?.note === 'string') setNote(parsed.note)
@@ -62,19 +62,14 @@ export default function MiniCareCheck() {
       ) : hasError ? (
         <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/50 p-4">
           <p className="text-sm text-[var(--text-primary)]">We couldn&apos;t load your care summary</p>
-          <button
-            type="button"
-            onClick={() => setHasError(false)}
-            className="mt-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
-          >
-            Retry
-            <ArrowRight className="h-4 w-4" />
+          <button type="button" onClick={() => setHasError(false)} className="mt-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]">
+            Retry <ArrowRight className="h-4 w-4" />
           </button>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-2 gap-2">
-            {options.map((option) => (
+            {options.map(option => (
               <button
                 key={option.id}
                 type="button"
@@ -95,7 +90,7 @@ export default function MiniCareCheck() {
             onChange={(event) => setNote(event.target.value)}
             rows={3}
             placeholder="What does your body and heart need today?"
-            className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
+            className="glass-input w-full rounded-2xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
           />
 
           <motion.div
@@ -120,8 +115,7 @@ export default function MiniCareCheck() {
             type="button"
             className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
           >
-            Check in
-            <ArrowRight className="h-4 w-4" />
+            Check in <ArrowRight className="h-4 w-4" />
           </button>
         </>
       )}
