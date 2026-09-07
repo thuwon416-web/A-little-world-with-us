@@ -15,7 +15,14 @@ end $$;
 begin;
 
 -- Remove every application file and all old application tables. auth.users is not touched.
-delete from storage.objects;
+-- Supabase blocks direct DELETEs from storage.objects; empty_bucket performs this safely.
+do $$
+declare bucket_record record;
+begin
+  for bucket_record in select id from storage.buckets loop
+    perform storage.empty_bucket(bucket_record.id);
+  end loop;
+end $$;
 delete from storage.buckets;
 drop schema if exists public cascade;
 create schema public;
