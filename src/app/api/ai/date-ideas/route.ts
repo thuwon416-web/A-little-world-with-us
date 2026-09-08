@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -9,6 +9,13 @@ const dateIdeasSchema = z.object({
   location: z.string().optional(),
   interests: z.string().optional(),
 })
+
+const generatedDateIdeasSchema = z.array(z.object({
+  title: z.string(),
+  description: z.string(),
+  estimatedCost: z.string(),
+  duration: z.string(),
+}))
 
 export async function POST(req: NextRequest) {
   try {
@@ -139,18 +146,18 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json()
     
-    let dateIdeas: any[] = []
+    let dateIdeas: z.infer<typeof generatedDateIdeasSchema> = []
     
     if (process.env.GROQ_API_KEY) {
       try {
-        dateIdeas = JSON.parse(data.choices?.[0]?.message?.content || '[]')
+        dateIdeas = generatedDateIdeasSchema.catch([]).parse(JSON.parse(data.choices?.[0]?.message?.content || '[]'))
       } catch {
         dateIdeas = []
       }
     } else {
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
       try {
-        dateIdeas = JSON.parse(text)
+        dateIdeas = generatedDateIdeasSchema.catch([]).parse(JSON.parse(text))
       } catch {
         dateIdeas = []
       }

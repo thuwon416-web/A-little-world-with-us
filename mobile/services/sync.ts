@@ -7,7 +7,10 @@ export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error'
 
 // Helper function to get authenticated user ID
 async function getUserId(): Promise<string> {
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
   if (error || !user) {
     throw new Error('User not authenticated')
   }
@@ -24,7 +27,7 @@ async function getCoupleId(): Promise<string | null> {
       .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
       .eq('status', 'accepted')
       .single()
-    
+
     if (error || !data) {
       return null
     }
@@ -62,7 +65,11 @@ export async function pushPendingMessages() {
       message_type: rawMessage._get('message_type') || 'text',
       location_payload: (() => {
         const value = rawMessage._get('location_payload')
-        try { return value ? JSON.parse(value) : null } catch { return null }
+        try {
+          return value ? JSON.parse(value) : null
+        } catch {
+          return null
+        }
       })(),
     }
 
@@ -87,8 +94,6 @@ export async function syncMessages(lastSyncAt?: string) {
   }
 
   // Get authenticated user
-  const userId = await getUserId()
-  
   // Get couple ID for filtering
   const coupleId = await getCoupleId()
 
@@ -132,17 +137,15 @@ export async function syncMessages(lastSyncAt?: string) {
   if (allMessages.length > 0) {
     await database.write(async () => {
       // First, collect all message IDs to check against local database
-      const messageIds = allMessages.map(msg => msg.id)
-      
+      const messageIds = allMessages.map((msg) => msg.id)
+
       // Batch fetch existing messages to avoid N+1 queries
       const existingMessages = await database
         .get('messages')
         .query(Q.where('id', Q.oneOf(messageIds)))
         .fetch()
-      
-      const existingMap = new Map(
-        (existingMessages as any[]).map(msg => [msg.id, msg])
-      )
+
+      const existingMap = new Map((existingMessages as any[]).map((msg) => [msg.id, msg]))
 
       // Process each remote message
       for (const remoteMessage of allMessages) {
@@ -156,7 +159,9 @@ export async function syncMessages(lastSyncAt?: string) {
             record.couple_id = remoteMessage.couple_id ?? ''
             record.created_at = remoteMessage.created_at ?? new Date().toISOString()
             record.message_type = remoteMessage.message_type ?? 'text'
-            record.location_payload = remoteMessage.location_payload ? JSON.stringify(remoteMessage.location_payload) : ''
+            record.location_payload = remoteMessage.location_payload
+              ? JSON.stringify(remoteMessage.location_payload)
+              : ''
             record.synced = true
           })
         } else {
@@ -164,12 +169,14 @@ export async function syncMessages(lastSyncAt?: string) {
           const localCreatedAt = localMessage._get('created_at') ?? ''
           if ((remoteMessage.created_at ?? '') > localCreatedAt) {
             await localMessage.update((record: any) => {
-            record.content = remoteMessage.content ?? record.content
-            record.sender_id = remoteMessage.sender_id ?? record.sender_id
-            record.couple_id = remoteMessage.couple_id ?? record.couple_id
-            record.created_at = remoteMessage.created_at ?? record.created_at
-            record.message_type = remoteMessage.message_type ?? record.message_type
-            record.location_payload = remoteMessage.location_payload ? JSON.stringify(remoteMessage.location_payload) : record.location_payload
+              record.content = remoteMessage.content ?? record.content
+              record.sender_id = remoteMessage.sender_id ?? record.sender_id
+              record.couple_id = remoteMessage.couple_id ?? record.couple_id
+              record.created_at = remoteMessage.created_at ?? record.created_at
+              record.message_type = remoteMessage.message_type ?? record.message_type
+              record.location_payload = remoteMessage.location_payload
+                ? JSON.stringify(remoteMessage.location_payload)
+                : record.location_payload
               record.synced = true
             })
           }

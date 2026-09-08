@@ -1,12 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 // Validation schema
 const recommendPartnersSchema = z.object({
-  preferences: z.record(z.string(), z.any()).optional(),
+  preferences: z.record(z.string(), z.unknown()).optional(),
 })
+
+const generatedRecommendationsSchema = z.array(z.object({
+  category: z.string(),
+  name: z.string(),
+  description: z.string(),
+  reason: z.string(),
+}))
 
 export async function POST(req: NextRequest) {
   try {
@@ -126,18 +133,18 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json()
     
-    let recommendations: any[] = []
+    let recommendations: z.infer<typeof generatedRecommendationsSchema> = []
     
     if (process.env.GROQ_API_KEY) {
       try {
-        recommendations = JSON.parse(data.choices?.[0]?.message?.content || '[]')
+        recommendations = generatedRecommendationsSchema.catch([]).parse(JSON.parse(data.choices?.[0]?.message?.content || '[]'))
       } catch {
         recommendations = []
       }
     } else {
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
       try {
-        recommendations = JSON.parse(text)
+        recommendations = generatedRecommendationsSchema.catch([]).parse(JSON.parse(text))
       } catch {
         recommendations = []
       }

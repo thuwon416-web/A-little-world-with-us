@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Activity, Bell, CalendarDays, ChevronDown, ChevronUp, Droplet, Heart, Info, Plus, Settings2, Sparkles, X } from 'lucide-react'
+import { Activity, Bell, CalendarDays, ChevronDown, ChevronUp, Droplet, Heart, Plus, Settings2, Sparkles, X } from 'lucide-react'
 import { calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, saveCareLog, saveCareReminder, saveCycleSettings, type CareDraft, type CareLog, type CareReminder, type CycleSettings } from '@/lib/care-data'
 
 type Tab = 'today' | 'insights' | 'calendar' | 'reminders' | 'settings'

@@ -1,58 +1,23 @@
-# Build Instructions
+# Mobile build instructions
 
 ## Prerequisites
 
-1. Install EAS CLI:
+Install the mobile dependencies with `npm install --prefix mobile`, configure the same Supabase project values in the mobile environment, and sign in with either accepted account.
+
+## Native builds
+
+Use EAS from the `mobile` directory:
 
 ```bash
-npm install -g eas-cli
+npx eas build --platform android --profile preview
+npx eas build --platform ios --profile preview
 ```
 
-2. Login to Expo:
+Create a new native build whenever location permissions, background location configuration, notifications, or native dependencies change. Expo Go cannot validate production background tracking.
 
-```bash
-eas login
-```
+## Two-device verification
 
-3. Configure project:
-
-```bash
-eas build:configure
-```
-
-## Build Android APK
-
-### Development Build (for testing)
-
-```bash
-eas build --platform android --profile development
-```
-
-### Preview Build (APK for distribution)
-
-```bash
-eas build --platform android --profile preview
-```
-
-### Production Build (for Play Store)
-
-```bash
-eas build --platform android --profile production
-```
-
-## Download APK
-
-After build completes:
-
-1. Go to https://expo.dev
-2. Navigate to your project
-3. Download the APK file
-4. Install on Android device
-
-## Local Build (Advanced)
-
-```bash
-eas build --platform android --local
-```
-
-This requires Android Studio and Java SDK.
+1. Install the build on both linked accounts and grant location permission on both devices.
+2. Confirm each device writes its latest location while only the admin sees the Location dashboard.
+3. Test offline queue/reconnect, a one-time chat location pin, battery/network state, and the seven-day history retention.
+4. Confirm shared Care, Memories, Plans, Calendar, Finance, and Reminders data appears for both users.

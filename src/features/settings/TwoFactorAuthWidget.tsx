@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- QR-code data URLs are rendered client-side. */
 
 import { useState, useEffect } from 'react'
 import { Shield, X } from 'lucide-react'

@@ -28,15 +28,6 @@ const requiredEnv = [
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
 ]
 
-const optionalEnv = [
-  'NEXT_PUBLIC_ANNIVERSARY',
-  'NEXT_PUBLIC_GOOGLE_MAPS_API_KEY',
-  'NEXT_PUBLIC_VIDEO_URLS',
-  'NEXT_PUBLIC_PIN_CODE',
-  'NEXT_PUBLIC_AI_API_URL',
-  'NEXT_PUBLIC_COUPLE_START',
-]
-
 const missingRequired = requiredEnv.filter(
   (key) => !process.env[key] || !process.env[key].trim()
 )
@@ -50,14 +41,6 @@ if (missingRequired.length > 0) {
   console.error('\nAdd them to your .env.local file or deployment environment.')
   console.error('Example values are provided in .env.example.\n')
   process.exit(1)
-}
-
-for (const key of optionalEnv) {
-  if (!process.env[key] || !process.env[key].trim()) {
-    console.warn(
-      `[env] Optional variable "${key}" is not set. The app may use fallback defaults for that feature.`
-    )
-  }
 }
 
 console.log('Environment validation passed.')

@@ -2,6 +2,8 @@
 
 import { supabase } from '@/lib/supabase'
 
+type CsvRow = Record<string, unknown>
+
 export default function ExportData() {
   const handleExport = async () => {
     try {
@@ -41,7 +43,7 @@ export default function ExportData() {
     }
   }
 
-  const convertToCSV = (data: any[]) => {
+  const convertToCSV = (data: CsvRow[]) => {
     if (data.length === 0) return ''
 
     const headers = Object.keys(data[0]).join(',')

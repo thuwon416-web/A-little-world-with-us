@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
 
@@ -24,11 +24,7 @@ export default function FinancialGoals() {
     })
   }, [])
 
-  useEffect(() => {
-    if (userId && coupleId) void loadGoals()
-  }, [userId, coupleId])
-
-  const loadGoals = async () => {
+  const loadGoals = useCallback(async () => {
     if (!coupleId) return
 
     const { data } = await supabase
@@ -38,7 +34,11 @@ export default function FinancialGoals() {
       .order('created_at', { ascending: false })
 
     setGoals((data ?? []) as FinancialGoal[])
-  }
+  }, [coupleId])
+
+  useEffect(() => {
+    if (userId && coupleId) void loadGoals()
+  }, [userId, coupleId, loadGoals])
 
   const addGoal = async () => {
     const targetAmount = Number(newGoal.target)

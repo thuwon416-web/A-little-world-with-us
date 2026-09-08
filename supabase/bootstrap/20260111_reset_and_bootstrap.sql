@@ -1,6 +1,7 @@
 -- A Little World With Us: destructive clean reset for the CURRENT Supabase project.
 -- Keeps only the two verified auth.users records below. Run once in Supabase SQL Editor.
--- WARNING: this permanently deletes all public-schema data and all storage bucket files.
+-- WARNING: this permanently deletes all public-schema data.
+-- Empty every Storage bucket manually in the Supabase Dashboard before running this script.
 
 do $$
 begin
@@ -14,16 +15,17 @@ end $$;
 
 begin;
 
--- Remove every application file and all old application tables. auth.users is not touched.
--- Supabase blocks direct DELETEs from storage.objects; empty_bucket performs this safely.
+-- Storage objects must be removed through the Supabase Storage Dashboard or API.
+-- Clear old Storage policies only; canonical buckets are recreated/upserted below.
 do $$
-declare bucket_record record;
+declare policy_record record;
 begin
-  for bucket_record in select id from storage.buckets loop
-    perform storage.empty_bucket(bucket_record.id);
+  for policy_record in
+    select policyname, tablename from pg_policies where schemaname = 'storage' and tablename in ('objects', 'buckets')
+  loop
+    execute format('drop policy if exists %I on storage.%I', policy_record.policyname, policy_record.tablename);
   end loop;
 end $$;
-delete from storage.buckets;
 drop schema if exists public cascade;
 create schema public;
 grant usage on schema public to postgres, anon, authenticated, service_role;
@@ -250,7 +252,8 @@ alter table public.saved_places enable row level security;
 create policy saved_places_admin_access on public.saved_places for all using (public.is_location_admin() and public.is_couple_member(couple_id)) with check (public.is_location_admin() and public.is_couple_member(couple_id));
 
 -- Private storage buckets with couple-aware paths (<owner-uuid>/...).
-insert into storage.buckets (id, name, public) values ('memories','memories',false),('gallery','gallery',false),('chat_files','chat_files',false),('chat_photos','chat_photos',false),('voice_messages','voice_messages',false);
+insert into storage.buckets (id, name, public) values ('memories','memories',false),('gallery','gallery',false),('chat_files','chat_files',false),('chat_photos','chat_photos',false),('voice_messages','voice_messages',false)
+on conflict (id) do update set name = excluded.name, public = excluded.public;
 create or replace function public.has_accepted_couple() returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.couple_links where status = 'accepted' and auth.uid() in (inviter_id, accepted_by));
 $$;

@@ -1,13 +1,13 @@
 import * as Notifications from 'expo-notifications'
 import { useEffect, useState } from 'react'
 
+import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 import {
   registerForPushNotifications,
   scheduleReminder,
   sendLocalNotification,
   type Reminder,
 } from '@/services/notifications'
-import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 export function useNotifications() {
   const [permissionStatus, setPermissionStatus] = useState<string>('unknown')
@@ -36,7 +36,11 @@ export function useNotifications() {
             .not('couple_id', 'is', null)
             .maybeSingle()
           if (link?.couple_id) {
-            const { data } = await supabase.from('reminders').select('*').eq('couple_id', link.couple_id).order('scheduled_at', { ascending: true })
+            const { data } = await supabase
+              .from('reminders')
+              .select('*')
+              .eq('couple_id', link.couple_id)
+              .order('scheduled_at', { ascending: true })
             setReminders((data ?? []) as Reminder[])
           }
         }

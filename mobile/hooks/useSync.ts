@@ -16,7 +16,7 @@ export function useSync() {
       const result = await syncMessages()
       setPendingCount(result.pending)
       setStatus('synced')
-    } catch (_error) {
+    } catch {
       setStatus('error')
     }
   }, [])

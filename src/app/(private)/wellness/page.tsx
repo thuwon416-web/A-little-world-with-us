@@ -20,15 +20,17 @@ const workouts = [
   { name: 'Couple Workout', duration: 25, calories: 200 },
   { name: 'Evening Walk', duration: 30, calories: 120 },
 ]
+type Workout = (typeof workouts)[number]
+type CompletedWorkout = Workout & { completedAt: string }
 
 export default function WellnessPage() {
   const [activeTab, setActiveTab] = useState<TabId>('physical')
-  const [completedWorkouts, setCompletedWorkouts] = useState<any[]>([])
-  const [selectedWorkout, setSelectedWorkout] = useState<any>(null)
+  const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([])
+  const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null)
 
   const filteredBoards = wellnessBoards.filter(board => board.category === activeTab)
 
-  const completeWorkout = (workout: any) => {
+  const completeWorkout = (workout: Workout) => {
     setCompletedWorkouts([
       ...completedWorkouts,
       { ...workout, completedAt: new Date().toISOString() },

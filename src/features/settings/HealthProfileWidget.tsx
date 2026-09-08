@@ -14,6 +14,10 @@ import {
   type HealthProfileInput,
 } from '@/lib/healthProfile'
 
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback
+}
+
 export default function HealthProfileWidget() {
   const [profile, setProfile] = useState<HealthProfile | null>(null)
   const [partnerProfile, setPartnerProfile] = useState<HealthProfile | null>(null)
@@ -58,7 +62,7 @@ export default function HealthProfileWidget() {
 
       const partner = await getPartnerHealthProfile()
       setPartnerProfile(partner)
-    } catch (err) {
+    } catch {
       setError('Failed to load health profile')
     } finally {
       setLoading(false)
@@ -88,8 +92,8 @@ export default function HealthProfileWidget() {
       setSuccess('Health profile saved successfully!')
       setEditing(false)
       await loadProfiles()
-    } catch (err: any) {
-      setError(err.message || 'Failed to save health profile')
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to save health profile'))
     }
   }
 
@@ -114,8 +118,8 @@ export default function HealthProfileWidget() {
       setEmergencyName('')
       setEmergencyPhone('')
       setEmergencyRelationship('')
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete health profile')
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to delete health profile'))
     }
   }
 

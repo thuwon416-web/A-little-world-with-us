@@ -5,6 +5,7 @@ import en from '@/i18n/locales/en.json'
 import mm from '@/i18n/locales/mm.json'
 
 type Language = 'mm' | 'en'
+type TranslationTree = { [key: string]: string | TranslationTree }
 
 interface LanguageContextType {
   language: Language
@@ -35,13 +36,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 
   const t = (key: string): string => {
     const keys = key.split('.')
-    let value: any = language === 'en' ? en : mm
+    let value: string | TranslationTree | undefined = language === 'en' ? en : mm
 
     for (const k of keys) {
-      value = value?.[k]
+      value = typeof value === 'object' && value !== null ? value[k] : undefined
     }
 
-    return value || key
+    return typeof value === 'string' ? value : key
   }
 
   return (

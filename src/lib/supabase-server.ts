@@ -13,8 +13,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 /**
  * Create a Supabase client for server-side usage
  */
-export function createServerClient() {
-  const cookieStore = cookies()
+export async function createServerClient() {
+  const cookieStore = await cookies()
 
   return createClient(supabaseUrl, supabaseAnonKey, {
     auth: {

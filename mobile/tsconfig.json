@@ -6,6 +6,5 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["**/*.ts", "**/*.tsx"],
-  "exclude": ["**/wellness-archive/**"]
+  "include": ["**/*.ts", "**/*.tsx"]
 }

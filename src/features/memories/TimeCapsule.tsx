@@ -43,8 +43,8 @@ export default function TimeCapsule() {
 
     try {
       const raw = localStorage.getItem('time-capsules')
-      const parsed = raw ? JSON.parse(raw) : []
-      setCapsules(parsed.map((c: any) => ({ ...c, source: 'local' })))
+      const parsed: Capsule[] = raw ? JSON.parse(raw) : []
+      setCapsules(parsed.map((capsule) => ({ ...capsule, source: 'local' })))
     } catch {
       setError('Failed to load time capsules')
     }

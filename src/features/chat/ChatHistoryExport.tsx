@@ -5,6 +5,8 @@ import { Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 
+type ExportedMessage = { created_at: string }
+
 export default function ChatHistoryExport() {
   const [loading, setLoading] = useState(false)
   const [dateRange, setDateRange] = useState<'7d' | '30d' | 'all'>('all')
@@ -24,7 +26,7 @@ export default function ChatHistoryExport() {
 
     // Filter by date range
     const now = new Date()
-    const filtered = (messages || []).filter((msg: any) => {
+    const filtered = ((messages || []) as ExportedMessage[]).filter((msg) => {
       if (dateRange === 'all') return true
       if (dateRange === '7d') {
         return new Date(msg.created_at) > new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)

@@ -20,13 +20,23 @@ export function ChatBubble({ message }: ChatBubbleProps) {
     <View style={[styles.row, isMe ? styles.rowMe : styles.rowThem]}>
       <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
         {message.type === 'location' && message.location ? (
-          <TouchableOpacity onPress={() => void Linking.openURL(`https://www.google.com/maps?q=${message.location?.latitude},${message.location?.longitude}`)}>
+          <TouchableOpacity
+            onPress={() =>
+              void Linking.openURL(
+                `https://www.google.com/maps?q=${message.location?.latitude},${message.location?.longitude}`
+              )
+            }
+          >
             <Text style={styles.locationTitle}>📍 Shared location</Text>
-            <Text style={styles.text}>{message.location.latitude.toFixed(5)}, {message.location.longitude.toFixed(5)}</Text>
+            <Text style={styles.text}>
+              {message.location.latitude.toFixed(5)}, {message.location.longitude.toFixed(5)}
+            </Text>
           </TouchableOpacity>
         ) : message.type === 'sos' ? (
           <Text style={styles.sosText}>🆘 Emergency SOS — open location details</Text>
-        ) : <Text style={styles.text}>{message.text}</Text>}
+        ) : (
+          <Text style={styles.text}>{message.text}</Text>
+        )}
       </View>
       <Text style={styles.time}>{message.time}</Text>
     </View>

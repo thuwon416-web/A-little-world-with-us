@@ -1,8 +1,8 @@
 import { Redirect, Tabs } from 'expo-router'
 import { Text } from 'react-native'
 
-import { useAuth } from '@/lib/auth'
 import { useAdmin } from '@/hooks/useAdmin'
+import { useAuth } from '@/lib/auth'
 
 export default function TabsLayout() {
   const { user, loading } = useAuth()

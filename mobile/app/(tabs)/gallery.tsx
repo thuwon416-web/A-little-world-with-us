@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import ImageUpload from '@/components/ImageUpload'
 import { supabase } from '@/lib/supabase'

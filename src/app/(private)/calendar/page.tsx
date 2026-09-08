@@ -7,9 +7,11 @@ import LoveCalendar from '@/features/planning/LoveCalendar'
 import BucketList from '@/features/planning/BucketList'
 import SharedWishlist from '@/features/planning/SharedWishlist'
 
+type CalendarEvent = { id: string; date: string; title: string; type: string | null }
+
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [events, setEvents] = useState<any[]>([])
+  const [events, setEvents] = useState<CalendarEvent[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [showSharedCalendar, setShowSharedCalendar] = useState(false)
@@ -39,7 +41,7 @@ export default function CalendarPage() {
       .lte('date', endOfMonth.toISOString())
       .order('date', { ascending: true })
 
-    setEvents(data || [])
+    setEvents((data ?? []) as CalendarEvent[])
   }, [currentDate, coupleId])
 
   useEffect(() => {

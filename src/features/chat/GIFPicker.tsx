@@ -1,12 +1,17 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- Giphy serves dynamic remote GIF URLs that are not part of Next image domains. */
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Search, X, Sparkles, TrendingUp } from 'lucide-react'
 
 interface GIF {
   id: string
   url: string
   title: string
+}
+
+type GiphyResponse = {
+  data?: Array<{ id?: string; title?: string; images?: { downsized_medium?: { url?: string }; original?: { url?: string } } }>
 }
 
 interface GIFPickerProps {
@@ -23,7 +28,7 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const searchGIFs = async (query: string) => {
+  const searchGIFs = useCallback(async (query: string) => {
     setLoading(true)
     setError(null)
 
@@ -33,14 +38,17 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
         : `https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_API_KEY}&q=${encodeURIComponent(query)}&limit=24&rating=g`
 
       const response = await fetch(endpoint)
-      const data = await response.json()
+      const data = await response.json() as GiphyResponse
 
       if (data.data) {
-        const formattedGIFs: GIF[] = data.data.map((gif: any) => ({
-          id: gif.id,
-          url: gif.images.downsized_medium?.url || gif.images.original?.url,
-          title: gif.title,
-        }))
+        const formattedGIFs: GIF[] = data.data.flatMap((gif) => {
+          const url = gif.images?.downsized_medium?.url || gif.images?.original?.url
+          return url ? [{
+          id: gif.id || url,
+          url,
+          title: gif.title || 'GIF',
+          }] : []
+        })
         setGifs(formattedGIFs)
       }
     } catch (err) {
@@ -51,7 +59,7 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   const getMockGIFs = (): GIF[] => {
     // Mock GIFs for when API is unavailable
@@ -67,7 +75,7 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
 
   useEffect(() => {
     searchGIFs('trending')
-  }, [])
+  }, [searchGIFs])
 
   const handleSearch = () => {
     if (searchTerm.trim()) {

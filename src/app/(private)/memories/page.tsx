@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- Supabase signed image URLs are user-provided and can expire. */
 
 import { Suspense, type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'

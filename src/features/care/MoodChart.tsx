@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
+type MoodLog = { log_date: string; mood: string | null }
+
 export default function MoodChart() {
-  const [moods, setMoods] = useState<any[]>([])
+  const [moods, setMoods] = useState<MoodLog[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function MoodChart() {
         <div className="flex justify-between gap-2">
           {moods.map((log, i) => (
             <div key={i} className="flex flex-col items-center">
-              <span className="text-2xl">{moodEmoji[log.mood] || '😐'}</span>
+              <span className="text-2xl">{moodEmoji[log.mood || ''] || '😐'}</span>
               <span className="text-xs text-gray-400 mt-1">
                 {new Date(log.log_date).toLocaleDateString('en-US', { weekday: 'short' })}
               </span>

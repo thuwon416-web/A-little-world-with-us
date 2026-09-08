@@ -30,7 +30,10 @@ export interface CycleLog {
 
 // Helper function to get authenticated user ID
 async function getUserId(): Promise<string> {
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
   if (error || !user) {
     throw new Error('User not authenticated')
   }

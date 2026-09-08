@@ -33,9 +33,17 @@ export interface BucketListRecord {
 }
 
 async function getCoupleId() {
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) throw new Error('User not authenticated')
-  const { data, error } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').not('couple_id', 'is', null).maybeSingle()
+  const { data, error } = await supabase
+    .from('couple_links')
+    .select('couple_id')
+    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+    .eq('status', 'accepted')
+    .not('couple_id', 'is', null)
+    .maybeSingle()
   if (error || !data?.couple_id) throw new Error('No accepted couple is linked to this account.')
   return data.couple_id
 }
@@ -69,7 +77,9 @@ export async function createPlan(payload: {
     return null
   }
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) throw new Error('User not authenticated')
 
   const { data, error } = await supabase
@@ -190,12 +200,20 @@ export async function addBucketItem(item: string) {
     return null
   }
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) throw new Error('User not authenticated')
 
   const { data, error } = await supabase
     .from('bucket_list')
-    .insert({ couple_id: await getCoupleId(), user_id: user.id, item, completed: false, completed_at: null })
+    .insert({
+      couple_id: await getCoupleId(),
+      user_id: user.id,
+      item,
+      completed: false,
+      completed_at: null,
+    })
     .select('*')
     .single()
 

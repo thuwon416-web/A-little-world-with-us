@@ -8,8 +8,9 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   rules: {
     '@typescript-eslint/no-unused-vars': 'warn',
-    '@typescript-eslint/no-explicit-any': 'warn',
-    'no-console': 'warn',
+    // React Native event callbacks intentionally discard their returned Promise.
+    'no-void': 'off',
+    'no-console': ['warn', { allow: ['warn', 'error'] }],
   },
   ignorePatterns: ['node_modules', 'dist', '.expo', '.eslintrc.js'],
 }

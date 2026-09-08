@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- Canvas export must read the original user-selected URL. */
 
 import { useState } from 'react'
 import { Download, Image as ImageIcon } from 'lucide-react'

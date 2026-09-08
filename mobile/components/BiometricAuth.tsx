@@ -10,7 +10,6 @@ interface BiometricAuthProps {
 
 export default function BiometricAuth({ onSuccess, onCancel }: BiometricAuthProps) {
   const [isSupported, setIsSupported] = useState(false)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [biometricType, setBiometricType] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -35,7 +34,7 @@ export default function BiometricAuth({ onSuccess, onCancel }: BiometricAuthProp
           setBiometricType('Biometric')
         }
       }
-    } catch (error) {
+    } catch {
       // Silently handle error
     }
   }
@@ -60,12 +59,11 @@ export default function BiometricAuth({ onSuccess, onCancel }: BiometricAuthProp
       })
 
       if (result.success) {
-        setIsAuthenticated(true)
         onSuccess()
       } else {
         Alert.alert('Authentication Failed', 'Please try again or use your passcode.')
       }
-    } catch (error) {
+    } catch {
       Alert.alert('Authentication Error', 'An error occurred during authentication.')
     } finally {
       setIsLoading(false)

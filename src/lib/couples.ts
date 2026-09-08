@@ -30,7 +30,13 @@ export interface CoupleStatusResult {
   status: CoupleStatus
   couple: Couple | null
   invite: CoupleLink | null
-  partner: any | null
+  partner: PartnerProfile | null
+}
+
+export interface PartnerProfile {
+  id: string
+  email: string | null
+  full_name: string | null
 }
 
 /**
@@ -63,7 +69,7 @@ export async function getCoupleStatus(): Promise<CoupleStatusResult> {
       status: 'accepted',
       couple: acceptedLink.couples as Couple,
       invite: acceptedLink as CoupleLink,
-      partner,
+      partner: partner as PartnerProfile | null,
     }
   }
 
@@ -86,7 +92,7 @@ export async function getCoupleStatus(): Promise<CoupleStatusResult> {
       status: 'pending',
       couple: null,
       invite: pendingInvite as CoupleLink,
-      partner: inviter,
+      partner: inviter as PartnerProfile | null,
     }
   }
 

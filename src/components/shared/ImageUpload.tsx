@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- This is a local data-URL upload preview. */
 
 import { type ChangeEvent, useRef, useState } from 'react'
 import { uploadGalleryImage } from '@/lib/storage'

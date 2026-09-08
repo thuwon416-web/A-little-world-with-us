@@ -1,7 +1,8 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- This is a local data-URL upload preview. */
 
 import { useState, useRef } from 'react'
-import { X, Upload, File as FileIcon, Image as ImageIcon, Film, Music, FileText, Check, AlertCircle } from 'lucide-react'
+import { X, Upload, File as FileIcon, Image as ImageIcon, Film, Music, FileText, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface FileUploadProps {
@@ -105,7 +106,7 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
       const filePath = `${user.id}/${fileName}`
 
       // Upload to Supabase storage
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('chat_files')
         .upload(filePath, selectedFile, {
           cacheControl: '3600',

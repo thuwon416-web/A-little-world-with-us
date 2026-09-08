@@ -99,7 +99,7 @@ export async function decryptData(encrypted: string): Promise<string> {
 /**
  * Encrypt object properties selectively
  */
-export async function encryptSensitiveFields<T extends Record<string, any>>(
+export async function encryptSensitiveFields<T extends Record<string, unknown>>(
   data: T,
   sensitiveFields: (keyof T)[]
 ): Promise<Partial<T>> {
@@ -107,7 +107,7 @@ export async function encryptSensitiveFields<T extends Record<string, any>>(
 
   for (const field of sensitiveFields) {
     if (typeof result[field] === 'string') {
-      result[field] = await encryptData(result[field] as string) as any
+      result[field] = await encryptData(result[field] as string) as T[keyof T]
     }
   }
 
@@ -117,7 +117,7 @@ export async function encryptSensitiveFields<T extends Record<string, any>>(
 /**
  * Decrypt object properties selectively
  */
-export async function decryptSensitiveFields<T extends Record<string, any>>(
+export async function decryptSensitiveFields<T extends Record<string, unknown>>(
   data: T,
   sensitiveFields: (keyof T)[]
 ): Promise<Partial<T>> {
@@ -126,7 +126,7 @@ export async function decryptSensitiveFields<T extends Record<string, any>>(
   for (const field of sensitiveFields) {
     if (typeof result[field] === 'string') {
       try {
-        result[field] = await decryptData(result[field] as string) as any
+        result[field] = await decryptData(result[field] as string) as T[keyof T]
       } catch {
         // If decryption fails, leave as-is (might not be encrypted)
       }

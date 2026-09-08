@@ -1,7 +1,8 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- This component displays local file previews before upload. */
 
 import { useState, useRef } from 'react'
-import { Image, X } from 'lucide-react'
+import { Image as ImageIcon, X } from 'lucide-react'
 
 interface Props {
   onClose: () => void
@@ -65,7 +66,7 @@ export default function PhotoShare({ onClose, onPhotoSelect }: Props) {
               onClick={() => fileInputRef.current?.click()}
               className="border-2 border-dashed border-[var(--accent-1)]/30 rounded-lg p-8 text-center cursor-pointer hover:bg-[var(--bg-2)]"
             >
-              <Image className="h-12 w-12 mx-auto mb-2 text-[var(--accent-1)]" />
+              <ImageIcon className="h-12 w-12 mx-auto mb-2 text-[var(--accent-1)]" />
               <p className="text-sm text-[var(--text-secondary)]">
                 Tap to select photo
               </p>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, X, Smile, Heart, Laugh, Sparkles } from 'lucide-react'
+import { Search, X, Smile, Heart, Laugh, Sparkles, type LucideIcon } from 'lucide-react'
 
 interface Sticker {
   id: string
@@ -104,7 +104,7 @@ const stickers: Sticker[] = [
 
 const categories = ['All', 'Emotions', 'Love', 'Funny', 'Animals', 'Celebration']
 
-const categoryIcons: Record<string, any> = {
+const categoryIcons: Record<string, LucideIcon> = {
   All: Sparkles,
   Emotions: Smile,
   Love: Heart,

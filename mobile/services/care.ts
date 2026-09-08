@@ -30,7 +30,10 @@ async function getActiveCareCoupleId(userId: string): Promise<string | undefined
 }
 
 export async function saveTodayCareLog(checkIn: CareCheckIn) {
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
   if (authError || !user) throw new Error('Please sign in again to save your check-in.')
 
   const logDate = new Date().toISOString().slice(0, 10)

@@ -1,6 +1,12 @@
 import React, { useState } from 'react'
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native'
-import { enabledBoards, WellnessBoard } from '@/data/wellness-boards'
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  ActivityIndicator,
+} from 'react-native'
 
 // Import only the enabled components
 import AffirmationDeck from '@/components/wellness/AffirmationDeck'
@@ -18,36 +24,37 @@ import GentleForecastBoard from '@/components/wellness/GentleForecastBoard'
 import GentleHoldBoard from '@/components/wellness/GentleHoldBoard'
 import GoldenLowBoard from '@/components/wellness/GoldenLowBoard'
 import GratitudeWall from '@/components/wellness/GratitudeWall'
+import LoveCheckInBoard from '@/components/wellness/LoveCheckInBoard'
 import LoveNotesBoard from '@/components/wellness/LoveNotesBoard'
 import MellowBloomBoard from '@/components/wellness/MellowBloomBoard'
 import ReassuranceCounter from '@/components/wellness/ReassuranceCounter'
-import LoveCheckInBoard from '@/components/wellness/LoveCheckInBoard'
 import SteadyLandingBoard from '@/components/wellness/SteadyLandingBoard'
 import TenderCompassBoard from '@/components/wellness/TenderCompassBoard'
+import { enabledBoards, WellnessBoard } from '@/data/wellness-boards'
 
 // Map component names to actual components
 const componentMap: Record<string, React.ComponentType> = {
-  'AffirmationDeck': AffirmationDeck,
-  'ApologyCorner': ApologyCorner,
-  'AppreciationJar': AppreciationJar,
-  'CoupleMoodMeter': CoupleMoodMeter,
-  'CouplePromiseBoard': CouplePromiseBoard,
-  'EverydayRitualsBoard': EverydayRitualsBoard,
-  'EasyBreathBoard': EasyBreathBoard,
-  'GentleHoldBoard': GentleHoldBoard,
-  'GentleForecastBoard': GentleForecastBoard,
-  'CarefulQuietBoard': CarefulQuietBoard,
-  'DayEchoBoard': DayEchoBoard,
-  'CozyReentryBoard': CozyReentryBoard,
-  'ArmchairMomentBoard': ArmchairMomentBoard,
-  'GratitudeWall': GratitudeWall,
-  'LoveNotesBoard': LoveNotesBoard,
-  'ReassuranceCounter': ReassuranceCounter,
-  'GoldenLowBoard': GoldenLowBoard,
-  'LoveCheckInBoard': LoveCheckInBoard,
-  'MellowBloomBoard': MellowBloomBoard,
-  'SteadyLandingBoard': SteadyLandingBoard,
-  'TenderCompassBoard': TenderCompassBoard,
+  AffirmationDeck,
+  ApologyCorner,
+  AppreciationJar,
+  CoupleMoodMeter,
+  CouplePromiseBoard,
+  EverydayRitualsBoard,
+  EasyBreathBoard,
+  GentleHoldBoard,
+  GentleForecastBoard,
+  CarefulQuietBoard,
+  DayEchoBoard,
+  CozyReentryBoard,
+  ArmchairMomentBoard,
+  GratitudeWall,
+  LoveNotesBoard,
+  ReassuranceCounter,
+  GoldenLowBoard,
+  LoveCheckInBoard,
+  MellowBloomBoard,
+  SteadyLandingBoard,
+  TenderCompassBoard,
 }
 
 export default function WellnessScreen() {
@@ -109,10 +116,7 @@ export default function WellnessScreen() {
         {enabledBoards.map((board) => (
           <TouchableOpacity
             key={board.id}
-            style={[
-              styles.boardButton,
-              selectedBoard?.id === board.id && styles.boardButtonActive,
-            ]}
+            style={[styles.boardButton, selectedBoard?.id === board.id && styles.boardButtonActive]}
             onPress={() => handleSelectBoard(board)}
           >
             <Text style={styles.boardIcon}>{board.icon}</Text>
@@ -122,9 +126,7 @@ export default function WellnessScreen() {
       </ScrollView>
 
       {/* Selected board */}
-      <View style={styles.boardContainer}>
-        {renderBoard()}
-      </View>
+      <View style={styles.boardContainer}>{renderBoard()}</View>
     </View>
   )
 }

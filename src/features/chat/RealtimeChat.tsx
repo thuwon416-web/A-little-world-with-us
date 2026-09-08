@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- Chat attachments use user-provided URLs and GIF media. */
 
 import { useState, useEffect, useRef } from 'react'
 import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, MapPin } from 'lucide-react'
@@ -24,6 +25,9 @@ interface Message {
   created_at: string
   location_payload?: { latitude: number; longitude: number; accuracy?: number; label?: string } | null
 }
+
+type StickerSelection = { emoji: string }
+type GifSelection = { url: string }
 
 export default function RealtimeChat() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -62,7 +66,7 @@ export default function RealtimeChat() {
 
     const chatKey = await deriveChatKey(couple.id)
     const decryptedMessages = await Promise.all(
-      (loadedMessages || []).map(async (msg: any) => {
+      (loadedMessages || []).map(async (msg: Message) => {
         if (msg.encrypted && msg.content) {
           try {
             const decrypted = await decryptMessage(msg.content, chatKey)
@@ -183,7 +187,7 @@ export default function RealtimeChat() {
     await supabase.from('messages').update({ media_url: mediaUrl }).eq('id', message.id)
   }
 
-  const handleStickerSelect = async (sticker: any) => {
+  const handleStickerSelect = async (sticker: StickerSelection) => {
     if (!coupleId || !currentUserId) return
 
     await insertRow('messages', {
@@ -197,7 +201,7 @@ export default function RealtimeChat() {
     setShowStickerPicker(false)
   }
 
-  const handleGIFSelect = async (gif: any) => {
+  const handleGIFSelect = async (gif: GifSelection) => {
     if (!coupleId || !currentUserId) return
 
     const message = await insertRow<{ id: string }>('messages', {

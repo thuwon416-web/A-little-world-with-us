@@ -28,7 +28,6 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  optimizeFonts: false,
   images: {
     remotePatterns: [
       {
@@ -40,6 +39,11 @@ const nextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1600, 2000],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+  async redirects() {
+    return [
+      { source: '/locations', destination: '/location', permanent: true },
+    ]
   },
   async headers() {
     return [
@@ -114,7 +118,7 @@ const sentryOptions = {
 }
 
 // Apply Sentry wrapper only if DSN is available
-const withSentry = process.env.NEXT_PUBLIC_SENTRY_DSN 
+const withSentry = (process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN)
   ? withSentryConfig(withPWA(nextConfig), sentryOptions)
   : withPWA(nextConfig)
 

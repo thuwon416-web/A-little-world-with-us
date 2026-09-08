@@ -12,6 +12,10 @@ import {
   type CoupleStatusResult,
 } from '@/lib/couples'
 
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback
+}
+
 export default function CoupleSettings() {
   const [status, setStatus] = useState<CoupleStatusResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -41,7 +45,7 @@ export default function CoupleSettings() {
         setEditingName(result.couple.name || '')
         setEditingAnniversary(result.couple.anniversary || '')
       }
-    } catch (err) {
+    } catch {
       setError('Failed to load couple status')
     } finally {
       setLoading(false)
@@ -60,8 +64,8 @@ export default function CoupleSettings() {
       setEmail('')
       setCoupleName('')
       await loadStatus()
-    } catch (err: any) {
-      setError(err.message || 'Failed to send invite')
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to send invite'))
     } finally {
       setInviting(false)
     }
@@ -75,8 +79,8 @@ export default function CoupleSettings() {
       await acceptCoupleInvite(status.invite.id)
       setSuccess('You are now coupled!')
       await loadStatus()
-    } catch (err: any) {
-      setError(err.message || 'Failed to accept invite')
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to accept invite'))
     }
   }
 
@@ -88,8 +92,8 @@ export default function CoupleSettings() {
       await declineCoupleInvite(status.invite.id)
       setSuccess('Invite declined')
       await loadStatus()
-    } catch (err: any) {
-      setError(err.message || 'Failed to decline invite')
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to decline invite'))
     }
   }
 
@@ -103,8 +107,8 @@ export default function CoupleSettings() {
       await leaveCouple()
       setSuccess('You have left the couple')
       await loadStatus()
-    } catch (err: any) {
-      setError(err.message || 'Failed to leave couple')
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to leave couple'))
     }
   }
 
@@ -121,8 +125,8 @@ export default function CoupleSettings() {
       })
       setSuccess('Couple updated successfully!')
       await loadStatus()
-    } catch (err: any) {
-      setError(err.message || 'Failed to update couple')
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to update couple'))
     } finally {
       setSaving(false)
     }

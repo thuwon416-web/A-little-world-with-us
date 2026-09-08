@@ -9,6 +9,8 @@ interface Props {
   onRecord: (recording: { blob: Blob; duration: number }) => void
 }
 
+type VoiceRecordingWindow = Window & { stopVoiceRecording?: () => void }
+
 export default function VoiceMessageRecorder({ onClose, onRecord }: Props) {
   const [isRecording, setIsRecording] = useState(false)
   const [duration, setDuration] = useState(0)
@@ -36,15 +38,15 @@ export default function VoiceMessageRecorder({ onClose, onRecord }: Props) {
       )
 
       // Store stop function for manual stop
-      ;(window as any).stopVoiceRecording = stopRecording
-    } catch (err) {
+      ;(window as VoiceRecordingWindow).stopVoiceRecording = stopRecording
+    } catch {
       setError('Failed to start recording')
       setIsRecording(false)
     }
   }
 
   const handleStopRecording = () => {
-    ;(window as any).stopVoiceRecording?.()
+    ;(window as VoiceRecordingWindow).stopVoiceRecording?.()
   }
 
   return (

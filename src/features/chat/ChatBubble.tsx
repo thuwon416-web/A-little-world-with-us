@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
+/* eslint-disable @next/next/no-img-element -- Chat attachments use short-lived user-provided URLs. */
 import { motion } from 'framer-motion'
 import { Heart, Reply } from 'lucide-react'
 

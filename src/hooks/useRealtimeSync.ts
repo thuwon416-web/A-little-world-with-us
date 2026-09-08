@@ -57,7 +57,12 @@ export function useRealtimeSync<T extends RowWithTimestamps>({
       onChange(row, payload.eventType ?? event)
     }
 
-    const subscriptionConfig: any = {
+    const subscriptionConfig: {
+      event: RealtimeEvent
+      schema: 'public'
+      table: string
+      filter?: string
+    } = {
       event: event === '*' ? '*' : event,
       schema: 'public',
       table,
@@ -67,7 +72,7 @@ export function useRealtimeSync<T extends RowWithTimestamps>({
       subscriptionConfig.filter = filter
     }
 
-    channel.on('postgres_changes' as any, subscriptionConfig as any, callback as any)
+    channel.on('postgres_changes' as never, subscriptionConfig as never, callback as never)
     void channel.subscribe()
 
     return () => {
