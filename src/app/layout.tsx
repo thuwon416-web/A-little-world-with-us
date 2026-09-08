@@ -9,6 +9,7 @@ import AmbientBackground from '@/components/effects/ambient-background'
 import { Toaster } from '@/components/ui/sonner'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import AIChatWidget from '@/components/AIChatWidget'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const descriptions = [
   'A private little world for KoKo and Pu Tuu — memories, love, and every day in between',
@@ -60,6 +61,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Toaster />
             <PWAInstallPrompt />
             <AIChatWidget />
+            <SpeedInsights />
           </ThemeProvider>
         </LanguageProvider>
       </body>
