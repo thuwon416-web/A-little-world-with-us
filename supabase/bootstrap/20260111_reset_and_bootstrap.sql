@@ -306,20 +306,16 @@ values ('900da207-67b7-4433-a105-90c4e4e6d9a4', false, 'unknown'), ('693b63dc-22
 create or replace function public.purge_expired_location_history() returns void language sql security definer set search_path = public as $$ delete from public.location_history where captured_at < now() - interval '7 days'; $$;
 commit;
 
--- Enable database-side retention where pg_cron is available. A missing extension must not undo the reset.
+-- Enable database-side retention only when pg_cron is already available.
+-- Dynamic SQL avoids a compile-time dependency on the optional cron schema.
 do $$
 begin
-  begin
-    execute 'create extension if not exists pg_cron';
-  exception when insufficient_privilege then
-    raise notice 'pg_cron is unavailable; schedule public.purge_expired_location_history() externally once per day.';
-  end;
   if exists (select 1 from pg_extension where extname = 'pg_cron') then
-    perform cron.unschedule(jobid) from cron.job where jobname = 'purge-location-history';
-    perform cron.schedule('purge-location-history', '15 3 * * *', $cron$select public.purge_expired_location_history()$cron$);
+    execute 'select cron.unschedule(jobid) from cron.job where jobname = ''purge-location-history''';
+    execute 'select cron.schedule(''purge-location-history'', ''15 3 * * *'', ''select public.purge_expired_location_history()'')';
+  else
+    raise notice 'pg_cron is unavailable; schedule public.purge_expired_location_history() externally once per day.';
   end if;
-exception when undefined_schema then
-  raise notice 'pg_cron is unavailable; schedule public.purge_expired_location_history() externally once per day.';
 end $$;
 
 -- Realtime events used by chat and the admin's live map.
