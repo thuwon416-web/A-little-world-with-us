@@ -1,5 +1,6 @@
 import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
+import { Platform } from 'react-native'
 
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
@@ -51,6 +52,21 @@ export async function registerForPushNotifications() {
   }
 
   const token = (await Notifications.getExpoPushTokenAsync()).data
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (isSupabaseConfigured && user && (Platform.OS === 'android' || Platform.OS === 'ios')) {
+    await supabase.from('push_devices').upsert(
+      {
+        user_id: user.id,
+        expo_push_token: token,
+        platform: Platform.OS,
+        device_id: Device.modelId ?? Device.deviceName ?? null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'expo_push_token' }
+    )
+  }
   return token
 }
 

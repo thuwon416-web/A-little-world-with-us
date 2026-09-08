@@ -3,6 +3,7 @@ import { Bell, Heart, MessageSquareText, Sparkles } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native'
 
+import { useLocation } from '@/hooks/useLocation'
 import { registerForPushNotifications, sendLocalNotification } from '@/services/notifications'
 
 type NotificationChannel = 'reminders' | 'messages' | 'milestones' | 'wellness'
@@ -55,6 +56,13 @@ const STORAGE_KEY = 'a-little-world-with-us-mobile-notification-settings'
 export default function SettingsScreen() {
   const [settings, setSettings] = useState<NotificationSettings>(defaultSettings)
   const [loading, setLoading] = useState(true)
+  const {
+    isSharing,
+    lastUpdated,
+    error: locationError,
+    toggleSharing,
+    refreshSharingStatus,
+  } = useLocation()
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -101,6 +109,18 @@ export default function SettingsScreen() {
     }
   }
 
+  const handleLocationSharing = async (enabled: boolean) => {
+    try {
+      await toggleSharing(enabled)
+      await refreshSharingStatus()
+    } catch {
+      Alert.alert(
+        'Location sharing',
+        'Unable to update location sharing. Check your device permissions.'
+      )
+    }
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.eyebrow}>Settings</Text>
@@ -144,6 +164,35 @@ export default function SettingsScreen() {
             />
           </View>
         ))}
+      </View>
+
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionTitle}>Privacy & location</Text>
+        <View style={styles.settingRow}>
+          <View style={styles.labelWrap}>
+            <View style={styles.iconWrap}>
+              <Text style={styles.locationIcon}>⌖</Text>
+            </View>
+            <View>
+              <Text style={styles.settingLabel}>Share my location in background</Text>
+              <Text style={styles.settingDescription}>
+                Only your accepted partner’s admin safety map can view this. Stop anytime here.
+              </Text>
+            </View>
+          </View>
+          <Switch
+            value={isSharing}
+            onValueChange={(value) => void handleLocationSharing(value)}
+            trackColor={{ false: '#2a2d36', true: '#ff6b9d' }}
+            thumbColor="#ffffff"
+          />
+        </View>
+        <Text style={styles.locationMeta}>
+          {isSharing
+            ? `Sharing active${lastUpdated ? ` · last sync ${new Date(lastUpdated).toLocaleTimeString()}` : ''}`
+            : 'Location is private until you explicitly turn sharing on.'}
+        </Text>
+        {locationError ? <Text style={styles.locationError}>{locationError}</Text> : null}
       </View>
     </ScrollView>
   )
@@ -258,5 +307,22 @@ const styles = StyleSheet.create({
     color: '#b9bac4',
     fontSize: 12,
     marginTop: 2,
+  },
+  locationIcon: {
+    color: '#19101f',
+    fontSize: 22,
+    fontWeight: '700',
+  },
+  locationMeta: {
+    color: '#b9bac4',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  locationError: {
+    color: '#ff9caf',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 8,
   },
 })

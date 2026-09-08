@@ -23,4 +23,13 @@ Leaflet/CARTO/OSM needs no map key. Do not add obsolete Google Maps or Mapbox va
 
 Push the verified commit to GitHub, then deploy through Vercel. Verify `/location` as the admin and verify the partner is redirected. Test shared Care, Memories, Plans, Calendar, Finance, Reminders, chat location pin, and Sentry event capture.
 
-Native background GPS still requires a new Android/iOS build and permission testing on two real devices.
+## 4. Native location release
+
+Deploy the Supabase Edge Functions before testing notifications and labels:
+
+```bash
+supabase functions deploy reverse-geocode
+supabase functions deploy location-alerts
+```
+
+Then build the Android preview APK from `mobile`. MapLibre/CARTO is the mobile map stack and needs no Google, Mapbox, or tile API key. Each person must deliberately enable **Settings > Privacy > Share my location in background**; this cannot be enabled remotely. Android background tracking is unavailable in Expo Go and may stop after a user force-stops the app, as required by Android/device-vendor restrictions.

@@ -176,9 +176,12 @@ create table public.offline_sync (id uuid primary key default gen_random_uuid(),
 create table public.feedback (id uuid primary key default gen_random_uuid(), user_id uuid references public.profiles(id) on delete set null, feedback text not null, created_at timestamptz not null default now());
 
 -- Location: both accounts write; only the designated admin can read pair data.
-create table public.user_locations (user_id uuid primary key references public.profiles(id) on delete cascade, couple_id uuid not null references public.couples(id) on delete cascade, latitude double precision not null, longitude double precision not null, accuracy double precision, battery_level integer check (battery_level between 0 and 100), is_charging boolean, network_type text, device_name text, app_version text, updated_at timestamptz not null default now());
-create table public.location_history (id uuid primary key default gen_random_uuid(), user_id uuid not null references public.profiles(id) on delete cascade, couple_id uuid not null references public.couples(id) on delete cascade, latitude double precision not null, longitude double precision not null, accuracy double precision, captured_at timestamptz not null default now());
+create table public.user_locations (user_id uuid primary key references public.profiles(id) on delete cascade, couple_id uuid not null references public.couples(id) on delete cascade, latitude double precision not null, longitude double precision not null, accuracy double precision, place_label text, battery_level integer check (battery_level between 0 and 100), is_charging boolean, network_type text, device_name text, app_version text, last_sync_at timestamptz not null default now(), updated_at timestamptz not null default now());
+create table public.location_history (id uuid primary key default gen_random_uuid(), user_id uuid not null references public.profiles(id) on delete cascade, couple_id uuid not null references public.couples(id) on delete cascade, latitude double precision not null, longitude double precision not null, accuracy double precision, place_label text, captured_at timestamptz not null default now());
 create index location_history_couple_captured_idx on public.location_history(couple_id, captured_at desc);
+create table public.location_sharing_settings (user_id uuid primary key references public.profiles(id) on delete cascade, enabled boolean not null default false, last_permission_state text not null default 'unknown' check (last_permission_state in ('unknown','granted','denied')), updated_at timestamptz not null default now());
+create table public.location_address_cache (id uuid primary key default gen_random_uuid(), grid_key text not null unique, latitude double precision not null, longitude double precision not null, label text not null, provider text not null default 'nominatim', cached_at timestamptz not null default now());
+create table public.push_devices (id uuid primary key default gen_random_uuid(), user_id uuid not null references public.profiles(id) on delete cascade, expo_push_token text not null unique, platform text not null check (platform in ('android','ios')), device_id text, preferences jsonb not null default '{"sos":true,"location_stale":true,"sharing":true}'::jsonb, updated_at timestamptz not null default now());
 create table public.saved_places (id uuid primary key default gen_random_uuid(), couple_id uuid not null references public.couples(id) on delete cascade, created_by uuid not null references public.profiles(id) on delete cascade, name text not null, latitude double precision not null, longitude double precision not null, radius_meters integer not null default 100 check (radius_meters between 25 and 10000), created_at timestamptz not null default now());
 create table public.emergency_alerts (id uuid primary key default gen_random_uuid(), couple_id uuid not null references public.couples(id) on delete cascade, reporter_id uuid not null references public.profiles(id) on delete cascade, latitude double precision, longitude double precision, message text, created_at timestamptz not null default now(), resolved_at timestamptz, resolved_by uuid references public.profiles(id) on delete set null);
 create table public.call_signals (id uuid primary key default gen_random_uuid(), couple_id uuid not null references public.couples(id) on delete cascade, caller_id uuid not null references public.profiles(id) on delete cascade, receiver_id uuid not null references public.profiles(id) on delete cascade, type text not null check (type in ('audio','video')), status text not null check (status in ('calling','ringing','in_call','ended','rejected')), created_at timestamptz not null default now(), updated_at timestamptz not null default now());
@@ -242,12 +245,18 @@ alter table public.feedback enable row level security;
 create policy feedback_insert_authenticated on public.feedback for insert with check (auth.uid() = user_id);
 
 alter table public.user_locations enable row level security;
-create policy locations_owner_write on public.user_locations for insert with check (auth.uid() = user_id and public.is_couple_member(couple_id));
-create policy locations_owner_update on public.user_locations for update using (auth.uid() = user_id) with check (auth.uid() = user_id and public.is_couple_member(couple_id));
+create policy locations_owner_write on public.user_locations for insert with check (auth.uid() = user_id and public.is_couple_member(couple_id) and exists (select 1 from public.location_sharing_settings s where s.user_id = auth.uid() and s.enabled));
+create policy locations_owner_update on public.user_locations for update using (auth.uid() = user_id) with check (auth.uid() = user_id and public.is_couple_member(couple_id) and exists (select 1 from public.location_sharing_settings s where s.user_id = auth.uid() and s.enabled));
 create policy locations_admin_pair_read on public.user_locations for select using (public.is_location_admin() and public.is_couple_member(couple_id));
 alter table public.location_history enable row level security;
-create policy location_history_owner_insert on public.location_history for insert with check (auth.uid() = user_id and public.is_couple_member(couple_id));
+create policy location_history_owner_insert on public.location_history for insert with check (auth.uid() = user_id and public.is_couple_member(couple_id) and exists (select 1 from public.location_sharing_settings s where s.user_id = auth.uid() and s.enabled));
 create policy location_history_admin_pair_read on public.location_history for select using (public.is_location_admin() and public.is_couple_member(couple_id));
+alter table public.location_sharing_settings enable row level security;
+create policy location_sharing_owner_access on public.location_sharing_settings for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+alter table public.location_address_cache enable row level security;
+create policy location_address_admin_read on public.location_address_cache for select using (public.is_location_admin());
+alter table public.push_devices enable row level security;
+create policy push_devices_owner_access on public.push_devices for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 alter table public.saved_places enable row level security;
 create policy saved_places_admin_access on public.saved_places for all using (public.is_location_admin() and public.is_couple_member(couple_id)) with check (public.is_location_admin() and public.is_couple_member(couple_id));
 
@@ -286,6 +295,9 @@ select pair.couple_id,'693b63dc-2262-47c9-ad81-ab9d3d0646c4',days::date,true,'69
 from flo_periods period cross join bootstrap_pair pair cross join lateral generate_series(period.start_date,period.end_date,'1 day'::interval) days;
 insert into public.care_cycle_settings (couple_id,cycle_length,period_length,last_period_start,updated_by)
 select couple_id,28,5,(select max(start_date) from flo_periods),'693b63dc-2262-47c9-ad81-ab9d3d0646c4' from bootstrap_pair;
+
+insert into public.location_sharing_settings (user_id, enabled, last_permission_state)
+values ('900da207-67b7-4433-a105-90c4e4e6d9a4', false, 'unknown'), ('693b63dc-2262-47c9-ad81-ab9d3d0646c4', false, 'unknown');
 
 create or replace function public.purge_expired_location_history() returns void language sql security definer set search_path = public as $$ delete from public.location_history where captured_at < now() - interval '7 days'; $$;
 commit;

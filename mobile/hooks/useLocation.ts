@@ -4,6 +4,7 @@ import { useAuth } from '@/lib/auth'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 import {
   getCurrentLocation,
+  getSharingStatus,
   getActiveCoupleId,
   shareLocation,
   startLocationTracking,
@@ -53,6 +54,13 @@ export function useLocation() {
     }
   }, [isSharing])
 
+  const refreshSharingStatus = useCallback(async () => {
+    const status = await getSharingStatus()
+    setIsSharing(status.enabled)
+    setLastUpdated(status.lastSyncAt)
+    return status
+  }, [])
+
   const toggleSharing = useCallback(async (share: boolean) => {
     try {
       if (!share) {
@@ -61,24 +69,24 @@ export function useLocation() {
         return
       }
 
-      const nextPoint = await getCurrentLocation()
-      setCurrentLocation(nextPoint)
-      setLastUpdated(nextPoint.timestamp)
-      setIsSharing(true)
-      setError(null)
-      await shareLocation(nextPoint)
-
       await startLocationTracking((updatedPoint) => {
         setCurrentLocation(updatedPoint)
         setLastUpdated(updatedPoint.timestamp)
         setError(null)
       })
+      const nextPoint = await getCurrentLocation()
+      setCurrentLocation(nextPoint)
+      setLastUpdated(nextPoint.timestamp)
+      setIsSharing(true)
+      setError(null)
+      await shareLocation(nextPoint, false)
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : 'Sharing failed')
     }
   }, [])
 
   useEffect(() => {
+    void refreshSharingStatus()
     void refreshCurrentLocation()
 
     const intervalId = setInterval(() => {
@@ -86,7 +94,7 @@ export function useLocation() {
     }, 30000)
 
     return () => clearInterval(intervalId)
-  }, [refreshCurrentLocation])
+  }, [refreshCurrentLocation, refreshSharingStatus])
 
   useEffect(() => {
     if (!isSupabaseConfigured || !user) {
@@ -149,5 +157,6 @@ export function useLocation() {
     lastUpdated,
     toggleSharing,
     refreshCurrentLocation,
+    refreshSharingStatus,
   }
 }

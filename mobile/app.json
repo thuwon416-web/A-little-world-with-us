@@ -53,7 +53,22 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": ["expo-router", "expo-secure-store"],
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow location while using the app to share it with your accepted partner.",
+          "locationAlwaysAndWhenInUsePermission": "Allow background location only while you have chosen to share it with your accepted partner.",
+          "isIosBackgroundLocationEnabled": true,
+          "isAndroidBackgroundLocationEnabled": true
+        }
+      ],
+      "expo-task-manager",
+      "expo-notifications",
+      "@maplibre/maplibre-react-native"
+    ],
     "extra": {
       "eas": {
         "projectId": "a-little-world-with-us-mobile"
