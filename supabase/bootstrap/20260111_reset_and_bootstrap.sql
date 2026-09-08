@@ -275,26 +275,30 @@ create policy shared_media_delete on storage.objects for delete using (bucket_id
 insert into public.profiles (id, email, role)
 select id, email, case when email = 'thuwon416@gmail.com' then 'admin' else 'user' end
 from auth.users where id in ('900da207-67b7-4433-a105-90c4e4e6d9a4','693b63dc-2262-47c9-ad81-ab9d3d0646c4');
-create temporary table bootstrap_pair (couple_id uuid not null) on commit drop;
-with created_couple as (insert into public.couples (name) values ('A Little World With Us') returning id)
-insert into bootstrap_pair select id from created_couple;
+insert into public.couples (name) values ('A Little World With Us');
 insert into public.couple_links (couple_id, inviter_id, accepted_by, status, accepted_at)
-select couple_id, '900da207-67b7-4433-a105-90c4e4e6d9a4', '693b63dc-2262-47c9-ad81-ab9d3d0646c4', 'accepted', now() from bootstrap_pair;
+select id, '900da207-67b7-4433-a105-90c4e4e6d9a4', '693b63dc-2262-47c9-ad81-ab9d3d0646c4', 'accepted', now()
+from public.couples order by created_at desc limit 1;
 
 -- Flo import. Adjacent or overlapping entries are merged into one menstrual range.
-create temporary table flo_raw (start_date date not null, end_date date not null) on commit drop;
-insert into flo_raw values
+create table public.bootstrap_flo_raw (start_date date not null, end_date date not null);
+insert into public.bootstrap_flo_raw values
 ('2024-05-06','2024-05-10'),('2024-06-06','2024-06-10'),('2024-07-03','2024-07-06'),('2024-08-03','2024-08-06'),('2024-08-27','2024-08-31'),('2024-09-01','2024-09-02'),('2024-10-21','2024-10-25'),('2024-11-16','2024-11-20'),('2024-12-15','2024-12-19'),('2025-01-11','2025-01-15'),('2025-02-03','2025-02-07'),('2025-03-01','2025-03-05'),('2025-03-26','2025-03-30'),('2025-04-02','2025-04-06'),('2025-05-02','2025-05-05'),('2025-05-17','2025-05-21'),('2025-05-31','2025-05-31'),('2025-06-01','2025-06-04'),('2025-06-12','2025-06-16'),('2025-07-09','2025-07-11'),('2025-08-06','2025-08-09'),('2025-08-17','2025-08-21'),('2025-08-26','2025-08-31'),('2025-09-01','2025-09-02'),('2025-09-06','2025-09-11'),('2025-09-28','2025-09-30'),('2025-10-01','2025-10-02'),('2025-10-25','2025-10-29'),('2025-11-20','2025-11-24'),('2025-12-14','2025-12-19'),('2026-01-10','2026-01-13'),('2026-02-08','2026-02-11'),('2026-03-10','2026-03-10'),('2026-04-02','2026-04-06'),('2026-05-02','2026-05-05'),('2026-05-31','2026-05-31'),('2026-06-01','2026-06-04'),('2026-07-22','2026-07-26'),('2026-08-17','2026-08-21'),('2026-08-26','2026-08-31'),('2026-09-01','2026-09-02'),('2026-09-06','2026-09-11');
-create temporary table flo_periods on commit drop as
-with ordered as (select *, lag(end_date) over (order by start_date, end_date) as prior_end from flo_raw), marked as (select *, sum(case when prior_end is null or start_date > prior_end + 1 then 1 else 0 end) over (order by start_date, end_date) as grp from ordered)
+create table public.bootstrap_flo_periods as
+with ordered as (select *, lag(end_date) over (order by start_date, end_date) as prior_end from public.bootstrap_flo_raw), marked as (select *, sum(case when prior_end is null or start_date > prior_end + 1 then 1 else 0 end) over (order by start_date, end_date) as grp from ordered)
 select min(start_date) as start_date, max(end_date) as end_date from marked group by grp;
 insert into public.cycle_logs (couple_id,user_id,start_date,end_date,phase,notes,source)
-select pair.couple_id,'693b63dc-2262-47c9-ad81-ab9d3d0646c4',period.start_date,period.end_date,'menstrual','Imported from Flo','flo_import' from flo_periods period cross join bootstrap_pair pair;
+select pair.couple_id,'693b63dc-2262-47c9-ad81-ab9d3d0646c4',period.start_date,period.end_date,'menstrual','Imported from Flo','flo_import'
+from public.bootstrap_flo_periods period cross join (select id as couple_id from public.couples order by created_at desc limit 1) pair;
 insert into public.care_daily_logs (couple_id,user_id,log_date,period_day,created_by,updated_by)
 select pair.couple_id,'693b63dc-2262-47c9-ad81-ab9d3d0646c4',days::date,true,'693b63dc-2262-47c9-ad81-ab9d3d0646c4','693b63dc-2262-47c9-ad81-ab9d3d0646c4'
-from flo_periods period cross join bootstrap_pair pair cross join lateral generate_series(period.start_date,period.end_date,'1 day'::interval) days;
+from public.bootstrap_flo_periods period cross join (select id as couple_id from public.couples order by created_at desc limit 1) pair cross join lateral generate_series(period.start_date,period.end_date,'1 day'::interval) days;
 insert into public.care_cycle_settings (couple_id,cycle_length,period_length,last_period_start,updated_by)
-select couple_id,28,5,(select max(start_date) from flo_periods),'693b63dc-2262-47c9-ad81-ab9d3d0646c4' from bootstrap_pair;
+select id,28,5,(select max(start_date) from public.bootstrap_flo_periods),'693b63dc-2262-47c9-ad81-ab9d3d0646c4'
+from public.couples order by created_at desc limit 1;
+
+drop table public.bootstrap_flo_periods;
+drop table public.bootstrap_flo_raw;
 
 insert into public.location_sharing_settings (user_id, enabled, last_permission_state)
 values ('900da207-67b7-4433-a105-90c4e4e6d9a4', false, 'unknown'), ('693b63dc-2262-47c9-ad81-ab9d3d0646c4', false, 'unknown');
@@ -302,10 +306,21 @@ values ('900da207-67b7-4433-a105-90c4e4e6d9a4', false, 'unknown'), ('693b63dc-22
 create or replace function public.purge_expired_location_history() returns void language sql security definer set search_path = public as $$ delete from public.location_history where captured_at < now() - interval '7 days'; $$;
 commit;
 
--- Enable database-side retention. If pg_cron is unavailable on the plan, run the function daily from a server cron instead.
-create extension if not exists pg_cron;
-select cron.unschedule(jobid) from cron.job where jobname = 'purge-location-history';
-select cron.schedule('purge-location-history', '15 3 * * *', $$select public.purge_expired_location_history()$$);
+-- Enable database-side retention where pg_cron is available. A missing extension must not undo the reset.
+do $$
+begin
+  begin
+    execute 'create extension if not exists pg_cron';
+  exception when insufficient_privilege then
+    raise notice 'pg_cron is unavailable; schedule public.purge_expired_location_history() externally once per day.';
+  end;
+  if exists (select 1 from pg_extension where extname = 'pg_cron') then
+    perform cron.unschedule(jobid) from cron.job where jobname = 'purge-location-history';
+    perform cron.schedule('purge-location-history', '15 3 * * *', $cron$select public.purge_expired_location_history()$cron$);
+  end if;
+exception when undefined_schema then
+  raise notice 'pg_cron is unavailable; schedule public.purge_expired_location_history() externally once per day.';
+end $$;
 
 -- Realtime events used by chat and the admin's live map.
 do $$ begin
