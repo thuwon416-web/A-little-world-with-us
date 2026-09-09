@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-type Device = { expo_push_token: string }
+type Device = { expo_push_token: string; preferences: { surprises?: boolean } | null }
 const url = Deno.env.get('SUPABASE_URL')
 const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 const jobSecret = Deno.env.get('SURPRISE_REVEAL_SECRET')
@@ -18,9 +18,12 @@ Deno.serve(async (request) => {
     if (!updated) continue
     revealed += 1
     await supabase.from('notifications').insert({ user_id: capsule.recipient_id, title: 'A surprise is ready', body: capsule.title, scheduled_at: new Date().toISOString() })
-    const { data: devices } = await supabase.from('push_devices').select('expo_push_token').eq('user_id', capsule.recipient_id)
-    const messages = (devices ?? []).map((device: Device) => ({ to: device.expo_push_token, sound: 'default', title: 'A surprise is ready', body: capsule.title, data: { type: 'surprise', capsuleId: capsule.id } }))
-    if (messages.length) await fetch('https://exp.host/--/api/v2/push/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(messages) })
+    const { data: devices } = await supabase.from('push_devices').select('expo_push_token,preferences').eq('user_id', capsule.recipient_id)
+    const messages = (devices ?? []).filter((device: Device) => device.preferences?.surprises !== false).map((device: Device) => ({ to: device.expo_push_token, sound: 'default', title: 'A surprise is ready', body: capsule.title, data: { type: 'surprise', capsuleId: capsule.id } }))
+    if (messages.length) {
+      const pushResponse = await fetch('https://exp.host/--/api/v2/push/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(messages) })
+      if (!pushResponse.ok) console.error('Expo push request failed', await pushResponse.text())
+    }
   }
   return Response.json({ revealed })
 })

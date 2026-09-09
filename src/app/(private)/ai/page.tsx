@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Copy, Heart, Send, Sparkles } from 'lucide-react'
 
-type Tool = 'chat' | 'letter' | 'message' | 'date' | 'gift'
+type Tool = 'chat' | 'letter' | 'message' | 'date' | 'gift' | 'surprise'
 
 const tools: Array<{ id: Tool; label: string; description: string }> = [
   { id: 'chat', label: 'Love coach', description: 'Ask for caring, practical relationship advice.' },
@@ -11,6 +11,7 @@ const tools: Array<{ id: Tool; label: string; description: string }> = [
   { id: 'message', label: 'Message helper', description: 'Draft a sweet, supportive, or repair message.' },
   { id: 'date', label: 'Date planner', description: 'Plan a date around your budget and mood.' },
   { id: 'gift', label: 'Gift ideas', description: 'Find thoughtful gifts for an occasion.' },
+  { id: 'surprise', label: 'Surprise ideas', description: 'Plan a thoughtful surprise from details you choose to share.' },
 ]
 
 const prompts: Record<Tool, { label: string; placeholder: string; instruction: string }> = {
@@ -19,6 +20,7 @@ const prompts: Record<Tool, { label: string; placeholder: string; instruction: s
   message: { label: 'What message do you need?', placeholder: 'A short apology after I forgot our call. I want it to feel honest, not dramatic.', instruction: 'Draft three short message options. Match the requested tone, avoid manipulative language, and label each option.' },
   date: { label: 'Tell us the budget, location, and interests', placeholder: 'Budget $30, Yangon, quiet food and photo walks, 3 hours on Saturday.', instruction: 'Create three practical romantic date plans. Include estimated cost, time, and a simple first step for each.' },
   gift: { label: 'Tell us the occasion and what they enjoy', placeholder: 'Birthday gift under $40. They love journaling, tea, and handmade things.', instruction: 'Suggest five thoughtful, realistic gift ideas. Include why each fits and a rough budget.' },
+  surprise: { label: 'Share the occasion, interests, and a budget', placeholder: 'Birthday, loves coffee walks and handmade notes, budget $30. They dislike crowded places.', instruction: 'Create five private surprise ideas using only these details. Include a simple first step and approximate cost.' },
 }
 
 export default function AIFeaturePage() {
@@ -37,14 +39,17 @@ export default function AIFeaturePage() {
     setError('')
 
     try {
-      const response = await fetch('/api/ai/chat', {
+      const response = await fetch(tool === 'surprise' ? '/api/ai/surprise' : '/api/ai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: `${current.instruction}\n\nUser request: ${input.trim()}` }),
+        body: tool === 'surprise'
+          ? JSON.stringify({ occasion: 'A private surprise', interests: input.trim() })
+          : JSON.stringify({ message: `${current.instruction}\n\nUser request: ${input.trim()}` }),
       })
-      const data = await response.json()
-      if (!response.ok || !data.response) throw new Error(data.error || 'Unable to generate a response')
-      setResult(data.response)
+      const data = await response.json() as { response?: string; ideas?: string; provider?: string; error?: string }
+      const generated = tool === 'surprise' ? data.ideas : data.response
+      if (!response.ok || !generated) throw new Error(data.error || 'Unable to generate a response')
+      setResult(generated)
       setProvider(data.provider || '')
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : 'Unable to generate a response')

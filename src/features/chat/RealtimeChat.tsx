@@ -2,7 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- Chat attachments use user-provided URLs and GIF media. */
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, MapPin } from 'lucide-react'
+import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, MapPin, Captions } from 'lucide-react'
 import { supabase, insertRow } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
@@ -12,6 +12,7 @@ import StickerPicker from './StickerPicker'
 import GIFPicker from './GIFPicker'
 import FileUpload from './FileUpload'
 import ReplyThread from './ReplyThread'
+import { resolveChatMediaUrl } from '@/lib/chatMedia'
 
 interface Message {
   id: string
@@ -24,6 +25,7 @@ interface Message {
   reply_to: string | null
   created_at: string
   location_payload?: { latitude: number; longitude: number; accuracy?: number; label?: string } | null
+  transcript?: string | null
 }
 
 type StickerSelection = { emoji: string }
@@ -44,7 +46,11 @@ export default function RealtimeChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    loadCoupleAndMessages()
+    let dispose: (() => void) | undefined
+    void loadCoupleAndMessages().then((cleanup) => {
+      dispose = cleanup
+    })
+    return () => dispose?.()
   }, [])
 
   const loadCoupleAndMessages = async () => {
@@ -67,15 +73,20 @@ export default function RealtimeChat() {
     const chatKey = await deriveChatKey(couple.id)
     const decryptedMessages = await Promise.all(
       (loadedMessages || []).map(async (msg: Message) => {
+        const mediaUrl = msg.message_type === 'voice'
+          ? await resolveChatMediaUrl(msg.media_url, 'voice')
+          : msg.message_type === 'photo'
+            ? await resolveChatMediaUrl(msg.media_url, 'photo')
+            : msg.media_url
         if (msg.encrypted && msg.content) {
           try {
             const decrypted = await decryptMessage(msg.content, chatKey)
-            return { ...msg, content: decrypted }
+            return { ...msg, content: decrypted, media_url: mediaUrl }
           } catch {
-            return msg
+            return { ...msg, media_url: mediaUrl }
           }
         }
-        return msg
+        return { ...msg, media_url: mediaUrl }
       })
     )
 
@@ -92,7 +103,13 @@ export default function RealtimeChat() {
           filter: `couple_id=eq.${couple.id}`,
         },
         async (payload) => {
-          const newMessage = payload.new as Message
+          const rawMessage = payload.new as Message
+          const mediaUrl = rawMessage.message_type === 'voice'
+            ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
+            : rawMessage.message_type === 'photo'
+              ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
+              : rawMessage.media_url
+          const newMessage = { ...rawMessage, media_url: mediaUrl }
 
           if (newMessage.encrypted && newMessage.content) {
             try {
@@ -104,6 +121,24 @@ export default function RealtimeChat() {
           } else {
             setMessages((prev) => [...prev, newMessage])
           }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `couple_id=eq.${couple.id}`,
+        },
+        async (payload) => {
+          const rawMessage = payload.new as Message
+          const mediaUrl = rawMessage.message_type === 'voice'
+            ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
+            : rawMessage.message_type === 'photo'
+              ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
+              : rawMessage.media_url
+          setMessages((current) => current.map((message) => message.id === rawMessage.id ? { ...message, ...rawMessage, media_url: mediaUrl } : message))
         }
       )
       .subscribe()
@@ -164,6 +199,24 @@ export default function RealtimeChat() {
     const mediaUrl = await uploadVoiceRecording(recording.blob, coupleId, message.id)
 
     await supabase.from('messages').update({ media_url: mediaUrl }).eq('id', message.id)
+  }
+
+  const handleTranscribe = async (message: Message) => {
+    if (!message.media_url || !message.id) return
+    try {
+      const media = await fetch(message.media_url)
+      if (!media.ok) throw new Error('Unable to read this voice message.')
+      const blob = await media.blob()
+      const form = new FormData()
+      form.set('audio', new File([blob], 'voice-message.webm', { type: blob.type || 'audio/webm' }))
+      form.set('messageId', message.id)
+      const response = await fetch('/api/ai/transcribe', { method: 'POST', body: form })
+      const data = await response.json() as { transcript?: string; error?: string }
+      if (!response.ok || !data.transcript) throw new Error(data.error ?? 'Unable to transcribe this voice message.')
+      setMessages((current) => current.map((item) => item.id === message.id ? { ...item, transcript: data.transcript ?? null } : item))
+    } catch (caught) {
+      window.alert(caught instanceof Error ? caught.message : 'Unable to transcribe this voice message.')
+    }
   }
 
   const handlePhotoMessage = async (file: File) => {
@@ -325,7 +378,7 @@ export default function RealtimeChat() {
 
                   {message.message_type === 'text' && <p className="text-sm">{message.content}</p>}
                   {message.message_type === 'voice' && message.media_url && (
-                    <audio controls src={message.media_url} className="h-8" />
+                    <div className="space-y-2"><audio controls src={message.media_url} className="h-8 max-w-full" /><button type="button" onClick={() => void handleTranscribe(message)} className="inline-flex items-center gap-1 text-xs text-[var(--accent-2)] hover:underline"><Captions className="h-3.5 w-3.5" />{message.transcript ? 'Refresh transcript' : 'Transcribe'}</button>{message.transcript ? <p className="rounded-lg bg-black/10 p-2 text-xs leading-relaxed text-[var(--text-secondary)]">{message.transcript}</p> : null}</div>
                   )}
                   {message.message_type === 'photo' && message.media_url && (
                     <img src={message.media_url} alt="Chat photo" className="rounded-lg max-w-full" />

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Heart, UserPlus, Check, X, LogOut, Calendar, AlertCircle } from 'lucide-react'
+import { useState, useEffect, useCallback } from 'react'
+import { Heart, UserPlus, Check, X, LogOut, Calendar, AlertCircle, Cake, Plus, Trash2 } from 'lucide-react'
 import {
   getCoupleStatus,
   createCoupleAndInvite,
@@ -11,6 +11,9 @@ import {
   updateCouple,
   type CoupleStatusResult,
 } from '@/lib/couples'
+import { supabase } from '@/lib/supabase'
+
+type CoupleOccasion = { id: string; title: string; month: number; day: number; kind: 'anniversary' | 'birthday' | 'custom' }
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback
@@ -31,12 +34,17 @@ export default function CoupleSettings() {
   const [editingName, setEditingName] = useState('')
   const [editingAnniversary, setEditingAnniversary] = useState('')
   const [saving, setSaving] = useState(false)
+  const [occasions, setOccasions] = useState<CoupleOccasion[]>([])
+  const [occasionTitle, setOccasionTitle] = useState('')
+  const [occasionDate, setOccasionDate] = useState('')
+  const [occasionKind, setOccasionKind] = useState<CoupleOccasion['kind']>('birthday')
 
-  useEffect(() => {
-    loadStatus()
+  const loadOccasions = useCallback(async (coupleId: string) => {
+    const { data } = await supabase.from('couple_occasions').select('id,title,month,day,kind').eq('couple_id', coupleId).order('month').order('day')
+    setOccasions((data ?? []) as CoupleOccasion[])
   }, [])
 
-  const loadStatus = async () => {
+  const loadStatus = useCallback(async () => {
     try {
       setLoading(true)
       const result = await getCoupleStatus()
@@ -44,13 +52,18 @@ export default function CoupleSettings() {
       if (result.couple) {
         setEditingName(result.couple.name || '')
         setEditingAnniversary(result.couple.anniversary || '')
+        await loadOccasions(result.couple.id)
       }
     } catch {
       setError('Failed to load couple status')
     } finally {
       setLoading(false)
     }
-  }
+  }, [loadOccasions])
+
+  useEffect(() => {
+    void loadStatus()
+  }, [loadStatus])
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -123,6 +136,16 @@ export default function CoupleSettings() {
         name: editingName.trim() || undefined,
         anniversary: editingAnniversary || undefined,
       })
+      if (editingAnniversary) {
+        const date = new Date(`${editingAnniversary}T00:00:00`)
+        await supabase.from('couple_occasions').upsert({
+          couple_id: status.couple.id,
+          title: 'Our anniversary',
+          month: date.getMonth() + 1,
+          day: date.getDate(),
+          kind: 'anniversary',
+        }, { onConflict: 'couple_id,kind,title' })
+      }
       setSuccess('Couple updated successfully!')
       await loadStatus()
     } catch (err) {
@@ -130,6 +153,31 @@ export default function CoupleSettings() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const addOccasion = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!status?.couple || !occasionTitle.trim() || !occasionDate) return
+    const date = new Date(`${occasionDate}T00:00:00`)
+    const { data: { user } } = await supabase.auth.getUser()
+    const { error: insertError } = await supabase.from('couple_occasions').insert({
+      couple_id: status.couple.id,
+      title: occasionTitle.trim(),
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+      kind: occasionKind,
+      created_by: user?.id ?? null,
+    })
+    if (insertError) { setError(insertError.message); return }
+    setOccasionTitle('')
+    setOccasionDate('')
+    await loadOccasions(status.couple.id)
+  }
+
+  const deleteOccasion = async (id: string) => {
+    const { error: deleteError } = await supabase.from('couple_occasions').delete().eq('id', id)
+    if (deleteError) { setError(deleteError.message); return }
+    setOccasions((current) => current.filter((occasion) => occasion.id !== id))
   }
 
   if (loading) {
@@ -299,6 +347,18 @@ export default function CoupleSettings() {
               <span>Anniversary: {new Date(status.couple.anniversary).toLocaleDateString()}</span>
             </div>
           )}
+
+          <div className="rounded-xl border border-[var(--accent-1)]/15 bg-[var(--bg-2)] p-4">
+            <div className="flex items-center gap-2"><Cake className="h-4 w-4 text-[var(--accent-2)]" /><p className="text-sm font-medium text-[var(--text-primary)]">Shared occasions</p></div>
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">Birthdays and special dates add a gentle visual touch for both of you.</p>
+            <form onSubmit={addOccasion} className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
+              <input value={occasionTitle} onChange={(event) => setOccasionTitle(event.target.value)} maxLength={80} placeholder="Her birthday" className="rounded-lg border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-2 py-1.5 text-sm text-[var(--text-primary)]" />
+              <input type="date" value={occasionDate} onChange={(event) => setOccasionDate(event.target.value)} className="rounded-lg border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-2 py-1.5 text-sm text-[var(--text-primary)]" />
+              <select value={occasionKind} onChange={(event) => setOccasionKind(event.target.value as CoupleOccasion['kind'])} className="rounded-lg border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-2 py-1.5 text-sm text-[var(--text-primary)]"><option value="birthday">Birthday</option><option value="custom">Special day</option></select>
+              <button type="submit" className="inline-flex items-center justify-center gap-1 rounded-lg bg-[var(--button-bg)] px-3 py-1.5 text-xs font-medium text-[var(--text-primary)]"><Plus className="h-3.5 w-3.5" />Add</button>
+            </form>
+            {occasions.length > 0 && <ul className="mt-3 space-y-2">{occasions.map((occasion) => <li key={occasion.id} className="flex items-center justify-between gap-3 rounded-lg bg-[var(--card-bg)] px-3 py-2 text-xs"><span className="text-[var(--text-primary)]">{occasion.title} · {String(occasion.month).padStart(2, '0')}/{String(occasion.day).padStart(2, '0')}</span><button type="button" onClick={() => void deleteOccasion(occasion.id)} aria-label={`Delete ${occasion.title}`} className="text-red-300 hover:text-red-200"><Trash2 className="h-3.5 w-3.5" /></button></li>)}</ul>}
+          </div>
         </div>
       )}
     </div>

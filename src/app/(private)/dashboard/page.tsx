@@ -1,10 +1,11 @@
 'use client'
 
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react'
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import DaysCounter from '@/features/dashboard/DaysCounter'
 import Countdown from '@/features/dashboard/Countdown'
 import CoupleLinkStatus from '@/features/auth/CoupleLinkStatus'
 import QuickActions from '@/features/dashboard/QuickActions'
+import AnniversaryShareCard from '@/features/dashboard/AnniversaryShareCard'
 import RelationshipStats from '@/features/dashboard/RelationshipStats'
 import {
   DEFAULT_WIDGETS,
@@ -12,6 +13,8 @@ import {
   saveDashboardLayout,
   type DashboardWidgetId,
 } from '@/features/dashboard/widgetRegistry'
+import { getCoupleStatus } from '@/lib/couples'
+import { supabase } from '@/lib/supabase'
 
 const MemoryOfTheDay = lazy(() => import('@/features/memories/MemoryOfTheDay'))
 const MiniCareCheck = lazy(() => import('@/features/cycle/MiniCareCheck'))
@@ -110,21 +113,8 @@ function getLittleRitual() {
   return rituals[daySeed % rituals.length]
 }
 
-function getOccasionMessage() {
-  const today = new Date()
-  const month = today.getMonth() + 1
-  const date = today.getDate()
-
-  if (month === 2 && date === 2) {
-    return 'Happy anniversary, my love. Every year with you feels like a beautiful chapter in our little world.'
-  }
-
-  if (month === 9 && date === 10) {
-    return 'Happy birthday, love. May this day feel as warm and beautiful as your heart.'
-  }
-
-  return 'Today is another beautiful day to love each other softly and fully.'
-}
+type ActiveOccasion = { title: string; kind: 'anniversary' | 'birthday' | 'custom' }
+const defaultOccasionMessage = 'Today is another beautiful day to love each other softly and fully.'
 
 export default function DashboardPage() {
   const heroCopy = useMemo(() => {
@@ -132,34 +122,42 @@ export default function DashboardPage() {
       greeting: getTimeGreeting(),
       focus: getDailyFocus(),
       ritual: getLittleRitual(),
-      occasion: getOccasionMessage(),
+      occasion: defaultOccasionMessage,
     }
   }, [])
 
   const [widgetOrder, setWidgetOrder] = useState<DashboardWidgetId[]>(DEFAULT_WIDGETS)
   const [widgetVisibility, setWidgetVisibility] =
     useState<Record<DashboardWidgetId, boolean>>(defaultVisibility)
+  const layoutReady = useRef(false)
+  const [activeOccasion, setActiveOccasion] = useState<ActiveOccasion | null>(null)
 
   useEffect(() => {
-    const saved = loadDashboardLayout()
-    if (!saved) return
-
-    const validOrder = saved.order.filter((id): id is DashboardWidgetId =>
-      DEFAULT_WIDGETS.includes(id as DashboardWidgetId)
-    )
-
-    setWidgetOrder(validOrder.length > 0 ? validOrder : DEFAULT_WIDGETS)
-    setWidgetVisibility({
-      ...defaultVisibility,
-      ...saved.visibility,
+    void loadDashboardLayout().then((saved) => {
+      if (saved) {
+        const validOrder = saved.order.filter((id): id is DashboardWidgetId => DEFAULT_WIDGETS.includes(id as DashboardWidgetId))
+        setWidgetOrder(validOrder.length > 0 ? validOrder : DEFAULT_WIDGETS)
+        setWidgetVisibility({ ...defaultVisibility, ...saved.visibility })
+      }
+      layoutReady.current = true
     })
   }, [])
 
   useEffect(() => {
-    saveDashboardLayout({
-      order: widgetOrder,
-      visibility: widgetVisibility,
-    })
+    const loadTodayOccasion = async () => {
+      const { couple } = await getCoupleStatus()
+      if (!couple) return
+      const today = new Date()
+      const { data } = await supabase.from('couple_occasions').select('title,kind,month,day').eq('couple_id', couple.id).eq('month', today.getMonth() + 1).eq('day', today.getDate()).limit(1)
+      const occasion = data?.[0] as (ActiveOccasion & { month: number; day: number }) | undefined
+      if (occasion) setActiveOccasion({ title: occasion.title, kind: occasion.kind })
+    }
+    void loadTodayOccasion()
+  }, [])
+
+  useEffect(() => {
+    if (!layoutReady.current) return
+    void saveDashboardLayout({ order: widgetOrder, visibility: widgetVisibility })
   }, [widgetOrder, widgetVisibility])
 
   const visibleWidgets = widgetOrder.filter((id) => widgetVisibility[id] !== false)
@@ -182,7 +180,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="dashboard-shell animate-fade-in">
+    <main className={`dashboard-shell animate-fade-in ${activeOccasion ? `dashboard-shell--${activeOccasion.kind}` : ''}`}>
       <section className="dashboard-hero">
         <div className="dashboard-hero__glow" />
         <div className="dashboard-hero__content">
@@ -197,7 +195,9 @@ export default function DashboardPage() {
           </div>
 
           <p className="dashboard-hero__subtitle">{COUPLE_NAME}</p>
-          <p className="dashboard-hero__meta">{heroCopy.occasion}</p>
+          <p className="dashboard-hero__meta">{activeOccasion ? (activeOccasion.kind === 'anniversary' ? `Happy anniversary — ${activeOccasion.title}.` : activeOccasion.kind === 'birthday' ? `Happy birthday — ${activeOccasion.title}.` : `A little love day: ${activeOccasion.title}.`) : heroCopy.occasion}</p>
+
+          <div className="mt-4"><AnniversaryShareCard /></div>
 
           <div className="mt-4">
             <CoupleLinkStatus />

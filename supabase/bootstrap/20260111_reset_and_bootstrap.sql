@@ -59,6 +59,21 @@ create table public.couples (
   updated_at timestamptz not null default now()
 );
 
+-- Shared annual dates drive visual occasions and reminders. They remain
+-- private to accepted members of this couple.
+create table public.couple_occasions (
+  id uuid primary key default gen_random_uuid(),
+  couple_id uuid not null references public.couples(id) on delete cascade,
+  title text not null check (char_length(title) between 1 and 80),
+  month smallint not null check (month between 1 and 12),
+  day smallint not null check (day between 1 and 31),
+  kind text not null default 'custom' check (kind in ('anniversary','birthday','custom')),
+  created_by uuid references public.profiles(id) on delete set null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (couple_id, kind, title)
+);
+
 create table public.couple_links (
   id uuid primary key default gen_random_uuid(),
   couple_id uuid not null references public.couples(id) on delete cascade,
@@ -75,6 +90,7 @@ create unique index couple_links_accepted_member_pair on public.couple_links (le
 create or replace function public.touch_updated_at() returns trigger language plpgsql as $$ begin new.updated_at = now(); return new; end $$;
 create trigger profiles_touch before update on public.profiles for each row execute function public.touch_updated_at();
 create trigger couples_touch before update on public.couples for each row execute function public.touch_updated_at();
+create trigger couple_occasions_touch before update on public.couple_occasions for each row execute function public.touch_updated_at();
 create or replace function public.handle_new_user() returns trigger language plpgsql security definer set search_path = public as $$
 begin
   insert into public.profiles (id, email, full_name)
@@ -103,6 +119,7 @@ create table public.messages (
   message_type text not null default 'text' check (message_type in ('text','voice','photo','sticker','gif','file','video','audio','location')),
   media_url text,
   media_duration integer,
+  transcript text,
   location_payload jsonb,
   encrypted boolean not null default false,
   created_at timestamptz not null default now(),
@@ -267,7 +284,7 @@ create policy messages_couple_update on public.messages for update using (public
 create policy messages_couple_delete on public.messages for delete using (public.is_couple_member(couple_id));
 
 do $$ declare table_name text; begin
-  foreach table_name in array array['memories','calendar_events','financial_goals','reminders','plans','bucket_list','todos','goals','health_profiles','cycle_logs','care_daily_logs','care_cycle_settings','care_reminders','mood_logs','care_logs','favorites','vault_items','astrology_profiles','emergency_alerts','call_signals','export_jobs'] loop
+  foreach table_name in array array['memories','calendar_events','financial_goals','reminders','plans','bucket_list','todos','goals','health_profiles','cycle_logs','care_daily_logs','care_cycle_settings','care_reminders','mood_logs','care_logs','favorites','vault_items','astrology_profiles','emergency_alerts','call_signals','export_jobs','couple_occasions'] loop
     execute format('alter table public.%I enable row level security', table_name);
     execute format('create policy %I on public.%I for all using (public.is_couple_member(couple_id)) with check (public.is_couple_member(couple_id))', table_name || '_couple_access', table_name);
   end loop;

@@ -67,7 +67,10 @@ export async function uploadVoiceRecording(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const fileName = `${coupleId}/${messageId}-${Date.now()}.webm`
+  // Private storage policies are scoped to the uploader's folder. Store the
+  // durable path in the message; callers resolve a short-lived signed URL when
+  // rendering it instead of persisting an expiring/public URL.
+  const fileName = `${user.id}/${coupleId}-${messageId}-${Date.now()}.webm`
 
   const { error } = await supabase.storage
     .from('voice_messages')
@@ -78,9 +81,5 @@ export async function uploadVoiceRecording(
 
   if (error) throw error
 
-  const { data: urlData } = supabase.storage
-    .from('voice_messages')
-    .getPublicUrl(fileName)
-
-  return urlData.publicUrl
+  return fileName
 }

@@ -23,7 +23,7 @@ async function getCoupleId(): Promise<string | null> {
     const userId = await getUserId()
     const { data, error } = await supabase
       .from('couple_links')
-      .select('id')
+      .select('couple_id')
       .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
       .eq('status', 'accepted')
       .single()
@@ -31,7 +31,7 @@ async function getCoupleId(): Promise<string | null> {
     if (error || !data) {
       return null
     }
-    return data.id
+    return data.couple_id
   } catch {
     return null
   }

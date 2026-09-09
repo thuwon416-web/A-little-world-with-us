@@ -5,7 +5,7 @@ A private couple app for shared memories, chat, Care, planning, wellness, and an
 ## Local setup
 
 1. Install web dependencies with `npm install` and mobile dependencies with `npm install --prefix mobile`.
-2. Copy `.env.example` to `.env.local` and add Supabase, Upstash, AI provider, notification, and Sentry values as needed.
+2. Copy `.env.example` to `.env.local` and add Supabase, Upstash, an optional server-side AI provider (such as `GROQ_API_KEY`), and Sentry values as needed.
 3. Run the web app with `npm run dev`; run checks with `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
 
 ## Database
@@ -13,6 +13,8 @@ A private couple app for shared memories, chat, Care, planning, wellness, and an
 The only database bootstrap source is [supabase/bootstrap/20260111_reset_and_bootstrap.sql](supabase/bootstrap/20260111_reset_and_bootstrap.sql).
 
 Before running it, empty every existing Supabase Storage bucket in the Dashboard. The script preserves the two verified Auth accounts, recreates public data/RLS, directly links the couple, and imports Flo cycle history. It does not delete Storage files itself.
+
+After a reset, run the additive upgrades in order: `20260909_f1_f6_schema_upgrade.sql`, then `20260909_release2_upgrade.sql`. They add partner-only surprises, private voice transcripts, and shared occasion dates without deleting existing pair data.
 
 ## Maps and monitoring
 

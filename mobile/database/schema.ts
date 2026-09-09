@@ -34,6 +34,6 @@ export class UserModel extends Model {
 }
 
 export default appSchema({
-  version: 2,
+  version: 3,
   tables: [MessageModel.createTableSchema(), UserModel.createTableSchema()],
 })

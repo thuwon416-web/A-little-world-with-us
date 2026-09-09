@@ -97,13 +97,13 @@ export default function ChatScreen() {
       try {
         const { data } = await supabase
           .from('couple_links')
-          .select('id, inviter_id, accepted_by')
+          .select('couple_id, inviter_id, accepted_by')
           .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
           .eq('status', 'accepted')
           .single()
 
-        if (data?.id && data.accepted_by) {
-          setCoupleId(data.id)
+        if (data?.couple_id && data.accepted_by) {
+          setCoupleId(data.couple_id)
           setPartnerId(data.inviter_id === user.id ? data.accepted_by : data.inviter_id)
         }
       } catch (error) {

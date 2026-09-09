@@ -253,6 +253,40 @@ body {
   gap: 1.5rem;
 }
 
+.dashboard-shell--anniversary .dashboard-hero,
+.dashboard-shell--birthday .dashboard-hero,
+.dashboard-shell--custom .dashboard-hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-shell--anniversary .dashboard-hero::after,
+.dashboard-shell--birthday .dashboard-hero::after,
+.dashboard-shell--custom .dashboard-hero::after {
+  content: '✦  ♥  ✦';
+  position: absolute;
+  right: 1.5rem;
+  bottom: 1rem;
+  color: var(--accent-2);
+  letter-spacing: 0.55rem;
+  opacity: 0.62;
+  animation: occasion-float 3.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.dashboard-shell--birthday .dashboard-hero::after { content: '✦  ✧  ✦'; }
+.dashboard-shell--custom .dashboard-hero::after { content: '♥  ✦  ♥'; }
+
+@keyframes occasion-float {
+  50% { transform: translateY(-5px); opacity: 0.95; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-shell--anniversary .dashboard-hero::after,
+  .dashboard-shell--birthday .dashboard-hero::after,
+  .dashboard-shell--custom .dashboard-hero::after { animation: none; }
+}
+
 .dashboard-grid--stats {
   display: grid;
   gap: 1rem;
@@ -272,6 +306,23 @@ body {
   gap: 1rem;
   flex-wrap: wrap;
 }
+
+.dashboard-share-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  border: 1px solid rgba(255, 215, 0, 0.38);
+  border-radius: 9999px;
+  padding: 0.55rem 0.9rem;
+  background: rgba(255, 215, 0, 0.1);
+  color: var(--text-primary);
+  font-size: 0.78rem;
+  transition: background 180ms ease, transform 180ms ease;
+}
+
+.dashboard-share-card:hover:not(:disabled) { background: rgba(255, 215, 0, 0.18); transform: translateY(-1px); }
+.dashboard-share-card:disabled { opacity: 0.6; cursor: wait; }
 
 .dashboard-layout-controls {
   display: flex;

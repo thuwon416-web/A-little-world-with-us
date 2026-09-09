@@ -79,7 +79,9 @@ export async function uploadChatPhoto(
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
 
-  const fileName = `${coupleId}/${messageId}-${Date.now()}.webp`
+  // Keep the object in the authenticated uploader's folder. `chat_photos` is
+  // private, so the database stores this path and the UI creates a signed URL.
+  const fileName = `${user.id}/${coupleId}-${messageId}-${Date.now()}.webp`
 
   const { error } = await supabase.storage
     .from('chat_photos')
@@ -90,9 +92,5 @@ export async function uploadChatPhoto(
 
   if (error) throw error
 
-  const { data: urlData } = supabase.storage
-    .from('chat_photos')
-    .getPublicUrl(fileName)
-
-  return urlData.publicUrl
+  return fileName
 }

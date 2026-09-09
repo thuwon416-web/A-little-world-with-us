@@ -3,7 +3,6 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
-import ServiceWorkerRegister from '@/components/shared/ServiceWorkerRegister'
 import InteractiveCursor from '@/components/effects/InteractiveCursor'
 import AmbientBackground from '@/components/effects/ambient-background'
 import { Toaster } from '@/components/ui/sonner'
@@ -55,7 +54,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeProvider>
             <AmbientBackground density="medium" />
             <InteractiveCursor />
-            <ServiceWorkerRegister />
             {children}
             <Toaster />
             <PWAInstallPrompt />
