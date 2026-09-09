@@ -12,9 +12,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const isSupabaseConfigured = true
 
 export async function getCurrentUserId(): Promise<string | null> {
-  if (!isSupabaseConfigured) {
-    return null
-  }
+  if (!isSupabaseConfigured) return null
 
   try {
     const {
@@ -22,20 +20,13 @@ export async function getCurrentUserId(): Promise<string | null> {
       error,
     } = await supabase.auth.getUser()
 
-    if (error) {
-      return null
-    }
-
+    if (error) return null
     return user?.id ?? null
   } catch {
     return null
   }
 }
 
-/**
- * Singleton Supabase client for browser-side usage.
- * Falls back to a safe placeholder client so the app keeps working when the database is not configured yet.
- */
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
   realtime: {
     params: {
@@ -58,9 +49,7 @@ export async function readRows<T>(
     }
 
     const { data, error } = await request
-    if (error) {
-      return []
-    }
+    if (error) return []
 
     return (data ?? []) as T[]
   } catch {
@@ -85,9 +74,7 @@ export async function readUserRows<T>(
     }
 
     const { data, error } = await request
-    if (error) {
-      return []
-    }
+    if (error) return []
 
     return (data ?? []) as T[]
   } catch {
@@ -102,15 +89,10 @@ export async function insertRow<T>(
   if (!isSupabaseConfigured) return null
 
   try {
-    const userId = await getCurrentUserId()
-    if (userId && !payload.user_id) {
-      payload.user_id = userId
-    }
-
+    // ❌ ဒီနေရာမှာ user_id ကို အလိုအလျောက် ထည့်ပေးနေတဲ့ code ကို ဖျက်လိုက်ပါပြီ။
+    // သက်ဆိုင်ရာ table ရဲ့ column တွေကို caller ကပဲ တိကျစွာ ထည့်ပေးရပါမယ်။
     const { data, error } = await supabase.from(table).insert(payload).select()
-    if (error) {
-      return null
-    }
+    if (error) return null
 
     return (data?.[0] ?? null) as T | null
   } catch {
@@ -122,22 +104,16 @@ export async function deleteRow(table: string, id: string, userId?: string): Pro
   if (!isSupabaseConfigured) return false
 
   try {
-    // Get user ID if not provided
-    const effectiveUserId = userId ?? await getCurrentUserId()
-    if (!effectiveUserId) {
-      return false
+    let query = supabase.from(table).delete().eq('id', id)
+
+    // ✅ caller က userId ထည့်ပေးမှသာ user_id နဲ့ ထပ်စစ်ပါ။
+    // ထည့်မပေးရင် id နဲ့ပဲ ဖျက်ပါလိမ့်မယ်။
+    if (userId) {
+      query = query.eq('user_id', userId)
     }
 
-    // Delete with ownership check - only delete if user_id matches
-    const { error } = await supabase
-      .from(table)
-      .delete()
-      .eq('id', id)
-      .eq('user_id', effectiveUserId)
-    
-    if (error) {
-      return false
-    }
+    const { error } = await query
+    if (error) return false
 
     return true
   } catch {
@@ -160,16 +136,19 @@ export type Memory = {
   reveal_at?: string | null
 }
 
+// ✅ Message type ကို Actual Database Schema နဲ့ ကိုက်ညီအောင် ပြင်ထားပါတယ်။
 export type Message = {
   id: string
   created_at: string
   sender_id: string
   couple_id: string
   content: string
-  visibility: 'private' | 'shared' | 'partner_only'
-  reply_to_id?: string | null
-  media_type?: 'image' | 'voice' | 'none'
+  message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location' | 'sos'
   media_url?: string | null
+  media_duration?: number | null
+  location_payload?: { latitude: number; longitude: number; accuracy?: number; label?: string } | null
+  encrypted?: boolean
+  reply_to?: string | null
   profiles?: { full_name?: string | null }
 }
 
@@ -202,17 +181,13 @@ export async function cachedQuery<T>(
   queryFn: () => Promise<T>,
   ttlSeconds: number = 300
 ): Promise<T> {
-  if (typeof window === 'undefined') {
-    return await queryFn()
-  }
+  if (typeof window === 'undefined') return await queryFn()
 
   const cached = localStorage.getItem(`cache:${key}`)
   if (cached) {
     try {
       const { data, timestamp } = JSON.parse(cached)
-      if (Date.now() - timestamp < ttlSeconds * 1000) {
-        return data
-      }
+      if (Date.now() - timestamp < ttlSeconds * 1000) return data
     } catch {
       // Invalid cache, ignore
     }
@@ -220,10 +195,7 @@ export async function cachedQuery<T>(
 
   const data = await queryFn()
   try {
-    localStorage.setItem(`cache:${key}`, JSON.stringify({
-      data,
-      timestamp: Date.now(),
-    }))
+    localStorage.setItem(`cache:${key}`, JSON.stringify({ data, timestamp: Date.now() }))
   } catch {
     // localStorage might be full or disabled, ignore
   }
