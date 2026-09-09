@@ -2,7 +2,10 @@
 -- Safe to run once in Supabase SQL Editor. It does not delete or modify app data.
 -- RLS remains enabled; this only restores PostgREST table/sequence privileges for
 -- authenticated users so existing policies can be applied.
+<<<<<<< HEAD
 -- IMPORTANT: Run this file by itself. Do not append BEGIN, ROLLBACK, or SET ROLE.
+=======
+>>>>>>> fb06d887acf8862a3e60c0a057b689f9aa006e2a
 
 grant usage on schema public to postgres, anon, authenticated, service_role;
 grant all on schema public to postgres, service_role;
@@ -16,3 +19,21 @@ select
   has_schema_privilege('authenticated', 'public', 'usage') as authenticated_can_use_public_schema,
   has_table_privilege('authenticated', 'public.profiles', 'select') as authenticated_can_select_profiles,
   has_table_privilege('authenticated', 'public.couple_links', 'select') as authenticated_can_select_couple_links;
+<<<<<<< HEAD
+=======
+
+-- RLS verification. Each query must return exactly one accepted link row.
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '900da207-67b7-4433-a105-90c4e4e6d9a4', true);
+select id, email, role from public.profiles;
+select id, couple_id, status, inviter_id, accepted_by from public.couple_links;
+rollback;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '693b63dc-2262-47c9-ad81-ab9d3d0646c4', true);
+select id, email, role from public.profiles;
+select id, couple_id, status, inviter_id, accepted_by from public.couple_links;
+rollback;
+>>>>>>> fb06d887acf8862a3e60c0a057b689f9aa006e2a
