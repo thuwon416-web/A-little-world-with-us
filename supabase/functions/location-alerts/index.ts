@@ -11,8 +11,16 @@ const supabase = createClient(supabaseUrl, serviceRole)
 
 Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
+  const authorization = request.headers.get('Authorization')
+  if (!authorization) return new Response('Unauthorized', { status: 401 })
+
+  const token = authorization.replace(/^Bearer\s+/i, '')
+  const { data: { user }, error: authError } = await supabase.auth.getUser(token)
+  if (authError || !user) return new Response('Unauthorized', { status: 401 })
+
   const body = await request.json().catch(() => null) as { type?: 'sos' | 'sharing_stopped' | 'location_stale'; userId?: string; title?: string; message?: string } | null
   if (!body?.type || !body.userId) return Response.json({ error: 'type and userId are required' }, { status: 400 })
+  if (body.userId !== user.id) return new Response('Forbidden', { status: 403 })
 
   const { data: link } = await supabase.from('couple_links')
     .select('inviter_id,accepted_by')

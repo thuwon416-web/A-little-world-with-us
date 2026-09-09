@@ -5,6 +5,9 @@ const withPWA = require('next-pwa')({
   scope: '/',
   sw: 'sw.js',
   reloadOnOnline: true,
+  // Next 15 does not always publish this internal manifest. Excluding it prevents
+  // a stale Workbox precache from failing installation with a 404 after deploys.
+  buildExcludes: [/app-build-manifest\.json$/],
   maximumFileSizeToCacheInBytes: 52428800, // 50 MB limit (P2 constraint)
   runtimeCaching: [
     {

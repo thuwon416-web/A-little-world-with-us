@@ -30,6 +30,12 @@ drop schema if exists public cascade;
 create schema public;
 grant usage on schema public to postgres, anon, authenticated, service_role;
 grant all on schema public to postgres, service_role;
+-- RLS decides which rows an authenticated account may access. These grants only
+-- allow PostgREST to reach the tables so that those RLS policies can be evaluated.
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
+alter default privileges in schema public grant select, insert, update, delete on tables to authenticated;
+alter default privileges in schema public grant usage, select on sequences to authenticated;
 
 create extension if not exists pgcrypto;
 
@@ -185,6 +191,11 @@ create table public.push_devices (id uuid primary key default gen_random_uuid(),
 create table public.saved_places (id uuid primary key default gen_random_uuid(), couple_id uuid not null references public.couples(id) on delete cascade, created_by uuid not null references public.profiles(id) on delete cascade, name text not null, latitude double precision not null, longitude double precision not null, radius_meters integer not null default 100 check (radius_meters between 25 and 10000), created_at timestamptz not null default now());
 create table public.emergency_alerts (id uuid primary key default gen_random_uuid(), couple_id uuid not null references public.couples(id) on delete cascade, reporter_id uuid not null references public.profiles(id) on delete cascade, latitude double precision, longitude double precision, message text, created_at timestamptz not null default now(), resolved_at timestamptz, resolved_by uuid references public.profiles(id) on delete set null);
 create table public.call_signals (id uuid primary key default gen_random_uuid(), couple_id uuid not null references public.couples(id) on delete cascade, caller_id uuid not null references public.profiles(id) on delete cascade, receiver_id uuid not null references public.profiles(id) on delete cascade, type text not null check (type in ('audio','video')), status text not null check (status in ('calling','ringing','in_call','ended','rejected')), created_at timestamptz not null default now(), updated_at timestamptz not null default now());
+
+-- Default privileges above cover future tables; these cover every table created
+-- by this bootstrap even when the SQL editor role has custom defaults.
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
 
 -- Older screens still submit user-owned records without couple_id. Fill it from the
 -- caller's accepted link before RLS is evaluated, so the canonical shared scope is kept.
