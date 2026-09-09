@@ -18,14 +18,18 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.alittleworldwithus.app",
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Allow live location sharing with your partner.",
         "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow background location updates for the shared safety map.",
-        "UIBackgroundModes": ["location"],
+        "UIBackgroundModes": [
+          "location"
+        ],
         "NSCameraUsageDescription": "Allow video calls and media capture.",
         "NSMicrophoneUsageDescription": "Allow voice notes and audio calls."
       }
@@ -46,7 +50,12 @@
         "FOREGROUND_SERVICE_LOCATION",
         "CAMERA",
         "RECORD_AUDIO",
-        "POST_NOTIFICATIONS"
+        "POST_NOTIFICATIONS",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_BACKGROUND_LOCATION",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_LOCATION"
       ]
     },
     "web": {
@@ -70,9 +79,13 @@
       "@maplibre/maplibre-react-native"
     ],
     "extra": {
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "a-little-world-with-us-mobile"
+        "projectId": "e408249d-9b07-4d2f-8df3-6115e4d47bab"
       }
-    }
+    },
+    "owner": "thuwon"
   }
 }
