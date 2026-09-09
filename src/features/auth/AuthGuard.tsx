@@ -11,7 +11,7 @@ import { supabase } from '@/lib/supabase'
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const [isAuth, setIsAuth] = useState(false)
-  const [pairStatus, setPairStatus] = useState<'accepted' | 'pending' | 'declined' | 'revoked' | null>(null)
+  const [pairStatus, setPairStatus] = useState<'accepted' | 'pending' | 'declined' | 'revoked' | 'error' | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -30,9 +30,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
       setIsAuth(true)
 
-      const status = await getPairStatus()
-      if (!mounted) return
-      setPairStatus(status?.status ?? 'pending')
+      try {
+        const status = await getPairStatus()
+        if (!mounted) return
+        setPairStatus(status?.status ?? 'pending')
+      } catch {
+        if (mounted) setPairStatus('error')
+      }
     }
 
     syncSession()
@@ -42,9 +46,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (session) {
         setIsAuth(true)
-        const status = await getPairStatus()
-        if (!mounted) return
-        setPairStatus(status?.status ?? 'pending')
+        try {
+          const status = await getPairStatus()
+          if (!mounted) return
+          setPairStatus(status?.status ?? 'pending')
+        } catch {
+          if (mounted) setPairStatus('error')
+        }
       } else {
         setIsAuth(false)
         setPairStatus(null)
@@ -75,7 +83,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
             Couple link required
           </h1>
           <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
-            {pairStatus === 'pending'
+            {pairStatus === 'error'
+              ? 'We could not verify your couple link. Please check the deployed Supabase connection and try again.'
+              : pairStatus === 'pending'
               ? 'Your pairing request is waiting for approval.'
               : 'Your couple link is not active yet.'}
           </p>
