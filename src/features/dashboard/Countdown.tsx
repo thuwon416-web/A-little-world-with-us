@@ -54,7 +54,7 @@ export default memo(function Countdown({ targetDate, label, icon = '🎂' }: Cou
 
   const calculate = useCallback(() => {
     const now = new Date()
-    const target = new Date(targetDate)
+    const target = new Date(targetDate + 'T00:00:00')
 
     target.setFullYear(now.getFullYear())
     if (target < now) {
