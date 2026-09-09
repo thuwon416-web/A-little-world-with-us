@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, MapPin, Captions } from 'lucide-react'
-import { supabase, insertRow } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
 import VoiceMessageRecorder from './VoiceMessageRecorder'
@@ -154,7 +154,7 @@ export default function RealtimeChat() {
     const chatKey = await deriveChatKey(coupleId)
     const encryptedContent = await encryptMessage(input.trim(), chatKey)
 
-    await insertRow('messages', {
+    const { error } = await supabase.from('messages').insert({
       couple_id: coupleId,
       sender_id: currentUserId,
       content: encryptedContent,
@@ -162,38 +162,57 @@ export default function RealtimeChat() {
       encrypted: true,
     })
 
+    if (error) {
+      console.error('Error sending message:', error)
+      return
+    }
+
     setInput('')
   }
 
   const handleSendLocation = () => {
     if (!coupleId || !currentUserId || !navigator.geolocation) return
-    navigator.geolocation.getCurrentPosition(async (position) => {
-      const latitude = position.coords.latitude
-      const longitude = position.coords.longitude
-      const accuracy = Math.round(position.coords.accuracy)
-      await insertRow('messages', {
-        couple_id: coupleId,
-        sender_id: currentUserId,
-        content: `Location pin · ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
-        message_type: 'location',
-        location_payload: { latitude, longitude, accuracy },
-        encrypted: false,
-      })
-    }, () => alert('Location permission is required to send a location pin.'), { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 })
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const latitude = position.coords.latitude
+        const longitude = position.coords.longitude
+        const accuracy = Math.round(position.coords.accuracy)
+
+        const { error } = await supabase.from('messages').insert({
+          couple_id: coupleId,
+          sender_id: currentUserId,
+          content: `Location pin · ${latitude.toFixed(5)}, ${longitude.toFixed(5)}`,
+          message_type: 'location',
+          location_payload: { latitude, longitude, accuracy },
+          encrypted: false,
+        })
+
+        if (error) {
+          console.error('Error sending location:', error)
+        }
+      },
+      () => alert('Location permission is required to send a location pin.'),
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 30000 }
+    )
   }
 
   const handleVoiceMessage = async (recording: { blob: Blob; duration: number }) => {
     if (!coupleId || !currentUserId) return
 
-    const message = await insertRow<{ id: string }>('messages', {
-      couple_id: coupleId,
-      sender_id: currentUserId,
-      message_type: 'voice',
-      media_duration: recording.duration,
-      encrypted: false,
-    })
+    const { data: message, error } = await supabase
+      .from('messages')
+      .insert({
+        couple_id: coupleId,
+        sender_id: currentUserId,
+        message_type: 'voice',
+        media_duration: recording.duration,
+        encrypted: false,
+      })
+      .select()
+      .single()
 
-    if (!message) return
+    if (error || !message) return
 
     const { uploadVoiceRecording } = await import('@/lib/voiceRecorder')
     const mediaUrl = await uploadVoiceRecording(recording.blob, coupleId, message.id)
@@ -225,14 +244,18 @@ export default function RealtimeChat() {
     const { compressImage } = await import('@/lib/imageCompressor')
     const compressed = await compressImage(file)
 
-    const message = await insertRow<{ id: string }>('messages', {
-      couple_id: coupleId,
-      sender_id: currentUserId,
-      message_type: 'photo',
-      encrypted: false,
-    })
+    const { data: message, error } = await supabase
+      .from('messages')
+      .insert({
+        couple_id: coupleId,
+        sender_id: currentUserId,
+        message_type: 'photo',
+        encrypted: false,
+      })
+      .select()
+      .single()
 
-    if (!message) return
+    if (error || !message) return
 
     const { uploadChatPhoto } = await import('@/lib/imageCompressor')
     const mediaUrl = await uploadChatPhoto(compressed.blob, coupleId, message.id)
@@ -243,7 +266,7 @@ export default function RealtimeChat() {
   const handleStickerSelect = async (sticker: StickerSelection) => {
     if (!coupleId || !currentUserId) return
 
-    await insertRow('messages', {
+    const { error } = await supabase.from('messages').insert({
       couple_id: coupleId,
       sender_id: currentUserId,
       content: sticker.emoji,
@@ -251,20 +274,29 @@ export default function RealtimeChat() {
       encrypted: false,
     })
 
+    if (error) {
+      console.error('Error sending sticker:', error)
+      return
+    }
+
     setShowStickerPicker(false)
   }
 
   const handleGIFSelect = async (gif: GifSelection) => {
     if (!coupleId || !currentUserId) return
 
-    const message = await insertRow<{ id: string }>('messages', {
-      couple_id: coupleId,
-      sender_id: currentUserId,
-      message_type: 'gif',
-      encrypted: false,
-    })
+    const { data: message, error } = await supabase
+      .from('messages')
+      .insert({
+        couple_id: coupleId,
+        sender_id: currentUserId,
+        message_type: 'gif',
+        encrypted: false,
+      })
+      .select()
+      .single()
 
-    if (!message) return
+    if (error || !message) return
 
     await supabase.from('messages').update({ media_url: gif.url }).eq('id', message.id)
 
@@ -287,7 +319,6 @@ export default function RealtimeChat() {
       else if (fileInfo.type.startsWith('video/')) messageType = 'video'
       else if (fileInfo.type.startsWith('audio/')) messageType = 'audio'
 
-      // Save message to database
       const { error } = await supabase.from('messages').insert({
         couple_id: coupleId,
         sender_id: currentUserId,
@@ -313,7 +344,7 @@ export default function RealtimeChat() {
     const chatKey = await deriveChatKey(coupleId)
     const encryptedContent = await encryptMessage(replyData.text, chatKey)
 
-    await insertRow('messages', {
+    const { error } = await supabase.from('messages').insert({
       couple_id: coupleId,
       sender_id: currentUserId,
       content: encryptedContent,
@@ -321,6 +352,10 @@ export default function RealtimeChat() {
       reply_to: replyData.replyTo,
       encrypted: true,
     })
+
+    if (error) {
+      console.error('Error sending reply:', error)
+    }
   }
 
   const handleMessageLongPress = (message: Message) => {
