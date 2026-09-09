@@ -147,9 +147,12 @@ export async function deleteRow(table: string, id: string, userId?: string): Pro
 
 // Type definitions for our tables
 export type Memory = {
-  id: number
+  id: string
   created_at: string
-  image_url: string
+  image_url: string | null
+  storage_path?: string | null
+  title?: string | null
+  description?: string | null
   caption: string | null
   date: string
   user_id?: string | null

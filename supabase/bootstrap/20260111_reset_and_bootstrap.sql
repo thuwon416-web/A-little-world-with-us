@@ -171,7 +171,38 @@ create table public.favorites (id uuid primary key default gen_random_uuid(), co
 
 -- Couple content retained by the other private routes.
 create table public.vault_items (id uuid primary key default gen_random_uuid(), couple_id uuid not null references public.couples(id) on delete cascade, user_id uuid not null references public.profiles(id) on delete cascade, title text not null, content text, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
-create table public.time_capsules (id uuid primary key default gen_random_uuid(), couple_id uuid not null references public.couples(id) on delete cascade, user_id uuid not null references public.profiles(id) on delete cascade, title text not null, content text, unlock_at timestamptz, created_at timestamptz not null default now());
+create table public.time_capsules (
+  id uuid primary key default gen_random_uuid(),
+  couple_id uuid not null references public.couples(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  recipient_id uuid not null references public.profiles(id) on delete cascade,
+  title text not null,
+  content text not null,
+  unlock_at timestamptz not null,
+  status text not null default 'scheduled' check (status in ('scheduled','revealed','cancelled')),
+  revealed_at timestamptz,
+  cancelled_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  check (recipient_id <> user_id)
+);
+create index time_capsules_recipient_unlock_idx on public.time_capsules(recipient_id, unlock_at);
+create trigger time_capsules_touch before update on public.time_capsules for each row execute function public.touch_updated_at();
+create table public.time_capsule_attachments (
+  id uuid primary key default gen_random_uuid(),
+  capsule_id uuid not null references public.time_capsules(id) on delete cascade,
+  storage_path text not null,
+  media_type text not null default 'image' check (media_type in ('image','file')),
+  created_at timestamptz not null default now()
+);
+create table public.export_jobs (
+  id uuid primary key default gen_random_uuid(),
+  couple_id uuid not null references public.couples(id) on delete cascade,
+  requested_by uuid not null references public.profiles(id) on delete cascade,
+  status text not null default 'ready' check (status in ('ready','failed')),
+  expires_at timestamptz not null default now() + interval '24 hours',
+  created_at timestamptz not null default now()
+);
 create table public.astrology_profiles (id uuid primary key default gen_random_uuid(), couple_id uuid references public.couples(id) on delete cascade, user_id uuid not null unique references public.profiles(id) on delete cascade, birth_date date, data jsonb not null default '{}'::jsonb, created_at timestamptz not null default now(), updated_at timestamptz not null default now());
 
 -- Personal security/device data.
@@ -236,7 +267,7 @@ create policy messages_couple_update on public.messages for update using (public
 create policy messages_couple_delete on public.messages for delete using (public.is_couple_member(couple_id));
 
 do $$ declare table_name text; begin
-  foreach table_name in array array['memories','calendar_events','financial_goals','reminders','plans','bucket_list','todos','goals','health_profiles','cycle_logs','care_daily_logs','care_cycle_settings','care_reminders','mood_logs','care_logs','favorites','vault_items','time_capsules','astrology_profiles','emergency_alerts','call_signals'] loop
+  foreach table_name in array array['memories','calendar_events','financial_goals','reminders','plans','bucket_list','todos','goals','health_profiles','cycle_logs','care_daily_logs','care_cycle_settings','care_reminders','mood_logs','care_logs','favorites','vault_items','astrology_profiles','emergency_alerts','call_signals','export_jobs'] loop
     execute format('alter table public.%I enable row level security', table_name);
     execute format('create policy %I on public.%I for all using (public.is_couple_member(couple_id)) with check (public.is_couple_member(couple_id))', table_name || '_couple_access', table_name);
   end loop;
@@ -244,6 +275,12 @@ end $$;
 
 alter table public.plan_items enable row level security;
 create policy plan_items_couple_access on public.plan_items for all using (exists (select 1 from public.plans p where p.id = plan_id and public.is_couple_member(p.couple_id))) with check (exists (select 1 from public.plans p where p.id = plan_id and public.is_couple_member(p.couple_id)));
+alter table public.time_capsules enable row level security;
+create policy time_capsules_creator_manage on public.time_capsules for all using (user_id = auth.uid()) with check (user_id = auth.uid() and public.is_couple_member(couple_id));
+create policy time_capsules_recipient_read_revealed on public.time_capsules for select using (recipient_id = auth.uid() and status = 'revealed' and unlock_at <= now());
+alter table public.time_capsule_attachments enable row level security;
+create policy time_capsule_attachments_creator_access on public.time_capsule_attachments for all using (exists (select 1 from public.time_capsules c where c.id = capsule_id and c.user_id = auth.uid())) with check (exists (select 1 from public.time_capsules c where c.id = capsule_id and c.user_id = auth.uid()));
+create policy time_capsule_attachments_recipient_read on public.time_capsule_attachments for select using (exists (select 1 from public.time_capsules c where c.id = capsule_id and c.recipient_id = auth.uid() and c.status = 'revealed' and c.unlock_at <= now()));
 alter table public.user_settings enable row level security;
 create policy user_settings_own_access on public.user_settings for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 alter table public.notifications enable row level security;
@@ -272,7 +309,7 @@ alter table public.saved_places enable row level security;
 create policy saved_places_admin_access on public.saved_places for all using (public.is_location_admin() and public.is_couple_member(couple_id)) with check (public.is_location_admin() and public.is_couple_member(couple_id));
 
 -- Private storage buckets with couple-aware paths (<owner-uuid>/...).
-insert into storage.buckets (id, name, public) values ('memories','memories',false),('gallery','gallery',false),('chat_files','chat_files',false),('chat_photos','chat_photos',false),('voice_messages','voice_messages',false)
+insert into storage.buckets (id, name, public) values ('memories','memories',false),('gallery','gallery',false),('chat_files','chat_files',false),('chat_photos','chat_photos',false),('voice_messages','voice_messages',false),('surprises','surprises',false)
 on conflict (id) do update set name = excluded.name, public = excluded.public;
 create or replace function public.has_accepted_couple() returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.couple_links where status = 'accepted' and auth.uid() in (inviter_id, accepted_by));
@@ -281,6 +318,8 @@ create policy shared_media_read on storage.objects for select using (bucket_id i
 create policy shared_media_insert on storage.objects for insert with check (bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages') and owner = auth.uid() and public.has_accepted_couple());
 create policy shared_media_update on storage.objects for update using (bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages') and owner = auth.uid());
 create policy shared_media_delete on storage.objects for delete using (bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages') and (owner = auth.uid() or public.has_accepted_couple()));
+create policy surprise_media_creator_access on storage.objects for all using (bucket_id = 'surprises' and owner = auth.uid()) with check (bucket_id = 'surprises' and owner = auth.uid() and public.has_accepted_couple());
+create policy surprise_media_recipient_read on storage.objects for select using (bucket_id = 'surprises' and exists (select 1 from public.time_capsule_attachments a join public.time_capsules c on c.id = a.capsule_id where a.storage_path = name and c.recipient_id = auth.uid() and c.status = 'revealed' and c.unlock_at <= now()));
 
 -- Preserve the supplied accounts, create their profiles, and directly accept the pair.
 insert into public.profiles (id, email, role)

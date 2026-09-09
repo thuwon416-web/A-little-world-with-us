@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, ChevronRight, ChevronLeft, Heart, Sparkles, Star, User, Mail, Activity, Moon, Zap } from 'lucide-react'
+import { Check, ChevronRight, ChevronLeft, Heart, Sparkles, Star, User, Activity, Moon, Zap } from 'lucide-react'
 import {
   getOnboardingProgress,
   initializeOnboarding,
@@ -14,7 +14,7 @@ import {
   type OnboardingData,
 } from '@/lib/onboarding'
 
-const TOTAL_STEPS = 7
+const TOTAL_STEPS = 6
 
 export default function OnboardingWizard() {
   const router = useRouter()
@@ -41,9 +41,9 @@ export default function OnboardingWizard() {
 
       const progress = await getOnboardingProgress()
       if (progress) {
-        setCurrentStep(progress.current_step)
-        setCompletedSteps(progress.completed_steps as number[])
-        if (progress.is_completed) {
+        setCurrentStep(progress.data.current_step ?? 1)
+        setCompletedSteps(progress.data.completed_steps ?? [])
+        if (progress.data.is_completed) {
           // Set cookie if DB says completed but cookie not set
           document.cookie = 'a-little-world-with-us-onboarding=true; path=/; max-age=31536000'
           router.push('/dashboard')
@@ -69,8 +69,8 @@ export default function OnboardingWizard() {
         await saveOnboardingData(formData)
       }
       const updated = await completeOnboardingStep(currentStep)
-      setCurrentStep(updated.current_step)
-      setCompletedSteps(updated.completed_steps as number[])
+      setCurrentStep(updated.data.current_step ?? currentStep)
+      setCompletedSteps(updated.data.completed_steps ?? [])
     } catch (error) {
       console.error('Failed to complete step:', error)
     } finally {
@@ -83,7 +83,7 @@ export default function OnboardingWizard() {
     try {
       const prevStep = Math.max(1, currentStep - 1)
       const updated = await updateOnboardingStep(prevStep)
-      setCurrentStep(updated.current_step)
+      setCurrentStep(updated.data.current_step ?? currentStep)
     } catch (error) {
       console.error('Failed to go back:', error)
     } finally {
@@ -95,8 +95,8 @@ export default function OnboardingWizard() {
     setSaving(true)
     try {
       const updated = await skipOnboardingStep(currentStep)
-      setCurrentStep(updated.current_step)
-      setCompletedSteps(updated.completed_steps as number[])
+      setCurrentStep(updated.data.current_step ?? currentStep)
+      setCompletedSteps(updated.data.completed_steps ?? [])
     } catch (error) {
       console.error('Failed to skip step:', error)
     } finally {
@@ -172,7 +172,7 @@ export default function OnboardingWizard() {
             />
           )}
           {currentStep === 3 && (
-            <PartnerStep
+            <PairReadyStep
               data={formData}
               onChange={setFormData}
               onNext={handleNext}
@@ -201,17 +201,7 @@ export default function OnboardingWizard() {
               saving={saving}
             />
           )}
-          {currentStep === 6 && (
-            <AstrologyStep
-              data={formData}
-              onChange={setFormData}
-              onNext={handleNext}
-              onBack={handleBack}
-              onSkip={handleSkip}
-              saving={saving}
-            />
-          )}
-          {currentStep === 7 && <CompleteStep onFinish={handleFinish} saving={saving} />}
+          {currentStep === 6 && <CompleteStep onFinish={handleFinish} saving={saving} />}
         </div>
       </div>
     </main>
@@ -335,7 +325,7 @@ function ProfileStep({
   )
 }
 
-function PartnerStep({
+function PairReadyStep({
   data,
   onChange,
   onNext,
@@ -353,28 +343,28 @@ function PartnerStep({
   return (
     <div className="space-y-6">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
-        <Mail className="h-6 w-6" />
+        <Heart className="h-6 w-6" />
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Partner</p>
+        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Your shared space</p>
         <h1 className="mt-3 text-2xl font-serif text-[var(--text-primary)]">
-          Invite your partner
+          Your pair is ready
         </h1>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">
-          Share this space with someone special.
+          Your shared memories, plans, and Care updates stay visible only to your accepted pair.
         </p>
       </div>
 
-      <div>
-        <label className="mb-2 block text-sm text-[var(--text-secondary)]">Partner Email</label>
-        <input
-          type="email"
-          value={data.partner_email || ''}
-          onChange={(e) => onChange({ ...data, partner_email: e.target.value })}
-          placeholder="partner@example.com"
-          className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50"
-        />
+      <div className="space-y-3">
+        <label className="flex cursor-pointer gap-3 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] p-4">
+          <input type="checkbox" checked={data.notifications_enabled ?? false} onChange={(event) => onChange({ ...data, notifications_enabled: event.target.checked })} />
+          <span><strong className="block text-sm text-[var(--text-primary)]">Allow gentle notifications</strong><span className="mt-1 block text-xs text-[var(--text-secondary)]">Reminders and scheduled surprises can notify this device.</span></span>
+        </label>
+        <label className="flex cursor-pointer gap-3 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] p-4">
+          <input type="checkbox" checked={data.location_consent ?? false} onChange={(event) => onChange({ ...data, location_consent: event.target.checked })} />
+          <span><strong className="block text-sm text-[var(--text-primary)]">Review location sharing later</strong><span className="mt-1 block text-xs text-[var(--text-secondary)]">Background sharing always needs separate device permission and can be stopped in Privacy.</span></span>
+        </label>
       </div>
 
       <div className="flex items-center justify-between gap-3">
@@ -399,7 +389,7 @@ function PartnerStep({
             disabled={saving}
             className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-6 py-2 text-sm font-medium text-[var(--bg-color)] disabled:opacity-40"
           >
-            {saving ? 'Sending...' : 'Send Invite'}
+            {saving ? 'Saving...' : 'Continue'}
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>
@@ -599,7 +589,7 @@ function CycleStep({
   )
 }
 
-function AstrologyStep({
+function _AstrologyStep({
   data: _data,
   onChange: _onChange,
   onNext,

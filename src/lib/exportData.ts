@@ -1,54 +1,19 @@
-import { supabase } from './supabase'
-
-export async function exportUserData(userId: string) {
+export async function exportUserData(): Promise<{ success: boolean; error?: string }> {
   try {
-    // Fetch all user data
-    const [memories, rituals, messages, todos] = await Promise.all([
-      supabase.from('memories').select('*').eq('user_id', userId),
-      supabase.from('rituals').select('*').eq('user_id', userId),
-      supabase.from('messages').select('*').eq('user_id', userId),
-      supabase.from('todos').select('*').eq('user_id', userId),
-    ])
-
-    const exportData = {
-      exportedAt: new Date().toISOString(),
-      userId,
-      memories: memories.data || [],
-      rituals: rituals.data || [],
-      messages: messages.data || [],
-      todos: todos.data || [],
+    const response = await fetch('/api/export', { method: 'POST' })
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({ error: 'Unable to prepare backup.' })) as { error?: string }
+      return { success: false, error: body.error }
     }
-
-    // Create downloadable JSON
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' })
+    const blob = await response.blob()
     const url = URL.createObjectURL(blob)
-    
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `our-little-world-data-${userId}.json` 
-    a.click()
-    
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `a-little-world-backup-${new Date().toISOString().slice(0, 10)}.zip`
+    anchor.click()
     URL.revokeObjectURL(url)
-
     return { success: true }
   } catch (error) {
-    console.error('Export error:', error)
-    return { success: false, error }
-  }
-}
-
-export async function deleteUserData(userId: string) {
-  try {
-    await Promise.all([
-      supabase.from('memories').delete().eq('user_id', userId),
-      supabase.from('rituals').delete().eq('user_id', userId),
-      supabase.from('messages').delete().eq('user_id', userId),
-      supabase.from('todos').delete().eq('user_id', userId),
-    ])
-
-    return { success: true }
-  } catch (error) {
-    console.error('Delete error:', error)
-    return { success: false, error }
+    return { success: false, error: error instanceof Error ? error.message : 'Unable to prepare backup.' }
   }
 }

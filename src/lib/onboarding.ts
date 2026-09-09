@@ -1,310 +1,112 @@
-/**
- * Onboarding Management - Phase 7
- * Functions for managing user onboarding progress
- */
-
 import { supabase } from './supabase'
 
-export interface OnboardingProgress {
-  id: string
-  user_id: string
-  current_step: number
-  completed_steps: number[]
-  is_completed: boolean
-  completed_at: string | null
-  created_at: string
-  updated_at: string
-}
-
-export interface OnboardingData {
+export type OnboardingData = {
   name?: string
   birth_date?: string
   gender?: 'male' | 'female' | 'other' | 'prefer_not_to_say'
-  partner_email?: string
   blood_type?: string
   height_cm?: number
   weight_kg?: number
   last_period_date?: string
   cycle_length?: number
+  notifications_enabled?: boolean
+  location_consent?: boolean
 }
 
-const ONBOARDING_STEPS = 7
+export type OnboardingProgress = {
+  user_id: string
+  data: OnboardingData & { current_step?: number; completed_steps?: number[]; is_completed?: boolean; completed_at?: string }
+  updated_at: string
+}
 
-/**
- * Get current user's onboarding progress
- */
+const STEPS = 6
+
+async function currentUser() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error('User not authenticated')
+  return user
+}
+
+async function currentCoupleId(userId: string) {
+  const { data, error } = await supabase.from('couple_links').select('couple_id')
+    .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`).eq('status', 'accepted').maybeSingle()
+  if (error || !data?.couple_id) throw new Error('An accepted couple link is required')
+  return data.couple_id as string
+}
+
 export async function getOnboardingProgress(): Promise<OnboardingProgress | null> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return null
-  }
-
-  const { data, error } = await supabase
-    .from('onboarding_progress')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
-
-  if (error) {
-    // If no progress exists, return null
-    if (error.code === 'PGRST116') {
-      return null
-    }
-    throw error
-  }
-
-  return data
+  const user = await currentUser()
+  const { data, error } = await supabase.from('onboarding_progress').select('*').eq('user_id', user.id).maybeSingle()
+  if (error) throw error
+  return data as OnboardingProgress | null
 }
 
-/**
- * Initialize onboarding progress for new user
- */
 export async function initializeOnboarding(): Promise<OnboardingProgress> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
-
+  const user = await currentUser()
   const { data, error } = await supabase
     .from('onboarding_progress')
-    .insert({
-      user_id: user.id,
-      current_step: 1,
-      completed_steps: [],
-      is_completed: false,
-    })
-    .select()
-    .single()
-
-  if (error || !data) {
-    throw new Error('Failed to initialize onboarding')
-  }
-
-  return data
+    .upsert({ user_id: user.id, data: { current_step: 1, completed_steps: [], is_completed: false } }, { onConflict: 'user_id' })
+    .select().single()
+  if (error) throw error
+  return data as OnboardingProgress
 }
 
-/**
- * Update current onboarding step
- */
-export async function updateOnboardingStep(step: number): Promise<OnboardingProgress> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
-
-  if (step < 1 || step > ONBOARDING_STEPS) {
-    throw new Error('Invalid step number')
-  }
-
-  const { data, error } = await supabase
-    .from('onboarding_progress')
-    .update({ current_step: step })
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error || !data) {
-    throw new Error('Failed to update onboarding step')
-  }
-
-  return data
+async function saveProgress(update: Partial<OnboardingProgress['data']>) {
+  const current = (await getOnboardingProgress()) ?? (await initializeOnboarding())
+  const { data, error } = await supabase.from('onboarding_progress')
+    .update({ data: { ...current.data, ...update } }).eq('user_id', current.user_id).select().single()
+  if (error) throw error
+  return data as OnboardingProgress
 }
 
-/**
- * Mark a step as completed
- */
-export async function completeOnboardingStep(step: number): Promise<OnboardingProgress> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
-
-  // Get current progress
-  const { data: current } = await supabase
-    .from('onboarding_progress')
-    .select('*')
-    .eq('user_id', user.id)
-    .single()
-
-  if (!current) {
-    throw new Error('Onboarding not initialized')
-  }
-
-  // Add step to completed steps if not already there
-  const completedSteps = current.completed_steps as number[]
-  if (!completedSteps.includes(step)) {
-    completedSteps.push(step)
-  }
-
-  // Move to next step if not at end
-  const nextStep = step < ONBOARDING_STEPS ? step + 1 : step
-
-  const { data, error } = await supabase
-    .from('onboarding_progress')
-    .update({
-      completed_steps: completedSteps,
-      current_step: nextStep,
-    })
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error || !data) {
-    throw new Error('Failed to complete onboarding step')
-  }
-
-  return data
+export async function updateOnboardingStep(step: number) {
+  if (step < 1 || step > STEPS) throw new Error('Invalid onboarding step')
+  return saveProgress({ current_step: step })
 }
 
-/**
- * Skip a step (for optional steps)
- */
-export async function skipOnboardingStep(step: number): Promise<OnboardingProgress> {
-  return completeOnboardingStep(step)
+export async function completeOnboardingStep(step: number) {
+  const current = (await getOnboardingProgress()) ?? (await initializeOnboarding())
+  return saveProgress({
+    completed_steps: Array.from(new Set([...(current.data.completed_steps ?? []), step])),
+    current_step: Math.min(STEPS, step + 1),
+  })
 }
 
-/**
- * Finish onboarding
- */
-export async function finishOnboarding(): Promise<OnboardingProgress> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
+export const skipOnboardingStep = completeOnboardingStep
+export async function finishOnboarding() { return saveProgress({ is_completed: true, current_step: STEPS, completed_at: new Date().toISOString() }) }
 
-  const { data, error } = await supabase
-    .from('onboarding_progress')
-    .update({
-      is_completed: true,
-      completed_at: new Date().toISOString(),
-      current_step: ONBOARDING_STEPS,
-    })
-    .eq('user_id', user.id)
-    .select()
-    .single()
-
-  if (error || !data) {
-    throw new Error('Failed to finish onboarding')
-  }
-
-  return data
-}
-
-/**
- * Reset onboarding (for testing)
- */
 export async function resetOnboarding(): Promise<void> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
-
-  const { error } = await supabase
-    .from('onboarding_progress')
-    .delete()
-    .eq('user_id', user.id)
-
-  if (error) {
-    throw new Error('Failed to reset onboarding')
-  }
+  const user = await currentUser()
+  const { error } = await supabase.from('onboarding_progress').delete().eq('user_id', user.id)
+  if (error) throw error
 }
 
-/**
- * Check if user needs onboarding
- */
-export async function needsOnboarding(): Promise<boolean> {
-  const progress = await getOnboardingProgress()
-  if (!progress) {
-    return true
-  }
-  return !progress.is_completed
-}
+export async function needsOnboarding(): Promise<boolean> { return !(await getOnboardingProgress())?.data.is_completed }
 
-/**
- * Save onboarding data to profile/health/cycle tables
- */
 export async function saveOnboardingData(data: OnboardingData): Promise<void> {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
-
-  // Update profile with basic info
+  const user = await currentUser()
   if (data.name || data.birth_date || data.gender) {
-    await supabase
-      .from('profiles')
-      .update({
-        ...(data.name && { full_name: data.name }),
-        ...(data.birth_date && { birth_date: data.birth_date }),
-        ...(data.gender && { gender: data.gender }),
-      })
-      .eq('id', user.id)
+    const { error } = await supabase.from('profiles').update({
+      ...(data.name ? { full_name: data.name } : {}),
+      ...(data.birth_date ? { birth_date: data.birth_date } : {}),
+      ...(data.gender ? { gender: data.gender } : {}),
+    }).eq('id', user.id)
+    if (error) throw error
   }
-
-  // Save health profile if provided
   if (data.blood_type || data.height_cm || data.weight_kg) {
-    const { data: existingHealth } = await supabase
-      .from('health_profiles')
-      .select('id')
-      .eq('user_id', user.id)
-      .single()
-
-    const healthData = {
-      user_id: user.id,
-      ...(data.blood_type && { blood_type: data.blood_type }),
-      ...(data.height_cm && { height_cm: data.height_cm }),
-      ...(data.weight_kg && { weight_kg: data.weight_kg }),
-    }
-
-    if (existingHealth) {
-      await supabase
-        .from('health_profiles')
-        .update(healthData)
-        .eq('id', existingHealth.id)
-    } else {
-      await supabase
-        .from('health_profiles')
-        .insert(healthData)
-    }
+    const { error } = await supabase.from('health_profiles').upsert({ user_id: user.id, ...data }, { onConflict: 'user_id' })
+    if (error) throw error
   }
-
-  // Save cycle data if provided (for female users)
   if (data.last_period_date || data.cycle_length) {
-    const { data: existingCycle } = await supabase
-      .from('cycle_logs')
-      .select('id')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-
-    if (existingCycle) {
-      await supabase
-        .from('cycle_logs')
-        .update({
-          ...(data.last_period_date && { period_start: data.last_period_date }),
-          ...(data.cycle_length && { cycle_length: data.cycle_length }),
-        })
-        .eq('id', existingCycle.id)
-    } else {
-      await supabase
-        .from('cycle_logs')
-        .insert({
-          user_id: user.id,
-          period_start: data.last_period_date || new Date().toISOString(),
-          cycle_length: data.cycle_length || 28,
-        })
-    }
+    const couple_id = await currentCoupleId(user.id)
+    const { error } = await supabase.from('care_cycle_settings').upsert({
+      ...(data.cycle_length ? { cycle_length: data.cycle_length } : {}),
+      ...(data.last_period_date ? { last_period_start: data.last_period_date } : {}), couple_id, updated_by: user.id,
+    }, { onConflict: 'couple_id' })
+    if (error) throw error
   }
-
-  // Send partner invite if email provided
-  if (data.partner_email) {
-    try {
-      const { createCoupleAndInvite } = await import('./couples')
-      await createCoupleAndInvite(data.partner_email)
-    } catch (error) {
-      console.error('Failed to send partner invite:', error)
-      // Don't throw - onboarding should continue even if invite fails
-    }
-  }
+  await saveProgress({
+    ...(data.notifications_enabled === undefined ? {} : { notifications_enabled: data.notifications_enabled }),
+    ...(data.location_consent === undefined ? {} : { location_consent: data.location_consent }),
+  })
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 import { generateAiResponse, isAiProvider } from '@/lib/ai/providers'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -19,7 +20,15 @@ export async function POST(req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       { cookies: { getAll: () => req.cookies.getAll(), setAll: () => {} } }
     )
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data: { user: cookieUser } } = await supabase.auth.getUser()
+    const bearer = req.headers.get('authorization')?.replace(/^Bearer\s+/i, '')
+    const tokenClient = bearer
+      ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!)
+      : null
+    const { data: { user: tokenUser } } = tokenClient && bearer
+      ? await tokenClient.auth.getUser(bearer)
+      : { data: { user: null } }
+    const user = cookieUser ?? tokenUser
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const rateLimitResult = await checkRateLimit(`ai-chat:${user.id}`, 10, 60_000)
