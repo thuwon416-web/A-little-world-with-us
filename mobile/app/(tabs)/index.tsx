@@ -1,7 +1,8 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { calculateDaysTogether } from '@/services/relationshipDays'
 
 const dashboardCards = [
-  { title: 'Days together', value: '387', tone: '#d9bfd7' },
+  { title: 'Days together', value: String(calculateDaysTogether()), tone: '#d9bfd7' },
   { title: 'Today', value: 'A quiet ritual', tone: '#8ed0c4' },
   { title: 'Memory', value: 'Sunset picnic', tone: '#8cb4ff' },
   { title: 'Care check', value: 'Feeling grounded', tone: '#ffd7a8' },

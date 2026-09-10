@@ -1,13 +1,14 @@
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Frown, Heart, Moon, Smile, Sparkles, Zap } from 'lucide-react-native'
 
 const moods = [
-  { value: 'happy', emoji: '😊', label: 'Happy' },
-  { value: 'calm', emoji: '😌', label: 'Calm' },
-  { value: 'excited', emoji: '🤩', label: 'Excited' },
-  { value: 'stressed', emoji: '😵', label: 'Stressed' },
-  { value: 'sad', emoji: '😔', label: 'Sad' },
-  { value: 'tired', emoji: '😴', label: 'Tired' },
+  { value: 'happy', Icon: Smile, label: 'Happy' },
+  { value: 'calm', Icon: Heart, label: 'Calm' },
+  { value: 'excited', Icon: Sparkles, label: 'Excited' },
+  { value: 'stressed', Icon: Zap, label: 'Stressed' },
+  { value: 'sad', Icon: Frown, label: 'Sad' },
+  { value: 'tired', Icon: Moon, label: 'Tired' },
 ] as const
 
 interface MoodSelectorProps {
@@ -24,7 +25,7 @@ export function MoodSelector({ value, onSelect }: MoodSelectorProps) {
           onPress={() => onSelect?.(mood.value)}
           style={[styles.pill, value === mood.value && styles.pillActive]}
         >
-          <Text style={styles.emoji}>{mood.emoji}</Text>
+          <mood.Icon size={22} color={value === mood.value ? '#0f0f12' : '#f3f0f5'} accessibilityLabel={`${mood.label} mood`} />
           <Text style={[styles.label, value === mood.value && styles.labelActive]}>
             {mood.label}
           </Text>

@@ -4,6 +4,7 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
 import { AuthProvider } from '@/lib/auth'
+import { ThemeProvider } from '@/context/ThemeContext'
 import '@/services/location'
 
 // Error Boundary Component
@@ -44,12 +45,14 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <AuthProvider>
+        <ThemeProvider>
         <StatusBar style="light" backgroundColor="#0f0f12" />
         <Stack>
           <Stack.Screen name="login" options={{ title: 'Login' }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
         </Stack>
+        </ThemeProvider>
       </AuthProvider>
     </ErrorBoundary>
   )

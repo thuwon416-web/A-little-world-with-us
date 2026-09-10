@@ -1,4 +1,5 @@
 import { Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { MapPin, Siren } from 'lucide-react-native'
 
 export type ChatMessage = {
   id: string
@@ -21,19 +22,25 @@ export function ChatBubble({ message }: ChatBubbleProps) {
       <View style={[styles.bubble, isMe ? styles.bubbleMe : styles.bubbleThem]}>
         {message.type === 'location' && message.location ? (
           <TouchableOpacity
-            onPress={() =>
+            onPress={() => {
               void Linking.openURL(
                 `https://www.google.com/maps?q=${message.location?.latitude},${message.location?.longitude}`
-              )
-            }
+              ).catch((error) => console.error('Unable to open location link', error))
+            }}
           >
-            <Text style={styles.locationTitle}>📍 Shared location</Text>
+            <View style={styles.locationHeading}>
+              <MapPin size={16} color="#f3f0f5" accessibilityLabel="Location" />
+              <Text style={styles.locationTitle}>Shared location</Text>
+            </View>
             <Text style={styles.text}>
               {message.location.latitude.toFixed(5)}, {message.location.longitude.toFixed(5)}
             </Text>
           </TouchableOpacity>
         ) : message.type === 'sos' ? (
-          <Text style={styles.sosText}>🆘 Emergency SOS — open location details</Text>
+          <View style={styles.locationHeading}>
+            <Siren size={16} color="#ffd3dc" accessibilityLabel="Emergency" />
+            <Text style={styles.sosText}>Emergency SOS - open location details</Text>
+          </View>
         ) : (
           <Text style={styles.text}>{message.text}</Text>
         )}
@@ -74,6 +81,7 @@ const styles = StyleSheet.create({
     lineHeight: 21,
   },
   locationTitle: { color: '#f3f0f5', fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  locationHeading: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   sosText: { color: '#ffd3dc', fontSize: 15, fontWeight: '700' },
   time: {
     color: '#8d8d99',

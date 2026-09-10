@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- This is a local data-URL upload preview. */
 
 import { type ChangeEvent, useRef, useState } from 'react'
+import Image from 'next/image'
 import { uploadGalleryImage } from '@/lib/storage'
 
 export type UploadImageResult = Awaited<ReturnType<typeof uploadGalleryImage>>
@@ -86,7 +87,14 @@ export default function ImageUpload({
 
       {preview && (
         <div className="mt-4 overflow-hidden rounded-[20px] border border-white/10">
-          <img src={preview} alt="Selected upload preview" className="h-52 w-full object-cover" />
+          <Image
+            src={preview}
+            alt="Selected upload preview"
+            width={640}
+            height={416}
+            unoptimized
+            className="h-52 w-full object-cover"
+          />
         </div>
       )}
 

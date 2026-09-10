@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- This is a local data-URL upload preview. */
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { X, Upload, File as FileIcon, Image as ImageIcon, Film, Music, FileText, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
@@ -193,10 +194,13 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
             <div className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4 space-y-3">
               {preview && (
                 <div className="relative">
-                  <img
+                  <Image
                     src={preview}
                     alt="Preview"
-                    className="w-full h-48 object-cover rounded-lg"
+                    width={640}
+                    height={384}
+                    unoptimized
+                    className="h-48 w-full rounded-lg object-cover"
                   />
                 </div>
               )}

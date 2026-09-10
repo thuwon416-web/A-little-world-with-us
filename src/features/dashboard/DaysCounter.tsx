@@ -3,8 +3,7 @@
 import { memo, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
-
-const ANNIVERSARY = new Date(process.env.NEXT_PUBLIC_ANNIVERSARY || '2023-02-02T00:00:00')
+import { calculateDaysTogether, getRelationshipStartDate } from '@/lib/relationship-days'
 
 /**
  * Displays total days together since the anniversary date.
@@ -14,9 +13,7 @@ export default memo(function DaysCounter() {
   const [days, setDays] = useState(0)
 
   useEffect(() => {
-    const now = new Date()
-    const diffMs = now.getTime() - ANNIVERSARY.getTime()
-    setDays(Math.floor(diffMs / (1000 * 60 * 60 * 24)))
+    setDays(calculateDaysTogether())
   }, [])
 
   return (
@@ -36,7 +33,7 @@ export default memo(function DaysCounter() {
       </motion.div>
 
       <h2 className="font-dancing text-3xl text-[var(--accent-2)] mb-1">Days Together</h2>
-      <p className="text-xs opacity-60 mb-6 uppercase tracking-widest">Since February 2, 2023</p>
+      <p className="text-xs opacity-60 mb-6 uppercase tracking-widest">Since {getRelationshipStartDate()}</p>
 
       <div className="flex items-center justify-center gap-3">
         <motion.span

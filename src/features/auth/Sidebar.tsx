@@ -1,14 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  Bell,
-  CalendarDays,
+  LogOut,
   Calendar,
   DollarSign,
-  Gamepad2,
   Heart,
   HelpCircle,
   Home,
@@ -28,17 +25,15 @@ const baseNavItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/memories', label: 'Memories', icon: Heart },
   { href: '/chat', label: 'Whispers', icon: MessageCircleHeart },
-  { href: '/plans', label: 'Plans', icon: CalendarDays },
-  { href: '/care', label: 'Care', icon: Heart },
-  { href: '/astrology', label: 'Astrology', icon: Star },
   { href: '/calls', label: 'Calls', icon: PhoneCall },
-  { href: '/ai', label: 'AI', icon: Sparkles },
-  { href: '/reminders', label: 'Reminders', icon: Bell },
-  { href: '/wellness', label: 'Wellness', icon: Heart },
-  { href: '/games', label: 'Play', icon: Gamepad2 },
+  { href: '/care', label: 'Care', icon: Heart },
+  { href: '/wellness', label: 'Wellness & Play', icon: Heart },
+  { href: '/calendar', label: 'Calendar & Plans', icon: Calendar },
+  { href: '/astrology', label: 'Astrology', icon: Star },
+  { href: '/ai', label: 'AI Companion', icon: Sparkles },
   { href: '/vault', label: 'Vault', icon: LockKeyhole },
-  { href: '/calendar', label: 'Calendar', icon: Calendar },
   { href: '/finance', label: 'Finance', icon: DollarSign },
+  { href: '/location', label: 'Location', icon: MapPin },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
 
@@ -47,53 +42,9 @@ const infoNavItems = [
   { href: '/help', label: 'Help', icon: HelpCircle },
 ]
 
-const adminNavItems = [
-  { href: '/location', label: 'Location', icon: MapPin },
-]
-
 export default function Sidebar() {
   const pathname = usePathname()
-  const [userRole, setUserRole] = useState<'admin' | 'user' | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-
-  useEffect(() => {
-    checkUserRole()
-  }, [])
-
-  const checkUserRole = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        setUserRole(null)
-        return
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-      setUserRole(profile?.role || 'user')
-    } catch (error) {
-      console.error('Failed to check user role:', error)
-      setUserRole('user')
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const navItems = userRole === 'admin' ? [...baseNavItems, ...adminNavItems, ...infoNavItems] : [...baseNavItems, ...infoNavItems]
-
-  if (isLoading) {
-    return (
-      <aside className="flex h-full w-full flex-col rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-6 shadow-lg backdrop-blur-xl">
-        <div className="flex h-full items-center justify-center">
-          <div className="text-sm text-[var(--text-secondary)]">Loading...</div>
-        </div>
-      </aside>
-    )
-  }
+  const navItems = [...baseNavItems, ...infoNavItems]
 
   return (
     <aside className="flex h-full w-full flex-col rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-6 shadow-lg backdrop-blur-xl">
@@ -133,6 +84,10 @@ export default function Sidebar() {
           )
         })}
       </nav>
+
+      <button type="button" onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }} className="mt-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-3)] hover:text-[var(--text-primary)]">
+        <LogOut size={17} /> Logout
+      </button>
 
       <div className="mt-5 rounded-2xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-3">
         <div className="mb-1 flex items-center gap-1 text-[10px] text-[var(--text-secondary)]">

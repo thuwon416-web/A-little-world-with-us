@@ -10,6 +10,10 @@ import ThemeToggle from '@/components/shared/ThemeToggle'
 import NotificationPermission from '@/components/NotificationPermission'
 import ExportData from '@/features/care/ExportData'
 import MoodChart from '@/features/care/MoodChart'
+import AIPrivacySettings from '@/features/settings/AIPrivacySettings'
+import ChatHistoryExport from '@/features/chat/ChatHistoryExport'
+import FinanceExport from '@/features/settings/FinanceExport'
+import PhotoExportSettings from '@/features/settings/PhotoExportSettings'
 
 const CoupleSettings = dynamic(() => import('@/features/settings/CoupleSettings'), {
   ssr: false,
@@ -104,6 +108,8 @@ export default function SettingsPage() {
               </div>
             ))}
           </div>
+
+          <AIPrivacySettings />
         </section>
 
         <aside className="space-y-5 rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
@@ -145,12 +151,15 @@ export default function SettingsPage() {
       </section>
 
       <section className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Care Data</p>
-        <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">Your wellness information</h2>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Data & Export</p>
+        <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">Your data, in one place</h2>
 
         <div className="mt-4 space-y-4">
           <MoodChart />
           <ExportData />
+          <ChatHistoryExport />
+          <FinanceExport />
+          <PhotoExportSettings />
         </div>
       </section>
 
@@ -160,12 +169,7 @@ export default function SettingsPage() {
 
         <div className="mt-4 space-y-3">
           <button
-            onClick={() => {
-              if (confirm('Export all your data? This will download all your memories, messages, and settings.')) {
-                // Export functionality is available in the Care Data section above
-                alert('Use the Export button in the Care Data section above to download your data.')
-              }
-            }}
+            onClick={() => alert('Use the Data & Export section above to download your available exports.')}
             className="w-full border border-red-500/30 text-red-500 py-3 rounded-lg font-medium hover:bg-red-500/10 transition"
           >
             📥 Export All My Data

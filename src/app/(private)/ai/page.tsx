@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Copy, Heart, Send, Sparkles } from 'lucide-react'
 
 type Tool = 'chat' | 'letter' | 'message' | 'date' | 'gift' | 'surprise'
@@ -18,9 +18,9 @@ const prompts: Record<Tool, { label: string; placeholder: string; instruction: s
   chat: { label: 'What would you like to talk through?', placeholder: 'For example: We have both been busy lately. How can we reconnect this weekend?', instruction: 'Give warm, practical relationship advice. Be concise, non-judgmental, and suggest small realistic next steps.' },
   letter: { label: 'Share names, memories, and the tone you want', placeholder: 'Write a gentle anniversary letter for May. Mention our first rainy-day coffee date and how patient she is.', instruction: 'Write a heartfelt, specific love letter. Use a warm, sincere tone and return only the letter.' },
   message: { label: 'What message do you need?', placeholder: 'A short apology after I forgot our call. I want it to feel honest, not dramatic.', instruction: 'Draft three short message options. Match the requested tone, avoid manipulative language, and label each option.' },
-  date: { label: 'Tell us the budget, location, and interests', placeholder: 'Budget $30, Yangon, quiet food and photo walks, 3 hours on Saturday.', instruction: 'Create three practical romantic date plans. Include estimated cost, time, and a simple first step for each.' },
-  gift: { label: 'Tell us the occasion and what they enjoy', placeholder: 'Birthday gift under $40. They love journaling, tea, and handmade things.', instruction: 'Suggest five thoughtful, realistic gift ideas. Include why each fits and a rough budget.' },
-  surprise: { label: 'Share the occasion, interests, and a budget', placeholder: 'Birthday, loves coffee walks and handmade notes, budget $30. They dislike crowded places.', instruction: 'Create five private surprise ideas using only these details. Include a simple first step and approximate cost.' },
+  date: { label: 'Tell us the budget, location, and interests', placeholder: 'Budget 50,000 MMK, Yangon, quiet food and photo walks, 3 hours on Saturday.', instruction: 'Create three practical romantic date plans. Include estimated cost in MMK, time, and a simple first step for each.' },
+  gift: { label: 'Tell us the occasion and what they enjoy', placeholder: 'Birthday gift under 60,000 MMK. They love journaling, tea, and handmade things.', instruction: 'Suggest five thoughtful, realistic gift ideas. Include why each fits and a rough budget in MMK.' },
+  surprise: { label: 'Share the occasion, interests, and a budget', placeholder: 'Birthday, loves coffee walks and handmade notes, budget 50,000 MMK. They dislike crowded places.', instruction: 'Create five private surprise ideas using only these details. Include a simple first step and approximate cost in MMK.' },
 }
 
 export default function AIFeaturePage() {
@@ -30,8 +30,25 @@ export default function AIFeaturePage() {
   const [provider, setProvider] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [copyStatus, setCopyStatus] = useState('')
 
   const current = prompts[tool]
+
+  useEffect(() => {
+    const saved = localStorage.getItem('ai-last-result')
+    if (!saved) return
+    try {
+      const parsed = JSON.parse(saved) as { tool?: Tool; input?: string; result?: string; provider?: string }
+      if (parsed.tool && parsed.result) {
+        setTool(parsed.tool)
+        setInput(parsed.input ?? '')
+        setResult(parsed.result)
+        setProvider(parsed.provider ?? '')
+      }
+    } catch {
+      localStorage.removeItem('ai-last-result')
+    }
+  }, [])
 
   const generate = async () => {
     if (!input.trim() || loading) return
@@ -51,6 +68,7 @@ export default function AIFeaturePage() {
       if (!response.ok || !generated) throw new Error(data.error || 'Unable to generate a response')
       setResult(generated)
       setProvider(data.provider || '')
+      localStorage.setItem('ai-last-result', JSON.stringify({ tool, input: input.trim(), result: generated, provider: data.provider || '', savedAt: new Date().toISOString() }))
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : 'Unable to generate a response')
     } finally {
@@ -59,7 +77,20 @@ export default function AIFeaturePage() {
   }
 
   const copyResult = async () => {
-    if (result) await navigator.clipboard.writeText(result)
+    if (!result) return
+    try {
+      await navigator.clipboard.writeText(result)
+      setCopyStatus('Copied')
+    } catch {
+      setCopyStatus('Copy failed')
+    }
+    window.setTimeout(() => setCopyStatus(''), 2000)
+  }
+
+  const clearResult = () => {
+    setResult('')
+    setProvider('')
+    localStorage.removeItem('ai-last-result')
   }
 
   return (
@@ -89,7 +120,7 @@ export default function AIFeaturePage() {
           <textarea id="ai-request" value={input} onChange={(event) => setInput(event.target.value)} placeholder={current.placeholder} maxLength={1000} className="mt-3 min-h-36 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4 text-sm leading-relaxed text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent-1)]" />
           <div className="mt-3 flex items-center justify-between gap-3"><span className="text-xs text-[var(--text-secondary)]">{input.length}/1000</span><button type="button" disabled={!input.trim() || loading} onClick={() => void generate()} className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-5 py-2.5 text-sm font-semibold text-[var(--bg-color)] disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-4 w-4" />{loading ? 'Thinking…' : 'Generate'}</button></div>
           {error ? <p className="mt-5 rounded-2xl bg-red-500/10 p-4 text-sm text-red-400">{error}</p> : null}
-          {result ? <div className="mt-6 rounded-3xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">Your result{provider ? ` · ${provider}` : ''}</p><button type="button" onClick={() => void copyResult()} className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]"><Copy className="h-3.5 w-3.5" />Copy</button></div><p className="mt-4 whitespace-pre-wrap leading-7 text-[var(--text-primary)]">{result}</p></div> : null}
+          {result ? <div className="mt-6 rounded-3xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">Your result{provider ? ` · ${provider}` : ''}</p><div className="flex items-center gap-2"><button type="button" onClick={() => void copyResult()} className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]"><Copy className="h-3.5 w-3.5" />{copyStatus || 'Copy'}</button><button type="button" onClick={clearResult} className="rounded-full border border-red-400/30 px-3 py-1.5 text-xs text-red-300">Clear</button></div></div><p className="mt-4 whitespace-pre-wrap leading-7 text-[var(--text-primary)]">{result}</p></div> : null}
         </section>
       </div>
     </div>

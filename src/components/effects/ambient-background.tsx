@@ -12,7 +12,7 @@ interface AmbientBackgroundProps {
 export default function AmbientBackground({ density = 'medium' }: AmbientBackgroundProps) {
   const { mode } = useTheme()
   const isMonochrome = mode === 'monochrome'
-  const count = density === 'low' ? 6 : density === 'high' ? 14 : 10
+  const count = density === 'low' ? 4 : density === 'high' ? 8 : 6
 
   const particles = useMemo(() => {
     return Array.from({ length: count }, (_, i) => ({
@@ -39,7 +39,7 @@ export default function AmbientBackground({ density = 'medium' }: AmbientBackgro
   }, [count])
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 hidden md:block">
       {/* Soft glowing orbs */}
       <div className="absolute top-10 left-10 w-72 h-72 rounded-full bg-rose-deep/10 blur-3xl animate-glow-pulse" />
       <div

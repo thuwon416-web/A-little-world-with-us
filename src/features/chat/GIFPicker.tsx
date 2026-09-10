@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- Giphy serves dynamic remote GIF URLs that are not part of Next image domains. */
 
 import { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import { Search, X, Sparkles, TrendingUp } from 'lucide-react'
 
 interface GIF {
@@ -171,12 +172,15 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
                   key={gif.id}
                   type="button"
                   onClick={() => onGIFSelect(gif)}
-                  className="aspect-square rounded-xl overflow-hidden border-2 border-[var(--accent-1)]/20 hover:border-[var(--accent-1)]/50 transition"
+                  className="relative aspect-square overflow-hidden rounded-xl border-2 border-[var(--accent-1)]/20 transition hover:border-[var(--accent-1)]/50"
                 >
-                  <img
+                  <Image
                     src={gif.url}
                     alt={gif.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="(max-width: 768px) 30vw, 150px"
+                    unoptimized
+                    className="object-cover"
                     loading="lazy"
                   />
                 </button>

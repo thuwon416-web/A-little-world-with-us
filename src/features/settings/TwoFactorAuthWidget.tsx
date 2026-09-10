@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- QR-code data URLs are rendered client-side. */
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Shield, X } from 'lucide-react'
 import { enable2FA, verify2FA, save2FASecret, get2FASecret, remove2FA } from '@/lib/2fa'
 
@@ -99,7 +100,14 @@ export default function TwoFactorAuthWidget() {
                   Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
                 </p>
                 {qrCode && (
-                  <img src={qrCode} alt="2FA QR Code for authenticator app" className="w-48 h-48 mx-auto" />
+                  <Image
+                    src={qrCode}
+                    alt="2FA QR Code for authenticator app"
+                    width={192}
+                    height={192}
+                    unoptimized
+                    className="mx-auto h-48 w-48"
+                  />
                 )}
               </div>
 

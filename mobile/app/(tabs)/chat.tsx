@@ -31,7 +31,6 @@ function formatMessageTime(value: string) {
 
 export default function ChatScreen() {
   const { user } = useAuth()
-  const { status, isOffline, pendingCount, refresh } = useSync()
   const { state: callState, placeCall } = useCall()
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<
@@ -46,6 +45,8 @@ export default function ChatScreen() {
   >([])
   const [partnerId, setPartnerId] = useState<string | null>(null)
   const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const { status, isOffline, pendingCount, refresh } = useSync(coupleId ?? undefined)
 
   useEffect(() => {
     const subscription = database
@@ -111,7 +112,7 @@ export default function ChatScreen() {
       }
     }
 
-    fetchPartnerId()
+    void fetchPartnerId()
   }, [user?.id])
 
   const handleSend = async () => {
@@ -143,7 +144,11 @@ export default function ChatScreen() {
       return
     }
 
-    await refresh()
+    try {
+      await refresh()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to sync chat.')
+    }
   }
 
   const handleSendLocation = async () => {
@@ -207,7 +212,8 @@ export default function ChatScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Whispers</Text>
+      <Text style={styles.title}>Chat</Text>
+      {error && <Text style={styles.error}>{error}</Text>}
 
       <View style={[styles.syncBanner, isOffline ? styles.offline : styles.online]}>
         <Text style={styles.syncText}>{statusLabel}</Text>
@@ -354,4 +360,5 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
   },
+  error: { color: '#ff9b9b', marginBottom: 8, fontSize: 13 },
 })

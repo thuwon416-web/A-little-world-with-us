@@ -1,12 +1,12 @@
 import { Redirect, Tabs } from 'expo-router'
-import { Text } from 'react-native'
+import { Heart, Home, MessageCircle, MoreHorizontal, Sparkles } from 'lucide-react-native'
 
 import { useAdmin } from '@/hooks/useAdmin'
 import { useAuth } from '@/lib/auth'
 
 export default function TabsLayout() {
   const { user, loading } = useAuth()
-  const { isAdmin, loading: adminLoading } = useAdmin()
+  const { loading: adminLoading } = useAdmin()
 
   if (loading || adminLoading) {
     return null
@@ -32,84 +32,39 @@ export default function TabsLayout() {
         },
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>🏠</Text>,
-        }}
-      />
+      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: ({ color, size }) => <Home color={color} size={size} /> }} />
       <Tabs.Screen
         name="chat"
         options={{
           title: 'Chat',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>💬</Text>,
-        }}
-      />
-      <Tabs.Screen
-        name="location"
-        options={{
-          title: 'Location',
-          href: isAdmin ? undefined : null,
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>📍</Text>,
+          tabBarIcon: ({ color, size }) => <MessageCircle color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="care"
         options={{
           title: 'Care',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>🌷</Text>,
-        }}
-      />
-      <Tabs.Screen
-        name="plans"
-        options={{
-          title: 'Plans',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>📅</Text>,
+          tabBarIcon: ({ color, size }) => <Sparkles color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="gallery"
         options={{
-          title: 'Gallery',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>🖼️</Text>,
+          title: 'Memories',
+          tabBarIcon: ({ color, size }) => <Heart color={color} size={size} />,
         }}
       />
-      <Tabs.Screen
-        name="wellness"
-        options={{
-          title: 'Wellness',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>❤️</Text>,
-        }}
-      />
-      <Tabs.Screen
-        name="ai"
-        options={{
-          title: 'AI',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>✨</Text>,
-        }}
-      />
-      <Tabs.Screen
-        name="reminders"
-        options={{
-          title: 'Reminders',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>🔔</Text>,
-        }}
-      />
-      <Tabs.Screen
-        name="settings"
-        options={{
-          title: 'Settings',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>⚙️</Text>,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => <Text style={{ color, fontSize: size }}>👤</Text>,
-        }}
-      />
+      <Tabs.Screen name="more" options={{ title: 'More', tabBarIcon: ({ color, size }) => <MoreHorizontal color={color} size={size} /> }} />
+      <Tabs.Screen name="plans" options={{ href: null }} />
+      <Tabs.Screen name="location" options={{ href: null }} />
+      <Tabs.Screen name="wellness" options={{ href: null }} />
+      <Tabs.Screen name="ai" options={{ href: null }} />
+      <Tabs.Screen name="reminders" options={{ href: null }} />
+      <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="music" options={{ href: null }} />
+      <Tabs.Screen name="finance" options={{ href: null }} />
+      <Tabs.Screen name="memories" options={{ href: null }} />
     </Tabs>
   )
 }

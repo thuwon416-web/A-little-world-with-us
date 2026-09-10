@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const generated = await generateAiResponse({
       maxTokens: 550,
       messages: [
-        { role: 'system', content: 'Suggest thoughtful, realistic surprise ideas for a couple. Use only the details supplied by the user. Return five concise options with a title, why it fits, approximate cost, and one first step. Never claim to know private facts.' },
+        { role: 'system', content: 'Suggest thoughtful, realistic surprise ideas for a couple. Use only the details supplied by the user. Return five concise options with a title, why it fits, approximate cost in MMK, and one first step. Never claim to know private facts. Reply in the same language as the user; use Myanmar language by default.' },
         { role: 'user', content: `Occasion: ${input.occasion}\nInterests: ${input.interests}\nBudget: ${input.budget || 'not specified'}\nOptional notes: ${input.notes || 'none'}` },
       ],
     })

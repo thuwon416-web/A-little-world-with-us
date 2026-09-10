@@ -29,10 +29,15 @@ export async function listGalleryImages(bucket = 'gallery'): Promise<GalleryImag
   const userId = await currentUserId()
   const { data, error } = await supabase.storage.from(bucket).list(userId, { limit: 100, offset: 0, sortBy: { column: 'created_at', order: 'desc' } })
   if (error) throw error
-  return Promise.all((data ?? []).filter((item) => item.name && !item.metadata?.isFolder).map(async (item) => {
+  const results = await Promise.all((data ?? []).filter((item) => item.name && !item.metadata?.isFolder).map(async (item) => {
     const path = `${userId}/${item.name}`
-    return { id: item.id ?? path, name: item.name, path, url: await signedUrl(bucket, path), created_at: item.created_at ?? new Date().toISOString() }
+    try {
+      return { id: item.id ?? path, name: item.name, path, url: await signedUrl(bucket, path), created_at: item.created_at ?? new Date().toISOString() }
+    } catch {
+      return null
+    }
   }))
+  return results.filter((item): item is GalleryImage => item !== null)
 }
 
 export async function deleteGalleryImage(path: string, bucket = 'gallery') {

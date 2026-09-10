@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- Canvas export must read the original user-selected URL. */
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { Download, Image as ImageIcon } from 'lucide-react'
 import { exportPhotosAsZIP, getStorageQuotaUsage } from '@/lib/photoPipeline'
 
@@ -101,10 +102,12 @@ export default function PhotoExport({ photos }: Props) {
                 : 'ring-1 ring-[var(--accent-1)]/20'
             }`}
           >
-            <img
+            <Image
               src={photo.url}
               alt={photo.filename}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 33vw, 160px"
+              className="object-cover"
             />
             {selectedPhotos.has(photo.id) && (
               <div className="absolute top-1 right-1 bg-[var(--accent-1)] text-white rounded-full p-1">

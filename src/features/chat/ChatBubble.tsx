@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 /* eslint-disable @next/next/no-img-element -- Chat attachments use short-lived user-provided URLs. */
 import { motion } from 'framer-motion'
 import { Heart, Reply } from 'lucide-react'
@@ -102,9 +103,12 @@ export default function ChatBubble({
             </div>
           )}
           {mediaType === 'image' && mediaUrl && (
-            <img
+            <Image
               src={mediaUrl}
               alt="Shared media"
+              width={640}
+              height={480}
+              unoptimized
               className="mb-2 max-h-60 w-full rounded-xl object-cover"
             />
           )}

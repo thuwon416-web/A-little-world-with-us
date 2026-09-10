@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth'
 
 export default function ImageUpload({
   onUpload,
@@ -20,6 +21,7 @@ export default function ImageUpload({
   const [preview, setPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState('')
+  const { user } = useAuth()
 
   const handlePickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -54,7 +56,8 @@ export default function ImageUpload({
 
       const response = await fetch(preview)
       const blob = await response.blob()
-      const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+      if (!user?.id) throw new Error('Please wait for sign-in to finish.')
+      const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
 
       const { data, error: uploadError } = await supabase.storage
         .from('gallery')
@@ -67,13 +70,17 @@ export default function ImageUpload({
         throw uploadError
       }
 
-      const { data: publicData } = supabase.storage.from('gallery').getPublicUrl(data?.path ?? path)
+      const storedPath = data?.path ?? path
+      const { data: signed, error: signedError } = await supabase.storage
+        .from('gallery')
+        .createSignedUrl(storedPath, 3600)
+      if (signedError || !signed?.signedUrl) throw signedError ?? new Error('Unable to preview upload.')
 
       const result = {
         id: data?.id ?? path,
         path: data?.path ?? path,
-        url: publicData.publicUrl,
-        name: path.split('/').pop() ?? 'gallery-image',
+        url: signed.signedUrl,
+        name: storedPath.split('/').pop() ?? 'gallery-image',
         created_at: new Date().toISOString(),
       }
 

@@ -6,6 +6,9 @@ import { getCoupleStatus } from '@/lib/couples'
 import LoveCalendar from '@/features/planning/LoveCalendar'
 import BucketList from '@/features/planning/BucketList'
 import SharedWishlist from '@/features/planning/SharedWishlist'
+import PlansPage from '@/app/(private)/plans/page'
+import RemindersPage from '@/app/(private)/reminders/page'
+import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 
 type CalendarEvent = { id: string; date: string; title: string; type: string | null }
 
@@ -16,6 +19,7 @@ export default function CalendarPage() {
   const [userId, setUserId] = useState<string | null>(null)
   const [showSharedCalendar, setShowSharedCalendar] = useState(false)
   const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'events' | 'plans' | 'reminders' | 'lists'>('events')
 
   useEffect(() => {
     const loadUserId = async () => {
@@ -91,7 +95,23 @@ export default function CalendarPage() {
         <p className="mt-2 text-sm text-[var(--text-secondary)]">Our events, goals, and dreams</p>
       </header>
 
+      <ExplicitAdviceControl
+        title="Plan a kinder conversation"
+        description="Ask the mediator for a small repair step around an upcoming plan or event."
+        placeholder="What do we need to coordinate without turning it into an argument?"
+      />
+
       <section className="space-y-6">
+        <nav className="flex gap-2 overflow-x-auto" aria-label="Calendar sections">
+          {(['events', 'plans', 'reminders', 'lists'] as const).map((tab) => (
+            <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-white' : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}>{tab}</button>
+          ))}
+        </nav>
+        {activeTab === 'plans' && <PlansPage />}
+        {activeTab === 'reminders' && <RemindersPage />}
+        {activeTab === 'lists' && <div className="grid gap-6 lg:grid-cols-2"><div className="glass-card p-5"><BucketList /></div><div className="glass-card p-5"><SharedWishlist /></div></div>}
+        {activeTab !== 'events' && activeTab !== 'lists' ? null : null}
+        {activeTab === 'events' && <>
         <div className="glass-card p-5">
           <LoveCalendar />
         </div>
@@ -195,6 +215,7 @@ export default function CalendarPage() {
             </div>
           )}
         </div>
+        </>}
       </section>
     </main>
   )

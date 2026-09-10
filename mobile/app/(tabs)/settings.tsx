@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Switch, Text, TouchableOpacity, View } from 'react-native'
 
 import { useLocation } from '@/hooks/useLocation'
+import { useTheme, type ThemePreference } from '@/context/ThemeContext'
 import { registerForPushNotifications, sendLocalNotification } from '@/services/notifications'
 
 type NotificationChannel = 'reminders' | 'messages' | 'milestones' | 'wellness'
@@ -63,6 +64,7 @@ export default function SettingsScreen() {
     toggleSharing,
     refreshSharingStatus,
   } = useLocation()
+  const { preference, setPreference } = useTheme()
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -142,6 +144,21 @@ export default function SettingsScreen() {
       </View>
 
       <View style={styles.sectionCard}>
+        <Text style={styles.sectionTitle}>Appearance</Text>
+        <View style={styles.themeRow}>
+          {(['midnight', 'sunset', 'random', 'auto'] as ThemePreference[]).map((option) => (
+            <TouchableOpacity
+              key={option}
+              onPress={() => setPreference(option)}
+              style={[styles.themeOption, preference === option && styles.themeOptionActive]}
+            >
+              <Text style={styles.themeOptionText}>{option[0].toUpperCase() + option.slice(1)}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+
+      <View style={styles.sectionCard}>
         <Text style={styles.sectionTitle}>What to notify me about</Text>
 
         {toggleItems.map(({ key, label, description, icon: Icon }) => (
@@ -206,6 +223,10 @@ const styles = StyleSheet.create({
     paddingBottom: 32,
     paddingHorizontal: 20,
   },
+  themeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  themeOption: { borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: '#2a2d36' },
+  themeOptionActive: { backgroundColor: '#d8b9c8' },
+  themeOptionText: { color: '#f3f0f5', fontWeight: '700', fontSize: 12 },
   eyebrow: {
     color: '#d9bfd7',
     fontSize: 12,

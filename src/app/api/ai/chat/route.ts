@@ -11,7 +11,7 @@ const chatSchema = z.object({
   provider: z.string().optional(),
 })
 
-const systemPrompt = 'You are a helpful relationship assistant for "A Little World With Us". Help with love advice, date ideas, and relationship tips. Be warm, supportive, romantic, and never judgmental.'
+const systemPrompt = 'You are a helpful relationship assistant for "A Little World With Us". Help with love advice, date ideas, and relationship tips. Be warm, supportive, romantic, and never judgmental. Reply in the same language as the user; use Myanmar language by default when the user does not clearly specify a language. Use MMK for monetary amounts.'
 
 export async function POST(req: NextRequest) {
   try {

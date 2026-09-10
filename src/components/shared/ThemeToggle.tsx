@@ -10,7 +10,7 @@ const themeOptions = [
   { key: 'midnight', label: 'Midnight Romance', icon: MoonStar },
   { key: 'sunset', label: 'Sunset Glow', icon: SunMedium },
   { key: 'ocean', label: 'Ocean Breeze', icon: Sparkles },
-  { key: 'monochrome', label: 'Monochrome Noir', icon: MoonStar },
+  { key: 'monochrome', label: 'Romantic Noir', icon: MoonStar },
 ] as const
 
 export default function ThemeToggle() {

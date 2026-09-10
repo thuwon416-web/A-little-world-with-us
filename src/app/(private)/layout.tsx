@@ -2,14 +2,17 @@ import { Suspense } from 'react'
 import AuthGuard from '@/features/auth/AuthGuard'
 import AppShell from '@/features/auth/app-shell'
 import PWAInstallPrompt from '@/features/settings/PWAInstallPrompt'
+import { AIGuardianProvider } from '@/features/ai-guardian/AIGuardianProvider'
 
 export default function PrivateLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthGuard>
-      <AppShell>
-        <Suspense fallback={<PrivatePageSkeleton />}>{children}</Suspense>
-        <PWAInstallPrompt />
-      </AppShell>
+      <AIGuardianProvider>
+        <AppShell>
+          <Suspense fallback={<PrivatePageSkeleton />}>{children}</Suspense>
+          <PWAInstallPrompt />
+        </AppShell>
+      </AIGuardianProvider>
     </AuthGuard>
   )
 }

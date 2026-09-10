@@ -2,17 +2,21 @@
 /* eslint-disable @next/next/no-img-element -- Chat attachments use user-provided URLs and GIF media. */
 
 import { useState, useEffect, useRef } from 'react'
-import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, MapPin, Captions } from 'lucide-react'
+import Image from 'next/image'
+import dynamic from 'next/dynamic'
+import { Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, MapPin, Captions, Sparkles, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
-import VoiceMessageRecorder from './VoiceMessageRecorder'
-import PhotoShare from './PhotoShare'
-import StickerPicker from './StickerPicker'
-import GIFPicker from './GIFPicker'
-import FileUpload from './FileUpload'
-import ReplyThread from './ReplyThread'
 import { resolveChatMediaUrl } from '@/lib/chatMedia'
+import { detectContextKeywords } from '@/features/ai-guardian/context/detector'
+
+const VoiceMessageRecorder = dynamic(() => import('./VoiceMessageRecorder'), { ssr: false })
+const PhotoShare = dynamic(() => import('./PhotoShare'), { ssr: false })
+const StickerPicker = dynamic(() => import('./StickerPicker'), { ssr: false })
+const GIFPicker = dynamic(() => import('./GIFPicker'), { ssr: false })
+const FileUpload = dynamic(() => import('./FileUpload'), { ssr: false })
+const ReplyThread = dynamic(() => import('./ReplyThread'), { ssr: false })
 
 interface Message {
   id: string
@@ -43,14 +47,25 @@ export default function RealtimeChat() {
   const [showFileUpload, setShowFileUpload] = useState(false)
   const [showReplyThread, setShowReplyThread] = useState(false)
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
+  const [contextCount, setContextCount] = useState(0)
+  const [contexts, setContexts] = useState<Array<{ id: string; category: string; sender_role: string; matched_keywords: string[] }>>([])
+  const [showAIPanel, setShowAIPanel] = useState(false)
+  const [aiResponse, setAiResponse] = useState('')
+  const [aiLoading, setAiLoading] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     let dispose: (() => void) | undefined
-    void loadCoupleAndMessages().then((cleanup) => {
-      dispose = cleanup
-    })
+    void loadCoupleAndMessages()
+      .then((cleanup) => { dispose = cleanup })
+      .catch((error) => {
+        console.error('Unable to initialize chat:', error)
+        setLoadError(error instanceof Error ? error.message : 'Unable to load chat.')
+      })
     return () => dispose?.()
+  // This loader is intentionally run once to establish the realtime subscription.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadCoupleAndMessages = async () => {
@@ -63,6 +78,9 @@ export default function RealtimeChat() {
     if (!couple) return
 
     setCoupleId(couple.id)
+    const { data: contextRows, count } = await supabase.from('ai_context_memory').select('id,category,sender_role,matched_keywords', { count: 'exact' }).eq('user_id', user.id).is('processed_at', null).gte('expires_at', new Date().toISOString())
+    setContextCount(count ?? 0)
+    setContexts((contextRows ?? []) as typeof contexts)
 
     const { data: loadedMessages } = await supabase
       .from('messages')
@@ -73,11 +91,16 @@ export default function RealtimeChat() {
     const chatKey = await deriveChatKey(couple.id)
     const decryptedMessages = await Promise.all(
       (loadedMessages || []).map(async (msg: Message) => {
-        const mediaUrl = msg.message_type === 'voice'
-          ? await resolveChatMediaUrl(msg.media_url, 'voice')
-          : msg.message_type === 'photo'
-            ? await resolveChatMediaUrl(msg.media_url, 'photo')
-            : msg.media_url
+        let mediaUrl = msg.media_url
+        try {
+          mediaUrl = msg.message_type === 'voice'
+            ? await resolveChatMediaUrl(msg.media_url, 'voice')
+            : msg.message_type === 'photo'
+              ? await resolveChatMediaUrl(msg.media_url, 'photo')
+              : msg.media_url
+        } catch {
+          mediaUrl = null
+        }
         if (msg.encrypted && msg.content) {
           try {
             const decrypted = await decryptMessage(msg.content, chatKey)
@@ -93,7 +116,7 @@ export default function RealtimeChat() {
     setMessages(decryptedMessages)
 
     const channel = supabase
-      .channel('chat')
+      .channel(`chat-${couple.id}`)
       .on(
         'postgres_changes',
         {
@@ -104,11 +127,16 @@ export default function RealtimeChat() {
         },
         async (payload) => {
           const rawMessage = payload.new as Message
-          const mediaUrl = rawMessage.message_type === 'voice'
-            ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
-            : rawMessage.message_type === 'photo'
-              ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
-              : rawMessage.media_url
+          let mediaUrl = rawMessage.media_url
+          try {
+            mediaUrl = rawMessage.message_type === 'voice'
+              ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
+              : rawMessage.message_type === 'photo'
+                ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
+                : rawMessage.media_url
+          } catch {
+            mediaUrl = null
+          }
           const newMessage = { ...rawMessage, media_url: mediaUrl }
 
           if (newMessage.encrypted && newMessage.content) {
@@ -133,11 +161,16 @@ export default function RealtimeChat() {
         },
         async (payload) => {
           const rawMessage = payload.new as Message
-          const mediaUrl = rawMessage.message_type === 'voice'
-            ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
-            : rawMessage.message_type === 'photo'
-              ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
-              : rawMessage.media_url
+          let mediaUrl = rawMessage.media_url
+          try {
+            mediaUrl = rawMessage.message_type === 'voice'
+              ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
+              : rawMessage.message_type === 'photo'
+                ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
+                : rawMessage.media_url
+          } catch {
+            mediaUrl = null
+          }
           setMessages((current) => current.map((message) => message.id === rawMessage.id ? { ...message, ...rawMessage, media_url: mediaUrl } : message))
         }
       )
@@ -151,23 +184,64 @@ export default function RealtimeChat() {
   const handleSend = async () => {
     if (!input.trim() || !coupleId || !currentUserId) return
 
+    const messageText = input.trim()
     const chatKey = await deriveChatKey(coupleId)
-    const encryptedContent = await encryptMessage(input.trim(), chatKey)
+    const encryptedContent = await encryptMessage(messageText, chatKey)
 
-    const { error } = await supabase.from('messages').insert({
+    const { data: savedMessage, error } = await supabase.from('messages').insert({
       couple_id: coupleId,
       sender_id: currentUserId,
       content: encryptedContent,
       message_type: 'text',
       encrypted: true,
-    })
+    }).select('id').single()
 
-    if (error) {
+    if (error || !savedMessage) {
       console.error('Error sending message:', error)
       return
     }
 
+    const detected = detectContextKeywords(messageText)
+    if (detected.length) {
+      const senderRole = 'her'
+      await supabase.from('ai_context_memory').insert(detected.map((item) => ({
+        user_id: currentUserId,
+        couple_id: coupleId,
+        source_message_id: savedMessage.id,
+        category: item.category,
+        sender_role: senderRole,
+        context_text: encryptedContent,
+        matched_keywords: item.matchedKeywords,
+      })))
+      setContextCount((count) => count + detected.length)
+    }
     setInput('')
+  }
+
+  const askGuardian = async () => {
+    setAiLoading(true)
+    try {
+      const response = await fetch('/api/ai/guardian', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Please review my recent context and give me a gentle, practical suggestion.' }),
+      })
+      const payload = await response.json() as { response?: string; error?: string }
+      if (!response.ok) throw new Error(payload.error ?? 'AI Guardian is unavailable.')
+      setAiResponse(payload.response ?? '')
+      setContextCount(0)
+    } catch (error) {
+      setAiResponse(error instanceof Error ? error.message : 'AI Guardian is unavailable.')
+    } finally {
+      setAiLoading(false)
+    }
+
+  }
+
+  const deleteContext = async (id: string) => {
+    await supabase.from('ai_context_memory').delete().eq('id', id).eq('user_id', currentUserId)
+    setContexts((items) => items.filter((item) => item.id !== id))
+    setContextCount((count) => Math.max(0, count - 1))
   }
 
   const handleSendLocation = () => {
@@ -379,8 +453,23 @@ export default function RealtimeChat() {
 
   return (
     <div className="flex flex-col h-[600px] glass-card">
+      <header className="flex items-center gap-3 border-b border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#8774E1] text-lg text-white">♥</div>
+        <div><p className="font-semibold text-[var(--text-primary)]">Your love</p><p className="text-xs text-emerald-400">Online</p></div>
+        <button type="button" onClick={() => setShowAIPanel((open) => !open)} className="ml-auto inline-flex items-center gap-1 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]" aria-label="Open AI Guardian">
+          <Sparkles className="h-3.5 w-3.5" /> AI {contextCount > 0 ? `•${contextCount}` : ''}
+        </button>
+      </header>
+      {loadError && <div role="alert" className="border-b border-rose-400/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-200">{loadError}</div>}
+      {showAIPanel && <section className="border-b border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4">
+        <div className="flex items-center justify-between"><p className="text-sm font-semibold text-[var(--text-primary)]">AI Guardian context</p><button type="button" onClick={() => setShowAIPanel(false)} aria-label="Close AI Guardian"><X className="h-4 w-4 text-[var(--text-secondary)]" /></button></div>
+        <p className="mt-2 text-xs text-[var(--text-secondary)]">{contextCount ? `${contextCount} unprocessed context hint${contextCount === 1 ? '' : 's'} detected.` : 'No unprocessed context hints.'}</p>
+        {contexts.length > 0 && <ul className="mt-3 space-y-2">{contexts.map((context) => <li key={context.id} className="flex items-center justify-between rounded-lg bg-[var(--card-bg)] px-3 py-2 text-xs text-[var(--text-primary)]"><span>{context.category} · {context.sender_role}</span><button type="button" onClick={() => void deleteContext(context.id)} className="text-[var(--text-secondary)] underline">Delete</button></li>)}</ul>}
+        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-full bg-[#8774E1] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
+        {aiResponse && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-primary)]">{aiResponse}</p>}
+      </section>}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.map((message) => {
+        {messages.length === 0 ? <div className="flex h-full items-center justify-center text-center text-[var(--text-secondary)]"><p>Say hello to your love ❤️</p></div> : messages.map((message) => {
           const replyToMessage = message.reply_to ? messages.find((m) => m.id === message.reply_to) : null
 
           return (
@@ -392,8 +481,8 @@ export default function RealtimeChat() {
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                     message.sender_id === currentUserId
-                      ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
-                      : 'bg-[var(--bg-2)] text-[var(--text-primary)]'
+                      ? 'rounded-[18px] rounded-br-[4px] bg-[#8774E1] text-white'
+                      : 'rounded-[18px] rounded-bl-[4px] bg-[#181818] text-white'
                   }`}
                   onContextMenu={(e) => {
                     e.preventDefault()
@@ -416,7 +505,14 @@ export default function RealtimeChat() {
                     <div className="space-y-2"><audio controls src={message.media_url} className="h-8 max-w-full" /><button type="button" onClick={() => void handleTranscribe(message)} className="inline-flex items-center gap-1 text-xs text-[var(--accent-2)] hover:underline"><Captions className="h-3.5 w-3.5" />{message.transcript ? 'Refresh transcript' : 'Transcribe'}</button>{message.transcript ? <p className="rounded-lg bg-black/10 p-2 text-xs leading-relaxed text-[var(--text-secondary)]">{message.transcript}</p> : null}</div>
                   )}
                   {message.message_type === 'photo' && message.media_url && (
-                    <img src={message.media_url} alt="Chat photo" className="rounded-lg max-w-full" />
+                    <Image
+                      src={message.media_url}
+                      alt="Chat photo"
+                      width={640}
+                      height={480}
+                      unoptimized
+                      className="max-w-full rounded-lg"
+                    />
                   )}
                   {message.message_type === 'video' && message.media_url && (
                     <video controls src={message.media_url} className="rounded-lg max-w-full" />
@@ -428,7 +524,14 @@ export default function RealtimeChat() {
                     <span className="text-4xl">{message.content}</span>
                   )}
                   {message.message_type === 'gif' && message.media_url && (
-                    <img src={message.media_url} alt="GIF" className="rounded-lg max-w-full" />
+                    <Image
+                      src={message.media_url}
+                      alt="GIF"
+                      width={480}
+                      height={480}
+                      unoptimized
+                      className="max-w-full rounded-lg"
+                    />
                   )}
                   {message.message_type === 'file' && (
                     <div className="flex items-center gap-2">
@@ -504,7 +607,7 @@ export default function RealtimeChat() {
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Type a message..."
-            className="flex-1 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-2 text-sm text-[var(--text-primary)]"
+            className="flex-1 rounded-full border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-2 text-sm text-[var(--text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8774E1]"
           />
           <button
             onClick={handleSend}

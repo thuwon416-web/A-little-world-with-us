@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
-import { Image, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import ImageUpload from '@/components/ImageUpload'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/auth'
 
 type GalleryItem = {
   id: string
@@ -15,42 +16,61 @@ type GalleryItem = {
 export default function GalleryScreen() {
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const { user, loading: authLoading } = useAuth()
 
   const loadGallery = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase.storage.from('gallery').list('', { limit: 100 })
+      if (!user?.id) return
+      const { data, error } = await supabase.storage.from('gallery').list(user.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
       if (error) {
         throw error
       }
 
-      const galleryItems = (data ?? [])
+      const galleryItems = (await Promise.all((data ?? [])
         .filter((item) => item.name && !item.metadata?.isFolder)
-        .map((item) => {
-          const { data: publicData } = supabase.storage.from('gallery').getPublicUrl(item.name)
-          return {
-            id: item.id ?? item.name,
-            path: item.name,
-            url: publicData.publicUrl,
-            name: item.name,
-            created_at: item.created_at ?? new Date().toISOString(),
-          }
-        })
+        .map(async (item) => {
+          const path = `${user.id}/${item.name}`
+          const { data: signed, error: signedError } = await supabase.storage.from('gallery').createSignedUrl(path, 3600)
+          if (signedError || !signed?.signedUrl) return null
+          return { id: item.id ?? path, path, url: signed.signedUrl, name: item.name, created_at: item.created_at ?? new Date().toISOString() }
+        }))).filter((item): item is GalleryItem => item !== null)
 
       setItems(galleryItems)
-    } catch {
+    } catch (caught) {
       setItems([])
+      setError(caught instanceof Error ? caught.message : 'Unable to load gallery.')
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    void loadGallery()
-  }, [])
+    if (!authLoading) void loadGallery()
+  }, [authLoading, user?.id])
 
   const handleUpload = (image: GalleryItem) => {
     setItems((current) => [image, ...current])
+  }
+
+  const handleDelete = (item: GalleryItem) => {
+    Alert.alert('Delete photo?', 'This removes the photo from your shared gallery.', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          void supabase.storage.from('gallery').remove([item.path]).then(({ error: deleteError }) => {
+            if (deleteError) {
+              setError(deleteError.message)
+              return
+            }
+            setItems((current) => current.filter((candidate) => candidate.id !== item.id))
+          })
+        },
+      },
+    ])
   }
 
   return (
@@ -61,7 +81,8 @@ export default function GalleryScreen() {
 
       <ImageUpload onUpload={handleUpload} />
 
-      {loading ? (
+      {error && <Text style={styles.error}>{error}</Text>}
+      {loading || authLoading ? (
         <Text style={styles.loading}>Loading gallery…</Text>
       ) : items.length === 0 ? (
         <View style={styles.emptyState}>
@@ -71,8 +92,16 @@ export default function GalleryScreen() {
         <View style={styles.grid}>
           {items.map((item) => (
             <View key={item.id} style={styles.card}>
-              <Image source={{ uri: item.url }} style={styles.image} resizeMode="cover" />
-              <Text style={styles.meta}>{new Date(item.created_at).toLocaleDateString()}</Text>
+              <Image
+                source={{ uri: item.url }}
+                style={styles.image}
+                resizeMode="cover"
+                onError={() => setItems((current) => current.filter((candidate) => candidate.id !== item.id))}
+              />
+              <View style={styles.metaRow}>
+                <Text style={styles.meta}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                <TouchableOpacity onPress={() => handleDelete(item)}><Text style={styles.delete}>Delete</Text></TouchableOpacity>
+              </View>
             </View>
           ))}
         </View>
@@ -146,4 +175,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
+  metaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 12 },
+  delete: { color: '#ff9b9b', fontSize: 12, fontWeight: '700' },
+  error: { color: '#ff9b9b', fontSize: 13, marginBottom: 10 },
 })

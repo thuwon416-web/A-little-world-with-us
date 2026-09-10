@@ -3,14 +3,17 @@
 import { useState } from 'react'
 import { wellnessBoards } from '@/data/wellness-boards'
 import WellnessBoard from '@/components/wellness/WellnessBoard'
+import RelationshipQuests from '@/features/games/RelationshipQuests'
+import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 
-type TabId = 'physical' | 'mental' | 'relationship' | 'workout'
+type TabId = 'physical' | 'mental' | 'relationship' | 'quests' | 'games'
 
 const tabs = [
-  { id: 'physical' as TabId, label: 'Physical Health', labelMy: 'ရုပ်ပိုင်းဆိုင်ရာ ကျန်းမာရေး' },
+  { id: 'physical' as TabId, label: 'Health', labelMy: 'ရုပ်ပိုင်းဆိုင်ရာ ကျန်းမာရေး' },
   { id: 'mental' as TabId, label: 'Mental Wellness', labelMy: 'စိတ်ပိုင်းဆိုင်ရာ ကျန်းမာရေး' },
   { id: 'relationship' as TabId, label: 'Relationship', labelMy: 'ဆက်ဆံရေး' },
-  { id: 'workout' as TabId, label: 'Workout Together', labelMy: 'တူတွဲ လေ့ကစား' },
+  { id: 'quests' as TabId, label: 'Quests', labelMy: 'စိန်ခေါ်မှုများ' },
+  { id: 'games' as TabId, label: 'Games', labelMy: 'ဂိမ်းများ' },
 ]
 
 const workouts = [
@@ -52,6 +55,12 @@ export default function WellnessPage() {
         </p>
       </header>
 
+      <ExplicitAdviceControl
+        title="Ask for a gentle reset"
+        description="Get one small, practical step for reconnecting. Nothing is sent automatically."
+        placeholder="What feels difficult for us today?"
+      />
+
       <nav className="flex gap-2 overflow-x-auto pb-2" aria-label="Wellness categories">
         {tabs.map((tab) => (
           <button
@@ -61,7 +70,7 @@ export default function WellnessPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${
               activeTab === tab.id
-                ? 'border-[var(--accent-1)]/40 bg-[var(--accent-1)]/20 text-[var(--accent-1)]'
+                ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-white'
                 : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10'
             }`}
             aria-selected={activeTab === tab.id}
@@ -71,9 +80,13 @@ export default function WellnessPage() {
         ))}
       </nav>
 
-      {activeTab === 'workout' ? (
+      {activeTab === 'quests' ? (
+        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5"><RelationshipQuests /></section>
+      ) : activeTab === 'games' ? (
+        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6"><h2 className="text-2xl font-bold text-[var(--text-primary)]">Games</h2><p className="mt-2 text-[var(--text-secondary)]">Playful ways to reconnect are coming together here.</p></section>
+      ) : activeTab === 'physical' ? (
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">💪 Workout Together</h2>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">💪 Health & movement</h2>
 
           {/* Workout Selection */}
           <div className="grid md:grid-cols-2 gap-4">

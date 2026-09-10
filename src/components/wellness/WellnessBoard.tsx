@@ -1,4 +1,5 @@
 // src/components/wellness/WellnessBoard.tsx
+import { Plus } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { type WellnessBoard as BoardData } from '@/types/wellness'
@@ -38,7 +39,11 @@ export default function WellnessBoard({ board }: WellnessBoardProps) {
           ))
         ) : (
           <div className="rounded-xl border border-dashed border-rose-300/50 bg-rose-50/40 p-6 text-center text-rose-700">
+            <Plus className="mx-auto mb-2 h-6 w-6" aria-hidden="true" />
             <p className="text-sm">No entries yet. Add your first gentle check-in when you are ready.</p>
+            <button type="button" className="mt-4 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
+              Start your first entry
+            </button>
           </div>
         )}
       </CardContent>

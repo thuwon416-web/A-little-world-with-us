@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 
 import { useNetwork } from './useNetwork'
 
-import { syncMessages, type SyncStatus } from '@/services/sync'
+import { subscribeToChanges, syncMessages, type SyncStatus } from '@/services/sync'
 
-export function useSync() {
+export function useSync(coupleId?: string) {
   const { isConnected } = useNetwork()
   const [status, setStatus] = useState<SyncStatus>('idle')
   const [pendingCount, setPendingCount] = useState(0)
@@ -29,6 +29,12 @@ export function useSync() {
 
     void refresh()
   }, [isConnected, refresh])
+
+  useEffect(() => {
+    if (!coupleId) return
+    const subscription = subscribeToChanges(() => void refresh(), coupleId)
+    return () => subscription.unsubscribe()
+  }, [coupleId, refresh])
 
   return {
     status,

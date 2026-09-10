@@ -7,11 +7,29 @@ export type CareLog = {
 export type CycleSettings = { couple_id: string; cycle_length: number; period_length: number; last_period_start: string | null; updated_at: string }
 export type CareReminder = { id: string; couple_id: string; reminder_type: 'pms' | 'period' | 'fertile' | 'symptom'; enabled: boolean }
 export type CareDraft = Omit<Partial<CareLog>, 'id' | 'user_id' | 'couple_id' | 'updated_at' | 'updated_by'> & { log_date: string }
-export type CycleSummary = { cycleLength: number; periodLength: number; lastPeriodStart: string | null; nextPeriodStart: string | null; fertileStart: string | null; fertileEnd: string | null; ovulationDate: string | null; day: number | null; regular: boolean; estimateReady: boolean }
+export type CycleHistoryEntry = { startDate: string; endDate: string; length: number; status: 'actual' | 'predicted'; variationMin: number; variationMax: number }
+export type CycleSummary = { cycleLength: number; periodLength: number; lastPeriodStart: string | null; nextPeriodStart: string | null; fertileStart: string | null; fertileEnd: string | null; ovulationDate: string | null; day: number | null; regular: boolean; estimateReady: boolean; variationMin: number; variationMax: number; cycleHistory: CycleHistoryEntry[] }
 
-const dateKey = (value: Date) => value.toISOString().slice(0, 10)
-const addDays = (date: string, amount: number) => { const result = new Date(`${date}T12:00:00`); result.setDate(result.getDate() + amount); return dateKey(result) }
-const daysBetween = (start: string, end: string) => Math.round((new Date(`${end}T12:00:00`).getTime() - new Date(`${start}T12:00:00`).getTime()) / 86400000)
+// Parse date-only values at local noon. This avoids UTC rollover and DST midnight
+// surprises while keeping cycle calculations independent from the user's timezone.
+export const dateKey = (value: Date) => {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+const parseDateOnly = (value: string) => {
+  const [year, month, day] = value.split('-').map(Number)
+  return new Date(year, month - 1, day, 12)
+}
+export const addDays = (date: string, amount: number) => { const result = parseDateOnly(date); result.setDate(result.getDate() + amount); return dateKey(result) }
+const daysBetween = (start: string, end: string) => Math.round((parseDateOnly(end).getTime() - parseDateOnly(start).getTime()) / 86400000)
+const floorMedian = (values: number[]) => {
+  const ordered = [...values].sort((a, b) => a - b)
+  const middle = Math.floor(ordered.length / 2)
+  const median = ordered.length % 2 ? ordered[middle] : (ordered[middle - 1] + ordered[middle]) / 2
+  return Math.floor(median)
+}
 
 export async function getAcceptedCareContext() {
   const { data: auth } = await supabase.auth.getUser()
@@ -73,14 +91,24 @@ export function periodStarts(logs: CareLog[]) {
 export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings): CycleSummary {
   const starts = periodStarts(logs)
   const historicalLengths = starts.slice(0, 6).flatMap((start, index) => { const older = starts[index + 1]; const length = older ? daysBetween(older, start) : 0; return length >= 15 && length <= 60 ? [length] : [] })
-  const cycleLength = historicalLengths.length ? Math.round(historicalLengths.reduce((sum, value) => sum + value, 0) / historicalLengths.length) : settings.cycle_length
+  // Use the floor of the median for predictions: Jun 25 → Jul 22 (27 days)
+  // and Jul 22 → Aug 17 (26 days) therefore predict 26, not rounded 27.
+  const cycleLength = historicalLengths.length ? floorMedian(historicalLengths) : settings.cycle_length
   const lastPeriodStart = settings.last_period_start ?? starts[0] ?? null
-  const variation = historicalLengths.length > 1 ? Math.max(...historicalLengths) - Math.min(...historicalLengths) : 0
-  if (!lastPeriodStart) return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular: variation <= 7, estimateReady: false }
+  const variationMin = historicalLengths.length ? Math.min(...historicalLengths) : cycleLength
+  const variationMax = historicalLengths.length ? Math.max(...historicalLengths) : cycleLength
+  const variation = variationMax - variationMin
+  const actualHistory: CycleHistoryEntry[] = starts.slice(0, 6).flatMap((start, index) => {
+    const older = starts[index + 1]
+    const length = older ? daysBetween(older, start) : 0
+    return older && length >= 15 && length <= 60 ? [{ startDate: older, endDate: addDays(start, -1), length, status: 'actual' as const, variationMin, variationMax }] : []
+  }).reverse()
+  if (!lastPeriodStart) return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular: variation <= 7, estimateReady: false, variationMin, variationMax, cycleHistory: actualHistory }
   const nextPeriodStart = addDays(lastPeriodStart, cycleLength)
   const ovulationDate = addDays(nextPeriodStart, -14)
   const today = dateKey(new Date())
-  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, fertileStart: addDays(ovulationDate, -5), fertileEnd: addDays(ovulationDate, 1), ovulationDate, day: Math.max(1, daysBetween(lastPeriodStart, today) + 1), regular: variation <= 7, estimateReady: starts.length >= 2 || settings.last_period_start !== null }
+  const cycleHistory = [...actualHistory, { startDate: lastPeriodStart, endDate: addDays(nextPeriodStart, -1), length: cycleLength, status: 'predicted' as const, variationMin, variationMax }]
+  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, fertileStart: addDays(ovulationDate, -5), fertileEnd: addDays(ovulationDate, 1), ovulationDate, day: Math.max(1, daysBetween(lastPeriodStart, today) + 1), regular: variation <= 7, estimateReady: starts.length >= 2 || settings.last_period_start !== null, variationMin, variationMax, cycleHistory }
 }
 
 export function getFertilityLabel(summary: CycleSummary) {
@@ -112,7 +140,7 @@ export type DailyLog = {
 export type CycleData = { last_period_start: string | null; average_cycle_length: number; average_period_length: number; next_period_start: string | null; fertile_window_start: string | null; fertile_window_end: string | null; ovulation_date: string | null }
 export async function getActiveCareCoupleLinkId(userId: string) { const context = await getAcceptedCareContext(); return context?.userId === userId ? context.coupleId : undefined }
 export async function getDailyLogs(_userId: string, startDate?: string, endDate?: string) { const context = await getAcceptedCareContext(); if (!context) return []; const logs = await getCareLogs(context.coupleId); return logs.filter((log) => (!startDate || log.log_date >= startDate) && (!endDate || log.log_date <= endDate)) }
-export async function getCurrentMonthLogs(userId: string) { const now = new Date(); return getDailyLogs(userId, new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10), new Date(now.getFullYear(), now.getMonth() + 1, 0).toISOString().slice(0, 10)) }
+export async function getCurrentMonthLogs(userId: string) { const now = new Date(); return getDailyLogs(userId, dateKey(new Date(now.getFullYear(), now.getMonth(), 1)), dateKey(new Date(now.getFullYear(), now.getMonth() + 1, 0))) }
 export async function getLatestLog(userId: string) { const logs = await getDailyLogs(userId); return logs[0] ?? null }
 export async function getTodayLog(userId: string) { return (await getDailyLogs(userId, dateKey(new Date()), dateKey(new Date())))[0] ?? null }
 export function calculateCycleData(logs: CareLog[]): CycleData { const summary = calculateCycleSummary(logs, { couple_id: '', cycle_length: 28, period_length: 5, last_period_start: null, updated_at: '' }); return { last_period_start: summary.lastPeriodStart, average_cycle_length: summary.cycleLength, average_period_length: summary.periodLength, next_period_start: summary.nextPeriodStart, fertile_window_start: summary.fertileStart, fertile_window_end: summary.fertileEnd, ovulation_date: summary.ovulationDate } }

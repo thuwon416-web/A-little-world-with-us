@@ -15,7 +15,6 @@ import {
   MapPin,
   Phone,
   Cpu,
-  Bell,
   Calendar,
   Lock,
   Settings,
@@ -27,7 +26,7 @@ import { supabase } from '@/lib/supabase'
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/memories', label: 'Memories', icon: Heart },
-  { href: '/wellness', label: 'Care', icon: Sparkles },
+  { href: '/care', label: 'Care', icon: Sparkles },
   { href: '/chat', label: 'Chat', icon: MessageCircleHeart },
 ]
 
@@ -35,11 +34,10 @@ const morePages = [
   { name: 'Location', href: '/location', icon: MapPin },
   { name: 'Calls', href: '/calls', icon: Phone },
   { name: 'AI', href: '/ai', icon: Cpu },
-  { name: 'Reminders', href: '/reminders', icon: Bell },
-  { name: 'Plans', href: '/plans', icon: Calendar },
+  { name: 'Calendar & Plans', href: '/calendar', icon: Calendar },
+  { name: 'Wellness & Play', href: '/wellness', icon: Sparkles },
   { name: 'Vault', href: '/vault', icon: Lock },
   { name: 'Settings', href: '/settings', icon: Settings },
-  { name: 'Calendar', href: '/calendar', icon: Calendar },
   { name: 'Finance', href: '/finance', icon: DollarSign },
   { name: 'About', href: '/about', icon: Info },
   { name: 'Help', href: '/help', icon: HelpCircle },

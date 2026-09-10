@@ -189,14 +189,14 @@ export async function syncMessages(lastSyncAt?: string) {
   return { synced: allMessages.length, pending }
 }
 
-export function subscribeToChanges(onChange: () => void) {
+export function subscribeToChanges(onChange: () => void, coupleId?: string) {
   if (!isSupabaseConfigured) {
     return { unsubscribe: () => undefined }
   }
 
   const channel = supabase
-    .channel('mobile-chat-sync')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+    .channel(`mobile-chat-sync-${coupleId ?? 'unknown'}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', ...(coupleId ? { filter: `couple_id=eq.${coupleId}` } : {}) }, () => {
       onChange()
     })
     .subscribe()

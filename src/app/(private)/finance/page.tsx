@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
+import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 
 interface FinancialGoal {
   id: string
@@ -10,6 +11,8 @@ interface FinancialGoal {
   target_amount: number
   current_amount: number
 }
+
+const formatMmk = (amount: number) => `${amount.toLocaleString()} MMK`
 
 export default function FinancialGoals() {
   const [goals, setGoals] = useState<FinancialGoal[]>([])
@@ -77,12 +80,18 @@ export default function FinancialGoals() {
         <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">💰 Financial Goals</h1>
       </section>
 
+      <ExplicitAdviceControl
+        title="Talk through a money decision"
+        description="Ask for a neutral conversation starter. AI never sees your finance records unless you type them here."
+        placeholder="How can we discuss a shared goal or budget difference respectfully?"
+      />
+
       {!coupleId && <p className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100">Link and accept a partner before creating shared financial goals.</p>}
 
       <section className="grid gap-4 rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 md:grid-cols-4">
         <input value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} placeholder="Goal name (e.g., Vacation)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
-        <input type="number" min="0" value={newGoal.target} onChange={(event) => setNewGoal({ ...newGoal, target: event.target.value })} placeholder="Target ($)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
-        <input type="number" min="0" value={newGoal.current} onChange={(event) => setNewGoal({ ...newGoal, current: event.target.value })} placeholder="Current ($)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
+        <input type="number" min="0" value={newGoal.target} onChange={(event) => setNewGoal({ ...newGoal, target: event.target.value })} placeholder="Target (MMK)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
+        <input type="number" min="0" value={newGoal.current} onChange={(event) => setNewGoal({ ...newGoal, current: event.target.value })} placeholder="Current (MMK)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
         <button type="button" onClick={addGoal} className="rounded-xl bg-[var(--accent-1)] px-4 py-3 font-medium text-[var(--bg-color)]">+ Add Goal</button>
       </section>
 
@@ -91,7 +100,7 @@ export default function FinancialGoals() {
           const progress = Math.min(100, Math.max(0, (goal.current_amount / goal.target_amount) * 100))
           return (
             <section key={goal.id} className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-              <div className="mb-3 flex items-center justify-between gap-4"><h2 className="text-xl font-bold text-[var(--text-primary)]">{goal.title}</h2><span className="text-sm text-[var(--text-secondary)]">${goal.current_amount} / ${goal.target_amount}</span></div>
+              <div className="mb-3 flex items-center justify-between gap-4"><h2 className="text-xl font-bold text-[var(--text-primary)]">{goal.title}</h2><span className="text-sm text-[var(--text-secondary)]">{formatMmk(goal.current_amount)} / {formatMmk(goal.target_amount)}</span></div>
               <div className="mb-4 h-3 w-full overflow-hidden rounded-full bg-[var(--accent-1)]/10"><div className="h-full rounded-full bg-[var(--accent-1)] transition-all" style={{ width: `${progress}%` }} /></div>
               <input type="number" min="0" placeholder="Add amount" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" onBlur={(event) => { void updateProgress(goal, event.target.value); event.target.value = '' }} />
             </section>

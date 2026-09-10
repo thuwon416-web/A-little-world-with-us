@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, Bell, CalendarDays, ChevronDown, ChevronUp, Droplet, Heart, Plus, Settings2, Sparkles, X } from 'lucide-react'
 import { calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, saveCareLog, saveCareReminder, saveCycleSettings, type CareDraft, type CareLog, type CareReminder, type CycleSettings } from '@/lib/care-data'
+import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 
 type Tab = 'today' | 'insights' | 'calendar' | 'reminders' | 'settings'
 type Section = 'mood' | 'symptoms' | 'sex' | 'discharge' | 'digestion' | 'pregnancy_test' | 'ovulation_test' | 'contraceptives' | 'activities'
@@ -44,6 +45,7 @@ export default function CarePage() {
   const tabs: Array<{ id: Tab; label: string; icon: typeof Sparkles }> = [{ id: 'today', label: 'Today', icon: Sparkles }, { id: 'insights', label: 'Insights', icon: Activity }, { id: 'calendar', label: 'Calendar', icon: CalendarDays }, { id: 'reminders', label: 'Reminders', icon: Bell }, { id: 'settings', label: 'Settings', icon: Settings2 }]
   return <div className="mx-auto max-w-5xl space-y-5 pb-8">
     <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Shared Cycle Care</p><h1 className="mt-1 text-3xl text-[var(--text-primary)]">Cycle Care</h1></div><button onClick={() => openLog()} className="glass-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold"><Plus className="h-4 w-4" />Log today</button></header>
+    <ExplicitAdviceControl mode="intimacy" title="Ask before discussing intimacy" description="Share only what you choose for consent-led, non-graphic guidance." placeholder="What would help us talk about closeness or boundaries?" />
     <nav className="flex gap-2 overflow-x-auto pb-1">{tabs.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => id === 'calendar' ? setCalendarOpen(true) : setTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm ${tab === id && id !== 'calendar' ? 'border-[var(--accent-1)]/50 bg-[var(--accent-1)]/15 text-[var(--accent-1)]' : 'border-white/10 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}><Icon className="h-4 w-4" />{label}</button>)}</nav>
     {tab === 'today' && <Today summary={summary} daysUntil={daysUntil} onLogPeriod={() => setCalendarOpen(true)} onOpen={openLog} onInsights={() => setTab('insights')} onReminders={() => setTab('reminders')} logs={logs} />}
     {tab === 'insights' && <Insights logs={logs} summary={summary} />}

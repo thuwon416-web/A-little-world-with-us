@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Droplets, Heart, Plus } from 'lucide-react-native'
 import {
   ActivityIndicator,
   Alert,
@@ -109,6 +110,7 @@ function Chips({
 }
 
 export default function CareScreen() {
+  const [activeTab, setActiveTab] = useState<'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'>('Today')
   const [mood, setMood] = useState('')
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
   const [sex, setSex] = useState<string[]>([])
@@ -152,12 +154,40 @@ export default function CareScreen() {
     } finally {
       setSaving(false)
     }
+
+    if (activeTab !== 'Today') {
+      return (
+        <View style={[styles.screen, styles.parityScreen]}>
+          <Text style={styles.eyebrow}>CYCLE CARE</Text>
+          <Text style={styles.title}>{activeTab}</Text>
+          <Text style={styles.heroNote}>
+            {activeTab === 'Insights'
+              ? 'Your cycle insights will appear after a few period logs.'
+              : activeTab === 'Calendar'
+                ? 'Your logged and predicted cycle days will appear here.'
+                : activeTab === 'Reminders'
+                  ? 'Gentle care reminders can be configured here.'
+                  : 'Cycle settings and privacy controls are kept here.'}
+          </Text>
+          <TouchableOpacity style={styles.saveButton} onPress={() => setActiveTab('Today')}>
+            <Text style={styles.saveText}>Back to Today</Text>
+          </TouchableOpacity>
+        </View>
+      )
+    }
   }
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.eyebrow}>CYCLE CARE · SHARED WITH YOUR PARTNER</Text>
       <Text style={styles.title}>Today</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>
+        {(['Today', 'Insights', 'Calendar', 'Reminders', 'Settings'] as const).map((tab) => (
+          <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, activeTab === tab && styles.tabActive]}>
+            <Text style={styles.tabText}>{tab}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
       <View style={styles.hero}>
         <Text style={styles.heroLabel}>SHARED CYCLE</Text>
         <Text style={styles.days}>Log a period</Text>
@@ -166,9 +196,9 @@ export default function CareScreen() {
       </View>
       <View style={styles.actions}>
         {[
-          ['🩸', 'Log period'],
-          ['＋', 'Symptoms'],
-          ['♡', 'Intimacy'],
+          ['period', 'Log period'],
+          ['symptoms', 'Symptoms'],
+          ['intimacy', 'Intimacy'],
         ].map(([icon, label]) => (
           <TouchableOpacity
             key={label}
@@ -176,7 +206,7 @@ export default function CareScreen() {
             onPress={() => (label === 'Log period' ? void saveCheckIn(true) : undefined)}
           >
             <View style={styles.actionIcon}>
-              <Text style={styles.actionEmoji}>{icon}</Text>
+              {icon === 'period' ? <Droplets color="#ff9b9b" size={25} /> : icon === 'symptoms' ? <Plus color="#ff9b9b" size={25} /> : <Heart color="#ff9b9b" size={25} />}
             </View>
             <Text style={styles.actionLabel}>{label}</Text>
           </TouchableOpacity>
@@ -307,6 +337,7 @@ export default function CareScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#1A0B2E' },
+  parityScreen: { padding: 20, paddingTop: 64 },
   content: { padding: 20, paddingTop: 64, paddingBottom: 36 },
   eyebrow: { color: '#c9b9dd', fontWeight: '700', letterSpacing: 1.3, fontSize: 10 },
   title: { color: '#fff8ff', fontWeight: '800', fontSize: 30, marginTop: 6 },
@@ -342,6 +373,10 @@ const styles = StyleSheet.create({
     borderColor: '#ff6b9d80',
   },
   actionEmoji: { fontSize: 25 },
+  tabRow: { gap: 8, paddingVertical: 16 },
+  tab: { borderRadius: 16, backgroundColor: '#39235a', paddingHorizontal: 14, paddingVertical: 9 },
+  tabActive: { backgroundColor: '#ff5d89' },
+  tabText: { color: '#fff', fontWeight: '700', fontSize: 12 },
   actionLabel: {
     color: '#f7eaf4',
     fontSize: 12,

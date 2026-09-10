@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- This component displays local file previews before upload. */
 
 import { useState, useRef } from 'react'
+import Image from 'next/image'
 import { Image as ImageIcon, X } from 'lucide-react'
 
 interface Props {
@@ -46,10 +47,13 @@ export default function PhotoShare({ onClose, onPhotoSelect }: Props) {
         <div className="space-y-4">
           {preview ? (
             <div className="relative">
-              <img
+              <Image
                 src={preview}
                 alt="Selected photo preview"
-                className="w-full h-64 object-cover rounded-lg"
+                width={640}
+                height={512}
+                unoptimized
+                className="h-64 w-full rounded-lg object-cover"
               />
               <button
                 onClick={() => {
