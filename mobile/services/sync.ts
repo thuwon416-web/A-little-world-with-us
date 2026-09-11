@@ -71,6 +71,9 @@ export async function pushPendingMessages() {
           return null
         }
       })(),
+      media_url: rawMessage._get('media_url') || null,
+      media_duration: rawMessage._get('media_duration') || null,
+      reply_to: rawMessage._get('reply_to') || null,
     }
 
     const { error } = await supabase.from('messages').upsert(payload).select()
@@ -162,6 +165,9 @@ export async function syncMessages(lastSyncAt?: string) {
             record.location_payload = remoteMessage.location_payload
               ? JSON.stringify(remoteMessage.location_payload)
               : ''
+            record.media_url = remoteMessage.media_url ?? ''
+            record.media_duration = remoteMessage.media_duration ?? null
+            record.reply_to = remoteMessage.reply_to ?? ''
             record.synced = true
           })
         } else {
@@ -177,6 +183,9 @@ export async function syncMessages(lastSyncAt?: string) {
               record.location_payload = remoteMessage.location_payload
                 ? JSON.stringify(remoteMessage.location_payload)
                 : record.location_payload
+              record.media_url = remoteMessage.media_url ?? record.media_url
+              record.media_duration = remoteMessage.media_duration ?? record.media_duration
+              record.reply_to = remoteMessage.reply_to ?? record.reply_to
               record.synced = true
             })
           }

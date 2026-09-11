@@ -1,4 +1,5 @@
 import React from 'react'
+import * as Haptics from 'expo-haptics'
 import {
   Pressable,
   StyleSheet,
@@ -47,7 +48,19 @@ export function Button({
   ]
 
   return (
-    <Pressable style={containerStyle} onPress={onPress} disabled={disabled}>
+    <Pressable
+      style={({ pressed }) => [containerStyle, pressed ? styles.pressed : null]}
+      onPress={() => {
+        if (!disabled) {
+          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+          onPress?.()
+        }
+      }}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={title}
+      accessibilityState={{ disabled }}
+    >
       <Text style={textStyles}>{title}</Text>
     </Pressable>
   )
@@ -88,4 +101,5 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.6,
   },
+  pressed: { transform: [{ scale: 0.97 }], opacity: 0.9 },
 })

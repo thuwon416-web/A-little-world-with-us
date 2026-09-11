@@ -1,0 +1,3 @@
+import { Text } from 'react-native'
+import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
+export default function PrivacyScreen() { return <SecondaryPage title="Privacy"><Text style={s.muted}>Your data belongs to you. Shared content is visible only to accepted couple members and is protected by Supabase row-level security.</Text><Text style={s.muted}>We collect only the information needed to provide chat, care, memories, planning, and wellness features. You can export or remove your data from Settings.</Text><Text style={s.muted}>Location sharing is opt-in and can be disabled at any time. AI features use only the permissions you enable.</Text></SecondaryPage> }

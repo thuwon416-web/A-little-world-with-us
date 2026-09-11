@@ -27,6 +27,19 @@ const migrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 4,
+      steps: [
+        addColumns({
+          table: 'messages',
+          columns: [
+            { name: 'media_url', type: 'string', isOptional: true },
+            { name: 'media_duration', type: 'number', isOptional: true },
+            { name: 'reply_to', type: 'string', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })
 

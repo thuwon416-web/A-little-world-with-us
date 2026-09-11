@@ -17,6 +17,7 @@ import {
   Settings,
   Sparkles,
   Star,
+  MonitorPlay,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { supabase } from '@/lib/supabase'
@@ -33,6 +34,7 @@ const baseNavItems = [
   { href: '/ai', label: 'AI Companion', icon: Sparkles },
   { href: '/vault', label: 'Vault', icon: LockKeyhole },
   { href: '/finance', label: 'Finance', icon: DollarSign },
+  { href: '/watch-together', label: 'Watch Together', icon: MonitorPlay },
   { href: '/location', label: 'Location', icon: MapPin },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]

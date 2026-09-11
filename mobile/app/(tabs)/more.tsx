@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { LogOut, Settings, MapPin, CalendarDays, HeartPulse, Sparkles, Music2 } from 'lucide-react-native'
+import { LogOut, Settings, MapPin, CalendarDays, HeartPulse, Sparkles, Music2, LockKeyhole, Moon, Gamepad2, Hourglass, Phone, Users, Shield, CircleHelp, Info, FileText, MonitorPlay } from 'lucide-react-native'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useAuth } from '@/lib/auth'
 
@@ -13,6 +13,17 @@ const items = [
   { href: '/(tabs)/finance', label: 'Finance', Icon: HeartPulse },
   { href: '/(tabs)/profile', label: 'Profile', Icon: LogOut },
   { href: '/(tabs)/music', label: 'Music', Icon: Music2 },
+  { href: '/(tabs)/vault', label: 'Private Vault', Icon: LockKeyhole },
+  { href: '/(tabs)/astrology', label: 'Astrology', Icon: Moon },
+  { href: '/(tabs)/games', label: 'Couple Games', Icon: Gamepad2 },
+  { href: '/(tabs)/time-capsules', label: 'Time Capsules', Icon: Hourglass },
+  { href: '/(tabs)/calls', label: 'Call History', Icon: Phone },
+  { href: '/(tabs)/couple-linking', label: 'Couple Linking', Icon: Users },
+  { href: '/(tabs)/privacy', label: 'Privacy', Icon: Shield },
+  { href: '/(tabs)/help', label: 'Help Center', Icon: CircleHelp },
+  { href: '/(tabs)/about', label: 'About', Icon: Info },
+  { href: '/(tabs)/terms', label: 'Terms', Icon: FileText },
+  { href: '/(tabs)/watch-together', label: 'Watch Together', Icon: MonitorPlay },
 ] as const
 
 export default function MoreScreen() {

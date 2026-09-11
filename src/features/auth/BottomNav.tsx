@@ -19,7 +19,8 @@ import {
   Lock,
   Settings,
   DollarSign,
-  X
+  X,
+  MonitorPlay,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
@@ -39,6 +40,7 @@ const morePages = [
   { name: 'Vault', href: '/vault', icon: Lock },
   { name: 'Settings', href: '/settings', icon: Settings },
   { name: 'Finance', href: '/finance', icon: DollarSign },
+  { name: 'Watch Together', href: '/watch-together', icon: MonitorPlay },
   { name: 'About', href: '/about', icon: Info },
   { name: 'Help', href: '/help', icon: HelpCircle },
 ]

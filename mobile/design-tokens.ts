@@ -20,6 +20,10 @@ export const designTokens = {
     lg: { fontSize: 18, lineHeight: 26, fontWeight: '600' },
     xl: { fontSize: 24, lineHeight: 32, fontWeight: '700' },
     xxl: { fontSize: 30, lineHeight: 38, fontWeight: '700' },
+    h1: { fontSize: 40, lineHeight: 48, fontWeight: '700' },
+    h2: { fontSize: 32, lineHeight: 40, fontWeight: '600' },
+    h3: { fontSize: 24, lineHeight: 32, fontWeight: '600' },
+    body: { fontSize: 16, lineHeight: 24, fontWeight: '400' },
   },
   spacing: {
     xs: 4,
@@ -51,6 +55,11 @@ export const designTokens = {
       shadowOffset: { width: 0, height: 4 },
       elevation: 5,
     },
+  },
+  motion: {
+    fast: 150,
+    normal: 300,
+    slow: 500,
   },
 } as const
 

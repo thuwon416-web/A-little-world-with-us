@@ -1,4 +1,7 @@
+import * as QuickActions from 'expo-quick-actions'
+import { useQuickActionRouting } from 'expo-quick-actions/router'
 import { Redirect, Tabs } from 'expo-router'
+import { useEffect } from 'react'
 import { Heart, Home, MessageCircle, MoreHorizontal, Sparkles } from 'lucide-react-native'
 
 import { useAdmin } from '@/hooks/useAdmin'
@@ -7,6 +10,15 @@ import { useAuth } from '@/lib/auth'
 export default function TabsLayout() {
   const { user, loading } = useAuth()
   const { loading: adminLoading } = useAdmin()
+  useQuickActionRouting()
+  useEffect(() => {
+    void QuickActions.setItems([
+      { id: 'love-note', title: 'Send Love Note', icon: 'love', params: { href: '/chat' } },
+      { id: 'log-mood', title: 'Log Mood', icon: 'compose', params: { href: '/care' } },
+      { id: 'calendar', title: 'View Calendar', icon: 'date', params: { href: '/calendar' } },
+      { id: 'timer', title: 'Start Timer', icon: 'time', params: { href: '/wellness' } },
+    ])
+  }, [])
 
   if (loading || adminLoading) {
     return null
@@ -65,6 +77,19 @@ export default function TabsLayout() {
       <Tabs.Screen name="music" options={{ href: null }} />
       <Tabs.Screen name="finance" options={{ href: null }} />
       <Tabs.Screen name="memories" options={{ href: null }} />
+      <Tabs.Screen name="calendar" options={{ href: null }} />
+      <Tabs.Screen name="lists" options={{ href: null }} />
+      <Tabs.Screen name="vault" options={{ href: null }} />
+      <Tabs.Screen name="astrology" options={{ href: null }} />
+      <Tabs.Screen name="games" options={{ href: null }} />
+      <Tabs.Screen name="time-capsules" options={{ href: null }} />
+      <Tabs.Screen name="calls" options={{ href: null }} />
+      <Tabs.Screen name="couple-linking" options={{ href: null }} />
+      <Tabs.Screen name="privacy" options={{ href: null }} />
+      <Tabs.Screen name="help" options={{ href: null }} />
+      <Tabs.Screen name="about" options={{ href: null }} />
+      <Tabs.Screen name="terms" options={{ href: null }} />
+      <Tabs.Screen name="watch-together" options={{ href: null }} />
     </Tabs>
   )
 }

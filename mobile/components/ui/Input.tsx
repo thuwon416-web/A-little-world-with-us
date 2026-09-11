@@ -16,6 +16,7 @@ export function Input({ label, error, style, ...props }: InputProps) {
         {...props}
         style={[styles.input, style, error ? styles.inputError : null]}
         placeholderTextColor={designTokens.colors.muted}
+        accessibilityLabel={label ?? props.placeholder}
       />
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
     </View>

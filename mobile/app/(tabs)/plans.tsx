@@ -68,7 +68,7 @@ export default function PlansScreen() {
         <Button title="New plan" onPress={() => setShowComposer((current) => !current)} />
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={() => router.push('/bucket-list')}
+          onPress={() => router.push('/lists')}
         >
           <Text style={styles.secondaryButtonText}>Bucket list</Text>
         </TouchableOpacity>

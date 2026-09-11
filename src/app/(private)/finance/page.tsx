@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
+import AdvancedFinancePanel from '@/features/finance/AdvancedFinancePanel'
 
 interface FinancialGoal {
   id: string
@@ -85,6 +86,7 @@ export default function FinancialGoals() {
         description="Ask for a neutral conversation starter. AI never sees your finance records unless you type them here."
         placeholder="How can we discuss a shared goal or budget difference respectfully?"
       />
+      <AdvancedFinancePanel />
 
       {!coupleId && <p className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100">Link and accept a partner before creating shared financial goals.</p>}
 

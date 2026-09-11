@@ -1,0 +1,3 @@
+import { Text } from 'react-native'
+import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
+export default function TermsScreen() { return <SecondaryPage title="Terms of Service"><Text style={s.muted}>Use this app respectfully and only with information you have the right to share. Keep your account credentials secure.</Text><Text style={s.muted}>You are responsible for content you create, including messages, uploads, and shared plans. Do not use the service to harm, harass, or impersonate others.</Text><Text style={s.muted}>Features may change as we improve the app. Contact support if you need help with your account or data.</Text></SecondaryPage> }

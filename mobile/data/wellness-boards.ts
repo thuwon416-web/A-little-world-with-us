@@ -5,6 +5,7 @@ export interface WellnessBoard {
   component: string
   enabled: boolean
   description?: string
+  category?: 'health' | 'mental' | 'relationship' | 'quests' | 'games'
 }
 
 export const wellnessBoards: WellnessBoard[] = [
