@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react'
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import ImageUpload from '@/components/ImageUpload'
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 type GalleryItem = {
   id: string
@@ -23,19 +23,33 @@ export default function GalleryScreen() {
     try {
       setLoading(true)
       if (!user?.id) return
-      const { data, error } = await supabase.storage.from('gallery').list(user.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+      const { data, error } = await supabase.storage
+        .from('gallery')
+        .list(user.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
       if (error) {
         throw error
       }
 
-      const galleryItems = (await Promise.all((data ?? [])
-        .filter((item) => item.name && !item.metadata?.isFolder)
-        .map(async (item) => {
-          const path = `${user.id}/${item.name}`
-          const { data: signed, error: signedError } = await supabase.storage.from('gallery').createSignedUrl(path, 3600)
-          if (signedError || !signed?.signedUrl) return null
-          return { id: item.id ?? path, path, url: signed.signedUrl, name: item.name, created_at: item.created_at ?? new Date().toISOString() }
-        }))).filter((item): item is GalleryItem => item !== null)
+      const galleryItems = (
+        await Promise.all(
+          (data ?? [])
+            .filter((item) => item.name && !item.metadata?.isFolder)
+            .map(async (item) => {
+              const path = `${user.id}/${item.name}`
+              const { data: signed, error: signedError } = await supabase.storage
+                .from('gallery')
+                .createSignedUrl(path, 3600)
+              if (signedError || !signed?.signedUrl) return null
+              return {
+                id: item.id ?? path,
+                path,
+                url: signed.signedUrl,
+                name: item.name,
+                created_at: item.created_at ?? new Date().toISOString(),
+              }
+            })
+        )
+      ).filter((item): item is GalleryItem => item !== null)
 
       setItems(galleryItems)
     } catch (caught) {
@@ -61,13 +75,16 @@ export default function GalleryScreen() {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          void supabase.storage.from('gallery').remove([item.path]).then(({ error: deleteError }) => {
-            if (deleteError) {
-              setError(deleteError.message)
-              return
-            }
-            setItems((current) => current.filter((candidate) => candidate.id !== item.id))
-          })
+          void supabase.storage
+            .from('gallery')
+            .remove([item.path])
+            .then(({ error: deleteError }) => {
+              if (deleteError) {
+                setError(deleteError.message)
+                return
+              }
+              setItems((current) => current.filter((candidate) => candidate.id !== item.id))
+            })
         },
       },
     ])
@@ -96,11 +113,15 @@ export default function GalleryScreen() {
                 source={{ uri: item.url }}
                 style={styles.image}
                 resizeMode="cover"
-                onError={() => setItems((current) => current.filter((candidate) => candidate.id !== item.id))}
+                onError={() =>
+                  setItems((current) => current.filter((candidate) => candidate.id !== item.id))
+                }
               />
               <View style={styles.metaRow}>
                 <Text style={styles.meta}>{new Date(item.created_at).toLocaleDateString()}</Text>
-                <TouchableOpacity onPress={() => handleDelete(item)}><Text style={styles.delete}>Delete</Text></TouchableOpacity>
+                <TouchableOpacity onPress={() => handleDelete(item)}>
+                  <Text style={styles.delete}>Delete</Text>
+                </TouchableOpacity>
               </View>
             </View>
           ))}
@@ -175,7 +196,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
-  metaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingRight: 12 },
+  metaRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingRight: 12,
+  },
   delete: { color: '#ff9b9b', fontSize: 12, fontWeight: '700' },
   error: { color: '#ff9b9b', fontSize: 13, marginBottom: 10 },
 })

@@ -6,20 +6,29 @@ import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react
 import { Button } from '@/components/Button'
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
 import { Input } from '@/components/Input'
-import { database } from '@/database'
-import { useCall } from '@/hooks/useCall'
-import { useSync } from '@/hooks/useSync'
-import { useAuth } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
 import { FileUpload } from '@/components/chat/FileUpload'
 import { GIFPicker } from '@/components/chat/GIFPicker'
 import { PhotoShare } from '@/components/chat/PhotoShare'
 import { ReplyThread } from '@/components/chat/ReplyThread'
 import { StickerPicker } from '@/components/chat/StickerPicker'
-import { VoiceMessageRecorder } from '@/components/chat/VoiceMessageRecorder'
 import { VoiceMessageGallery } from '@/components/chat/VoiceMessageGallery'
-import type { ChatAttachment, ChatMessageType, NativeChatMessage } from '@/components/chat/chat-types'
-import { deleteChatMedia, getBucketForMimeType, getChatMediaUrl, uploadChatMedia } from '@/services/chatMedia'
+import { VoiceMessageRecorder } from '@/components/chat/VoiceMessageRecorder'
+import type {
+  ChatAttachment,
+  ChatMessageType,
+  NativeChatMessage,
+} from '@/components/chat/chat-types'
+import { database } from '@/database'
+import { useCall } from '@/hooks/useCall'
+import { useSync } from '@/hooks/useSync'
+import { useAuth } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
+import {
+  deleteChatMedia,
+  getBucketForMimeType,
+  getChatMediaUrl,
+  uploadChatMedia,
+} from '@/services/chatMedia'
 
 function formatMessageTime(value: string) {
   const date = new Date(value)
@@ -46,7 +55,9 @@ export default function ChatScreen() {
   const [partnerId, setPartnerId] = useState<string | null>(null)
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
-  const [mediaModal, setMediaModal] = useState<'photo' | 'voice' | 'file' | 'gif' | 'sticker' | null>(null)
+  const [mediaModal, setMediaModal] = useState<
+    'photo' | 'voice' | 'file' | 'gif' | 'sticker' | null
+  >(null)
   const [replyMessage, setReplyMessage] = useState<NativeChatMessage | null>(null)
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
   const listRef = useRef<FlatList<ChatMessage>>(null)
@@ -58,7 +69,8 @@ export default function ChatScreen() {
       .query(Q.sortBy('created_at', 'asc'))
       .observe()
       .subscribe((records) => {
-        void Promise.all(records.map(async (record) => {
+        void Promise.all(
+          records.map(async (record) => {
             const rawRecord = record as unknown as { id: string; _get: (column: string) => unknown }
             const serializedLocation = rawRecord._get('location_payload')
             let location: { latitude: number; longitude: number; accuracy?: number } | null = null
@@ -80,20 +92,39 @@ export default function ChatScreen() {
             const mediaDuration = rawRecord._get('media_duration')
             const replyTo = rawRecord._get('reply_to')
             const normalizedType: ChatMessageType =
-              messageType === 'voice' || messageType === 'photo' || messageType === 'sticker' ||
-              messageType === 'gif' || messageType === 'file' || messageType === 'video' ||
-              messageType === 'audio' || messageType === 'location' || messageType === 'sos'
+              messageType === 'voice' ||
+              messageType === 'photo' ||
+              messageType === 'sticker' ||
+              messageType === 'gif' ||
+              messageType === 'file' ||
+              messageType === 'video' ||
+              messageType === 'audio' ||
+              messageType === 'location' ||
+              messageType === 'sos'
                 ? messageType
                 : 'text'
-            const bucket = normalizedType === 'photo' ? 'chat_photos' : normalizedType === 'voice' || normalizedType === 'audio' ? 'voice_messages' : normalizedType === 'file' ? 'chat_files' : null
-            const resolvedMediaUrl = bucket && typeof mediaUrl === 'string'
-              ? await getChatMediaUrl(bucket, mediaUrl)
-              : typeof mediaUrl === 'string' ? mediaUrl : null
+            const bucket =
+              normalizedType === 'photo'
+                ? 'chat_photos'
+                : normalizedType === 'voice' || normalizedType === 'audio'
+                  ? 'voice_messages'
+                  : normalizedType === 'file'
+                    ? 'chat_files'
+                    : null
+            const resolvedMediaUrl =
+              bucket && typeof mediaUrl === 'string'
+                ? await getChatMediaUrl(bucket, mediaUrl)
+                : typeof mediaUrl === 'string'
+                  ? mediaUrl
+                  : null
             return {
               id: rawRecord.id,
               sender: (rawRecord._get('sender_id') === user?.id ? 'me' : 'them') as 'me' | 'them',
               content: typeof content === 'string' ? content : '',
-              senderId: typeof rawRecord._get('sender_id') === 'string' ? rawRecord._get('sender_id') as string : '',
+              senderId:
+                typeof rawRecord._get('sender_id') === 'string'
+                  ? (rawRecord._get('sender_id') as string)
+                  : '',
               text: typeof content === 'string' ? content : '',
               time: formatMessageTime(
                 typeof createdAt === 'string' ? createdAt : new Date().toISOString()
@@ -107,7 +138,8 @@ export default function ChatScreen() {
               createdAt: typeof createdAt === 'string' ? createdAt : new Date().toISOString(),
               location,
             }
-          })).then((nextMessages) => setMessages(nextMessages))
+          })
+        ).then((nextMessages) => setMessages(nextMessages))
       })
 
     return () => subscription.unsubscribe()
@@ -223,14 +255,26 @@ export default function ChatScreen() {
     duration?: number
   ) => {
     if (!user?.id || !coupleId) throw new Error('Connect to your partner before sending media.')
-    const { data: message, error: insertError } = await supabase.from('messages').insert({
-      couple_id: coupleId, sender_id: user.id, message_type: messageType,
-      media_duration: duration ?? null, content: messageType === 'file' ? attachment.name : null, encrypted: false,
-    }).select('id').single()
-    if (insertError || !message) throw new Error(insertError?.message || 'Unable to create media message.')
+    const { data: message, error: insertError } = await supabase
+      .from('messages')
+      .insert({
+        couple_id: coupleId,
+        sender_id: user.id,
+        message_type: messageType,
+        media_duration: duration ?? null,
+        content: messageType === 'file' ? attachment.name : null,
+        encrypted: false,
+      })
+      .select('id')
+      .single()
+    if (insertError || !message)
+      throw new Error(insertError?.message || 'Unable to create media message.')
     try {
       const path = await uploadChatMedia(user.id, message.id, attachment)
-      const { error: updateError } = await supabase.from('messages').update({ media_url: path }).eq('id', message.id)
+      const { error: updateError } = await supabase
+        .from('messages')
+        .update({ media_url: path })
+        .eq('id', message.id)
       if (updateError) throw new Error(updateError.message)
       await refresh()
     } catch (caught) {
@@ -241,7 +285,13 @@ export default function ChatScreen() {
 
   const sendSticker = async (emoji: string) => {
     if (!user?.id || !coupleId) throw new Error('Connect to your partner before sending stickers.')
-    const { error: insertError } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: user.id, content: emoji, message_type: 'sticker', encrypted: false })
+    const { error: insertError } = await supabase.from('messages').insert({
+      couple_id: coupleId,
+      sender_id: user.id,
+      content: emoji,
+      message_type: 'sticker',
+      encrypted: false,
+    })
     if (insertError) throw new Error(insertError.message)
     setMediaModal(null)
     await refresh()
@@ -249,7 +299,13 @@ export default function ChatScreen() {
 
   const sendGif = async (url: string) => {
     if (!user?.id || !coupleId) throw new Error('Connect to your partner before sending GIFs.')
-    const { error: insertError } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: user.id, media_url: url, message_type: 'gif', encrypted: false })
+    const { error: insertError } = await supabase.from('messages').insert({
+      couple_id: coupleId,
+      sender_id: user.id,
+      media_url: url,
+      message_type: 'gif',
+      encrypted: false,
+    })
     if (insertError) throw new Error(insertError.message)
     setMediaModal(null)
     await refresh()
@@ -257,18 +313,41 @@ export default function ChatScreen() {
 
   const sendReply = async (text: string, replyTo: string) => {
     if (!user?.id || !coupleId) throw new Error('Connect to your partner before replying.')
-    const { error: insertError } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: user.id, content: text, message_type: 'text', reply_to: replyTo, encrypted: false })
+    const { error: insertError } = await supabase.from('messages').insert({
+      couple_id: coupleId,
+      sender_id: user.id,
+      content: text,
+      message_type: 'text',
+      reply_to: replyTo,
+      encrypted: false,
+    })
     if (insertError) throw new Error(insertError.message)
     await refresh()
   }
 
   const deleteMessage = async (message: ChatMessage) => {
     if (!user?.id || message.senderId !== user.id) return
-    if (message.mediaPath && (message.messageType === 'photo' || message.messageType === 'voice' || message.messageType === 'audio' || message.messageType === 'file')) {
-      const bucket = getBucketForMimeType(message.messageType === 'photo' ? 'image/*' : message.messageType === 'voice' || message.messageType === 'audio' ? 'audio/*' : 'application/octet-stream')
+    if (
+      message.mediaPath &&
+      (message.messageType === 'photo' ||
+        message.messageType === 'voice' ||
+        message.messageType === 'audio' ||
+        message.messageType === 'file')
+    ) {
+      const bucket = getBucketForMimeType(
+        message.messageType === 'photo'
+          ? 'image/*'
+          : message.messageType === 'voice' || message.messageType === 'audio'
+            ? 'audio/*'
+            : 'application/octet-stream'
+      )
       await deleteChatMedia(bucket, message.mediaPath)
     }
-    const { error: deleteError } = await supabase.from('messages').delete().eq('id', message.id).eq('sender_id', user.id)
+    const { error: deleteError } = await supabase
+      .from('messages')
+      .delete()
+      .eq('id', message.id)
+      .eq('sender_id', user.id)
     if (deleteError) setError(deleteError.message)
     else await refresh()
   }
@@ -304,22 +383,55 @@ export default function ChatScreen() {
         ref={listRef}
         data={messages}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <ChatBubble message={item} highlighted={item.id === highlightedMessageId} replyPreview={item.replyTo ? messages.find((candidate) => candidate.id === item.replyTo)?.text : undefined} onReplyContext={item.replyTo ? () => {
-          const targetIndex = messages.findIndex((candidate) => candidate.id === item.replyTo)
-          if (targetIndex >= 0) {
-            listRef.current?.scrollToIndex({ index: targetIndex, animated: true, viewPosition: 0.5 })
-            setHighlightedMessageId(item.replyTo ?? null)
-            setTimeout(() => setHighlightedMessageId(null), 1800)
-          }
-        } : undefined} onReply={(selected) => setReplyMessage({
-          id: selected.id, senderId: selected.senderId, content: selected.text, messageType: selected.messageType,
-          mediaUrl: selected.mediaUrl, mediaDuration: selected.mediaDuration, replyTo: selected.replyTo, createdAt: selected.createdAt,
-          mediaPath: selected.mediaPath,
-        })} onDelete={(selected) => void deleteMessage(selected)} />}
+        renderItem={({ item }) => (
+          <ChatBubble
+            message={item}
+            highlighted={item.id === highlightedMessageId}
+            replyPreview={
+              item.replyTo
+                ? messages.find((candidate) => candidate.id === item.replyTo)?.text
+                : undefined
+            }
+            onReplyContext={
+              item.replyTo
+                ? () => {
+                    const targetIndex = messages.findIndex(
+                      (candidate) => candidate.id === item.replyTo
+                    )
+                    if (targetIndex >= 0) {
+                      listRef.current?.scrollToIndex({
+                        index: targetIndex,
+                        animated: true,
+                        viewPosition: 0.5,
+                      })
+                      setHighlightedMessageId(item.replyTo ?? null)
+                      setTimeout(() => setHighlightedMessageId(null), 1800)
+                    }
+                  }
+                : undefined
+            }
+            onReply={(selected) =>
+              setReplyMessage({
+                id: selected.id,
+                senderId: selected.senderId,
+                content: selected.text,
+                messageType: selected.messageType,
+                mediaUrl: selected.mediaUrl,
+                mediaDuration: selected.mediaDuration,
+                replyTo: selected.replyTo,
+                createdAt: selected.createdAt,
+                mediaPath: selected.mediaPath,
+              })
+            }
+            onDelete={(selected) => void deleteMessage(selected)}
+          />
+        )}
         style={styles.list}
         contentContainerStyle={styles.listContent}
         numColumns={1}
-        onScrollToIndexFailed={({ index }) => listRef.current?.scrollToOffset({ offset: Math.max(0, index * 72), animated: true })}
+        onScrollToIndexFailed={({ index }) =>
+          listRef.current?.scrollToOffset({ offset: Math.max(0, index * 72), animated: true })
+        }
       />
       <VoiceMessageGallery messages={messages} />
 
@@ -328,6 +440,9 @@ export default function ChatScreen() {
           style={[styles.callButton, !partnerId && styles.callButtonDisabled]}
           onPress={() => handleCall('audio')}
           disabled={!partnerId}
+          accessibilityRole="button"
+          accessibilityLabel="Start audio call"
+          accessibilityHint="Calls your partner using audio"
         >
           <Text style={styles.callButtonText}>Audio call</Text>
         </TouchableOpacity>
@@ -335,6 +450,9 @@ export default function ChatScreen() {
           style={[styles.callButtonVideo, !partnerId && styles.callButtonDisabled]}
           onPress={() => handleCall('video')}
           disabled={!partnerId}
+          accessibilityRole="button"
+          accessibilityLabel="Start video call"
+          accessibilityHint="Calls your partner using video"
         >
           <Text style={styles.callButtonText}>Video call</Text>
         </TouchableOpacity>
@@ -344,17 +462,35 @@ export default function ChatScreen() {
 
       <View style={styles.composer}>
         <View style={styles.toolRow}>
-          <TouchableOpacity onPress={() => setMediaModal('photo')} accessibilityLabel="Share photo"><Text style={styles.toolText}>Photo</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => setMediaModal('voice')} accessibilityLabel="Record voice note"><Text style={styles.toolText}>Voice</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => setMediaModal('file')} accessibilityLabel="Attach file"><Text style={styles.toolText}>File</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => setMediaModal('gif')} accessibilityLabel="Choose GIF"><Text style={styles.toolText}>GIF</Text></TouchableOpacity>
-          <TouchableOpacity onPress={() => setMediaModal('sticker')} accessibilityLabel="Choose sticker"><Text style={styles.toolText}>Sticker</Text></TouchableOpacity>
+          <TouchableOpacity onPress={() => setMediaModal('photo')} accessibilityLabel="Share photo">
+            <Text style={styles.toolText}>Photo</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setMediaModal('voice')}
+            accessibilityLabel="Record voice note"
+          >
+            <Text style={styles.toolText}>Voice</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setMediaModal('file')} accessibilityLabel="Attach file">
+            <Text style={styles.toolText}>File</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setMediaModal('gif')} accessibilityLabel="Choose GIF">
+            <Text style={styles.toolText}>GIF</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setMediaModal('sticker')}
+            accessibilityLabel="Choose sticker"
+          >
+            <Text style={styles.toolText}>Sticker</Text>
+          </TouchableOpacity>
         </View>
         <TouchableOpacity
           style={styles.locationButton}
           onPress={() => void handleSendLocation()}
           disabled={!coupleId}
           accessibilityLabel="Send current location"
+          accessibilityRole="button"
+          accessibilityHint="Sends your current location to your partner"
         >
           <Text style={styles.locationButtonText}>📍</Text>
         </TouchableOpacity>
@@ -363,15 +499,45 @@ export default function ChatScreen() {
           onChangeText={setDraft}
           placeholder="Write something sweet..."
           style={styles.input}
+          accessibilityLabel="Message"
+          accessibilityHint="Enter a message to send to your partner"
         />
         <Button title="Send" onPress={() => void handleSend()} />
       </View>
-      <PhotoShare visible={mediaModal === 'photo'} onClose={() => setMediaModal(null)} onPhotoSelect={(photo) => sendMediaMessage(photo, 'photo')} />
-      <VoiceMessageRecorder visible={mediaModal === 'voice'} onClose={() => setMediaModal(null)} onRecord={({ attachment, duration }) => sendMediaMessage(attachment, 'voice', duration)} />
-      <FileUpload visible={mediaModal === 'file'} onClose={() => setMediaModal(null)} onFileSelect={(file) => sendMediaMessage(file, file.mimeType.startsWith('audio/') ? 'audio' : 'file')} />
-      <GIFPicker visible={mediaModal === 'gif'} onClose={() => setMediaModal(null)} onSelect={sendGif} />
-      <StickerPicker visible={mediaModal === 'sticker'} onClose={() => setMediaModal(null)} onSelect={sendSticker} />
-      <ReplyThread visible={Boolean(replyMessage)} message={replyMessage} currentUserId={user?.id ?? null} onClose={() => setReplyMessage(null)} onReply={sendReply} />
+      <PhotoShare
+        visible={mediaModal === 'photo'}
+        onClose={() => setMediaModal(null)}
+        onPhotoSelect={(photo) => sendMediaMessage(photo, 'photo')}
+      />
+      <VoiceMessageRecorder
+        visible={mediaModal === 'voice'}
+        onClose={() => setMediaModal(null)}
+        onRecord={({ attachment, duration }) => sendMediaMessage(attachment, 'voice', duration)}
+      />
+      <FileUpload
+        visible={mediaModal === 'file'}
+        onClose={() => setMediaModal(null)}
+        onFileSelect={(file) =>
+          sendMediaMessage(file, file.mimeType.startsWith('audio/') ? 'audio' : 'file')
+        }
+      />
+      <GIFPicker
+        visible={mediaModal === 'gif'}
+        onClose={() => setMediaModal(null)}
+        onSelect={sendGif}
+      />
+      <StickerPicker
+        visible={mediaModal === 'sticker'}
+        onClose={() => setMediaModal(null)}
+        onSelect={sendSticker}
+      />
+      <ReplyThread
+        visible={Boolean(replyMessage)}
+        message={replyMessage}
+        currentUserId={user?.id ?? null}
+        onClose={() => setReplyMessage(null)}
+        onReply={sendReply}
+      />
     </View>
   )
 }

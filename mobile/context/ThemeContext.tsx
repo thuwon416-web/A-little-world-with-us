@@ -4,9 +4,24 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 export type ThemePreference = 'midnight' | 'sunset' | 'random' | 'auto'
 export type ThemeName = 'midnight' | 'sunset'
 
-export const themes: Record<ThemeName, { background: string; card: string; text: string; muted: string; accent: string }> = {
-  midnight: { background: '#0f0f12', card: '#171b22', text: '#f3f0f5', muted: '#c4c4ce', accent: '#d9bfd7' },
-  sunset: { background: '#24151b', card: '#3b2225', text: '#fff5ec', muted: '#f1c7ae', accent: '#ff9b78' },
+export const themes: Record<
+  ThemeName,
+  { background: string; card: string; text: string; muted: string; accent: string }
+> = {
+  midnight: {
+    background: '#0f0f12',
+    card: '#171b22',
+    text: '#f3f0f5',
+    muted: '#c4c4ce',
+    accent: '#d9bfd7',
+  },
+  sunset: {
+    background: '#24151b',
+    card: '#3b2225',
+    text: '#fff5ec',
+    muted: '#f1c7ae',
+    accent: '#ff9b78',
+  },
 }
 
 type ThemeContextValue = {

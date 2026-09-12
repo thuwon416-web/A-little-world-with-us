@@ -1,9 +1,25 @@
 import { Q } from '@nozbe/watermelondb'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { database } from '@/database'
+import { MessageModel, OfflineQueueModel } from '@/database/schema'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import type { ChatMessage } from '@/shared-types'
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error'
+type MessageFields = {
+  content: string
+  sender_id: string
+  couple_id: string
+  message_type: string
+  media_url: string
+  media_duration: number | null
+  reply_to: string
+  location_payload: string
+  created_at: string
+  synced: boolean
+}
+type LocalMessage = MessageModel & MessageFields & { _get<T>(column: string): T }
 
 // Helper function to get authenticated user ID
 async function getUserId(): Promise<string> {
@@ -49,13 +65,12 @@ export async function pushPendingMessages() {
 
   const pending = await database.get('messages').query(Q.where('synced', false)).fetch()
   const coupleId = await getCoupleId()
-
   if (!coupleId) {
     throw new Error('No accepted couple link found')
   }
 
   for (const message of pending) {
-    const rawMessage = message as any
+    const rawMessage = message as unknown as LocalMessage
     const payload = {
       id: rawMessage.id,
       content: rawMessage._get('content'),
@@ -64,7 +79,7 @@ export async function pushPendingMessages() {
       created_at: rawMessage._get('created_at'),
       message_type: rawMessage._get('message_type') || 'text',
       location_payload: (() => {
-        const value = rawMessage._get('location_payload')
+        const value = rawMessage._get<string>('location_payload')
         try {
           return value ? JSON.parse(value) : null
         } catch {
@@ -80,8 +95,9 @@ export async function pushPendingMessages() {
 
     if (!error) {
       await database.write(async () => {
-        await rawMessage.update((record: any) => {
-          record.synced = true
+        await rawMessage.update((record) => {
+          const fields = record as unknown as MessageFields
+          fields.synced = true
         })
       })
     }
@@ -99,12 +115,17 @@ export async function syncMessages(lastSyncAt?: string) {
   // Get authenticated user
   // Get couple ID for filtering
   const coupleId = await getCoupleId()
+  if (!coupleId) {
+    throw new Error('No accepted couple link found')
+  }
 
   // Fetch messages with pagination
-  let allMessages: any[] = []
+  let allMessages: ChatMessage[] = []
   let page = 0
   const pageSize = 100
 
+  const effectiveLastSyncAt =
+    lastSyncAt ?? (await AsyncStorage.getItem(`messages:last-synced:${coupleId}`))
   while (true) {
     let query = supabase
       .from('messages')
@@ -112,14 +133,11 @@ export async function syncMessages(lastSyncAt?: string) {
       .order('created_at', { ascending: true })
       .range(page * pageSize, (page + 1) * pageSize - 1)
 
-    // Filter by couple ID if available
-    if (coupleId) {
-      query = query.eq('couple_id', coupleId)
-    }
+    query = query.eq('couple_id', coupleId)
 
     // Filter by last sync time if provided
-    if (lastSyncAt) {
-      query = query.gte('created_at', lastSyncAt)
+    if (effectiveLastSyncAt) {
+      query = query.gte('created_at', effectiveLastSyncAt)
     }
 
     const { data, error } = await query
@@ -148,7 +166,9 @@ export async function syncMessages(lastSyncAt?: string) {
         .query(Q.where('id', Q.oneOf(messageIds)))
         .fetch()
 
-      const existingMap = new Map((existingMessages as any[]).map((msg) => [msg.id, msg]))
+      const existingMap = new Map(
+        existingMessages.map((msg) => [msg.id, msg as unknown as LocalMessage])
+      )
 
       // Process each remote message
       for (const remoteMessage of allMessages) {
@@ -156,37 +176,39 @@ export async function syncMessages(lastSyncAt?: string) {
 
         if (!localMessage) {
           // Create new message
-          await database.get('messages').create((record: any) => {
-            record.content = remoteMessage.content ?? ''
-            record.sender_id = remoteMessage.sender_id ?? 'unknown'
-            record.couple_id = remoteMessage.couple_id ?? ''
-            record.created_at = remoteMessage.created_at ?? new Date().toISOString()
-            record.message_type = remoteMessage.message_type ?? 'text'
-            record.location_payload = remoteMessage.location_payload
+          await database.get<MessageModel>('messages').create((record) => {
+            const fields = record as unknown as MessageFields
+            fields.content = remoteMessage.content ?? ''
+            fields.sender_id = remoteMessage.sender_id ?? 'unknown'
+            fields.couple_id = remoteMessage.couple_id ?? ''
+            fields.created_at = remoteMessage.created_at ?? new Date().toISOString()
+            fields.message_type = remoteMessage.message_type ?? 'text'
+            fields.location_payload = remoteMessage.location_payload
               ? JSON.stringify(remoteMessage.location_payload)
               : ''
-            record.media_url = remoteMessage.media_url ?? ''
-            record.media_duration = remoteMessage.media_duration ?? null
-            record.reply_to = remoteMessage.reply_to ?? ''
-            record.synced = true
+            fields.media_url = remoteMessage.media_url ?? ''
+            fields.media_duration = remoteMessage.media_duration ?? null
+            fields.reply_to = remoteMessage.reply_to ?? ''
+            fields.synced = true
           })
         } else {
           // Update existing message if remote is newer
           const localCreatedAt = localMessage._get('created_at') ?? ''
           if ((remoteMessage.created_at ?? '') > localCreatedAt) {
-            await localMessage.update((record: any) => {
-              record.content = remoteMessage.content ?? record.content
-              record.sender_id = remoteMessage.sender_id ?? record.sender_id
-              record.couple_id = remoteMessage.couple_id ?? record.couple_id
-              record.created_at = remoteMessage.created_at ?? record.created_at
-              record.message_type = remoteMessage.message_type ?? record.message_type
-              record.location_payload = remoteMessage.location_payload
+            await localMessage.update((record) => {
+              const fields = record as unknown as MessageFields
+              fields.content = remoteMessage.content ?? fields.content
+              fields.sender_id = remoteMessage.sender_id ?? fields.sender_id
+              fields.couple_id = remoteMessage.couple_id ?? fields.couple_id
+              fields.created_at = remoteMessage.created_at ?? fields.created_at
+              fields.message_type = remoteMessage.message_type ?? fields.message_type
+              fields.location_payload = remoteMessage.location_payload
                 ? JSON.stringify(remoteMessage.location_payload)
-                : record.location_payload
-              record.media_url = remoteMessage.media_url ?? record.media_url
-              record.media_duration = remoteMessage.media_duration ?? record.media_duration
-              record.reply_to = remoteMessage.reply_to ?? record.reply_to
-              record.synced = true
+                : fields.location_payload
+              fields.media_url = remoteMessage.media_url ?? fields.media_url
+              fields.media_duration = remoteMessage.media_duration ?? fields.media_duration
+              fields.reply_to = remoteMessage.reply_to ?? fields.reply_to
+              fields.synced = true
             })
           }
         }
@@ -194,8 +216,33 @@ export async function syncMessages(lastSyncAt?: string) {
     })
   }
 
+  await AsyncStorage.setItem(`messages:last-synced:${coupleId}`, new Date().toISOString())
   const pending = await pushPendingMessages()
   return { synced: allMessages.length, pending }
+}
+
+export async function flushOfflineQueue() {
+  const queue = await database.get<OfflineQueueModel>('offline_queue').query().fetch()
+  let flushed = 0
+  for (const item of queue) {
+    try {
+      const body = JSON.parse(item.body) as { table?: string; values?: Record<string, unknown> }
+      if (!body.table || item.method !== 'POST') throw new Error('Unsupported offline request')
+      const { error } = await supabase.from(body.table).insert(body.values ?? {})
+      if (error) throw error
+      await database.write(async () => item.markAsDeleted())
+      flushed += 1
+    } catch {
+      const nextRetry = item.retry_count + 1
+      await database.write(async () => {
+        await item.update((updated) => {
+          updated.retry_count = nextRetry
+        })
+      })
+      if (nextRetry >= 3) await database.write(async () => item.markAsDeleted())
+    }
+  }
+  return flushed
 }
 
 export function subscribeToChanges(onChange: () => void, coupleId?: string) {
@@ -205,9 +252,18 @@ export function subscribeToChanges(onChange: () => void, coupleId?: string) {
 
   const channel = supabase
     .channel(`mobile-chat-sync-${coupleId ?? 'unknown'}`)
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'messages', ...(coupleId ? { filter: `couple_id=eq.${coupleId}` } : {}) }, () => {
-      onChange()
-    })
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'messages',
+        ...(coupleId ? { filter: `couple_id=eq.${coupleId}` } : {}),
+      },
+      () => {
+        onChange()
+      }
+    )
     .subscribe()
 
   return {

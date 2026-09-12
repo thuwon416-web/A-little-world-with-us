@@ -1,6 +1,6 @@
-import React from 'react'
 import { BlurView } from 'expo-blur'
 import { LinearGradient } from 'expo-linear-gradient'
+import React from 'react'
 import { StyleSheet, View, type ViewProps } from 'react-native'
 
 import { designTokens } from '@/design-tokens'
@@ -8,7 +8,10 @@ import { designTokens } from '@/design-tokens'
 export function Card({ style, children, ...props }: ViewProps) {
   return (
     <BlurView intensity={35} tint="dark" {...props} style={[styles.card, style]}>
-      <LinearGradient colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.035)']} style={StyleSheet.absoluteFill} />
+      <LinearGradient
+        colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.035)']}
+        style={StyleSheet.absoluteFill}
+      />
       <View style={styles.content}>{children}</View>
     </BlurView>
   )

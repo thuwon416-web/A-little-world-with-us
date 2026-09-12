@@ -1,14 +1,5 @@
 export type ChatMessageType =
-  | 'text'
-  | 'voice'
-  | 'photo'
-  | 'sticker'
-  | 'gif'
-  | 'file'
-  | 'video'
-  | 'audio'
-  | 'location'
-  | 'sos'
+  'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location' | 'sos'
 
 export type NativeChatMessage = {
   id: string

@@ -62,7 +62,11 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
           {photo ? (
             <View>
               <Image source={{ uri: photo.uri }} style={styles.preview} />
-              <TouchableOpacity style={styles.clear} onPress={() => setPhoto(null)} accessibilityLabel="Remove selected photo">
+              <TouchableOpacity
+                style={styles.clear}
+                onPress={() => setPhoto(null)}
+                accessibilityLabel="Remove selected photo"
+              >
                 <X color="#fff" size={18} />
               </TouchableOpacity>
             </View>
@@ -72,7 +76,11 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
               <Text style={styles.secondary}>Choose a photo</Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity style={[styles.send, !photo && styles.disabled]} disabled={!photo || sending} onPress={() => void send()}>
+          <TouchableOpacity
+            style={[styles.send, !photo && styles.disabled]}
+            disabled={!photo || sending}
+            onPress={() => void send()}
+          >
             <Send color="#fff" size={18} />
             <Text style={styles.sendText}>{sending ? 'Sending...' : 'Send photo'}</Text>
           </TouchableOpacity>
@@ -85,13 +93,41 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
   card: { backgroundColor: '#171b22', borderRadius: 24, padding: 20 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
   title: { color: '#f3f0f5', fontSize: 20, fontWeight: '700' },
   secondary: { color: '#aaa7b2', marginTop: 12 },
-  dropzone: { height: 220, borderWidth: 2, borderStyle: 'dashed', borderColor: '#b88ae566', borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+  dropzone: {
+    height: 220,
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: '#b88ae566',
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   preview: { width: '100%', height: 260, borderRadius: 16 },
-  clear: { position: 'absolute', right: 10, top: 10, backgroundColor: '#0009', borderRadius: 20, padding: 8 },
-  send: { marginTop: 16, backgroundColor: '#b88ae5', borderRadius: 14, padding: 14, flexDirection: 'row', justifyContent: 'center', gap: 8 },
+  clear: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    backgroundColor: '#0009',
+    borderRadius: 20,
+    padding: 8,
+  },
+  send: {
+    marginTop: 16,
+    backgroundColor: '#b88ae5',
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
   sendText: { color: '#fff', fontWeight: '700' },
   disabled: { opacity: 0.45 },
 })

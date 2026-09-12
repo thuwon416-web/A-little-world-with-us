@@ -4,9 +4,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 export default function NotFoundScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Page not found</Text>
-      <Text style={styles.text}>This screen does not exist yet.</Text>
-      <Link href="/login" asChild>
+      <Text style={styles.eyebrow}>A LITTLE WORLD WITH US</Text>
+      <Text style={styles.title}>This screen wandered off</Text>
+      <Text style={styles.text}>The page you&apos;re looking for is not available.</Text>
+      <Link href="/(tabs)" asChild>
         <Pressable style={styles.button}>
           <Text style={styles.buttonText}>Go home</Text>
         </Pressable>
@@ -28,6 +29,12 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: '700',
     marginBottom: 8,
+  },
+  eyebrow: {
+    color: '#d9bfd7',
+    fontSize: 12,
+    letterSpacing: 2,
+    marginBottom: 12,
   },
   text: {
     color: '#c4c4ce',

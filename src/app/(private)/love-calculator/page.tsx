@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronRight, Heart, Home, Shuffle } from 'lucide-react'
 import LoveCalculator from '@/features/games/LoveCalculator'
+import { calculateLoveScore } from '@/lib/love-score'
 
 const factors = ['Chemistry', 'Trust', 'Humor', 'Romance', 'Shared dreams']
 
@@ -11,11 +12,16 @@ export default function LoveCalculatorPage() {
   const [her, setHer] = useState('Meera')
   const [me, setMe] = useState('Aarav')
   const [values, setValues] = useState([92, 96, 88, 94, 90])
+  const calculatedScore = calculateLoveScore(her, me)
+  useEffect(() => {
+    if (!her.trim() || !me.trim()) return
+    setValues((current) => current.map((_, index) => Math.max(0, Math.min(100, calculatedScore + index - 2))))
+  }, [calculatedScore, her, me])
   const average = Math.round(values.reduce((sum, value) => sum + value, 0) / values.length)
   const circumference = 2 * Math.PI * 54
   const offset = circumference - (average / 100) * circumference
 
-  const randomize = () => setValues(factors.map(() => Math.floor(Math.random() * 30) + 70))
+  const randomize = () => setValues(factors.map((_, index) => Math.max(0, Math.min(100, calculatedScore + index - 2))))
 
   return (
     <div className="min-h-screen max-w-4xl">

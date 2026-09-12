@@ -24,7 +24,12 @@ export type NativeCycleSummary = {
   estimateReady: boolean
   variationMin: number
   variationMax: number
-  cycleHistory: Array<{ startDate: string; endDate: string; length: number; status: 'actual' | 'predicted' }>
+  cycleHistory: {
+    startDate: string
+    endDate: string
+    length: number
+    status: 'actual' | 'predicted'
+  }[]
 }
 
 function parseDate(value: string) {
@@ -47,11 +52,17 @@ function daysBetween(start: string, end: string) {
 }
 
 export function periodStarts(logs: NativeCareLog[]) {
-  const days = logs.filter((log) => log.period_day).map((log) => log.log_date).sort()
+  const days = logs
+    .filter((log) => log.period_day)
+    .map((log) => log.log_date)
+    .sort()
   return days.filter((day, index) => index === 0 || daysBetween(days[index - 1], day) > 1).reverse()
 }
 
-export function calculateNativeCycleSummary(logs: NativeCareLog[], settings: NativeCycleSettings): NativeCycleSummary {
+export function calculateNativeCycleSummary(
+  logs: NativeCareLog[],
+  settings: NativeCycleSettings
+): NativeCycleSummary {
   const starts = periodStarts(logs)
   const historicalLengths = starts.slice(0, 6).flatMap((start, index) => {
     const older = starts[index + 1]
@@ -66,15 +77,32 @@ export function calculateNativeCycleSummary(logs: NativeCareLog[], settings: Nat
   const lastPeriodStart = settings.last_period_start ?? starts[0] ?? null
   const variationMin = historicalLengths.length ? Math.min(...historicalLengths) : cycleLength
   const variationMax = historicalLengths.length ? Math.max(...historicalLengths) : cycleLength
-  const actualHistory = starts.slice(0, 6).flatMap((start, index) => {
-    const older = starts[index + 1]
-    const length = older ? daysBetween(older, start) : 0
-    return older && length >= 15 && length <= 60
-      ? [{ startDate: older, endDate: addDays(start, -1), length, status: 'actual' as const }]
-      : []
-  }).reverse()
+  const actualHistory = starts
+    .slice(0, 6)
+    .flatMap((start, index) => {
+      const older = starts[index + 1]
+      const length = older ? daysBetween(older, start) : 0
+      return older && length >= 15 && length <= 60
+        ? [{ startDate: older, endDate: addDays(start, -1), length, status: 'actual' as const }]
+        : []
+    })
+    .reverse()
   if (!lastPeriodStart) {
-    return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular: variationMax - variationMin <= 7, estimateReady: false, variationMin, variationMax, cycleHistory: actualHistory }
+    return {
+      cycleLength,
+      periodLength: settings.period_length,
+      lastPeriodStart: null,
+      nextPeriodStart: null,
+      fertileStart: null,
+      fertileEnd: null,
+      ovulationDate: null,
+      day: null,
+      regular: variationMax - variationMin <= 7,
+      estimateReady: false,
+      variationMin,
+      variationMax,
+      cycleHistory: actualHistory,
+    }
   }
   const nextPeriodStart = addDays(lastPeriodStart, cycleLength)
   const ovulationDate = addDays(nextPeriodStart, -14)
@@ -92,6 +120,14 @@ export function calculateNativeCycleSummary(logs: NativeCareLog[], settings: Nat
     estimateReady: starts.length >= 2 || settings.last_period_start !== null,
     variationMin,
     variationMax,
-    cycleHistory: [...actualHistory, { startDate: lastPeriodStart, endDate: addDays(nextPeriodStart, -1), length: cycleLength, status: 'predicted' }],
+    cycleHistory: [
+      ...actualHistory,
+      {
+        startDate: lastPeriodStart,
+        endDate: addDays(nextPeriodStart, -1),
+        length: cycleLength,
+        status: 'predicted',
+      },
+    ],
   }
 }

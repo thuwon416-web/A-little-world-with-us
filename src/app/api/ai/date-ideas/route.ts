@@ -5,9 +5,9 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 // Validation schema
 const dateIdeasSchema = z.object({
-  budget: z.string().optional(),
-  location: z.string().optional(),
-  interests: z.string().optional(),
+  budget: z.string().max(200).optional(),
+  location: z.string().max(200).optional(),
+  interests: z.string().max(500).optional(),
 })
 
 const generatedDateIdeasSchema = z.array(z.object({
@@ -137,10 +137,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
       return NextResponse.json(
-        { error: 'AI service unavailable', details: errorData },
-        { status: response.status }
+        { error: 'AI service unavailable' },
+        { status: 503 }
       )
     }
 
@@ -173,7 +172,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.error('Date Ideas error:', error)
+    console.error('Date Ideas error')
     return NextResponse.json({ error: 'Failed to generate date ideas' }, { status: 500 })
   }
 }

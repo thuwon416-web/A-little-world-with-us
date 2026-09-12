@@ -5,7 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 // Validation schema
 const recommendPartnersSchema = z.object({
-  preferences: z.record(z.string(), z.unknown()).optional(),
+  preferences: z.record(z.string().max(50), z.string().max(200)).refine((value) => Object.keys(value).length <= 20).optional(),
 })
 
 const generatedRecommendationsSchema = z.array(z.object({
@@ -124,10 +124,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
       return NextResponse.json(
-        { error: 'AI service unavailable', details: errorData },
-        { status: response.status }
+        { error: 'AI service unavailable' },
+        { status: 503 }
       )
     }
 
@@ -160,7 +159,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.error('AI Recommendations error:', error)
+    console.error('AI Recommendations error')
     return NextResponse.json({ error: 'Failed to get recommendations' }, { status: 500 })
   }
 }

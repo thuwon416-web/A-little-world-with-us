@@ -2,8 +2,8 @@ import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 export default function ImageUpload({
   onUpload,
@@ -74,7 +74,8 @@ export default function ImageUpload({
       const { data: signed, error: signedError } = await supabase.storage
         .from('gallery')
         .createSignedUrl(storedPath, 3600)
-      if (signedError || !signed?.signedUrl) throw signedError ?? new Error('Unable to preview upload.')
+      if (signedError || !signed?.signedUrl)
+        throw signedError ?? new Error('Unable to preview upload.')
 
       const result = {
         id: data?.id ?? path,

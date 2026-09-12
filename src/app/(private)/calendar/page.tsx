@@ -10,7 +10,21 @@ import PlansPage from '@/app/(private)/plans/page'
 import RemindersPage from '@/app/(private)/reminders/page'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 
-type CalendarEvent = { id: string; date: string; title: string; type: string | null }
+type CalendarEventType = 'date' | 'trip' | 'goal' | 'life' | 'other'
+type CalendarEvent = {
+  id: string
+  event_date: string
+  title: string
+  type: CalendarEventType
+  event_time: string | null
+}
+
+function formatDate(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -26,7 +40,7 @@ export default function CalendarPage() {
       const id = await getCurrentUserId()
       setUserId(id)
       const status = await getCoupleStatus()
-      setCoupleId(status.status === 'accepted' ? status.couple?.id ?? null : null)
+      setCoupleId(status.status === 'accepted' ? (status.couple?.id ?? null) : null)
     }
     loadUserId()
   }, [])
@@ -38,12 +52,12 @@ export default function CalendarPage() {
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
 
     const { data } = await supabase
-      .from('calendar_events')
+      .from('events')
       .select('*')
       .eq('couple_id', coupleId)
-      .gte('date', startOfMonth.toISOString())
-      .lte('date', endOfMonth.toISOString())
-      .order('date', { ascending: true })
+      .gte('event_date', formatDate(startOfMonth))
+      .lte('event_date', formatDate(endOfMonth))
+      .order('event_date', { ascending: true })
 
     setEvents((data ?? []) as CalendarEvent[])
   }, [currentDate, coupleId])
@@ -60,10 +74,18 @@ export default function CalendarPage() {
     const title = prompt('Event title:')
     if (!title) return
 
-    const type = prompt('Type (anniversary, date, reminder):') || 'reminder'
+    const requestedType = prompt('Type (date, trip, goal, life, other):') || 'other'
+    const type: CalendarEventType = ['date', 'trip', 'goal', 'life', 'other'].includes(
+      requestedType
+    )
+      ? (requestedType as CalendarEventType)
+      : 'other'
 
-    await supabase.from('calendar_events').insert({
-      date: selectedDate.toISOString(),
+    await supabase.from('events').insert({
+      event_date: formatDate(selectedDate),
+      event_time: null,
+      description: null,
+      repeat: null,
       title,
       type,
       user_id: userId,
@@ -90,7 +112,7 @@ export default function CalendarPage() {
           className="text-4xl text-[var(--text-primary)]"
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          Calendar & Planning
+          Calendar & Plans
         </h1>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">Our events, goals, and dreams</p>
       </header>
@@ -104,118 +126,152 @@ export default function CalendarPage() {
       <section className="space-y-6">
         <nav className="flex gap-2 overflow-x-auto" aria-label="Calendar sections">
           {(['events', 'plans', 'reminders', 'lists'] as const).map((tab) => (
-            <button key={tab} type="button" onClick={() => setActiveTab(tab)} className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-white' : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}>{tab}</button>
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setActiveTab(tab)}
+              className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-white' : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}
+            >
+              {tab}
+            </button>
           ))}
         </nav>
         {activeTab === 'plans' && <PlansPage />}
         {activeTab === 'reminders' && <RemindersPage />}
-        {activeTab === 'lists' && <div className="grid gap-6 lg:grid-cols-2"><div className="glass-card p-5"><BucketList /></div><div className="glass-card p-5"><SharedWishlist /></div></div>}
+        {activeTab === 'lists' && (
+          <div className="grid gap-6 lg:grid-cols-2">
+            <div className="glass-card p-5">
+              <BucketList />
+            </div>
+            <div className="glass-card p-5">
+              <SharedWishlist />
+            </div>
+          </div>
+        )}
         {activeTab !== 'events' && activeTab !== 'lists' ? null : null}
-        {activeTab === 'events' && <>
-        <div className="glass-card p-5">
-          <LoveCalendar />
-        </div>
+        {activeTab === 'events' && (
+          <>
+            <div className="glass-card p-5">
+              <LoveCalendar />
+            </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          <div className="glass-card p-5">
-            <BucketList />
-          </div>
-
-          <div className="glass-card p-5">
-            <SharedWishlist />
-          </div>
-        </div>
-
-        {/* Shared Calendar Toggle */}
-        <div className="glass-card p-5">
-          <button
-            onClick={() => setShowSharedCalendar(!showSharedCalendar)}
-            className="w-full text-[var(--text-primary)] font-medium p-3 border border-[var(--accent-1)]/20 rounded-xl hover:bg-[var(--accent-1)]/10"
-          >
-            {showSharedCalendar ? 'Hide Shared Calendar' : 'Show Shared Calendar'}
-          </button>
-
-          {showSharedCalendar && (
-            <div className="mt-4 space-y-4">
-              {/* Navigation */}
-              <div className="flex justify-between items-center">
-                <button
-                  onClick={() => {
-                    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1))
-                  }}
-                  className="px-4 py-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
-                >
-                  ← Previous
-                </button>
-                <h2 className="text-xl font-bold text-[var(--text-primary)]">
-                  {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </h2>
-                <button
-                  onClick={() => {
-                    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1))
-                  }}
-                  className="px-4 py-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
-                >
-                  Next →
-                </button>
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="glass-card p-5">
+                <BucketList />
               </div>
 
-              {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-2">
-                {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                  <div key={day} className="text-center font-bold text-[var(--text-secondary)] py-2">
-                    {day}
-                  </div>
-                ))}
+              <div className="glass-card p-5">
+                <SharedWishlist />
+              </div>
+            </div>
 
-                {Array.from({ length: firstDay }).map((_, i) => (
-                  <div key={`empty-${i}`} className="p-2" />
-                ))}
+            {/* Shared Calendar Toggle */}
+            <div className="glass-card p-5">
+              <button
+                onClick={() => setShowSharedCalendar(!showSharedCalendar)}
+                className="w-full text-[var(--text-primary)] font-medium p-3 border border-[var(--accent-1)]/20 rounded-xl hover:bg-[var(--accent-1)]/10"
+              >
+                {showSharedCalendar ? 'Hide Shared Calendar' : 'Show Shared Calendar'}
+              </button>
 
-                {Array.from({ length: days }).map((_, i) => {
-                  const day = i + 1
-                  const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
-                  const dayEvents = events.filter(e => new Date(e.date).getDate() === day)
-
-                  return (
+              {showSharedCalendar && (
+                <div className="mt-4 space-y-4">
+                  {/* Navigation */}
+                  <div className="flex justify-between items-center">
                     <button
-                      key={day}
-                      onClick={() => setSelectedDate(date)}
-                      className={`p-2 border rounded-xl min-h-[80px] ${
-                        dayEvents.length > 0 
-                          ? 'border-[var(--accent-1)]/30 bg-[var(--accent-1)]/10' 
-                          : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)]'
-                      } text-[var(--text-primary)] hover:border-[var(--accent-1)]/50`}
+                      onClick={() => {
+                        setCurrentDate(
+                          new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
+                        )
+                      }}
+                      className="px-4 py-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
                     >
-                      <div className="font-bold">{day}</div>
-                      {dayEvents.map(event => (
-                        <div key={event.id} className="text-xs mt-1 truncate text-[var(--text-secondary)]">
-                          {event.title}
-                        </div>
-                      ))}
+                      ← Previous
                     </button>
-                  )
-                })}
-              </div>
+                    <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                      {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </h2>
+                    <button
+                      onClick={() => {
+                        setCurrentDate(
+                          new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+                        )
+                      }}
+                      className="px-4 py-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
+                    >
+                      Next →
+                    </button>
+                  </div>
 
-              {/* Add Event */}
-              {selectedDate && (
-                <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-                  <h3 className="font-bold text-xl mb-2 text-[var(--text-primary)]">
-                    {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                  </h3>
-                  <button
-                    onClick={() => void addEvent()}
-                    className="w-full bg-[var(--accent-1)] text-[var(--bg-color)] py-3 rounded-xl font-medium"
-                  >
-                    + Add Event
-                  </button>
+                  {/* Calendar Grid */}
+                  <div className="grid grid-cols-7 gap-2">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                      <div
+                        key={day}
+                        className="text-center font-bold text-[var(--text-secondary)] py-2"
+                      >
+                        {day}
+                      </div>
+                    ))}
+
+                    {Array.from({ length: firstDay }).map((_, i) => (
+                      <div key={`empty-${i}`} className="p-2" />
+                    ))}
+
+                    {Array.from({ length: days }).map((_, i) => {
+                      const day = i + 1
+                      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+                      const dayEvents = events.filter(
+                        (e) => Number(e.event_date.slice(8, 10)) === day
+                      )
+
+                      return (
+                        <button
+                          key={day}
+                          onClick={() => setSelectedDate(date)}
+                          className={`p-2 border rounded-xl min-h-[80px] ${
+                            dayEvents.length > 0
+                              ? 'border-[var(--accent-1)]/30 bg-[var(--accent-1)]/10'
+                              : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)]'
+                          } text-[var(--text-primary)] hover:border-[var(--accent-1)]/50`}
+                        >
+                          <div className="font-bold">{day}</div>
+                          {dayEvents.map((event) => (
+                            <div
+                              key={event.id}
+                              className="text-xs mt-1 truncate text-[var(--text-secondary)]"
+                            >
+                              {event.title}
+                            </div>
+                          ))}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Add Event */}
+                  {selectedDate && (
+                    <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
+                      <h3 className="font-bold text-xl mb-2 text-[var(--text-primary)]">
+                        {selectedDate.toLocaleDateString('en-US', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </h3>
+                      <button
+                        onClick={() => void addEvent()}
+                        className="w-full bg-[var(--accent-1)] text-[var(--bg-color)] py-3 rounded-xl font-medium"
+                      >
+                        + Add Event
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
-        </>}
+          </>
+        )}
       </section>
     </main>
   )

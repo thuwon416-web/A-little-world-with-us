@@ -49,6 +49,11 @@ const nextConfig = {
   async redirects() {
     return [
       { source: '/locations', destination: '/location', permanent: true },
+      { source: '/stats', destination: '/dashboard', permanent: true },
+      { source: '/cycle', destination: '/care', permanent: true },
+      { source: '/plans', destination: '/planning', permanent: true },
+      { source: '/couple-status', destination: '/couple-linking', permanent: true },
+      { source: '/love-calculator', destination: '/games', permanent: true },
     ]
   },
   async headers() {
@@ -124,9 +129,10 @@ const sentryOptions = {
 }
 
 // Apply Sentry wrapper only if DSN is available
-const withSentry = (process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN)
-  ? withSentryConfig(withPWA(nextConfig), sentryOptions)
-  : withPWA(nextConfig)
+const withSentry =
+  process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN
+    ? withSentryConfig(withPWA(nextConfig), sentryOptions)
+    : withPWA(nextConfig)
 
 // Apply bundle analyzer
 module.exports = withBundleAnalyzer(withSentry)

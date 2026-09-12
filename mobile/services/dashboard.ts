@@ -13,12 +13,20 @@ export type DashboardData = {
 }
 
 async function getCoupleId() {
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser()
   if (authError || !user) throw new Error('Please sign in again to view your dashboard.')
-  const { data, error } = await supabase.from('couple_links').select('couple_id')
-    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').maybeSingle()
+  const { data, error } = await supabase
+    .from('couple_links')
+    .select('couple_id')
+    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+    .eq('status', 'accepted')
+    .maybeSingle()
   if (error) throw error
-  if (!data?.couple_id) throw new Error('Accept a partner link before viewing your shared dashboard.')
+  if (!data?.couple_id)
+    throw new Error('Accept a partner link before viewing your shared dashboard.')
   return data.couple_id
 }
 
@@ -38,13 +46,42 @@ function longestConsecutiveDays(values: string[]) {
 
 export async function getDashboardData(): Promise<DashboardData> {
   const coupleId = await getCoupleId()
-  const [{ count: messageCount, error: messagesError }, { count: memoryCount, error: memoriesError }, { count: vaultCount, error: vaultError }, { data: messages, error: messageDatesError }, { data: memories, error: memoryError }, { data: playlist, error: playlistError }] = await Promise.all([
-    supabase.from('messages').select('id', { count: 'exact', head: true }).eq('couple_id', coupleId),
-    supabase.from('memories').select('id', { count: 'exact', head: true }).eq('couple_id', coupleId),
-    supabase.from('vault_items').select('id', { count: 'exact', head: true }).eq('couple_id', coupleId),
-    supabase.from('messages').select('created_at').eq('couple_id', coupleId).order('created_at', { ascending: true }),
-    supabase.from('memories').select('id,title,caption,date,category,image_url,created_at').eq('couple_id', coupleId),
-    supabase.from('shared_playlist').select('*').eq('couple_id', coupleId).order('position').order('created_at').limit(1),
+  const [
+    { count: messageCount, error: messagesError },
+    { count: memoryCount, error: memoriesError },
+    { count: vaultCount, error: vaultError },
+    { data: messages, error: messageDatesError },
+    { data: memories, error: memoryError },
+    { data: playlist, error: playlistError },
+  ] = await Promise.all([
+    supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('couple_id', coupleId),
+    supabase
+      .from('memories')
+      .select('id', { count: 'exact', head: true })
+      .eq('couple_id', coupleId),
+    supabase
+      .from('vault_items')
+      .select('id', { count: 'exact', head: true })
+      .eq('couple_id', coupleId),
+    supabase
+      .from('messages')
+      .select('created_at')
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: true }),
+    supabase
+      .from('memories')
+      .select('id,title,caption,date,category,image_url,created_at')
+      .eq('couple_id', coupleId),
+    supabase
+      .from('shared_playlist')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('position')
+      .order('created_at')
+      .limit(1),
   ])
   if (messagesError) throw messagesError
   if (memoriesError) throw memoriesError
@@ -53,13 +90,17 @@ export async function getDashboardData(): Promise<DashboardData> {
   if (memoryError) throw memoryError
   if (playlistError) throw playlistError
   const memoryRows = (memories ?? []) as MemoryRecord[]
-  const randomMemory = memoryRows.length ? memoryRows[Math.floor(Math.random() * memoryRows.length)] : null
+  const randomMemory = memoryRows.length
+    ? memoryRows[Math.floor(Math.random() * memoryRows.length)]
+    : null
   return {
     coupleId,
     messageCount: messageCount ?? 0,
     memoryCount: memoryCount ?? 0,
     vaultCount: vaultCount ?? 0,
-    longestStreak: longestConsecutiveDays((messages ?? []).map((message) => message.created_at.slice(0, 10))),
+    longestStreak: longestConsecutiveDays(
+      (messages ?? []).map((message) => message.created_at.slice(0, 10))
+    ),
     memory: randomMemory ?? null,
     playlistSong: ((playlist ?? [])[0] as PlaylistSong | undefined) ?? null,
   }

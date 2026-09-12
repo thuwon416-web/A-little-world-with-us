@@ -15,6 +15,9 @@ export default function AstrologyPage() {
           <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Cosmic Connection</p>
           <h1 className="mt-2 text-3xl font-serif text-[var(--text-primary)]">Astrology</h1>
         </div>
+        <p className="rounded-2xl border border-[var(--accent-1)]/15 bg-[var(--card-bg)] px-4 py-3 text-sm text-[var(--text-secondary)]">
+          Astrology is for entertainment only and is not medical, financial, or relationship advice.
+        </p>
         <div className="ml-auto flex items-center gap-2 rounded-full bg-[var(--accent-1)]/10 px-4 py-2 text-sm text-[var(--accent-1)]">
           <Sparkles className="h-4 w-4" />
           <span>Myanmar Astrology</span>

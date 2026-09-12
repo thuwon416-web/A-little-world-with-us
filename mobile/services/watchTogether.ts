@@ -1,5 +1,6 @@
-import { supabase } from '@/lib/supabase'
 import { getContext } from './secondary'
+
+import { supabase } from '@/lib/supabase'
 
 export type WatchlistItem = {
   id: string
@@ -13,11 +14,24 @@ export type WatchlistItem = {
 }
 
 export type WatchSyncEvent = 'play' | 'pause' | 'seek' | 'video'
+export type WatchSyncPayload = { position?: number; youtubeId?: string; timestamp: number }
+const watchChannels = new Map<string, ReturnType<typeof supabase.channel>>()
+
+function getWatchChannel(coupleId: string) {
+  const existing = watchChannels.get(coupleId)
+  if (existing) return existing
+  const channel = supabase.channel(`watch-sync-${coupleId}`)
+  watchChannels.set(coupleId, channel)
+  channel.subscribe()
+  return channel
+}
 
 export function extractYouTubeId(input: string) {
   const value = input.trim()
   if (/^[A-Za-z0-9_-]{11}$/.test(value)) return value
-  const match = value.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/)
+  const match = value.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([A-Za-z0-9_-]{11})/
+  )
   return match?.[1] ?? null
 }
 
@@ -32,21 +46,38 @@ export async function getWatchContext() {
 }
 
 export async function getWatchlist(coupleId: string) {
-  const { data, error } = await supabase.from('watchlist').select('*').eq('couple_id', coupleId).order('position').order('created_at')
+  const { data, error } = await supabase
+    .from('watchlist')
+    .select('*')
+    .eq('couple_id', coupleId)
+    .order('position')
+    .order('created_at')
   if (error) throw new Error(error.message)
   return (data ?? []) as WatchlistItem[]
 }
 
-export async function addWatchlistItem(coupleId: string, userId: string, youtubeId: string, title: string) {
-  const { count } = await supabase.from('watchlist').select('id', { count: 'exact', head: true }).eq('couple_id', coupleId)
-  const { data, error } = await supabase.from('watchlist').insert({
-    couple_id: coupleId,
-    added_by: userId,
-    youtube_id: youtubeId,
-    title: title.trim() || `YouTube video ${youtubeId}`,
-    thumbnail_url: getYouTubeThumbnail(youtubeId),
-    position: count ?? 0,
-  }).select('*').single()
+export async function addWatchlistItem(
+  coupleId: string,
+  userId: string,
+  youtubeId: string,
+  title: string
+) {
+  const { count } = await supabase
+    .from('watchlist')
+    .select('id', { count: 'exact', head: true })
+    .eq('couple_id', coupleId)
+  const { data, error } = await supabase
+    .from('watchlist')
+    .insert({
+      couple_id: coupleId,
+      added_by: userId,
+      youtube_id: youtubeId,
+      title: title.trim() || `YouTube video ${youtubeId}`,
+      thumbnail_url: getYouTubeThumbnail(youtubeId),
+      position: count ?? 0,
+    })
+    .select('*')
+    .single()
   if (error) throw new Error(error.message)
   return data as WatchlistItem
 }
@@ -57,32 +88,38 @@ export async function removeWatchlistItem(id: string) {
 }
 
 export async function addWatchHistory(coupleId: string, userId: string, youtubeId: string) {
-  const { error } = await supabase.from('watch_history').insert({ couple_id: coupleId, watched_by: userId, youtube_id: youtubeId })
+  const { error } = await supabase
+    .from('watch_history')
+    .insert({ couple_id: coupleId, watched_by: userId, youtube_id: youtubeId })
   if (error) throw new Error(error.message)
 }
 
-export async function sendWatchSync(coupleId: string, event: WatchSyncEvent, payload: { position?: number; youtubeId?: string }) {
-  const channel = supabase.channel(`watch-sync-${coupleId}`)
-  await new Promise<void>((resolve, reject) => {
-    channel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') resolve()
-      if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') reject(new Error(`Watch sync unavailable: ${status}`))
-    })
+export async function sendWatchSync(
+  coupleId: string,
+  event: WatchSyncEvent,
+  payload: Omit<WatchSyncPayload, 'timestamp'>
+) {
+  const response = await getWatchChannel(coupleId).send({
+    type: 'broadcast',
+    event,
+    payload: { ...payload, timestamp: Date.now() },
   })
-  try {
-    const response = await channel.send({ type: 'broadcast', event, payload })
-    if (response !== 'ok') throw new Error(`Watch sync unavailable: ${response}`)
-  } finally {
-    await supabase.removeChannel(channel)
-  }
+  if (response !== 'ok') throw new Error(`Watch sync unavailable: ${response}`)
 }
 
-export function subscribeToWatchSync(coupleId: string, onEvent: (event: WatchSyncEvent, payload: { position?: number; youtubeId?: string }) => void) {
-  const channel = supabase.channel(`watch-sync-${coupleId}`)
-  channel.on('broadcast', { event: 'play' }, ({ payload }) => onEvent('play', payload))
+export function subscribeToWatchSync(
+  coupleId: string,
+  onEvent: (event: WatchSyncEvent, payload: WatchSyncPayload) => void
+) {
+  const channel = getWatchChannel(coupleId)
+  channel
+    .on('broadcast', { event: 'play' }, ({ payload }) => onEvent('play', payload))
     .on('broadcast', { event: 'pause' }, ({ payload }) => onEvent('pause', payload))
     .on('broadcast', { event: 'seek' }, ({ payload }) => onEvent('seek', payload))
     .on('broadcast', { event: 'video' }, ({ payload }) => onEvent('video', payload))
     .subscribe()
-  return () => { void supabase.removeChannel(channel) }
+  return () => {
+    watchChannels.delete(coupleId)
+    void supabase.removeChannel(channel)
+  }
 }

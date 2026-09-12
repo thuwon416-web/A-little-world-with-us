@@ -10,9 +10,12 @@ import {
   HelpCircle,
   Home,
   Info,
+  Image,
   LockKeyhole,
   MapPin,
   MessageCircleHeart,
+  Gamepad2,
+  Music,
   PhoneCall,
   Settings,
   Sparkles,
@@ -29,12 +32,15 @@ const baseNavItems = [
   { href: '/calls', label: 'Calls', icon: PhoneCall },
   { href: '/care', label: 'Care', icon: Heart },
   { href: '/wellness', label: 'Wellness & Play', icon: Heart },
-  { href: '/calendar', label: 'Calendar & Plans', icon: Calendar },
+  { href: '/calendar', label: 'Plans', icon: Calendar },
   { href: '/astrology', label: 'Astrology', icon: Star },
   { href: '/ai', label: 'AI Companion', icon: Sparkles },
   { href: '/vault', label: 'Vault', icon: LockKeyhole },
   { href: '/finance', label: 'Finance', icon: DollarSign },
   { href: '/watch-together', label: 'Watch Together', icon: MonitorPlay },
+  { href: '/games', label: 'Games', icon: Gamepad2 },
+  { href: '/music', label: 'Music', icon: Music },
+  { href: '/gallery', label: 'Gallery', icon: Image },
   { href: '/location', label: 'Location', icon: MapPin },
   { href: '/settings', label: 'Settings', icon: Settings },
 ]
@@ -87,7 +93,14 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <button type="button" onClick={async () => { await supabase.auth.signOut(); window.location.href = '/login' }} className="mt-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-3)] hover:text-[var(--text-primary)]">
+      <button
+        type="button"
+        onClick={async () => {
+          await supabase.auth.signOut()
+          window.location.href = '/login'
+        }}
+        className="mt-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-3)] hover:text-[var(--text-primary)]"
+      >
         <LogOut size={17} /> Logout
       </button>
 

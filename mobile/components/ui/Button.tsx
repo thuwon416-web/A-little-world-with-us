@@ -1,5 +1,5 @@
-import React from 'react'
 import * as Haptics from 'expo-haptics'
+import React from 'react'
 import {
   Pressable,
   StyleSheet,
@@ -17,6 +17,7 @@ interface ButtonProps {
   title: string
   variant?: ButtonVariant
   disabled?: boolean
+  accessibilityHint?: string
   onPress?: () => void
   style?: StyleProp<ViewStyle>
   textStyle?: StyleProp<TextStyle>
@@ -26,6 +27,7 @@ export function Button({
   title,
   variant = 'primary',
   disabled = false,
+  accessibilityHint,
   onPress,
   style,
   textStyle,
@@ -59,6 +61,7 @@ export function Button({
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={title}
+      accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled }}
     >
       <Text style={textStyles}>{title}</Text>

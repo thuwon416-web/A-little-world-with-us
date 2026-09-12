@@ -1,53 +1,556 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as LocalAuthentication from 'expo-local-authentication'
-import { useEffect, useState } from 'react'
-import { Alert, ScrollView, Share, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useRouter } from 'expo-router'
+import { useEffect, useState } from 'react'
+import {
+  Alert,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+
+import { useTheme, type ThemePreference } from '@/context/ThemeContext'
+import { useLocation } from '@/hooks/useLocation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import { useLocation } from '@/hooks/useLocation'
-import { useTheme, type ThemePreference } from '@/context/ThemeContext'
 import { registerForPushNotifications, sendLocalNotification } from '@/services/notifications'
-import { exportSettingsData, getSettingsData, saveCouple, saveHealthProfile, saveLocalSecurity, savePrivacy, unlinkCouple, type SettingsData } from '@/services/settings'
+import {
+  exportSettingsData,
+  getSettingsData,
+  saveCouple,
+  saveHealthProfile,
+  saveLocalSecurity,
+  savePrivacy,
+  unlinkCouple,
+  type SettingsData,
+} from '@/services/settings'
 
-type NotificationSettings = { pushEnabled: boolean; reminders: boolean; messages: boolean; milestones: boolean; wellness: boolean }
+type NotificationSettings = {
+  pushEnabled: boolean
+  reminders: boolean
+  messages: boolean
+  milestones: boolean
+  wellness: boolean
+}
 const notificationKey = 'a-little-world-with-us-mobile-notification-settings'
-const defaults: NotificationSettings = { pushEnabled: false, reminders: true, messages: true, milestones: true, wellness: true }
+const defaults: NotificationSettings = {
+  pushEnabled: false,
+  reminders: true,
+  messages: true,
+  milestones: true,
+  wellness: true,
+}
 const privacyLabels = [
-  ['allow_ai_read_mood', 'Allow AI to read mood'], ['allow_ai_read_cycle', 'Allow AI to read cycle'], ['allow_ai_read_chat', 'Allow AI to read chat'], ['allow_ai_read_location', 'Allow AI to read location'], ['allow_ai_read_finance', 'Allow AI to read finance'], ['share_cycle', 'Share cycle data'], ['share_mood', 'Share mood data'], ['share_location', 'Share location'],
+  ['allow_ai_read_mood', 'Allow AI to read mood'],
+  ['allow_ai_read_cycle', 'Allow AI to read cycle'],
+  ['allow_ai_read_chat', 'Allow AI to read chat'],
+  ['allow_ai_read_location', 'Allow AI to read location'],
+  ['allow_ai_read_finance', 'Allow AI to read finance'],
+  ['share_cycle', 'Share cycle data'],
+  ['share_mood', 'Share mood data'],
+  ['share_location', 'Share location'],
 ] as const
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) { return <View style={styles.section}><Text style={styles.sectionTitle}>{title}</Text>{children}</View> }
-function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (value: boolean) => void }) { return <View style={styles.row}><Text style={styles.label}>{label}</Text><Switch value={value} onValueChange={onChange} trackColor={{ false: '#34313e', true: '#d8b9c8' }} /></View> }
-function Button({ title, onPress, danger = false }: { title: string; onPress: () => void; danger?: boolean }) { return <TouchableOpacity style={[styles.button, danger && styles.dangerButton]} onPress={onPress}><Text style={styles.buttonText}>{title}</Text></TouchableOpacity> }
-
-export default function SettingsScreen() {
-  const { user, signOut } = useAuth(); const router = useRouter(); const { preference, setPreference } = useTheme(); const { isSharing, lastUpdated, error: locationError, toggleSharing, refreshSharingStatus } = useLocation()
-  const [data, setData] = useState<SettingsData | null>(null); const [notifications, setNotifications] = useState(defaults); const [health, setHealth] = useState<SettingsData['health']>({ age: '', weight: '', height: '', conditions: '', medications: '', allergies: '' }); const [privacy, setPrivacy] = useState<Record<string, boolean>>({}); const [name, setName] = useState(''); const [anniversary, setAnniversary] = useState(''); const [pin, setPin] = useState(''); const [loading, setLoading] = useState(true); const [error, setError] = useState('')
-  const load = async () => { try { setLoading(true); setError(''); const [next, savedNotifications] = await Promise.all([getSettingsData(), AsyncStorage.getItem(notificationKey)]); setData(next); setHealth(next.health); setPrivacy(next.privacy); setName(next.coupleName ?? ''); setAnniversary(next.anniversary ?? ''); if (savedNotifications) setNotifications({ ...defaults, ...JSON.parse(savedNotifications) }) } catch (caught) { setError(caught instanceof Error ? caught.message : 'Unable to load settings.') } finally { setLoading(false) } }
-  useEffect(() => { void load() }, [])
-  useEffect(() => { if (!loading) void AsyncStorage.setItem(notificationKey, JSON.stringify(notifications)) }, [loading, notifications])
-  const saveHealth = async () => { if (!user) return; try { await saveHealthProfile(user.id, health); Alert.alert('Saved', 'Health profile updated.') } catch (caught) { Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please check your values.') } }
-  const savePrivacySettings = async () => { if (!user) return; try { await savePrivacy(user.id, privacy); Alert.alert('Saved', 'Privacy settings updated.') } catch (caught) { Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.') } }
-  const saveCoupleSettings = async () => { if (!data?.coupleId) return; try { await saveCouple(data.coupleId, anniversary, name); Alert.alert('Saved', 'Couple settings updated.') } catch (caught) { Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.') } }
-  const exportData = async (kind: 'photos' | 'chat' | 'care' | 'finance') => { if (!data?.coupleId) return; try { const content = await exportSettingsData(data.coupleId, kind); await Share.share({ title: `${kind} export.${kind === 'chat' ? 'json' : 'csv'}`, message: content }) } catch (caught) { Alert.alert('Export failed', caught instanceof Error ? caught.message : 'Unable to export data.') } }
-  const security = async (enabled: boolean) => { if (!user) return; try { await saveLocalSecurity(user.id, enabled, data?.biometricEnabled ?? false, enabled ? pin : undefined); setData((current) => current ? { ...current, pinEnabled: enabled } : current) } catch (caught) { Alert.alert('Security', caught instanceof Error ? caught.message : 'Unable to update PIN.') } }
-  const biometric = async (enabled: boolean) => { if (!user) return; if (enabled && !(await LocalAuthentication.hasHardwareAsync())) { Alert.alert('Biometrics', 'This device does not support biometric authentication.'); return } await saveLocalSecurity(user.id, data?.pinEnabled ?? false, enabled); setData((current) => current ? { ...current, biometricEnabled: enabled } : current) }
-  if (loading) return <View style={styles.center}><Text style={styles.muted}>Loading settings...</Text></View>
-  if (!data) return <View style={styles.center}><Text style={styles.error}>{error}</Text><Button title="Retry" onPress={() => void load()} /></View>
-  return <ScrollView contentContainerStyle={styles.container}><Text style={styles.eyebrow}>Settings</Text><Text style={styles.title}>Your shared world</Text>{error ? <Text style={styles.error}>{error}</Text> : null}
-    <Section title="Notifications"><Toggle label={`Push notifications · ${notifications.pushEnabled ? 'Enabled' : 'Off'}`} value={notifications.pushEnabled} onChange={async (value) => { if (value) { const token = await registerForPushNotifications(); if (!token) return Alert.alert('Notifications', 'Push notifications are unavailable on this device.'); await sendLocalNotification('Love reminders ready', 'Your gentle connection nudges are enabled.') }; setNotifications((current) => ({ ...current, pushEnabled: value })) }} />{(['reminders', 'messages', 'milestones', 'wellness'] as const).map((key) => <Toggle key={key} label={key[0].toUpperCase() + key.slice(1)} value={notifications[key]} onChange={(value) => setNotifications((current) => ({ ...current, [key]: value }))} />)}</Section>
-    <Section title="Appearance"><View style={styles.options}>{(['midnight', 'sunset', 'random', 'auto'] as ThemePreference[]).map((option) => <TouchableOpacity key={option} onPress={() => setPreference(option)} style={[styles.option, preference === option && styles.optionActive]}><Text style={styles.buttonText}>{option}</Text></TouchableOpacity>)}</View></Section>
-    <Section title="Couple settings"><Text style={styles.muted}>Partner: {data.partnerEmail ?? 'Not linked'}</Text><Text style={styles.muted}>Status: {data.relationshipStatus}</Text><TextInput value={name} onChangeText={setName} placeholder="Couple name" placeholderTextColor="#8d8d99" style={styles.input} /><TextInput value={anniversary} onChangeText={setAnniversary} placeholder="Anniversary (YYYY-MM-DD)" placeholderTextColor="#8d8d99" style={styles.input} /><Button title="Save couple settings" onPress={() => void saveCoupleSettings()} />{data.coupleId ? <Button title="Unlink couple" danger onPress={() => Alert.alert('Unlink couple?', 'This revokes the accepted link.', [{ text: 'Cancel' }, { text: 'Unlink', style: 'destructive', onPress: () => supabase.from('couple_links').select('id').eq('couple_id', data.coupleId).eq('status', 'accepted').maybeSingle().then(({ data: link }) => link && unlinkCouple(link.id).then(load).catch((caught) => setError(caught instanceof Error ? caught.message : 'Unable to unlink.'))) }])} /> : null}</Section>
-    <Section title="Health profile"><TextInput value={health.age} onChangeText={(value) => setHealth((current) => ({ ...current, age: value }))} placeholder="Age (1-120)" placeholderTextColor="#8d8d99" keyboardType="numeric" style={styles.input} /><TextInput value={health.weight} onChangeText={(value) => setHealth((current) => ({ ...current, weight: value }))} placeholder="Weight kg (1-300)" placeholderTextColor="#8d8d99" keyboardType="decimal-pad" style={styles.input} /><TextInput value={health.height} onChangeText={(value) => setHealth((current) => ({ ...current, height: value }))} placeholder="Height cm (50-250)" placeholderTextColor="#8d8d99" keyboardType="decimal-pad" style={styles.input} />{(['conditions', 'medications', 'allergies'] as const).map((key) => <TextInput key={key} value={health[key]} onChangeText={(value) => setHealth((current) => ({ ...current, [key]: value }))} placeholder={`${key[0].toUpperCase() + key.slice(1)} (comma separated)`} placeholderTextColor="#8d8d99" style={styles.input} />)}<Button title="Save health profile" onPress={() => void saveHealth()} /></Section>
-    <Section title="Privacy controls">{privacyLabels.map(([key, label]) => <Toggle key={key} label={label} value={Boolean(privacy[key])} onChange={(value) => setPrivacy((current) => ({ ...current, [key]: value }))} />)}<Button title="Save privacy settings" onPress={() => void savePrivacySettings()} /></Section>
-    <Section title="Exports"><Button title="Export photos (CSV)" onPress={() => void exportData('photos')} /><Button title="Export chat (JSON)" onPress={() => void exportData('chat')} /><Button title="Export Care data (CSV)" onPress={() => void exportData('care')} /><Button title="Export finance (CSV)" onPress={() => void exportData('finance')} /></Section>
-    <Section title="Security"><Toggle label="PIN lock" value={data.pinEnabled} onChange={(value) => value ? Alert.alert('Set PIN', 'Enter a PIN below, then tap Set PIN.') : void security(false)} />{!data.pinEnabled ? <><TextInput value={pin} onChangeText={setPin} placeholder="New PIN (4-6 digits)" placeholderTextColor="#8d8d99" keyboardType="numeric" secureTextEntry style={styles.input} /><Button title="Set PIN" onPress={() => void security(true)} /></> : <Button title="Remove PIN" danger onPress={() => void security(false)} />}<Toggle label="Biometric authentication" value={data.biometricEnabled} onChange={(value) => void biometric(value)} /><Button title="Set up 2FA" onPress={async () => { try { const { data: factor, error: enrollError } = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'A Little World with Us' }); if (enrollError) throw enrollError; Alert.alert('2FA setup', `Scan this secret in your authenticator app:\n${factor?.totp.secret ?? 'Secret unavailable'}`) } catch (caught) { Alert.alert('2FA setup failed', caught instanceof Error ? caught.message : 'Unable to start 2FA setup.') } }} /><Button title="Log out" danger onPress={() => void signOut()} /></Section>
-    <Section title="Favorites"><Text style={styles.muted}>Quick access to the spaces you use most.</Text><View style={styles.options}><Button title="Chat" onPress={() => router.push('/chat')} /><Button title="Care" onPress={() => router.push('/care')} /><Button title="Memories" onPress={() => router.push('/memories')} /></View></Section>
-    <Section title="Reminders"><Text style={styles.muted}>Manage your gentle care and connection nudges.</Text><Button title="Open reminders" onPress={() => router.push('/reminders')} /></Section>
-    <Section title="Language"><View style={styles.options}><TouchableOpacity style={[styles.option, data.language === 'my' && styles.optionActive]} onPress={async () => { await AsyncStorage.setItem('a-little-world-with-us-language', 'my'); setData((current) => current ? { ...current, language: 'my' } : current) }}><Text style={styles.buttonText}>မြန်မာ</Text></TouchableOpacity><TouchableOpacity style={[styles.option, data.language === 'en' && styles.optionActive]} onPress={async () => { await AsyncStorage.setItem('a-little-world-with-us-language', 'en'); setData((current) => current ? { ...current, language: 'en' } : current) }}><Text style={styles.buttonText}>English</Text></TouchableOpacity></View></Section>
-    <Section title="Location sharing"><Toggle label={isSharing ? 'Sharing active' : 'Location private'} value={isSharing} onChange={(value) => void toggleSharing(value).then(refreshSharingStatus)} />{lastUpdated ? <Text style={styles.muted}>Last sync {new Date(lastUpdated).toLocaleTimeString()}</Text> : null}{locationError ? <Text style={styles.error}>{locationError}</Text> : null}</Section>
-  </ScrollView>
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {children}
+    </View>
+  )
+}
+function Toggle({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: boolean
+  onChange: (value: boolean) => void
+}) {
+  return (
+    <View style={styles.row}>
+      <Text style={styles.label}>{label}</Text>
+      <Switch
+        value={value}
+        onValueChange={onChange}
+        trackColor={{ false: '#34313e', true: '#d8b9c8' }}
+      />
+    </View>
+  )
+}
+function Button({
+  title,
+  onPress,
+  danger = false,
+}: {
+  title: string
+  onPress: () => void
+  danger?: boolean
+}) {
+  return (
+    <TouchableOpacity style={[styles.button, danger && styles.dangerButton]} onPress={onPress}>
+      <Text style={styles.buttonText}>{title}</Text>
+    </TouchableOpacity>
+  )
 }
 
-const styles = StyleSheet.create({ container: { flexGrow: 1, backgroundColor: '#0f0f12', paddingTop: 72, paddingBottom: 40, paddingHorizontal: 20, gap: 14 }, center: { flex: 1, backgroundColor: '#0f0f12', justifyContent: 'center', alignItems: 'center', gap: 14, padding: 24 }, eyebrow: { color: '#d9bfd7', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' }, title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700' }, section: { backgroundColor: '#171b22', borderRadius: 20, padding: 18, borderWidth: 1, borderColor: '#2a2d35', gap: 10 }, sectionTitle: { color: '#f3f0f5', fontSize: 18, fontWeight: '700', marginBottom: 4 }, row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12, paddingVertical: 8 }, label: { color: '#f3f0f5', flex: 1 }, muted: { color: '#c4c4ce', fontSize: 13 }, error: { color: '#ff9b9b' }, input: { backgroundColor: '#0f0f12', borderRadius: 12, color: '#f3f0f5', padding: 12, borderWidth: 1, borderColor: '#2a2d35' }, button: { backgroundColor: '#d8b9c8', padding: 13, borderRadius: 12, alignItems: 'center', marginTop: 4 }, dangerButton: { backgroundColor: '#8d3b52' }, buttonText: { color: '#f3f0f5', fontWeight: '800' }, options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, option: { backgroundColor: '#2a2d36', paddingHorizontal: 13, paddingVertical: 10, borderRadius: 12 }, optionActive: { backgroundColor: '#d8b9c8' } })
+export default function SettingsScreen() {
+  const { user, signOut } = useAuth()
+  const router = useRouter()
+  const { preference, setPreference } = useTheme()
+  const {
+    isSharing,
+    lastUpdated,
+    error: locationError,
+    toggleSharing,
+    refreshSharingStatus,
+  } = useLocation()
+  const [data, setData] = useState<SettingsData | null>(null)
+  const [notifications, setNotifications] = useState(defaults)
+  const [health, setHealth] = useState<SettingsData['health']>({
+    age: '',
+    weight: '',
+    height: '',
+    conditions: '',
+    medications: '',
+    allergies: '',
+  })
+  const [privacy, setPrivacy] = useState<Record<string, boolean>>({})
+  const [name, setName] = useState('')
+  const [anniversary, setAnniversary] = useState('')
+  const [pin, setPin] = useState('')
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const load = async () => {
+    try {
+      setLoading(true)
+      setError('')
+      const [next, savedNotifications] = await Promise.all([
+        getSettingsData(),
+        AsyncStorage.getItem(notificationKey),
+      ])
+      setData(next)
+      setHealth(next.health)
+      setPrivacy(next.privacy)
+      setName(next.coupleName ?? '')
+      setAnniversary(next.anniversary ?? '')
+      if (savedNotifications) setNotifications({ ...defaults, ...JSON.parse(savedNotifications) })
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to load settings.')
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    void load()
+  }, [])
+  useEffect(() => {
+    if (!loading) void AsyncStorage.setItem(notificationKey, JSON.stringify(notifications))
+  }, [loading, notifications])
+  const saveHealth = async () => {
+    if (!user) return
+    try {
+      await saveHealthProfile(user.id, health)
+      Alert.alert('Saved', 'Health profile updated.')
+    } catch (caught) {
+      Alert.alert(
+        'Unable to save',
+        caught instanceof Error ? caught.message : 'Please check your values.'
+      )
+    }
+  }
+  const savePrivacySettings = async () => {
+    if (!user) return
+    try {
+      await savePrivacy(user.id, privacy)
+      Alert.alert('Saved', 'Privacy settings updated.')
+    } catch (caught) {
+      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    }
+  }
+  const saveCoupleSettings = async () => {
+    if (!data?.coupleId) return
+    try {
+      await saveCouple(data.coupleId, anniversary, name)
+      Alert.alert('Saved', 'Couple settings updated.')
+    } catch (caught) {
+      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    }
+  }
+  const exportData = async (kind: 'photos' | 'chat' | 'care' | 'finance') => {
+    if (!data?.coupleId) return
+    try {
+      const content = await exportSettingsData(data.coupleId, kind)
+      await Share.share({
+        title: `${kind} export.${kind === 'chat' ? 'json' : 'csv'}`,
+        message: content,
+      })
+    } catch (caught) {
+      Alert.alert(
+        'Export failed',
+        caught instanceof Error ? caught.message : 'Unable to export data.'
+      )
+    }
+  }
+  const security = async (enabled: boolean) => {
+    if (!user) return
+    try {
+      await saveLocalSecurity(
+        user.id,
+        enabled,
+        data?.biometricEnabled ?? false,
+        enabled ? pin : undefined
+      )
+      setData((current) => (current ? { ...current, pinEnabled: enabled } : current))
+    } catch (caught) {
+      Alert.alert('Security', caught instanceof Error ? caught.message : 'Unable to update PIN.')
+    }
+  }
+  const biometric = async (enabled: boolean) => {
+    if (!user) return
+    if (enabled && !(await LocalAuthentication.hasHardwareAsync())) {
+      Alert.alert('Biometrics', 'This device does not support biometric authentication.')
+      return
+    }
+    await saveLocalSecurity(user.id, data?.pinEnabled ?? false, enabled)
+    setData((current) => (current ? { ...current, biometricEnabled: enabled } : current))
+  }
+  if (loading)
+    return (
+      <View style={styles.center}>
+        <Text style={styles.muted}>Loading settings...</Text>
+      </View>
+    )
+  if (!data)
+    return (
+      <View style={styles.center}>
+        <Text style={styles.error}>{error}</Text>
+        <Button title="Retry" onPress={() => void load()} />
+      </View>
+    )
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.eyebrow}>Settings</Text>
+      <Text style={styles.title}>Your shared world</Text>
+      {error ? <Text style={styles.error}>{error}</Text> : null}
+      <Section title="Notifications">
+        <Toggle
+          label={`Push notifications · ${notifications.pushEnabled ? 'Enabled' : 'Off'}`}
+          value={notifications.pushEnabled}
+          onChange={async (value) => {
+            if (value) {
+              const token = await registerForPushNotifications()
+              if (!token)
+                return Alert.alert(
+                  'Notifications',
+                  'Push notifications are unavailable on this device.'
+                )
+              await sendLocalNotification(
+                'Love reminders ready',
+                'Your gentle connection nudges are enabled.'
+              )
+            }
+            setNotifications((current) => ({ ...current, pushEnabled: value }))
+          }}
+        />
+        {(['reminders', 'messages', 'milestones', 'wellness'] as const).map((key) => (
+          <Toggle
+            key={key}
+            label={key[0].toUpperCase() + key.slice(1)}
+            value={notifications[key]}
+            onChange={(value) => setNotifications((current) => ({ ...current, [key]: value }))}
+          />
+        ))}
+      </Section>
+      <Section title="Appearance">
+        <View style={styles.options}>
+          {(['midnight', 'sunset', 'random', 'auto'] as ThemePreference[]).map((option) => (
+            <TouchableOpacity
+              key={option}
+              onPress={() => setPreference(option)}
+              style={[styles.option, preference === option && styles.optionActive]}
+            >
+              <Text style={styles.buttonText}>{option}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </Section>
+      <Section title="Couple settings">
+        <Text style={styles.muted}>Partner: {data.partnerEmail ?? 'Not linked'}</Text>
+        <Text style={styles.muted}>Status: {data.relationshipStatus}</Text>
+        <TextInput
+          value={name}
+          onChangeText={setName}
+          placeholder="Couple name"
+          placeholderTextColor="#8d8d99"
+          style={styles.input}
+        />
+        <TextInput
+          value={anniversary}
+          onChangeText={setAnniversary}
+          placeholder="Anniversary (YYYY-MM-DD)"
+          placeholderTextColor="#8d8d99"
+          style={styles.input}
+        />
+        <Button title="Save couple settings" onPress={() => void saveCoupleSettings()} />
+        {data.coupleId ? (
+          <Button
+            title="Unlink couple"
+            danger
+            onPress={() =>
+              Alert.alert('Unlink couple?', 'This revokes the accepted link.', [
+                { text: 'Cancel' },
+                {
+                  text: 'Unlink',
+                  style: 'destructive',
+                  onPress: () =>
+                    supabase
+                      .from('couple_links')
+                      .select('id')
+                      .eq('couple_id', data.coupleId)
+                      .eq('status', 'accepted')
+                      .maybeSingle()
+                      .then(
+                        ({ data: link }) =>
+                          link &&
+                          unlinkCouple(link.id)
+                            .then(load)
+                            .catch((caught) =>
+                              setError(
+                                caught instanceof Error ? caught.message : 'Unable to unlink.'
+                              )
+                            )
+                      ),
+                },
+              ])
+            }
+          />
+        ) : null}
+      </Section>
+      <Section title="Health profile">
+        <TextInput
+          value={health.age}
+          onChangeText={(value) => setHealth((current) => ({ ...current, age: value }))}
+          placeholder="Age (1-120)"
+          placeholderTextColor="#8d8d99"
+          keyboardType="numeric"
+          style={styles.input}
+        />
+        <TextInput
+          value={health.weight}
+          onChangeText={(value) => setHealth((current) => ({ ...current, weight: value }))}
+          placeholder="Weight kg (1-300)"
+          placeholderTextColor="#8d8d99"
+          keyboardType="decimal-pad"
+          style={styles.input}
+        />
+        <TextInput
+          value={health.height}
+          onChangeText={(value) => setHealth((current) => ({ ...current, height: value }))}
+          placeholder="Height cm (50-250)"
+          placeholderTextColor="#8d8d99"
+          keyboardType="decimal-pad"
+          style={styles.input}
+        />
+        {(['conditions', 'medications', 'allergies'] as const).map((key) => (
+          <TextInput
+            key={key}
+            value={health[key]}
+            onChangeText={(value) => setHealth((current) => ({ ...current, [key]: value }))}
+            placeholder={`${key[0].toUpperCase() + key.slice(1)} (comma separated)`}
+            placeholderTextColor="#8d8d99"
+            style={styles.input}
+          />
+        ))}
+        <Button title="Save health profile" onPress={() => void saveHealth()} />
+      </Section>
+      <Section title="Privacy controls">
+        {privacyLabels.map(([key, label]) => (
+          <Toggle
+            key={key}
+            label={label}
+            value={Boolean(privacy[key])}
+            onChange={(value) => setPrivacy((current) => ({ ...current, [key]: value }))}
+          />
+        ))}
+        <Button title="Save privacy settings" onPress={() => void savePrivacySettings()} />
+      </Section>
+      <Section title="Exports">
+        <Button title="Export photos (CSV)" onPress={() => void exportData('photos')} />
+        <Button title="Export chat (JSON)" onPress={() => void exportData('chat')} />
+        <Button title="Export Care data (CSV)" onPress={() => void exportData('care')} />
+        <Button title="Export finance (CSV)" onPress={() => void exportData('finance')} />
+      </Section>
+      <Section title="Security">
+        <Toggle
+          label="PIN lock"
+          value={data.pinEnabled}
+          onChange={(value) =>
+            value
+              ? Alert.alert('Set PIN', 'Enter a PIN below, then tap Set PIN.')
+              : void security(false)
+          }
+        />
+        {!data.pinEnabled ? (
+          <>
+            <TextInput
+              value={pin}
+              onChangeText={setPin}
+              placeholder="New PIN (4-6 digits)"
+              placeholderTextColor="#8d8d99"
+              keyboardType="numeric"
+              secureTextEntry
+              style={styles.input}
+            />
+            <Button title="Set PIN" onPress={() => void security(true)} />
+          </>
+        ) : (
+          <Button title="Remove PIN" danger onPress={() => void security(false)} />
+        )}
+        <Toggle
+          label="Biometric authentication"
+          value={data.biometricEnabled}
+          onChange={(value) => void biometric(value)}
+        />
+        <Button
+          title="Set up 2FA"
+          onPress={async () => {
+            try {
+              const { data: factor, error: enrollError } = await supabase.auth.mfa.enroll({
+                factorType: 'totp',
+                friendlyName: 'A Little World with Us',
+              })
+              if (enrollError) throw enrollError
+              Alert.alert(
+                '2FA setup',
+                `Scan this secret in your authenticator app:\n${factor?.totp.secret ?? 'Secret unavailable'}`
+              )
+            } catch (caught) {
+              Alert.alert(
+                '2FA setup failed',
+                caught instanceof Error ? caught.message : 'Unable to start 2FA setup.'
+              )
+            }
+          }}
+        />
+        <Button title="Log out" danger onPress={() => void signOut()} />
+      </Section>
+      <Section title="Favorites">
+        <Text style={styles.muted}>Quick access to the spaces you use most.</Text>
+        <View style={styles.options}>
+          <Button title="Chat" onPress={() => router.push('/chat')} />
+          <Button title="Care" onPress={() => router.push('/care')} />
+          <Button title="Memories" onPress={() => router.push('/memories')} />
+        </View>
+      </Section>
+      <Section title="Reminders">
+        <Text style={styles.muted}>Manage your gentle care and connection nudges.</Text>
+        <Button title="Open reminders" onPress={() => router.push('/reminders')} />
+      </Section>
+      <Section title="Language">
+        <View style={styles.options}>
+          <TouchableOpacity
+            style={[styles.option, data.language === 'my' && styles.optionActive]}
+            onPress={async () => {
+              await AsyncStorage.setItem('a-little-world-with-us-language', 'my')
+              setData((current) => (current ? { ...current, language: 'my' } : current))
+            }}
+          >
+            <Text style={styles.buttonText}>မြန်မာ</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.option, data.language === 'en' && styles.optionActive]}
+            onPress={async () => {
+              await AsyncStorage.setItem('a-little-world-with-us-language', 'en')
+              setData((current) => (current ? { ...current, language: 'en' } : current))
+            }}
+          >
+            <Text style={styles.buttonText}>English</Text>
+          </TouchableOpacity>
+        </View>
+      </Section>
+      <Section title="Location sharing">
+        <Toggle
+          label={isSharing ? 'Sharing active' : 'Location private'}
+          value={isSharing}
+          onChange={(value) => void toggleSharing(value).then(refreshSharingStatus)}
+        />
+        {lastUpdated ? (
+          <Text style={styles.muted}>Last sync {new Date(lastUpdated).toLocaleTimeString()}</Text>
+        ) : null}
+        {locationError ? <Text style={styles.error}>{locationError}</Text> : null}
+      </Section>
+    </ScrollView>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#0f0f12',
+    paddingTop: 72,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    gap: 14,
+  },
+  center: {
+    flex: 1,
+    backgroundColor: '#0f0f12',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 14,
+    padding: 24,
+  },
+  eyebrow: { color: '#d9bfd7', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700' },
+  section: {
+    backgroundColor: '#171b22',
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#2a2d35',
+    gap: 10,
+  },
+  sectionTitle: { color: '#f3f0f5', fontSize: 18, fontWeight: '700', marginBottom: 4 },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 8,
+  },
+  label: { color: '#f3f0f5', flex: 1 },
+  muted: { color: '#c4c4ce', fontSize: 13 },
+  error: { color: '#ff9b9b' },
+  input: {
+    backgroundColor: '#0f0f12',
+    borderRadius: 12,
+    color: '#f3f0f5',
+    padding: 12,
+    borderWidth: 1,
+    borderColor: '#2a2d35',
+  },
+  button: {
+    backgroundColor: '#d8b9c8',
+    padding: 13,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  dangerButton: { backgroundColor: '#8d3b52' },
+  buttonText: { color: '#f3f0f5', fontWeight: '800' },
+  options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  option: {
+    backgroundColor: '#2a2d36',
+    paddingHorizontal: 13,
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  optionActive: { backgroundColor: '#d8b9c8' },
+})

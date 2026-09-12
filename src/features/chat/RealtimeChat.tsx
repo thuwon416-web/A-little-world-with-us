@@ -113,7 +113,7 @@ export default function RealtimeChat() {
       })
     )
 
-    setMessages(decryptedMessages)
+    setMessages(Array.from(new Map(decryptedMessages.map((message) => [message.id, message])).values()))
 
     const channel = supabase
       .channel(`chat-${couple.id}`)
@@ -142,12 +142,14 @@ export default function RealtimeChat() {
           if (newMessage.encrypted && newMessage.content) {
             try {
               const decrypted = await decryptMessage(newMessage.content, chatKey)
-              setMessages((prev) => [...prev, { ...newMessage, content: decrypted }])
+              setMessages((prev) => prev.some((message) => message.id === newMessage.id)
+                ? prev.map((message) => message.id === newMessage.id ? { ...message, ...newMessage, content: decrypted } : message)
+                : [...prev, { ...newMessage, content: decrypted }])
             } catch {
-              setMessages((prev) => [...prev, newMessage])
+              setMessages((prev) => prev.some((message) => message.id === newMessage.id) ? prev : [...prev, newMessage])
             }
           } else {
-            setMessages((prev) => [...prev, newMessage])
+            setMessages((prev) => prev.some((message) => message.id === newMessage.id) ? prev : [...prev, newMessage])
           }
         }
       )
@@ -174,7 +176,13 @@ export default function RealtimeChat() {
           setMessages((current) => current.map((message) => message.id === rawMessage.id ? { ...message, ...rawMessage, media_url: mediaUrl } : message))
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+          window.setTimeout(() => {
+            void channel.subscribe()
+          }, 1000)
+        }
+      })
 
     return () => {
       supabase.removeChannel(channel)

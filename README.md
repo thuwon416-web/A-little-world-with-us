@@ -21,3 +21,5 @@ After a reset, run the additive upgrades in order: `20260909_f1_f6_schema_upgrad
 Web location uses Leaflet with CARTO/OSM tiles; no map API key is required. Sentry is optional but recommended in production. Keep DSNs and auth tokens in ignored local files or Vercel Environment Variables, never in Git.
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for the production sequence and [mobile/BUILD_INSTRUCTIONS.md](mobile/BUILD_INSTRUCTIONS.md) for native builds.
+
+For a complete local setup and validation checklist, see [docs/SETUP.md](docs/SETUP.md). Contributors should also read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).

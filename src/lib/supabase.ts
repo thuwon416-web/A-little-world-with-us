@@ -100,17 +100,13 @@ export async function insertRow<T>(
   }
 }
 
-export async function deleteRow(table: string, id: string, userId?: string): Promise<boolean> {
+export async function deleteRow(table: string, id: string, userId: string): Promise<boolean> {
   if (!isSupabaseConfigured) return false
 
   try {
     let query = supabase.from(table).delete().eq('id', id)
 
-    // ✅ caller က userId ထည့်ပေးမှသာ user_id နဲ့ ထပ်စစ်ပါ။
-    // ထည့်မပေးရင် id နဲ့ပဲ ဖျက်ပါလိမ့်မယ်။
-    if (userId) {
-      query = query.eq('user_id', userId)
-    }
+    query = query.eq('user_id', userId)
 
     const { error } = await query
     if (error) return false

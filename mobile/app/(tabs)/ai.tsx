@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useAI } from '@/hooks/useAI'
+import { saveAISuggestion } from '@/services/favorites'
 
 export default function AIAssistantScreen() {
   const [tab, setTab] = useState<'gift' | 'date' | 'message'>('gift')
@@ -14,8 +15,16 @@ export default function AIAssistantScreen() {
     await refreshSuggestions(tab)
   }
 
-  const saveFavorite = (content: string) => {
-    Alert.alert('Saved', 'Suggestion saved to favorites')
+  const saveFavorite = async (content: string) => {
+    try {
+      await saveAISuggestion(content, tab)
+      Alert.alert('Saved', 'Suggestion saved to favorites')
+    } catch (caught) {
+      Alert.alert(
+        'Save failed',
+        caught instanceof Error ? caught.message : 'Unable to save suggestion.'
+      )
+    }
   }
 
   const copyText = async (content: string) => {
@@ -69,7 +78,7 @@ export default function AIAssistantScreen() {
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionButton}
-                  onPress={() => saveFavorite(item.content)}
+                  onPress={() => void saveFavorite(item.content)}
                 >
                   <Text style={styles.actionText}>Save</Text>
                 </TouchableOpacity>

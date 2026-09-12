@@ -1,105 +1,1010 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
-import { ActivityIndicator, Alert, ScrollView, Share, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Share,
+  StyleSheet,
+  Switch,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 
-import { saveTodayCareLog, saveCareLogForDate, getCareData, saveCareSettings, type CareLog, type CareSettings } from '@/services/care'
-import { addDays, calculateNativeCycleSummary, dateKey, type NativeCycleSummary } from '@/services/cycleCalculator'
+import {
+  saveTodayCareLog,
+  saveCareLogForDate,
+  getCareData,
+  saveCareSettings,
+  type CareLog,
+  type CareSettings,
+} from '@/services/care'
+import {
+  addDays,
+  calculateNativeCycleSummary,
+  dateKey,
+  type NativeCycleSummary,
+} from '@/services/cycleCalculator'
 
-const moods = ['Calm', 'Happy', 'Energetic', 'Frisky', 'Mood swings', 'Irritated', 'Sad', 'Anxious', 'Low energy']
-const symptoms = ['Everything is fine', 'Cramps', 'Tender breasts', 'Headache', 'Acne', 'Backache', 'Fatigue', 'Cravings', 'Insomnia', 'Abdominal pain', 'Hot flashes']
-const sexOptions = ["Didn't have sex", 'Protected sex', 'Unprotected sex', 'Oral sex', 'Anal sex', 'Masturbation', 'Sensual touch', 'Sex toys', 'Orgasm', 'No orgasm', 'High sex drive', 'Neutral sex drive', 'Low sex drive']
-const dischargeOptions = ['No discharge', 'Creamy', 'Watery', 'Sticky', 'Egg white', 'Spotting', 'Unusual']
+const moods = [
+  'Calm',
+  'Happy',
+  'Energetic',
+  'Frisky',
+  'Mood swings',
+  'Irritated',
+  'Sad',
+  'Anxious',
+  'Low energy',
+]
+const symptoms = [
+  'Everything is fine',
+  'Cramps',
+  'Tender breasts',
+  'Headache',
+  'Acne',
+  'Backache',
+  'Fatigue',
+  'Cravings',
+  'Insomnia',
+  'Abdominal pain',
+  'Hot flashes',
+]
+const sexOptions = [
+  "Didn't have sex",
+  'Protected sex',
+  'Unprotected sex',
+  'Oral sex',
+  'Anal sex',
+  'Masturbation',
+  'Sensual touch',
+  'Sex toys',
+  'Orgasm',
+  'No orgasm',
+  'High sex drive',
+  'Neutral sex drive',
+  'Low sex drive',
+]
+const dischargeOptions = [
+  'No discharge',
+  'Creamy',
+  'Watery',
+  'Sticky',
+  'Egg white',
+  'Spotting',
+  'Unusual',
+]
 const digestionOptions = ['Nausea', 'Bloating', 'Constipation', 'Diarrhea']
 const pregnancyOptions = ["Didn't take test", 'Positive', 'Negative', 'Faint line']
 const contraceptionOptions = ['Taken on time', "Yesterday's pill", 'Missed pill']
-const activityOptions = ["Didn't exercise", 'Yoga', 'Gym', 'Aerobics & dancing', 'Swimming', 'Team sports', 'Running', 'Cycling', 'Walking']
+const activityOptions = [
+  "Didn't exercise",
+  'Yoga',
+  'Gym',
+  'Aerobics & dancing',
+  'Swimming',
+  'Team sports',
+  'Running',
+  'Cycling',
+  'Walking',
+]
 
-function Chips({ options, selected, onToggle, tone = 'pink' }: { options: string[]; selected: string[]; onToggle: (value: string) => void; tone?: 'pink' | 'purple' | 'green' }) {
-  return <View style={styles.chips}>{options.map((option) => <TouchableOpacity key={option} onPress={() => onToggle(option)} style={[styles.chip, tone === 'purple' && styles.purpleChip, tone === 'green' && styles.greenChip, selected.includes(option) && styles.chipSelected]}><Text style={[styles.chipText, selected.includes(option) && styles.chipTextSelected]}>{option}</Text></TouchableOpacity>)}</View>
+function Chips({
+  options,
+  selected,
+  onToggle,
+  tone = 'pink',
+}: {
+  options: string[]
+  selected: string[]
+  onToggle: (value: string) => void
+  tone?: 'pink' | 'purple' | 'green'
+}) {
+  return (
+    <View style={styles.chips}>
+      {options.map((option) => (
+        <TouchableOpacity
+          key={option}
+          accessibilityRole="checkbox"
+          accessibilityLabel={option}
+          accessibilityState={{ checked: selected.includes(option) }}
+          onPress={() => onToggle(option)}
+          style={[
+            styles.chip,
+            tone === 'purple' && styles.purpleChip,
+            tone === 'green' && styles.greenChip,
+            selected.includes(option) && styles.chipSelected,
+          ]}
+        >
+          <Text style={[styles.chipText, selected.includes(option) && styles.chipTextSelected]}>
+            {option}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  )
 }
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
-  return <View style={styles.card}><Text style={styles.cardTitle}>{title}</Text>{children}</View>
+  return (
+    <View style={styles.card}>
+      <Text style={styles.cardTitle}>{title}</Text>
+      {children}
+    </View>
+  )
 }
 
 function Insights({ logs, summary }: { logs: CareLog[]; summary: NativeCycleSummary }) {
-  const moodCounts = useMemo(() => Object.entries(logs.reduce<Record<string, number>>((counts, log) => { if (log.mood) counts[log.mood] = (counts[log.mood] ?? 0) + 1; return counts }, {})).sort((a, b) => b[1] - a[1]).slice(0, 6), [logs])
-  const symptomCounts = useMemo(() => Object.entries(logs.flatMap((log) => log.symptoms ?? []).reduce<Record<string, number>>((counts, symptom) => { counts[symptom] = (counts[symptom] ?? 0) + 1; return counts }, {})).sort((a, b) => b[1] - a[1]).slice(0, 6), [logs])
+  const moodCounts = useMemo(
+    () =>
+      Object.entries(
+        logs.reduce<Record<string, number>>((counts, log) => {
+          if (log.mood) counts[log.mood] = (counts[log.mood] ?? 0) + 1
+          return counts
+        }, {})
+      )
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6),
+    [logs]
+  )
+  const symptomCounts = useMemo(
+    () =>
+      Object.entries(
+        logs
+          .flatMap((log) => log.symptoms ?? [])
+          .reduce<Record<string, number>>((counts, symptom) => {
+            counts[symptom] = (counts[symptom] ?? 0) + 1
+            return counts
+          }, {})
+      )
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 6),
+    [logs]
+  )
   const maxMood = Math.max(1, ...moodCounts.map(([, count]) => count))
-  return <ScrollView contentContainerStyle={styles.content}>
-    <Text style={styles.eyebrow}>CYCLE CARE</Text><Text style={styles.title}>Insights</Text>
-    <Card title="Cycle statistics"><View style={styles.statGrid}><Stat label="Average cycle" value={`${summary.cycleLength} days`} /><Stat label="Variation" value={`${summary.variationMin}-${summary.variationMax} days`} /><Stat label="Regularity" value={summary.regular ? 'Regular' : 'Irregular'} /><Stat label="Period average" value={`${summary.periodLength} days`} /></View></Card>
-    <Card title="Mood trends">{moodCounts.length ? moodCounts.map(([mood, count]) => <View key={mood} style={styles.barRow}><Text style={styles.barLabel}>{mood}</Text><View style={styles.barTrack}><View style={[styles.bar, { width: `${(count / maxMood) * 100}%` }]} /></View><Text style={styles.barValue}>{count}</Text></View>) : <Text style={styles.muted}>Log moods to see your trend.</Text>}</Card>
-    <Card title="Most frequent symptoms">{symptomCounts.length ? symptomCounts.map(([symptom, count]) => <View key={symptom} style={styles.frequencyRow}><Text style={styles.text}>{symptom}</Text><Text style={styles.accentText}>{count} days</Text></View>) : <Text style={styles.muted}>Log symptoms to see patterns.</Text>}</Card>
-    <Card title="Cycle history">{summary.cycleHistory.slice(-6).reverse().map((cycle) => <View key={`${cycle.startDate}-${cycle.status}`} style={styles.frequencyRow}><Text style={styles.text}>{cycle.startDate} - {cycle.endDate}</Text><Text style={styles.accentText}>{cycle.length}d · {cycle.status}</Text></View>)}</Card>
-  </ScrollView>
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <Text style={styles.eyebrow}>CYCLE CARE</Text>
+      <Text style={styles.title}>Insights</Text>
+      <Card title="Cycle statistics">
+        <View style={styles.statGrid}>
+          <Stat label="Average cycle" value={`${summary.cycleLength} days`} />
+          <Stat label="Variation" value={`${summary.variationMin}-${summary.variationMax} days`} />
+          <Stat label="Regularity" value={summary.regular ? 'Regular' : 'Irregular'} />
+          <Stat label="Period average" value={`${summary.periodLength} days`} />
+        </View>
+      </Card>
+      <Card title="Mood trends">
+        {moodCounts.length ? (
+          moodCounts.map(([mood, count]) => (
+            <View key={mood} style={styles.barRow}>
+              <Text style={styles.barLabel}>{mood}</Text>
+              <View style={styles.barTrack}>
+                <View style={[styles.bar, { width: `${(count / maxMood) * 100}%` }]} />
+              </View>
+              <Text style={styles.barValue}>{count}</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.muted}>Log moods to see your trend.</Text>
+        )}
+      </Card>
+      <Card title="Most frequent symptoms">
+        {symptomCounts.length ? (
+          symptomCounts.map(([symptom, count]) => (
+            <View key={symptom} style={styles.frequencyRow}>
+              <Text style={styles.text}>{symptom}</Text>
+              <Text style={styles.accentText}>{count} days</Text>
+            </View>
+          ))
+        ) : (
+          <Text style={styles.muted}>Log symptoms to see patterns.</Text>
+        )}
+      </Card>
+      <Card title="Cycle history">
+        {summary.cycleHistory
+          .slice(-6)
+          .reverse()
+          .map((cycle) => (
+            <View key={`${cycle.startDate}-${cycle.status}`} style={styles.frequencyRow}>
+              <Text style={styles.text}>
+                {cycle.startDate} - {cycle.endDate}
+              </Text>
+              <Text style={styles.accentText}>
+                {cycle.length}d · {cycle.status}
+              </Text>
+            </View>
+          ))}
+      </Card>
+    </ScrollView>
+  )
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
-  return <View style={styles.stat}><Text style={styles.statValue}>{value}</Text><Text style={styles.muted}>{label}</Text></View>
+  return (
+    <View style={styles.stat}>
+      <Text style={styles.statValue}>{value}</Text>
+      <Text style={styles.muted}>{label}</Text>
+    </View>
+  )
 }
 
-function Calendar({ logs, summary, onLog }: { logs: CareLog[]; summary: NativeCycleSummary; onLog: (date: string) => void }) {
+function Calendar({
+  logs,
+  summary,
+  onLog,
+}: {
+  logs: CareLog[]
+  summary: NativeCycleSummary
+  onLog: (date: string) => void
+}) {
   const [month, setMonth] = useState(new Date())
-  const year = month.getFullYear(); const monthIndex = month.getMonth()
-  const days = new Date(year, monthIndex + 1, 0).getDate(); const firstDay = new Date(year, monthIndex, 1).getDay()
+  const year = month.getFullYear()
+  const monthIndex = month.getMonth()
+  const days = new Date(year, monthIndex + 1, 0).getDate()
+  const firstDay = new Date(year, monthIndex, 1).getDay()
   const periodDays = new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
   const monthName = month.toLocaleDateString([], { month: 'long', year: 'numeric' })
-  return <ScrollView contentContainerStyle={styles.content}><Text style={styles.eyebrow}>CYCLE CARE</Text><Text style={styles.title}>Calendar</Text>
-    <Card title={monthName}><View style={styles.calendarHeader}><TouchableOpacity onPress={() => setMonth(new Date(year, monthIndex - 1, 1))}><Text style={styles.nav}>‹</Text></TouchableOpacity><Text style={styles.calendarMonth}>{monthName}</Text><TouchableOpacity onPress={() => setMonth(new Date(year, monthIndex + 1, 1))}><Text style={styles.nav}>›</Text></TouchableOpacity></View>
-      <View style={styles.weekRow}>{['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => <Text key={`${day}-${index}`} style={styles.weekDay}>{day}</Text>)}</View><View style={styles.calendarGrid}>{Array.from({ length: firstDay }).map((_, index) => <View key={`empty-${index}`} style={styles.dayCell} />)}{Array.from({ length: days }, (_, index) => { const day = index + 1; const date = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const actual = periodDays.has(date); const predicted = Boolean(summary.nextPeriodStart && date >= summary.nextPeriodStart && date < addDays(summary.nextPeriodStart, summary.periodLength)); const fertile = Boolean(summary.fertileStart && summary.fertileEnd && date >= summary.fertileStart && date <= summary.fertileEnd); const ovulation = date === summary.ovulationDate; const today = date === dateKey(new Date()); return <TouchableOpacity key={date} onPress={() => onLog(date)} style={[styles.dayCell, actual && styles.periodDay, predicted && styles.predictedDay, fertile && styles.fertileDay, ovulation && styles.ovulationDay, today && styles.todayDay]}><Text style={styles.dayText}>{day}</Text></TouchableOpacity> })}</View>
-      <View style={styles.legend}><Text style={styles.legendText}>● Period</Text><Text style={styles.legendText}>◌ Predicted</Text><Text style={styles.legendText}>● Fertile</Text><Text style={styles.legendText}>● Ovulation</Text></View>
-    </Card><Card title="Forecast"><Text style={styles.text}>{summary.nextPeriodStart ? `Next period: ${summary.nextPeriodStart}` : 'Log at least one period to begin forecasting.'}</Text><Text style={styles.muted}>{summary.day ? `Today is cycle day ${summary.day}.` : 'Tap a date to log a period day.'}</Text></Card>
-  </ScrollView>
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <Text style={styles.eyebrow}>CYCLE CARE</Text>
+      <Text style={styles.title}>Calendar</Text>
+      <Card title={monthName}>
+        <View style={styles.calendarHeader}>
+          <TouchableOpacity onPress={() => setMonth(new Date(year, monthIndex - 1, 1))}>
+            <Text style={styles.nav}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.calendarMonth}>{monthName}</Text>
+          <TouchableOpacity onPress={() => setMonth(new Date(year, monthIndex + 1, 1))}>
+            <Text style={styles.nav}>›</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.weekRow}>
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
+            <Text key={`${day}-${index}`} style={styles.weekDay}>
+              {day}
+            </Text>
+          ))}
+        </View>
+        <View style={styles.calendarGrid}>
+          {Array.from({ length: firstDay }).map((_, index) => (
+            <View key={`empty-${index}`} style={styles.dayCell} />
+          ))}
+          {Array.from({ length: days }, (_, index) => {
+            const day = index + 1
+            const date = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+            const actual = periodDays.has(date)
+            const predicted = Boolean(
+              summary.nextPeriodStart &&
+              date >= summary.nextPeriodStart &&
+              date < addDays(summary.nextPeriodStart, summary.periodLength)
+            )
+            const fertile = Boolean(
+              summary.fertileStart &&
+              summary.fertileEnd &&
+              date >= summary.fertileStart &&
+              date <= summary.fertileEnd
+            )
+            const ovulation = date === summary.ovulationDate
+            const today = date === dateKey(new Date())
+            return (
+              <TouchableOpacity
+                key={date}
+                onPress={() => onLog(date)}
+                style={[
+                  styles.dayCell,
+                  actual && styles.periodDay,
+                  predicted && styles.predictedDay,
+                  fertile && styles.fertileDay,
+                  ovulation && styles.ovulationDay,
+                  today && styles.todayDay,
+                ]}
+              >
+                <Text style={styles.dayText}>{day}</Text>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
+        <View style={styles.legend}>
+          <Text style={styles.legendText}>● Period</Text>
+          <Text style={styles.legendText}>◌ Predicted</Text>
+          <Text style={styles.legendText}>● Fertile</Text>
+          <Text style={styles.legendText}>● Ovulation</Text>
+        </View>
+      </Card>
+      <Card title="Forecast">
+        <Text style={styles.text}>
+          {summary.nextPeriodStart
+            ? `Next period: ${summary.nextPeriodStart}`
+            : 'Log at least one period to begin forecasting.'}
+        </Text>
+        <Text style={styles.muted}>
+          {summary.day ? `Today is cycle day ${summary.day}.` : 'Tap a date to log a period day.'}
+        </Text>
+      </Card>
+    </ScrollView>
+  )
 }
 
 function Reminders() {
-  const [enabled, setEnabled] = useState({ period: true, fertile: true, ovulation: true, daily: true }); const [time, setTime] = useState('09:00')
-  useEffect(() => { void AsyncStorage.getItem('care.reminders').then((value) => { if (!value) return; const saved = JSON.parse(value) as { enabled?: typeof enabled; time?: string }; if (saved.enabled) setEnabled(saved.enabled); if (saved.time) setTime(saved.time) }).catch((error) => console.error('Unable to load Care reminders', error)) }, [])
-  const persist = (nextEnabled: typeof enabled, nextTime: string) => { void AsyncStorage.setItem('care.reminders', JSON.stringify({ enabled: nextEnabled, time: nextTime })).catch((error) => console.error('Unable to save Care reminders', error)) }
-  const toggle = (key: keyof typeof enabled) => setEnabled((current) => { const next = { ...current, [key]: !current[key] }; persist(next, time); return next })
-  const updateTime = (next: string) => { setTime(next); persist(enabled, next) }
-  return <ScrollView contentContainerStyle={styles.content}><Text style={styles.eyebrow}>CYCLE CARE</Text><Text style={styles.title}>Reminders</Text><Card title="Smart reminders"><Reminder label="Period coming soon (2 days before)" value={enabled.period} onChange={() => toggle('period')} /><Reminder label="Fertile window starting" value={enabled.fertile} onChange={() => toggle('fertile')} /><Reminder label="Ovulation expected" value={enabled.ovulation} onChange={() => toggle('ovulation')} /><Reminder label="Log mood and symptoms daily" value={enabled.daily} onChange={() => toggle('daily')} /></Card><Card title="Notification time"><Text style={styles.muted}>Choose when daily reminders are delivered.</Text><TextInput value={time} onChangeText={updateTime} placeholder="09:00" placeholderTextColor="#bcaed1" style={styles.input} /></Card></ScrollView>
+  const [enabled, setEnabled] = useState({
+    period: true,
+    fertile: true,
+    ovulation: true,
+    daily: true,
+  })
+  const [time, setTime] = useState('09:00')
+  useEffect(() => {
+    void AsyncStorage.getItem('care.reminders')
+      .then((value) => {
+        if (!value) return
+        const saved = JSON.parse(value) as { enabled?: typeof enabled; time?: string }
+        if (saved.enabled) setEnabled(saved.enabled)
+        if (saved.time) setTime(saved.time)
+      })
+      .catch((error) => console.error('Unable to load Care reminders', error))
+  }, [])
+  const persist = (nextEnabled: typeof enabled, nextTime: string) => {
+    void AsyncStorage.setItem(
+      'care.reminders',
+      JSON.stringify({ enabled: nextEnabled, time: nextTime })
+    ).catch((error) => console.error('Unable to save Care reminders', error))
+  }
+  const toggle = (key: keyof typeof enabled) =>
+    setEnabled((current) => {
+      const next = { ...current, [key]: !current[key] }
+      persist(next, time)
+      return next
+    })
+  const updateTime = (next: string) => {
+    setTime(next)
+    persist(enabled, next)
+  }
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <Text style={styles.eyebrow}>CYCLE CARE</Text>
+      <Text style={styles.title}>Reminders</Text>
+      <Card title="Smart reminders">
+        <Reminder
+          label="Period coming soon (2 days before)"
+          value={enabled.period}
+          onChange={() => toggle('period')}
+        />
+        <Reminder
+          label="Fertile window starting"
+          value={enabled.fertile}
+          onChange={() => toggle('fertile')}
+        />
+        <Reminder
+          label="Ovulation expected"
+          value={enabled.ovulation}
+          onChange={() => toggle('ovulation')}
+        />
+        <Reminder
+          label="Log mood and symptoms daily"
+          value={enabled.daily}
+          onChange={() => toggle('daily')}
+        />
+      </Card>
+      <Card title="Notification time">
+        <Text style={styles.muted}>Choose when daily reminders are delivered.</Text>
+        <TextInput
+          value={time}
+          onChangeText={updateTime}
+          placeholder="09:00"
+          placeholderTextColor="#bcaed1"
+          style={styles.input}
+        />
+      </Card>
+    </ScrollView>
+  )
 }
 
-function Reminder({ label, value, onChange }: { label: string; value: boolean; onChange: () => void }) {
-  return <View style={styles.reminder}><Text style={styles.text}>{label}</Text><Switch value={value} onValueChange={onChange} trackColor={{ false: '#4b3764', true: '#ff5d89' }} /></View>
+function Reminder({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: boolean
+  onChange: () => void
+}) {
+  return (
+    <View style={styles.reminder}>
+      <Text style={styles.text}>{label}</Text>
+      <Switch
+        accessibilityLabel={label}
+        accessibilityHint="Toggles this reminder"
+        value={value}
+        onValueChange={onChange}
+        trackColor={{ false: '#4b3764', true: '#ff5d89' }}
+      />
+    </View>
+  )
 }
 
 function HealthProfile() {
-  const [profile, setProfile] = useState({ age: '', weight: '', height: '', conditions: '', medications: '' })
-  useEffect(() => { void AsyncStorage.getItem('care.healthProfile').then((value) => { if (value) setProfile(JSON.parse(value) as typeof profile) }).catch((error) => console.error('Unable to load health profile', error)) }, [])
-  const update = (key: keyof typeof profile, value: string) => setProfile((current) => { const next = { ...current, [key]: value }; void AsyncStorage.setItem('care.healthProfile', JSON.stringify(next)).catch((error) => console.error('Unable to save health profile', error)); return next })
-  return <Card title="Health profile"><TextInput value={profile.age} onChangeText={(value) => update('age', value)} placeholder="Age" placeholderTextColor="#bcaed1" keyboardType="numeric" style={styles.input} /><TextInput value={profile.weight} onChangeText={(value) => update('weight', value)} placeholder="Weight (kg)" placeholderTextColor="#bcaed1" keyboardType="decimal-pad" style={styles.input} /><TextInput value={profile.height} onChangeText={(value) => update('height', value)} placeholder="Height (cm)" placeholderTextColor="#bcaed1" keyboardType="decimal-pad" style={styles.input} /><TextInput value={profile.conditions} onChangeText={(value) => update('conditions', value)} placeholder="Medical conditions" placeholderTextColor="#bcaed1" style={styles.input} /><TextInput value={profile.medications} onChangeText={(value) => update('medications', value)} placeholder="Medications" placeholderTextColor="#bcaed1" style={styles.input} /></Card>
+  const [profile, setProfile] = useState({
+    age: '',
+    weight: '',
+    height: '',
+    conditions: '',
+    medications: '',
+  })
+  useEffect(() => {
+    void AsyncStorage.getItem('care.healthProfile')
+      .then((value) => {
+        if (value) setProfile(JSON.parse(value) as typeof profile)
+      })
+      .catch((error) => console.error('Unable to load health profile', error))
+  }, [])
+  const update = (key: keyof typeof profile, value: string) =>
+    setProfile((current) => {
+      const next = { ...current, [key]: value }
+      void AsyncStorage.setItem('care.healthProfile', JSON.stringify(next)).catch((error) =>
+        console.error('Unable to save health profile', error)
+      )
+      return next
+    })
+  return (
+    <Card title="Health profile">
+      <TextInput
+        value={profile.age}
+        onChangeText={(value) => update('age', value)}
+        placeholder="Age"
+        placeholderTextColor="#bcaed1"
+        keyboardType="numeric"
+        style={styles.input}
+      />
+      <TextInput
+        value={profile.weight}
+        onChangeText={(value) => update('weight', value)}
+        placeholder="Weight (kg)"
+        placeholderTextColor="#bcaed1"
+        keyboardType="decimal-pad"
+        style={styles.input}
+      />
+      <TextInput
+        value={profile.height}
+        onChangeText={(value) => update('height', value)}
+        placeholder="Height (cm)"
+        placeholderTextColor="#bcaed1"
+        keyboardType="decimal-pad"
+        style={styles.input}
+      />
+      <TextInput
+        value={profile.conditions}
+        onChangeText={(value) => update('conditions', value)}
+        placeholder="Medical conditions"
+        placeholderTextColor="#bcaed1"
+        style={styles.input}
+      />
+      <TextInput
+        value={profile.medications}
+        onChangeText={(value) => update('medications', value)}
+        placeholder="Medications"
+        placeholderTextColor="#bcaed1"
+        style={styles.input}
+      />
+    </Card>
+  )
 }
 
 export default function CareScreen() {
-  const [activeTab, setActiveTab] = useState<'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'>('Today')
-  const [data, setData] = useState<{ logs: CareLog[]; settings: CareSettings; coupleId: string; userId: string } | null>(null)
-  const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [error, setError] = useState<string | null>(null)
-  const [mood, setMood] = useState(''); const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]); const [sex, setSex] = useState<string[]>([]); const [discharge, setDischarge] = useState<string[]>([]); const [digestion, setDigestion] = useState<string[]>([]); const [pregnancyTest, setPregnancyTest] = useState<string[]>([]); const [ovulationTest, setOvulationTest] = useState(''); const [contraceptives, setContraceptives] = useState<string[]>([]); const [activities, setActivities] = useState<string[]>([]); const [water, setWater] = useState(''); const [weight, setWeight] = useState(''); const [basalTemp, setBasalTemp] = useState(''); const [notes, setNotes] = useState(''); const [periodDay, setPeriodDay] = useState(false)
-  const [shareCycle, setShareCycle] = useState(true); const [cycleLength, setCycleLength] = useState('28'); const [periodLength, setPeriodLength] = useState('5'); const [lastPeriodStart, setLastPeriodStart] = useState('')
-  const toggle = (current: string[], value: string, setter: (next: string[]) => void) => setter(current.includes(value) ? current.filter((item) => item !== value) : [...current, value])
-  const refresh = async () => { try { setLoading(true); setError(null); const next = await getCareData(); setData(next); setCycleLength(String(next.settings.cycleLength)); setPeriodLength(String(next.settings.periodLength)); setLastPeriodStart(next.settings.lastPeriodStart ?? '') } catch (caught) { setError(caught instanceof Error ? caught.message : 'Unable to load Care data.') } finally { setLoading(false) } }
-  useEffect(() => { void refresh() }, [])
-  const summary = useMemo(() => data ? calculateNativeCycleSummary(data.logs.map((log) => ({ log_date: log.logDate, period_day: log.periodDay, mood: log.mood, symptoms: log.symptoms })), { cycle_length: data.settings.cycleLength, period_length: data.settings.periodLength, last_period_start: data.settings.lastPeriodStart }) : null, [data])
-  const save = async (overrideDate?: string) => { if (!data) return; try { setSaving(true); const checkIn = { mood: mood || undefined, symptoms: selectedSymptoms, sex, discharge, digestion, pregnancyTest, ovulationTest: ovulationTest || undefined, contraceptives, activities, waterIntake: water ? Number(water) : undefined, weight: weight ? Number(weight) : undefined, basalTemp: basalTemp ? Number(basalTemp) : undefined, notes: notes || undefined, periodStarted: overrideDate ? true : periodDay }; if (overrideDate) await saveCareLogForDate(data.coupleId, data.userId, overrideDate, checkIn); else await saveTodayCareLog(checkIn); Alert.alert('Saved', 'Your shared Care log was saved.'); await refresh() } catch (caught) { Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.') } finally { setSaving(false) } }
-  const saveSettings = async () => { if (!data) return; try { await saveCareSettings({ coupleId: data.coupleId, cycleLength: Number(cycleLength), periodLength: Number(periodLength), lastPeriodStart: lastPeriodStart || null }); await refresh(); Alert.alert('Saved', 'Cycle settings updated.') } catch (caught) { Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.') } }
-  const exportData = async () => { if (!data) return; const header = 'date,period,mood,symptoms,water,weight,basal_temperature,notes'; const rows = data.logs.map((log) => [log.logDate, log.periodDay, log.mood ?? '', `"${(log.symptoms ?? []).join('; ')}"`, log.waterIntake ?? '', log.weight ?? '', log.basalTemp ?? '', `"${(log.notes ?? '').replace(/"/g, '""')}"`].join(',')); await Share.share({ message: [header, ...rows].join('\n'), title: 'Care data export.csv' }) }
-  if (loading) return <View style={styles.center}><ActivityIndicator color="#ff5d89" /><Text style={styles.muted}>Loading Care...</Text></View>
-  if (!data || !summary) return <View style={styles.center}><Text style={styles.text}>{error ?? 'Connect to your partner to use Care.'}</Text><TouchableOpacity style={styles.saveButton} onPress={() => void refresh()}><Text style={styles.saveText}>Retry</Text></TouchableOpacity></View>
-  return <View style={styles.screen}><ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabRow}>{(['Today', 'Insights', 'Calendar', 'Reminders', 'Settings'] as const).map((tab) => <TouchableOpacity key={tab} onPress={() => setActiveTab(tab)} style={[styles.tab, activeTab === tab && styles.tabActive]}><Text style={styles.tabText}>{tab}</Text></TouchableOpacity>)}</ScrollView>{activeTab === 'Insights' ? <Insights logs={data.logs} summary={summary} /> : activeTab === 'Calendar' ? <Calendar logs={data.logs} summary={summary} onLog={(date) => { setActiveTab('Today'); void save(date) }} /> : activeTab === 'Reminders' ? <Reminders /> : activeTab === 'Settings' ? <ScrollView contentContainerStyle={styles.content}><Text style={styles.eyebrow}>CYCLE CARE</Text><Text style={styles.title}>Settings</Text><Card title="Cycle settings"><TextInput value={cycleLength} onChangeText={setCycleLength} keyboardType="numeric" placeholder="Average cycle length (days)" placeholderTextColor="#bcaed1" style={styles.input} /><TextInput value={periodLength} onChangeText={setPeriodLength} keyboardType="numeric" placeholder="Average period length (days)" placeholderTextColor="#bcaed1" style={styles.input} /><TextInput value={lastPeriodStart} onChangeText={setLastPeriodStart} placeholder="Last period start (YYYY-MM-DD)" placeholderTextColor="#bcaed1" style={styles.input} /><TouchableOpacity style={styles.saveButton} onPress={() => void saveSettings()}><Text style={styles.saveText}>Save cycle settings</Text></TouchableOpacity></Card><Card title="Privacy"><Reminder label="Share cycle data with partner" value={shareCycle} onChange={() => setShareCycle((value) => !value)} /></Card><Card title="Export"><TouchableOpacity style={styles.secondaryButton} onPress={() => void exportData()}><Text style={styles.saveText}>Export cycle data (CSV)</Text></TouchableOpacity></Card><HealthProfile /></ScrollView> : <ScrollView contentContainerStyle={styles.content}><Text style={styles.eyebrow}>CYCLE CARE · SHARED WITH YOUR PARTNER</Text><Text style={styles.title}>Today</Text><View style={styles.hero}><Text style={styles.heroLabel}>CYCLE DAY</Text><Text style={styles.days}>{summary.day ?? '—'}</Text><Text style={styles.heroNote}>{summary.nextPeriodStart ? `Next period ${summary.nextPeriodStart}` : 'Log a period to begin forecasting.'}</Text></View><Card title="Mood"><Chips options={moods} selected={mood ? [mood] : []} onToggle={(value) => setMood(mood === value ? '' : value)} tone="purple" /></Card><Card title="Symptoms"><Chips options={symptoms} selected={selectedSymptoms} onToggle={(value) => toggle(selectedSymptoms, value, setSelectedSymptoms)} /></Card><Card title="Period day"><Reminder label="I am on my period today" value={periodDay} onChange={() => setPeriodDay((value) => !value)} /></Card><Card title="Sexual activity"><Chips options={sexOptions} selected={sex} onToggle={(value) => toggle(sex, value, setSex)} /></Card><Card title="Contraception"><Chips options={contraceptionOptions} selected={contraceptives} onToggle={(value) => toggle(contraceptives, value, setContraceptives)} tone="green" /></Card><Card title="Discharge"><Chips options={dischargeOptions} selected={discharge} onToggle={(value) => toggle(discharge, value, setDischarge)} tone="purple" /></Card><Card title="Digestion"><Chips options={digestionOptions} selected={digestion} onToggle={(value) => toggle(digestion, value, setDigestion)} /></Card><Card title="Pregnancy test"><Chips options={pregnancyOptions} selected={pregnancyTest} onToggle={(value) => toggle(pregnancyTest, value, setPregnancyTest)} /></Card><Card title="Activities"><Chips options={activityOptions} selected={activities} onToggle={(value) => toggle(activities, value, setActivities)} tone="green" /></Card><Card title="Ovulation test"><Chips options={['Positive', 'Negative', "Didn't take"]} selected={ovulationTest ? [ovulationTest] : []} onToggle={(value) => setOvulationTest(ovulationTest === value ? '' : value)} /></Card><Card title="Daily details"><TextInput value={water} onChangeText={setWater} keyboardType="numeric" placeholder="Water (ml)" placeholderTextColor="#bcaed1" style={styles.input} /><TextInput value={weight} onChangeText={setWeight} keyboardType="decimal-pad" placeholder="Weight (kg)" placeholderTextColor="#bcaed1" style={styles.input} /><TextInput value={basalTemp} onChangeText={setBasalTemp} keyboardType="decimal-pad" placeholder="Basal temperature (°C)" placeholderTextColor="#bcaed1" style={styles.input} /><TextInput value={notes} onChangeText={setNotes} multiline placeholder="Notes" placeholderTextColor="#bcaed1" style={[styles.input, styles.notes]} /></Card><TouchableOpacity disabled={saving} style={[styles.saveButton, saving && styles.disabled]} onPress={() => void save()}>{saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveText}>Save shared daily log</Text>}</TouchableOpacity></ScrollView>}</View>
+  const [activeTab, setActiveTab] = useState<
+    'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
+  >('Today')
+  const [data, setData] = useState<{
+    logs: CareLog[]
+    settings: CareSettings
+    coupleId: string
+    userId: string
+  } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [mood, setMood] = useState('')
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
+  const [sex, setSex] = useState<string[]>([])
+  const [discharge, setDischarge] = useState<string[]>([])
+  const [digestion, setDigestion] = useState<string[]>([])
+  const [pregnancyTest, setPregnancyTest] = useState<string[]>([])
+  const [ovulationTest, setOvulationTest] = useState('')
+  const [contraceptives, setContraceptives] = useState<string[]>([])
+  const [activities, setActivities] = useState<string[]>([])
+  const [water, setWater] = useState('')
+  const [weight, setWeight] = useState('')
+  const [basalTemp, setBasalTemp] = useState('')
+  const [notes, setNotes] = useState('')
+  const [periodDay, setPeriodDay] = useState(false)
+  const [shareCycle, setShareCycle] = useState(true)
+  const [cycleLength, setCycleLength] = useState('28')
+  const [periodLength, setPeriodLength] = useState('5')
+  const [lastPeriodStart, setLastPeriodStart] = useState('')
+  const toggle = (current: string[], value: string, setter: (next: string[]) => void) =>
+    setter(current.includes(value) ? current.filter((item) => item !== value) : [...current, value])
+  const refresh = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      const next = await getCareData()
+      setData(next)
+      setCycleLength(String(next.settings.cycleLength))
+      setPeriodLength(String(next.settings.periodLength))
+      setLastPeriodStart(next.settings.lastPeriodStart ?? '')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to load Care data.')
+    } finally {
+      setLoading(false)
+    }
+  }
+  useEffect(() => {
+    void refresh()
+  }, [])
+  const summary = useMemo(
+    () =>
+      data
+        ? calculateNativeCycleSummary(
+            data.logs.map((log) => ({
+              log_date: log.logDate,
+              period_day: log.periodDay,
+              mood: log.mood,
+              symptoms: log.symptoms,
+            })),
+            {
+              cycle_length: data.settings.cycleLength,
+              period_length: data.settings.periodLength,
+              last_period_start: data.settings.lastPeriodStart,
+            }
+          )
+        : null,
+    [data]
+  )
+  const save = async (overrideDate?: string) => {
+    if (!data) return
+    try {
+      setSaving(true)
+      const checkIn = {
+        mood: mood || undefined,
+        symptoms: selectedSymptoms,
+        sex,
+        discharge,
+        digestion,
+        pregnancyTest,
+        ovulationTest: ovulationTest || undefined,
+        contraceptives,
+        activities,
+        waterIntake: water ? Number(water) : undefined,
+        weight: weight ? Number(weight) : undefined,
+        basalTemp: basalTemp ? Number(basalTemp) : undefined,
+        notes: notes || undefined,
+        periodStarted: overrideDate ? true : periodDay,
+      }
+      if (overrideDate) await saveCareLogForDate(data.coupleId, data.userId, overrideDate, checkIn)
+      else await saveTodayCareLog(checkIn)
+      Alert.alert('Saved', 'Your shared Care log was saved.')
+      await refresh()
+    } catch (caught) {
+      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    } finally {
+      setSaving(false)
+    }
+  }
+  const saveSettings = async () => {
+    if (!data) return
+    try {
+      await saveCareSettings({
+        coupleId: data.coupleId,
+        cycleLength: Number(cycleLength),
+        periodLength: Number(periodLength),
+        lastPeriodStart: lastPeriodStart || null,
+      })
+      await refresh()
+      Alert.alert('Saved', 'Cycle settings updated.')
+    } catch (caught) {
+      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    }
+  }
+  const exportData = async () => {
+    if (!data) return
+    const header = 'date,period,mood,symptoms,water,weight,basal_temperature,notes'
+    const rows = data.logs.map((log) =>
+      [
+        log.logDate,
+        log.periodDay,
+        log.mood ?? '',
+        `"${(log.symptoms ?? []).join('; ')}"`,
+        log.waterIntake ?? '',
+        log.weight ?? '',
+        log.basalTemp ?? '',
+        `"${(log.notes ?? '').replace(/"/g, '""')}"`,
+      ].join(',')
+    )
+    await Share.share({ message: [header, ...rows].join('\n'), title: 'Care data export.csv' })
+  }
+  if (loading)
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator color="#ff5d89" />
+        <Text style={styles.muted}>Loading Care...</Text>
+      </View>
+    )
+  if (!data || !summary)
+    return (
+      <View style={styles.center}>
+        <Text style={styles.text}>{error ?? 'Connect to your partner to use Care.'}</Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Retry loading Care"
+          accessibilityHint="Loads Care data again"
+          style={styles.saveButton}
+          onPress={() => void refresh()}
+        >
+          <Text style={styles.saveText}>Retry</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  return (
+    <View style={styles.screen}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabRow}
+      >
+        {(['Today', 'Insights', 'Calendar', 'Reminders', 'Settings'] as const).map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            onPress={() => setActiveTab(tab)}
+            style={[styles.tab, activeTab === tab && styles.tabActive]}
+          >
+            <Text style={styles.tabText}>{tab}</Text>
+          </TouchableOpacity>
+        ))}
+      </ScrollView>
+      {activeTab === 'Insights' ? (
+        <Insights logs={data.logs} summary={summary} />
+      ) : activeTab === 'Calendar' ? (
+        <Calendar
+          logs={data.logs}
+          summary={summary}
+          onLog={(date) => {
+            setActiveTab('Today')
+            void save(date)
+          }}
+        />
+      ) : activeTab === 'Reminders' ? (
+        <Reminders />
+      ) : activeTab === 'Settings' ? (
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={styles.eyebrow}>CYCLE CARE</Text>
+          <Text style={styles.title}>Settings</Text>
+          <Card title="Cycle settings">
+            <TextInput
+              value={cycleLength}
+              onChangeText={setCycleLength}
+              keyboardType="numeric"
+              placeholder="Average cycle length (days)"
+              placeholderTextColor="#bcaed1"
+              style={styles.input}
+            />
+            <TextInput
+              value={periodLength}
+              onChangeText={setPeriodLength}
+              keyboardType="numeric"
+              placeholder="Average period length (days)"
+              placeholderTextColor="#bcaed1"
+              style={styles.input}
+            />
+            <TextInput
+              value={lastPeriodStart}
+              onChangeText={setLastPeriodStart}
+              placeholder="Last period start (YYYY-MM-DD)"
+              placeholderTextColor="#bcaed1"
+              style={styles.input}
+            />
+            <TouchableOpacity style={styles.saveButton} onPress={() => void saveSettings()}>
+              <Text style={styles.saveText}>Save cycle settings</Text>
+            </TouchableOpacity>
+          </Card>
+          <Card title="Privacy">
+            <Reminder
+              label="Share cycle data with partner"
+              value={shareCycle}
+              onChange={() => setShareCycle((value) => !value)}
+            />
+          </Card>
+          <Card title="Export">
+            <TouchableOpacity style={styles.secondaryButton} onPress={() => void exportData()}>
+              <Text style={styles.saveText}>Export cycle data (CSV)</Text>
+            </TouchableOpacity>
+          </Card>
+          <HealthProfile />
+        </ScrollView>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
+          <Text style={styles.eyebrow}>CYCLE CARE · SHARED WITH YOUR PARTNER</Text>
+          <Text style={styles.title}>Today</Text>
+          <View style={styles.hero}>
+            <Text style={styles.heroLabel}>CYCLE DAY</Text>
+            <Text style={styles.days}>{summary.day ?? '—'}</Text>
+            <Text style={styles.heroNote}>
+              {summary.nextPeriodStart
+                ? `Next period ${summary.nextPeriodStart}`
+                : 'Log a period to begin forecasting.'}
+            </Text>
+          </View>
+          <Card title="Mood">
+            <Chips
+              options={moods}
+              selected={mood ? [mood] : []}
+              onToggle={(value) => setMood(mood === value ? '' : value)}
+              tone="purple"
+            />
+          </Card>
+          <Card title="Symptoms">
+            <Chips
+              options={symptoms}
+              selected={selectedSymptoms}
+              onToggle={(value) => toggle(selectedSymptoms, value, setSelectedSymptoms)}
+            />
+          </Card>
+          <Card title="Period day">
+            <Reminder
+              label="I am on my period today"
+              value={periodDay}
+              onChange={() => setPeriodDay((value) => !value)}
+            />
+          </Card>
+          <Card title="Sexual activity">
+            <Chips
+              options={sexOptions}
+              selected={sex}
+              onToggle={(value) => toggle(sex, value, setSex)}
+            />
+          </Card>
+          <Card title="Contraception">
+            <Chips
+              options={contraceptionOptions}
+              selected={contraceptives}
+              onToggle={(value) => toggle(contraceptives, value, setContraceptives)}
+              tone="green"
+            />
+          </Card>
+          <Card title="Discharge">
+            <Chips
+              options={dischargeOptions}
+              selected={discharge}
+              onToggle={(value) => toggle(discharge, value, setDischarge)}
+              tone="purple"
+            />
+          </Card>
+          <Card title="Digestion">
+            <Chips
+              options={digestionOptions}
+              selected={digestion}
+              onToggle={(value) => toggle(digestion, value, setDigestion)}
+            />
+          </Card>
+          <Card title="Pregnancy test">
+            <Chips
+              options={pregnancyOptions}
+              selected={pregnancyTest}
+              onToggle={(value) => toggle(pregnancyTest, value, setPregnancyTest)}
+            />
+          </Card>
+          <Card title="Activities">
+            <Chips
+              options={activityOptions}
+              selected={activities}
+              onToggle={(value) => toggle(activities, value, setActivities)}
+              tone="green"
+            />
+          </Card>
+          <Card title="Ovulation test">
+            <Chips
+              options={['Positive', 'Negative', "Didn't take"]}
+              selected={ovulationTest ? [ovulationTest] : []}
+              onToggle={(value) => setOvulationTest(ovulationTest === value ? '' : value)}
+            />
+          </Card>
+          <Card title="Daily details">
+            <TextInput
+              value={water}
+              onChangeText={setWater}
+              keyboardType="numeric"
+              placeholder="Water (ml)"
+              placeholderTextColor="#bcaed1"
+              style={styles.input}
+            />
+            <TextInput
+              value={weight}
+              onChangeText={setWeight}
+              keyboardType="decimal-pad"
+              placeholder="Weight (kg)"
+              placeholderTextColor="#bcaed1"
+              style={styles.input}
+            />
+            <TextInput
+              value={basalTemp}
+              onChangeText={setBasalTemp}
+              keyboardType="decimal-pad"
+              placeholder="Basal temperature (°C)"
+              placeholderTextColor="#bcaed1"
+              style={styles.input}
+            />
+            <TextInput
+              value={notes}
+              onChangeText={setNotes}
+              multiline
+              placeholder="Notes"
+              placeholderTextColor="#bcaed1"
+              style={[styles.input, styles.notes]}
+            />
+          </Card>
+          <TouchableOpacity
+            disabled={saving}
+            style={[styles.saveButton, saving && styles.disabled]}
+            onPress={() => void save()}
+          >
+            {saving ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.saveText}>Save shared daily log</Text>
+            )}
+          </TouchableOpacity>
+        </ScrollView>
+      )}
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#1A0B2E' }, content: { padding: 20, paddingTop: 24, paddingBottom: 50 }, center: { flex: 1, backgroundColor: '#1A0B2E', justifyContent: 'center', alignItems: 'center', padding: 24, gap: 12 },
-  eyebrow: { color: '#c9b9dd', fontWeight: '700', letterSpacing: 1.3, fontSize: 10 }, title: { color: '#fff8ff', fontWeight: '800', fontSize: 30, marginTop: 6 }, tabRow: { gap: 8, paddingHorizontal: 20, paddingTop: 62, paddingBottom: 12, backgroundColor: '#1A0B2E' }, tab: { borderRadius: 16, backgroundColor: '#39235a', paddingHorizontal: 14, paddingVertical: 9 }, tabActive: { backgroundColor: '#ff5d89' }, tabText: { color: '#fff', fontWeight: '700', fontSize: 12 },
-  hero: { marginTop: 18, borderRadius: 28, padding: 24, alignItems: 'center', backgroundColor: '#2d1b4e', borderWidth: 1, borderColor: '#ffffff20' }, heroLabel: { color: '#c9b9dd', fontSize: 11, fontWeight: '800', letterSpacing: 1.5 }, days: { color: '#FFD700', fontWeight: '800', fontSize: 38, marginTop: 8 }, heroNote: { color: '#f7eaf4', fontSize: 15, fontWeight: '600', marginTop: 10, textAlign: 'center' },
-  card: { backgroundColor: '#2d1b4e', borderRadius: 22, padding: 18, marginTop: 16, borderWidth: 1, borderColor: '#ffffff1a' }, cardTitle: { color: '#fff8ff', fontSize: 19, fontWeight: '800' }, muted: { color: '#c9b9dd', fontSize: 13, marginTop: 5 }, text: { color: '#f7eaf4', fontSize: 14 }, accentText: { color: '#ff9bba', fontWeight: '700' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 }, chip: { borderRadius: 20, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: '#40245f' }, purpleChip: { backgroundColor: '#39235a' }, greenChip: { backgroundColor: '#184c45' }, chipSelected: { backgroundColor: '#ff5d89' }, chipText: { color: '#f0e7f7', fontWeight: '600', fontSize: 13 }, chipTextSelected: { color: '#fff' },
-  input: { borderRadius: 12, borderWidth: 1, borderColor: '#ffffff24', backgroundColor: '#1f1037', color: '#fff8ff', paddingHorizontal: 12, paddingVertical: 11, marginTop: 10 }, notes: { minHeight: 82, textAlignVertical: 'top' }, saveButton: { marginTop: 16, alignItems: 'center', borderRadius: 16, backgroundColor: '#ff5d89', paddingVertical: 15 }, secondaryButton: { alignItems: 'center', borderRadius: 16, backgroundColor: '#604582', paddingVertical: 14, marginTop: 14 }, saveText: { color: '#fff', fontWeight: '800' }, disabled: { opacity: 0.6 },
-  reminder: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#ffffff12' }, statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 }, stat: { width: '47%', backgroundColor: '#1f1037', borderRadius: 12, padding: 12 }, statValue: { color: '#ffb6c9', fontSize: 17, fontWeight: '800' },
-  barRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 }, barLabel: { color: '#f7eaf4', width: 105, fontSize: 12 }, barTrack: { flex: 1, height: 10, borderRadius: 5, backgroundColor: '#1f1037', overflow: 'hidden' }, bar: { height: '100%', backgroundColor: '#ff5d89', borderRadius: 5 }, barValue: { color: '#c9b9dd', width: 20, textAlign: 'right' }, frequencyRow: { flexDirection: 'row', justifyContent: 'space-between', gap: 8, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#ffffff12' },
-  calendarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }, calendarMonth: { color: '#fff', fontWeight: '800' }, nav: { color: '#ff9bba', fontSize: 32, paddingHorizontal: 12 }, weekRow: { flexDirection: 'row', marginTop: 14 }, weekDay: { color: '#c9b9dd', width: `${100 / 7}%`, textAlign: 'center', fontWeight: '700' }, calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 }, dayCell: { width: `${100 / 7}%`, aspectRatio: 1, alignItems: 'center', justifyContent: 'center', borderRadius: 10, borderWidth: 1, borderColor: 'transparent' }, dayText: { color: '#f7eaf4', fontSize: 13 }, periodDay: { backgroundColor: '#e84b72' }, predictedDay: { borderColor: '#ff9bba', borderStyle: 'dotted' }, fertileDay: { backgroundColor: '#276b8a' }, ovulationDay: { backgroundColor: '#34815a' }, todayDay: { borderColor: '#fff', borderWidth: 2 }, legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 16 }, legendText: { color: '#c9b9dd', fontSize: 11 },
+  screen: { flex: 1, backgroundColor: '#1A0B2E' },
+  content: { padding: 20, paddingTop: 24, paddingBottom: 50 },
+  center: {
+    flex: 1,
+    backgroundColor: '#1A0B2E',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+    gap: 12,
+  },
+  eyebrow: { color: '#c9b9dd', fontWeight: '700', letterSpacing: 1.3, fontSize: 10 },
+  title: { color: '#fff8ff', fontWeight: '800', fontSize: 30, marginTop: 6 },
+  tabRow: {
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingTop: 62,
+    paddingBottom: 12,
+    backgroundColor: '#1A0B2E',
+  },
+  tab: { borderRadius: 16, backgroundColor: '#39235a', paddingHorizontal: 14, paddingVertical: 9 },
+  tabActive: { backgroundColor: '#ff5d89' },
+  tabText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  hero: {
+    marginTop: 18,
+    borderRadius: 28,
+    padding: 24,
+    alignItems: 'center',
+    backgroundColor: '#2d1b4e',
+    borderWidth: 1,
+    borderColor: '#ffffff20',
+  },
+  heroLabel: { color: '#c9b9dd', fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
+  days: { color: '#FFD700', fontWeight: '800', fontSize: 38, marginTop: 8 },
+  heroNote: {
+    color: '#f7eaf4',
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 10,
+    textAlign: 'center',
+  },
+  card: {
+    backgroundColor: '#2d1b4e',
+    borderRadius: 22,
+    padding: 18,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#ffffff1a',
+  },
+  cardTitle: { color: '#fff8ff', fontSize: 19, fontWeight: '800' },
+  muted: { color: '#c9b9dd', fontSize: 13, marginTop: 5 },
+  text: { color: '#f7eaf4', fontSize: 14 },
+  accentText: { color: '#ff9bba', fontWeight: '700' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+  chip: { borderRadius: 20, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: '#40245f' },
+  purpleChip: { backgroundColor: '#39235a' },
+  greenChip: { backgroundColor: '#184c45' },
+  chipSelected: { backgroundColor: '#ff5d89' },
+  chipText: { color: '#f0e7f7', fontWeight: '600', fontSize: 13 },
+  chipTextSelected: { color: '#fff' },
+  input: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#ffffff24',
+    backgroundColor: '#1f1037',
+    color: '#fff8ff',
+    paddingHorizontal: 12,
+    paddingVertical: 11,
+    marginTop: 10,
+  },
+  notes: { minHeight: 82, textAlignVertical: 'top' },
+  saveButton: {
+    marginTop: 16,
+    alignItems: 'center',
+    borderRadius: 16,
+    backgroundColor: '#ff5d89',
+    paddingVertical: 15,
+  },
+  secondaryButton: {
+    alignItems: 'center',
+    borderRadius: 16,
+    backgroundColor: '#604582',
+    paddingVertical: 14,
+    marginTop: 14,
+  },
+  saveText: { color: '#fff', fontWeight: '800' },
+  disabled: { opacity: 0.6 },
+  reminder: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffffff12',
+  },
+  statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 },
+  stat: { width: '47%', backgroundColor: '#1f1037', borderRadius: 12, padding: 12 },
+  statValue: { color: '#ffb6c9', fontSize: 17, fontWeight: '800' },
+  barRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
+  barLabel: { color: '#f7eaf4', width: 105, fontSize: 12 },
+  barTrack: {
+    flex: 1,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#1f1037',
+    overflow: 'hidden',
+  },
+  bar: { height: '100%', backgroundColor: '#ff5d89', borderRadius: 5 },
+  barValue: { color: '#c9b9dd', width: 20, textAlign: 'right' },
+  frequencyRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 8,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ffffff12',
+  },
+  calendarHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  calendarMonth: { color: '#fff', fontWeight: '800' },
+  nav: { color: '#ff9bba', fontSize: 32, paddingHorizontal: 12 },
+  weekRow: { flexDirection: 'row', marginTop: 14 },
+  weekDay: { color: '#c9b9dd', width: `${100 / 7}%`, textAlign: 'center', fontWeight: '700' },
+  calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
+  dayCell: {
+    width: `${100 / 7}%`,
+    aspectRatio: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'transparent',
+  },
+  dayText: { color: '#f7eaf4', fontSize: 13 },
+  periodDay: { backgroundColor: '#e84b72' },
+  predictedDay: { borderColor: '#ff9bba', borderStyle: 'dotted' },
+  fertileDay: { backgroundColor: '#276b8a' },
+  ovulationDay: { backgroundColor: '#34815a' },
+  todayDay: { borderColor: '#fff', borderWidth: 2 },
+  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 16 },
+  legendText: { color: '#c9b9dd', fontSize: 11 },
 })

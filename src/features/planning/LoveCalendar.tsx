@@ -13,6 +13,22 @@ type Entry = {
   type: 'anniversary' | 'plan' | 'reminder'
 }
 
+type CanonicalEventType = 'date' | 'trip' | 'goal' | 'life' | 'other'
+
+const toCanonicalType: Record<Entry['type'], CanonicalEventType> = {
+  anniversary: 'date',
+  plan: 'goal',
+  reminder: 'other',
+}
+
+const fromCanonicalType: Record<CanonicalEventType, Entry['type']> = {
+  date: 'anniversary',
+  trip: 'plan',
+  goal: 'plan',
+  life: 'plan',
+  other: 'reminder',
+}
+
 const moodColors: Record<Entry['mood'], string> = {
   sweet: 'bg-[var(--accent-1)]/20 text-[var(--accent-1)]',
   adventure: 'bg-[var(--bg-2)] text-[var(--accent-1)]',
@@ -31,22 +47,24 @@ export default function LoveCalendar() {
 
   const loadEntries = async (activeCoupleId: string) => {
     const { data } = await supabase
-      .from('calendar_events')
-      .select('id,date,title,type')
+      .from('events')
+      .select('id,event_date,title,type')
       .eq('couple_id', activeCoupleId)
-      .order('date', { ascending: true })
-    setEntries((data ?? []).map((entry) => ({
-      id: entry.id,
-      date: String(entry.date).slice(0, 10),
-      label: entry.title ?? 'Untitled plan',
-      mood: entry.type === 'anniversary' ? 'special' : entry.type === 'plan' ? 'adventure' : 'sweet',
-      type: entry.type === 'anniversary' || entry.type === 'plan' ? entry.type : 'reminder',
-    })))
+      .order('event_date', { ascending: true })
+    setEntries(
+      (data ?? []).map((entry) => ({
+        id: entry.id,
+        date: String(entry.event_date).slice(0, 10),
+        label: entry.title ?? 'Untitled plan',
+        mood: entry.type === 'date' ? 'special' : entry.type === 'goal' ? 'adventure' : 'sweet',
+        type: fromCanonicalType[entry.type as CanonicalEventType] ?? 'reminder',
+      }))
+    )
   }
 
   useEffect(() => {
     void Promise.all([getCurrentUserId(), getCoupleStatus()]).then(([id, status]) => {
-      const activeCoupleId = status.status === 'accepted' ? status.couple?.id ?? null : null
+      const activeCoupleId = status.status === 'accepted' ? (status.couple?.id ?? null) : null
       setUserId(id)
       setCoupleId(activeCoupleId)
       if (activeCoupleId) void loadEntries(activeCoupleId)
@@ -61,12 +79,15 @@ export default function LoveCalendar() {
   const addEntry = async () => {
     const value = label.trim()
     if (!value || !selectedDate || !coupleId || !userId) return
-    const { error } = await supabase.from('calendar_events').insert({
+    const { error } = await supabase.from('events').insert({
       user_id: userId,
       couple_id: coupleId,
-      date: new Date(`${selectedDate}T12:00:00`).toISOString(),
+      event_date: selectedDate,
+      event_time: null,
+      description: null,
       title: value,
-      type,
+      type: toCanonicalType[type],
+      repeat: null,
     })
     if (!error) {
       setLabel('')
@@ -146,13 +167,21 @@ export default function LoveCalendar() {
             placeholder="Add a date idea"
             className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
           />
-          <button onClick={() => void addEntry()} disabled={!coupleId} className="glass-button px-3 py-2 text-sm disabled:opacity-50">
+          <button
+            onClick={() => void addEntry()}
+            disabled={!coupleId}
+            className="glass-button px-3 py-2 text-sm disabled:opacity-50"
+          >
             Add
           </button>
         </div>
       </div>
 
-      {!coupleId && <p className="text-sm text-amber-200">Accept a couple link to save plans shared by both accounts.</p>}
+      {!coupleId && (
+        <p className="text-sm text-amber-200">
+          Accept a couple link to save plans shared by both accounts.
+        </p>
+      )}
 
       <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80">
         <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">

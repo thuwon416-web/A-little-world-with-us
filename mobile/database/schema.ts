@@ -36,7 +36,33 @@ export class UserModel extends Model {
   }
 }
 
+export class OfflineQueueModel extends Model {
+  static table = 'offline_queue'
+  method!: string
+  url!: string
+  body!: string
+  retry_count!: number
+  created_at!: string
+
+  static createTableSchema() {
+    return tableSchema({
+      name: 'offline_queue',
+      columns: [
+        { name: 'method', type: 'string' },
+        { name: 'url', type: 'string' },
+        { name: 'body', type: 'string' },
+        { name: 'retry_count', type: 'number' },
+        { name: 'created_at', type: 'string' },
+      ],
+    })
+  }
+}
+
 export default appSchema({
-  version: 4,
-  tables: [MessageModel.createTableSchema(), UserModel.createTableSchema()],
+  version: 5,
+  tables: [
+    MessageModel.createTableSchema(),
+    UserModel.createTableSchema(),
+    OfflineQueueModel.createTableSchema(),
+  ],
 })

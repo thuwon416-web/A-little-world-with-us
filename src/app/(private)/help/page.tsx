@@ -2,6 +2,7 @@
 
 import { HelpCircle, Search, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import Link from 'next/link'
 
 import KeyboardShortcutsHelp from '@/components/shared/KeyboardShortcutsHelp'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
@@ -91,7 +92,9 @@ export default function HelpPage() {
             <HelpCircle className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Support</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+              Support
+            </p>
             <h1 className="mt-1 text-3xl font-serif text-[var(--text-primary)]">Help & FAQ</h1>
           </div>
         </div>
@@ -114,7 +117,10 @@ export default function HelpPage() {
           <div className="space-y-3">
             {filteredFaq.length > 0 ? (
               filteredFaq.map(({ question, answer }) => (
-                <div key={question} className="rounded-[22px] border border-white/10 bg-[var(--card-bg-strong)] p-4">
+                <div
+                  key={question}
+                  className="rounded-[22px] border border-white/10 bg-[var(--card-bg-strong)] p-4"
+                >
                   <p className="font-medium text-[var(--text-primary)]">{question}</p>
                   <p className="mt-2 text-sm text-[var(--text-secondary)]">{answer}</p>
                 </div>
@@ -131,13 +137,51 @@ export default function HelpPage() {
           {showShortcuts ? <KeyboardShortcutsHelp /> : null}
 
           <div className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
+            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Troubleshooting</h2>
+            <div className="mt-4 space-y-3 text-sm">
+              <p>
+                <strong className="text-[var(--text-primary)]">Cannot log in?</strong> Check your
+                connection, confirm your email, and try the password reset flow.
+              </p>
+              <p>
+                <strong className="text-[var(--text-primary)]">
+                  Cannot link with your partner?
+                </strong>{' '}
+                Confirm both accounts are registered and that the invite has not expired.
+              </p>
+              <p>
+                <strong className="text-[var(--text-primary)]">App is slow or not loading?</strong>{' '}
+                Refresh the page, check your connection, and try again with the latest browser
+                version.
+              </p>
+              <p>
+                <strong className="text-[var(--text-primary)]">Notifications not working?</strong>{' '}
+                Review notification permissions in Settings and in your device or browser settings.
+              </p>
+              <p>
+                <strong className="text-[var(--text-primary)]">Location not sharing?</strong>{' '}
+                Confirm location permission is enabled and that sharing has been turned on for your
+                accepted partner.
+              </p>
+              <p>
+                <strong className="text-[var(--text-primary)]">AI not responding?</strong> Check
+                your connection, submit a shorter request, and try again.
+              </p>
+            </div>
+          </div>
+
+          <div className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Need more help?</p>
-                <h2 className="text-lg font-semibold text-[var(--text-primary)]">Contact support</h2>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+                  Need more help?
+                </p>
+                <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                  Contact support
+                </h2>
               </div>
             </div>
 
@@ -151,6 +195,17 @@ export default function HelpPage() {
             >
               support@alittleworldwithus.com
             </a>
+            <div className="mt-4 flex flex-wrap gap-3 text-sm">
+              <Link href="/about" className="text-[var(--accent-1)] hover:underline">
+                About & FAQ
+              </Link>
+              <Link href="/privacy" className="text-[var(--accent-1)] hover:underline">
+                Privacy Policy
+              </Link>
+              <Link href="/terms" className="text-[var(--accent-1)] hover:underline">
+                Terms of Service
+              </Link>
+            </div>
           </div>
         </div>
       </div>

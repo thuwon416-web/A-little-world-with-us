@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable @next/next/no-img-element -- YouTube thumbnails are remote user-selected URLs. */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import RealtimeChat from '@/features/chat/RealtimeChat'
 import { supabase } from '@/lib/supabase'
@@ -20,6 +20,8 @@ export default function WatchTogetherPage() {
   const [playing, setPlaying] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const channelName = useMemo(() => coupleId ? `watch-sync-${coupleId}` : null, [coupleId])
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+  const latestSyncTimestamp = useRef(0)
 
   useEffect(() => {
     let channel: ReturnType<typeof supabase.channel> | null = null
@@ -32,29 +34,39 @@ export default function WatchTogetherPage() {
       const rows = (data ?? []) as WatchItem[]
       setItems(rows); setCurrent(rows[0] ?? null)
       channel = supabase.channel(`watch-sync-${couple.id}`)
-        .on('broadcast', { event: 'play' }, () => setPlaying(true))
-        .on('broadcast', { event: 'pause' }, () => setPlaying(false))
-        .on('broadcast', { event: 'video' }, ({ payload }) => { const item = rows.find((row) => row.youtube_id === payload.youtubeId); if (item) setCurrent(item) })
+      channelRef.current = channel
+        .on('broadcast', { event: 'play' }, ({ payload }) => {
+          const timestamp = Number(payload.timestamp) || 0
+          if (timestamp <= latestSyncTimestamp.current) return
+          latestSyncTimestamp.current = timestamp
+          setPlaying(true)
+        })
+        .on('broadcast', { event: 'pause' }, ({ payload }) => {
+          const timestamp = Number(payload.timestamp) || 0
+          if (timestamp <= latestSyncTimestamp.current) return
+          latestSyncTimestamp.current = timestamp
+          setPlaying(false)
+        })
+        .on('broadcast', { event: 'video' }, ({ payload }) => {
+          const timestamp = Number(payload.timestamp) || 0
+          if (timestamp <= latestSyncTimestamp.current) return
+          latestSyncTimestamp.current = timestamp
+          const item = rows.find((row) => row.youtube_id === payload.youtubeId)
+          if (item) setCurrent(item)
+        })
         .subscribe()
     })().catch((reason: unknown) => setError(reason instanceof Error ? reason.message : 'Unable to load Watch Together.'))
-    return () => { if (channel) void supabase.removeChannel(channel) }
+    return () => {
+      channelRef.current = null
+      if (channel) void supabase.removeChannel(channel)
+    }
   }, [])
 
   const broadcast = async (event: 'play' | 'pause' | 'video', payload: Record<string, unknown> = {}) => {
     if (!channelName) return
-    const sender = supabase.channel(channelName)
-    await new Promise<void>((resolve, reject) => {
-      sender.subscribe((status) => {
-        if (status === 'SUBSCRIBED') resolve()
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') reject(new Error(`Watch sync unavailable: ${status}`))
-      })
-    })
-    try {
-      const response = await sender.send({ type: 'broadcast', event, payload })
-      if (response !== 'ok') throw new Error(`Watch sync unavailable: ${response}`)
-    } finally {
-      await supabase.removeChannel(sender)
-    }
+    if (!channelRef.current) return
+    const response = await channelRef.current.send({ type: 'broadcast', event, payload: { ...payload, timestamp: Date.now() } })
+    if (response !== 'ok') throw new Error(`Watch sync unavailable: ${response}`)
   }
   const select = async (item: WatchItem) => {
     setCurrent(item); setPlaying(false); await broadcast('video', { youtubeId: item.youtube_id })

@@ -1,8 +1,8 @@
 import { Database } from '@nozbe/watermelondb'
-import { addColumns, schemaMigrations } from '@nozbe/watermelondb/Schema/migrations'
+import { addColumns, createTable, schemaMigrations } from '@nozbe/watermelondb/Schema/migrations'
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite'
 
-import schema, { MessageModel, UserModel } from './schema'
+import schema, { MessageModel, OfflineQueueModel, UserModel } from './schema'
 
 const migrations = schemaMigrations({
   migrations: [
@@ -40,6 +40,21 @@ const migrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 5,
+      steps: [
+        createTable({
+          name: 'offline_queue',
+          columns: [
+            { name: 'method', type: 'string' },
+            { name: 'url', type: 'string' },
+            { name: 'body', type: 'string' },
+            { name: 'retry_count', type: 'number' },
+            { name: 'created_at', type: 'string' },
+          ],
+        }),
+      ],
+    },
   ],
 })
 
@@ -51,8 +66,9 @@ const adapter = new SQLiteAdapter({
 
 export const database = new Database({
   adapter,
-  modelClasses: [MessageModel, UserModel],
+  modelClasses: [MessageModel, UserModel, OfflineQueueModel],
 })
 
 export const messagesCollection = database.get('messages')
 export const usersCollection = database.get('users')
+export const offlineQueueCollection = database.get('offline_queue')

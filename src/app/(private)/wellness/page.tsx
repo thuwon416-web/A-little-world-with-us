@@ -5,6 +5,8 @@ import { wellnessBoards } from '@/data/wellness-boards'
 import WellnessBoard from '@/components/wellness/WellnessBoard'
 import RelationshipQuests from '@/features/games/RelationshipQuests'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
+import { supabase } from '@/lib/supabase'
+import { logWellnessActivity } from '@/services/wellness'
 
 type TabId = 'physical' | 'mental' | 'relationship' | 'quests' | 'games'
 
@@ -33,7 +35,10 @@ export default function WellnessPage() {
 
   const filteredBoards = wellnessBoards.filter(board => board.category === activeTab)
 
-  const completeWorkout = (workout: Workout) => {
+  const completeWorkout = async (workout: Workout) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await logWellnessActivity(user.id, workout.name)
     setCompletedWorkouts([
       ...completedWorkouts,
       { ...workout, completedAt: new Date().toISOString() },

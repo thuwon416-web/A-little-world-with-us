@@ -93,7 +93,7 @@ export default function BucketList() {
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-[var(--accent-2)]">
           <ListTodo className="w-5 h-5" />
-          <h3 className="font-dancing text-2xl">Shared Bucket List</h3>
+          <h3 className="font-dancing text-2xl">Lists</h3>
         </div>
         <div className="rounded-full bg-[var(--card-bg)] px-2 py-1 text-[10px] uppercase tracking-[0.2em]">
           {totalProgress}% done

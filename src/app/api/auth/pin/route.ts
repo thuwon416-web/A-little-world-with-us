@@ -40,6 +40,14 @@ export async function POST(req: NextRequest) {
     const { action, pin } = pinRequestSchema.parse(await req.json())
 
     if (action === 'hash') {
+      const rateLimitResult = await checkRateLimit(`pin-hash:${user.id}`, 5, 60000)
+      if (!rateLimitResult.allowed) {
+        return NextResponse.json(
+          { error: 'Too many PIN changes. Try again later.' },
+          { status: 429 }
+        )
+      }
+
       const hashedPin = await bcrypt.hash(pin, SALT_ROUNDS)
 
       // Store the hashed PIN in user_settings
@@ -101,7 +109,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.error('PIN API error:', error)
+    console.error('PIN API error')
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

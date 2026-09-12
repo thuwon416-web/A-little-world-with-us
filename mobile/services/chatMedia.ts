@@ -1,5 +1,5 @@
-import { supabase } from '@/lib/supabase'
 import type { ChatAttachment } from '@/components/chat/chat-types'
+import { supabase } from '@/lib/supabase'
 
 export type ChatMediaBucket = 'chat_photos' | 'voice_messages' | 'chat_files'
 

@@ -12,5 +12,5 @@ module.exports = {
     'no-void': 'off',
     'no-console': ['warn', { allow: ['warn', 'error'] }],
   },
-  ignorePatterns: ['node_modules', 'dist', '.expo', '.eslintrc.js'],
+  ignorePatterns: ['node_modules', 'dist', '.expo', '.eslintrc.js', 'jest.config.js'],
 }

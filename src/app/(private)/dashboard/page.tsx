@@ -20,20 +20,15 @@ const MemoryOfTheDay = lazy(() => import('@/features/memories/MemoryOfTheDay'))
 const MiniCareCheck = lazy(() => import('@/features/cycle/MiniCareCheck'))
 const MusicPlayer = lazy(() => import('@/features/dashboard/MusicPlayer'))
 
-const COUPLE_NAME = 'KoKo × Pu Tuu'
-
 const defaultVisibility: Record<DashboardWidgetId, boolean> = {
   'days-counter': true,
-  'countdown': true,
+  countdown: true,
   'memory-of-the-day': true,
   'mini-care-check': true,
   'music-player': true,
 }
 
-const widgetMap: Record<
-  DashboardWidgetId,
-  { label: string; render: () => JSX.Element }
-> = {
+const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.Element }> = {
   'days-counter': {
     label: 'Days together',
     render: () => <DaysCounter />,
@@ -131,11 +126,15 @@ export default function DashboardPage() {
     useState<Record<DashboardWidgetId, boolean>>(defaultVisibility)
   const layoutReady = useRef(false)
   const [activeOccasion, setActiveOccasion] = useState<ActiveOccasion | null>(null)
+  const [coupleName, setCoupleName] = useState('Our World')
+  const [anniversary, setAnniversary] = useState<string | null>(null)
 
   useEffect(() => {
     void loadDashboardLayout().then((saved) => {
       if (saved) {
-        const validOrder = saved.order.filter((id): id is DashboardWidgetId => DEFAULT_WIDGETS.includes(id as DashboardWidgetId))
+        const validOrder = saved.order.filter((id): id is DashboardWidgetId =>
+          DEFAULT_WIDGETS.includes(id as DashboardWidgetId)
+        )
         setWidgetOrder(validOrder.length > 0 ? validOrder : DEFAULT_WIDGETS)
         setWidgetVisibility({ ...defaultVisibility, ...saved.visibility })
       }
@@ -147,8 +146,16 @@ export default function DashboardPage() {
     const loadTodayOccasion = async () => {
       const { couple } = await getCoupleStatus()
       if (!couple) return
+      setCoupleName(couple.name?.trim() || 'Our World')
+      setAnniversary(couple.anniversary ?? null)
       const today = new Date()
-      const { data } = await supabase.from('couple_occasions').select('title,kind,month,day').eq('couple_id', couple.id).eq('month', today.getMonth() + 1).eq('day', today.getDate()).limit(1)
+      const { data } = await supabase
+        .from('couple_occasions')
+        .select('title,kind,month,day')
+        .eq('couple_id', couple.id)
+        .eq('month', today.getMonth() + 1)
+        .eq('day', today.getDate())
+        .limit(1)
       const occasion = data?.[0] as (ActiveOccasion & { month: number; day: number }) | undefined
       if (occasion) setActiveOccasion({ title: occasion.title, kind: occasion.kind })
     }
@@ -180,7 +187,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className={`dashboard-shell animate-fade-in ${activeOccasion ? `dashboard-shell--${activeOccasion.kind}` : ''}`}>
+    <main
+      className={`dashboard-shell animate-fade-in ${activeOccasion ? `dashboard-shell--${activeOccasion.kind}` : ''}`}
+    >
       <section className="dashboard-hero">
         <div className="dashboard-hero__glow" />
         <div className="dashboard-hero__content">
@@ -194,10 +203,20 @@ export default function DashboardPage() {
             <span className="dashboard-hero__badge">∞</span>
           </div>
 
-          <p className="dashboard-hero__subtitle">{COUPLE_NAME}</p>
-          <p className="dashboard-hero__meta">{activeOccasion ? (activeOccasion.kind === 'anniversary' ? `Happy anniversary — ${activeOccasion.title}.` : activeOccasion.kind === 'birthday' ? `Happy birthday — ${activeOccasion.title}.` : `A little love day: ${activeOccasion.title}.`) : heroCopy.occasion}</p>
+          <p className="dashboard-hero__subtitle">{coupleName}</p>
+          <p className="dashboard-hero__meta">
+            {activeOccasion
+              ? activeOccasion.kind === 'anniversary'
+                ? `Happy anniversary — ${activeOccasion.title}.`
+                : activeOccasion.kind === 'birthday'
+                  ? `Happy birthday — ${activeOccasion.title}.`
+                  : `A little love day: ${activeOccasion.title}.`
+              : heroCopy.occasion}
+          </p>
 
-          <div className="mt-4"><AnniversaryShareCard /></div>
+          <div className="mt-4">
+            <AnniversaryShareCard />
+          </div>
 
           <div className="mt-4">
             <CoupleLinkStatus />
@@ -262,7 +281,14 @@ export default function DashboardPage() {
               }}
               className="dashboard-panel dashboard-card-interactive"
             >
-              {widget.render()}
+              {widgetId === 'countdown' ? (
+                <Countdown
+                  targetDate={anniversary ?? new Date().toISOString()}
+                  label={anniversary ? 'Anniversary' : 'Next occasion'}
+                />
+              ) : (
+                widget.render()
+              )}
               <div className="dashboard-widget-drag-handle" aria-hidden="true">
                 {index + 1}
               </div>

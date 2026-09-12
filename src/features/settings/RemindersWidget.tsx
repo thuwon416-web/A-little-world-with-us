@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Bell, Plus, X, Calendar } from 'lucide-react'
-import { insertRow, readUserRows, deleteRow, type Reminder } from '@/lib/supabase'
+import { insertRow, readUserRows, deleteRow, getCurrentUserId, type Reminder } from '@/lib/supabase'
 
 interface DisplayReminder {
   id: string
@@ -55,7 +55,9 @@ export default function RemindersWidget() {
   }
 
   const handleDelete = async (id: string) => {
-    await deleteRow('reminders', id)
+    const userId = await getCurrentUserId()
+    if (!userId) return
+    await deleteRow('reminders', id, userId)
     loadReminders()
   }
 

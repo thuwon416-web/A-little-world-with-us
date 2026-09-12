@@ -44,28 +44,46 @@ export async function initiateCall(receiverId: string, type: CallType) {
 }
 
 export async function acceptCall(callId: string) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+  if (userError || !user) return false
   const { error } = await supabase
     .from('call_signals')
     .update({ status: 'in_call', updated_at: new Date().toISOString() })
     .eq('id', callId)
+    .or(`caller_id.eq.${user.id},receiver_id.eq.${user.id}`)
 
   return !error
 }
 
 export async function rejectCall(callId: string) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+  if (userError || !user) return false
   const { error } = await supabase
     .from('call_signals')
     .update({ status: 'rejected', updated_at: new Date().toISOString() })
     .eq('id', callId)
+    .or(`caller_id.eq.${user.id},receiver_id.eq.${user.id}`)
 
   return !error
 }
 
 export async function endCall(callId: string) {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
+  if (userError || !user) return false
   const { error } = await supabase
     .from('call_signals')
     .update({ status: 'ended', updated_at: new Date().toISOString() })
     .eq('id', callId)
+    .or(`caller_id.eq.${user.id},receiver_id.eq.${user.id}`)
 
   return !error
 }
@@ -82,7 +100,10 @@ export function subscribeToCallSignals(onSignal: (signal: CallSignal) => void) {
       { event: 'INSERT', schema: 'public', table: 'call_signals' },
       (payload) => {
         const signal = payload.new as CallSignal
-        onSignal(signal)
+        void supabase.auth.getUser().then(({ data: { user } }) => {
+          if (user && (signal.caller_id === user.id || signal.receiver_id === user.id))
+            onSignal(signal)
+        })
       }
     )
     .subscribe()

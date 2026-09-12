@@ -5,7 +5,7 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 // Validation schema
 const messageSuggestionsSchema = z.object({
-  context: z.string().optional(),
+  context: z.string().max(1000).optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -103,10 +103,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
       return NextResponse.json(
-        { error: 'AI service unavailable', details: errorData },
-        { status: response.status }
+        { error: 'AI service unavailable' },
+        { status: 503 }
       )
     }
 
@@ -139,7 +138,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.error('Message Suggestions error:', error)
+    console.error('Message Suggestions error')
     return NextResponse.json({ error: 'Failed to generate suggestions' }, { status: 500 })
   }
 }

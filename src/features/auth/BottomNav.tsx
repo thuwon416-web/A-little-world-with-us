@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { 
-  Heart, 
+import {
+  Heart,
   HelpCircle,
-  Home, 
+  Home,
   Info,
-  LogOut, 
-  MessageCircleHeart, 
-  MoreHorizontal, 
+  LogOut,
+  MessageCircleHeart,
+  MoreHorizontal,
   Sparkles,
   MapPin,
   Phone,
@@ -35,7 +35,7 @@ const morePages = [
   { name: 'Location', href: '/location', icon: MapPin },
   { name: 'Calls', href: '/calls', icon: Phone },
   { name: 'AI', href: '/ai', icon: Cpu },
-  { name: 'Calendar & Plans', href: '/calendar', icon: Calendar },
+  { name: 'Plans', href: '/calendar', icon: Calendar },
   { name: 'Wellness & Play', href: '/wellness', icon: Sparkles },
   { name: 'Vault', href: '/vault', icon: Lock },
   { name: 'Settings', href: '/settings', icon: Settings },
@@ -54,7 +54,11 @@ export default function BottomNav() {
   useEffect(() => {
     void supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return
-      const { data } = await supabase.from('profiles').select('role,email').eq('id', user.id).maybeSingle()
+      const { data } = await supabase
+        .from('profiles')
+        .select('role,email')
+        .eq('id', user.id)
+        .maybeSingle()
       setIsAdmin(data?.role === 'admin' && data.email === 'thuwon416@gmail.com')
     })
   }, [])
@@ -124,17 +128,21 @@ export default function BottomNav() {
             </div>
 
             <div className="grid grid-cols-2 gap-3">
-              {morePages.filter((page) => page.href !== '/location' || isAdmin).map((page) => (
-                <Link
-                  key={page.name}
-                  href={page.href}
-                  onClick={() => setMoreMenuOpen(false)}
-                  className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4 transition hover:bg-[var(--card-bg)]/60"
-                >
-                  <page.icon size={24} className="text-[var(--accent-1)]" />
-                  <span className="text-xs font-medium text-[var(--text-primary)]">{page.name}</span>
-                </Link>
-              ))}
+              {morePages
+                .filter((page) => page.href !== '/location' || isAdmin)
+                .map((page) => (
+                  <Link
+                    key={page.name}
+                    href={page.href}
+                    onClick={() => setMoreMenuOpen(false)}
+                    className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4 transition hover:bg-[var(--card-bg)]/60"
+                  >
+                    <page.icon size={24} className="text-[var(--accent-1)]" />
+                    <span className="text-xs font-medium text-[var(--text-primary)]">
+                      {page.name}
+                    </span>
+                  </Link>
+                ))}
             </div>
 
             <button

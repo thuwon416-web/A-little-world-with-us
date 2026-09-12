@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Copy, Heart, Send, Sparkles } from 'lucide-react'
+import { addFavorite, type FavoriteCategory } from '@/lib/favorites'
 
 type Tool = 'chat' | 'letter' | 'message' | 'date' | 'gift' | 'surprise'
 
@@ -31,6 +32,7 @@ export default function AIFeaturePage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [copyStatus, setCopyStatus] = useState('')
+  const [saveStatus, setSaveStatus] = useState('')
 
   const current = prompts[tool]
 
@@ -93,6 +95,18 @@ export default function AIFeaturePage() {
     localStorage.removeItem('ai-last-result')
   }
 
+  const saveResult = async () => {
+    if (!result) return
+    try {
+      const category: FavoriteCategory = tool === 'gift' ? 'gift_ideas' : 'favorites'
+      await addFavorite(category, result.slice(0, 120), tool, undefined, result)
+      setSaveStatus('Saved')
+    } catch (caught) {
+      setSaveStatus(caught instanceof Error ? caught.message : 'Save failed')
+    }
+    window.setTimeout(() => setSaveStatus(''), 2500)
+  }
+
   return (
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
@@ -120,7 +134,7 @@ export default function AIFeaturePage() {
           <textarea id="ai-request" value={input} onChange={(event) => setInput(event.target.value)} placeholder={current.placeholder} maxLength={1000} className="mt-3 min-h-36 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4 text-sm leading-relaxed text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent-1)]" />
           <div className="mt-3 flex items-center justify-between gap-3"><span className="text-xs text-[var(--text-secondary)]">{input.length}/1000</span><button type="button" disabled={!input.trim() || loading} onClick={() => void generate()} className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-5 py-2.5 text-sm font-semibold text-[var(--bg-color)] disabled:cursor-not-allowed disabled:opacity-50"><Send className="h-4 w-4" />{loading ? 'Thinking…' : 'Generate'}</button></div>
           {error ? <p className="mt-5 rounded-2xl bg-red-500/10 p-4 text-sm text-red-400">{error}</p> : null}
-          {result ? <div className="mt-6 rounded-3xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">Your result{provider ? ` · ${provider}` : ''}</p><div className="flex items-center gap-2"><button type="button" onClick={() => void copyResult()} className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]"><Copy className="h-3.5 w-3.5" />{copyStatus || 'Copy'}</button><button type="button" onClick={clearResult} className="rounded-full border border-red-400/30 px-3 py-1.5 text-xs text-red-300">Clear</button></div></div><p className="mt-4 whitespace-pre-wrap leading-7 text-[var(--text-primary)]">{result}</p></div> : null}
+          {result ? <div className="mt-6 rounded-3xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">Your result{provider ? ` · ${provider}` : ''}</p><div className="flex items-center gap-2"><button type="button" onClick={() => void copyResult()} className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]"><Copy className="h-3.5 w-3.5" />{copyStatus || 'Copy'}</button><button type="button" onClick={() => void saveResult()} className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]"><Heart className="h-3.5 w-3.5" />{saveStatus || 'Save'}</button><button type="button" onClick={clearResult} className="rounded-full border border-red-400/30 px-3 py-1.5 text-xs text-red-300">Clear</button></div></div><p className="mt-4 whitespace-pre-wrap leading-7 text-[var(--text-primary)]">{result}</p></div> : null}
         </section>
       </div>
     </div>

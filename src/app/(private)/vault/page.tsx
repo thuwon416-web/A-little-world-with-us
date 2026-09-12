@@ -6,7 +6,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Lock, Eye, Plus, X, Save, Heart, Sparkles } from 'lucide-react'
 import VaultCard from '@/features/vault/VaultCard'
-import { setVaultUnlocked } from '@/lib/auth'
 import { insertRow, readRows, type SecretLetter } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
 
@@ -50,6 +49,8 @@ function VaultPageContent() {
   const [newContent, setNewContent] = useState('')
   const [vaultCategory, setVaultCategory] = useState<VaultCategory>('all')
   const [revealDate, setRevealDate] = useState('')
+  const [pin, setPin] = useState('')
+  const [unlockError, setUnlockError] = useState('')
 
   const filteredLetters = useMemo(() => {
     if (vaultCategory === 'all') return letters
@@ -74,12 +75,6 @@ function VaultPageContent() {
       }
       setIsAuthenticated(true)
 
-      const vaultUnlocked =
-        typeof window !== 'undefined' && localStorage.getItem('a-little-world-with-us-vault') === 'true'
-      if (vaultUnlocked) {
-        setIsUnlocked(true)
-        fetchLetters()
-      }
     }
 
     checkAuth()
@@ -93,11 +88,30 @@ function VaultPageContent() {
     setLetters(data)
   }
 
-  const handleUnlock = () => {
-    setVaultUnlocked(true)
+  const handleUnlock = async () => {
+    setUnlockError('')
+    const response = await fetch('/api/auth/pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify', pin }),
+    })
+    const result = await response.json()
+    if (!response.ok || !result.valid) {
+      setUnlockError(result.error ?? 'Invalid PIN')
+      return
+    }
     setIsUnlocked(true)
     fetchLetters()
   }
+
+  useEffect(() => {
+    if (!isUnlocked) return
+    const timeout = window.setTimeout(() => {
+      setIsUnlocked(false)
+      setLetters(fallbackLetters)
+    }, 5 * 60 * 1000)
+    return () => window.clearTimeout(timeout)
+  }, [isUnlocked])
 
   const handleCreate = async () => {
     if (!newTitle.trim() || !newContent.trim()) return
@@ -174,6 +188,16 @@ function VaultPageContent() {
           <p className="mt-2 text-sm text-[var(--text-secondary)]">
             Your private letters and memories, sealed until the right moment.
           </p>
+          <input
+            value={pin}
+            onChange={(event) => setPin(event.target.value)}
+            inputMode="numeric"
+            maxLength={4}
+            type="password"
+            placeholder="Enter your 4-digit PIN"
+            className="mt-5 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-transparent px-4 py-3 text-center text-[var(--text-primary)]"
+          />
+          {unlockError ? <p className="mt-2 text-sm text-red-400">{unlockError}</p> : null}
 
           <motion.button
             whileHover={{ scale: 1.02 }}

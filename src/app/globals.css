@@ -14,6 +14,26 @@
 /* ===== SHADCN BASE VARIABLES ===== */
 @layer base {
   :root {
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+      --space-10: 2.5rem;
+      --space-12: 3rem;
+      --font-xs: 0.75rem;
+      --font-sm: 0.875rem;
+      --font-base: 1rem;
+      --font-lg: 1.125rem;
+      --font-xl: 1.25rem;
+      --font-2xl: 1.5rem;
+      --font-3xl: 1.875rem;
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-error: #ef4444;
+      --color-muted: #a8a0b8;
     --background: 270 50% 12%;
     --foreground: 40 50% 95%;
     --card: 270 30% 18%;
@@ -42,6 +62,34 @@
     --font-display: var(--font-playfair);
     --font-body: var(--font-poppins);
     --font-accent: var(--font-dancing);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  @layer components {
+    .glass-button,
+    button {
+      transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    }
+
+    button:not(:disabled):hover,
+    .glass-button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:not(:disabled):active,
+    .glass-button:active {
+      transform: translateY(0);
+    }
   }
 }
 

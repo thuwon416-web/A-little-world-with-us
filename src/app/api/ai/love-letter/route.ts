@@ -5,10 +5,10 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 // Validation schema
 const loveLetterSchema = z.object({
-  partnerName: z.string().optional(),
-  relationshipLength: z.string().optional(),
-  specialMemories: z.string().optional(),
-  tone: z.string().optional(),
+  partnerName: z.string().max(200).optional(),
+  relationshipLength: z.string().max(100).optional(),
+  specialMemories: z.string().max(1000).optional(),
+  tone: z.string().max(100).optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -100,10 +100,9 @@ export async function POST(req: NextRequest) {
     }
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
       return NextResponse.json(
-        { error: 'AI service unavailable', details: errorData },
-        { status: response.status }
+        { error: 'AI service unavailable' },
+        { status: 503 }
       )
     }
 
@@ -127,7 +126,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.error('Love Letter error:', error)
+    console.error('Love Letter error')
     return NextResponse.json({ error: 'Failed to generate love letter' }, { status: 500 })
   }
 }
