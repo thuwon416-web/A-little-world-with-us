@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { type FormEvent, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Heart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -12,6 +12,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [sessionExpired, setSessionExpired] = useState(false)
+
+  useEffect(() => {
+    setSessionExpired(new URLSearchParams(window.location.search).get('reason') === 'session_expired')
+  }, [])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -46,6 +51,11 @@ export default function LoginPage() {
           </h1>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">Sign in to your little world.</p>
         </div>
+        {sessionExpired && (
+          <p className="mb-4 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+            Session expired. Please sign in again.
+          </p>
+        )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <input

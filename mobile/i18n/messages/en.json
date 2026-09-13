@@ -1,0 +1,37 @@
+{
+  "nav": {
+    "home": "Home",
+    "chat": "Chat",
+    "care": "Care",
+    "memories": "Memories",
+    "more": "More",
+    "plans": "Plans",
+    "ourMemories": "Our Memories",
+    "ourStory": "Our Story",
+    "wellness": "Wellness & Play",
+    "settings": "Settings",
+    "locationSafety": "Location Safety",
+    "aiGuardian": "AI Guardian",
+    "finance": "Finance",
+    "profile": "Profile",
+    "music": "Music",
+    "privateVault": "Private Vault",
+    "astrology": "Astrology",
+    "coupleGames": "Couple Games",
+    "timeCapsules": "Time Capsules",
+    "calls": "Calls",
+    "coupleLinking": "Couple Linking",
+    "privacy": "Privacy",
+    "helpCenter": "Help Center",
+    "about": "About",
+    "terms": "Terms",
+    "watchTogether": "Watch Together",
+    "lists": "Lists",
+    "reminders": "Reminders",
+    "everythingElse": "Everything else",
+    "signOut": "Sign out"
+  },
+  "settings": {
+    "language": "Language"
+  }
+}

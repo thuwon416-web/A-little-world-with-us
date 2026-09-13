@@ -1,4 +1,5 @@
 import { Redis } from '@upstash/redis'
+import { getDailyAiUsage } from '@/lib/ai/usage-log'
 
 // Initialize Redis client (fallback to in-memory if not configured)
 let redis: Redis | null = null
@@ -97,4 +98,18 @@ export async function checkRateLimit(
   
   userLimit.count++
   return { allowed: true, remaining: limit - userLimit.count, resetTime: userLimit.resetTime }
+}
+
+export async function checkAiUsageLimit(
+  userId: string,
+  dailyLimit: number
+): Promise<{ allowed: boolean; currentUsage: number; resetTime: Date }> {
+  const currentUsage = await getDailyAiUsage(userId)
+  const now = new Date()
+  const resetTime = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1))
+  return {
+    allowed: currentUsage < dailyLimit,
+    currentUsage,
+    resetTime,
+  }
 }

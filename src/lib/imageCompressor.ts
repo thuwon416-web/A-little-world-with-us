@@ -3,6 +3,8 @@
  * Converts to WebP and compresses
  */
 
+import { validateUpload } from './upload-validation'
+
 export interface CompressedImage {
   blob: Blob
   url: string
@@ -16,6 +18,9 @@ export async function compressImage(
   maxHeight: number = 1920,
   quality: number = 0.8
 ): Promise<CompressedImage> {
+  const validation = validateUpload(file, { imagesOnly: true })
+  if (!validation.valid) throw new Error(validation.error)
+
   return new Promise((resolve, reject) => {
     const img = new Image()
     const url = URL.createObjectURL(file)

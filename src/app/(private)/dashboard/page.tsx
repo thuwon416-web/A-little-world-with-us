@@ -1,14 +1,7 @@
 'use client'
 
-import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
-import DaysCounter from '@/features/dashboard/DaysCounter'
-import Countdown from '@/features/dashboard/Countdown'
-import CoupleLinkStatus from '@/features/auth/CoupleLinkStatus'
-import QuickActions from '@/features/dashboard/QuickActions'
-import AnniversaryShareCard from '@/features/dashboard/AnniversaryShareCard'
-import RelationshipStats from '@/features/dashboard/RelationshipStats'
-import OnThisDay from '@/features/dashboard/OnThisDay'
-import OurStats from '@/features/dashboard/OurStats'
+import dynamic from 'next/dynamic'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   DEFAULT_WIDGETS,
   loadDashboardLayout,
@@ -18,9 +11,17 @@ import {
 import { getCoupleStatus } from '@/lib/couples'
 import { supabase } from '@/lib/supabase'
 
-const MemoryOfTheDay = lazy(() => import('@/features/memories/MemoryOfTheDay'))
-const MiniCareCheck = lazy(() => import('@/features/cycle/MiniCareCheck'))
-const MusicPlayer = lazy(() => import('@/features/dashboard/MusicPlayer'))
+const DaysCounter = dynamic(() => import('@/features/dashboard/DaysCounter'), { loading: () => <DashboardPanelSkeleton /> })
+const Countdown = dynamic(() => import('@/features/dashboard/Countdown'), { loading: () => <DashboardPanelSkeleton /> })
+const CoupleLinkStatus = dynamic(() => import('@/features/auth/CoupleLinkStatus'), { loading: () => <DashboardPanelSkeleton /> })
+const QuickActions = dynamic(() => import('@/features/dashboard/QuickActions'), { loading: () => <DashboardPanelSkeleton /> })
+const AnniversaryShareCard = dynamic(() => import('@/features/dashboard/AnniversaryShareCard'), { loading: () => <DashboardPanelSkeleton /> })
+const RelationshipStats = dynamic(() => import('@/features/dashboard/RelationshipStats'), { loading: () => <DashboardPanelSkeleton /> })
+const OnThisDay = dynamic(() => import('@/features/dashboard/OnThisDay'), { loading: () => <DashboardPanelSkeleton /> })
+const OurStats = dynamic(() => import('@/features/dashboard/OurStats'), { loading: () => <DashboardPanelSkeleton /> })
+const MemoryOfTheDay = dynamic(() => import('@/features/memories/MemoryOfTheDay'), { loading: () => <DashboardPanelSkeleton /> })
+const MiniCareCheck = dynamic(() => import('@/features/cycle/MiniCareCheck'), { loading: () => <DashboardPanelSkeleton /> })
+const MusicPlayer = dynamic(() => import('@/features/dashboard/MusicPlayer'), { loading: () => <DashboardPanelSkeleton /> })
 
 const defaultVisibility: Record<DashboardWidgetId, boolean> = {
   'days-counter': true,
@@ -42,25 +43,19 @@ const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.El
   'memory-of-the-day': {
     label: 'Memory of the day',
     render: () => (
-      <Suspense fallback={<DashboardPanelSkeleton />}>
         <MemoryOfTheDay />
-      </Suspense>
     ),
   },
   'mini-care-check': {
     label: 'Mini care check',
     render: () => (
-      <Suspense fallback={<DashboardPanelSkeleton />}>
         <MiniCareCheck />
-      </Suspense>
     ),
   },
   'music-player': {
     label: 'Music player',
     render: () => (
-      <Suspense fallback={<div className="dashboard-shimmer h-16 w-full rounded-[1.25rem]" />}>
         <MusicPlayer />
-      </Suspense>
     ),
   },
 }
@@ -171,7 +166,10 @@ export default function DashboardPage() {
     void saveDashboardLayout({ order: widgetOrder, visibility: widgetVisibility })
   }, [widgetOrder, widgetVisibility])
 
-  const visibleWidgets = widgetOrder.filter((id) => widgetVisibility[id] !== false)
+  const visibleWidgets = useMemo(
+    () => widgetOrder.filter((id) => widgetVisibility[id] !== false),
+    [widgetOrder, widgetVisibility]
+  )
 
   const handleWidgetDrop = (fromId: string, toId: DashboardWidgetId) => {
     if (fromId === toId) return

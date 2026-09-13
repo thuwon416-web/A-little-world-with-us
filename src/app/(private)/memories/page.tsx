@@ -9,6 +9,7 @@ import { Heart, X } from 'lucide-react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
 import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
+import { validateUpload } from '@/lib/upload-validation'
 
 const MemoryCurationAI = dynamic(
   () => import('@/features/memories/MemoryCurationAI'),
@@ -170,17 +171,12 @@ function MemoriesPageContent() {
       return
     }
 
-    const invalidFile = files.find((file) => !['image/jpeg', 'image/png', 'image/webp'].includes(file.type))
+    const invalidFile = files
+      .map((file) => ({ file, validation: validateUpload(file, { imagesOnly: true }) }))
+      .find(({ validation }) => !validation.valid)
     if (invalidFile) {
       setSelectedFiles([])
-      setError(`${invalidFile.name}: choose a JPEG, PNG, or WebP image.`)
-      return
-    }
-
-    const oversizedFile = files.find((file) => file.size > 10 * 1024 * 1024)
-    if (oversizedFile) {
-      setSelectedFiles([])
-      setError(`${oversizedFile.name}: images must be 10 MB or smaller before compression.`)
+      setError(invalidFile.validation.error ?? 'Unsupported image file.')
       return
     }
 

@@ -1,4 +1,5 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import { validateUpload } from '@/lib/upload-validation'
 
 export type GalleryImage = { id: string; name: string; path: string; url: string; created_at: string }
 
@@ -16,6 +17,8 @@ async function currentUserId() {
 
 export async function uploadGalleryImage(file: File, _folder?: string) {
   if (!isSupabaseConfigured) throw new Error('Supabase is not configured.')
+  const validation = validateUpload(file, { imagesOnly: true })
+  if (!validation.valid) throw new Error(validation.error)
   const userId = await currentUserId()
   const extension = file.name.includes('.') ? file.name.split('.').pop() ?? 'jpg' : 'jpg'
   const path = `${userId}/${crypto.randomUUID()}.${extension}`

@@ -1,7 +1,7 @@
 'use client'
 
 import { BookHeart, Cake, Heart, HeartCrack, Handshake, MessageCircle, Sparkles, Star, type LucideIcon } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { EmptyState } from '@/components/ui/empty-state'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { RelationshipMemory } from '@/shared-types'
@@ -20,7 +20,7 @@ function yearsAgo(date: string) {
   return Math.max(1, new Date().getFullYear() - new Date(date).getFullYear())
 }
 
-export default function OnThisDay({ coupleId }: { coupleId: string }) {
+function OnThisDay({ coupleId }: { coupleId: string }) {
   const [memories, setMemories] = useState<RelationshipMemory[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -31,6 +31,8 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
       .catch(() => setMemories([]))
       .finally(() => setLoading(false))
   }, [coupleId])
+
+  const visibleMemories = useMemo(() => memories.slice(0, 3), [memories])
 
   return (
     <section className="glass-card dashboard-panel rounded-2xl p-6">
@@ -47,7 +49,7 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
         </div>
       ) : (
         <div className="mt-3 space-y-4">
-          {memories.map((memory) => (
+          {visibleMemories.map((memory) => (
             <article key={memory.id} className="border-l-2 border-[var(--accent-1)]/40 pl-3">
               <p className="text-xs text-[var(--text-secondary)]">
                 {yearsAgo(memory.date_time)} years ago today
@@ -71,3 +73,5 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
     </section>
   )
 }
+
+export default memo(OnThisDay)

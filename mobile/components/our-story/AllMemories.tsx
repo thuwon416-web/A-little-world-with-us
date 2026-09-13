@@ -1,5 +1,5 @@
 import { BookHeart } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import MemoryCard from './MemoryCard'
@@ -10,7 +10,7 @@ import type { MemoryImportance, RelationshipMemory } from '@/shared-types'
 
 const PAGE_SIZE = 50
 
-export default function AllMemories({
+function AllMemories({
   coupleId,
   initialCategory = 'all',
 }: {
@@ -47,11 +47,18 @@ export default function AllMemories({
     return () => clearTimeout(timer)
   }, [coupleId, search])
 
-  const categories = [...new Set(memories.map((item) => item.category))].sort()
-  const visible = memories.filter(
-    (item) =>
-      (importance === 'all' || item.importance === importance) &&
-      (category === 'all' || item.category === category)
+  const categories = useMemo(
+    () => [...new Set(memories.map((item) => item.category))].sort(),
+    [memories]
+  )
+  const visible = useMemo(
+    () =>
+      memories.filter(
+        (item) =>
+          (importance === 'all' || item.importance === importance) &&
+          (category === 'all' || item.category === category)
+      ),
+    [category, importance, memories]
   )
   if (loading)
     return (
@@ -120,11 +127,17 @@ export default function AllMemories({
           if (hasMore && !loadingMore) void load(memories.length)
         }}
         onEndReachedThreshold={0.5}
+        removeClippedSubviews
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
         ListFooterComponent={loadingMore ? <Text style={styles.muted}>Loading more…</Text> : null}
       />
     </View>
   )
 }
+
+export default memo(AllMemories)
 
 const styles = StyleSheet.create({
   wrapper: { flex: 1, gap: 12 },

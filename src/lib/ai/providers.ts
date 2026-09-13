@@ -1,3 +1,5 @@
+import { fetchWithTimeout } from '@/lib/ai/request-client'
+
 export type AiProvider =
   | 'groq'
   | 'gemini'
@@ -23,6 +25,18 @@ interface GenerateOptions {
 export interface AiGeneration {
   content: string
   provider: AiProvider
+}
+
+export interface AiProviderFailure {
+  provider: AiProvider
+  error: string
+}
+
+export class AIProviderError extends Error {
+  constructor(public readonly failures: AiProviderFailure[]) {
+    super('All configured AI providers failed')
+    this.name = 'AIProviderError'
+  }
 }
 
 const fallbackOrder: AiProvider[] = [
@@ -70,6 +84,8 @@ const openAiCompatibleProviders: Partial<Record<AiProvider, { key: string; endpo
   },
 }
 
+const resilienceOrder: AiProvider[] = ['groq', 'gemini', 'cerebras']
+
 function getModel(provider: AiProvider, defaultModel: string) {
   return process.env[`AI_${provider.toUpperCase()}_MODEL`] || defaultModel
 }
@@ -91,14 +107,13 @@ async function callOpenAiCompatible(
   const config = openAiCompatibleProviders[provider]
   if (!config || !process.env[config.key]) throw new Error(`${provider} is not configured`)
 
-  const response = await fetch(config.endpoint, {
+  const response = await fetchWithTimeout(config.endpoint, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${process.env[config.key]}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ model: getModel(provider, config.model), messages, max_tokens: maxTokens }),
-    signal: AbortSignal.timeout(20_000),
   })
   if (!response.ok) throw new Error(`${provider} request failed with ${response.status}`)
   const content = getOpenAiContent(await parseJson(response))
@@ -111,11 +126,10 @@ async function callGemini(messages: AiMessage[], maxTokens: number): Promise<str
   if (!key) throw new Error('gemini is not configured')
   const prompt = messages.map((message) => `${message.role}: ${message.content}`).join('\n\n')
   const model = getModel('gemini', 'gemini-2.0-flash')
-  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+  const response = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: maxTokens } }),
-    signal: AbortSignal.timeout(20_000),
   })
   if (!response.ok) throw new Error(`gemini request failed with ${response.status}`)
   const data = await parseJson(response)
@@ -128,11 +142,10 @@ async function callGemini(messages: AiMessage[], maxTokens: number): Promise<str
 async function callCohere(messages: AiMessage[], maxTokens: number): Promise<string> {
   const key = process.env.COHERE_API_KEY
   if (!key) throw new Error('cohere is not configured')
-  const response = await fetch('https://api.cohere.com/v2/chat', {
+  const response = await fetchWithTimeout('https://api.cohere.com/v2/chat', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ model: getModel('cohere', 'command-a-03-2025'), messages, max_tokens: maxTokens }),
-    signal: AbortSignal.timeout(20_000),
   })
   if (!response.ok) throw new Error(`cohere request failed with ${response.status}`)
   const data = await parseJson(response)
@@ -147,11 +160,10 @@ async function callCloudflare(messages: AiMessage[], maxTokens: number): Promise
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
   if (!key || !accountId) throw new Error('cloudflare is not configured')
   const model = getModel('cloudflare', '@cf/meta/llama-3.1-8b-instruct')
-  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`, {
+  const response = await fetchWithTimeout(`https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/run/${model}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages, max_tokens: maxTokens }),
-    signal: AbortSignal.timeout(20_000),
   })
   if (!response.ok) throw new Error(`cloudflare request failed with ${response.status}`)
   const data = await parseJson(response)
@@ -160,11 +172,12 @@ async function callCloudflare(messages: AiMessage[], maxTokens: number): Promise
   return result.response
 }
 
-export async function generateAiResponse({ messages, maxTokens = 600, provider }: GenerateOptions): Promise<AiGeneration> {
-  const providers = provider
-    ? [provider, ...fallbackOrder.filter((candidate) => candidate !== provider)]
-    : fallbackOrder
-
+async function callWithFallback(
+  providers: AiProvider[],
+  messages: AiMessage[],
+  maxTokens: number
+): Promise<AiGeneration> {
+  const failures: AiProviderFailure[] = []
   for (const candidate of providers) {
     try {
       const content = candidate === 'gemini'
@@ -174,13 +187,28 @@ export async function generateAiResponse({ messages, maxTokens = 600, provider }
           : candidate === 'cloudflare'
             ? await callCloudflare(messages, maxTokens)
             : await callOpenAiCompatible(candidate, messages, maxTokens)
+      console.warn(`AI provider ${candidate} selected`)
       return { content, provider: candidate }
     } catch (error) {
-      console.warn(`AI provider ${candidate} unavailable`, error instanceof Error ? error.message : 'unknown error')
+      const message = error instanceof Error && error.name === 'AbortError'
+        ? 'Request timed out'
+        : error instanceof Error
+          ? error.message
+          : 'Unknown provider error'
+      failures.push({ provider: candidate, error: message })
+      console.warn(`AI provider ${candidate} unavailable`, message)
     }
   }
 
-  throw new Error('No configured AI provider could generate a response')
+  throw new AIProviderError(failures)
+}
+
+export async function generateAiResponse({ messages, maxTokens = 600, provider }: GenerateOptions): Promise<AiGeneration> {
+  const providers = provider
+    ? [provider, ...fallbackOrder.filter((candidate) => candidate !== provider)]
+    : resilienceOrder
+
+  return callWithFallback(providers, messages, maxTokens)
 }
 
 export function isAiProvider(value: string | undefined): value is AiProvider {

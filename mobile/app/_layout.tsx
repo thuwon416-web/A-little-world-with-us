@@ -4,6 +4,7 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
 import { ThemeProvider } from '@/context/ThemeContext'
+import { I18nProvider } from '@/i18n/config'
 import { AuthProvider } from '@/lib/auth'
 import '@/services/location'
 
@@ -45,14 +46,16 @@ export default function RootLayout() {
   return (
     <ErrorBoundary>
       <AuthProvider>
-        <ThemeProvider>
-          <StatusBar style="light" backgroundColor="#0f0f12" />
-          <Stack>
-            <Stack.Screen name="login" options={{ title: 'Login' }} />
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
-          </Stack>
-        </ThemeProvider>
+        <I18nProvider>
+          <ThemeProvider>
+            <StatusBar style="light" backgroundColor="#0f0f12" />
+            <Stack>
+              <Stack.Screen name="login" options={{ title: 'Login' }} />
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
+            </Stack>
+          </ThemeProvider>
+        </I18nProvider>
       </AuthProvider>
     </ErrorBoundary>
   )

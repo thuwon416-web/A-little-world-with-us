@@ -19,6 +19,7 @@ import {
   Users,
   type LucideIcon,
 } from 'lucide-react-native'
+import { memo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
 
 import { spacing, typography } from '@/context/ThemeContext'
@@ -53,7 +54,7 @@ export function formatMemoryDate(value: string) {
   }).format(new Date(value))
 }
 
-export default function MemoryCard({ memory }: { memory: RelationshipMemory }) {
+function MemoryCard({ memory }: { memory: RelationshipMemory }) {
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -78,6 +79,8 @@ export default function MemoryCard({ memory }: { memory: RelationshipMemory }) {
     </View>
   )
 }
+
+export default memo(MemoryCard)
 
 const styles = StyleSheet.create({
   card: {

@@ -1,7 +1,7 @@
 'use client'
 
 import { BookHeart } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import MemoryCard from './MemoryCard'
 import { EmptyState as SharedEmptyState } from '@/components/ui/empty-state'
 import { ErrorState, LoadingCards } from './Timeline'
@@ -10,7 +10,7 @@ import type { MemoryImportance, RelationshipMemory } from '@/shared-types'
 
 const PAGE_SIZE = 50
 
-export default function AllMemories({ coupleId, initialCategory = 'all' }: { coupleId: string; initialCategory?: string }) {
+function AllMemories({ coupleId, initialCategory = 'all' }: { coupleId: string; initialCategory?: string }) {
   const [memories, setMemories] = useState<RelationshipMemory[]>([])
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState(initialCategory)
@@ -22,7 +22,7 @@ export default function AllMemories({ coupleId, initialCategory = 'all' }: { cou
   const [hasMore, setHasMore] = useState(true)
   const [error, setError] = useState('')
 
-  async function load(offset = 0) {
+  const load = useCallback(async (offset = 0) => {
     offset ? setLoadingMore(true) : setLoading(true)
     setError('')
     try {
@@ -36,7 +36,7 @@ export default function AllMemories({ coupleId, initialCategory = 'all' }: { cou
     } finally {
       offset ? setLoadingMore(false) : setLoading(false)
     }
-  }
+  }, [coupleId, search])
 
   useEffect(() => {
     const timer = window.setTimeout(() => void load(), 250)
@@ -46,13 +46,13 @@ export default function AllMemories({ coupleId, initialCategory = 'all' }: { cou
   }, [coupleId, search])
 
   const categories = useMemo(() => [...new Set(memories.map((memory) => memory.category))].sort(), [memories])
-  const filtered = memories.filter((memory) => {
+  const filtered = useMemo(() => memories.filter((memory) => {
     const date = new Date(memory.date_time)
     return (category === 'all' || memory.category === category) &&
       (importance === 'all' || memory.importance === importance) &&
       (!from || date >= new Date(`${from}T00:00:00`)) &&
       (!to || date <= new Date(`${to}T23:59:59`))
-  })
+  }), [category, from, importance, memories, to])
 
   if (loading) return <LoadingCards />
   if (error) return <ErrorState message={error} onRetry={() => void load()} />
@@ -82,3 +82,5 @@ export default function AllMemories({ coupleId, initialCategory = 'all' }: { cou
     </div>
   )
 }
+
+export default memo(AllMemories)

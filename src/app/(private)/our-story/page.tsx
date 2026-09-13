@@ -1,14 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { BookHeart, Heart, Layers, Sparkles } from 'lucide-react'
-import AllMemories from '@/features/our-story/AllMemories'
-import Categories from '@/features/our-story/Categories'
-import Timeline from '@/features/our-story/Timeline'
 import { getCoupleStatus } from '@/lib/couples'
 
 type Tab = 'timeline' | 'all' | 'categories'
+
+const TabSkeleton = () => <div className="h-96 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
+const Timeline = dynamic(() => import('@/features/our-story/Timeline'), { loading: TabSkeleton })
+const AllMemories = dynamic(() => import('@/features/our-story/AllMemories'), { loading: TabSkeleton })
+const Categories = dynamic(() => import('@/features/our-story/Categories'), { loading: TabSkeleton })
 
 export default function OurStoryPage() {
   const [coupleId, setCoupleId] = useState<string | null>(null)

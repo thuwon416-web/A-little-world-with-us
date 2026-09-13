@@ -25,36 +25,38 @@ import {
   Infinity,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { supabase } from '@/lib/supabase'
 
 const baseNavItems = [
-  { href: '/dashboard', label: 'Home', icon: Home },
-  { href: '/memories', label: 'Memories', icon: Heart },
-  { href: '/our-story', label: 'Our Story', icon: BookHeart },
-  { href: '/chat', label: 'Whispers', icon: MessageCircleHeart },
-  { href: '/calls', label: 'Calls', icon: PhoneCall },
-  { href: '/care', label: 'Care', icon: Heart },
-  { href: '/wellness', label: 'Wellness & Play', icon: Heart },
-  { href: '/calendar', label: 'Plans', icon: Calendar },
-  { href: '/astrology', label: 'Astrology', icon: Star },
-  { href: '/ai', label: 'AI Companion', icon: Sparkles },
-  { href: '/vault', label: 'Vault', icon: LockKeyhole },
-  { href: '/finance', label: 'Finance', icon: DollarSign },
-  { href: '/watch-together', label: 'Watch Together', icon: MonitorPlay },
-  { href: '/games', label: 'Games', icon: Gamepad2 },
-  { href: '/music', label: 'Music', icon: Music },
-  { href: '/gallery', label: 'Gallery', icon: Image },
-  { href: '/location', label: 'Location', icon: MapPin },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/dashboard', key: 'home', icon: Home },
+  { href: '/memories', key: 'memories', icon: Heart },
+  { href: '/our-story', key: 'ourStory', icon: BookHeart },
+  { href: '/chat', key: 'whispers', icon: MessageCircleHeart },
+  { href: '/calls', key: 'calls', icon: PhoneCall },
+  { href: '/care', key: 'care', icon: Heart },
+  { href: '/wellness', key: 'wellness', icon: Heart },
+  { href: '/calendar', key: 'plans', icon: Calendar },
+  { href: '/astrology', key: 'astrology', icon: Star },
+  { href: '/ai', key: 'ai', icon: Sparkles },
+  { href: '/vault', key: 'vault', icon: LockKeyhole },
+  { href: '/finance', key: 'finance', icon: DollarSign },
+  { href: '/watch-together', key: 'watchTogether', icon: MonitorPlay },
+  { href: '/games', key: 'games', icon: Gamepad2 },
+  { href: '/music', key: 'music', icon: Music },
+  { href: '/gallery', key: 'gallery', icon: Image },
+  { href: '/location', key: 'location', icon: MapPin },
+  { href: '/settings', key: 'settings', icon: Settings },
 ]
 
 const infoNavItems = [
-  { href: '/about', label: 'About', icon: Info },
-  { href: '/help', label: 'Help', icon: HelpCircle },
+  { href: '/about', key: 'about', icon: Info },
+  { href: '/help', key: 'help', icon: HelpCircle },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const { t } = useLanguage()
   const navItems = [...baseNavItems, ...infoNavItems]
 
   return (
@@ -76,7 +78,7 @@ export default function Sidebar() {
       </Link>
 
       <nav className="flex flex-1 flex-col gap-1">
-        {navItems.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, key, icon: Icon }) => {
           const active = pathname === href
 
           return (
@@ -90,7 +92,7 @@ export default function Sidebar() {
               }`}
             >
               <Icon size={17} />
-              {label}
+              {t(`nav.${key}`)}
             </Link>
           )
         })}
@@ -104,13 +106,13 @@ export default function Sidebar() {
         }}
         className="mt-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-3)] hover:text-[var(--text-primary)]"
       >
-        <LogOut size={17} /> Logout
+        <LogOut size={17} /> {t('nav.logout')}
       </button>
 
       <div className="mt-5 rounded-2xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-3">
         <div className="mb-1 flex items-center gap-1 text-[10px] text-[var(--text-secondary)]">
           <Sparkles size={11} />
-          Today&apos;s whisper
+          {t('nav.todaysWhisper')}
         </div>
         <p className="text-xs italic leading-relaxed text-[var(--text-primary)]">
           “You are my favorite hello and hardest goodbye.”

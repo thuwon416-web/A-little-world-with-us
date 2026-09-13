@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Clock3, Lock, Mail, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { validateUpload } from '@/lib/upload-validation'
 
 type CapsuleAttachment = { id: string; storage_path: string; media_type: 'image' | 'file'; url?: string }
 type Capsule = { id: string; title: string; content: string; unlock_at: string; status: 'scheduled' | 'revealed' | 'cancelled'; user_id: string; recipient_id: string; created_at: string; time_capsule_attachments?: CapsuleAttachment[] }
@@ -28,6 +29,10 @@ export default function TimeCapsule() {
 
   const seal = async () => {
     if (!title.trim() || !content.trim() || !unlockAt) { setError('Add a title, message, and reveal time.'); return }
+    if (attachment) {
+      const validation = validateUpload(attachment)
+      if (!validation.valid) { setError(validation.error ?? 'Unsupported attachment.'); return }
+    }
     setSaving(true); setError('')
     const { data: userData } = await supabase.auth.getUser()
     const user = userData.user

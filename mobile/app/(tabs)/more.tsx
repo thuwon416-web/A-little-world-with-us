@@ -24,65 +24,70 @@ import {
 } from 'lucide-react-native'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 
 const items = [
-  { href: '/(tabs)/plans', label: 'Plans', Icon: CalendarDays },
-  { href: '/(tabs)/memories', label: 'Our Memories', Icon: HeartPulse },
-  { href: '/(tabs)/our-story', label: 'Our Story', Icon: BookHeart },
-  { href: '/(tabs)/wellness', label: 'Wellness & Play', Icon: HeartPulse },
-  { href: '/(tabs)/settings', label: 'Settings', Icon: Settings },
-  { href: '/(tabs)/location', label: 'Location Safety', Icon: MapPin },
-  { href: '/(tabs)/ai', label: 'AI Guardian', Icon: Sparkles },
-  { href: '/(tabs)/finance', label: 'Finance', Icon: HeartPulse },
-  { href: '/(tabs)/profile', label: 'Profile', Icon: LogOut },
-  { href: '/(tabs)/music', label: 'Music', Icon: Music2 },
-  { href: '/(tabs)/vault', label: 'Private Vault', Icon: LockKeyhole },
-  { href: '/(tabs)/astrology', label: 'Astrology', Icon: Moon },
-  { href: '/(tabs)/games', label: 'Couple Games', Icon: Gamepad2 },
-  { href: '/(tabs)/time-capsules', label: 'Time Capsules', Icon: Hourglass },
-  { href: '/(tabs)/calls', label: 'Calls', Icon: Phone },
-  { href: '/(tabs)/couple-linking', label: 'Couple Linking', Icon: Users },
-  { href: '/(tabs)/privacy', label: 'Privacy', Icon: Shield },
-  { href: '/(tabs)/help', label: 'Help Center', Icon: CircleHelp },
-  { href: '/(tabs)/about', label: 'About', Icon: Info },
-  { href: '/(tabs)/terms', label: 'Terms', Icon: FileText },
-  { href: '/(tabs)/watch-together', label: 'Watch Together', Icon: MonitorPlay },
-  { href: '/(tabs)/lists', label: 'Lists', Icon: ListChecks },
-  { href: '/(tabs)/reminders', label: 'Reminders', Icon: Bell },
+  { href: '/(tabs)/plans', key: 'plans', Icon: CalendarDays },
+  { href: '/(tabs)/memories', key: 'ourMemories', Icon: HeartPulse },
+  { href: '/(tabs)/our-story', key: 'ourStory', Icon: BookHeart },
+  { href: '/(tabs)/wellness', key: 'wellness', Icon: HeartPulse },
+  { href: '/(tabs)/settings', key: 'settings', Icon: Settings },
+  { href: '/(tabs)/location', key: 'locationSafety', Icon: MapPin },
+  { href: '/(tabs)/ai', key: 'aiGuardian', Icon: Sparkles },
+  { href: '/(tabs)/finance', key: 'finance', Icon: HeartPulse },
+  { href: '/(tabs)/profile', key: 'profile', Icon: LogOut },
+  { href: '/(tabs)/music', key: 'music', Icon: Music2 },
+  { href: '/(tabs)/vault', key: 'privateVault', Icon: LockKeyhole },
+  { href: '/(tabs)/astrology', key: 'astrology', Icon: Moon },
+  { href: '/(tabs)/games', key: 'coupleGames', Icon: Gamepad2 },
+  { href: '/(tabs)/time-capsules', key: 'timeCapsules', Icon: Hourglass },
+  { href: '/(tabs)/calls', key: 'calls', Icon: Phone },
+  { href: '/(tabs)/couple-linking', key: 'coupleLinking', Icon: Users },
+  { href: '/(tabs)/privacy', key: 'privacy', Icon: Shield },
+  { href: '/(tabs)/help', key: 'helpCenter', Icon: CircleHelp },
+  { href: '/(tabs)/about', key: 'about', Icon: Info },
+  { href: '/(tabs)/terms', key: 'terms', Icon: FileText },
+  { href: '/(tabs)/watch-together', key: 'watchTogether', Icon: MonitorPlay },
+  { href: '/(tabs)/lists', key: 'lists', Icon: ListChecks },
+  { href: '/(tabs)/reminders', key: 'reminders', Icon: Bell },
 ] as const
 
 export default function MoreScreen() {
   const { signOut } = useAuth()
   const router = useRouter()
+  const { t } = useTranslation()
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>More</Text>
-      <Text style={styles.title}>Everything else</Text>
+      <Text style={styles.eyebrow}>{t('nav.more')}</Text>
+      <Text style={styles.title}>{t('nav.everythingElse')}</Text>
       <View style={styles.grid}>
-        {items.map(({ href, label, Icon }) => (
-          <TouchableOpacity
-            key={label}
-            accessibilityRole="button"
-            accessibilityLabel={label}
-            accessibilityHint={`Opens ${label}`}
-            style={styles.card}
-            onPress={() => router.push(href)}
-          >
-            <Icon size={22} color="#d9bfd7" />
-            <Text style={styles.label}>{label}</Text>
-          </TouchableOpacity>
-        ))}
+        {items.map(({ href, key, Icon }) => {
+          const label = t(`nav.${key}`)
+          return (
+            <TouchableOpacity
+              key={key}
+              accessibilityRole="button"
+              accessibilityLabel={label}
+              accessibilityHint={`Opens ${label}`}
+              style={styles.card}
+              onPress={() => router.push(href)}
+            >
+              <Icon size={22} color="#d9bfd7" />
+              <Text style={styles.label}>{label}</Text>
+            </TouchableOpacity>
+          )
+        })}
       </View>
       <TouchableOpacity
         accessibilityRole="button"
-        accessibilityLabel="Sign out"
-        accessibilityHint="Signs out of the current account"
+        accessibilityLabel={t('nav.signOut')}
+        accessibilityHint={t('nav.signOut')}
         onPress={() => void signOut()}
         style={styles.logout}
       >
         <LogOut size={18} color="#ff9b9b" />
-        <Text style={styles.logoutText}>Sign out</Text>
+        <Text style={styles.logoutText}>{t('nav.signOut')}</Text>
       </TouchableOpacity>
     </ScrollView>
   )

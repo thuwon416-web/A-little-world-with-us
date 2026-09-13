@@ -1,5 +1,5 @@
 import { BookHeart } from 'lucide-react-native'
-import { useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useMemo, useState } from 'react'
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import MemoryCard from './MemoryCard'
@@ -10,7 +10,7 @@ import type { RelationshipMemory } from '@/shared-types'
 
 const PAGE_SIZE = 50
 
-export default function Timeline({ coupleId }: { coupleId: string }) {
+function Timeline({ coupleId }: { coupleId: string }) {
   const [memories, setMemories] = useState<RelationshipMemory[]>([])
   const [year, setYear] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
@@ -105,11 +105,17 @@ export default function Timeline({ coupleId }: { coupleId: string }) {
           if (!loadingMore && memories.length >= PAGE_SIZE) void load(true)
         }}
         onEndReachedThreshold={0.5}
+        removeClippedSubviews
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
         ListFooterComponent={loadingMore ? <Text style={styles.muted}>Loading more…</Text> : null}
       />
     </View>
   )
 }
+
+export default memo(Timeline)
 
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (

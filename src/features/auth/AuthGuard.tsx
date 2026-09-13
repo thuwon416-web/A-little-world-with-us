@@ -18,13 +18,16 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     const syncSession = async () => {
       const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const {
         data: { user },
       } = await supabase.auth.getUser()
 
       if (!mounted) return
 
       if (!user) {
-        router.replace('/login')
+        router.replace(session ? '/login?reason=session_expired' : '/login')
         return
       }
 
@@ -56,7 +59,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       } else {
         setIsAuth(false)
         setPairStatus(null)
-        router.replace('/login')
+        router.replace('/login?reason=session_expired')
       }
     })
 

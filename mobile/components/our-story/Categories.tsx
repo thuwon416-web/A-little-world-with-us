@@ -9,7 +9,7 @@ import {
   Star,
   type LucideIcon,
 } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import MemoryCard from './MemoryCard'
@@ -27,7 +27,7 @@ const icons: Record<string, LucideIcon> = {
   first_events: Sparkles,
 }
 
-export default function Categories({
+function Categories({
   coupleId,
   onOpenCategory,
 }: {
@@ -78,6 +78,10 @@ export default function Categories({
       data={entries}
       numColumns={2}
       keyExtractor={([category]) => category}
+      removeClippedSubviews
+      initialNumToRender={10}
+      maxToRenderPerBatch={10}
+      windowSize={5}
       columnWrapperStyle={styles.row}
       contentContainerStyle={styles.grid}
       renderItem={({ item: [category, count] }) => (
@@ -105,6 +109,8 @@ export default function Categories({
     />
   )
 }
+
+export default memo(Categories)
 
 const styles = StyleSheet.create({
   grid: { gap: 12, paddingBottom: 24 },

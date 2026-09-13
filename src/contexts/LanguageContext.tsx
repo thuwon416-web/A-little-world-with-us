@@ -21,7 +21,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window === 'undefined') return
     
-    const saved = localStorage.getItem('a-little-world-with-us-lang') as Language
+    const saved = (
+      localStorage.getItem('a-little-world-with-us-locale') ??
+      localStorage.getItem('a-little-world-with-us-lang')
+    ) as Language
     if (saved && (saved === 'mm' || saved === 'en')) {
       setLanguageState(saved)
     }
@@ -31,6 +34,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLanguageState(lang)
     if (typeof window !== 'undefined') {
       localStorage.setItem('a-little-world-with-us-lang', lang)
+      localStorage.setItem('a-little-world-with-us-locale', lang)
     }
   }
 

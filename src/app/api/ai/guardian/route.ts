@@ -1,8 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
-import { generateAiResponse } from '@/lib/ai/providers'
-import { checkDailyRateLimit } from '@/lib/rate-limit'
+import { AIProviderError, generateAiResponse } from '@/lib/ai/providers'
+import { logAiUsage } from '@/lib/ai/usage-log'
+import { checkAiUsageLimit, checkDailyRateLimit } from '@/lib/rate-limit'
 import {
   DEFAULT_PRIVACY_SETTINGS,
   type AIPrivacySettings,
@@ -18,6 +19,7 @@ const guardianSchema = z.object({
 const privacyColumns = 'allow_ai_read_mood,allow_ai_read_cycle,allow_ai_read_chat,allow_ai_read_location,allow_ai_read_finance'
 
 export async function POST(req: NextRequest) {
+  let authenticatedUserId: string | undefined
   try {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -32,6 +34,7 @@ export async function POST(req: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    authenticatedUserId = user.id
 
     const rateLimit = await checkDailyRateLimit(user.id, 75)
     if (!rateLimit.allowed) {
@@ -42,6 +45,13 @@ export async function POST(req: NextRequest) {
     }
 
     const input = guardianSchema.parse(await req.json())
+    const usageLimit = await checkAiUsageLimit(user.id, 75)
+    if (!usageLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Daily AI usage limit exceeded. Please try again tomorrow.', resetTime: usageLimit.resetTime },
+        { status: 429 }
+      )
+    }
     const { data, error: settingsError } = await supabase
       .from('ai_privacy_settings')
       .select(privacyColumns)
@@ -116,6 +126,15 @@ export async function POST(req: NextRequest) {
       ],
       maxTokens: 600,
     })
+    void logAiUsage({
+      userId: user.id,
+      coupleId: coupleLink?.couple_id,
+      endpoint: 'guardian',
+      provider: result.provider,
+      status: 'success',
+      promptLength: systemPrompt.length + input.message.length,
+      responseLength: result.content.length,
+    })
 
     const usedIds = (contexts ?? []).map((context) => context.id)
     if (usedIds.length) {
@@ -128,6 +147,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid input', details: error.issues }, { status: 400 })
     }
 
+    if (error instanceof AIProviderError) {
+      if (authenticatedUserId) {
+        void logAiUsage({
+          userId: authenticatedUserId,
+          endpoint: 'guardian',
+          provider: error.failures.at(-1)?.provider ?? 'unknown',
+          status: error.failures.length > 0 && error.failures.every((failure) => failure.error === 'Request timed out')
+            ? 'timeout'
+            : 'failure',
+          promptLength: 0,
+          responseLength: 0,
+        })
+      }
+      console.error('AI Guardian providers exhausted:', error.failures.map(({ provider, error: reason }) => ({ provider, reason })))
+      return NextResponse.json(
+        { error: 'AI Guardian providers are temporarily unavailable. Please try again shortly.' },
+        { status: 503 }
+      )
+    }
     console.error('AI Guardian API error:', error)
     return NextResponse.json({ error: 'AI Guardian is unavailable.' }, { status: 503 })
   }

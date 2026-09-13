@@ -16,6 +16,7 @@ import {
 
 import { useTheme, type ThemePreference } from '@/context/ThemeContext'
 import { useLocation } from '@/hooks/useLocation'
+import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { registerForPushNotifications, sendLocalNotification } from '@/services/notifications'
@@ -104,6 +105,7 @@ export default function SettingsScreen() {
   const { user, signOut } = useAuth()
   const router = useRouter()
   const { preference, setPreference } = useTheme()
+  const { locale, setLocale, t } = useTranslation()
   const {
     isSharing,
     lastUpdated,
@@ -459,21 +461,23 @@ export default function SettingsScreen() {
         <Text style={styles.muted}>Manage your gentle care and connection nudges.</Text>
         <Button title="Open reminders" onPress={() => router.push('/reminders')} />
       </Section>
-      <Section title="Language">
+      <Section title={t('settings.language')}>
         <View style={styles.options}>
           <TouchableOpacity
-            style={[styles.option, data.language === 'my' && styles.optionActive]}
+            style={[styles.option, locale === 'my' && styles.optionActive]}
             onPress={async () => {
               await AsyncStorage.setItem('a-little-world-with-us-language', 'my')
+              setLocale('my')
               setData((current) => (current ? { ...current, language: 'my' } : current))
             }}
           >
             <Text style={styles.buttonText}>မြန်မာ</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.option, data.language === 'en' && styles.optionActive]}
+            style={[styles.option, locale === 'en' && styles.optionActive]}
             onPress={async () => {
               await AsyncStorage.setItem('a-little-world-with-us-language', 'en')
+              setLocale('en')
               setData((current) => (current ? { ...current, language: 'en' } : current))
             }}
           >

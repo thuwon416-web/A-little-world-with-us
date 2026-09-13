@@ -5,11 +5,13 @@ import { Heart, Home, MessageCircle, MoreHorizontal, Sparkles } from 'lucide-rea
 import { useEffect } from 'react'
 
 import { useAdmin } from '@/hooks/useAdmin'
+import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 
 export default function TabsLayout() {
   const { user, loading } = useAuth()
   const { loading: adminLoading } = useAdmin()
+  const { t } = useTranslation()
   useQuickActionRouting()
   useEffect(() => {
     void QuickActions.setItems([
@@ -47,40 +49,40 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarAccessibilityLabel: 'Home tab',
+          title: t('nav.home'),
+          tabBarAccessibilityLabel: `${t('nav.home')} tab`,
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
-          title: 'Chat',
-          tabBarAccessibilityLabel: 'Chat tab',
+          title: t('nav.chat'),
+          tabBarAccessibilityLabel: `${t('nav.chat')} tab`,
           tabBarIcon: ({ color, size }) => <MessageCircle color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="care"
         options={{
-          title: 'Care',
-          tabBarAccessibilityLabel: 'Care tab',
+          title: t('nav.care'),
+          tabBarAccessibilityLabel: `${t('nav.care')} tab`,
           tabBarIcon: ({ color, size }) => <Sparkles color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="gallery"
         options={{
-          title: 'Memories',
-          tabBarAccessibilityLabel: 'Memories tab',
+          title: t('nav.memories'),
+          tabBarAccessibilityLabel: `${t('nav.memories')} tab`,
           tabBarIcon: ({ color, size }) => <Heart color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
-          title: 'More',
-          tabBarAccessibilityLabel: 'More tab',
+          title: t('nav.more'),
+          tabBarAccessibilityLabel: `${t('nav.more')} tab`,
           tabBarIcon: ({ color, size }) => <MoreHorizontal color={color} size={size} />,
         }}
       />

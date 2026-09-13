@@ -1,13 +1,14 @@
 'use client'
 
 import { BookHeart } from 'lucide-react'
+import { memo } from 'react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { EmptyState } from '@/components/ui/empty-state'
 import { calculateDaysTogether } from '@/lib/relationship-days'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 
-export default function OurStats({ coupleId }: { coupleId: string }) {
+function OurStats({ coupleId }: { coupleId: string }) {
   const [stats, setStats] = useState<Record<string, number> | null>(null)
 
   useEffect(() => {
@@ -62,3 +63,5 @@ export default function OurStats({ coupleId }: { coupleId: string }) {
     </section>
   )
 }
+
+export default memo(OurStats)
