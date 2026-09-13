@@ -20,6 +20,7 @@ import {
   MonitorPlay,
   ListChecks,
   Bell,
+  BookHeart,
 } from 'lucide-react-native'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -28,6 +29,7 @@ import { useAuth } from '@/lib/auth'
 const items = [
   { href: '/(tabs)/plans', label: 'Plans', Icon: CalendarDays },
   { href: '/(tabs)/memories', label: 'Our Memories', Icon: HeartPulse },
+  { href: '/(tabs)/our-story', label: 'Our Story', Icon: BookHeart },
   { href: '/(tabs)/wellness', label: 'Wellness & Play', Icon: HeartPulse },
   { href: '/(tabs)/settings', label: 'Settings', Icon: Settings },
   { href: '/(tabs)/location', label: 'Location Safety', Icon: MapPin },

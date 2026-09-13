@@ -1,4 +1,3 @@
-import * as Haptics from 'expo-haptics'
 import React from 'react'
 import {
   Pressable,
@@ -10,6 +9,7 @@ import {
 } from 'react-native'
 
 import { designTokens } from '@/design-tokens'
+import { haptics } from '@/lib/haptics'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline'
 
@@ -54,7 +54,7 @@ export function Button({
       style={({ pressed }) => [containerStyle, pressed ? styles.pressed : null]}
       onPress={() => {
         if (!disabled) {
-          void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+          void haptics.light()
           onPress?.()
         }
       }}
@@ -76,6 +76,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
   },
   baseText: {
     fontWeight: '700',

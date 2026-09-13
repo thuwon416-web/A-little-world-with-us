@@ -72,6 +72,14 @@ web_modules/
 .env.*.local
 !.env.example
 
+# Python upload tooling
+scripts/__pycache__/
+*.pyc
+
+# Data files (large JSON from Telegram extraction)
+# Backup separately; do not commit to Git
+data/*.json
+
 # Vercel
 .vercel
 

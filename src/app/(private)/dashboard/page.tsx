@@ -7,6 +7,8 @@ import CoupleLinkStatus from '@/features/auth/CoupleLinkStatus'
 import QuickActions from '@/features/dashboard/QuickActions'
 import AnniversaryShareCard from '@/features/dashboard/AnniversaryShareCard'
 import RelationshipStats from '@/features/dashboard/RelationshipStats'
+import OnThisDay from '@/features/dashboard/OnThisDay'
+import OurStats from '@/features/dashboard/OurStats'
 import {
   DEFAULT_WIDGETS,
   loadDashboardLayout,
@@ -128,6 +130,7 @@ export default function DashboardPage() {
   const [activeOccasion, setActiveOccasion] = useState<ActiveOccasion | null>(null)
   const [coupleName, setCoupleName] = useState('Our World')
   const [anniversary, setAnniversary] = useState<string | null>(null)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   useEffect(() => {
     void loadDashboardLayout().then((saved) => {
@@ -146,6 +149,7 @@ export default function DashboardPage() {
     const loadTodayOccasion = async () => {
       const { couple } = await getCoupleStatus()
       if (!couple) return
+      setCoupleId(couple.id)
       setCoupleName(couple.name?.trim() || 'Our World')
       setAnniversary(couple.anniversary ?? null)
       const today = new Date()
@@ -236,6 +240,7 @@ export default function DashboardPage() {
       </section>
 
       <RelationshipStats />
+      {coupleId ? <OnThisDay coupleId={coupleId} /> : null}
 
       <div className="dashboard-toolbar">
         <p className="dashboard-kicker">Customize home</p>
@@ -297,6 +302,7 @@ export default function DashboardPage() {
         })}
       </section>
 
+      {coupleId ? <OurStats coupleId={coupleId} /> : null}
       <QuickActions />
     </main>
   )

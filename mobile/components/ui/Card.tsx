@@ -3,13 +3,28 @@ import { LinearGradient } from 'expo-linear-gradient'
 import React from 'react'
 import { StyleSheet, View, type ViewProps } from 'react-native'
 
-import { designTokens } from '@/design-tokens'
+import { useTheme } from '@/context/ThemeContext'
 
 export function Card({ style, children, ...props }: ViewProps) {
+  const { colors } = useTheme()
+
   return (
-    <BlurView intensity={35} tint="dark" {...props} style={[styles.card, style]}>
+    <BlurView
+      intensity={24}
+      tint="dark"
+      {...props}
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.cardBg,
+          borderColor: colors.cardBorder,
+          shadowColor: colors.accent1,
+        },
+        style,
+      ]}
+    >
       <LinearGradient
-        colors={['rgba(255,255,255,0.10)', 'rgba(255,255,255,0.035)']}
+        colors={[`${colors.accent1}20`, `${colors.accent2}10`, 'transparent']}
         style={StyleSheet.absoluteFill}
       />
       <View style={styles.content}>{children}</View>
@@ -20,15 +35,13 @@ export function Card({ style, children, ...props }: ViewProps) {
 const styles = StyleSheet.create({
   card: {
     overflow: 'hidden',
-    borderRadius: designTokens.radii.lg,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: designTokens.colors.border,
-    padding: designTokens.spacing.lg,
-    shadowColor: '#000',
-    shadowOpacity: 0.18,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+    padding: 24,
+    shadowOpacity: 0.12,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 5,
   },
   content: { zIndex: 1 },
 })

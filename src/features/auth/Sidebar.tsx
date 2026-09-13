@@ -21,6 +21,8 @@ import {
   Sparkles,
   Star,
   MonitorPlay,
+  BookHeart,
+  Infinity,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { supabase } from '@/lib/supabase'
@@ -28,6 +30,7 @@ import { supabase } from '@/lib/supabase'
 const baseNavItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
   { href: '/memories', label: 'Memories', icon: Heart },
+  { href: '/our-story', label: 'Our Story', icon: BookHeart },
   { href: '/chat', label: 'Whispers', icon: MessageCircleHeart },
   { href: '/calls', label: 'Calls', icon: PhoneCall },
   { href: '/care', label: 'Care', icon: Heart },
@@ -58,7 +61,7 @@ export default function Sidebar() {
     <aside className="flex h-full w-full flex-col rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-6 shadow-lg backdrop-blur-xl">
       <Link href="/dashboard" className="mb-7 flex items-center gap-3 px-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-lg">
-          ♾
+          <Infinity size={22} aria-hidden="true" />
         </div>
 
         <div>

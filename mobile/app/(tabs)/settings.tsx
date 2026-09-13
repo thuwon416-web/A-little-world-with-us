@@ -276,7 +276,13 @@ export default function SettingsScreen() {
               onPress={() => setPreference(option)}
               style={[styles.option, preference === option && styles.optionActive]}
             >
-              <Text style={styles.buttonText}>{option}</Text>
+              <Text style={styles.buttonText}>
+                {option === 'midnight'
+                  ? 'Midnight Romance'
+                  : option === 'sunset'
+                    ? 'Sunset Glow'
+                    : option[0].toUpperCase() + option.slice(1)}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>

@@ -14,26 +14,55 @@
 /* ===== SHADCN BASE VARIABLES ===== */
 @layer base {
   :root {
-      --space-1: 0.25rem;
-      --space-2: 0.5rem;
-      --space-3: 0.75rem;
-      --space-4: 1rem;
-      --space-5: 1.25rem;
-      --space-6: 1.5rem;
-      --space-8: 2rem;
-      --space-10: 2.5rem;
-      --space-12: 3rem;
-      --font-xs: 0.75rem;
-      --font-sm: 0.875rem;
-      --font-base: 1rem;
-      --font-lg: 1.125rem;
-      --font-xl: 1.25rem;
-      --font-2xl: 1.5rem;
-      --font-3xl: 1.875rem;
-      --color-success: #10b981;
-      --color-warning: #f59e0b;
-      --color-error: #ef4444;
-      --color-muted: #a8a0b8;
+    --font-display: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+    --font-body: "Inter", "Poppins", system-ui, sans-serif;
+    --font-serif: var(--font-display);
+    --font-sans: var(--font-body);
+    --font-accent: var(--font-display);
+    --text-h1: 2rem;
+    --text-h2: 1.5rem;
+    --text-h3: 1.25rem;
+    --text-body: 1rem;
+    --text-small: 0.875rem;
+    --text-caption: 0.75rem;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+    --space-3xl: 48px;
+    --space-4xl: 64px;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-8: 2rem;
+    --space-10: 2.5rem;
+    --space-12: 3rem;
+    --font-xs: 0.75rem;
+    --font-sm: 0.875rem;
+    --font-base: 1rem;
+    --font-lg: 1.125rem;
+    --font-xl: 1.25rem;
+    --font-2xl: 1.5rem;
+    --font-3xl: 1.875rem;
+    --color-success: #10b981;
+    --color-warning: #f59e0b;
+    --color-error: #ef4444;
+    --color-muted: #a8a0b8;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
     --background: 270 50% 12%;
     --foreground: 40 50% 95%;
     --card: 270 30% 18%;
@@ -90,26 +119,98 @@
     .glass-button:active {
       transform: translateY(0);
     }
+
+    .glass-card {
+      background: rgba(23, 27, 34, 0.72);
+      border: 1px solid rgba(184, 138, 229, 0.22);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-normal);
+    }
+
+    .glass-card:hover {
+      box-shadow: var(--shadow-lg);
+      border-color: rgba(184, 138, 229, 0.4);
+      transform: translateY(-2px);
+    }
+
+    .glass-card-strong {
+      background: rgba(32, 36, 45, 0.82);
+      border: 1px solid rgba(184, 138, 229, 0.3);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      box-shadow: var(--shadow-lg), 0 0 20px rgba(184, 138, 229, 0.12);
+    }
+
+    .gradient-border {
+      position: relative;
+      background: rgba(23, 27, 34, 0.72);
+      border-radius: var(--radius-lg);
+    }
+
+    .gradient-border::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(184, 138, 229, 0.9), rgba(217, 191, 215, 0.9));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+
+    .smooth-hover {
+      transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    }
+
+    .smooth-hover:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .skeleton-shimmer {
+      position: relative;
+      overflow: hidden;
+      background: linear-gradient(
+        90deg,
+        rgba(23, 27, 34, 0.6) 0%,
+        rgba(139, 120, 188, 0.18) 50%,
+        rgba(23, 27, 34, 0.6) 100%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 1.5s ease-in-out infinite;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: -200% 0;
+      }
+      100% {
+        background-position: 200% 0;
+      }
+    }
   }
 }
 
 /* ===== CINEMATIC THEME VARIABLES (MIDNIGHT DEFAULT) ===== */
 :root {
-  --bg-color: #1a0b2e;
+  --bg-color: #0f0f12;
   --bg-gradient: linear-gradient(
     160deg,
-    #1a0b2e 0%,
-    #2d1b4e 25%,
-    #4a2c6a 55%,
-    #3d2659 80%,
-    #1a0b2e 100%
+    #0f0f12 0%,
+    #171b22 45%,
+    #241d2d 100%
   );
-  --card-bg: rgba(45, 27, 78, 0.6);
-  --card-bg-strong: rgba(25, 22, 35, 0.9);
-  --text-primary: #f5f0ff;
-  --text-secondary: #d7d2e7;
-  --accent-1: #ff6b9d;
-  --accent-2: #ffd700;
+  --card-bg: rgba(23, 27, 34, 0.82);
+  --card-bg-strong: rgba(23, 27, 34, 0.96);
+  --text-primary: #f3f0f5;
+  --text-secondary: #c4c4ce;
+  --accent-1: #b88ae5;
+  --accent-2: #d9bfd7;
   --soft-pink: #ff8fb1;
   --warm-gold: #ffd700;
   --cream: #1f1830;
@@ -126,14 +227,14 @@
 
 /* ===== SUNSET THEME MODE ===== */
 :root[data-theme-mode='sunset'] {
-  --bg-color: #fff5ee;
-  --bg-gradient: linear-gradient(135deg, #fff5ee 0%, #ffd7b8 42%, #ffc1b6 100%);
-  --card-bg: rgba(255, 255, 255, 0.72);
-  --card-bg-strong: rgba(255, 249, 244, 0.9);
-  --text-primary: #4a2b2f;
-  --text-secondary: #7a5b5d;
-  --accent-1: #ff7e5f;
-  --accent-2: #feb47b;
+  --bg-color: #1a0f0a;
+  --bg-gradient: linear-gradient(135deg, #1a0f0a 0%, #2a1810 48%, #4a202c 100%);
+  --card-bg: rgba(42, 24, 16, 0.86);
+  --card-bg-strong: rgba(42, 24, 16, 0.96);
+  --text-primary: #fff5ec;
+  --text-secondary: #f1c7ae;
+  --accent-1: #ff9a56;
+  --accent-2: #ff6b9d;
   --soft-pink: #ff7a8a;
   --warm-gold: #ffcc70;
   --cream: #fff5ec;
@@ -293,11 +394,28 @@ body {
   background: var(--bg-gradient);
   background-attachment: fixed;
   min-height: 100vh;
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   color: var(--text-primary);
   transition:
     background 240ms ease,
     color 240ms ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+}
+
+button,
+input,
+textarea,
+select,
+label {
+  font-family: var(--font-sans);
 }
 
 .dashboard-shell {

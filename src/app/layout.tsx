@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next'
+import { Inter, Playfair_Display } from 'next/font/google'
 
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -9,6 +10,9 @@ import { Toaster } from '@/components/ui/sonner'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import AIChatWidget from '@/components/AIChatWidget'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display' })
 
 const descriptions = [
   'A private little world for KoKo and Pu Tuu — memories, love, and every day in between',
@@ -49,6 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="my"
       suppressHydrationWarning
       data-theme-mode="midnight"
+      className={`${inter.variable} ${playfair.variable}`}
     >
       <body className="min-h-screen font-sans antialiased">
         <LanguageProvider>

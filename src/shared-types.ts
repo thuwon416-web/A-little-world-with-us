@@ -32,6 +32,23 @@ export interface Memory {
   updated_at: string
 }
 
+export interface RelationshipMemory {
+  id: string
+  couple_id: string
+  category: string
+  sub_category: string | null
+  date_time: string
+  quote_burmese: string | null
+  context: string | null
+  persons: string[]
+  emotional_tone: string | null
+  importance: 'critical' | 'high' | 'medium' | 'low'
+  batch_id: string | null
+  created_at: string
+}
+
+export type MemoryImportance = RelationshipMemory['importance']
+
 export type MessageType =
   'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location'
 

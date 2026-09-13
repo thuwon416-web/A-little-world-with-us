@@ -22,6 +22,9 @@ import {
   View,
 } from 'react-native'
 
+import OnThisDay from '@/components/dashboard/OnThisDay'
+import OurStats from '@/components/dashboard/OurStats'
+import { supabase } from '@/lib/supabase'
 import { getCareData, type CareLog, type CareSettings } from '@/services/care'
 import { calculateNativeCycleSummary } from '@/services/cycleCalculator'
 import { getDashboardData, type DashboardData } from '@/services/dashboard'
@@ -75,6 +78,7 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [playing, setPlaying] = useState(false)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -83,6 +87,18 @@ export default function DashboardScreen() {
       const [nextDashboard, nextCare] = await Promise.all([getDashboardData(), getCareData()])
       setDashboard(nextDashboard)
       setCare({ logs: nextCare.logs, settings: nextCare.settings })
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (user) {
+        const { data: link } = await supabase
+          .from('couple_links')
+          .select('couple_id')
+          .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+          .eq('status', 'accepted')
+          .maybeSingle()
+        setCoupleId(link?.couple_id ?? null)
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Unable to load your dashboard.')
     } finally {
@@ -158,6 +174,7 @@ export default function DashboardScreen() {
         <Text style={styles.heroValue}>{calculateDaysTogether()}</Text>
         <Text style={styles.heroText}>days of choosing each other</Text>
       </View>
+      {coupleId ? <OnThisDay coupleId={coupleId} /> : null}
       <Text style={styles.sectionTitle}>Relationship stats</Text>
       <View style={styles.stats}>
         <StatCard title="Messages" value={dashboard.messageCount} />
@@ -165,6 +182,7 @@ export default function DashboardScreen() {
         <StatCard title="Vault" value={dashboard.vaultCount} />
         <StatCard title="Longest streak" value={dashboard.longestStreak} />
       </View>
+      {coupleId ? <OurStats coupleId={coupleId} /> : null}
       <Text style={styles.sectionTitle}>Quick actions</Text>
       <View style={styles.actions}>
         {quickActions.map(({ label, icon: Icon, route }) => (

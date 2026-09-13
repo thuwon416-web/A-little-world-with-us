@@ -1,20 +1,19 @@
 'use client'
 
-import { MoonStar, Sparkles, SunMedium, Shuffle } from 'lucide-react'
+import { MoonStar, SunMedium, Shuffle, WandSparkles } from 'lucide-react'
 
 import { useTheme } from '@/contexts/ThemeContext'
-import type { ThemeMode } from '@/contexts/ThemeContext'
+import type { ThemePreference } from '@/contexts/ThemeContext'
 
 const themeOptions = [
   { key: 'random', label: 'Random', icon: Shuffle },
   { key: 'midnight', label: 'Midnight Romance', icon: MoonStar },
   { key: 'sunset', label: 'Sunset Glow', icon: SunMedium },
-  { key: 'ocean', label: 'Ocean Breeze', icon: Sparkles },
-  { key: 'monochrome', label: 'Romantic Noir', icon: MoonStar },
+  { key: 'auto', label: 'Auto', icon: WandSparkles },
 ] as const
 
 export default function ThemeToggle() {
-  const { mode, setMode, autoMode, toggleAutoMode } = useTheme()
+  const { preference, setPreference } = useTheme()
 
   return (
     <div className="flex flex-col gap-3">
@@ -22,32 +21,19 @@ export default function ThemeToggle() {
         <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-primary)]/70">
           Theme
         </span>
-        <button
-          type="button"
-          onClick={toggleAutoMode}
-          className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-2 py-1 text-[10px] font-medium text-[var(--text-primary)]/80 transition hover:bg-[var(--card-bg)]/45"
-          aria-label="Toggle automatic theme mode"
-        >
-          {autoMode ? 'Auto' : 'Manual'}
-        </button>
+        <span className="text-[10px] text-[var(--text-primary)]/60">{preference}</span>
       </div>
 
       <div className="space-y-2">
         {themeOptions.map(({ key, label, icon: Icon }) => {
-          const isActive = key === 'random' ? false : mode === key
+          const isActive = preference === key
 
           return (
             <button
               key={key}
               type="button"
               onClick={() => {
-                if (key === 'random') {
-                  const themes: ThemeMode[] = ['midnight', 'sunset', 'ocean', 'monochrome']
-                  const randomTheme = themes[Math.floor(Math.random() * themes.length)]
-                  setMode(randomTheme)
-                } else {
-                  setMode(key)
-                }
+                setPreference(key as ThemePreference)
               }}
               className={`flex w-full items-center justify-between gap-2 rounded-full border px-3 py-2 text-left text-[11px] transition-all ${
                 isActive

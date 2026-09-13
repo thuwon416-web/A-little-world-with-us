@@ -20,7 +20,8 @@ const config: Config = {
     extend: {
       fontFamily: {
         script: ['var(--font-dancing)', 'Dancing Script', 'cursive'],
-        sans: ['var(--font-poppins)', 'Poppins', 'sans-serif'],
+        sans: ['var(--font-sans)', 'Inter', 'Poppins', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Playfair Display', 'Cormorant Garamond', 'Georgia', 'serif'],
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
