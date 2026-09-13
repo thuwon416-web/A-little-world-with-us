@@ -1,14 +1,17 @@
 'use client'
 
-import { MoonStar, SunMedium, Shuffle, WandSparkles } from 'lucide-react'
+import { Circle, MoonStar, Shuffle, Sparkles, SunMedium, WandSparkles, Waves } from 'lucide-react'
 
 import { useTheme } from '@/contexts/ThemeContext'
 import type { ThemePreference } from '@/contexts/ThemeContext'
 
 const themeOptions = [
   { key: 'random', label: 'Random', icon: Shuffle },
+  { key: 'romantic', label: 'Emergent Airy', icon: Sparkles },
   { key: 'midnight', label: 'Midnight Romance', icon: MoonStar },
   { key: 'sunset', label: 'Sunset Glow', icon: SunMedium },
+  { key: 'ocean', label: 'Ocean Breeze', icon: Waves },
+  { key: 'monochrome', label: 'Monochrome', icon: Circle },
   { key: 'auto', label: 'Auto', icon: WandSparkles },
 ] as const
 

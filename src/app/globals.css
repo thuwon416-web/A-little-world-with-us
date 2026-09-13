@@ -249,6 +249,25 @@
   --button-bg: linear-gradient(90deg, rgba(255, 158, 108, 0.18), rgba(255, 215, 0, 0.1));
 }
 
+/* ===== ROMANTIC THEME MODE (EMERGENT AIRY — LIGHT YELLOW) ===== */
+:root[data-theme-mode='romantic'] {
+  --bg-color: #fffbf0;
+  --bg-gradient: linear-gradient(135deg, #fffbf0 0%, #fff4d9 45%, #ffe9c7 100%);
+  --card-bg: rgba(255, 251, 240, 0.82);
+  --card-bg-strong: rgba(255, 248, 226, 0.95);
+  --text-primary: #4a3d1f;
+  --text-secondary: #7d6b42;
+  --accent-1: #f4c04f;
+  --accent-2: #ffd97a;
+  --soft-pink: #ffb8a6;
+  --warm-gold: #ffe08a;
+  --cream: #fffbf0;
+  --deep-rose: #e5a04d;
+  --midnight-purple: #4a3d1f;
+  --glass-alpha: 0.72;
+  --bg-1: linear-gradient(135deg, #fffbf0 0%, #fff4d9 38%, #ffe9c7 100%);
+}
+
 /* ===== OCEAN THEME MODE ===== */
 :root[data-theme-mode='ocean'] {
   --bg-color: #edf8ff;

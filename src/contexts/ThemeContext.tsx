@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-export type ThemeMode = 'midnight' | 'sunset' | 'ocean' | 'monochrome'
-export type ThemePreference = 'midnight' | 'sunset' | 'random' | 'auto'
+export type ThemeMode = 'romantic' | 'midnight' | 'sunset' | 'ocean' | 'monochrome'
+export type ThemePreference = ThemeMode | 'random' | 'auto'
 
 export type ThemeContextType = {
   mode: ThemeMode
@@ -24,10 +24,17 @@ const ThemeContext = createContext<ThemeContextType>({
 })
 
 const themeMap: Record<ThemeMode, ThemeMode> = {
+  romantic: 'romantic',
   midnight: 'midnight',
   sunset: 'sunset',
   ocean: 'ocean',
   monochrome: 'monochrome',
+}
+
+const EXPLICIT_MODES: ThemeMode[] = ['romantic', 'midnight', 'sunset', 'ocean', 'monochrome']
+
+function isThemeMode(value: string | null): value is ThemeMode {
+  return value !== null && EXPLICIT_MODES.includes(value as ThemeMode)
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
@@ -45,9 +52,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     if (storedPreference === 'random') {
       const savedRandom = sessionStorage.getItem('a-little-world-with-us-random-theme') as ThemeMode | null
-      const nextMode = savedRandom === 'midnight' || savedRandom === 'sunset'
+      const nextMode = isThemeMode(savedRandom)
         ? savedRandom
-        : Math.random() > 0.5 ? 'midnight' : 'sunset'
+        : EXPLICIT_MODES[Math.floor(Math.random() * EXPLICIT_MODES.length)]
       sessionStorage.setItem('a-little-world-with-us-random-theme', nextMode)
       setModeState(nextMode)
       setPreferenceState('random')
@@ -62,7 +69,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    if (storedPreference === 'midnight' || storedPreference === 'sunset') {
+    if (isThemeMode(storedPreference)) {
       setModeState(storedPreference)
       setPreferenceState(storedPreference)
       setAutoMode(false)
@@ -72,11 +79,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     if (storedMode && themeMap[storedMode]) {
       setModeState(storedMode)
       setAutoMode(storedAuto !== 'false')
-      setPreferenceState(storedAuto !== 'false' ? 'auto' : storedMode === 'sunset' ? 'sunset' : 'midnight')
+      setPreferenceState(storedAuto !== 'false' ? 'auto' : isThemeMode(storedMode) ? storedMode : 'midnight')
       return
     }
 
-      const detectedMode: ThemeMode = window.matchMedia('(prefers-color-scheme: light)').matches ? 'sunset' : 'midnight'
+    const detectedMode: ThemeMode = window.matchMedia('(prefers-color-scheme: light)').matches ? 'sunset' : 'midnight'
       setModeState(detectedMode)
     setAutoMode(true)
   }, [])
@@ -120,7 +127,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         preference,
         setPreference: (nextPreference) => {
           if (nextPreference === 'random') {
-            const nextMode: ThemeMode = Math.random() > 0.5 ? 'midnight' : 'sunset'
+            const nextMode = EXPLICIT_MODES[Math.floor(Math.random() * EXPLICIT_MODES.length)]
             sessionStorage.setItem('a-little-world-with-us-random-theme', nextMode)
             setModeState(nextMode)
             setAutoMode(false)
