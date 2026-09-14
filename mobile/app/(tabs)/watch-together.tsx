@@ -202,5 +202,12 @@ const styles = StyleSheet.create({
   muted: { color: '#a8a4ad' },
   remove: { color: '#ff9b9b', fontSize: 12 },
   error: { color: '#ff9b9b' },
-  chatLink: { backgroundColor: '#343044', borderRadius: 10, padding: 14, alignItems: 'center' },
+  chatLink: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#ff6b81',
+    borderRadius: 10,
+    padding: 14,
+    alignItems: 'center',
+  },
 })

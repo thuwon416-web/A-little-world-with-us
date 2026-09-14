@@ -71,7 +71,7 @@ export default function RelationshipStats() {
         watchHistoryResult,
       ] = await Promise.all([
         supabase
-          .from('memories')
+          .from('relationship_memories')
           .select('id', { count: 'exact', head: true })
           .eq('couple_id', link.couple_id),
         supabase

@@ -148,15 +148,21 @@ export type Message = {
   profiles?: { full_name?: string | null }
 }
 
-export type SecretLetter = {
-  id: number
+export type VaultItem = {
+  id: string
+  couple_id: string
+  user_id: string
   created_at: string
+  updated_at: string
   title: string
-  content: string
+  content: string | null
+  photo_url: string | null
+  category: string | null
   is_locked: boolean
-  category?: string | null
-  reveal_at?: string | null
+  reveal_at: string | null
 }
+
+export type SecretLetter = VaultItem
 
 export type Reminder = {
   id: string

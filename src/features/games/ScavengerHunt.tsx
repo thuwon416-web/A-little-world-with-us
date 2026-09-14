@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { Gift } from 'lucide-react'
 
 export default function ScavengerHunt({ totalClues = 3 }: { totalClues?: number }) {
   const [found, setFound] = useState<string[]>(() => {
@@ -74,7 +75,7 @@ export default function ScavengerHunt({ totalClues = 3 }: { totalClues?: number 
 
       {unlocked ? (
         <div className="mt-4 p-3 bg-gradient-to-r from-[var(--accent-1)]/10 to-[var(--accent-2)]/6 rounded">
-          <div className="font-medium text-[var(--accent-1)]">Surprise unlocked! 🎁</div>
+          <div className="font-medium text-[var(--accent-1)]">Surprise unlocked! <Gift className="inline h-4 w-4" /></div>
           <div className="text-sm opacity-70">
             You can now visit the secret page in the dashboard.
           </div>

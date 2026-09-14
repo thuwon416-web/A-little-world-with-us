@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Plus, X, ExternalLink, Heart, Gift, Tag, Star } from 'lucide-react'
+import { X, ExternalLink, Heart, Gift, Tag, Star } from 'lucide-react'
+import { AnimatedIcon } from '@/components/ui/animated-icon'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   getFavorites,
   getPartnerFavorites,
@@ -133,7 +135,11 @@ export default function FavoritesWidget() {
             </div>
           ))}
           {items.length === 0 && (
-            <p className="text-sm text-[var(--text-secondary)] text-center py-4">No items yet</p>
+            <EmptyState
+              icon={Star}
+              title="No favorites yet"
+              description="Star the spaces you use most."
+            />
           )}
         </div>
       </div>
@@ -176,7 +182,7 @@ export default function FavoritesWidget() {
         onClick={() => setShowAddModal(true)}
         className="mt-4 w-full rounded-xl border border-dashed border-[var(--accent-1)]/30 bg-[var(--bg-2)] px-3 py-3 text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2"
       >
-        <Plus className="h-4 w-4" />
+        <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />
         Add Item
       </button>
 

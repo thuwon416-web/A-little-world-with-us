@@ -1,4 +1,5 @@
 'use client'
+import { Smartphone } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 type BeforeInstallPromptEvent = Event & {
@@ -32,7 +33,7 @@ export default function PWAInstallPrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-[var(--card-bg)] rounded-2xl border border-[var(--accent-1)]/20 shadow-[0_18px_45px_rgba(0,0,0,0.15)] p-4 z-50 animate-fade-in">
-      <p className="font-medium text-[var(--text-primary)] mb-2">📲 Install Our Little World</p>
+      <p className="mb-2 flex items-center gap-2 font-medium text-[var(--text-primary)]"><Smartphone className="h-4 w-4" /> Install Our Little World</p>
       <p className="text-sm text-[var(--text-secondary)] mb-4">
         Add to your home screen for quick access to your couple space
       </p>

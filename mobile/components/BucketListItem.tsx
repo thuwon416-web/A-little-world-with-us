@@ -1,4 +1,5 @@
 import React from 'react'
+import { Check } from 'lucide-react-native'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 interface BucketListItemProps {
@@ -12,7 +13,7 @@ export function BucketListItem({ item, completed, completedAt, onToggle }: Bucke
   return (
     <TouchableOpacity style={styles.row} onPress={onToggle} activeOpacity={0.85}>
       <View style={[styles.check, completed && styles.completed]}>
-        {completed ? <Text style={styles.checkText}>✓</Text> : null}
+        {completed ? <Check size={14} color="#f3f0f5" /> : null}
       </View>
       <View style={styles.meta}>
         <Text style={[styles.title, completed && styles.doneTitle]}>{item}</Text>
@@ -45,11 +46,6 @@ const styles = StyleSheet.create({
   completed: {
     backgroundColor: '#2f8f66',
     borderColor: '#2f8f66',
-  },
-  checkText: {
-    color: '#f3f0f5',
-    fontWeight: '800',
-    fontSize: 12,
   },
   meta: {
     flex: 1,

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { HeartCrack } from 'lucide-react'
 import { useEffect } from 'react'
 import { logError } from '@/lib/errorLogger'
 
@@ -21,8 +22,8 @@ export default function Error({
   return (
     <main className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.85),_rgba(244,214,219,0.75),_rgba(250,245,242,1))] px-6 py-10">
       <div className="w-full max-w-md rounded-[32px] border border-rose-200/70 bg-white/80 p-8 text-center shadow-[0_18px_60px_rgba(180,120,130,0.15)] backdrop-blur-xl">
-        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-2xl shadow-inner shadow-rose-200">
-          💞
+        <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 shadow-inner shadow-rose-200">
+          <HeartCrack className="h-7 w-7 text-rose-600" />
         </div>
         <p className="text-[10px] uppercase tracking-[0.28em] text-rose-500">Connection issue</p>
         <h2 className="mt-3 text-3xl font-serif text-rose-900">Something paused the moment</h2>

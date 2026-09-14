@@ -1,6 +1,8 @@
 import React, { useMemo, useState } from 'react'
+import { Heart } from 'lucide-react-native'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type NoteMood = 'sweet' | 'deep' | 'playful' | 'thankful'
@@ -78,7 +80,7 @@ export default function LoveNotesBoard() {
             <Text style={styles.latestText}>{latest.text}</Text>
           </View>
         ) : (
-          <Text style={styles.empty}>No notes yet.</Text>
+          <EmptyState icon={Heart} title="No notes yet" description="Write your first love note." />
         )}
       </View>
 

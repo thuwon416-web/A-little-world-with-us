@@ -1,18 +1,16 @@
 'use client'
 
-import { Circle, MoonStar, Shuffle, Sparkles, SunMedium, WandSparkles, Waves } from 'lucide-react'
+import { Circle, MoonStar, Sparkles, SunMedium, Waves } from 'lucide-react'
 
 import { useTheme } from '@/contexts/ThemeContext'
 import type { ThemePreference } from '@/contexts/ThemeContext'
 
 const themeOptions = [
-  { key: 'random', label: 'Random', icon: Shuffle },
   { key: 'romantic', label: 'Emergent Airy', icon: Sparkles },
   { key: 'midnight', label: 'Midnight Romance', icon: MoonStar },
   { key: 'sunset', label: 'Sunset Glow', icon: SunMedium },
   { key: 'ocean', label: 'Ocean Breeze', icon: Waves },
   { key: 'monochrome', label: 'Monochrome', icon: Circle },
-  { key: 'auto', label: 'Auto', icon: WandSparkles },
 ] as const
 
 export default function ThemeToggle() {
@@ -43,7 +41,7 @@ export default function ThemeToggle() {
                   ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/12 text-[var(--text-primary)] shadow-[0_0_18px_rgba(255,182,193,0.2)]'
                   : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)]/80 hover:bg-[var(--card-bg)]'
               }`}
-              aria-label={key === 'random' ? 'Set random theme' : `Set ${label} theme`}
+              aria-label={`Set ${label} theme`}
             >
               <span className="inline-flex items-center gap-1.5">
                 <Icon className="h-3.5 w-3.5" />

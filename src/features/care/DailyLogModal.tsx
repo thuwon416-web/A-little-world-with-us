@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { X, Check, Droplets, Thermometer, Scale, Activity, Coffee } from 'lucide-react'
+import { Activity, Angry, Annoyed, Bone, Check, CircleDot, Coffee, Droplet, Droplets, Frown, Flame, Heart, Laugh, Meh, Moon, Package, Scale, Smile, Thermometer, X, Zap } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getActiveCareCoupleLinkId, saveDailyLog, type DailyLog } from '@/lib/care-data'
 
@@ -26,30 +26,31 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
   const [other, setOther] = useState<string[]>([])
   const [medicationTaken, setMedicationTaken] = useState<boolean | null>(null)
   const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   const moodOptions = [
-    { emoji: '😐', label: 'Calm', labelMy: 'ငြိမ်သက်' },
-    { emoji: '😊', label: 'Happy', labelMy: 'ပျော်ရွှင်' },
-    { emoji: '⚡', label: 'Energetic', labelMy: 'စွမ်းအားတော်' },
-    { emoji: '😜', label: 'Frisky', labelMy: 'စိတ်လှုပ်ရှား' },
-    { emoji: '🥺', label: 'Sad', labelMy: 'စိတ်ညစ်' },
-    { emoji: '😟', label: 'Anxious', labelMy: 'စိုးရိမ်' },
-    { emoji: '😶', label: 'Mood swings', labelMy: 'စိတ်အပြောင်းအလဲ' },
-    { emoji: '😡', label: 'Irritated', labelMy: 'စိတ်ဒေါသ' },
+    { Icon: Meh, label: 'Calm', labelMy: 'ငြိမ်သက်' },
+    { Icon: Smile, label: 'Happy', labelMy: 'ပျော်ရွှင်' },
+    { Icon: Zap, label: 'Energetic', labelMy: 'စွမ်းအားတော်' },
+    { Icon: Laugh, label: 'Frisky', labelMy: 'စိတ်လှုပ်ရှား' },
+    { Icon: Frown, label: 'Sad', labelMy: 'စိတ်ညစ်' },
+    { Icon: Annoyed, label: 'Anxious', labelMy: 'စိုးရိမ်' },
+    { Icon: Meh, label: 'Mood swings', labelMy: 'စိတ်အပြောင်းအလဲ' },
+    { Icon: Angry, label: 'Irritated', labelMy: 'စိတ်ဒေါသ' },
   ]
 
   const symptomOptions = [
-    { icon: '🤕', label: 'Cramps', labelMy: 'ကိုက်ခဲ' },
-    { icon: '🫁', label: 'Tender breasts', labelMy: 'ရင်သားနာ' },
-    { icon: '🤕', label: 'Headache', labelMy: 'ခေါင်းကိုက်' },
-    { icon: '🔴', label: 'Acne', labelMy: 'မျက်နှာတွင်ပြည်' },
-    { icon: '😴', label: 'Fatigue', labelMy: 'ပင်နိုင်း' },
-    { icon: '🌙', label: 'Insomnia', labelMy: 'မအိပ်ရ' },
-    { icon: '🎈', label: 'Bloating', labelMy: 'ဖောရောင်' },
-    { icon: '🩸', label: 'Spotting', labelMy: 'သွေးစက်' },
-    { icon: '🔥', label: 'Hot flashes', labelMy: 'ကိုယ်ပူ' },
-    { icon: '💧', label: 'Vaginal dryness', labelMy: 'ခြောက်သွေ့' },
-    { icon: '⚡', label: 'Abdominal pain', labelMy: 'ဗိုက်နာ' },
+    { Icon: Bone, label: 'Cramps', labelMy: 'ကိုက်ခဲ' },
+    { Icon: Heart, label: 'Tender breasts', labelMy: 'ရင်သားနာ' },
+    { Icon: Bone, label: 'Headache', labelMy: 'ခေါင်းကိုက်' },
+    { Icon: CircleDot, label: 'Acne', labelMy: 'မျက်နှာတွင်ပြည်' },
+    { Icon: Moon, label: 'Fatigue', labelMy: 'ပင်နိုင်း' },
+    { Icon: Moon, label: 'Insomnia', labelMy: 'မအိပ်ရ' },
+    { Icon: Package, label: 'Bloating', labelMy: 'ဖောရောင်' },
+    { Icon: Droplet, label: 'Spotting', labelMy: 'သွေးစက်' },
+    { Icon: Flame, label: 'Hot flashes', labelMy: 'ကိုယ်ပူ' },
+    { Icon: Droplets, label: 'Vaginal dryness', labelMy: 'ခြောက်သွေ့' },
+    { Icon: Zap, label: 'Abdominal pain', labelMy: 'ဗိုက်နာ' },
   ]
 
   const sexOptions = [
@@ -110,9 +111,9 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
       }
 
       await saveDailyLog(logData)
-      alert('Daily log saved successfully! 💜')
-      onClose()
       onLogSaved?.()
+      setSaveSuccess(true)
+      window.setTimeout(onClose, 1200)
     } catch (error) {
       console.error('Error saving log:', error)
       alert('Failed to save log. Please try again.')
@@ -164,7 +165,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
                       : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/50'
                   }`}
                 >
-                  <span className="text-2xl">{option.emoji}</span>
+                  <option.Icon className="mx-auto h-6 w-6" />
                   <p className="mt-1 text-xs font-medium">{option.label}</p>
                   <p className="text-[10px] text-[var(--text-secondary)]">{option.labelMy}</p>
                 </button>
@@ -187,7 +188,7 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
                       : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/50'
                   }`}
                 >
-                  <span className="text-2xl">{option.icon}</span>
+                  <option.Icon className="mx-auto h-6 w-6" />
                   <p className="mt-1 text-xs font-medium">{option.label}</p>
                   <p className="text-[10px] text-[var(--text-secondary)]">{option.labelMy}</p>
                 </button>
@@ -411,6 +412,12 @@ export default function DailyLogModal({ isOpen, onClose, selectedDate, onLogSave
               'Save Log'
             )}
           </button>
+          {saveSuccess ? (
+            <div className="mt-3 flex items-center justify-center gap-2 text-sm text-[var(--accent-1)]">
+              <Heart className="inline h-4 w-4" />
+              Daily log saved successfully!
+            </div>
+          ) : null}
         </div>
       </motion.div>
     </div>

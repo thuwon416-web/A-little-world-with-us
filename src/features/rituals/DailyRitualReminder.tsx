@@ -1,3 +1,5 @@
+import { Sunrise } from 'lucide-react'
+
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 
@@ -5,9 +7,12 @@ export default function DailyRitualReminder() {
   return (
     <Card className="bg-amber-50 border-amber-200">
       <CardContent className="flex items-center justify-between p-4">
-        <div>
-          <h3 className="font-serif text-lg">🌅 Good Morning Ritual</h3>
-          <p className="text-sm text-stone-600">Send your morning message now!</p>
+        <div className="flex items-center gap-2">
+          <Sunrise className="h-5 w-5 text-amber-600" />
+          <div>
+            <h3 className="font-serif text-lg">Good Morning Ritual</h3>
+            <p className="text-sm text-stone-600">Send your morning message now!</p>
+          </div>
         </div>
         <Button variant="outline" className="border-amber-400 text-amber-700">
           Do it

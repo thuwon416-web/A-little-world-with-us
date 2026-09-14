@@ -1,4 +1,6 @@
+import type { ComponentType } from 'react'
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { CircleAlert, Sparkles } from 'lucide-react-native'
 
 import { designTokens } from '@/design-tokens'
 
@@ -12,13 +14,13 @@ export function LoadingState({ label = 'Loading...' }: { label?: string }) {
 }
 
 export function EmptyState({
-  icon = '✨',
+  icon: Icon = Sparkles,
   title,
   message,
   actionLabel,
   onAction,
 }: {
-  icon?: string
+  icon?: ComponentType<any>
   title: string
   message: string
   actionLabel?: string
@@ -26,7 +28,7 @@ export function EmptyState({
 }) {
   return (
     <View style={styles.state}>
-      <Text style={styles.icon}>{icon}</Text>
+      <Icon size={36} color={designTokens.colors.secondary} />
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.muted}>{message}</Text>
       {actionLabel && onAction ? (
@@ -46,7 +48,7 @@ export function EmptyState({
 export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
   return (
     <View style={styles.state}>
-      <Text style={styles.icon}>😕</Text>
+      <CircleAlert size={36} color={designTokens.colors.secondary} />
       <Text style={styles.title}>Something went wrong</Text>
       <Text style={styles.muted}>{message}</Text>
       {onRetry ? (

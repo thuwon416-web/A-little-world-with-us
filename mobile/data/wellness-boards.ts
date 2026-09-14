@@ -13,7 +13,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'affirmation',
     name: 'Affirmations',
-    icon: '✨',
+    icon: 'Sparkles',
     component: 'AffirmationDeck',
     enabled: true,
     description: 'Daily affirmations for couples',
@@ -21,7 +21,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'apology',
     name: 'Apology Corner',
-    icon: '🤝',
+    icon: 'Handshake',
     component: 'ApologyCorner',
     enabled: true,
     description: 'Say sorry and move forward',
@@ -29,7 +29,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'appreciation',
     name: 'Appreciation Jar',
-    icon: '🫙',
+    icon: 'Package',
     component: 'AppreciationJar',
     enabled: true,
     description: 'Collect moments of gratitude',
@@ -37,7 +37,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'mood-meter',
     name: 'Couple Mood Meter',
-    icon: '😊',
+    icon: 'Smile',
     component: 'CoupleMoodMeter',
     enabled: true,
     description: "Track each other's mood",
@@ -45,7 +45,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'promise',
     name: 'Promise Board',
-    icon: '💍',
+    icon: 'Gem',
     component: 'CouplePromiseBoard',
     enabled: true,
     description: 'Make and keep promises',
@@ -53,7 +53,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'rituals',
     name: 'Everyday Rituals',
-    icon: '🌅',
+    icon: 'Sunrise',
     component: 'EverydayRitualsBoard',
     enabled: true,
     description: 'Build healthy habits together',
@@ -61,7 +61,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'breath',
     name: 'Easy Breath',
-    icon: '🧘',
+    icon: 'PersonStanding',
     component: 'EasyBreathBoard',
     enabled: true,
     description: 'Breathe together',
@@ -69,7 +69,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'hold',
     name: 'Gentle Hold',
-    icon: '🤗',
+    icon: 'HeartHandshake',
     component: 'GentleHoldBoard',
     enabled: true,
     description: 'Virtual hugs',
@@ -77,7 +77,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'forecast',
     name: 'Gentle Forecast',
-    icon: '🌤️',
+    icon: 'CloudSun',
     component: 'GentleForecastBoard',
     enabled: true,
     description: 'Predict your day together',
@@ -85,7 +85,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'quiet',
     name: 'Careful Quiet',
-    icon: '🤫',
+    icon: 'VolumeX',
     component: 'CarefulQuietBoard',
     enabled: true,
     description: 'Peaceful silence together',
@@ -93,7 +93,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'day-echo',
     name: 'Day Echo',
-    icon: '🔊',
+    icon: 'Volume2',
     component: 'DayEchoBoard',
     enabled: true,
     description: 'Reflect on your day',
@@ -101,7 +101,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'cozy',
     name: 'Cozy Reentry',
-    icon: '🏠',
+    icon: 'Home',
     component: 'CozyReentryBoard',
     enabled: true,
     description: 'Welcome home rituals',
@@ -109,7 +109,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'armchair',
     name: 'Armchair Moment',
-    icon: '🪑',
+    icon: 'Armchair',
     component: 'ArmchairMomentBoard',
     enabled: true,
     description: 'Relax together',
@@ -117,7 +117,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'gratitude',
     name: 'Gratitude Wall',
-    icon: '🙏',
+    icon: 'HandHeart',
     component: 'GratitudeWall',
     enabled: true,
     description: "Share what you're grateful for",
@@ -125,7 +125,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'love-notes',
     name: 'Love Notes',
-    icon: '💕',
+    icon: 'Heart',
     component: 'LoveNotesBoard',
     enabled: true,
     description: 'Express your love',
@@ -133,7 +133,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'reassurance',
     name: 'Reassurance Counter',
-    icon: '💚',
+    icon: 'Heart',
     component: 'ReassuranceCounter',
     enabled: true,
     description: 'Count reassurances',
@@ -141,7 +141,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'golden-low',
     name: 'Golden Low',
-    icon: '🌅',
+    icon: 'Sunrise',
     component: 'GoldenLowBoard',
     enabled: true,
     description: 'Find peace in low moments',
@@ -149,7 +149,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'check-in',
     name: 'Love Check-in',
-    icon: '❤️',
+    icon: 'Heart',
     component: 'LoveCheckInBoard',
     enabled: true,
     description: 'Daily relationship check-in',
@@ -157,7 +157,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'mellow',
     name: 'Mellow Bloom',
-    icon: '🌸',
+    icon: 'Flower2',
     component: 'MellowBloomBoard',
     enabled: true,
     description: 'Grow together',
@@ -165,7 +165,7 @@ export const wellnessBoards: WellnessBoard[] = [
   {
     id: 'steady',
     name: 'Steady Landing',
-    icon: '🛬',
+    icon: 'PlaneLanding',
     component: 'SteadyLandingBoard',
     enabled: true,
     description: 'Find your footing together',

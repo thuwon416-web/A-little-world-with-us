@@ -1,19 +1,78 @@
 // src/components/wellness/WellnessBoard.tsx
-import { Plus } from 'lucide-react'
+import {
+  Bell,
+  CalendarDays,
+  Clock3,
+  CloudSun,
+  Droplets,
+  Flower2,
+  Gem,
+  HandHeart,
+  Handshake,
+  Heart,
+  HeartHandshake,
+  Home,
+  Leaf,
+  Mail,
+  MessageSquareText,
+  Package,
+  PartyPopper,
+  PersonStanding,
+  PlaneLanding,
+  RefreshCw,
+  Smile,
+  Sparkles,
+  Stars,
+  Volume2,
+  VolumeX,
+  type LucideIcon,
+} from 'lucide-react'
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { EmptyState } from '@/components/ui/empty-state'
 import { type WellnessBoard as BoardData } from '@/types/wellness'
 
 interface WellnessBoardProps {
   board: BoardData
 }
 
+const boardIconMap: Record<string, LucideIcon> = {
+  CalendarDays,
+  Droplets,
+  PersonStanding,
+  Leaf,
+  RefreshCw,
+  HeartHandshake,
+  CloudSun,
+  VolumeX,
+  Volume2,
+  Home,
+  Gem,
+  Bell,
+  HandHeart,
+  Heart,
+  Sparkles,
+  MessageSquareText,
+  Package,
+  Handshake,
+  Stars,
+  Mail,
+  PartyPopper,
+  Clock3,
+  Flower2,
+  PlaneLanding,
+  Smile,
+}
+
 export default function WellnessBoard({ board }: WellnessBoardProps) {
+  const Icon = boardIconMap[board.icon] ?? Sparkles
+
   return (
     <Card className="bg-white/70 backdrop-blur-sm border-rose-200 shadow-sm hover:shadow-md transition-all">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-2xl font-serif text-rose-900">
-          <span className="text-3xl">{board.icon}</span>
+          <Icon className="h-7 w-7 text-rose-600" />
           {board.title}
         </CardTitle>
         <CardDescription className="text-rose-700">{board.description}</CardDescription>
@@ -32,19 +91,17 @@ export default function WellnessBoard({ board }: WellnessBoardProps) {
                   size="sm"
                   className="mt-2 text-rose-600 hover:text-rose-800 hover:bg-rose-100"
                 >
-                  ✨ {item.action}
+                  <Sparkles className="mr-1 h-4 w-4" /> {item.action}
                 </Button>
               )}
             </div>
           ))
         ) : (
-          <div className="rounded-xl border border-dashed border-rose-300/50 bg-rose-50/40 p-6 text-center text-rose-700">
-            <Plus className="mx-auto mb-2 h-6 w-6" aria-hidden="true" />
-            <p className="text-sm">No entries yet. Add your first gentle check-in when you are ready.</p>
-            <button type="button" className="mt-4 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-600">
-              Start your first entry
-            </button>
-          </div>
+          <EmptyState
+            icon={Sparkles}
+            title="No entries yet"
+            description="Add your first gentle check-in when you are ready."
+          />
         )}
       </CardContent>
     </Card>

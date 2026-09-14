@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { AlertTriangle } from 'lucide-react'
 import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { logError } from '@/lib/errorLogger'
@@ -36,8 +37,8 @@ export class ErrorBoundary extends Component<Props, State> {
         this.props.fallback || (
           <div className="flex min-h-[320px] items-center justify-center p-6">
             <div className="w-full max-w-md rounded-[28px] border border-rose-200 bg-white/80 p-6 text-center shadow-lg">
-              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-100 text-2xl">
-                ⚠️
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-100">
+                <AlertTriangle className="h-6 w-6 text-rose-600" />
               </div>
               <h2 className="text-xl font-bold text-rose-900">Something went wrong</h2>
               <p className="mt-2 text-sm leading-6 text-stone-600">

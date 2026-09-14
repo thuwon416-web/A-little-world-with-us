@@ -58,8 +58,8 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
   }
 
   const handleSetPin = async () => {
-    if (pin.length !== 4) {
-      setError('PIN must be 4 digits')
+    if (!/^\d{4,6}$/.test(pin)) {
+      setError('PIN must be 4 to 6 digits')
       return
     }
 
@@ -92,7 +92,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
   }
 
   const handleUnlock = async () => {
-    if (pin.length !== 4) {
+    if (!/^\d{4,6}$/.test(pin)) {
       setError('Enter complete PIN')
       return
     }

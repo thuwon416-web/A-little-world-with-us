@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Droplet, Heart, Plus } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getDailyLogs, calculateCycleData, type CycleData } from '@/lib/care-data'
 
@@ -82,10 +83,10 @@ export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) 
       {/* Quick Actions */}
       <section className="grid grid-cols-3 gap-3 text-center">
         {[
-          ['🩸', 'Log period'],
-          ['＋', 'Symptoms'],
-          ['♡', 'Intimacy'],
-        ].map(([icon, label]) => (
+          { Icon: Droplet, label: 'Log period' },
+          { Icon: Plus, label: 'Symptoms' },
+          { Icon: Heart, label: 'Intimacy' },
+        ].map(({ Icon, label }) => (
           <button
             key={label}
             type="button"
@@ -93,7 +94,7 @@ export default function CycleDashboard({ onOpenDailyLog }: CycleDashboardProps) 
             className="group flex flex-col items-center gap-2 rounded-3xl py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:text-[var(--text-primary)]"
           >
             <span className="flex h-16 w-16 items-center justify-center rounded-full border border-[var(--accent-1)]/50 bg-[var(--card-bg)] text-2xl text-[var(--accent-1)] shadow-[0_0_15px_rgba(255,107,157,0.2)] transition group-hover:scale-105 group-hover:shadow-[0_0_25px_rgba(255,107,157,0.4)]">
-              {icon}
+              <Icon className="h-7 w-7" />
             </span>
             {label}
           </button>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Circle, Droplet, Flower2 } from 'lucide-react'
 import { Calendar } from '@/components/ui/calendar'
 import { supabase } from '@/lib/supabase'
 import { getDailyLogs, calculateCycleData } from '@/lib/care-data'
@@ -96,13 +97,13 @@ export default function PeriodCalendar({ onDateSelect }: PeriodCalendarProps) {
           </h3>
           <div className="space-y-2 text-sm text-[var(--text-primary)]">
             {periodDates.has(selectedDate.toISOString().split('T')[0]) && (
-              <p className="flex items-center gap-2"><span>🩸</span><span>Period day</span></p>
+              <p className="flex items-center gap-2"><Droplet className="h-4 w-4" /><span>Period day</span></p>
             )}
             {fertileDates.has(selectedDate.toISOString().split('T')[0]) && (
-              <p className="flex items-center gap-2"><span>🌸</span><span>Fertile day</span></p>
+              <p className="flex items-center gap-2"><Flower2 className="h-4 w-4" /><span>Fertile day</span></p>
             )}
             {selectedDate.toISOString().split('T')[0] === new Date().toISOString().split('T')[0] && (
-              <p className="flex items-center gap-2"><span>🔴</span><span>Today</span></p>
+              <p className="flex items-center gap-2"><Circle className="h-4 w-4 fill-red-500 text-red-500" /><span>Today</span></p>
             )}
             {!periodDates.has(selectedDate.toISOString().split('T')[0]) &&
              !fertileDates.has(selectedDate.toISOString().split('T')[0]) &&

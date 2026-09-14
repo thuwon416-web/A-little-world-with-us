@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Bell } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { requestNotificationPermission, scheduleReminder } from '@/lib/care-notifications'
 import { Switch } from '@/components/ui/switch'
@@ -65,7 +66,7 @@ export default function SmartReminders() {
     <div className="glass-card space-y-4 p-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-[var(--text-primary)]">Smart Reminders</h3>
-        {!permissionGranted && <span className="text-xs text-[var(--accent-2)]">🔔 Notification permission required</span>}
+        {!permissionGranted && <span className="inline-flex items-center gap-1 text-xs text-[var(--accent-2)]"><Bell className="icon-wiggle-once h-3.5 w-3.5" /> Notification permission required</span>}
       </div>
 
       <div className="space-y-3">
@@ -91,7 +92,7 @@ export default function SmartReminders() {
           onClick={async () => { const granted = await requestNotificationPermission(); setPermissionGranted(granted) }}
           className="glass-button w-full rounded-lg py-2 text-sm text-white transition hover:brightness-110"
         >
-          🔔 Enable Notifications
+          <Bell className="mr-2 inline h-4 w-4" /> Enable Notifications
         </button>
       )}
     </div>

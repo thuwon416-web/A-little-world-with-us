@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Bell, Clock3, Plus, Sparkles } from 'lucide-react'
+import { Clock3, Plus, Sparkles } from 'lucide-react'
+import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { requestNotificationPermission, scheduleBrowserReminder } from '@/lib/notifications'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
@@ -65,7 +66,7 @@ export default function RemindersPage() {
           onClick={enableNotifications}
           className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-[var(--bg-color)]"
         >
-          <Bell className="h-4 w-4" /> Enable alerts
+          <AnimatedIcon name="Bell" animation="wiggle" trigger="hover" size={16} /> Enable alerts
         </button>
       </div>
 

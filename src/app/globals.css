@@ -1370,3 +1370,24 @@ button.micro-interaction:hover {
 button.micro-interaction:active {
   transform: scale(0.98);
 }
+
+/* Icon animation utilities (Tier 2) */
+@keyframes icon-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes icon-bounce-once {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes icon-wiggle-once {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-6deg); }
+  75% { transform: rotate(6deg); }
+}
+
+.icon-pulse-soft { animation: icon-pulse-soft 2s ease-in-out infinite; }
+.icon-bounce-once { animation: icon-bounce-once 0.6s ease-out; }
+.icon-wiggle-once { animation: icon-wiggle-once 0.5s ease-in-out; }

@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle2, ListTodo, Plus, Sparkles } from 'lucide-react'
+import { CheckCircle2, ListTodo, Sparkles } from 'lucide-react'
+import { AnimatedIcon } from '@/components/ui/animated-icon'
 
 type BucketItem = {
   id: string
@@ -137,7 +138,7 @@ export default function BucketList() {
           onClick={addItem}
           className="glass-button flex w-full items-center justify-center gap-2 text-sm"
         >
-          <Plus className="h-4 w-4" /> Add to list
+          <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} /> Add to list
         </button>
       </div>
       <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm">

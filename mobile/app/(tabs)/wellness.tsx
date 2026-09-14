@@ -1,5 +1,29 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
+  Armchair,
+  Check,
+  CloudSun,
+  Dumbbell,
+  Flower2,
+  Gem,
+  HandHeart,
+  Handshake,
+  Heart,
+  HeartHandshake,
+  Home,
+  Package,
+  PersonStanding,
+  PlaneLanding,
+  RefreshCw,
+  Smile,
+  Sparkles,
+  Sunrise,
+  Trophy,
+  Volume2,
+  VolumeX,
+  type LucideIcon,
+} from 'lucide-react-native'
+import {
   ActivityIndicator,
   Alert,
   ScrollView,
@@ -28,6 +52,7 @@ import LoveCheckInBoard from '@/components/wellness/LoveCheckInBoard'
 import LoveNotesBoard from '@/components/wellness/LoveNotesBoard'
 import MellowBloomBoard from '@/components/wellness/MellowBloomBoard'
 import ReassuranceCounter from '@/components/wellness/ReassuranceCounter'
+import { EmptyState } from '@/components/ui/EmptyState'
 import SteadyLandingBoard from '@/components/wellness/SteadyLandingBoard'
 import TenderCompassBoard from '@/components/wellness/TenderCompassBoard'
 import { enabledBoards, type WellnessBoard } from '@/data/wellness-boards'
@@ -40,15 +65,42 @@ import {
   type WellnessLog,
 } from '@/services/wellnessTracking'
 
-type Category = 'health' | 'mental' | 'relationship' | 'quests' | 'games'
+type Category = 'health' | 'mental' | 'relationship' | 'quests'
 
-const categories: { id: Category; label: string; icon: string }[] = [
-  { id: 'health', label: 'Health', icon: '🏃' },
-  { id: 'mental', label: 'Mental', icon: '🧘' },
-  { id: 'relationship', label: 'Relationship', icon: '💕' },
-  { id: 'quests', label: 'Quests', icon: '🏆' },
-  { id: 'games', label: 'Games', icon: '🎲' },
+const categoryIconMap: Record<Category, LucideIcon> = {
+  health: Dumbbell,
+  mental: PersonStanding,
+  relationship: Heart,
+  quests: Trophy,
+}
+
+const categories: { id: Category; label: string }[] = [
+  { id: 'health', label: 'Health' },
+  { id: 'mental', label: 'Mental' },
+  { id: 'relationship', label: 'Relationship' },
+  { id: 'quests', label: 'Quests' },
 ]
+
+const boardIconMap: Record<string, LucideIcon> = {
+  Sparkles,
+  Handshake,
+  Package,
+  Smile,
+  Gem,
+  Sunrise,
+  PersonStanding,
+  HeartHandshake,
+  CloudSun,
+  VolumeX,
+  Volume2,
+  Home,
+  Armchair,
+  HandHeart,
+  Heart,
+  Flower2,
+  PlaneLanding,
+  RefreshCw,
+}
 
 const boardCategories: Record<string, Category> = {
   affirmation: 'mental',
@@ -77,13 +129,6 @@ const quests = [
   { id: 'love-notes-3', title: 'Send 3 love notes today', reward: 'Heart badge' },
   { id: 'date-night', title: 'Plan a date night', reward: 'Together badge' },
   { id: 'appreciations-5', title: 'Share 5 appreciations', reward: 'Gratitude badge' },
-]
-
-const games = [
-  { id: 'would-you-rather', name: 'Would You Rather', questions: 20 },
-  { id: 'never-have-i-ever', name: 'Never Have I Ever', questions: 30 },
-  { id: '36-questions', name: '36 Questions', questions: 36 },
-  { id: 'love-quiz', name: 'Love Quiz', questions: 15 },
 ]
 
 const componentMap: Record<string, React.ComponentType> = {
@@ -217,13 +262,15 @@ export default function WellnessScreen() {
         <Text style={styles.muted}>More activities are coming to this category.</Text>
       ) : null}
       {filteredBoards.map((board) => {
+        const BoardIcon = boardIconMap[board.icon] ?? Sparkles
+
         return (
           <TouchableOpacity
             key={board.id}
             style={styles.boardButton}
             onPress={() => setSelectedBoard(board)}
           >
-            <Text style={styles.boardIcon}>{board.icon}</Text>
+            <BoardIcon size={28} color="#ff6b81" />
             <View style={styles.boardInfo}>
               <Text style={styles.boardName}>{board.name}</Text>
               <Text style={styles.muted}>{board.description}</Text>
@@ -267,16 +314,20 @@ export default function WellnessScreen() {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.categoryRow}
       >
-        {categories.map((item) => (
-          <TouchableOpacity
-            key={item.id}
-            style={[styles.categoryButton, category === item.id && styles.categoryActive]}
-            onPress={() => setCategory(item.id)}
-          >
-            <Text style={styles.categoryIcon}>{item.icon}</Text>
-            <Text style={styles.categoryText}>{item.label}</Text>
-          </TouchableOpacity>
-        ))}
+        {categories.map((item) => {
+          const CategoryIcon = categoryIconMap[item.id]
+
+          return (
+            <TouchableOpacity
+              key={item.id}
+              style={[styles.categoryButton, category === item.id && styles.categoryActive]}
+              onPress={() => setCategory(item.id)}
+            >
+              <CategoryIcon size={20} color={category === item.id ? '#ff6b81' : '#d8b98c'} />
+              <Text style={styles.categoryText}>{item.label}</Text>
+            </TouchableOpacity>
+          )
+        })}
       </ScrollView>
       <ScrollView contentContainerStyle={styles.content}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -321,7 +372,11 @@ export default function WellnessScreen() {
                 </Text>
               ))
             ) : (
-              <Text style={styles.muted}>Complete a workout to start your history.</Text>
+              <EmptyState
+                icon={Dumbbell}
+                title="No workouts yet"
+                description="Complete a workout to start your history."
+              />
             )}
           </>
         ) : null}
@@ -334,10 +389,10 @@ export default function WellnessScreen() {
                 style={[styles.quest, completedQuestIds.has(quest.id) && styles.completed]}
                 onPress={() => void completeQuest(quest.id)}
               >
-                <Text style={styles.cardTitle}>
-                  {completedQuestIds.has(quest.id) ? '✓ ' : ''}
-                  {quest.title}
-                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  {completedQuestIds.has(quest.id) ? <Check size={14} color="#8ed0c4" /> : null}
+                  <Text style={styles.cardTitle}>{quest.title}</Text>
+                </View>
                 <Text style={styles.muted}>
                   {completedQuestIds.has(quest.id) ? 'Completed' : quest.reward}
                 </Text>
@@ -345,26 +400,7 @@ export default function WellnessScreen() {
             ))}
           </>
         ) : null}
-        {category === 'games' ? (
-          <>
-            <Text style={styles.sectionTitle}>Couple games</Text>
-            {games.map((game) => (
-              <View key={game.id} style={styles.game}>
-                <Text style={styles.cardTitle}>{game.name}</Text>
-                <Text style={styles.muted}>{game.questions} questions</Text>
-                <TouchableOpacity
-                  style={styles.smallButton}
-                  onPress={() =>
-                    Alert.alert(game.name, 'Game mode is ready to play from the shared game board.')
-                  }
-                >
-                  <Text style={styles.smallButtonText}>Play</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-          </>
-        ) : null}
-        {category !== 'health' && category !== 'quests' && category !== 'games' ? (
+        {category !== 'health' && category !== 'quests' ? (
           <>
             <Text style={styles.sectionTitle}>
               {categories.find((item) => item.id === category)?.label} boards
@@ -449,16 +485,14 @@ const styles = StyleSheet.create({
   history: { color: '#d5c4d4', padding: 11, backgroundColor: '#171b27', borderRadius: 11 },
   quest: { backgroundColor: '#171b27', padding: 15, borderRadius: 15, gap: 4 },
   completed: { borderColor: '#86d6ad', borderWidth: 1 },
-  game: { backgroundColor: '#171b27', padding: 15, borderRadius: 15, gap: 8 },
   adviceButton: {
-    borderColor: '#ff9bba',
-    borderWidth: 1,
+    backgroundColor: '#ff6b81',
     borderRadius: 13,
     padding: 13,
     alignItems: 'center',
     marginTop: 12,
   },
-  adviceText: { color: '#ff9bba', fontWeight: '800' },
+  adviceText: { color: '#fff', fontWeight: '800' },
   adviceCard: { backgroundColor: '#221d2d', borderRadius: 14, padding: 15, gap: 7 },
   advice: { color: '#f4edf5', lineHeight: 21 },
   link: { color: '#ff9bba', padding: 20, paddingTop: 60, fontWeight: '800' },

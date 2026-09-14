@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, SmilePlus } from 'lucide-react'
 
-const moods = ['😊 Happy', '😌 Calm', '💞 Romantic', '😴 Tired', '😕 Stressed'] as const
+const moods = ['Happy', 'Calm', 'Romantic', 'Tired', 'Stressed'] as const
 
 export default function MoodSyncPanel() {
-  const [selectedMood, setSelectedMood] = useState<(typeof moods)[number]>('😊 Happy')
-  const [partnerMood, setPartnerMood] = useState<(typeof moods)[number]>('💞 Romantic')
+  const [selectedMood, setSelectedMood] = useState<(typeof moods)[number]>('Happy')
+  const [partnerMood, setPartnerMood] = useState<(typeof moods)[number]>('Romantic')
   const [syncScore, setSyncScore] = useState(84)
 
   useEffect(() => {
@@ -25,11 +25,11 @@ export default function MoodSyncPanel() {
     localStorage.setItem('a-little-world-with-us-partner-mood', partnerMood)
 
     const moodMap = {
-      '😊 Happy': 3,
-      '😌 Calm': 2,
-      '💞 Romantic': 4,
-      '😴 Tired': 1,
-      '😕 Stressed': 1,
+      Happy: 3,
+      Calm: 2,
+      Romantic: 4,
+      Tired: 1,
+      Stressed: 1,
     }
     const compatibility = Math.min(
       99,

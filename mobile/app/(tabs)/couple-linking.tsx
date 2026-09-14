@@ -17,6 +17,15 @@ export default function CoupleLinkingScreen() {
   useEffect(() => {
     void load()
   }, [])
+  const accepted = context?.link?.status === 'accepted'
+  const isInviter = context?.link?.inviter_id === context?.user?.id
+  const statusLabel = accepted
+    ? 'Linked and accepted'
+    : context?.link?.status === 'pending'
+      ? isInviter
+        ? 'Invitation sent'
+        : 'Invitation received'
+      : 'Not linked'
   const accept = async () => {
     if (!/^[a-zA-Z0-9]{6,}$/.test(code.trim()))
       return Alert.alert('Invalid code', 'Enter the invitation code.')
@@ -31,13 +40,15 @@ export default function CoupleLinkingScreen() {
   return (
     <SecondaryPage title="Couple Linking">
       <View style={s.card}>
-        <Text style={s.buttonText}>Status: {context?.link?.status ?? 'Not linked'}</Text>
+        <Text style={s.buttonText}>Status: {statusLabel}</Text>
         <Text style={s.muted}>
           Partner:{' '}
           {context?.link
-            ? context.link.inviter_id === context.user?.id
-              ? 'Invitation recipient'
-              : 'Invitation sent'
+            ? accepted
+              ? 'Linked partner'
+              : isInviter
+                ? 'Invitation recipient'
+                : 'Invitation sender'
             : 'No partner linked'}
         </Text>
         {context?.link?.status === 'accepted' ? (

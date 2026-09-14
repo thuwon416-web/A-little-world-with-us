@@ -3,7 +3,9 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { PlanItem } from '@/components/PlanItem'
 import { ProgressBar } from '@/components/ProgressBar'
+import { EmptyState } from '@/components/ui/EmptyState'
 import type { PlanRecord } from '@/services/plans'
+import { ListChecks } from 'lucide-react-native'
 
 interface PlanCardProps {
   plan: PlanRecord
@@ -63,7 +65,11 @@ export function PlanCard({ plan, onPress, onToggleItem }: PlanCardProps) {
               />
             ))
         ) : (
-          <Text style={styles.empty}>No checklist items yet.</Text>
+          <EmptyState
+            icon={ListChecks}
+            title="No checklist items yet"
+            description="Add items to keep this plan moving."
+          />
         )}
       </View>
     </TouchableOpacity>

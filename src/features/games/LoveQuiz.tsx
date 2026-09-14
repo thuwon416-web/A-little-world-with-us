@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { Heart } from 'lucide-react'
 
 const QUESTIONS = [
   {
@@ -70,7 +71,7 @@ export default function LoveQuiz() {
           </div>
           <div className="text-sm opacity-70 mt-2">
             {score === QUESTIONS.length
-              ? 'Perfect! You know her so well ❤️'
+              ? <>Perfect! You know her so well <Heart className="inline h-4 w-4 fill-current" /></>
               : 'Nice try — keep learning the little things.'}
           </div>
         </div>

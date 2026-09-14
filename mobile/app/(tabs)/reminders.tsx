@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Bell } from 'lucide-react-native'
 import {
   Alert,
   ScrollView,
@@ -10,6 +11,7 @@ import {
 } from 'react-native'
 
 import { useNotifications } from '@/hooks/useNotifications'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 export default function RemindersScreen() {
   const { permissionStatus, reminders, addReminder, triggerTest } = useNotifications()
@@ -65,7 +67,11 @@ export default function RemindersScreen() {
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {reminders.length === 0 ? (
-          <Text style={styles.empty}>No reminders yet. Create one to keep the love flowing.</Text>
+          <EmptyState
+            icon={Bell}
+            title="No reminders yet"
+            description="Create one to keep the love flowing."
+          />
         ) : (
           reminders.map((reminder) => (
             <View key={reminder.id} style={styles.card}>
@@ -136,7 +142,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   secondaryButton: {
-    backgroundColor: '#1f3b2f',
+    backgroundColor: '#ff6b81',
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',

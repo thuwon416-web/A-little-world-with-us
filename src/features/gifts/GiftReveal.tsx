@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Gift } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import Confetti from '@/features/dashboard/Confetti'
@@ -11,7 +12,9 @@ export default function GiftReveal() {
       {revealed ? (
         <div>
           <Confetti trigger={revealed} />
-          <h2 className="text-4xl font-serif mb-4">🎁 You found a surprise!</h2>
+          <h2 className="text-4xl font-serif mb-4">
+            <Gift className="inline h-5 w-5" /> You found a surprise!
+          </h2>
           <p className="text-lg">A special message from your love...</p>
         </div>
       ) : (

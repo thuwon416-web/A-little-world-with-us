@@ -1,4 +1,5 @@
 'use client'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
 import { getCurrentUserId } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
@@ -184,9 +185,10 @@ export default function CalendarPage() {
                           new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
                         )
                       }}
-                      className="px-4 py-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-2 text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
                     >
-                      ← Previous
+                      <ChevronLeft className="h-4 w-4" />
+                      <span>Previous</span>
                     </button>
                     <h2 className="text-xl font-bold text-[var(--text-primary)]">
                       {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
@@ -197,9 +199,10 @@ export default function CalendarPage() {
                           new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
                         )
                       }}
-                      className="px-4 py-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
+                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-2 text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
                     >
-                      Next →
+                      <span>Next</span>
+                      <ChevronRight className="h-4 w-4" />
                     </button>
                   </div>
 

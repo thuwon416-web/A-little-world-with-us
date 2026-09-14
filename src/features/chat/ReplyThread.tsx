@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Reply as ReplyIcon, Send } from 'lucide-react'
+import { Image as ImageIcon, Mic, Music, Paperclip, Smile, Video, X, Reply as ReplyIcon, Send } from 'lucide-react'
 
 interface Message {
   id: string
@@ -49,19 +49,19 @@ export default function ReplyThread({ message, currentUserId, onReply, onClose }
       case 'text':
         return message.content || 'Text message'
       case 'voice':
-        return '🎤 Voice message'
+        return <><Mic className="mr-1 inline h-4 w-4" /> Voice message</>
       case 'photo':
-        return '📷 Photo'
+        return <><ImageIcon className="mr-1 inline h-4 w-4" /> Photo</>
       case 'video':
-        return '🎬 Video'
+        return <><Video className="mr-1 inline h-4 w-4" /> Video</>
       case 'audio':
-        return '🎵 Audio'
+        return <><Music className="mr-1 inline h-4 w-4" /> Audio</>
       case 'sticker':
-        return '😊 Sticker'
+        return <><Smile className="mr-1 inline h-4 w-4" /> Sticker</>
       case 'gif':
-        return '🎬 GIF'
+        return <><Video className="mr-1 inline h-4 w-4" /> GIF</>
       case 'file':
-        return '📎 File'
+        return <><Paperclip className="mr-1 inline h-4 w-4" /> File</>
       default:
         return 'Message'
     }

@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { MessageCircle } from 'lucide-react'
 
 export default function MessageSuggestions() {
   const [suggestions, setSuggestions] = useState<string[]>([])
@@ -39,7 +40,7 @@ export default function MessageSuggestions() {
 
   return (
     <div className="p-4 bg-[var(--card-bg-strong)] rounded-2xl border border-[var(--accent-1)]/20">
-      <h3 className="font-bold text-[var(--text-primary)] mb-2">💬 Message Suggestions</h3>
+      <h3 className="mb-2 flex items-center gap-2 font-bold text-[var(--text-primary)]"><MessageCircle className="h-4 w-4" /> Message Suggestions</h3>
       <input
         value={context}
         onChange={(e) => setContext(e.target.value)}

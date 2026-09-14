@@ -75,11 +75,11 @@ export default function AdminLocationsPage() {
     { id: 'live', label: 'Live Map', icon: MapPin }, { id: 'timeline', label: 'Timeline', icon: Route }, { id: 'places', label: 'Saved Places', icon: Navigation }, { id: 'device', label: 'Device Status', icon: Smartphone }, { id: 'calls', label: 'App Calls', icon: PhoneCall }, { id: 'safety', label: 'Safety / SOS', icon: ShieldCheck },
   ]
 
-  if (loading) return <div className="flex min-h-[400px] items-center justify-center text-[var(--text-secondary)]"><RefreshCw className="mr-2 h-5 w-5 animate-spin" /> Loading paired location data…</div>
+  if (loading) return <div className="flex min-h-[400px] items-center justify-center text-[var(--text-secondary)]"><RefreshCw className="icon-pulse-soft mr-2 h-5 w-5 animate-spin" /> Loading paired location data…</div>
   if (error) return <section className="glass-card mx-auto max-w-2xl p-6 text-center"><AlertTriangle className="mx-auto h-8 w-8 text-[var(--accent-1)]" /><h1 className="mt-3 text-2xl text-[var(--text-primary)]">Location is not ready</h1><p className="mt-2 text-sm text-[var(--text-secondary)]">{error}</p></section>
 
   return <div className="space-y-6">
-    <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Pair safety dashboard</p><h1 className="mt-2 text-3xl font-serif text-[var(--text-primary)]">Location</h1></div><button type="button" onClick={() => void load()} className="glass-button inline-flex items-center gap-2 px-4 py-2 text-sm"><RefreshCw className="h-4 w-4" /> Refresh</button></header>
+    <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Pair safety dashboard</p><h1 className="mt-2 text-3xl font-serif text-[var(--text-primary)]">Location</h1></div><button type="button" onClick={() => void load()} className="glass-button inline-flex items-center gap-2 px-4 py-2 text-sm"><RefreshCw className="icon-pulse-soft h-4 w-4" /> Refresh</button></header>
     <nav className="flex gap-2 overflow-x-auto pb-1">{tabs.map(({ id, label, icon: Icon }) => <button key={id} type="button" onClick={() => setTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm ${tab === id ? 'border-[var(--accent-1)]/50 bg-[var(--accent-1)]/15 text-[var(--accent-1)]' : 'border-white/10 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}><Icon className="h-4 w-4" />{label}</button>)}</nav>
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px]">
       <section className="glass-card min-h-[520px] overflow-hidden p-4">

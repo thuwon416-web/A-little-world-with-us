@@ -27,30 +27,58 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 
-const items = [
-  { href: '/(tabs)/plans', key: 'plans', Icon: CalendarDays },
-  { href: '/(tabs)/memories', key: 'ourMemories', Icon: HeartPulse },
-  { href: '/(tabs)/our-story', key: 'ourStory', Icon: BookHeart },
-  { href: '/(tabs)/wellness', key: 'wellness', Icon: HeartPulse },
-  { href: '/(tabs)/settings', key: 'settings', Icon: Settings },
-  { href: '/(tabs)/location', key: 'locationSafety', Icon: MapPin },
-  { href: '/(tabs)/ai', key: 'aiGuardian', Icon: Sparkles },
-  { href: '/(tabs)/finance', key: 'finance', Icon: HeartPulse },
-  { href: '/(tabs)/profile', key: 'profile', Icon: LogOut },
-  { href: '/(tabs)/music', key: 'music', Icon: Music2 },
-  { href: '/(tabs)/vault', key: 'privateVault', Icon: LockKeyhole },
-  { href: '/(tabs)/astrology', key: 'astrology', Icon: Moon },
-  { href: '/(tabs)/games', key: 'coupleGames', Icon: Gamepad2 },
-  { href: '/(tabs)/time-capsules', key: 'timeCapsules', Icon: Hourglass },
-  { href: '/(tabs)/calls', key: 'calls', Icon: Phone },
-  { href: '/(tabs)/couple-linking', key: 'coupleLinking', Icon: Users },
-  { href: '/(tabs)/privacy', key: 'privacy', Icon: Shield },
-  { href: '/(tabs)/help', key: 'helpCenter', Icon: CircleHelp },
-  { href: '/(tabs)/about', key: 'about', Icon: Info },
-  { href: '/(tabs)/terms', key: 'terms', Icon: FileText },
-  { href: '/(tabs)/watch-together', key: 'watchTogether', Icon: MonitorPlay },
-  { href: '/(tabs)/lists', key: 'lists', Icon: ListChecks },
-  { href: '/(tabs)/reminders', key: 'reminders', Icon: Bell },
+const sections = [
+  {
+    title: 'Daily',
+    items: [
+      { href: '/(tabs)/plans', key: 'plans', Icon: CalendarDays },
+      { href: '/(tabs)/reminders', key: 'reminders', Icon: Bell },
+      { href: '/(tabs)/lists', key: 'lists', Icon: ListChecks },
+      { href: '/(tabs)/calls', key: 'calls', Icon: Phone },
+    ],
+  },
+  {
+    title: 'Shared',
+    items: [
+      { href: '/(tabs)/our-story', key: 'ourStory', Icon: BookHeart },
+      { href: '/(tabs)/memories', key: 'ourMemories', Icon: HeartPulse },
+      { href: '/(tabs)/wellness', key: 'wellness', Icon: HeartPulse },
+      { href: '/(tabs)/music', key: 'music', Icon: Music2 },
+      { href: '/(tabs)/location', key: 'locationSafety', Icon: MapPin },
+      { href: '/(tabs)/vault', key: 'privateVault', Icon: LockKeyhole },
+    ],
+  },
+  {
+    title: 'Play',
+    items: [
+      { href: '/(tabs)/games', key: 'coupleGames', Icon: Gamepad2 },
+      { href: '/(tabs)/watch-together', key: 'watchTogether', Icon: MonitorPlay },
+      { href: '/(tabs)/time-capsules', key: 'timeCapsules', Icon: Hourglass },
+    ],
+  },
+  {
+    title: 'AI',
+    items: [{ href: '/(tabs)/ai', key: 'aiGuardian', Icon: Sparkles }],
+  },
+  {
+    title: 'Account',
+    items: [
+      { href: '/(tabs)/settings', key: 'settings', Icon: Settings },
+      { href: '/(tabs)/privacy', key: 'privacy', Icon: Shield },
+      { href: '/(tabs)/couple-linking', key: 'coupleLinking', Icon: Users },
+      { href: '/(tabs)/profile', key: 'profile', Icon: LogOut },
+      { href: '/(tabs)/finance', key: 'finance', Icon: HeartPulse },
+      { href: '/(tabs)/astrology', key: 'astrology', Icon: Moon },
+    ],
+  },
+  {
+    title: 'Legal',
+    items: [
+      { href: '/(tabs)/about', key: 'about', Icon: Info },
+      { href: '/(tabs)/terms', key: 'terms', Icon: FileText },
+      { href: '/(tabs)/help', key: 'helpCenter', Icon: CircleHelp },
+    ],
+  },
 ] as const
 
 export default function MoreScreen() {
@@ -61,24 +89,29 @@ export default function MoreScreen() {
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.eyebrow}>{t('nav.more')}</Text>
       <Text style={styles.title}>{t('nav.everythingElse')}</Text>
-      <View style={styles.grid}>
-        {items.map(({ href, key, Icon }) => {
-          const label = t(`nav.${key}`)
-          return (
-            <TouchableOpacity
-              key={key}
-              accessibilityRole="button"
-              accessibilityLabel={label}
-              accessibilityHint={`Opens ${label}`}
-              style={styles.card}
-              onPress={() => router.push(href)}
-            >
-              <Icon size={22} color="#d9bfd7" />
-              <Text style={styles.label}>{label}</Text>
-            </TouchableOpacity>
-          )
-        })}
-      </View>
+      {sections.map(({ title: sectionTitle, items: sectionItems }) => (
+        <View key={sectionTitle} style={styles.section}>
+          <Text style={styles.sectionHeader}>{sectionTitle}</Text>
+          <View style={styles.grid}>
+            {sectionItems.map(({ href, key, Icon }) => {
+              const label = t(`nav.${key}`)
+              return (
+                <TouchableOpacity
+                  key={key}
+                  accessibilityRole="button"
+                  accessibilityLabel={label}
+                  accessibilityHint={`Opens ${label}`}
+                  style={styles.card}
+                  onPress={() => router.push(href)}
+                >
+                  <Icon size={22} color="#d9bfd7" />
+                  <Text style={styles.label}>{label}</Text>
+                </TouchableOpacity>
+              )
+            })}
+          </View>
+        </View>
+      ))}
       <TouchableOpacity
         accessibilityRole="button"
         accessibilityLabel={t('nav.signOut')}
@@ -97,6 +130,16 @@ const styles = StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: '#0f0f12', padding: 20, paddingTop: 72 },
   eyebrow: { color: '#d9bfd7', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
   title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700', marginTop: 8, marginBottom: 22 },
+  section: { marginTop: 20 },
+  sectionHeader: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1.2,
+    color: '#7d6b42',
+    marginBottom: 10,
+    textTransform: 'uppercase',
+    paddingHorizontal: 4,
+  },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   card: {
     width: '47%',

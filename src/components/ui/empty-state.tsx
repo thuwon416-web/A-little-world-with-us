@@ -22,7 +22,7 @@ export function EmptyState({ icon: Icon, title, description, action, className }
         className
       )}
     >
-      <div className="flex h-16 w-16 items-center justify-center rounded-full border border-[var(--accent-1)]/25 bg-[var(--card-bg-strong)] text-[var(--accent-1)] shadow-[0_0_20px_rgba(184,138,229,0.12)]">
+      <div className="icon-bounce-once flex h-16 w-16 items-center justify-center rounded-full border border-[var(--accent-1)]/25 bg-[var(--card-bg-strong)] text-[var(--accent-1)] shadow-[0_0_20px_rgba(184,138,229,0.12)]">
         <Icon className="h-8 w-8" aria-hidden="true" />
       </div>
 

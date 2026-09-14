@@ -7,8 +7,8 @@ import { checkRateLimit } from '@/lib/rate-limit'
 
 const SALT_ROUNDS = 10
 const pinRequestSchema = z.object({
-  action: z.enum(['hash', 'verify']),
-  pin: z.string().regex(/^\d{4}$/, 'PIN must be 4 digits'),
+  action: z.enum(['hash', 'verify', 'remove', 'status']),
+  pin: z.string().regex(/^\d{4,6}$/, 'PIN must be 4 to 6 digits').optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -39,6 +39,37 @@ export async function POST(req: NextRequest) {
 
     const { action, pin } = pinRequestSchema.parse(await req.json())
 
+    if ((action === 'hash' || action === 'verify') && !pin) {
+      return NextResponse.json({ error: 'PIN is required' }, { status: 400 })
+    }
+
+    if (action === 'status') {
+      const { data, error } = await supabase
+        .from('user_settings')
+        .select('lock_pin_hash')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (error) {
+        return NextResponse.json({ error: 'Failed to load PIN status' }, { status: 500 })
+      }
+
+      return NextResponse.json({ hasPIN: Boolean(data?.lock_pin_hash) })
+    }
+
+    if (action === 'remove') {
+      const { error } = await supabase
+        .from('user_settings')
+        .update({ lock_pin_hash: null })
+        .eq('user_id', user.id)
+
+      if (error) {
+        return NextResponse.json({ error: 'Failed to remove PIN' }, { status: 500 })
+      }
+
+      return NextResponse.json({ success: true })
+    }
+
     if (action === 'hash') {
       const rateLimitResult = await checkRateLimit(`pin-hash:${user.id}`, 5, 60000)
       if (!rateLimitResult.allowed) {
@@ -48,7 +79,7 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      const hashedPin = await bcrypt.hash(pin, SALT_ROUNDS)
+      const hashedPin = await bcrypt.hash(pin!, SALT_ROUNDS)
 
       // Store the hashed PIN in user_settings
       const { error } = await supabase
@@ -91,7 +122,7 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      const isValid = await bcrypt.compare(pin, data.lock_pin_hash)
+      const isValid = await bcrypt.compare(pin!, data.lock_pin_hash)
 
       return NextResponse.json({ valid: isValid })
     }

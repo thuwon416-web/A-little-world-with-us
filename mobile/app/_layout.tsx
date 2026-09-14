@@ -3,7 +3,7 @@ import { StatusBar } from 'expo-status-bar'
 import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
-import { ThemeProvider } from '@/context/ThemeContext'
+import { ThemeProvider, useTheme } from '@/context/ThemeContext'
 import { I18nProvider } from '@/i18n/config'
 import { AuthProvider } from '@/lib/auth'
 import '@/services/location'
@@ -42,13 +42,20 @@ class ErrorBoundary extends React.Component<
   }
 }
 
+function ThemedStatusBar() {
+  const { theme, colors } = useTheme()
+  const isDark = theme === 'midnight' || theme === 'sunset' || theme === 'monochrome'
+
+  return <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background} />
+}
+
 export default function RootLayout() {
   return (
     <ErrorBoundary>
       <AuthProvider>
         <I18nProvider>
           <ThemeProvider>
-            <StatusBar style="light" backgroundColor="#0f0f12" />
+          <ThemedStatusBar />
             <Stack>
               <Stack.Screen name="login" options={{ title: 'Login' }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />

@@ -6,7 +6,6 @@ import { Moon, Heart } from 'lucide-react'
 interface MoonPhaseData {
   phase: string
   phaseMy: string
-  emoji: string
   illumination: number
   description: string
   descriptionMy: string
@@ -18,7 +17,6 @@ const moonPhases: MoonPhaseData[] = [
   {
     phase: 'New Moon',
     phaseMy: 'လမွေး',
-    emoji: '🌑',
     illumination: 0,
     description: 'Time for new beginnings and setting intentions.',
     descriptionMy: 'အစသစ်စွာစတင်ရန်နှင့် ရည်မှန်းချက်ချရန်အချိန်။',
@@ -28,7 +26,6 @@ const moonPhases: MoonPhaseData[] = [
   {
     phase: 'Waxing Crescent',
     phaseMy: 'လရွေး',
-    emoji: '🌒',
     illumination: 25,
     description: 'Growing energy. Take action on your intentions.',
     descriptionMy: 'စွမ်းအင်တိုးတက်နေပါ။ ရည်မှန်းချက်တွေကို အကောင်အထည်ဖော်ပါ။',
@@ -38,7 +35,6 @@ const moonPhases: MoonPhaseData[] = [
   {
     phase: 'First Quarter',
     phaseMy: 'လပြည့်ဝမတ်',
-    emoji: '🌓',
     illumination: 50,
     description: 'Take decisive action. Overcome challenges.',
     descriptionMy: 'ဆုံးဖြတ်ချက်ချပါ။ စိန်ခေါ်မှုတွေကို အောင်နိုင်ပါ။',
@@ -48,7 +44,6 @@ const moonPhases: MoonPhaseData[] = [
   {
     phase: 'Waxing Gibbous',
     phaseMy: 'လပြည့်မတ်',
-    emoji: '🌔',
     illumination: 75,
     description: 'Refine and adjust. Fine-tune your plans.',
     descriptionMy: 'ပြုပြင်ပြင်ဆင်ပါ။ စီမံကိန်းတွေကို ချိန်ညှိပါ။',
@@ -58,7 +53,6 @@ const moonPhases: MoonPhaseData[] = [
   {
     phase: 'Full Moon',
     phaseMy: 'လပြည့်',
-    emoji: '🌕',
     illumination: 100,
     description: 'Peak energy. Emotions are heightened.',
     descriptionMy: 'စွမ်းအင်အမြင့်စား။ စိတ်ခံစားမှုမြင့်မားပါ။',
@@ -68,7 +62,6 @@ const moonPhases: MoonPhaseData[] = [
   {
     phase: 'Waning Gibbous',
     phaseMy: 'လလွန်',
-    emoji: '🌖',
     illumination: 75,
     description: 'Share wisdom. Teach and learn together.',
     descriptionMy: 'အတွေးအခေါ်များမျှဝေပါ။ အတူသင်ယူပါ။',
@@ -78,7 +71,6 @@ const moonPhases: MoonPhaseData[] = [
   {
     phase: 'Last Quarter',
     phaseMy: 'လကွမ်း',
-    emoji: '🌗',
     illumination: 50,
     description: 'Release and let go. Clear out what no longer serves.',
     descriptionMy: 'လွှတ်လိုက်ပါ။ မလိုအပ်တဲ့အရာတွေကို ရှင်းလင်းပါ။',
@@ -88,7 +80,6 @@ const moonPhases: MoonPhaseData[] = [
   {
     phase: 'Waning Crescent',
     phaseMy: 'လကွမ်းရွေး',
-    emoji: '🌘',
     illumination: 25,
     description: 'Rest and reflect. Prepare for new cycle.',
     descriptionMy: 'အနားယူပြီး ပြန်စဉ်းစားပါ။ ခါလတ်အသစ်အတွက် ပြင်ဆင်ပါ။',
@@ -136,7 +127,9 @@ export default function MoonPhase() {
 
       {/* Current Moon Phase Display */}
       <div className="mb-6 flex items-center gap-4 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
-        <div className="text-6xl">{currentPhase.emoji}</div>
+        <div className="text-[var(--accent-1)]" style={{ transform: `rotate(${currentPhase.illumination * 1.8}deg)` }}>
+          <Moon className="h-12 w-12" />
+        </div>
         <div className="flex-1">
           <h3 className="text-2xl font-bold text-[var(--text-primary)]">
             {showMyanmar ? currentPhase.phaseMy : currentPhase.phase}
@@ -182,7 +175,7 @@ export default function MoonPhase() {
                   : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
               }`}
             >
-              <span className="text-2xl">{phase.emoji}</span>
+              <Moon className="h-6 w-6 text-[var(--accent-1)]" style={{ transform: `rotate(${phase.illumination * 1.8}deg)` }} />
               <span className="text-xs text-[var(--text-primary)]">
                 {showMyanmar ? phase.phaseMy : phase.phase}
               </span>

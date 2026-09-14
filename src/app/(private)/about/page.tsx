@@ -1,4 +1,15 @@
 import Link from 'next/link'
+import {
+  Bot,
+  Camera,
+  Heart,
+  Mail,
+  MessageCircle,
+  MoonStar,
+  NotebookText,
+  Palette,
+  Target,
+} from 'lucide-react'
 
 export default function About() {
   return (
@@ -40,35 +51,35 @@ export default function About() {
           <h2 className="font-bold text-xl mb-4 text-[var(--text-primary)]">Features</h2>
           <ul className="space-y-3">
             <li className="flex items-center gap-3 text-[var(--text-primary)]">
-              <span className="text-2xl">📸</span>
+              <Camera className="h-5 w-5 text-[var(--accent-1)]" />
               <span>Memory timeline with photos and notes</span>
             </li>
             <li className="flex items-center gap-3 text-[var(--text-primary)]">
-              <span className="text-2xl">🎯</span>
+              <Target className="h-5 w-5 text-[var(--accent-1)]" />
               <span>Relationship goals and progress tracking</span>
             </li>
             <li className="flex items-center gap-3 text-[var(--text-primary)]">
-              <span className="text-2xl">💬</span>
+              <MessageCircle className="h-5 w-5 text-[var(--accent-1)]" />
               <span>Private messaging between partners</span>
             </li>
             <li className="flex items-center gap-3 text-[var(--text-primary)]">
-              <span className="text-2xl">📝</span>
+              <NotebookText className="h-5 w-5 text-[var(--accent-1)]" />
               <span>Shared todo lists and reminders</span>
             </li>
             <li className="flex items-center gap-3 text-[var(--text-primary)]">
-              <span className="text-2xl">💌</span>
+              <Mail className="h-5 w-5 text-[var(--accent-1)]" />
               <span>Daily love notes and gentle reminders</span>
             </li>
             <li className="flex items-center gap-3 text-[var(--text-primary)]">
-              <span className="text-2xl">🌙</span>
+              <MoonStar className="h-5 w-5 text-[var(--accent-1)]" />
               <span>Bedtime stories and evening rituals</span>
             </li>
             <li className="flex items-center gap-3 text-[var(--text-primary)]">
-              <span className="text-2xl">🎨</span>
+              <Palette className="h-5 w-5 text-[var(--accent-1)]" />
               <span>Random date ideas generator</span>
             </li>
             <li className="flex items-center gap-3 text-[var(--text-primary)]">
-              <span className="text-2xl">🤖</span>
+              <Bot className="h-5 w-5 text-[var(--accent-1)]" />
               <span>AI-powered relationship assistant</span>
             </li>
           </ul>
@@ -153,8 +164,9 @@ export default function About() {
 
         <section className="rounded-[24px] border border-white/10 bg-[var(--card-bg)] p-5">
           <h2 className="font-bold text-xl mb-4 text-[var(--text-primary)]">Built With Love</h2>
-          <p className="text-[var(--text-secondary)] leading-relaxed">
-            Made for couples who believe that every day together is worth celebrating. 💕
+          <p className="flex items-center gap-2 text-[var(--text-secondary)] leading-relaxed">
+            <Heart className="h-4 w-4 text-[var(--accent-1)]" />
+            <span>Made for couples who believe that every day together is worth celebrating.</span>
           </p>
         </section>
       </div>

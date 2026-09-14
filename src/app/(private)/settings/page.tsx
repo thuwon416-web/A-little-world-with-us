@@ -1,6 +1,6 @@
 'use client'
 
-import { BellRing, NotebookPen, ShieldCheck, Wand2 } from 'lucide-react'
+import { BellRing, Download, NotebookPen, ShieldCheck, Trash2, Wand2 } from 'lucide-react'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 
@@ -170,9 +170,10 @@ export default function SettingsPage() {
         <div className="mt-4 space-y-3">
           <button
             onClick={() => alert('Use the Data & Export section above to download your available exports.')}
-            className="w-full border border-red-500/30 text-red-500 py-3 rounded-lg font-medium hover:bg-red-500/10 transition"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500/30 py-3 font-medium text-red-500 transition hover:bg-red-500/10"
           >
-            📥 Export All My Data
+            <Download className="h-4 w-4" />
+            <span>Export All My Data</span>
           </button>
 
           <button
@@ -181,9 +182,10 @@ export default function SettingsPage() {
                 alert('Account deletion requires authentication. Please contact support for assistance.')
               }
             }}
-            className="w-full bg-red-500 text-white py-3 rounded-lg font-medium hover:bg-red-600 transition"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-500 py-3 font-medium text-white transition hover:bg-red-600"
           >
-            🗑️ Delete My Account
+            <Trash2 className="h-4 w-4" />
+            <span>Delete My Account</span>
           </button>
         </div>
       </section>

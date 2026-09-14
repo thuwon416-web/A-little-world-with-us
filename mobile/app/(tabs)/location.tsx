@@ -6,14 +6,17 @@ import {
   PointAnnotation,
   ShapeSource,
 } from '@maplibre/maplibre-react-native'
+import * as Location from 'expo-location'
 import { Redirect } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useAdmin } from '@/hooks/useAdmin'
 import { useLocation } from '@/hooks/useLocation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import { sendLocalNotification } from '@/services/notifications'
+import { useTheme } from '@/context/ThemeContext'
 
 type LocationHistoryRow = {
   latitude: number
@@ -55,6 +58,7 @@ const tabs = [
 type Tab = (typeof tabs)[number]
 
 export default function LocationScreen() {
+  const { colors } = useTheme()
   const { isAdmin, loading: adminLoading } = useAdmin()
   const { user } = useAuth()
   const {
@@ -74,6 +78,76 @@ export default function LocationScreen() {
   const [sosAlerts, setSosAlerts] = useState<SosAlert[]>([])
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'empty'>('loading')
+  const [sosSending, setSosSending] = useState(false)
+  const [sosSentAt, setSosSentAt] = useState<string | null>(null)
+  const [sosLocation, setSosLocation] = useState<{ latitude: number; longitude: number; accuracy: number | null } | null>(null)
+  const [sosError, setSosError] = useState('')
+
+  const sendSOS = async () => {
+    if (sosSending || !user || !coupleId) return
+    setSosSending(true)
+    setSosError('')
+    try {
+      const permission = await Location.requestForegroundPermissionsAsync()
+      if (permission.status !== Location.PermissionStatus.GRANTED) {
+        throw new Error('Location permission is required to send an SOS.')
+      }
+      const position = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High,
+      })
+      const point = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+        accuracy: position.coords.accuracy,
+      }
+      const [alertResult, messageResult] = await Promise.all([
+        supabase.from('emergency_alerts').insert({
+          couple_id: coupleId,
+          reporter_id: user.id,
+          latitude: point.latitude,
+          longitude: point.longitude,
+          accuracy: point.accuracy,
+        }),
+        supabase.from('messages').insert({
+          couple_id: coupleId,
+          sender_id: user.id,
+          content: 'Emergency SOS — current location shared',
+          message_type: 'sos',
+          location_payload: point,
+        }),
+      ])
+      if (alertResult.error || messageResult.error) {
+        throw new Error(alertResult.error?.message ?? messageResult.error?.message ?? 'SOS could not be saved.')
+      }
+      setSosLocation(point)
+      setSosSentAt(new Date().toISOString())
+      await sendLocalNotification('Emergency SOS sent', 'Your location has been shared with your partner.')
+      setSosAlerts((current) => [
+        {
+          id: `local-${Date.now()}`,
+          message: 'Emergency SOS — current location shared',
+          created_at: new Date().toISOString(),
+          resolved_at: null,
+        },
+        ...current,
+      ])
+    } catch (caught) {
+      setSosError(caught instanceof Error ? caught.message : 'Failed to send SOS.')
+    } finally {
+      setSosSending(false)
+    }
+  }
+
+  const confirmSOS = () => {
+    Alert.alert(
+      'Send emergency SOS?',
+      'Your current location will be shared with your partner.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Send SOS', style: 'destructive', onPress: () => void sendSOS() },
+      ]
+    )
+  }
 
   useEffect(() => {
     if (!isAdmin || !user) return
@@ -325,6 +399,30 @@ export default function LocationScreen() {
         </ScrollView>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
+          <View style={[styles.sosCard, { backgroundColor: colors.cardBg, borderColor: colors.error }]}>
+            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Emergency SOS</Text>
+            <Text style={[styles.meta, { color: colors.textSecondary }]}>
+              Share your current location with your partner immediately.
+            </Text>
+            <TouchableOpacity
+              style={[styles.sosButton, { backgroundColor: colors.error }]}
+              onPress={confirmSOS}
+              disabled={sosSending || !coupleId}
+              accessibilityRole="button"
+              accessibilityLabel="Send emergency SOS"
+            >
+              <Text style={styles.sosButtonText}>{sosSending ? 'Sending...' : 'EMERGENCY SOS'}</Text>
+            </TouchableOpacity>
+            {sosSentAt ? (
+              <Text style={[styles.sosSuccess, { color: colors.success }]}>SOS sent {new Date(sosSentAt).toLocaleString()}</Text>
+            ) : null}
+            {sosLocation ? (
+              <Text style={[styles.meta, { color: colors.textSecondary }]}>
+                Location shared: {sosLocation.latitude.toFixed(6)}, {sosLocation.longitude.toFixed(6)}
+              </Text>
+            ) : null}
+            {sosError ? <Text style={[styles.sosError, { color: colors.error }]}>{sosError}</Text> : null}
+          </View>
           {sosAlerts.map((alert) => (
             <View key={alert.id} style={styles.listItem}>
               <Text style={styles.cardTitle}>
@@ -418,6 +516,23 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: '#260f2d', fontWeight: '800' },
   loading: { color: '#d4bdd1', textAlign: 'center', marginTop: 8, fontSize: 12 },
+  sosCard: {
+    backgroundColor: '#32111d',
+    borderColor: '#ef4444',
+    borderWidth: 1,
+    borderRadius: 20,
+    padding: 16,
+    gap: 10,
+  },
+  sosButton: {
+    backgroundColor: '#dc2626',
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  sosButtonText: { color: '#fff', fontSize: 18, fontWeight: '800' },
+  sosSuccess: { color: '#86efac', fontSize: 12 },
+  sosError: { color: '#fca5a5', fontSize: 12 },
   list: { paddingBottom: 20 },
   listItem: {
     backgroundColor: '#2b1745',

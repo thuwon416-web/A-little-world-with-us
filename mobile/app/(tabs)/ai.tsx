@@ -1,21 +1,112 @@
 import * as Clipboard from 'expo-clipboard'
+import { Sparkles } from 'lucide-react-native'
 import { useState } from 'react'
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
+import { useTheme } from '@/context/ThemeContext'
 import { useAI } from '@/hooks/useAI'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { supabase } from '@/lib/supabase'
 import { saveAISuggestion } from '@/services/favorites'
 
+type Tool = 'gift' | 'date' | 'message' | 'coach' | 'letter' | 'surprise'
+
+const tools: Array<{ id: Tool; label: string }> = [
+  { id: 'gift', label: 'Gift Ideas' },
+  { id: 'date', label: 'Date Ideas' },
+  { id: 'message', label: 'Message Helper' },
+  { id: 'coach', label: 'Love Coach' },
+  { id: 'letter', label: 'Love Letter' },
+  { id: 'surprise', label: 'Surprise Ideas' },
+]
+
+const instructions: Record<'coach' | 'letter' | 'surprise', string> = {
+  coach:
+    'Give warm, practical relationship advice. Be concise, non-judgmental, and suggest small realistic next steps.',
+  letter:
+    'Write a heartfelt, specific love letter. Use a warm, sincere tone and return only the letter.',
+  surprise:
+    'Create five private surprise ideas using only these details. Include a simple first step and approximate cost in MMK.',
+}
+
 export default function AIAssistantScreen() {
-  const [tab, setTab] = useState<'gift' | 'date' | 'message'>('gift')
+  const { colors } = useTheme()
+  const [tab, setTab] = useState<Tool>('gift')
+  const [input, setInput] = useState('')
+  const [customResult, setCustomResult] = useState('')
+  const [customState, setCustomState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [customError, setCustomError] = useState<string | null>(null)
   const { items, state, error, refreshSuggestions } = useAI()
 
   const filteredItems = items.filter((item) => item.suggestion_type === tab)
+  const isCustomTool = tab === 'coach' || tab === 'letter' || tab === 'surprise'
+  const isLoading = isCustomTool ? customState === 'loading' : state === 'loading'
+  const displayedError = isCustomTool ? customError : error
 
   const handleRefresh = async () => {
-    await refreshSuggestions(tab)
+    if (!isCustomTool) {
+      await refreshSuggestions(tab, input.trim() ? [input.trim()] : [])
+      return
+    }
+
+    if (!input.trim()) {
+      setCustomError('Tell us a little more first.')
+      setCustomState('error')
+      return
+    }
+
+    setCustomState('loading')
+    setCustomError(null)
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+      if (!webUrl || !session?.access_token) {
+        throw new Error('Please sign in again.')
+      }
+
+      const response = await fetch(
+        `${webUrl}/api/ai/${tab === 'surprise' ? 'surprise' : 'chat'}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${session.access_token}`,
+          },
+          body:
+            tab === 'surprise'
+              ? JSON.stringify({
+                  occasion: 'A private surprise',
+                  interests: input.trim(),
+                })
+              : JSON.stringify({
+                  message: `${instructions[tab]}\n\nUser request: ${input.trim()}`,
+                }),
+        }
+      )
+      const body = (await response.json()) as {
+        response?: string
+        ideas?: string
+        error?: string
+      }
+      const generated = tab === 'surprise' ? body.ideas : body.response
+      if (!response.ok || !generated) {
+        throw new Error(body.error || 'Unable to generate a response')
+      }
+      setCustomResult(generated)
+      setCustomState('success')
+    } catch (caught) {
+      setCustomError(caught instanceof Error ? caught.message : 'Unable to generate a response')
+      setCustomState('error')
+    }
   }
 
   const saveFavorite = async (content: string) => {
+    if (isCustomTool) {
+      Alert.alert('Save unavailable', 'This tool does not support saved suggestions yet.')
+      return
+    }
     try {
       await saveAISuggestion(content, tab)
       Alert.alert('Saved', 'Suggestion saved to favorites')
@@ -33,58 +124,114 @@ export default function AIAssistantScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>AI Love Assistant</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>AI Love Assistant</Text>
 
-      <View style={styles.tabs}>
-        {(['gift', 'date', 'message'] as const).map((key) => (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.tabs}
+      >
+        {tools.map(({ id, label }) => (
           <TouchableOpacity
-            key={key}
-            style={[styles.tab, tab === key && styles.activeTab]}
-            onPress={() => setTab(key)}
+            key={id}
+            style={[
+              styles.tab,
+              { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+              tab === id && { backgroundColor: colors.accent1 },
+            ]}
+            onPress={() => {
+              setTab(id)
+              setInput('')
+              setCustomResult('')
+              setCustomError(null)
+              setCustomState('idle')
+            }}
           >
-            <Text style={[styles.tabText, tab === key && styles.activeTabText]}>
-              {key === 'gift' ? 'Gift Ideas' : key === 'date' ? 'Date Ideas' : 'Message Helper'}
+            <Text
+              style={[
+                styles.tabText,
+                { color: colors.textPrimary },
+                tab === id && { color: colors.background },
+              ]}
+            >
+              {label}
             </Text>
           </TouchableOpacity>
         ))}
-      </View>
+      </ScrollView>
 
-      <TouchableOpacity style={styles.refreshButton} onPress={() => void handleRefresh()}>
-        <Text style={styles.refreshText}>
-          {state === 'loading' ? 'Generating...' : 'Refresh ideas'}
+      <TextInput
+        style={[
+          styles.input,
+          {
+            color: colors.textPrimary,
+            backgroundColor: colors.cardBg,
+            borderColor: colors.cardBorder,
+          },
+        ]}
+        value={input}
+        onChangeText={setInput}
+        placeholder="Tell us what you need help with..."
+        placeholderTextColor={colors.textSecondary}
+        multiline
+        maxLength={1000}
+      />
+
+      <TouchableOpacity
+        style={[styles.refreshButton, { backgroundColor: colors.accent1 }]}
+        onPress={() => void handleRefresh()}
+        disabled={isLoading}
+      >
+        <Text style={[styles.refreshText, { color: colors.background }]}>
+          {isLoading ? 'Generating...' : 'Refresh ideas'}
         </Text>
       </TouchableOpacity>
 
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+      {displayedError ? <Text style={[styles.error, { color: colors.error }]}>{displayedError}</Text> : null}
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
-        {filteredItems.length === 0 ? (
-          <Text style={styles.empty}>
-            No suggestions yet. Tap refresh to generate something sweet.
-          </Text>
-        ) : (
+        {isCustomTool && customResult ? (
+          <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+            <Text style={[styles.badge, { color: colors.accent2 }]}>AI-generated</Text>
+            <Text style={[styles.content, { color: colors.textPrimary }]}>{customResult}</Text>
+            <View style={styles.actions}>
+              <TouchableOpacity
+                style={[styles.actionButton, { borderColor: colors.accent1 }]}
+                onPress={() => void copyText(customResult)}
+              >
+                <Text style={[styles.actionText, { color: colors.textPrimary }]}>Copy</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : !isCustomTool && filteredItems.length > 0 ? (
           filteredItems.map((item) => (
-            <View key={item.id} style={styles.card}>
-              <Text style={styles.badge}>AI-generated</Text>
-              <Text style={styles.content}>{item.content}</Text>
+            <View key={item.id} style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+              <Text style={[styles.badge, { color: colors.accent2 }]}>AI-generated</Text>
+              <Text style={[styles.content, { color: colors.textPrimary }]}>{item.content}</Text>
 
               <View style={styles.actions}>
                 <TouchableOpacity
-                  style={styles.actionButton}
+                  style={[styles.actionButton, { borderColor: colors.accent1 }]}
                   onPress={() => void copyText(item.content)}
                 >
-                  <Text style={styles.actionText}>Copy</Text>
+                  <Text style={[styles.actionText, { color: colors.textPrimary }]}>Copy</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.actionButton}
+                  style={[styles.actionButton, { borderColor: colors.accent1 }]}
                   onPress={() => void saveFavorite(item.content)}
                 >
-                  <Text style={styles.actionText}>Save</Text>
+                  <Text style={[styles.actionText, { color: colors.textPrimary }]}>Save</Text>
                 </TouchableOpacity>
               </View>
             </View>
           ))
+        ) : (
+          <EmptyState
+            icon={Sparkles}
+            title="No suggestions yet"
+            description="Tap refresh to generate something sweet."
+          />
         )}
       </ScrollView>
     </View>
@@ -111,26 +258,27 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   tab: {
-    flex: 1,
+    minWidth: 110,
     paddingVertical: 12,
+    paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: '#171b22',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2a2d35',
-  },
-  activeTab: {
-    backgroundColor: '#b88ae5',
   },
   tabText: {
-    color: '#f3f0f5',
     fontWeight: '600',
   },
-  activeTabText: {
-    color: '#110d1a',
+  input: {
+    minHeight: 92,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    textAlignVertical: 'top',
+    marginBottom: 12,
   },
   refreshButton: {
-    backgroundColor: '#1f3b2f',
+    backgroundColor: '#ff6b81',
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -176,7 +324,9 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   actionButton: {
-    backgroundColor: '#2a2d35',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#ff6b81',
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,

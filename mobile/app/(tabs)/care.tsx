@@ -13,7 +13,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { Sparkles } from 'lucide-react-native'
 
+import { useTheme } from '@/context/ThemeContext'
+import { supabase } from '@/lib/supabase'
 import {
   saveTodayCareLog,
   saveCareLogForDate,
@@ -494,6 +497,7 @@ function HealthProfile() {
 }
 
 export default function CareScreen() {
+  const { colors } = useTheme()
   const [activeTab, setActiveTab] = useState<
     'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
   >('Today')
@@ -524,6 +528,10 @@ export default function CareScreen() {
   const [cycleLength, setCycleLength] = useState('28')
   const [periodLength, setPeriodLength] = useState('5')
   const [lastPeriodStart, setLastPeriodStart] = useState('')
+  const [intimacyMessage, setIntimacyMessage] = useState('')
+  const [intimacyResult, setIntimacyResult] = useState('')
+  const [intimacyError, setIntimacyError] = useState('')
+  const [intimacyLoading, setIntimacyLoading] = useState(false)
   const toggle = (current: string[], value: string, setter: (next: string[]) => void) =>
     setter(current.includes(value) ? current.filter((item) => item !== value) : [...current, value])
   const refresh = async () => {
@@ -625,6 +633,42 @@ export default function CareScreen() {
     )
     await Share.share({ message: [header, ...rows].join('\n'), title: 'Care data export.csv' })
   }
+  const askIntimacy = async () => {
+    if (!intimacyMessage.trim() || intimacyLoading) return
+    setIntimacyLoading(true)
+    setIntimacyError('')
+    setIntimacyResult('')
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+      if (!webUrl || !session?.access_token) throw new Error('Please sign in again.')
+      const response = await fetch(`${webUrl}/api/ai/intimacy`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ message: intimacyMessage.trim() }),
+      })
+      const body = (await response.json()) as {
+        response?: string
+        consentDisclaimer?: string
+        error?: string
+      }
+      if (!response.ok || !body.response) {
+        throw new Error(body.error || 'AI advice is unavailable.')
+      }
+      setIntimacyResult(
+        body.consentDisclaimer ? `${body.response}\n\n${body.consentDisclaimer}` : body.response
+      )
+    } catch (caught) {
+      setIntimacyError(caught instanceof Error ? caught.message : 'AI advice is unavailable.')
+    } finally {
+      setIntimacyLoading(false)
+    }
+  }
   if (loading)
     return (
       <View style={styles.center}>
@@ -649,6 +693,57 @@ export default function CareScreen() {
     )
   return (
     <View style={styles.screen}>
+      <View style={[styles.intimacyContainer, { backgroundColor: colors.background }]}>
+        <View style={[styles.intimacyCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+          <View style={styles.intimacyHeader}>
+            <Sparkles color={colors.accent1} size={20} />
+            <View style={styles.intimacyHeaderText}>
+              <Text style={[styles.intimacyTitle, { color: colors.textPrimary }]}>
+                Ask before discussing intimacy
+              </Text>
+              <Text style={[styles.intimacyDescription, { color: colors.textSecondary }]}>
+                Share only what you choose for consent-led, non-graphic guidance.
+              </Text>
+            </View>
+          </View>
+          <TextInput
+            value={intimacyMessage}
+            onChangeText={setIntimacyMessage}
+            maxLength={2000}
+            multiline
+            placeholder="What would help us talk about closeness or boundaries?"
+            placeholderTextColor={colors.textSecondary}
+            style={[
+              styles.intimacyInput,
+              { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder },
+            ]}
+          />
+          <View style={styles.intimacyActions}>
+            <Text style={[styles.intimacyPrivacy, { color: colors.textSecondary }]}>
+              Nothing is shared until you press Ask.
+            </Text>
+            <TouchableOpacity
+              style={[styles.intimacyButton, { backgroundColor: colors.accent1 }]}
+              onPress={() => void askIntimacy()}
+              disabled={!intimacyMessage.trim() || intimacyLoading}
+            >
+              <Text style={[styles.intimacyButtonText, { color: colors.background }]}>
+                {intimacyLoading ? 'Thinking…' : 'Ask intimacy guide'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+          {intimacyError ? (
+            <Text style={[styles.intimacyError, { color: colors.error }]}>{intimacyError}</Text>
+          ) : null}
+          {intimacyResult ? (
+            <View style={[styles.intimacyResult, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+              <Text style={[styles.intimacyResultText, { color: colors.textPrimary }]}>
+                {intimacyResult}
+              </Text>
+            </View>
+          ) : null}
+        </View>
+      </View>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -863,6 +958,20 @@ export default function CareScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: '#1A0B2E' },
+  intimacyContainer: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 4 },
+  intimacyCard: { borderRadius: 22, borderWidth: 1, padding: 18, gap: 12 },
+  intimacyHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+  intimacyHeaderText: { flex: 1, gap: 4 },
+  intimacyTitle: { fontSize: 18, fontWeight: '800' },
+  intimacyDescription: { fontSize: 14, lineHeight: 20 },
+  intimacyInput: { minHeight: 96, borderRadius: 14, borderWidth: 1, padding: 12, textAlignVertical: 'top' },
+  intimacyActions: { gap: 10 },
+  intimacyPrivacy: { fontSize: 12 },
+  intimacyButton: { alignSelf: 'flex-end', borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 },
+  intimacyButtonText: { fontWeight: '800' },
+  intimacyError: { fontSize: 13 },
+  intimacyResult: { borderRadius: 14, borderWidth: 1, padding: 14 },
+  intimacyResultText: { fontSize: 14, lineHeight: 22 },
   content: { padding: 20, paddingTop: 24, paddingBottom: 50 },
   center: {
     flex: 1,

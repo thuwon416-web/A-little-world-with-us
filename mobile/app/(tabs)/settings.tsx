@@ -272,7 +272,9 @@ export default function SettingsScreen() {
       </Section>
       <Section title="Appearance">
         <View style={styles.options}>
-          {(['midnight', 'sunset', 'random', 'auto'] as ThemePreference[]).map((option) => (
+          {(
+            ['midnight', 'sunset', 'romantic', 'ocean', 'monochrome'] as ThemePreference[]
+          ).map((option) => (
             <TouchableOpacity
               key={option}
               onPress={() => setPreference(option)}
@@ -283,7 +285,11 @@ export default function SettingsScreen() {
                   ? 'Midnight Romance'
                   : option === 'sunset'
                     ? 'Sunset Glow'
-                    : option[0].toUpperCase() + option.slice(1)}
+                    : option === 'romantic'
+                      ? 'Emergent Airy'
+                      : option === 'ocean'
+                        ? 'Ocean Breeze'
+                        : 'Monochrome'}
               </Text>
             </TouchableOpacity>
           ))}

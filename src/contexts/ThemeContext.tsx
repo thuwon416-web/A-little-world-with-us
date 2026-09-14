@@ -3,13 +3,11 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 export type ThemeMode = 'romantic' | 'midnight' | 'sunset' | 'ocean' | 'monochrome'
-export type ThemePreference = ThemeMode | 'random' | 'auto'
+export type ThemePreference = ThemeMode
 
 export type ThemeContextType = {
   mode: ThemeMode
   setMode: (mode: ThemeMode) => void
-  autoMode: boolean
-  toggleAutoMode: () => void
   preference: ThemePreference
   setPreference: (preference: ThemePreference) => void
 }
@@ -17,9 +15,7 @@ export type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType>({
   mode: 'midnight',
   setMode: () => undefined,
-  autoMode: true,
-  toggleAutoMode: () => undefined,
-  preference: 'auto',
+  preference: 'midnight',
   setPreference: () => undefined,
 })
 
@@ -40,52 +36,34 @@ function isThemeMode(value: string | null): value is ThemeMode {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
   const [mode, setModeState] = useState<ThemeMode>('midnight')
-  const [autoMode, setAutoMode] = useState(true)
-  const [preference, setPreferenceState] = useState<ThemePreference>('auto')
+  const [preference, setPreferenceState] = useState<ThemePreference>('midnight')
 
   useEffect(() => {
     setMounted(true)
 
     const storedMode = localStorage.getItem('a-little-world-with-us-theme-mode') as ThemeMode | null
-    const storedAuto = localStorage.getItem('a-little-world-with-us-theme-auto')
-    const storedPreference = localStorage.getItem('a-little-world-with-us-theme-preference') as ThemePreference | null
+    const storedPreference = localStorage.getItem('a-little-world-with-us-theme-preference')
 
-    if (storedPreference === 'random') {
-      const savedRandom = sessionStorage.getItem('a-little-world-with-us-random-theme') as ThemeMode | null
-      const nextMode = isThemeMode(savedRandom)
-        ? savedRandom
-        : EXPLICIT_MODES[Math.floor(Math.random() * EXPLICIT_MODES.length)]
-      sessionStorage.setItem('a-little-world-with-us-random-theme', nextMode)
-      setModeState(nextMode)
-      setPreferenceState('random')
-      setAutoMode(false)
-      return
-    }
-
-    if (storedPreference === 'auto') {
-      setModeState(window.matchMedia('(prefers-color-scheme: light)').matches ? 'sunset' : 'midnight')
-      setPreferenceState('auto')
-      setAutoMode(true)
+    if (storedPreference === 'random' || storedPreference === 'auto') {
+      setModeState('midnight')
+      setPreferenceState('midnight')
       return
     }
 
     if (isThemeMode(storedPreference)) {
       setModeState(storedPreference)
       setPreferenceState(storedPreference)
-      setAutoMode(false)
       return
     }
 
     if (storedMode && themeMap[storedMode]) {
       setModeState(storedMode)
-      setAutoMode(storedAuto !== 'false')
-      setPreferenceState(storedAuto !== 'false' ? 'auto' : isThemeMode(storedMode) ? storedMode : 'midnight')
+      setPreferenceState(storedMode)
       return
     }
 
-    const detectedMode: ThemeMode = window.matchMedia('(prefers-color-scheme: light)').matches ? 'sunset' : 'midnight'
-      setModeState(detectedMode)
-    setAutoMode(true)
+    setModeState('midnight')
+    setPreferenceState('midnight')
   }, [])
 
   useEffect(() => {
@@ -96,19 +74,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       mode === 'midnight' || mode === 'monochrome' ? 'dark' : 'light'
 
     localStorage.setItem('a-little-world-with-us-theme-mode', mode)
-    localStorage.setItem('a-little-world-with-us-theme-auto', String(autoMode))
     localStorage.setItem('a-little-world-with-us-theme-preference', preference)
-  }, [mode, autoMode, mounted, preference])
-
-  useEffect(() => {
-    if (!autoMode || !mounted) return
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: light)')
-    const updateTheme = () => setModeState(mediaQuery.matches ? 'sunset' : 'midnight')
-    updateTheme()
-    mediaQuery.addEventListener('change', updateTheme)
-    return () => mediaQuery.removeEventListener('change', updateTheme)
-  }, [autoMode, mounted])
+  }, [mode, mounted, preference])
 
   if (!mounted) {
     return <div className="min-h-screen bg-[var(--bg-1)]" />
@@ -119,25 +86,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       value={{
         mode,
         setMode: (nextMode) => {
-          setAutoMode(false)
           setModeState(nextMode)
         },
-        autoMode,
-        toggleAutoMode: () => setAutoMode((prev) => !prev),
         preference,
         setPreference: (nextPreference) => {
-          if (nextPreference === 'random') {
-            const nextMode = EXPLICIT_MODES[Math.floor(Math.random() * EXPLICIT_MODES.length)]
-            sessionStorage.setItem('a-little-world-with-us-random-theme', nextMode)
-            setModeState(nextMode)
-            setAutoMode(false)
-          } else if (nextPreference === 'auto') {
-            setModeState(window.matchMedia('(prefers-color-scheme: light)').matches ? 'sunset' : 'midnight')
-            setAutoMode(true)
-          } else {
-            setModeState(nextPreference)
-            setAutoMode(false)
-          }
+          setModeState(nextPreference)
           setPreferenceState(nextPreference)
         },
       }}

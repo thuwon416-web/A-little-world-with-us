@@ -9,11 +9,16 @@ import {
   Play,
   Pause,
   CalendarDays,
+  ChevronDown,
+  ChevronUp,
+  Settings2,
+  X,
 } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Image,
   Linking,
+  Modal,
   ScrollView,
   Share,
   StyleSheet,
@@ -24,13 +29,45 @@ import {
 
 import OnThisDay from '@/components/dashboard/OnThisDay'
 import OurStats from '@/components/dashboard/OurStats'
+import { useTheme } from '@/context/ThemeContext'
 import { supabase } from '@/lib/supabase'
 import { getCareData, type CareLog, type CareSettings } from '@/services/care'
 import { calculateNativeCycleSummary } from '@/services/cycleCalculator'
 import { getDashboardData, type DashboardData } from '@/services/dashboard'
 import { calculateDaysTogether, relationshipAnniversary } from '@/services/relationshipDays'
+import {
+  DEFAULT_DASHBOARD_WIDGETS,
+  loadDashboardLayout,
+  saveDashboardLayout,
+  type DashboardLayout,
+  type DashboardWidgetId,
+} from '@/services/settings'
 
 type CareData = { logs: CareLog[]; settings: CareSettings }
+
+const FOCUS_ITEMS = [
+  'Slow down and enjoy the quiet rhythm of us.',
+  'Make space for a little softness and calm today.',
+  'Choose gentleness, even in the smallest moments.',
+  'Be extra present with each other today.',
+  'Hold each other with patience and warmth.',
+]
+
+const RITUAL_ITEMS = [
+  'Share one thing that made your heart feel full today.',
+  'Hold hands for a minute without talking.',
+  'Send a warm voice note or sweet message.',
+  'Take a slow walk and notice one beautiful thing together.',
+  'Make tea or coffee and sit in the same quiet moment.',
+]
+
+function getDailyFocus(): string {
+  return FOCUS_ITEMS[new Date().getDate() % FOCUS_ITEMS.length]
+}
+
+function getLittleRitual(): string {
+  return RITUAL_ITEMS[new Date().getDate() % RITUAL_ITEMS.length]
+}
 
 const quickActions = [
   { label: 'Love Note', icon: Heart, route: '/chat' },
@@ -40,6 +77,14 @@ const quickActions = [
   { label: 'Calendar', icon: CalendarDays, route: '/plans' },
   { label: 'Open Chat', icon: MessageCircle, route: '/chat' },
 ] as const
+
+const widgetLabels: Record<DashboardWidgetId, string> = {
+  'days-counter': 'Days Together',
+  countdown: 'Countdown',
+  'memory-of-the-day': 'Memory of the Day',
+  'mini-care-check': 'Mini Care Check',
+  'music-player': 'Music Player',
+}
 
 function dateOnly(value: Date) {
   return new Date(value.getFullYear(), value.getMonth(), value.getDate())
@@ -73,12 +118,21 @@ function StatCard({ title, value }: { title: string; value: number }) {
 
 export default function DashboardScreen() {
   const router = useRouter()
+  const { colors } = useTheme()
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [care, setCare] = useState<CareData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [playing, setPlaying] = useState(false)
   const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout>({
+    order: [...DEFAULT_DASHBOARD_WIDGETS],
+    visibility: Object.fromEntries(
+      DEFAULT_DASHBOARD_WIDGETS.map((id) => [id, true])
+    ) as Record<DashboardWidgetId, boolean>,
+  })
+  const [customizing, setCustomizing] = useState(false)
+  const [layoutError, setLayoutError] = useState('')
 
   const load = useCallback(async () => {
     try {
@@ -108,6 +162,11 @@ export default function DashboardScreen() {
   useEffect(() => {
     void load()
   }, [load])
+  useEffect(() => {
+    void loadDashboardLayout()
+      .then(setDashboardLayout)
+      .catch((caught) => setLayoutError(caught instanceof Error ? caught.message : 'Unable to load dashboard layout.'))
+  }, [])
 
   const summary = useMemo(
     () =>
@@ -140,6 +199,88 @@ export default function DashboardScreen() {
       (Date.now() - new Date(`${relationshipAnniversary}T12:00:00`).getTime()) / 31536000000
     )
   )
+  const todaysFocus = getDailyFocus()
+  const littleRitual = getLittleRitual()
+  const updateLayout = (next: DashboardLayout) => {
+    setDashboardLayout(next)
+    void saveDashboardLayout(next).catch((caught) =>
+      setLayoutError(caught instanceof Error ? caught.message : 'Unable to save dashboard layout.')
+    )
+  }
+  const moveWidget = (id: DashboardWidgetId, direction: -1 | 1) => {
+    const index = dashboardLayout.order.indexOf(id)
+    const target = index + direction
+    if (target < 0 || target >= dashboardLayout.order.length) return
+    const order = [...dashboardLayout.order]
+    ;[order[index], order[target]] = [order[target], order[index]]
+    updateLayout({ ...dashboardLayout, order })
+  }
+  const renderWidget = (id: DashboardWidgetId) => {
+    if (id === 'days-counter') {
+      return (
+        <View style={styles.heroCard}>
+          <Text style={styles.heroLabel}>DAYS TOGETHER</Text>
+          <Text style={styles.heroValue}>{calculateDaysTogether()}</Text>
+          <Text style={styles.heroText}>days of choosing each other</Text>
+        </View>
+      )
+    }
+    if (id === 'countdown') {
+      return (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Countdown</Text>
+          <Text style={styles.countdown}>{countdown}</Text>
+          <Text style={styles.muted}>Your next meaningful date, gently held.</Text>
+        </View>
+      )
+    }
+    if (id === 'memory-of-the-day') {
+      return (
+        <View style={styles.card}>
+          <View style={styles.cardHeader}>
+            <Text style={styles.cardTitle}>Memory of the day</Text>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Refresh memory of the day" onPress={() => void load()}>
+              <RefreshCw color="#d9bfd7" size={18} />
+            </TouchableOpacity>
+          </View>
+          {dashboard?.memory?.image_url ? <Image source={{ uri: dashboard.memory.image_url }} style={styles.memoryImage} /> : null}
+          <Text style={styles.memoryTitle}>{dashboard?.memory?.title ?? 'A new memory is waiting'}</Text>
+          <Text style={styles.muted}>{dashboard?.memory?.caption ?? 'Add a memory to make this space yours.'}</Text>
+        </View>
+      )
+    }
+    if (id === 'mini-care-check') {
+      return (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Mini Care check</Text>
+          <Text style={styles.careValue}>{summary?.day ? `Cycle day ${summary.day}` : 'No cycle day yet'}</Text>
+          <Text style={styles.muted}>{summary?.nextPeriodStart ? `Next period in ${daysUntil(summary.nextPeriodStart)} days` : 'Log a period to begin forecasting.'}</Text>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Care" style={styles.secondaryButton} onPress={() => router.push('/care')}>
+            <Text style={styles.secondaryText}>Open Care</Text>
+          </TouchableOpacity>
+        </View>
+      )
+    }
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.cardTitle}>Our playlist</Text>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Music" onPress={() => router.push('/music')}>
+            <Text style={styles.link}>Open Music</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.musicTitle}>{dashboard?.playlistSong?.title ?? 'Add your first shared song'}</Text>
+        <Text style={styles.muted}>{dashboard?.playlistSong?.artist ?? 'A soundtrack for your little world.'}</Text>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel={playing ? 'Pause playlist' : 'Play playlist'} style={styles.playButton} onPress={() => {
+          setPlaying((value) => !value)
+          if (dashboard?.playlistSong?.external_id) void Linking.openURL(`https://www.youtube.com/watch?v=${dashboard.playlistSong.external_id}`)
+        }}>
+          {playing ? <Pause color="#fff" size={18} /> : <Play color="#fff" size={18} />}
+          <Text style={styles.primaryText}>{playing ? 'Pause' : 'Play'}</Text>
+        </TouchableOpacity>
+      </View>
+    )
+  }
 
   if (loading)
     return (
@@ -169,11 +310,31 @@ export default function DashboardScreen() {
       <Text style={styles.eyebrow}>Love dashboard</Text>
       <Text style={styles.title}>Good evening, KoKo × Pu Tuu</Text>
       <Text style={styles.subtitle}>Today is a good day to notice the little things.</Text>
-      <View style={styles.heroCard}>
-        <Text style={styles.heroLabel}>DAYS TOGETHER</Text>
-        <Text style={styles.heroValue}>{calculateDaysTogether()}</Text>
-        <Text style={styles.heroText}>days of choosing each other</Text>
+      <TouchableOpacity style={[styles.customizeButton, { backgroundColor: colors.cardBg }]} onPress={() => setCustomizing(true)}>
+        <Settings2 color={colors.accent1} size={18} />
+        <Text style={[styles.customizeText, { color: colors.textPrimary }]}>Customize home</Text>
+      </TouchableOpacity>
+      <View
+        style={[
+          styles.infoCard,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
+        <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>TODAY&apos;S FOCUS</Text>
+        <Text style={[styles.infoText, { color: colors.textPrimary }]}>{todaysFocus}</Text>
       </View>
+      <View
+        style={[
+          styles.infoCard,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
+        <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>LITTLE RITUAL</Text>
+        <Text style={[styles.infoText, { color: colors.textPrimary }]}>{littleRitual}</Text>
+      </View>
+      {dashboardLayout.order
+        .filter((id) => dashboardLayout.visibility[id])
+        .map((id) => <View key={id}>{renderWidget(id)}</View>)}
       {coupleId ? <OnThisDay coupleId={coupleId} /> : null}
       <Text style={styles.sectionTitle}>Relationship stats</Text>
       <View style={styles.stats}>
@@ -199,84 +360,6 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         ))}
       </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Countdown</Text>
-        <Text style={styles.countdown}>{countdown}</Text>
-        <Text style={styles.muted}>Your next meaningful date, gently held.</Text>
-      </View>
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>Memory of the day</Text>
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Refresh memory of the day"
-            onPress={() => void load()}
-          >
-            <RefreshCw color="#d9bfd7" size={18} />
-          </TouchableOpacity>
-        </View>
-        {dashboard.memory?.image_url ? (
-          <Image source={{ uri: dashboard.memory.image_url }} style={styles.memoryImage} />
-        ) : null}
-        <Text style={styles.memoryTitle}>
-          {dashboard.memory?.title ?? 'A new memory is waiting'}
-        </Text>
-        <Text style={styles.muted}>
-          {dashboard.memory?.caption ?? 'Add a memory to make this space yours.'}
-        </Text>
-      </View>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Mini Care check</Text>
-        <Text style={styles.careValue}>
-          {summary.day ? `Cycle day ${summary.day}` : 'No cycle day yet'}
-        </Text>
-        <Text style={styles.muted}>
-          {summary.nextPeriodStart
-            ? `Next period in ${daysUntil(summary.nextPeriodStart)} days`
-            : 'Log a period to begin forecasting.'}
-        </Text>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel="Open Care"
-          style={styles.secondaryButton}
-          onPress={() => router.push('/care')}
-        >
-          <Text style={styles.secondaryText}>Open Care</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>Our playlist</Text>
-          <TouchableOpacity
-            accessibilityRole="button"
-            accessibilityLabel="Open Music"
-            onPress={() => router.push('/music')}
-          >
-            <Text style={styles.link}>Open Music</Text>
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.musicTitle}>
-          {dashboard.playlistSong?.title ?? 'Add your first shared song'}
-        </Text>
-        <Text style={styles.muted}>
-          {dashboard.playlistSong?.artist ?? 'A soundtrack for your little world.'}
-        </Text>
-        <TouchableOpacity
-          accessibilityRole="button"
-          accessibilityLabel={playing ? 'Pause playlist' : 'Play playlist'}
-          style={styles.playButton}
-          onPress={() => {
-            setPlaying((value) => !value)
-            if (dashboard.playlistSong?.external_id)
-              void Linking.openURL(
-                `https://www.youtube.com/watch?v=${dashboard.playlistSong.external_id}`
-              )
-          }}
-        >
-          {playing ? <Pause color="#fff" size={18} /> : <Play color="#fff" size={18} />}
-          <Text style={styles.primaryText}>{playing ? 'Pause' : 'Play'}</Text>
-        </TouchableOpacity>
-      </View>
       <View style={styles.shareCard}>
         <Text style={styles.cardTitle}>Anniversary</Text>
         <Text style={styles.anniversary}>{yearsTogether} years together</Text>
@@ -297,6 +380,38 @@ export default function DashboardScreen() {
           <Text style={styles.secondaryText}>Share our love</Text>
         </TouchableOpacity>
       </View>
+      <Modal visible={customizing} transparent animationType="slide" onRequestClose={() => setCustomizing(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={[styles.customizeModal, { backgroundColor: colors.cardBg }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Customize home</Text>
+              <TouchableOpacity onPress={() => setCustomizing(false)} accessibilityLabel="Close customization">
+                <X color={colors.textPrimary} size={22} />
+              </TouchableOpacity>
+            </View>
+            {dashboardLayout.order.map((id, index) => (
+              <View key={id} style={[styles.widgetRow, { borderColor: colors.cardBorder }]}>
+                <TouchableOpacity
+                  style={[styles.visibilityToggle, { backgroundColor: dashboardLayout.visibility[id] ? colors.accent1 : colors.surface }]}
+                  onPress={() => updateLayout({ ...dashboardLayout, visibility: { ...dashboardLayout.visibility, [id]: !dashboardLayout.visibility[id] } })}
+                >
+                  <Text style={{ color: dashboardLayout.visibility[id] ? colors.background : colors.textSecondary }}>
+                    {dashboardLayout.visibility[id] ? 'Shown' : 'Hidden'}
+                  </Text>
+                </TouchableOpacity>
+                <Text style={[styles.widgetLabel, { color: colors.textPrimary }]}>{widgetLabels[id]}</Text>
+                <TouchableOpacity onPress={() => moveWidget(id, -1)} disabled={index === 0} accessibilityLabel={`Move ${widgetLabels[id]} up`}>
+                  <ChevronUp color={index === 0 ? colors.textSecondary : colors.textPrimary} size={20} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => moveWidget(id, 1)} disabled={index === dashboardLayout.order.length - 1} accessibilityLabel={`Move ${widgetLabels[id]} down`}>
+                  <ChevronDown color={index === dashboardLayout.order.length - 1 ? colors.textSecondary : colors.textPrimary} size={20} />
+                </TouchableOpacity>
+              </View>
+            ))}
+            {layoutError ? <Text style={[styles.error, { color: colors.error }]}>{layoutError}</Text> : null}
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   )
 }
@@ -331,6 +446,15 @@ const styles = StyleSheet.create({
   heroLabel: { color: '#d9bfd7', fontSize: 11, letterSpacing: 1.6 },
   heroValue: { color: '#ffd7a8', fontSize: 42, fontWeight: '800', marginTop: 6 },
   heroText: { color: '#f3f0f5', fontSize: 15 },
+  infoCard: {
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 12,
+    gap: 6,
+  },
+  infoLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
+  infoText: { fontSize: 14, lineHeight: 21 },
   sectionTitle: { color: '#f3f0f5', fontSize: 18, fontWeight: '800', marginTop: 8 },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   statCard: {
@@ -407,4 +531,36 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   link: { color: '#ff9bba', fontWeight: '700' },
+  customizeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 8,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  customizeText: { fontWeight: '700' },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: '#00000088',
+  },
+  customizeModal: {
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+    gap: 12,
+  },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  modalTitle: { fontSize: 22, fontWeight: '800' },
+  widgetRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderBottomWidth: 1,
+    paddingVertical: 10,
+  },
+  visibilityToggle: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 7 },
+  widgetLabel: { flex: 1, fontWeight: '700' },
 })

@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
-import { ArrowRight, CalendarDays, Sparkles } from 'lucide-react'
+import { ArrowRight, Calendar, CalendarDays, Sparkles } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 
 const memoryPrompts = [
   'On this day last year, we were just beginning to feel how natural it was to choose each other again and again.',
@@ -59,7 +60,14 @@ export default function MemoryOfTheDay() {
           <div className="dashboard-shimmer h-20 w-full rounded-2xl" />
           <div className="dashboard-shimmer h-10 w-32 rounded-full" />
         </div>
-      ) : showEmptyState || hasError ? (
+      ) : showEmptyState ? (
+        <EmptyState
+          icon={Calendar}
+          title="No memory today yet"
+          description="Check back tomorrow or add a moment now."
+          action={{ label: 'Add one', onClick: () => { window.location.href = '/memories' } }}
+        />
+      ) : hasError ? (
         <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/50 p-4">
           <p className="text-sm text-[var(--text-primary)]">No memory today yet</p>
           <Link

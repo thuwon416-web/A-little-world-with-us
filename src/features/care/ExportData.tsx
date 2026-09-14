@@ -1,5 +1,6 @@
 'use client'
 
+import { Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 type CsvRow = Record<string, unknown>
@@ -65,7 +66,7 @@ export default function ExportData() {
         onClick={handleExport}
         className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm transition"
       >
-        📥 Download CSV
+        <Download className="mr-2 inline h-4 w-4" /> Download CSV
       </button>
     </div>
   )

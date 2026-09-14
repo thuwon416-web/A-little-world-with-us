@@ -6,15 +6,26 @@ export async function getContext() {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) throw new Error('Please sign in again.')
-  const { data, error } = await supabase
+
+  const { data: accepted, error: acceptedError } = await supabase
     .from('couple_links')
     .select('id,couple_id,inviter_id,accepted_by,status,invite_code')
     .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+    .eq('status', 'accepted')
+    .maybeSingle()
+  if (acceptedError) throw new Error(acceptedError.message)
+  if (accepted) return { user, link: accepted, coupleId: accepted.couple_id }
+
+  const { data: pending, error: pendingError } = await supabase
+    .from('couple_links')
+    .select('id,couple_id,inviter_id,accepted_by,status,invite_code')
+    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+    .eq('status', 'pending')
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
-  if (error) throw new Error(error.message)
-  return { user, link: data, coupleId: data?.status === 'accepted' ? data.couple_id : null }
+  if (pendingError) throw new Error(pendingError.message)
+  return { user, link: pending, coupleId: null }
 }
 
 export async function getVaultItems(coupleId: string): Promise<VaultItem[]> {

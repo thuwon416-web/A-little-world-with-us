@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
-import { Award, Sparkles } from 'lucide-react'
+import { Award, Heart, Smile, Sparkles } from 'lucide-react'
 
 const initialStats = [
   { label: 'Arguments won', me: 8, her: 6 },
@@ -20,7 +20,9 @@ export default function CoupleScoreboard() {
     const herTotal = stats.reduce((sum, item) => sum + item.her, 0)
 
     if (meTotal === herTotal) return 'It’s a draw, love!'
-    return meTotal > herTotal ? 'You win this round 😌' : 'She wins this round 💖'
+    return meTotal > herTotal
+      ? <>You win this round <Smile className="inline h-3.5 w-3.5" /></>
+      : <>She wins this round <Heart className="inline h-3.5 w-3.5 fill-current" /></>
   }, [stats])
 
   const awardPoint = (index: number, side: 'me' | 'her') => {

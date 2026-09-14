@@ -1,5 +1,6 @@
 'use client'
 
+import { Cake } from 'lucide-react'
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 
@@ -44,7 +45,7 @@ const RollingNumber = memo(function RollingNumber({ value }: { value: number }) 
  * Reusable countdown timer that automatically rolls over to next year
  * if the target date has already passed.
  */
-export default memo(function Countdown({ targetDate, label, icon = '🎂' }: CountdownProps) {
+export default memo(function Countdown({ targetDate, label, icon = <Cake className="h-5 w-5" /> }: CountdownProps) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
     hours: 0,

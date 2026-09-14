@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { Flame } from 'lucide-react-native'
 import {
   Alert,
   ScrollView,
@@ -249,7 +250,11 @@ export default function FinanceScreen() {
         ))}
       </View>
       <View style={styles.card}>
-        <Text style={styles.section}>Love streak 🔥 {data?.streak?.current_streak ?? 0} days</Text>
+        <View style={styles.rowCentered}>
+          <Text style={styles.section}>Love streak</Text>
+          <Flame size={18} color="#ff6b81" />
+        </View>
+        <Text style={styles.muted}>{data?.streak?.current_streak ?? 0} days</Text>
         <Text style={styles.muted}>Check in daily to keep your shared streak alive.</Text>
         <TouchableOpacity style={styles.secondary} onPress={() => void streakCheckIn()}>
           <Text style={styles.primaryText}>Daily check-in</Text>
@@ -298,6 +303,7 @@ const styles = StyleSheet.create({
   error: { color: '#ff9b9b' },
   link: { color: '#ff9bba', fontWeight: '700' },
   row: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
+  rowCentered: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   goal: { gap: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#2a2d35' },
   goalTitle: { color: '#fff', fontSize: 16, fontWeight: '700', flex: 1 },
   track: { height: 9, backgroundColor: '#2a2d35', borderRadius: 8, overflow: 'hidden' },

@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
-import { BookHeart, Heart, Layers, Sparkles } from 'lucide-react'
+import { Heart, Layers, Sparkles } from 'lucide-react'
+import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { getCoupleStatus } from '@/lib/couples'
 
 type Tab = 'timeline' | 'all' | 'categories'
@@ -36,7 +37,7 @@ export default function OurStoryPage() {
     >
       <header className="rounded-3xl border border-[var(--accent-1)]/15 bg-[var(--card-bg)] p-6 shadow-lg backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <BookHeart className="text-[var(--accent-1)]" />
+          <AnimatedIcon name="BookHeart" animation="bounce" trigger="hover" size={24} className="text-[var(--accent-1)]" />
           <div>
             <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Our Story</h1>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">Every memory we&apos;ve made together</p>

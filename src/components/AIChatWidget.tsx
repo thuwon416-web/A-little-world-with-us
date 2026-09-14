@@ -1,4 +1,5 @@
 'use client'
+import { Hand, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 
 export default function AIChatWidget() {
@@ -36,9 +37,10 @@ export default function AIChatWidget() {
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 bg-[var(--accent-1)] text-white p-4 rounded-full shadow-lg z-50 hover:opacity-90 transition"
+        className="fixed bottom-4 right-4 z-50 rounded-full bg-[var(--accent-1)] p-4 text-white shadow-lg transition hover:opacity-90"
+        aria-label="Open AI assistant"
       >
-        💬
+        <MessageCircle className="h-5 w-5" />
       </button>
 
       {/* Chat Window */}
@@ -53,8 +55,11 @@ export default function AIChatWidget() {
           {/* Messages */}
           <div className="h-64 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
-              <div className="text-center text-[var(--text-secondary)] text-sm">
-                <p>👋 Hi! I&apos;m your AI assistant.</p>
+              <div className="text-center text-sm text-[var(--text-secondary)]">
+                <div className="mb-2 flex items-center justify-center gap-2 text-[var(--text-primary)]">
+                  <Hand className="h-4 w-4" />
+                  <p>Hi! I&apos;m your AI assistant.</p>
+                </div>
                 <p className="mt-2">Ask me about relationship advice, date ideas, or anything else!</p>
               </div>
             )}

@@ -1,4 +1,4 @@
-import { Heart, Plane, Star, Target, Home, Trash2 } from 'lucide-react-native'
+import { Check, Gift, Heart, Plane, Star, Target, Home, Trash2 } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import {
   Alert,
@@ -12,14 +12,19 @@ import {
 } from 'react-native'
 
 import { useAuth } from '@/lib/auth'
+import { useTheme } from '@/context/ThemeContext'
 import {
   getCalendarData,
   getSharedCalendarPreference,
   saveCalendarEvent,
   saveSharedCalendarPreference,
   deleteCalendarEvent,
+  saveListItem,
+  toggleListItem,
+  deleteListItem,
   type CalendarEvent,
   type CalendarEventType,
+  type ListItem,
 } from '@/services/calendar'
 
 const types: CalendarEventType[] = ['date', 'trip', 'goal', 'life', 'other']
@@ -36,7 +41,9 @@ const daysUntil = (date: string) =>
 
 export default function CalendarScreen() {
   const { user } = useAuth()
+  const { colors } = useTheme()
   const [events, setEvents] = useState<CalendarEvent[]>([])
+  const [wishlist, setWishlist] = useState<ListItem[]>([])
   const [coupleId, setCoupleId] = useState('')
   const [month, setMonth] = useState(new Date())
   const [shared, setShared] = useState(true)
@@ -49,10 +56,12 @@ export default function CalendarScreen() {
   const [type, setType] = useState<CalendarEventType>('date')
   const [repeat, setRepeat] = useState('')
   const [error, setError] = useState('')
+  const [wishlistDraft, setWishlistDraft] = useState('')
   const load = async () => {
     try {
       const data = await getCalendarData()
       setEvents(data.events)
+      setWishlist(data.wishlist)
       setCoupleId(data.coupleId)
       if (user) setShared(await getSharedCalendarPreference(user.id))
     } catch (caught) {
@@ -115,11 +124,24 @@ export default function CalendarScreen() {
     setShowAdd(true)
   }
   const openEvent = (event: CalendarEvent) => setSelected(event)
+  const addWishlistItem = async () => {
+    if (!wishlistDraft.trim() || wishlistDraft.trim().length > 100 || !user) {
+      Alert.alert('Invalid item', 'Enter a wishlist item up to 100 characters.')
+      return
+    }
+    try {
+      await saveListItem(coupleId, user.id, 'wishlist', wishlistDraft.trim())
+      setWishlistDraft('')
+      await load()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to add wishlist item.')
+    }
+  }
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>SHARED CALENDAR</Text>
-      <Text style={styles.title}>Calendar</Text>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.eyebrow, { color: colors.accent2 }]}>SHARED CALENDAR</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>Calendar</Text>
+      {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
       <View style={styles.toolbar}>
         <TouchableOpacity onPress={() => setMonth(new Date(year, monthIndex - 1, 1))}>
           <Text style={styles.nav}>‹</Text>
@@ -197,6 +219,51 @@ export default function CalendarScreen() {
             </TouchableOpacity>
           )
         })}
+      </View>
+      <View style={[styles.wishlistCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+        <View style={styles.wishlistHeader}>
+          <Gift color={colors.accent2} size={20} />
+          <Text style={[styles.wishlistTitle, { color: colors.textPrimary }]}>Shared Wishlist</Text>
+        </View>
+        <View style={styles.wishlistForm}>
+          <TextInput
+            value={wishlistDraft}
+            onChangeText={setWishlistDraft}
+            placeholder="A gift idea"
+            placeholderTextColor={colors.textSecondary}
+            style={[styles.wishlistInput, { backgroundColor: colors.surface, borderColor: colors.cardBorder, color: colors.textPrimary }]}
+          />
+          <TouchableOpacity style={[styles.wishlistAdd, { backgroundColor: colors.accent1 }]} onPress={() => void addWishlistItem()}>
+            <Text style={[styles.addText, { color: colors.background }]}>Add</Text>
+          </TouchableOpacity>
+        </View>
+        {wishlist.map((item) => (
+          <View key={item.id} style={[styles.wishlistItem, { backgroundColor: colors.surface }]}>
+            <TouchableOpacity
+              style={[styles.wishlistCheck, { backgroundColor: colors.cardBorder }]}
+              onPress={() => void toggleListItem('wishlist', item.id, !item.completed).then(load)}
+            >
+              <Check color={item.completed ? colors.background : colors.textSecondary} size={17} />
+            </TouchableOpacity>
+            <Text style={[styles.wishlistText, { color: item.completed ? colors.textSecondary : colors.textPrimary }, item.completed && styles.wishlistDone]}>
+              {item.item || item.title}
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                Alert.alert('Delete wishlist item?', '', [
+                  { text: 'Cancel' },
+                  {
+                    text: 'Delete',
+                    style: 'destructive',
+                    onPress: () => void deleteListItem('wishlist', item.id).then(load),
+                  },
+                ])
+              }
+            >
+              <Trash2 color={colors.error} size={17} />
+            </TouchableOpacity>
+          </View>
+        ))}
       </View>
       <TouchableOpacity style={styles.add} onPress={() => setShowAdd(true)}>
         <Text style={styles.addText}>+ Add event</Text>
@@ -313,10 +380,10 @@ export default function CalendarScreen() {
   )
 }
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0f0f12', padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { color: '#d9bfd7', letterSpacing: 2, fontSize: 12 },
-  title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700' },
-  error: { color: '#ff9b9b' },
+  container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
+  eyebrow: { letterSpacing: 2, fontSize: 12 },
+  title: { fontSize: 30, fontWeight: '700' },
+  error: {},
   toolbar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -357,6 +424,16 @@ const styles = StyleSheet.create({
   },
   eventText: { flex: 1 },
   eventTitle: { color: '#fff', fontWeight: '700' },
+  wishlistCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 12 },
+  wishlistHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  wishlistTitle: { fontSize: 20, fontWeight: '700' },
+  wishlistForm: { flexDirection: 'row', gap: 8 },
+  wishlistInput: { flex: 1, borderRadius: 12, borderWidth: 1, padding: 12 },
+  wishlistAdd: { borderRadius: 12, paddingHorizontal: 18, justifyContent: 'center' },
+  wishlistItem: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, padding: 12 },
+  wishlistCheck: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  wishlistText: { flex: 1, fontSize: 15 },
+  wishlistDone: { textDecorationLine: 'line-through' },
   add: { backgroundColor: '#ff6b81', padding: 14, borderRadius: 13, alignItems: 'center' },
   addText: { color: '#fff', fontWeight: '800' },
   overlay: { flex: 1, backgroundColor: '#0009', justifyContent: 'center', padding: 20 },

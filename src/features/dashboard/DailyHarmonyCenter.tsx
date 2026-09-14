@@ -109,7 +109,7 @@ export default function DailyHarmonyCenter() {
       <div className="grid gap-4 md:grid-cols-2">
         <div className="glass-card rounded-3xl p-4">
           <div className="flex items-center gap-2 text-[var(--accent-2)] mb-3">
-            <Bell className="w-5 h-5" />
+            <Bell className="icon-wiggle-once w-5 h-5" />
             <h3 className="font-dancing text-2xl">Daily Notifications</h3>
           </div>
 

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Bell } from 'lucide-react'
 import { requestNotificationPermission } from '@/lib/notifications'
 
 export default function NotificationPermission() {
@@ -23,7 +24,7 @@ export default function NotificationPermission() {
 
   return (
     <div className="p-4 bg-[var(--accent-1)]/10 rounded-2xl border border-[var(--accent-1)]/20">
-      <h3 className="font-medium text-[var(--text-primary)] mb-2">🔔 Enable Notifications</h3>
+      <h3 className="mb-2 flex items-center gap-2 font-medium text-[var(--text-primary)]"><Bell className="icon-wiggle-once h-4 w-4" /> Enable Notifications</h3>
       <p className="text-sm text-[var(--text-secondary)] mb-4">
         Stay updated with reminders and important alerts
       </p>

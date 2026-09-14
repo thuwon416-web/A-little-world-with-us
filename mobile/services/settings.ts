@@ -4,6 +4,103 @@ import * as SecureStore from 'expo-secure-store'
 
 import { supabase } from '@/lib/supabase'
 
+export type DashboardWidgetId =
+  | 'days-counter'
+  | 'countdown'
+  | 'memory-of-the-day'
+  | 'mini-care-check'
+  | 'music-player'
+
+export type DashboardLayout = {
+  order: DashboardWidgetId[]
+  visibility: Record<DashboardWidgetId, boolean>
+}
+
+export const DEFAULT_DASHBOARD_WIDGETS: DashboardWidgetId[] = [
+  'days-counter',
+  'countdown',
+  'memory-of-the-day',
+  'mini-care-check',
+  'music-player',
+]
+
+const DASHBOARD_LAYOUT_KEY = 'a-little-world-with-us-dashboard-layout-v1'
+
+function isDashboardLayout(value: unknown): value is DashboardLayout {
+  if (!value || typeof value !== 'object') return false
+  const candidate = value as Partial<DashboardLayout>
+  return Array.isArray(candidate.order) && Boolean(candidate.visibility)
+}
+
+function defaultDashboardLayout(): DashboardLayout {
+  return {
+    order: [...DEFAULT_DASHBOARD_WIDGETS],
+    visibility: Object.fromEntries(
+      DEFAULT_DASHBOARD_WIDGETS.map((id) => [id, true])
+    ) as Record<DashboardWidgetId, boolean>,
+  }
+}
+
+function normalizeDashboardLayout(value: unknown): DashboardLayout {
+  const fallback = defaultDashboardLayout()
+  if (!isDashboardLayout(value)) return fallback
+  const order = value.order.filter(
+    (id): id is DashboardWidgetId => DEFAULT_DASHBOARD_WIDGETS.includes(id)
+  )
+  for (const id of DEFAULT_DASHBOARD_WIDGETS) {
+    if (!order.includes(id)) order.push(id)
+  }
+  return {
+    order,
+    visibility: { ...fallback.visibility, ...value.visibility },
+  }
+}
+
+export async function loadDashboardLayout(): Promise<DashboardLayout> {
+  const local = await AsyncStorage.getItem(DASHBOARD_LAYOUT_KEY)
+  const localLayout = local ? normalizeDashboardLayout(JSON.parse(local)) : defaultDashboardLayout()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return localLayout
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('settings')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (error) throw error
+  const remote = (data?.settings as { dashboard_layout?: unknown } | null)?.dashboard_layout
+  const layout = remote ? normalizeDashboardLayout(remote) : localLayout
+  await AsyncStorage.setItem(DASHBOARD_LAYOUT_KEY, JSON.stringify(layout))
+  return layout
+}
+
+export async function saveDashboardLayout(layout: DashboardLayout): Promise<void> {
+  const normalized = normalizeDashboardLayout(layout)
+  await AsyncStorage.setItem(DASHBOARD_LAYOUT_KEY, JSON.stringify(normalized))
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return
+  const { data: current, error: readError } = await supabase
+    .from('user_settings')
+    .select('settings')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  if (readError) throw readError
+  const { error } = await supabase.from('user_settings').upsert(
+    {
+      user_id: user.id,
+      settings: {
+        ...((current?.settings ?? {}) as Record<string, unknown>),
+        dashboard_layout: normalized,
+      },
+    },
+    { onConflict: 'user_id' }
+  )
+  if (error) throw error
+}
+
 export type SettingsData = {
   userId: string
   coupleId: string | null

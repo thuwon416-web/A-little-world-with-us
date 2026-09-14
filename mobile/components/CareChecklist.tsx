@@ -1,4 +1,5 @@
 import React from 'react'
+import { Check } from 'lucide-react-native'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const careItems = [
@@ -19,7 +20,7 @@ export function CareChecklist({ values = {}, onToggle }: CareChecklistProps) {
       {careItems.map((item) => (
         <TouchableOpacity key={item.key} style={styles.row} onPress={() => onToggle?.(item.key)}>
           <View style={[styles.check, values[item.key] && styles.checkDone]}>
-            {values[item.key] ? <Text style={styles.checkText}>✓</Text> : null}
+            {values[item.key] ? <Check size={14} color="#f3f0f5" /> : null}
           </View>
           <Text style={[styles.label, values[item.key] && styles.labelDone]}>{item.label}</Text>
         </TouchableOpacity>
@@ -49,11 +50,6 @@ const styles = StyleSheet.create({
   checkDone: {
     backgroundColor: '#2f8f66',
     borderColor: '#2f8f66',
-  },
-  checkText: {
-    color: '#f3f0f5',
-    fontWeight: '700',
-    fontSize: 12,
   },
   label: {
     color: '#f3f0f5',

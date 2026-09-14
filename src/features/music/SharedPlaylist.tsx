@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { CalendarHeart, Loader2, Plus, Trash2, X } from 'lucide-react'
+import { CalendarHeart, Loader2, Trash2, X } from 'lucide-react'
+import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { getCoupleStatus } from '@/lib/couples'
 import { supabase } from '@/lib/supabase'
 import YouTubePlayer from './YouTubePlayer'
@@ -195,7 +196,7 @@ export default function SharedPlaylist({ coupleId: requestedCoupleId, realtime, 
     }
   }
 
-  if (loading) return <div className={`flex items-center justify-center gap-2 rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-8 text-sm text-[var(--text-secondary)] ${className}`}><Loader2 className="h-4 w-4 animate-spin" /> Loading your playlist…</div>
+  if (loading) return <div className={`flex items-center justify-center gap-2 rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-8 text-sm text-[var(--text-secondary)] ${className}`}><Loader2 className="icon-pulse-soft h-4 w-4 animate-spin" /> Loading your playlist…</div>
   if (!coupleId) return <div className={`rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 text-sm text-[var(--text-secondary)] ${className}`}>Link your partner to start a shared playlist.</div>
 
   return (
@@ -203,7 +204,7 @@ export default function SharedPlaylist({ coupleId: requestedCoupleId, realtime, 
       {error && <div role="alert" className="flex items-start justify-between gap-3 rounded-2xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-100"><span>{error}</span><button type="button" onClick={() => setError(null)} aria-label="Dismiss error"><X className="h-4 w-4" /></button></div>}
 
       <form onSubmit={addTrack} className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-        <div className="mb-4 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]"><Plus className="h-4 w-4 text-[var(--accent-1)]" /> Add a song for us</div>
+        <div className="mb-4 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]"><AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} className="text-[var(--accent-1)]" /> Add a song for us</div>
         <div className="grid gap-3 sm:grid-cols-2">
           <input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="YouTube URL or video ID" aria-label="YouTube URL or video ID" className="sm:col-span-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]" />
           <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Song title" aria-label="Song title" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]" />
@@ -211,7 +212,7 @@ export default function SharedPlaylist({ coupleId: requestedCoupleId, realtime, 
           <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="A note for your partner (optional)" aria-label="Song notes" rows={2} className="sm:col-span-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]" />
         </div>
         {previewId && <div className="mt-4"><YouTubePlayer videoId={previewId} title={title || 'Song preview'} /></div>}
-        <button type="submit" disabled={saving || !previewId || !title.trim()} className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} {saving ? 'Adding…' : 'Add to playlist'}</button>
+        <button type="submit" disabled={saving || !previewId || !title.trim()} className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />} {saving ? 'Adding…' : 'Add to playlist'}</button>
       </form>
 
       <div className="space-y-3">

@@ -59,7 +59,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .select('id', { count: 'exact', head: true })
       .eq('couple_id', coupleId),
     supabase
-      .from('memories')
+      .from('relationship_memories')
       .select('id', { count: 'exact', head: true })
       .eq('couple_id', coupleId),
     supabase

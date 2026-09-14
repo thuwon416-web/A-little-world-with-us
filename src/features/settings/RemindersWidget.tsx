@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Bell, Plus, X, Calendar } from 'lucide-react'
+import { Bell, X, Calendar } from 'lucide-react'
+import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { insertRow, readUserRows, deleteRow, getCurrentUserId, type Reminder } from '@/lib/supabase'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface DisplayReminder {
   id: string
@@ -100,9 +102,11 @@ export default function RemindersWidget() {
           </div>
         ))}
         {reminders.length === 0 && (
-          <p className="text-sm text-[var(--text-secondary)] text-center py-4">
-            No reminders yet
-          </p>
+          <EmptyState
+            icon={Bell}
+            title="No reminders yet"
+            description="Create one to keep your connection on track."
+          />
         )}
       </div>
 
@@ -110,7 +114,7 @@ export default function RemindersWidget() {
         onClick={() => setShowAddModal(true)}
         className="w-full rounded-xl border border-dashed border-[var(--accent-1)]/30 bg-[var(--bg-2)] px-3 py-3 text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2"
       >
-        <Plus className="h-4 w-4" />
+        <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />
         Add Reminder
       </button>
 

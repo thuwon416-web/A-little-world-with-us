@@ -4,33 +4,13 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock, Eye, Plus, X, Save, Heart, Sparkles } from 'lucide-react'
+import { Lock, Eye, Plus, X, Save, Sparkles } from 'lucide-react'
 import VaultCard from '@/features/vault/VaultCard'
-import { insertRow, readRows, type SecretLetter } from '@/lib/supabase'
+import { getCoupleStatus } from '@/lib/couples'
+import { getCurrentUserId, insertRow, type VaultItem } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
 
 type VaultCategory = 'all' | 'private' | 'celebration' | 'ritual' | 'travel'
-
-const fallbackLetters: SecretLetter[] = [
-  {
-    id: 1,
-    created_at: new Date().toISOString(),
-    title: 'A little promise',
-    content: 'May we always choose softness, laughter, and each other.',
-    is_locked: false,
-    category: 'private',
-    reveal_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 14).toISOString(),
-  },
-  {
-    id: 2,
-    created_at: new Date().toISOString(),
-    title: 'For our anniversary',
-    content: 'Here is to all the lovely chapters yet to be written.',
-    is_locked: false,
-    category: 'celebration',
-    reveal_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString(),
-  },
-]
 
 export default function VaultPage() {
   return (
@@ -43,7 +23,9 @@ export default function VaultPage() {
 function VaultPageContent() {
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [letters, setLetters] = useState<SecretLetter[]>(fallbackLetters)
+  const [letters, setLetters] = useState<VaultItem[]>([])
+  const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
   const [showForm, setShowForm] = useState(false)
   const [newTitle, setNewTitle] = useState('')
   const [newContent, setNewContent] = useState('')
@@ -73,19 +55,33 @@ function VaultPageContent() {
         window.location.href = '/login'
         return
       }
+      const [currentUserId, coupleStatus] = await Promise.all([getCurrentUserId(), getCoupleStatus()])
+      setUserId(currentUserId)
+      setCoupleId(coupleStatus.status === 'accepted' ? coupleStatus.couple?.id ?? null : null)
       setIsAuthenticated(true)
-
     }
 
     checkAuth()
   }, [])
 
   const fetchLetters = async () => {
-    const data = await readRows<SecretLetter>('secret_letters', '*', {
-      column: 'created_at',
-      ascending: false,
-    })
-    setLetters(data)
+    if (!coupleId) {
+      setLetters([])
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('vault_items')
+      .select('*')
+      .eq('couple_id', coupleId)
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      setLetters([])
+      return
+    }
+
+    setLetters((data ?? []) as VaultItem[])
   }
 
   const handleUnlock = async () => {
@@ -101,30 +97,33 @@ function VaultPageContent() {
       return
     }
     setIsUnlocked(true)
-    fetchLetters()
+    void fetchLetters()
   }
 
   useEffect(() => {
     if (!isUnlocked) return
     const timeout = window.setTimeout(() => {
       setIsUnlocked(false)
-      setLetters(fallbackLetters)
     }, 5 * 60 * 1000)
     return () => window.clearTimeout(timeout)
   }, [isUnlocked])
 
   const handleCreate = async () => {
     if (!newTitle.trim() || !newContent.trim()) return
+    if (!coupleId || !userId) return
 
     const nextLetter = {
+      couple_id: coupleId,
+      user_id: userId,
       title: newTitle.trim(),
       content: newContent.trim(),
+      photo_url: null,
       is_locked: Boolean(revealDate),
       category: vaultCategory === 'all' ? 'private' : vaultCategory,
       reveal_at: revealDate ? new Date(revealDate).toISOString() : null,
     }
 
-    const created = await insertRow<SecretLetter>('secret_letters', nextLetter)
+    const created = await insertRow<VaultItem>('vault_items', nextLetter)
 
     if (created) {
       setLetters((prev) => [created, ...prev])
@@ -134,19 +133,6 @@ function VaultPageContent() {
       setShowForm(false)
       return
     }
-
-    setLetters((prev) => [
-      {
-        id: Date.now(),
-        created_at: new Date().toISOString(),
-        ...nextLetter,
-      },
-      ...prev,
-    ])
-    setNewTitle('')
-    setNewContent('')
-    setRevealDate('')
-    setShowForm(false)
   }
 
   if (!isAuthenticated) {
@@ -192,7 +178,7 @@ function VaultPageContent() {
             value={pin}
             onChange={(event) => setPin(event.target.value)}
             inputMode="numeric"
-            maxLength={4}
+            maxLength={6}
             type="password"
             placeholder="Enter your 4-digit PIN"
             className="mt-5 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-transparent px-4 py-3 text-center text-[var(--text-primary)]"
@@ -256,8 +242,8 @@ function VaultPageContent() {
       <div className="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-3xl p-6 border border-[var(--accent-1)]/20 bg-[var(--card-bg)] backdrop-blur">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-1)]">
-              🔐
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-1)] text-white">
+              <Lock className="h-5 w-5" />
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">
@@ -425,7 +411,7 @@ function VaultPageContent() {
       {filteredLetters.length === 0 ? (
        <div className="rounded-[32px] border border-dashed border-[var(--accent-1)]/35 bg-[var(--card-bg)]/65 p-10 text-center shadow-lg backdrop-blur-xl">
          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--button-bg)] text-[var(--text-primary)]">
-           <Heart className="h-6 w-6 text-[var(--accent-1)]" />
+           <Lock className="h-4 w-4" />
          </div>
          <h2
            className="text-3xl text-[var(--text-primary)]"

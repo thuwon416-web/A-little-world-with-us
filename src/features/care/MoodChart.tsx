@@ -1,6 +1,16 @@
 'use client'
 
+import {
+  Angry,
+  Frown,
+  Meh,
+  Moon,
+  Smile,
+  Sparkles,
+  Zap,
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
+
 import { supabase } from '@/lib/supabase'
 
 type MoodLog = { log_date: string; mood: string | null }
@@ -33,14 +43,14 @@ export default function MoodChart() {
     }
   }
 
-  const moodEmoji: Record<string, string> = {
-    happy: '😊',
-    sad: '😢',
-    anxious: '😰',
-    calm: '😌',
-    irritable: '😠',
-    tired: '😴',
-    energetic: '⚡',
+  const moodIcons: Record<string, typeof Smile> = {
+    happy: Smile,
+    sad: Frown,
+    anxious: Sparkles,
+    calm: Smile,
+    irritable: Angry,
+    tired: Moon,
+    energetic: Zap,
   }
 
   if (loading) {
@@ -56,14 +66,17 @@ export default function MoodChart() {
       <h3 className="font-medium mb-4">Mood This Week</h3>
       {moods.length > 0 ? (
         <div className="flex justify-between gap-2">
-          {moods.map((log, i) => (
-            <div key={i} className="flex flex-col items-center">
-              <span className="text-2xl">{moodEmoji[log.mood || ''] || '😐'}</span>
-              <span className="text-xs text-gray-400 mt-1">
-                {new Date(log.log_date).toLocaleDateString('en-US', { weekday: 'short' })}
-              </span>
-            </div>
-          ))}
+          {moods.map((log, i) => {
+            const Icon = moodIcons[log.mood || ''] || Meh
+            return (
+              <div key={i} className="flex flex-col items-center">
+                <Icon className="h-7 w-7 text-rose-500" />
+                <span className="text-xs text-gray-400 mt-1">
+                  {new Date(log.log_date).toLocaleDateString('en-US', { weekday: 'short' })}
+                </span>
+              </div>
+            )
+          })}
         </div>
       ) : (
         <p className="text-sm text-gray-400">No mood data yet</p>

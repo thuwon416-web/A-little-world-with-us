@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Heart, Activity, AlertCircle, Plus, X, Save, Eye, EyeOff } from 'lucide-react'
+import { Heart, HeartPulse, AlertCircle, X, Save, Eye, EyeOff } from 'lucide-react'
+import { EmptyState } from '@/components/ui/empty-state'
 import {
   getHealthProfile,
   saveHealthProfile,
@@ -293,19 +294,12 @@ export default function HealthProfileWidget() {
       ) : (
         <div className="space-y-4">
           {!editing ? (
-            <div className="text-center py-8">
-              <Activity className="h-12 w-12 mx-auto mb-3 text-[var(--accent-1)]/50" />
-              <p className="text-sm text-[var(--text-secondary)]">
-                No health profile yet. Add your health information for emergency reference.
-              </p>
-              <button
-                onClick={() => setEditing(true)}
-                className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)]"
-              >
-                <Plus className="h-4 w-4" />
-                Add Profile
-              </button>
-            </div>
+            <EmptyState
+              icon={HeartPulse}
+              title="No health profile yet"
+              description="Add your health information for emergency reference."
+              action={{ label: 'Add Profile', onClick: () => setEditing(true) }}
+            />
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-3">
               <div>

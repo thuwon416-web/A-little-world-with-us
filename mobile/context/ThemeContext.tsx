@@ -1,9 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { Appearance } from 'react-native'
 
-export type ThemePreference = 'midnight' | 'sunset' | 'random' | 'auto'
-export type ThemeName = 'midnight' | 'sunset'
+export type ThemeName = 'midnight' | 'sunset' | 'romantic' | 'ocean' | 'monochrome'
+export type ThemePreference = ThemeName
 export type ThemeColors = {
   background: string
   surface: string
@@ -85,6 +84,48 @@ export const themes: Record<ThemeName, ThemeColors> = {
     warning: '#ffd166',
     error: '#ff8f8f',
   },
+  romantic: {
+    background: '#fffbf0',
+    surface: '#fff4d9',
+    cardBg: '#fff8e6',
+    cardBorder: '#e8d99a',
+    textPrimary: '#4a3d1f',
+    textSecondary: '#7d6b42',
+    accent1: '#f4c04f',
+    accent2: '#ffd97a',
+    accent3: '#ffe08a',
+    success: '#a3c586',
+    warning: '#e6b84a',
+    error: '#d97070',
+  },
+  ocean: {
+    background: '#edf8ff',
+    surface: '#d7f1ff',
+    cardBg: '#f6fcff',
+    cardBorder: '#a7d8f0',
+    textPrimary: '#133a52',
+    textSecondary: '#4c6f89',
+    accent1: '#4a90e2',
+    accent2: '#87ceeb',
+    accent3: '#b7e4ff',
+    success: '#5cc3d5',
+    warning: '#e6b84a',
+    error: '#d97070',
+  },
+  monochrome: {
+    background: '#050505',
+    surface: '#0e0e10',
+    cardBg: '#111214',
+    cardBorder: '#2a2d30',
+    textPrimary: '#f5f5f3',
+    textSecondary: '#b7b8bb',
+    accent1: '#e6e7e9',
+    accent2: '#a9adb3',
+    accent3: '#c5c7ca',
+    success: '#a3c586',
+    warning: '#e6b84a',
+    error: '#d97070',
+  },
 }
 
 type ThemeContextValue = {
@@ -95,49 +136,40 @@ type ThemeContextValue = {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  preference: 'auto',
+  preference: 'midnight',
   theme: 'midnight',
   colors: themes.midnight,
   setPreference: () => undefined,
 })
 
 const STORAGE_KEY = 'a-little-world-with-us-mobile-theme'
-let randomThemeSession: ThemeName | null = null
 
 function resolveTheme(preference: ThemePreference): ThemeName {
-  if (preference === 'midnight' || preference === 'sunset') return preference
-  if (preference === 'random') {
-    randomThemeSession ??= Math.random() > 0.5 ? 'midnight' : 'sunset'
-    return randomThemeSession
-  }
-  return Appearance.getColorScheme() === 'light' ? 'sunset' : 'midnight'
+  return preference
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>('auto')
+  const [preference, setPreferenceState] = useState<ThemePreference>('midnight')
   const [theme, setTheme] = useState<ThemeName>('midnight')
 
   useEffect(() => {
     void AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
-      const next = stored as ThemePreference | null
-      if (next === 'midnight' || next === 'sunset' || next === 'random' || next === 'auto') {
-        setPreferenceState(next)
-        setTheme(resolveTheme(next))
-      }
+      const next: ThemePreference =
+        stored === 'midnight' ||
+        stored === 'sunset' ||
+        stored === 'romantic' ||
+        stored === 'ocean' ||
+        stored === 'monochrome'
+          ? stored
+          : 'midnight'
+      setPreferenceState(next)
+      setTheme(resolveTheme(next))
     })
   }, [])
 
-  useEffect(() => {
-    if (preference !== 'auto') return
-    const subscription = Appearance.addChangeListener(({ colorScheme }) => {
-      setTheme(colorScheme === 'light' ? 'sunset' : 'midnight')
-    })
-    return () => subscription.remove()
-  }, [preference])
-
   const setPreference = (next: ThemePreference) => {
     setPreferenceState(next)
-    setTheme(resolveTheme(next))
+    setTheme(next)
     void AsyncStorage.setItem(STORAGE_KEY, next)
   }
 

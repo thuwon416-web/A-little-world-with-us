@@ -52,9 +52,30 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="my"
       suppressHydrationWarning
-      data-theme-mode="midnight"
       className={`${inter.variable} ${playfair.variable}`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var pref = localStorage.getItem('a-little-world-with-us-theme-preference');
+                  var mode = localStorage.getItem('a-little-world-with-us-theme-mode');
+                  var resolved = 'midnight';
+                  var modes = ['midnight','sunset','romantic','ocean','monochrome'];
+                  if (pref && modes.indexOf(pref) !== -1) {
+                    resolved = pref;
+                  } else if (mode && modes.indexOf(mode) !== -1) {
+                    resolved = mode;
+                  }
+                  document.documentElement.dataset.themeMode = resolved;
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+      </head>
       <body className="min-h-screen font-sans antialiased">
         <LanguageProvider>
           <ThemeProvider>

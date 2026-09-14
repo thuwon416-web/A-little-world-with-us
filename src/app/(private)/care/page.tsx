@@ -8,7 +8,7 @@ import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 type Tab = 'today' | 'insights' | 'calendar' | 'reminders' | 'settings'
 type Section = 'mood' | 'symptoms' | 'sex' | 'discharge' | 'digestion' | 'pregnancy_test' | 'ovulation_test' | 'contraceptives' | 'activities'
 const sections: Array<{ id: Section; title: string; options: string[] }> = [
-  { id: 'mood', title: 'Mood', options: ['Calm 😌', 'Happy 😊', 'Energetic ⚡', 'Frisky 😘', 'Mood swings 😵‍💫', 'Irritated 😡', 'Sad 😢', 'Anxious 😰'] },
+  { id: 'mood', title: 'Mood', options: ['Calm', 'Happy', 'Energetic', 'Frisky', 'Mood swings', 'Irritated', 'Sad', 'Anxious'] },
   { id: 'symptoms', title: 'Symptoms', options: ['Everything is fine', 'Cramps', 'Tender breasts', 'Headache', 'Acne', 'Backache', 'Fatigue', 'Cravings', 'Insomnia', 'Abdominal pain', 'Hot flashes'] },
   { id: 'sex', title: 'Sex & sex drive', options: ["Didn't have sex", 'Protected sex', 'Unprotected sex', 'Oral sex', 'Anal sex', 'Masturbation', 'Sensual touch', 'Sex toys', 'Orgasm', 'No orgasm', 'High sex drive', 'Neutral sex drive', 'Low sex drive'] },
   { id: 'discharge', title: 'Discharge', options: ['No discharge', 'Creamy', 'Watery', 'Sticky', 'Egg white', 'Spotting', 'Unusual'] },

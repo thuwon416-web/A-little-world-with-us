@@ -1,5 +1,6 @@
 'use client'
 
+import { DollarSign } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
@@ -78,7 +79,10 @@ export default function FinancialGoals() {
     <div className="mx-auto max-w-4xl space-y-8 animate-fade-in">
       <section className="rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Goals</p>
-        <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">💰 Financial Goals</h1>
+        <h1 className="mt-3 flex items-center gap-3 text-3xl font-serif text-[var(--text-primary)]">
+          <DollarSign className="h-7 w-7 text-[var(--accent-1)]" />
+          <span>Financial Goals</span>
+        </h1>
       </section>
 
       <ExplicitAdviceControl

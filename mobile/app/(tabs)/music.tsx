@@ -8,8 +8,55 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { Play, Sparkles, Star } from 'lucide-react-native'
 
+import { useTheme } from '@/context/ThemeContext'
 import { addSong, getPlaylist, PlaylistSong, removeSong, toggleAnniversary } from '@/services/music'
+
+type MusicTab = 'playlist' | 'mood'
+
+const moodBoard = [
+  {
+    id: 'romantic',
+    label: 'Soft & romantic',
+    description: 'Warm songs for slow evenings and close conversations.',
+    tracks: [
+      { youtubeId: '450p7goxZqg', title: 'Kiss Me', artist: 'Sixpence None the Richer', duration: '3:30' },
+      { youtubeId: '3JWTaaS7LdU', title: 'All of Me', artist: 'John Legend', duration: '4:29' },
+      { youtubeId: 'lp-EO5I60KA', title: 'Thinking Out Loud', artist: 'Ed Sheeran', duration: '4:41' },
+    ],
+  },
+  {
+    id: 'happy',
+    label: 'Bright & happy',
+    description: 'A little lift for dancing in the kitchen together.',
+    tracks: [
+      { youtubeId: 'ZbZSe6N_BXs', title: 'Happy', artist: 'Pharrell Williams', duration: '3:53' },
+      { youtubeId: 'OPf0YbXqDm0', title: 'Uptown Funk', artist: 'Mark Ronson ft. Bruno Mars', duration: '4:30' },
+      { youtubeId: 'ru0K8uYEZWw', title: 'Can’t Stop the Feeling!', artist: 'Justin Timberlake', duration: '4:01' },
+    ],
+  },
+  {
+    id: 'chill',
+    label: 'Slow & chill',
+    description: 'Low-key soundtracks for quiet mornings and rainy days.',
+    tracks: [
+      { youtubeId: '5qap5aO4i9A', title: 'lofi hip hop radio', artist: 'Lofi Girl', duration: 'Live' },
+      { youtubeId: 'DWcJFNfaw9c', title: 'Coffee shop radio', artist: 'Chillhop Music', duration: 'Live' },
+      { youtubeId: 'hHW1oY26kxQ', title: 'Peaceful Piano', artist: 'Soothing Relaxation', duration: 'Live' },
+    ],
+  },
+  {
+    id: 'sad',
+    label: 'Tender & sad',
+    description: 'Gentle songs for naming and holding difficult feelings.',
+    tracks: [
+      { youtubeId: 'RgKAFK5djSk', title: 'See You Again', artist: 'Wiz Khalifa ft. Charlie Puth', duration: '3:58' },
+      { youtubeId: 'hLQl3WQQoQ0', title: 'Someone Like You', artist: 'Adele', duration: '4:45' },
+      { youtubeId: 'YQHsXMglC9A', title: 'Hello', artist: 'Adele', duration: '4:55' },
+    ],
+  },
+] as const
 
 function extractId(value: string) {
   const trimmed = value.trim()
@@ -20,6 +67,8 @@ function extractId(value: string) {
 }
 
 export default function MusicScreen() {
+  const { colors } = useTheme()
+  const [tab, setTab] = useState<MusicTab>('playlist')
   const [songs, setSongs] = useState<PlaylistSong[]>([])
   const [input, setInput] = useState('')
   const [title, setTitle] = useState('')
@@ -53,93 +102,166 @@ export default function MusicScreen() {
     }
   }
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>Music</Text>
-      <Text style={styles.title}>Our Playlist</Text>
-      <View style={styles.card}>
-        <TextInput
-          value={input}
-          onChangeText={setInput}
-          placeholder="YouTube URL or video ID"
-          placeholderTextColor="#8d8d99"
-          style={styles.input}
-        />
-        <TextInput
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Song title"
-          placeholderTextColor="#8d8d99"
-          style={styles.input}
-        />
-        <TextInput
-          value={note}
-          onChangeText={setNote}
-          placeholder="Why I added this (optional)"
-          placeholderTextColor="#8d8d99"
-          style={styles.input}
-        />
-        <TouchableOpacity style={styles.primary} onPress={() => void add()}>
-          <Text style={styles.primaryText}>Add song</Text>
-        </TouchableOpacity>
-      </View>
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-      {songs.map((song) => (
-        <View key={song.id} style={styles.card}>
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.eyebrow, { color: colors.accent2 }]}>Music</Text>
+      <Text style={[styles.title, { color: colors.textPrimary }]}>Sounds for us</Text>
+      <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+        Keep the songs that feel like you two close at hand.
+      </Text>
+
+      <View style={[styles.tabs, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+        {([
+          ['playlist', 'Our Playlist'],
+          ['mood', 'Mood Board'],
+        ] as const).map(([value, label]) => (
           <TouchableOpacity
-            onPress={() =>
-              void Linking.openURL(`https://www.youtube.com/watch?v=${song.external_id}`)
-            }
+            key={value}
+            style={[styles.tab, tab === value && { backgroundColor: colors.accent1 }]}
+            onPress={() => setTab(value)}
           >
-            <Text style={styles.song}>{song.title}</Text>
-            <Text style={styles.artist}>{song.artist || 'YouTube'}</Text>
+            <Text style={[styles.tabText, { color: tab === value ? colors.background : colors.textSecondary }]}>
+              {label}
+            </Text>
           </TouchableOpacity>
-          {song.why_added ? <Text style={styles.note}>“{song.why_added}”</Text> : null}
-          <View style={styles.actions}>
-            <TouchableOpacity
-              onPress={() =>
-                void toggleAnniversary(song.id, !song.is_anniversary_song).then(reload)
-              }
-            >
-              <Text style={styles.action}>
-                {song.is_anniversary_song ? '★ Anniversary song' : '☆ Make anniversary song'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => void removeSong(song.id).then(reload)}>
-              <Text style={styles.delete}>Remove</Text>
+        ))}
+      </View>
+
+      {tab === 'playlist' ? (
+        <>
+          <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+            <TextInput
+              value={input}
+              onChangeText={setInput}
+              placeholder="YouTube URL or video ID"
+              placeholderTextColor={colors.textSecondary}
+              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.cardBorder }]}
+            />
+            <TextInput
+              value={title}
+              onChangeText={setTitle}
+              placeholder="Song title"
+              placeholderTextColor={colors.textSecondary}
+              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.cardBorder }]}
+            />
+            <TextInput
+              value={note}
+              onChangeText={setNote}
+              placeholder="Why I added this (optional)"
+              placeholderTextColor={colors.textSecondary}
+              style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.background, borderColor: colors.cardBorder }]}
+            />
+            <TouchableOpacity style={[styles.primary, { backgroundColor: colors.accent1 }]} onPress={() => void add()}>
+              <Text style={[styles.primaryText, { color: colors.background }]}>Add song</Text>
             </TouchableOpacity>
           </View>
-        </View>
-      ))}
+
+          {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
+          {songs.map((song) => (
+            <View key={song.id} style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+              <TouchableOpacity
+                onPress={() =>
+                  void Linking.openURL(`https://www.youtube.com/watch?v=${song.external_id}`)
+                }
+              >
+                <Text style={[styles.song, { color: colors.textPrimary }]}>{song.title}</Text>
+                <Text style={[styles.artist, { color: colors.textSecondary }]}>{song.artist || 'YouTube'}</Text>
+              </TouchableOpacity>
+              {song.why_added ? <Text style={[styles.note, { color: colors.accent2 }]}>“{song.why_added}”</Text> : null}
+              <View style={styles.actions}>
+                <TouchableOpacity
+                  onPress={() =>
+                    void toggleAnniversary(song.id, !song.is_anniversary_song).then(reload)
+                  }
+                >
+                  <View style={styles.actionRow}>
+                    <Star color={colors.accent2} fill={song.is_anniversary_song ? colors.accent2 : 'none'} size={16} />
+                    <Text style={[styles.action, { color: colors.accent2 }]}>
+                      {song.is_anniversary_song ? 'Anniversary song' : 'Make anniversary song'}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => void removeSong(song.id).then(reload)}>
+                  <Text style={[styles.delete, { color: colors.error }]}>Remove</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ))}
+        </>
+      ) : (
+        <>
+          <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+            <View style={styles.moodHeading}>
+              <Sparkles color={colors.accent1} size={18} />
+              <Text style={[styles.moodTitle, { color: colors.textPrimary }]}>Find the right feeling</Text>
+            </View>
+            <Text style={[styles.artist, { color: colors.textSecondary }]}>
+              A few starting points for your next shared moment.
+            </Text>
+          </View>
+          {moodBoard.map((mood) => (
+            <View key={mood.id} style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+              <Text style={[styles.song, { color: colors.textPrimary }]}>{mood.label}</Text>
+              <Text style={[styles.artist, { color: colors.textSecondary }]}>{mood.description}</Text>
+              <View style={styles.moodTracks}>
+                {mood.tracks.map((track) => (
+                  <TouchableOpacity
+                    key={track.youtubeId}
+                    style={[styles.track, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+                    onPress={() => void Linking.openURL(`https://www.youtube.com/watch?v=${track.youtubeId}`)}
+                  >
+                    <View style={[styles.playIcon, { backgroundColor: colors.accent1 }]}>
+                      <Play color={colors.background} fill={colors.background} size={12} />
+                    </View>
+                    <View style={styles.trackDetails}>
+                      <Text style={[styles.trackTitle, { color: colors.textPrimary }]} numberOfLines={1}>{track.title}</Text>
+                      <Text style={[styles.artist, { color: colors.textSecondary }]} numberOfLines={1}>{track.artist}</Text>
+                    </View>
+                    <Text style={[styles.duration, { color: colors.textSecondary }]}>{track.duration}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          ))}
+        </>
+      )}
     </ScrollView>
   )
 }
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0f0f12', padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { color: '#d9bfd7', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700' },
+  container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
+  eyebrow: { fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { fontSize: 30, fontWeight: '700' },
+  subtitle: { fontSize: 14, lineHeight: 21 },
+  tabs: { flexDirection: 'row', borderRadius: 14, borderWidth: 1, padding: 4, gap: 4 },
+  tab: { flex: 1, paddingVertical: 11, borderRadius: 10, alignItems: 'center' },
+  tabText: { fontWeight: '700' },
   card: {
-    backgroundColor: '#171b22',
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#2a2d35',
     gap: 10,
   },
   input: {
-    backgroundColor: '#0f0f12',
     borderRadius: 12,
-    color: '#f3f0f5',
     padding: 12,
     borderWidth: 1,
-    borderColor: '#2a2d35',
   },
-  primary: { backgroundColor: '#d8b9c8', padding: 13, borderRadius: 12, alignItems: 'center' },
-  primaryText: { color: '#0f0f12', fontWeight: '800' },
-  song: { color: '#f3f0f5', fontSize: 18, fontWeight: '700' },
-  artist: { color: '#c4c4ce' },
-  note: { color: '#d9bfd7', fontStyle: 'italic' },
+  primary: { padding: 13, borderRadius: 12, alignItems: 'center' },
+  primaryText: { fontWeight: '800' },
+  song: { fontSize: 18, fontWeight: '700' },
+  artist: {},
+  note: { fontStyle: 'italic' },
   actions: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
-  action: { color: '#d9bfd7', fontWeight: '700' },
-  delete: { color: '#ff9b9b', fontWeight: '700' },
-  error: { color: '#ff9b9b' },
+  actionRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  action: { fontWeight: '700' },
+  delete: { fontWeight: '700' },
+  error: {},
+  moodHeading: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  moodTitle: { fontSize: 16, fontWeight: '700' },
+  moodTracks: { gap: 8, marginTop: 4 },
+  track: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, borderWidth: 1, padding: 10 },
+  playIcon: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
+  trackDetails: { flex: 1, minWidth: 0 },
+  trackTitle: { fontSize: 14, fontWeight: '600' },
+  duration: { fontSize: 12 },
 })

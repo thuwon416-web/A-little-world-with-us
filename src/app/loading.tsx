@@ -1,3 +1,5 @@
+import { Heart } from 'lucide-react'
+
 export default function Loading() {
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.9),_rgba(247,236,239,0.85),_rgba(250,245,242,1))] px-6">
@@ -8,9 +10,7 @@ export default function Loading() {
 
       <div className="relative z-10 w-full max-w-md rounded-[28px] border border-rose-200/70 bg-white/70 p-8 text-center shadow-[0_18px_60px_rgba(180,120,130,0.12)] backdrop-blur-xl">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 via-white to-rose-200 shadow-inner shadow-rose-200">
-          <span className="text-2xl" aria-hidden="true">
-            ♥
-          </span>
+          <Heart className="h-7 w-7 text-rose-500" aria-hidden="true" />
         </div>
 
         <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-rose-100 border-t-rose-500" />

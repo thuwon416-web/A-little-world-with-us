@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { Lock, X } from 'lucide-react'
-import { hasPIN, setPIN, removePIN } from '@/lib/pinLock'
 
 export default function PINLockWidget() {
   const [hasPin, setHasPin] = useState(false)
@@ -12,12 +11,26 @@ export default function PINLockWidget() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    setHasPin(hasPIN())
+    const loadStatus = async () => {
+      try {
+        const response = await fetch('/api/auth/pin', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'status' }),
+        })
+        const result = await response.json() as { hasPIN?: boolean; error?: string }
+        if (!response.ok) throw new Error(result.error || 'Unable to load PIN status')
+        setHasPin(Boolean(result.hasPIN))
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : 'Unable to load PIN status')
+      }
+    }
+    void loadStatus()
   }, [])
 
   const handleSetPIN = async () => {
-    if (pin.length < 4) {
-      setError('PIN must be at least 4 digits')
+    if (!/^\d{4,6}$/.test(pin)) {
+      setError('PIN must be 4 to 6 digits')
       return
     }
 
@@ -26,19 +39,46 @@ export default function PINLockWidget() {
       return
     }
 
-    await setPIN(pin)
-    setHasPin(true)
-    setShowModal(false)
-    setPin('')
-    setConfirmPin('')
-    setError('')
+    try {
+      const response = await fetch('/api/auth/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'hash', pin }),
+      })
+      const result = await response.json() as { error?: string }
+      if (!response.ok) {
+        setError(result.error || 'Failed to set PIN')
+        return
+      }
+      setHasPin(true)
+      setShowModal(false)
+      setPin('')
+      setConfirmPin('')
+      setError('')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Failed to set PIN')
+    }
   }
 
   const handleRemovePIN = async () => {
     if (!confirm('Are you sure you want to remove PIN lock?')) return
 
-    await removePIN()
-    setHasPin(false)
+    try {
+      const response = await fetch('/api/auth/pin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'remove' }),
+      })
+      const result = await response.json() as { error?: string }
+      if (!response.ok) {
+        setError(result.error || 'Failed to remove PIN')
+        return
+      }
+      setHasPin(false)
+      setError('')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Failed to remove PIN')
+    }
   }
 
   return (
@@ -63,7 +103,7 @@ export default function PINLockWidget() {
       ) : (
         <div className="space-y-3">
           <p className="text-sm text-[var(--text-secondary)]">
-            Set a PIN to protect your app with client-side encryption.
+            Set a PIN to protect your app and private vault.
           </p>
           <button
             onClick={() => setShowModal(true)}
@@ -89,7 +129,7 @@ export default function PINLockWidget() {
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">PIN (min 4 digits) *</label>
+                <label className="text-sm text-[var(--text-secondary)]">PIN (4-6 digits) *</label>
                 <input
                   type="password"
                   value={pin}
@@ -118,7 +158,7 @@ export default function PINLockWidget() {
 
               <button
                 onClick={handleSetPIN}
-                disabled={pin.length < 4 || pin !== confirmPin}
+                disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin}
                 className="w-full rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] disabled:opacity-50"
               >
                 Set PIN

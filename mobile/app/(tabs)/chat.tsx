@@ -2,6 +2,7 @@ import { Q } from '@nozbe/watermelondb'
 import * as Location from 'expo-location'
 import { useEffect, useRef, useState } from 'react'
 import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { MapPin } from 'lucide-react-native'
 
 import { Button } from '@/components/Button'
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
@@ -495,7 +496,7 @@ export default function ChatScreen() {
           accessibilityRole="button"
           accessibilityHint="Sends your current location to your partner"
         >
-          <Text style={styles.locationButtonText}>📍</Text>
+          <MapPin size={16} />
         </TouchableOpacity>
         <Input
           value={draft}
@@ -594,14 +595,18 @@ const styles = StyleSheet.create({
   },
   callButton: {
     flex: 1,
-    backgroundColor: '#1b2d25',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#ff6b81',
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
   },
   callButtonVideo: {
     flex: 1,
-    backgroundColor: '#2d2f43',
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#ff6b81',
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -632,7 +637,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  locationButtonText: { fontSize: 19 },
   input: {
     flex: 1,
   },

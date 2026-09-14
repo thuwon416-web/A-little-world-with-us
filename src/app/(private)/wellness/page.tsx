@@ -1,5 +1,6 @@
 'use client'
 
+import { Check, Dumbbell } from 'lucide-react'
 import { useState } from 'react'
 import { wellnessBoards } from '@/data/wellness-boards'
 import WellnessBoard from '@/components/wellness/WellnessBoard'
@@ -91,7 +92,10 @@ export default function WellnessPage() {
         <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6"><h2 className="text-2xl font-bold text-[var(--text-primary)]">Games</h2><p className="mt-2 text-[var(--text-secondary)]">Playful ways to reconnect are coming together here.</p></section>
       ) : activeTab === 'physical' ? (
         <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-[var(--text-primary)]">💪 Health & movement</h2>
+          <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--text-primary)]">
+            <Dumbbell className="h-6 w-6 text-[var(--accent-1)]" />
+            <span>Health & movement</span>
+          </h2>
 
           {/* Workout Selection */}
           <div className="grid md:grid-cols-2 gap-4">
@@ -119,9 +123,10 @@ export default function WellnessPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => completeWorkout(selectedWorkout)}
-                  className="flex-1 bg-[var(--accent-1)] text-[var(--bg-color)] py-3 rounded-xl font-bold"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--accent-1)] py-3 font-bold text-[var(--bg-color)]"
                 >
-                  ✓ Complete Workout
+                  <Check className="h-4 w-4" />
+                  <span>Complete Workout</span>
                 </button>
                 <button
                   onClick={() => setSelectedWorkout(null)}

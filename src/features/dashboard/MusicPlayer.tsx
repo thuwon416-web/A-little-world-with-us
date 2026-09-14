@@ -2,7 +2,8 @@
 
 import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
-import { AlertCircle, Music, Pause, Play } from 'lucide-react'
+import { AlertCircle, Music } from 'lucide-react'
+import { AnimatedIcon } from '@/components/ui/animated-icon'
 
 /**
  * Floating music player toggle.
@@ -69,7 +70,7 @@ export default memo(function MusicPlayer() {
           className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
         >
           Retry
-          <Play className="h-4 w-4" />
+          <AnimatedIcon name="Play" animation="bounce" trigger="hover" size={16} />
         </button>
       </div>
     )
@@ -94,7 +95,13 @@ export default memo(function MusicPlayer() {
                 exit={{ opacity: 0, rotate: 90 }}
                 className="relative z-10"
               >
-                <Pause className="h-5 w-5 text-[var(--accent-1)]" />
+                <AnimatedIcon
+                  name="Pause"
+                  animation="pulse"
+                  trigger="hover"
+                  size={20}
+                  className="text-[var(--accent-1)]"
+                />
               </motion.div>
             ) : (
               <motion.div
@@ -104,7 +111,13 @@ export default memo(function MusicPlayer() {
                 exit={{ opacity: 0, rotate: -90 }}
                 className="relative z-10"
               >
-                <Play className="ml-0.5 h-5 w-5 text-[var(--accent-1)]" />
+                <AnimatedIcon
+                  name="Play"
+                  animation="bounce"
+                  trigger="hover"
+                  size={20}
+                  className="ml-0.5 text-[var(--accent-1)]"
+                />
               </motion.div>
             )}
           </AnimatePresence>
@@ -127,7 +140,11 @@ export default memo(function MusicPlayer() {
         className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
       >
         {isPlaying ? 'Pause' : 'Play'}
-        {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+        {isPlaying ? (
+          <AnimatedIcon name="Pause" animation="pulse" trigger="hover" size={16} />
+        ) : (
+          <AnimatedIcon name="Play" animation="bounce" trigger="hover" size={16} />
+        )}
       </button>
     </div>
   )
