@@ -16,7 +16,7 @@ type MessageFields = {
   media_duration: number | null
   reply_to: string
   location_payload: string
-  created_at: string
+  created_at: number
   synced: boolean
 }
 type LocalMessage = MessageModel & MessageFields & { _get<T>(column: string): T }
@@ -76,7 +76,7 @@ export async function pushPendingMessages() {
       content: rawMessage._get('content'),
       sender_id: rawMessage._get('sender_id'),
       couple_id: rawMessage._get('couple_id') || coupleId,
-      created_at: rawMessage._get('created_at'),
+      created_at: new Date(rawMessage._get('created_at')).toISOString(),
       message_type: rawMessage._get('message_type') || 'text',
       location_payload: (() => {
         const value = rawMessage._get<string>('location_payload')
@@ -181,7 +181,9 @@ export async function syncMessages(lastSyncAt?: string) {
             fields.content = remoteMessage.content ?? ''
             fields.sender_id = remoteMessage.sender_id ?? 'unknown'
             fields.couple_id = remoteMessage.couple_id ?? ''
-            fields.created_at = remoteMessage.created_at ?? new Date().toISOString()
+            fields.created_at = remoteMessage.created_at
+              ? new Date(remoteMessage.created_at).getTime()
+              : Date.now()
             fields.message_type = remoteMessage.message_type ?? 'text'
             fields.location_payload = remoteMessage.location_payload
               ? JSON.stringify(remoteMessage.location_payload)
@@ -193,14 +195,17 @@ export async function syncMessages(lastSyncAt?: string) {
           })
         } else {
           // Update existing message if remote is newer
-          const localCreatedAt = localMessage._get('created_at') ?? ''
-          if ((remoteMessage.created_at ?? '') > localCreatedAt) {
+          const localCreatedAt = localMessage._get<number>('created_at') ?? 0
+          const remoteCreatedAt = remoteMessage.created_at
+            ? new Date(remoteMessage.created_at).getTime()
+            : 0
+          if (remoteCreatedAt > localCreatedAt) {
             await localMessage.update((record) => {
               const fields = record as unknown as MessageFields
               fields.content = remoteMessage.content ?? fields.content
               fields.sender_id = remoteMessage.sender_id ?? fields.sender_id
               fields.couple_id = remoteMessage.couple_id ?? fields.couple_id
-              fields.created_at = remoteMessage.created_at ?? fields.created_at
+              fields.created_at = remoteCreatedAt || fields.created_at
               fields.message_type = remoteMessage.message_type ?? fields.message_type
               fields.location_payload = remoteMessage.location_payload
                 ? JSON.stringify(remoteMessage.location_payload)

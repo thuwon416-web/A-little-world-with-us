@@ -13,7 +13,7 @@ export type CallSignal = {
   updated_at?: string
 }
 
-const channelName = 'call-signals'
+const CHANNEL_PREFIX = 'call-signals'
 
 export async function initiateCall(receiverId: string, type: CallType) {
   if (!isSupabaseConfigured) {
@@ -93,8 +93,9 @@ export function subscribeToCallSignals(onSignal: (signal: CallSignal) => void) {
     return { unsubscribe: () => undefined }
   }
 
+  const uniqueChannelName = `${CHANNEL_PREFIX}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const channel = supabase
-    .channel(channelName)
+    .channel(uniqueChannelName)
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'call_signals' },

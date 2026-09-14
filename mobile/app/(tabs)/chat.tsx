@@ -127,7 +127,9 @@ export default function ChatScreen() {
                   : '',
               text: typeof content === 'string' ? content : '',
               time: formatMessageTime(
-                typeof createdAt === 'string' ? createdAt : new Date().toISOString()
+                typeof createdAt === 'number'
+                  ? new Date(createdAt).toISOString()
+                  : new Date().toISOString()
               ),
               type: normalizedType,
               messageType: normalizedType,
@@ -135,7 +137,10 @@ export default function ChatScreen() {
               mediaPath: typeof mediaUrl === 'string' ? mediaUrl : null,
               mediaDuration: typeof mediaDuration === 'number' ? mediaDuration : null,
               replyTo: typeof replyTo === 'string' ? replyTo : null,
-              createdAt: typeof createdAt === 'string' ? createdAt : new Date().toISOString(),
+              createdAt:
+                typeof createdAt === 'number'
+                  ? new Date(createdAt).toISOString()
+                  : new Date().toISOString(),
               location,
             }
           })
@@ -174,21 +179,19 @@ export default function ChatScreen() {
     const trimmed = draft.trim()
     if (!trimmed || !user?.id || !coupleId) return
 
-    const createdAt = new Date().toISOString()
-
     await database.write(async () => {
       await database.get('messages').create((record) => {
         const rawRecord = record as unknown as {
           content: string
           sender_id: string
           couple_id: string
-          created_at: string
+          created_at: number
           synced: boolean
         }
         rawRecord.content = trimmed
         rawRecord.sender_id = user.id
         rawRecord.couple_id = coupleId
-        rawRecord.created_at = createdAt
+        rawRecord.created_at = Date.now()
         rawRecord.synced = !isOffline
       })
     })
@@ -229,7 +232,7 @@ export default function ChatScreen() {
             content: string
             sender_id: string
             couple_id: string
-            created_at: string
+            created_at: number
             synced: boolean
             message_type: string
             location_payload: string
@@ -237,7 +240,7 @@ export default function ChatScreen() {
           rawRecord.content = 'Shared a location'
           rawRecord.sender_id = user.id
           rawRecord.couple_id = coupleId
-          rawRecord.created_at = new Date().toISOString()
+          rawRecord.created_at = Date.now()
           rawRecord.message_type = 'location'
           rawRecord.location_payload = JSON.stringify(payload)
           rawRecord.synced = !isOffline

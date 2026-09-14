@@ -28,7 +28,7 @@ export async function queueFailedRequest(request: { method: string; url: string;
       record.url = request.url
       record.body = JSON.stringify(request.body ?? null)
       record.retry_count = 0
-      record.created_at = new Date().toISOString()
+      record.created_at = Date.now()
     })
   })
 }

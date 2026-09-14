@@ -22,7 +22,6 @@ function getWatchChannel(coupleId: string) {
   if (existing) return existing
   const channel = supabase.channel(`watch-sync-${coupleId}`)
   watchChannels.set(coupleId, channel)
-  channel.subscribe()
   return channel
 }
 
@@ -111,13 +110,22 @@ export function subscribeToWatchSync(
   coupleId: string,
   onEvent: (event: WatchSyncEvent, payload: WatchSyncPayload) => void
 ) {
+  const existingChannel = watchChannels.get(coupleId)
+  if (existingChannel) {
+    void supabase.removeChannel(existingChannel)
+    watchChannels.delete(coupleId)
+  }
   const channel = getWatchChannel(coupleId)
   channel
     .on('broadcast', { event: 'play' }, ({ payload }) => onEvent('play', payload))
     .on('broadcast', { event: 'pause' }, ({ payload }) => onEvent('pause', payload))
     .on('broadcast', { event: 'seek' }, ({ payload }) => onEvent('seek', payload))
     .on('broadcast', { event: 'video' }, ({ payload }) => onEvent('video', payload))
-    .subscribe()
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('Watch-sync channel subscribed:', coupleId)
+      }
+    })
   return () => {
     watchChannels.delete(coupleId)
     void supabase.removeChannel(channel)
