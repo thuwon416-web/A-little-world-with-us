@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Dumbbell } from 'lucide-react'
+import { Check, Dumbbell, Gamepad2 } from 'lucide-react'
 import { useState } from 'react'
 import { wellnessBoards } from '@/data/wellness-boards'
 import WellnessBoard from '@/components/wellness/WellnessBoard'
@@ -33,6 +33,7 @@ export default function WellnessPage() {
   const [activeTab, setActiveTab] = useState<TabId>('physical')
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([])
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null)
+  const [completedGame, setCompletedGame] = useState(false)
 
   const filteredBoards = wellnessBoards.filter(board => board.category === activeTab)
 
@@ -47,6 +48,19 @@ export default function WellnessPage() {
     setSelectedWorkout(null)
   }
 
+  const completeQuest = async (questId: string) => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await logWellnessActivity(user.id, questId, 'quest')
+  }
+
+  const completeGame = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await logWellnessActivity(user.id, 'relationship-games', 'game')
+    setCompletedGame(true)
+  }
+
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 animate-fade-in">
       <header>
@@ -57,7 +71,7 @@ export default function WellnessPage() {
           Wellness Boards
         </h1>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">
-          20 curated boards for emotional wellness
+          21 curated boards for emotional wellness
         </p>
       </header>
 
@@ -87,9 +101,23 @@ export default function WellnessPage() {
       </nav>
 
       {activeTab === 'quests' ? (
-        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5"><RelationshipQuests /></section>
+        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5"><RelationshipQuests onQuestComplete={completeQuest} /></section>
       ) : activeTab === 'games' ? (
-        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6"><h2 className="text-2xl font-bold text-[var(--text-primary)]">Games</h2><p className="mt-2 text-[var(--text-secondary)]">Playful ways to reconnect are coming together here.</p></section>
+        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
+          <div className="flex items-center gap-3">
+            <Gamepad2 className="h-6 w-6 text-[var(--accent-1)]" />
+            <h2 className="text-2xl font-bold text-[var(--text-primary)]">Games</h2>
+          </div>
+          <p className="mt-2 text-[var(--text-secondary)]">Playful ways to reconnect are coming together here.</p>
+          <button
+            type="button"
+            onClick={() => void completeGame()}
+            disabled={completedGame}
+            className="mt-4 rounded-xl bg-[var(--accent-1)] px-4 py-3 font-bold text-[var(--bg-color)] disabled:opacity-60"
+          >
+            {completedGame ? 'Game completed' : 'Complete a game'}
+          </button>
+        </section>
       ) : activeTab === 'physical' ? (
         <div className="space-y-6">
           <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--text-primary)]">

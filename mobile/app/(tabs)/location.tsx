@@ -6,10 +6,11 @@ import {
   PointAnnotation,
   ShapeSource,
 } from '@maplibre/maplibre-react-native'
+import Constants from 'expo-constants'
 import * as Location from 'expo-location'
 import { Redirect } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import { useAdmin } from '@/hooks/useAdmin'
 import { useLocation } from '@/hooks/useLocation'
@@ -35,6 +36,7 @@ type LocationRow = {
   is_charging: boolean | null
   network_type: string | null
   device_name: string | null
+  app_version: string | null
 }
 type SavedPlace = { id: string; name: string; radius_meters: number }
 type CallEvent = { id: string; type: string; status: string; created_at: string }
@@ -45,7 +47,8 @@ type SosAlert = {
   resolved_at: string | null
 }
 
-const CARTO_DARK_STYLE = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+const mapStyle = process.env.EXPO_PUBLIC_CARTO_STYLE_URL ?? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+const APP_VERSION = Constants.expoConfig?.version ?? 'Unknown'
 const DEFAULT_CENTER: [number, number] = [100.5018, 13.7563]
 const tabs = [
   'Live Map',
@@ -77,11 +80,14 @@ export default function LocationScreen() {
   const [calls, setCalls] = useState<CallEvent[]>([])
   const [sosAlerts, setSosAlerts] = useState<SosAlert[]>([])
   const [coupleId, setCoupleId] = useState<string | null>(null)
-  const [status, setStatus] = useState<'loading' | 'ready' | 'empty'>('loading')
   const [sosSending, setSosSending] = useState(false)
   const [sosSentAt, setSosSentAt] = useState<string | null>(null)
   const [sosLocation, setSosLocation] = useState<{ latitude: number; longitude: number; accuracy: number | null } | null>(null)
   const [sosError, setSosError] = useState('')
+  const [placeModalOpen, setPlaceModalOpen] = useState(false)
+  const [placeName, setPlaceName] = useState('')
+  const [placeRadius, setPlaceRadius] = useState('100')
+  const [placeSaving, setPlaceSaving] = useState(false)
 
   const sendSOS = async () => {
     if (sosSending || !user || !coupleId) return
@@ -149,6 +155,61 @@ export default function LocationScreen() {
     )
   }
 
+  const savePlace = async () => {
+    if (!user || !coupleId || !placeName.trim()) return
+    const radius = Number(placeRadius)
+    if (!Number.isInteger(radius) || radius < 25 || radius > 10000) {
+      Alert.alert('Invalid radius', 'Radius must be a whole number from 25 to 10,000 meters.')
+      return
+    }
+    const point = currentLocation
+    if (!point) {
+      Alert.alert('Location unavailable', 'Refresh your device location before saving a place.')
+      return
+    }
+    setPlaceSaving(true)
+    const { data, error: saveError } = await supabase
+      .from('saved_places')
+      .insert({
+        couple_id: coupleId,
+        created_by: user.id,
+        name: placeName.trim(),
+        latitude: point.latitude,
+        longitude: point.longitude,
+        radius_meters: radius,
+      })
+      .select('id,name,radius_meters')
+      .single()
+    setPlaceSaving(false)
+    if (saveError) {
+      Alert.alert('Unable to save place', saveError.message)
+      return
+    }
+    setSavedPlaces((places) => [...places, data as SavedPlace])
+    setPlaceName('')
+    setPlaceRadius('100')
+    setPlaceModalOpen(false)
+  }
+
+  const deletePlace = (place: SavedPlace) => {
+    Alert.alert('Delete saved place?', place.name, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => {
+          void supabase.from('saved_places').delete().eq('id', place.id).then(({ error: deleteError }) => {
+            if (deleteError) {
+              Alert.alert('Unable to delete place', deleteError.message)
+              return
+            }
+            setSavedPlaces((places) => places.filter((item) => item.id !== place.id))
+          })
+        },
+      },
+    ])
+  }
+
   useEffect(() => {
     if (!isAdmin || !user) return
     const load = async () => {
@@ -160,7 +221,6 @@ export default function LocationScreen() {
         .not('couple_id', 'is', null)
         .maybeSingle()
       if (!link?.couple_id) {
-        setStatus('empty')
         return
       }
       setCoupleId(link.couple_id)
@@ -200,7 +260,6 @@ export default function LocationScreen() {
       setSavedPlaces((places.data ?? []) as SavedPlace[])
       setCalls((callEvents.data ?? []) as CallEvent[])
       setSosAlerts((alerts.data ?? []) as SosAlert[])
-      setStatus(latest.data?.length ? 'ready' : 'empty')
     }
     void load()
   }, [isAdmin, user])
@@ -228,10 +287,33 @@ export default function LocationScreen() {
     }
   }, [coupleId, isAdmin])
 
+  const displayedRows = useMemo(() => {
+    if (!currentLocation || !user?.id || rows.some((row) => row.user_id === user.id)) {
+      return rows
+    }
+    return [
+      {
+        user_id: user.id,
+        latitude: currentLocation.latitude,
+        longitude: currentLocation.longitude,
+        accuracy: currentLocation.accuracy,
+        place_label: null,
+        updated_at: currentLocation.timestamp,
+        battery_level: null,
+        is_charging: null,
+        network_type: null,
+        device_name: null,
+        app_version: APP_VERSION,
+      },
+      ...rows,
+    ]
+  }, [currentLocation, rows, user?.id])
+  const hasAnyLocation = displayedRows.length > 0 || currentLocation !== null
+
   const center = useMemo<[number, number]>(() => {
-    const focus = rows[0] ?? currentLocation ?? partnerLocation
+    const focus = displayedRows[0] ?? partnerLocation
     return focus ? [focus.longitude, focus.latitude] : DEFAULT_CENTER
-  }, [currentLocation, partnerLocation, rows])
+  }, [displayedRows, partnerLocation])
   const routeShape = useMemo(
     () => ({
       type: 'Feature' as const,
@@ -271,7 +353,7 @@ export default function LocationScreen() {
         <>
           <MapView
             style={styles.map}
-            mapStyle={CARTO_DARK_STYLE}
+            mapStyle={mapStyle}
             logoEnabled={false}
             attributionEnabled
           >
@@ -289,7 +371,7 @@ export default function LocationScreen() {
                 />
               </ShapeSource>
             ) : null}
-            {rows.map((row) => (
+            {displayedRows.map((row) => (
               <PointAnnotation
                 id={row.user_id}
                 key={row.user_id}
@@ -300,7 +382,7 @@ export default function LocationScreen() {
                 </View>
               </PointAnnotation>
             ))}
-            {rows.map((row) =>
+            {displayedRows.map((row) =>
               row.accuracy ? (
                 <ShapeSource
                   key={`${row.user_id}-accuracy`}
@@ -325,7 +407,7 @@ export default function LocationScreen() {
           </MapView>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>
-              {status === 'ready' ? 'Live pair location' : 'Waiting for GPS data'}
+              {hasAnyLocation ? 'Live location' : 'Waiting for GPS data'}
             </Text>
             <Text style={styles.meta}>
               {error ??
@@ -367,20 +449,36 @@ export default function LocationScreen() {
                 {row.battery_level ?? '—'}% · {row.is_charging ? 'charging' : 'not charging'} ·{' '}
                 {row.network_type ?? 'offline'} · {new Date(row.updated_at).toLocaleString()}
               </Text>
+              <Text style={styles.meta}>
+                App version: {APP_VERSION} · Accuracy:{' '}
+                {row.user_id === user?.id
+                  ? (currentLocation?.accuracy ?? row.accuracy) === null
+                    ? 'Not reported'
+                    : `±${Math.round(currentLocation?.accuracy ?? row.accuracy ?? 0)}m`
+                  : row.accuracy === null
+                    ? 'Not reported'
+                    : `±${Math.round(row.accuracy)}m`}
+              </Text>
             </View>
           ))}
           {!rows.length ? <Empty label="No linked device has shared a location yet." /> : null}
         </ScrollView>
       ) : activeTab === 'Saved Places' ? (
         <ScrollView contentContainerStyle={styles.list}>
+          <TouchableOpacity style={styles.button} onPress={() => setPlaceModalOpen(true)}>
+            <Text style={styles.buttonText}>Add place from current location</Text>
+          </TouchableOpacity>
           {savedPlaces.map((place) => (
             <View key={place.id} style={styles.listItem}>
               <Text style={styles.cardTitle}>{place.name}</Text>
               <Text style={styles.meta}>Safe zone · {place.radius_meters}m radius</Text>
+              <TouchableOpacity onPress={() => deletePlace(place)}>
+                <Text style={styles.danger}>Delete</Text>
+              </TouchableOpacity>
             </View>
           ))}
           {!savedPlaces.length ? (
-            <Empty label="No saved places yet. Add Home or another safe zone from the web map." />
+            <Empty label="No saved places yet." />
           ) : null}
         </ScrollView>
       ) : activeTab === 'App Calls' ? (
@@ -438,6 +536,24 @@ export default function LocationScreen() {
           ) : null}
         </ScrollView>
       )}
+      <Modal visible={placeModalOpen} transparent animationType="slide" onRequestClose={() => setPlaceModalOpen(false)}>
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.cardTitle}>Add saved place</Text>
+            <TextInput style={styles.input} value={placeName} onChangeText={setPlaceName} placeholder="Name" placeholderTextColor={colors.textSecondary} />
+            <TextInput style={styles.input} value={placeRadius} onChangeText={setPlaceRadius} placeholder="Radius in meters" placeholderTextColor={colors.textSecondary} keyboardType="numeric" />
+            <Text style={styles.meta}>
+              {currentLocation ? `Using current location: ${currentLocation.latitude.toFixed(5)}, ${currentLocation.longitude.toFixed(5)}` : 'Current location unavailable'}
+            </Text>
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setPlaceModalOpen(false)}><Text style={styles.meta}>Cancel</Text></TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={() => void savePlace()} disabled={placeSaving}>
+                <Text style={styles.buttonText}>{placeSaving ? 'Saving...' : 'Save place'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
       {loading ? <Text style={styles.loading}>Checking device location…</Text> : null}
     </View>
   )
@@ -515,6 +631,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: { color: '#260f2d', fontWeight: '800' },
+  danger: { color: '#fca5a5', fontWeight: '700', marginTop: 10 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#5d416f',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    color: '#fff7fb',
+    marginTop: 10,
+  },
+  modalBackdrop: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.55)',
+  },
+  modalCard: {
+    backgroundColor: '#2b1745',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 20,
+  },
+  modalActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 12 },
   loading: { color: '#d4bdd1', textAlign: 'center', marginTop: 8, fontSize: 12 },
   sosCard: {
     backgroundColor: '#32111d',

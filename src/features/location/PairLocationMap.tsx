@@ -8,6 +8,7 @@ export type MapLocation = { user_id: string; latitude: number; longitude: number
 export type MapHistory = { user_id: string; latitude: number; longitude: number; captured_at: string }
 export type MapPlace = { id: string; name: string; latitude: number; longitude: number; radius_meters: number }
 export type MapAlert = { id: string; reporter_id: string; latitude: number | null; longitude: number | null; created_at: string }
+const tileUrl = process.env.NEXT_PUBLIC_CARTO_TILE_URL ?? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 
 const marker = (label: string, color: string) => divIcon({ className: 'pair-map-marker', html: `<span style="display:grid;place-items:center;width:34px;height:34px;border-radius:9999px;border:2px solid #fff;background:${color};box-shadow:0 4px 16px rgba(0,0,0,.45);font-size:16px">${label}</span>`, iconSize: [34, 34], iconAnchor: [17, 17] })
 
@@ -22,7 +23,7 @@ export default function PairLocationMap({ locations, history, selectedUser, name
   const focus: LatLngExpression | null = selected ? [selected.latitude, selected.longitude] : null
   const route = history.filter((row) => row.user_id === selectedUser).slice().reverse().map((row) => [row.latitude, row.longitude] as LatLngExpression)
   return <MapContainer center={focus ?? [16.8661, 96.1951]} zoom={focus ? 13 : 4} scrollWheelZoom className="h-[430px] w-full rounded-2xl" aria-label="Live pair location map">
-    <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
+    <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' url={tileUrl} />
     <FocusMap point={focus} />
     {route.length > 1 && <Polyline positions={route} pathOptions={{ color: '#FFD700', weight: 4, opacity: 0.75 }} />}
     {locations.map((row, index) => <Marker key={row.user_id} position={[row.latitude, row.longitude]} icon={marker(index === 0 ? '♥' : '✦', index === 0 ? '#ff6b9d' : '#8b5cf6')}><Popup><strong>{names[row.user_id] ?? 'Linked account'}</strong><br />Updated {new Date(row.updated_at).toLocaleString()}<br />Accuracy ±{Math.round(row.accuracy ?? 0)}m</Popup></Marker>)}

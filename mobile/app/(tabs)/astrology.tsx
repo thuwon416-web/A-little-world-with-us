@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Alert, Text, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
 import { supabase } from '@/lib/supabase'
 import { moonPhase } from '@/services/secondary'
+import { calculateSynastry, createAstrologyProfile } from '@/services/astrology'
 
 const signs = [
   'Aries',
@@ -22,7 +23,31 @@ const signs = [
 export default function AstrologyScreen() {
   const [sign, setSign] = useState('Aries')
   const [advice, setAdvice] = useState('')
-  const score = 70 + ((signs.indexOf(sign) * 7) % 29)
+  const [score, setScore] = useState<number | null>(null)
+  useEffect(() => {
+    const loadCompatibility = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: link } = await supabase
+        .from('couple_links')
+        .select('inviter_id,accepted_by')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
+      if (!link?.inviter_id || !link.accepted_by) return
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id,birth_date')
+        .in('id', [link.inviter_id, link.accepted_by])
+      const dates = (profiles ?? [])
+        .map((profile) => profile.birth_date)
+        .filter((birthDate): birthDate is string => Boolean(birthDate))
+        .map((birthDate) => new Date(`${birthDate}T12:00:00`))
+      if (dates.length !== 2 || dates.some((date) => Number.isNaN(date.getTime()))) return
+      setScore(calculateSynastry(createAstrologyProfile(dates[0]), createAstrologyProfile(dates[1])))
+    }
+    void loadCompatibility()
+  }, [])
   const horoscope = async () => {
     try {
       const { data, error } = await supabase.functions.invoke('ai-horoscope', {
@@ -48,8 +73,8 @@ export default function AstrologyScreen() {
       </Text>
       <View style={s.card}>
         <Text style={s.buttonText}>Compatibility</Text>
-        <Text style={{ color: '#ff9bba', fontSize: 38, fontWeight: '800' }}>{score}%</Text>
-        <Text style={s.muted}>A playful reflection based on your selected sign.</Text>
+        <Text style={{ color: '#ff9bba', fontSize: 38, fontWeight: '800' }}>{score ?? '—'}%</Text>
+        <Text style={s.muted}>Based on both partners&apos; saved birth dates.</Text>
       </View>
       <View style={s.card}>
         <Text style={s.buttonText}>Your sign</Text>

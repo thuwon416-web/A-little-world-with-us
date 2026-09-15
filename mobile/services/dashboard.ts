@@ -57,7 +57,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
-      .eq('couple_id', coupleId),
+      .eq('couple_id', coupleId)
+      .not('message_type', 'in', '(sos,location)'),
     supabase
       .from('relationship_memories')
       .select('id', { count: 'exact', head: true })
@@ -70,6 +71,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .from('messages')
       .select('created_at')
       .eq('couple_id', coupleId)
+      .not('message_type', 'in', '(sos,location)')
       .order('created_at', { ascending: true }),
     supabase
       .from('memories')

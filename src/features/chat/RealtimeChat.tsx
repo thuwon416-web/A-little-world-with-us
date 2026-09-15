@@ -4,12 +4,13 @@
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import { Heart, Send, Mic, Image as ImageIcon, Sticker, Gift, Paperclip, Reply as ReplyIcon, MapPin, Captions, Sparkles, X } from 'lucide-react'
+import { Heart, Paperclip, Reply as ReplyIcon, MapPin, Captions, Sparkles, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
 import { resolveChatMediaUrl } from '@/lib/chatMedia'
 import { detectContextKeywords } from '@/features/ai-guardian/context/detector'
+import ChatInputBar from './ChatInputBar'
 
 const VoiceMessageRecorder = dynamic(() => import('./VoiceMessageRecorder'), { ssr: false })
 const PhotoShare = dynamic(() => import('./PhotoShare'), { ssr: false })
@@ -189,10 +190,10 @@ export default function RealtimeChat() {
     }
   }
 
-  const handleSend = async () => {
-    if (!input.trim() || !coupleId || !currentUserId) return
+  const handleSend = async (text = input) => {
+    if (!text.trim() || !coupleId || !currentUserId) return
 
-    const messageText = input.trim()
+    const messageText = text.trim()
     const chatKey = await deriveChatKey(coupleId)
     const encryptedContent = await encryptMessage(messageText, chatKey)
 
@@ -553,10 +554,12 @@ export default function RealtimeChat() {
                   {message.message_type === 'sos' && message.location_payload && (
                     <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 p-3 text-sm text-red-100 hover:bg-red-500/25"><MapPin className="h-5 w-5 text-red-300" /><span><strong>🆘 Emergency SOS</strong><br />Open the sender’s current location.</span></a>
                   )}
-                  <p className="text-xs text-[var(--text-secondary)] mt-1">
-                    {new Date(message.created_at).toLocaleTimeString()}
-                  </p>
+                  <div className="mt-1 flex items-center justify-end gap-1 text-[10px] opacity-70">
+                    <span>{new Date(message.created_at).toLocaleTimeString()}</span>
+                    <span aria-hidden="true" />
+                  </div>
                 </div>
+                <div className="hidden items-center justify-end gap-1 text-xs" aria-hidden="true" />
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
                   <button
                     type="button"
@@ -576,56 +579,15 @@ export default function RealtimeChat() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="border-t border-[var(--accent-1)]/20 p-4">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowVoiceRecorder(true)}
-            className="p-2 rounded-xl hover:bg-[var(--bg-2)] text-[var(--text-secondary)]"
-          >
-            <Mic className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setShowPhotoShare(true)}
-            className="p-2 rounded-xl hover:bg-[var(--bg-2)] text-[var(--text-secondary)]"
-          >
-            <ImageIcon className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setShowStickerPicker(true)}
-            className="p-2 rounded-xl hover:bg-[var(--bg-2)] text-[var(--text-secondary)]"
-          >
-            <Sticker className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setShowGIFPicker(true)}
-            className="p-2 rounded-xl hover:bg-[var(--bg-2)] text-[var(--text-secondary)]"
-          >
-            <Gift className="h-5 w-5" />
-          </button>
-          <button
-            onClick={() => setShowFileUpload(true)}
-            className="p-2 rounded-xl hover:bg-[var(--bg-2)] text-[var(--text-secondary)]"
-          >
-            <Paperclip className="h-5 w-5" />
-          </button>
-          <button type="button" onClick={handleSendLocation} className="p-2 rounded-xl hover:bg-[var(--bg-2)] text-[var(--text-secondary)]" aria-label="Send current location"><MapPin className="h-5 w-5" /></button>
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type a message..."
-            className="flex-1 rounded-full border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-2 text-sm text-[var(--text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8774E1]"
-          />
-          <button
-            onClick={handleSend}
-            disabled={!input.trim()}
-            className="p-2 rounded-xl bg-[var(--button-bg)] text-[var(--text-primary)] disabled:opacity-50"
-          >
-            <Send className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
+      <ChatInputBar
+        onSend={(text) => void handleSend(text)}
+        onVoiceRecord={() => setShowVoiceRecorder(true)}
+        onPhotoSelect={() => setShowPhotoShare(true)}
+        onStickerSelect={() => setShowStickerPicker(true)}
+        onGIFSelect={() => setShowGIFPicker(true)}
+        onFileSelect={() => setShowFileUpload(true)}
+        onLocationSend={handleSendLocation}
+      />
 
       {showVoiceRecorder && (
         <VoiceMessageRecorder

@@ -1,3 +1,4 @@
+﻿@charset "UTF-8";
 @import 'leaflet/dist/leaflet.css';
 
 @tailwind base;
@@ -249,7 +250,7 @@
   --button-bg: linear-gradient(90deg, rgba(255, 158, 108, 0.18), rgba(255, 215, 0, 0.1));
 }
 
-/* ===== ROMANTIC THEME MODE (EMERGENT AIRY — LIGHT YELLOW) ===== */
+/* ===== ROMANTIC THEME MODE (EMERGENT AIRY â€” LIGHT YELLOW) ===== */
 :root[data-theme-mode='romantic'] {
   --bg-color: #fffbf0;
   --bg-gradient: linear-gradient(135deg, #fffbf0 0%, #fff4d9 45%, #ffe9c7 100%);
@@ -413,7 +414,7 @@ body {
   background: var(--bg-gradient);
   background-attachment: fixed;
   min-height: 100vh;
-  font-family: var(--font-sans);
+  font-family: 'Noto Sans Myanmar', 'Padauk', 'Myanmar Text', system-ui, sans-serif;
   color: var(--text-primary);
   transition:
     background 240ms ease,
@@ -455,7 +456,7 @@ label {
 .dashboard-shell--anniversary .dashboard-hero::after,
 .dashboard-shell--birthday .dashboard-hero::after,
 .dashboard-shell--custom .dashboard-hero::after {
-  content: '✦  ♥  ✦';
+  content: 'âœ¦  â™¥  âœ¦';
   position: absolute;
   right: 1.5rem;
   bottom: 1rem;
@@ -466,8 +467,8 @@ label {
   pointer-events: none;
 }
 
-.dashboard-shell--birthday .dashboard-hero::after { content: '✦  ✧  ✦'; }
-.dashboard-shell--custom .dashboard-hero::after { content: '♥  ✦  ♥'; }
+.dashboard-shell--birthday .dashboard-hero::after { content: 'âœ¦  âœ§  âœ¦'; }
+.dashboard-shell--custom .dashboard-hero::after { content: 'â™¥  âœ¦  â™¥'; }
 
 @keyframes occasion-float {
   50% { transform: translateY(-5px); opacity: 0.95; }

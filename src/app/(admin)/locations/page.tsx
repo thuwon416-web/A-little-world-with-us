@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Battery, Clock3, MapPin, Navigation, PhoneCall, RefreshCw, Route, ShieldCheck, Smartphone } from 'lucide-react'
+import { AlertTriangle, Battery, Clock3, MapPin, Navigation, Phone, PhoneCall, RefreshCw, Route, ShieldCheck, Smartphone, Video } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import EmergencySOS from '@/features/location/EmergencySOS'
 import dynamic from 'next/dynamic'
@@ -13,6 +13,7 @@ type LocationRow = { user_id: string; couple_id: string; latitude: number; longi
 type HistoryRow = { id: string; user_id: string; latitude: number; longitude: number; accuracy: number | null; captured_at: string }
 type EmergencyAlert = { id: string; reporter_id: string; latitude: number; longitude: number; created_at: string; resolved_at: string | null }
 type SavedPlace = { id: string; name: string; latitude: number; longitude: number; radius_meters: number }
+type CallEvent = { id: string; type: string; status: string; created_at: string; caller_id: string; receiver_id: string }
 type Tab = 'live' | 'timeline' | 'places' | 'device' | 'calls' | 'safety'
 
 function relativeTime(value: string) {
@@ -29,6 +30,8 @@ export default function AdminLocationsPage() {
   const [history, setHistory] = useState<HistoryRow[]>([])
   const [alerts, setAlerts] = useState<EmergencyAlert[]>([])
   const [places, setPlaces] = useState<SavedPlace[]>([])
+  const [calls, setCalls] = useState<CallEvent[]>([])
+  const [placeForm, setPlaceForm] = useState({ name: '', latitude: '', longitude: '', radius: '100' })
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -44,22 +47,47 @@ export default function AdminLocationsPage() {
     const { data: link, error: linkError } = await supabase.from('couple_links').select('inviter_id, accepted_by, couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').maybeSingle()
     if (linkError || !link?.accepted_by || !link.couple_id) { setError('No accepted linked partner is available yet.'); setLoading(false); return }
     const userIds = [link.inviter_id, link.accepted_by]
-    const [profilesResult, locationResult, historyResult, alertsResult, placesResult] = await Promise.all([
+    const [profilesResult, locationResult, historyResult, alertsResult, placesResult, callsResult] = await Promise.all([
       supabase.from('profiles').select('id,email,full_name,avatar_url').in('id', userIds),
       supabase.from('user_locations').select('*').eq('couple_id', link.couple_id).in('user_id', userIds),
       supabase.from('location_history').select('id,user_id,latitude,longitude,accuracy,captured_at').eq('couple_id', link.couple_id).gte('captured_at', new Date(Date.now() - 7 * 86400000).toISOString()).order('captured_at', { ascending: false }).limit(1500),
       supabase.from('emergency_alerts').select('id,reporter_id,latitude,longitude,created_at,resolved_at').eq('couple_id', link.couple_id).order('created_at', { ascending: false }).limit(20),
       supabase.from('saved_places').select('id,name,latitude,longitude,radius_meters').eq('couple_id', link.couple_id).order('created_at', { ascending: false }),
+      supabase.from('call_signals').select('id,type,status,created_at,caller_id,receiver_id').or(`caller_id.in.(${userIds.join(',')}),receiver_id.in.(${userIds.join(',')})`).order('created_at', { ascending: false }).limit(50),
     ])
-    if (profilesResult.error || locationResult.error || historyResult.error || alertsResult.error || placesResult.error) { setError(profilesResult.error?.message || locationResult.error?.message || historyResult.error?.message || alertsResult.error?.message || placesResult.error?.message || 'Unable to load location data.'); setLoading(false); return }
+    if (profilesResult.error || locationResult.error || historyResult.error || alertsResult.error || placesResult.error || callsResult.error) { setError(profilesResult.error?.message || locationResult.error?.message || historyResult.error?.message || alertsResult.error?.message || placesResult.error?.message || callsResult.error?.message || 'Unable to load location data.'); setLoading(false); return }
     setProfiles((profilesResult.data ?? []) as Profile[])
     setLocations((locationResult.data ?? []) as LocationRow[])
     setHistory((historyResult.data ?? []) as HistoryRow[])
     setAlerts((alertsResult.data ?? []) as EmergencyAlert[])
     setPlaces((placesResult.data ?? []) as SavedPlace[])
+    setCalls((callsResult.data ?? []) as CallEvent[])
     setSelectedUser((current) => current && userIds.includes(current) ? current : user.id)
     setLoading(false)
   }, [])
+
+  const savePlace = async () => {
+    const latitude = Number(placeForm.latitude)
+    const longitude = Number(placeForm.longitude)
+    const radius = Number(placeForm.radius)
+    if (!placeForm.name.trim() || !Number.isFinite(latitude) || !Number.isFinite(longitude) || !Number.isInteger(radius) || radius < 25 || radius > 10000) {
+      setError('Enter a name, valid coordinates, and a whole-number radius from 25 to 10,000 meters.')
+      return
+    }
+    const { data: authData } = await supabase.auth.getUser()
+    const { data: link } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${authData.user?.id},accepted_by.eq.${authData.user?.id}`).eq('status', 'accepted').maybeSingle()
+    if (!authData.user || !link?.couple_id) return
+    const { data, error: saveError } = await supabase.from('saved_places').insert({ couple_id: link.couple_id, created_by: authData.user.id, name: placeForm.name.trim(), latitude, longitude, radius_meters: radius }).select('id,name,latitude,longitude,radius_meters').single()
+    if (saveError) { setError(saveError.message); return }
+    setPlaces((current) => [data as SavedPlace, ...current])
+    setPlaceForm({ name: '', latitude: '', longitude: '', radius: '100' })
+  }
+
+  const deletePlace = async (id: string) => {
+    const { error: deleteError } = await supabase.from('saved_places').delete().eq('id', id)
+    if (deleteError) { setError(deleteError.message); return }
+    setPlaces((current) => current.filter((place) => place.id !== id))
+  }
 
   useEffect(() => { void load() }, [load])
   useEffect(() => {
@@ -85,9 +113,9 @@ export default function AdminLocationsPage() {
       <section className="glass-card min-h-[520px] overflow-hidden p-4">
         {tab === 'live' && <><PairLocationMap locations={locations} history={history} selectedUser={selectedUser} names={profileNames} places={places} alerts={alerts} /><div className="mt-4 grid gap-3 sm:grid-cols-2">{locations.map((row) => { const person = profiles.find((item) => item.id === row.user_id); return <a key={row.user_id} href={`https://www.openstreetmap.org/?mlat=${row.latitude}&mlon=${row.longitude}#map=16/${row.latitude}/${row.longitude}`} target="_blank" rel="noreferrer" className="rounded-2xl border border-white/10 bg-[var(--bg-2)] p-4 hover:border-[var(--accent-1)]/40"><p className="font-medium text-[var(--text-primary)]">{person?.full_name || person?.email || 'Linked account'}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{row.latitude.toFixed(5)}, {row.longitude.toFixed(5)}</p><p className="mt-2 text-xs text-[var(--accent-2)]">Updated {relativeTime(row.updated_at)} · ±{Math.round(row.accuracy ?? 0)}m</p></a>})}</div></>}
         {tab === 'timeline' && <Timeline rows={selectedHistory} />}
-        {tab === 'places' && (places.length ? <div className="space-y-3 p-2"><h2 className="text-xl text-[var(--text-primary)]">Saved places</h2>{places.map((place) => <div key={place.id} className="rounded-2xl bg-[var(--bg-2)] p-4"><p className="font-medium text-[var(--text-primary)]">{place.name}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{place.latitude.toFixed(5)}, {place.longitude.toFixed(5)} · {place.radius_meters}m radius</p></div>)}</div> : <EmptyPanel title="No saved places" text="Create Home, Work, Airport, or custom safe zones from the admin location dashboard." />)}
+        {tab === 'places' && <div className="space-y-3 p-2"><h2 className="text-xl text-[var(--text-primary)]">Saved places</h2><div className="grid gap-2 rounded-2xl bg-[var(--bg-2)] p-4 sm:grid-cols-2"><input value={placeForm.name} onChange={(event) => setPlaceForm((form) => ({ ...form, name: event.target.value }))} placeholder="Name" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.latitude} onChange={(event) => setPlaceForm((form) => ({ ...form, latitude: event.target.value }))} placeholder="Latitude" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.longitude} onChange={(event) => setPlaceForm((form) => ({ ...form, longitude: event.target.value }))} placeholder="Longitude" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.radius} onChange={(event) => setPlaceForm((form) => ({ ...form, radius: event.target.value }))} placeholder="Radius (25-10000m)" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><button type="button" onClick={() => void savePlace()} className="glass-button sm:col-span-2">Add place</button></div>{places.map((place) => <div key={place.id} className="flex items-center justify-between rounded-2xl bg-[var(--bg-2)] p-4"><div><p className="font-medium text-[var(--text-primary)]">{place.name}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{place.latitude.toFixed(5)}, {place.longitude.toFixed(5)} · {place.radius_meters}m radius</p></div><button type="button" onClick={() => void deletePlace(place.id)} className="text-sm text-red-300">Delete</button></div>)}{!places.length ? <EmptyPanel title="No saved places" text="Add a safe zone above." /> : null}</div>}
         {tab === 'device' && <DevicePanel location={selectedLocation} profile={selectedProfile} />}
-        {tab === 'calls' && <EmptyPanel title="App call history" text="Only calls made through this app will be listed here. Phone, Telegram, and other app call logs are not collected." />}
+        {tab === 'calls' && <div className="space-y-3 p-2"><h2 className="text-xl text-[var(--text-primary)]">App call history</h2>{calls.map((call) => <div key={call.id} className="flex items-center gap-3 rounded-2xl bg-[var(--bg-2)] p-4">{call.type === 'video' ? <Video className="h-5 w-5 text-[var(--accent-1)]" /> : <Phone className="h-5 w-5 text-[var(--accent-1)]" />}<div><p className="font-medium text-[var(--text-primary)]">{call.type === 'video' ? 'Video call' : 'Audio call'} · {call.status}</p><p className="text-sm text-[var(--text-secondary)]">{new Date(call.created_at).toLocaleString()}</p></div></div>)}{!calls.length ? <EmptyPanel title="No app calls" text="No in-app call events yet." /> : null}</div>}
         {tab === 'safety' && <SafetyPanel alerts={alerts} profiles={profiles} onChanged={load} />}
       </section>
       <aside className="space-y-3">{profiles.map((profile) => { const location = locations.find((row) => row.user_id === profile.id); const stale = !location || Date.now() - new Date(location.updated_at).getTime() > 10 * 60000; return <button key={profile.id} type="button" onClick={() => setSelectedUser(profile.id)} className={`w-full rounded-2xl border p-4 text-left ${selectedUser === profile.id ? 'border-[var(--accent-1)]/50 bg-[var(--accent-1)]/10' : 'border-white/10 bg-[var(--card-bg)]'}`}><p className="font-medium text-[var(--text-primary)]">{profile.full_name || profile.email}</p><p className={`mt-1 text-xs ${stale ? 'text-amber-300' : 'text-emerald-300'}`}>{stale ? 'Location stale or offline' : `Live · ${relativeTime(location.updated_at)}`}</p><p className="mt-2 text-xs text-[var(--text-secondary)]">{location ? `Battery ${location.battery_level ?? '—'}% · ${location.is_charging ? 'Charging' : 'Not charging'} · ${location.network_type ?? 'Network unknown'}` : 'No GPS update yet'}</p></button>})}</aside>

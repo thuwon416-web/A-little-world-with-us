@@ -8,14 +8,18 @@ export type WellnessLog = {
   completed_at: string
 }
 
-export async function logWellnessActivity(userId: string, activityId: string) {
+export async function logWellnessActivity(
+  userId: string,
+  activityId: string,
+  activityType: 'workout' | 'quest' | 'game' = 'workout',
+): Promise<void> {
   const { data, error } = await supabase
     .from('wellness_logs')
-    .insert({ user_id: userId, activity_type: 'workout', activity_id: activityId })
+    .insert({ user_id: userId, activity_type: activityType, activity_id: activityId })
     .select()
     .single()
   if (error) throw error
-  return data as WellnessLog
+  void (data as WellnessLog)
 }
 
 export async function getWellnessHistory(userId: string) {

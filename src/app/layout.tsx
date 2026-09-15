@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from 'next'
+﻿import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 
 import './globals.css'
@@ -15,10 +15,10 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display' })
 
 const descriptions = [
-  'A private little world for KoKo and Pu Tuu — memories, love, and every day in between',
-  'Our little world — where every moment together matters',
-  'Two souls, one little world — love, care, and everything in between',
-  'A quiet space for us — memories, moods, and everyday love',
+  'A private little world for KoKo and Pu Tuu â€” memories, love, and every day in between',
+  'Our little world â€” where every moment together matters',
+  'Two souls, one little world â€” love, care, and everything in between',
+  'A quiet space for us â€” memories, moods, and everyday love',
   'Just us, our world, and all the little things that make it ours',
 ]
 
@@ -55,6 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${playfair.variable}`}
     >
       <head>
+        <meta charSet="UTF-8" />
         <script
           dangerouslySetInnerHTML={{
             __html: `

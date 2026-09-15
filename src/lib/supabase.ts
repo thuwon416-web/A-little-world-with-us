@@ -145,6 +145,10 @@ export type Message = {
   location_payload?: { latitude: number; longitude: number; accuracy?: number; label?: string } | null
   encrypted?: boolean
   reply_to?: string | null
+  reactions?: Record<string, string> | null
+  delivered_at?: string | null
+  seen_at?: string | null
+  edited_at?: string | null
   profiles?: { full_name?: string | null }
 }
 

@@ -1,12 +1,13 @@
 import { Q } from '@nozbe/watermelondb'
 import * as Location from 'expo-location'
 import { useEffect, useRef, useState } from 'react'
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { MapPin } from 'lucide-react-native'
+import { Alert, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { FileText, Gift, Image as ImageIcon, MapPin, Mic, Paperclip, Send, Sticker, X } from 'lucide-react-native'
 
 import { Button } from '@/components/Button'
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
 import { Input } from '@/components/Input'
+import { useTheme } from '@/context/ThemeContext'
 import { FileUpload } from '@/components/chat/FileUpload'
 import { GIFPicker } from '@/components/chat/GIFPicker'
 import { PhotoShare } from '@/components/chat/PhotoShare'
@@ -50,6 +51,7 @@ function formatMessageTime(value: string) {
 
 export default function ChatScreen() {
   const { user } = useAuth()
+  const { colors } = useTheme()
   const { state: callState, placeCall } = useCall()
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -59,6 +61,7 @@ export default function ChatScreen() {
   const [mediaModal, setMediaModal] = useState<
     'photo' | 'voice' | 'file' | 'gif' | 'sticker' | null
   >(null)
+  const [attachmentsOpen, setAttachmentsOpen] = useState(false)
   const [replyMessage, setReplyMessage] = useState<NativeChatMessage | null>(null)
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
   const listRef = useRef<FlatList<ChatMessage>>(null)
@@ -465,38 +468,67 @@ export default function ChatScreen() {
       {callState !== 'idle' && <Text style={styles.callStatus}>Call status: {callState}</Text>}
 
       <View style={styles.composer}>
-        <View style={styles.toolRow}>
-          <TouchableOpacity onPress={() => setMediaModal('photo')} accessibilityLabel="Share photo">
-            <Text style={styles.toolText}>Photo</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setMediaModal('voice')}
-            accessibilityLabel="Record voice note"
-          >
-            <Text style={styles.toolText}>Voice</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setMediaModal('file')} accessibilityLabel="Attach file">
-            <Text style={styles.toolText}>File</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setMediaModal('gif')} accessibilityLabel="Choose GIF">
-            <Text style={styles.toolText}>GIF</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => setMediaModal('sticker')}
-            accessibilityLabel="Choose sticker"
-          >
-            <Text style={styles.toolText}>Sticker</Text>
-          </TouchableOpacity>
-        </View>
-        <TouchableOpacity
-          style={styles.locationButton}
-          onPress={() => void handleSendLocation()}
-          disabled={!coupleId}
-          accessibilityLabel="Send current location"
-          accessibilityRole="button"
-          accessibilityHint="Sends your current location to your partner"
+        <Modal
+          visible={attachmentsOpen}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setAttachmentsOpen(false)}
         >
-          <MapPin size={16} />
+          <TouchableOpacity
+            style={styles.attachmentOverlay}
+            activeOpacity={1}
+            onPress={() => setAttachmentsOpen(false)}
+          >
+            <View style={[styles.attachmentSheet, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+              <View style={styles.attachmentHeader}>
+                <Text style={[styles.attachmentTitle, { color: colors.textPrimary }]}>Attachments</Text>
+                <TouchableOpacity onPress={() => setAttachmentsOpen(false)} accessibilityLabel="Close attachments">
+                  <X color={colors.textSecondary} size={22} />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.attachmentGrid}>
+                {[
+                  ['Photo', ImageIcon, 'photo'],
+                  ['Voice', Mic, 'voice'],
+                  ['File', FileText, 'file'],
+                  ['GIF', Gift, 'gif'],
+                  ['Sticker', Sticker, 'sticker'],
+                ].map(([label, Icon, type]) => (
+                  <TouchableOpacity
+                    key={label as string}
+                    style={[styles.attachmentItem, { backgroundColor: colors.surface }]}
+                    onPress={() => {
+                      setAttachmentsOpen(false)
+                      setMediaModal(type as typeof mediaModal)
+                    }}
+                  >
+                    <Icon color={colors.accent1} size={20} />
+                    <Text style={[styles.attachmentLabel, { color: colors.textPrimary }]}>{label as string}</Text>
+                  </TouchableOpacity>
+                ))}
+                <TouchableOpacity
+                  style={[styles.attachmentItem, { backgroundColor: colors.surface }]}
+                  onPress={() => {
+                    setAttachmentsOpen(false)
+                    void handleSendLocation()
+                  }}
+                  disabled={!coupleId}
+                >
+                  <MapPin color={colors.accent1} size={20} />
+                  <Text style={[styles.attachmentLabel, { color: colors.textPrimary }]}>Location</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </TouchableOpacity>
+        </Modal>
+        <TouchableOpacity
+          style={[styles.attachmentButton, { backgroundColor: colors.surface }]}
+          onPress={() => setAttachmentsOpen(true)}
+          accessibilityLabel="Open attachments"
+          accessibilityRole="button"
+          accessibilityHint="Choose a photo, voice note, file, GIF, sticker, or location"
+        >
+          <Paperclip color={colors.textSecondary} size={20} />
         </TouchableOpacity>
         <Input
           value={draft}
@@ -506,7 +538,13 @@ export default function ChatScreen() {
           accessibilityLabel="Message"
           accessibilityHint="Enter a message to send to your partner"
         />
-        <Button title="Send" onPress={() => void handleSend()} />
+        <TouchableOpacity
+          style={[styles.sendButton, { backgroundColor: colors.accent1 }]}
+          onPress={() => (draft.trim() ? void handleSend() : setMediaModal('voice'))}
+          accessibilityLabel={draft.trim() ? 'Send message' : 'Record voice note'}
+        >
+          {draft.trim() ? <Send color={colors.background} size={18} /> : <Mic color={colors.background} size={18} />}
+        </TouchableOpacity>
       </View>
       <PhotoShare
         visible={mediaModal === 'photo'}
@@ -629,11 +667,17 @@ const styles = StyleSheet.create({
     gap: 10,
     marginTop: 16,
   },
-  locationButton: {
+  attachmentButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#2d2f43',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  sendButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -641,6 +685,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   error: { color: '#ff9b9b', marginBottom: 8, fontSize: 13 },
-  toolRow: { position: 'absolute', bottom: 58, left: 0, right: 0, flexDirection: 'row', gap: 8 },
-  toolText: { color: '#d9bfd7', fontSize: 11, fontWeight: '700' },
+  attachmentOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#0008' },
+  attachmentSheet: { borderTopWidth: 1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
+  attachmentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  attachmentTitle: { fontSize: 20, fontWeight: '700' },
+  attachmentGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  attachmentItem: { width: '30%', minHeight: 72, borderRadius: 14, alignItems: 'center', justifyContent: 'center', gap: 6 },
+  attachmentLabel: { fontSize: 12, fontWeight: '600' },
 })

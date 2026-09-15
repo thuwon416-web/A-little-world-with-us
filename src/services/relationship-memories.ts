@@ -33,6 +33,17 @@ async function fetchAllBatched<T>(
   return all
 }
 
+const CATEGORY_ALIASES: Record<string, string> = {
+  promise: 'promises',
+  commitment: 'promises',
+  vow: 'promises',
+}
+
+function normalizeCategory(category: string) {
+  const normalized = category.toLowerCase().trim()
+  return CATEGORY_ALIASES[normalized] ?? normalized
+}
+
 export const relationshipMemoriesService = {
   async getByCouple(
     coupleId: string,
@@ -112,7 +123,8 @@ export const relationshipMemoriesService = {
       'category'
     )
     return rows.reduce<Record<string, number>>((stats, row) => {
-      stats[row.category] = (stats[row.category] ?? 0) + 1
+      const category = normalizeCategory(row.category)
+      stats[category] = (stats[category] ?? 0) + 1
       return stats
     }, {})
   },

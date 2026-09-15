@@ -73,7 +73,8 @@ export default function RelationshipStats() {
         supabase
           .from('relationship_memories')
           .select('id', { count: 'exact', head: true })
-          .eq('couple_id', link.couple_id),
+          .eq('couple_id', link.couple_id)
+          .not('message_type', 'in', '(sos,location)'),
         supabase
           .from('messages')
           .select('id', { count: 'exact', head: true })

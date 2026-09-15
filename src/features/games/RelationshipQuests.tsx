@@ -11,6 +11,10 @@ type Quest = {
   done?: boolean
 }
 
+type RelationshipQuestsProps = {
+  onQuestComplete?: (questId: string) => Promise<void>
+}
+
 const defaultQuests: Quest[] = [
   { id: 'coffee-date', title: 'Plan a cozy coffee date', reward: 20, done: false },
   { id: 'compliment', title: 'Give a genuine compliment', reward: 15, done: false },
@@ -18,7 +22,7 @@ const defaultQuests: Quest[] = [
   { id: 'night-out', title: 'Pick a little adventure for tonight', reward: 30, done: false },
 ]
 
-export default function RelationshipQuests() {
+export default function RelationshipQuests({ onQuestComplete }: RelationshipQuestsProps) {
   const [quests, setQuests] = useState<Quest[]>(defaultQuests)
 
   useEffect(() => {
@@ -28,7 +32,11 @@ export default function RelationshipQuests() {
     }
   }, [])
 
-  const toggleQuest = (id: string) => {
+  const toggleQuest = async (id: string) => {
+    const quest = quests.find((item) => item.id === id)
+    if (quest && !quest.done && onQuestComplete) {
+      await onQuestComplete(id)
+    }
     const updated = quests.map((quest) =>
       quest.id === id ? { ...quest, done: !quest.done } : quest
     )
@@ -56,7 +64,7 @@ export default function RelationshipQuests() {
                 <div className="text-[11px] opacity-60">Reward: {quest.reward} love points</div>
               </div>
               <button
-                onClick={() => toggleQuest(quest.id)}
+                onClick={() => void toggleQuest(quest.id)}
                 className="glass-button px-3 py-2 text-[11px]"
               >
                 {quest.done ? 'Done' : 'Mark done'}

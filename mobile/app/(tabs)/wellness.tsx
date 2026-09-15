@@ -2,7 +2,10 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Armchair,
   Check,
+  CalendarDays,
   CloudSun,
+  Compass,
+  Droplets,
   Dumbbell,
   Flower2,
   Gem,
@@ -35,7 +38,6 @@ import {
 
 import AffirmationDeck from '@/components/wellness/AffirmationDeck'
 import ApologyCorner from '@/components/wellness/ApologyCorner'
-import AppreciationJar from '@/components/wellness/AppreciationJar'
 import ArmchairMomentBoard from '@/components/wellness/ArmchairMomentBoard'
 import CarefulQuietBoard from '@/components/wellness/CarefulQuietBoard'
 import CoupleMoodMeter from '@/components/wellness/CoupleMoodMeter'
@@ -44,14 +46,14 @@ import CozyReentryBoard from '@/components/wellness/CozyReentryBoard'
 import DayEchoBoard from '@/components/wellness/DayEchoBoard'
 import EasyBreathBoard from '@/components/wellness/EasyBreathBoard'
 import EverydayRitualsBoard from '@/components/wellness/EverydayRitualsBoard'
-import GentleForecastBoard from '@/components/wellness/GentleForecastBoard'
 import GentleHoldBoard from '@/components/wellness/GentleHoldBoard'
 import GoldenLowBoard from '@/components/wellness/GoldenLowBoard'
 import GratitudeWall from '@/components/wellness/GratitudeWall'
 import LoveCheckInBoard from '@/components/wellness/LoveCheckInBoard'
 import LoveNotesBoard from '@/components/wellness/LoveNotesBoard'
 import MellowBloomBoard from '@/components/wellness/MellowBloomBoard'
-import ReassuranceCounter from '@/components/wellness/ReassuranceCounter'
+import CycleTrackerBoard from '@/components/wellness/CycleTrackerBoard'
+import PeriodSymptomsBoard from '@/components/wellness/PeriodSymptomsBoard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import SteadyLandingBoard from '@/components/wellness/SteadyLandingBoard'
 import TenderCompassBoard from '@/components/wellness/TenderCompassBoard'
@@ -91,6 +93,8 @@ const boardIconMap: Record<string, LucideIcon> = {
   PersonStanding,
   HeartHandshake,
   CloudSun,
+  CalendarDays,
+  Droplets,
   VolumeX,
   Volume2,
   Home,
@@ -99,30 +103,31 @@ const boardIconMap: Record<string, LucideIcon> = {
   Heart,
   Flower2,
   PlaneLanding,
+  Compass,
   RefreshCw,
 }
 
 const boardCategories: Record<string, Category> = {
   affirmation: 'mental',
   apology: 'relationship',
-  appreciation: 'relationship',
   'mood-meter': 'mental',
   promise: 'relationship',
   rituals: 'relationship',
   breath: 'mental',
   hold: 'relationship',
-  forecast: 'health',
   quiet: 'mental',
   'day-echo': 'mental',
   cozy: 'relationship',
   armchair: 'mental',
   gratitude: 'mental',
   'love-notes': 'relationship',
-  reassurance: 'relationship',
+  'cycle-tracker': 'health',
+  'period-symptoms': 'health',
   'golden-low': 'mental',
   'check-in': 'relationship',
   mellow: 'relationship',
   steady: 'health',
+  'tender-compass': 'relationship',
 }
 
 const quests = [
@@ -134,20 +139,19 @@ const quests = [
 const componentMap: Record<string, React.ComponentType> = {
   AffirmationDeck,
   ApologyCorner,
-  AppreciationJar,
   CoupleMoodMeter,
   CouplePromiseBoard,
   EverydayRitualsBoard,
   EasyBreathBoard,
   GentleHoldBoard,
-  GentleForecastBoard,
   CarefulQuietBoard,
   DayEchoBoard,
   CozyReentryBoard,
   ArmchairMomentBoard,
   GratitudeWall,
   LoveNotesBoard,
-  ReassuranceCounter,
+  CycleTrackerBoard,
+  PeriodSymptomsBoard,
   GoldenLowBoard,
   LoveCheckInBoard,
   MellowBloomBoard,

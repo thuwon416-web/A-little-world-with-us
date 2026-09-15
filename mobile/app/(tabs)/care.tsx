@@ -140,7 +140,7 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-function Insights({ logs, summary }: { logs: CareLog[]; summary: NativeCycleSummary }) {
+function Insights({ logs, summary, savedCycleLength }: { logs: CareLog[]; summary: NativeCycleSummary; savedCycleLength: number }) {
   const moodCounts = useMemo(
     () =>
       Object.entries(
@@ -174,7 +174,8 @@ function Insights({ logs, summary }: { logs: CareLog[]; summary: NativeCycleSumm
       <Text style={styles.title}>Insights</Text>
       <Card title="Cycle statistics">
         <View style={styles.statGrid}>
-          <Stat label="Average cycle" value={`${summary.cycleLength} days`} />
+          <Stat label="Calculated average" value={`${summary.cycleLength} days`} />
+          <Stat label="Saved setting" value={`${savedCycleLength} days`} />
           <Stat label="Variation" value={`${summary.variationMin}-${summary.variationMax} days`} />
           <Stat label="Regularity" value={summary.regular ? 'Regular' : 'Irregular'} />
           <Stat label="Period average" value={`${summary.periodLength} days`} />
@@ -760,7 +761,7 @@ export default function CareScreen() {
         ))}
       </ScrollView>
       {activeTab === 'Insights' ? (
-        <Insights logs={data.logs} summary={summary} />
+        <Insights logs={data.logs} summary={summary} savedCycleLength={data.settings.cycleLength} />
       ) : activeTab === 'Calendar' ? (
         <Calendar
           logs={data.logs}
@@ -827,7 +828,9 @@ export default function CareScreen() {
             <Text style={styles.days}>{summary.day ?? '—'}</Text>
             <Text style={styles.heroNote}>
               {summary.nextPeriodStart
-                ? `Next period ${summary.nextPeriodStart}`
+                ? summary.nextPeriodStart === dateKey(new Date())
+                  ? 'Period expected today'
+                  : `Next period ${summary.nextPeriodStart}`
                 : 'Log a period to begin forecasting.'}
             </Text>
           </View>

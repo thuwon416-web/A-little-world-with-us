@@ -33,6 +33,7 @@ function VaultPageContent() {
   const [revealDate, setRevealDate] = useState('')
   const [pin, setPin] = useState('')
   const [unlockError, setUnlockError] = useState('')
+  const isPinValid = /^\d{4,6}$/.test(pin)
 
   const filteredLetters = useMemo(() => {
     if (vaultCategory === 'all') return letters
@@ -85,6 +86,10 @@ function VaultPageContent() {
   }
 
   const handleUnlock = async () => {
+    if (!isPinValid) {
+      setUnlockError('PIN must be 4-6 digits')
+      return
+    }
     setUnlockError('')
     const response = await fetch('/api/auth/pin', {
       method: 'POST',
@@ -183,12 +188,14 @@ function VaultPageContent() {
             placeholder="Enter your 4-digit PIN"
             className="mt-5 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-transparent px-4 py-3 text-center text-[var(--text-primary)]"
           />
+          <p className="mt-2 text-xs text-[var(--text-secondary)]">PIN must be 4-6 digits</p>
           {unlockError ? <p className="mt-2 text-sm text-red-400">{unlockError}</p> : null}
 
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleUnlock}
+            disabled={!isPinValid}
             className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--button-bg)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]"
           >
             <Eye className="h-4 w-4" />

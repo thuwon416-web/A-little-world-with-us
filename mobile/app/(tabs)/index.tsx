@@ -91,12 +91,9 @@ function dateOnly(value: Date) {
 }
 
 function daysUntil(value: string) {
-  return Math.max(
-    0,
-    Math.ceil(
-      (dateOnly(new Date(`${value}T12:00:00`)).getTime() - dateOnly(new Date()).getTime()) /
-        86400000
-    )
+  return Math.ceil(
+    (dateOnly(new Date(`${value}T12:00:00`)).getTime() - dateOnly(new Date()).getTime()) /
+      86400000
   )
 }
 
@@ -189,9 +186,18 @@ export default function DashboardScreen() {
   )
   const anniversary = nextAnniversary()
   const anniversaryDays = daysUntil(anniversary)
+  const nextPeriodDays = summary?.nextPeriodStart ? daysUntil(summary.nextPeriodStart) : null
+  const nextPeriodText =
+    nextPeriodDays === null
+      ? null
+      : nextPeriodDays === 0
+        ? 'Period expected today'
+        : nextPeriodDays < 0
+          ? `Period overdue by ${Math.abs(nextPeriodDays)} days`
+          : `Next period in ${nextPeriodDays} days`
   const countdown =
-    summary?.nextPeriodStart && daysUntil(summary.nextPeriodStart) < anniversaryDays
-      ? `${daysUntil(summary.nextPeriodStart)} days until next period`
+    nextPeriodText && nextPeriodDays !== null && nextPeriodDays < anniversaryDays
+      ? nextPeriodText
       : `${anniversaryDays} days until Anniversary`
   const yearsTogether = Math.max(
     0,
@@ -254,7 +260,7 @@ export default function DashboardScreen() {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Mini Care check</Text>
           <Text style={styles.careValue}>{summary?.day ? `Cycle day ${summary.day}` : 'No cycle day yet'}</Text>
-          <Text style={styles.muted}>{summary?.nextPeriodStart ? `Next period in ${daysUntil(summary.nextPeriodStart)} days` : 'Log a period to begin forecasting.'}</Text>
+          <Text style={styles.muted}>{nextPeriodText ?? 'Log a period to begin forecasting.'}</Text>
           <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Care" style={styles.secondaryButton} onPress={() => router.push('/care')}>
             <Text style={styles.secondaryText}>Open Care</Text>
           </TouchableOpacity>

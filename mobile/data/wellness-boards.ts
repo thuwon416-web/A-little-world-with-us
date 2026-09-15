@@ -27,14 +27,6 @@ export const wellnessBoards: WellnessBoard[] = [
     description: 'Say sorry and move forward',
   },
   {
-    id: 'appreciation',
-    name: 'Appreciation Jar',
-    icon: 'Package',
-    component: 'AppreciationJar',
-    enabled: true,
-    description: 'Collect moments of gratitude',
-  },
-  {
     id: 'mood-meter',
     name: 'Couple Mood Meter',
     icon: 'Smile',
@@ -73,14 +65,6 @@ export const wellnessBoards: WellnessBoard[] = [
     component: 'GentleHoldBoard',
     enabled: true,
     description: 'Virtual hugs',
-  },
-  {
-    id: 'forecast',
-    name: 'Gentle Forecast',
-    icon: 'CloudSun',
-    component: 'GentleForecastBoard',
-    enabled: true,
-    description: 'Predict your day together',
   },
   {
     id: 'quiet',
@@ -131,14 +115,6 @@ export const wellnessBoards: WellnessBoard[] = [
     description: 'Express your love',
   },
   {
-    id: 'reassurance',
-    name: 'Reassurance Counter',
-    icon: 'Heart',
-    component: 'ReassuranceCounter',
-    enabled: true,
-    description: 'Count reassurances',
-  },
-  {
     id: 'golden-low',
     name: 'Golden Low',
     icon: 'Sunrise',
@@ -169,6 +145,33 @@ export const wellnessBoards: WellnessBoard[] = [
     component: 'SteadyLandingBoard',
     enabled: true,
     description: 'Find your footing together',
+  },
+  {
+    id: 'tender-compass',
+    name: 'Tender Compass',
+    icon: 'Compass',
+    component: 'TenderCompassBoard',
+    enabled: true,
+    category: 'relationship',
+    description: 'Gentle guidance for difficult moments.',
+  },
+  {
+    id: 'cycle-tracker',
+    name: 'Cycle Tracker',
+    icon: 'CalendarDays',
+    component: 'CycleTrackerBoard',
+    enabled: true,
+    category: 'health',
+    description: 'Track your menstrual cycle',
+  },
+  {
+    id: 'period-symptoms',
+    name: 'Period Symptoms',
+    icon: 'Droplets',
+    component: 'PeriodSymptomsBoard',
+    enabled: true,
+    category: 'health',
+    description: 'Log cramps, bloating, and other symptoms',
   },
 ]
 

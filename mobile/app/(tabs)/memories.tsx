@@ -50,6 +50,46 @@ export default function MemoriesScreen() {
             ),
       },
     ])
+  const createCuratedStory = async () => {
+    if (!curationSelected.length || curationLoading) {
+      if (!curationSelected.length) setCurationError('Choose at least one memory first.')
+      return
+    }
+    setCurationLoading(true)
+    setCurationError('')
+    setCurationStory('')
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+      if (!webUrl || !session?.access_token) {
+        throw new Error('Please sign in again.')
+      }
+      const response = await fetch(`${webUrl}/api/ai/curate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({
+          memoryIds: curationSelected,
+          theme: curationTheme.trim() || 'Our story',
+          context: curationContext.trim(),
+        }),
+      })
+      const body = (await response.json()) as { story?: string; error?: string }
+      if (!response.ok || !body.story) {
+        throw new Error(body.error || 'Unable to create a story right now.')
+      }
+      setCurationStory(body.story)
+    } catch (caught) {
+      setCurationError(caught instanceof Error ? caught.message : 'Unable to create a story right now.')
+    } finally {
+      setCurationLoading(false)
+    }
+  }
+
   const askMediator = async () => {
     if (!mediatorMessage.trim() || mediatorLoading) return
     setMediatorLoading(true)
@@ -62,45 +102,6 @@ export default function MemoriesScreen() {
       const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
       if (!webUrl || !session?.access_token) {
         throw new Error('Please sign in again.')
-      }
-      const createCuratedStory = async () => {
-        if (!curationSelected.length || curationLoading) {
-          if (!curationSelected.length) setCurationError('Choose at least one memory first.')
-          return
-        }
-        setCurationLoading(true)
-        setCurationError('')
-        setCurationStory('')
-        try {
-          const {
-            data: { session },
-          } = await supabase.auth.getSession()
-          const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
-          if (!webUrl || !session?.access_token) {
-            throw new Error('Please sign in again.')
-          }
-          const response = await fetch(`${webUrl}/api/ai/curate`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${session.access_token}`,
-            },
-            body: JSON.stringify({
-              memoryIds: curationSelected,
-              theme: curationTheme.trim() || 'Our story',
-              context: curationContext.trim(),
-            }),
-          })
-          const body = (await response.json()) as { story?: string; error?: string }
-          if (!response.ok || !body.story) {
-            throw new Error(body.error || 'Unable to create a story right now.')
-          }
-          setCurationStory(body.story)
-        } catch (caught) {
-          setCurationError(caught instanceof Error ? caught.message : 'Unable to create a story right now.')
-        } finally {
-          setCurationLoading(false)
-        }
       }
       const response = await fetch(`${webUrl}/api/ai/mediate`, {
         method: 'POST',

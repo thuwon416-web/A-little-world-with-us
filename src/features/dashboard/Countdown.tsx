@@ -101,7 +101,13 @@ export default memo(function Countdown({ targetDate, label, icon = <Cake classNa
       <div className="grid grid-cols-4 gap-3 items-center justify-center">
         {units.map((unit) => (
           <div key={unit.label} className="flex flex-col items-center">
-            <RollingNumber value={unit.value} />
+            {unit.label === 'Days' && unit.value === 0 ? (
+              <span className="flex h-10 items-center text-sm font-semibold text-[var(--accent-1)]">
+                Expected today
+              </span>
+            ) : (
+              <RollingNumber value={unit.value} />
+            )}
             <span className="text-[10px] uppercase tracking-wider opacity-60 mt-1">{unit.label}</span>
           </div>
         ))}

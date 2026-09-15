@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Clock3,
   CloudSun,
+  Compass,
   Droplets,
   Flower2,
   Gem,
@@ -29,7 +30,6 @@ import {
 } from 'lucide-react'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { type WellnessBoard as BoardData } from '@/types/wellness'
 
@@ -45,6 +45,7 @@ const boardIconMap: Record<string, LucideIcon> = {
   RefreshCw,
   HeartHandshake,
   CloudSun,
+  Compass,
   VolumeX,
   Volume2,
   Home,
@@ -84,16 +85,7 @@ export default function WellnessBoard({ board }: WellnessBoardProps) {
               key={index}
               className="border-l-4 border-rose-300 pl-4 py-2 bg-rose-50/50 rounded-r-lg"
             >
-              <p className="text-stone-800 italic font-medium">&ldquo;{item.text}&rdquo;</p>
-              {item.action && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="mt-2 text-rose-600 hover:text-rose-800 hover:bg-rose-100"
-                >
-                  <Sparkles className="mr-1 h-4 w-4" /> {item.action}
-                </Button>
-              )}
+              <p className="text-stone-800 italic font-medium">&ldquo;{item}&rdquo;</p>
             </div>
           ))
         ) : (

@@ -147,6 +147,10 @@ export function ChatBubble({
             {message.type === 'sticker' ? message.content : message.text}
           </Text>
         )}
+        <View style={styles.timestampRow}>
+          <Text style={styles.time}>{message.time}</Text>
+          <Text style={styles.statusPlaceholder} accessibilityLabel="Message status" />
+        </View>
         <View style={styles.actions}>
           {onReply && (
             <TouchableOpacity
@@ -163,7 +167,7 @@ export function ChatBubble({
           )}
         </View>
       </View>
-      <Text style={styles.time}>{message.time}</Text>
+      <View style={styles.reactionPlaceholder} accessible={false} />
     </View>
   )
 }
@@ -173,8 +177,8 @@ const styles = StyleSheet.create({
   rowMe: { alignItems: 'flex-end' },
   rowThem: { alignItems: 'flex-start' },
   bubble: { maxWidth: '84%', paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
-  bubbleMe: { backgroundColor: '#b88ae5', borderBottomRightRadius: 4 },
-  bubbleThem: { backgroundColor: '#171b22', borderBottomLeftRadius: 4 },
+  bubbleMe: { backgroundColor: '#8774E1', borderBottomRightRadius: 4 },
+  bubbleThem: { backgroundColor: '#212121', borderBottomLeftRadius: 4 },
   text: { color: '#f3f0f5', fontSize: 15, lineHeight: 21, flexShrink: 1 },
   heading: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   locationTitle: { color: '#f3f0f5', fontSize: 15, fontWeight: '700', marginBottom: 4 },
@@ -200,11 +204,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   actions: { flexDirection: 'row', gap: 12, justifyContent: 'flex-end', marginTop: 8 },
-  time: {
-    color: '#8d8d99',
-    fontSize: 10,
+  timestampRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    gap: 4,
     marginTop: 4,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
+    opacity: 0.7,
+  },
+  time: {
+    color: '#fff',
+    fontSize: 10,
+  },
+  statusPlaceholder: {
+    width: 0,
+    height: 0,
+  },
+  reactionPlaceholder: {
+    display: 'none',
   },
 })

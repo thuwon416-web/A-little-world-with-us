@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Heart, Star, Calendar, Sparkles } from 'lucide-react'
+import { calculateChineseSign, calculateMyanmarDay, calculateNumerology, calculateSynastry, calculateWesternSign, type AstrologyProfile } from '@/lib/astrology'
+import { supabase } from '@/lib/supabase'
 
 // Zodiac signs for Western astrology
 const _zodiacSigns = [
@@ -109,18 +111,39 @@ const _thadinne = [
 
 export default function CompatibilityScore() {
   const [selectedMethod, setSelectedMethod] = useState<'western' | 'vedic' | 'chinese' | 'myanmar'>('western')
+  const [overallScore, setOverallScore] = useState<number | null>(null)
 
-  // Simplified compatibility calculation
-  const calculateScore = (method: string): number => {
-    // In production, this would use actual birth dates and complex algorithms
-    const scores = {
-      western: 85,
-      vedic: 78,
-      chinese: 92,
-      myanmar: 88,
+  useEffect(() => {
+    const loadCompatibility = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: link } = await supabase
+        .from('couple_links')
+        .select('inviter_id,accepted_by')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
+      if (!link?.inviter_id || !link.accepted_by) return
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id,birth_date')
+        .in('id', [link.inviter_id, link.accepted_by])
+      const dates = (profiles ?? [])
+        .map((profile) => profile.birth_date)
+        .filter((birthDate): birthDate is string => Boolean(birthDate))
+        .map((birthDate) => new Date(`${birthDate}T12:00:00`))
+      if (dates.length !== 2 || dates.some((date) => Number.isNaN(date.getTime()))) return
+      const createProfile = (birthDate: Date): AstrologyProfile => ({
+        birthDate,
+        westernSign: calculateWesternSign(birthDate),
+        chineseSign: calculateChineseSign(birthDate),
+        myanmarDay: calculateMyanmarDay(birthDate),
+        numerologyNumber: calculateNumerology(birthDate),
+      })
+      setOverallScore(calculateSynastry(createProfile(dates[0]), createProfile(dates[1])))
     }
-    return scores[method as keyof typeof scores] || 75
-  }
+    void loadCompatibility()
+  }, [])
 
   const methods = [
     { id: 'western', name: 'Western', nameMy: 'အနောက်တိုင်း', icon: Star, description: 'Zodiac signs' },
@@ -129,9 +152,7 @@ export default function CompatibilityScore() {
     { id: 'myanmar', name: 'Myanmar', nameMy: 'မြန်မာ', icon: Heart, description: 'Thadinne' },
   ]
 
-  const overallScore = Math.round(
-    (calculateScore('western') + calculateScore('vedic') + calculateScore('chinese') + calculateScore('myanmar')) / 4
-  )
+  const displayScore = overallScore ?? 50
 
   return (
     <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-6">
@@ -146,7 +167,7 @@ export default function CompatibilityScore() {
           </div>
         </div>
         <div className="text-right">
-          <p className="text-3xl font-bold text-[var(--accent-1)]">{overallScore}%</p>
+          <p className="text-3xl font-bold text-[var(--accent-1)]">{displayScore}%</p>
           <p className="text-xs text-[var(--text-secondary)]">Overall</p>
         </div>
       </div>
@@ -171,7 +192,7 @@ export default function CompatibilityScore() {
                 <p className="text-sm font-medium text-[var(--text-primary)]">{method.name}</p>
                 <p className="text-xs text-[var(--text-secondary)]">{method.nameMy}</p>
               </div>
-              <p className="text-sm font-bold text-[var(--accent-1)]">{calculateScore(method.id)}%</p>
+              <p className="text-sm font-bold text-[var(--accent-1)]">{displayScore}%</p>
             </button>
           )
         })}
