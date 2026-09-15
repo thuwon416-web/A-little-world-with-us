@@ -17,6 +17,8 @@ import { useLocation } from '@/hooks/useLocation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { sendLocalNotification } from '@/services/notifications'
+import { resolveSos } from '@/services/safety-sos'
+import { createCheckin, type SafetyCheckin } from '@/services/safety-checkins'
 import { useTheme } from '@/context/ThemeContext'
 
 type LocationHistoryRow = {
@@ -45,6 +47,8 @@ type SosAlert = {
   message: string | null
   created_at: string
   resolved_at: string | null
+  resolved_by: string | null
+  resolution_note: string | null
 }
 
 const mapStyle = process.env.EXPO_PUBLIC_CARTO_STYLE_URL ?? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
@@ -79,6 +83,7 @@ export default function LocationScreen() {
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([])
   const [calls, setCalls] = useState<CallEvent[]>([])
   const [sosAlerts, setSosAlerts] = useState<SosAlert[]>([])
+  const [checkins, setCheckins] = useState<SafetyCheckin[]>([])
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [sosSending, setSosSending] = useState(false)
   const [sosSentAt, setSosSentAt] = useState<string | null>(null)
@@ -88,6 +93,13 @@ export default function LocationScreen() {
   const [placeName, setPlaceName] = useState('')
   const [placeRadius, setPlaceRadius] = useState('100')
   const [placeSaving, setPlaceSaving] = useState(false)
+  const [resolveModalAlert, setResolveModalAlert] = useState<SosAlert | null>(null)
+  const [resolutionNote, setResolutionNote] = useState('')
+  const [resolving, setResolving] = useState(false)
+  const [checkinType, setCheckinType] = useState<SafetyCheckin['checkinType'] | null>(null)
+  const [checkinNote, setCheckinNote] = useState('')
+  const [checkinExpected, setCheckinExpected] = useState('')
+  const [checkinSending, setCheckinSending] = useState(false)
 
   const sendSOS = async () => {
     if (sosSending || !user || !coupleId) return
@@ -134,6 +146,8 @@ export default function LocationScreen() {
           message: 'Emergency SOS — current location shared',
           created_at: new Date().toISOString(),
           resolved_at: null,
+          resolved_by: null,
+          resolution_note: null,
         },
         ...current,
       ])
@@ -153,6 +167,53 @@ export default function LocationScreen() {
         { text: 'Send SOS', style: 'destructive', onPress: () => void sendSOS() },
       ]
     )
+  }
+
+  const submitCheckin = async () => {
+    if (!checkinType || checkinSending || !coupleId) return
+    const expectedDate = checkinExpected.trim() ? new Date(checkinExpected.trim()) : null
+    if (expectedDate && Number.isNaN(expectedDate.getTime())) {
+      Alert.alert('Invalid expected time', 'Use a valid date and time.')
+      return
+    }
+    setCheckinSending(true)
+    try {
+      const checkin = await createCheckin({
+        checkinType,
+        message: checkinNote.trim() || null,
+        latitude: currentLocation?.latitude ?? null,
+        longitude: currentLocation?.longitude ?? null,
+        accuracy: currentLocation?.accuracy ?? null,
+        expectedUntil: expectedDate?.toISOString() ?? null,
+      })
+      const { error } = await supabase.functions.invoke('checkin-notify', { body: { checkinId: checkin.id, type: checkinType } })
+      if (error) throw error
+      setCheckins((current) => [checkin, ...current])
+      setCheckinType(null)
+      setCheckinNote('')
+      setCheckinExpected('')
+    } catch (caught) {
+      Alert.alert('Unable to send check-in', caught instanceof Error ? caught.message : 'Please try again.')
+    } finally {
+      setCheckinSending(false)
+    }
+  }
+
+  const submitResolution = async () => {
+    if (!resolveModalAlert || resolving) return
+    setResolving(true)
+    try {
+      await resolveSos(resolveModalAlert.id, resolutionNote)
+      setSosAlerts((current) => current.map((alert) => alert.id === resolveModalAlert.id
+        ? { ...alert, resolved_at: new Date().toISOString(), resolution_note: resolutionNote.trim() || null }
+        : alert))
+      setResolveModalAlert(null)
+      setResolutionNote('')
+    } catch (caught) {
+      Alert.alert('Unable to resolve SOS', caught instanceof Error ? caught.message : 'Please try again.')
+    } finally {
+      setResolving(false)
+    }
   }
 
   const savePlace = async () => {
@@ -225,7 +286,7 @@ export default function LocationScreen() {
       }
       setCoupleId(link.couple_id)
       const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      const [latest, route, places, callEvents, alerts] = await Promise.all([
+      const [latest, route, places, callEvents, alerts, checkinRows] = await Promise.all([
         supabase
           .from('user_locations')
           .select('*')
@@ -250,16 +311,23 @@ export default function LocationScreen() {
           .limit(50),
         supabase
           .from('emergency_alerts')
-          .select('id,message,created_at,resolved_at')
+          .select('id,message,created_at,resolved_at,resolved_by,resolution_note')
           .eq('couple_id', link.couple_id)
           .order('created_at', { ascending: false })
           .limit(50),
+        supabase
+          .from('safety_checkins')
+          .select('*')
+          .eq('couple_id', link.couple_id)
+          .order('created_at', { ascending: false })
+          .limit(20),
       ])
       setRows((latest.data ?? []) as LocationRow[])
       setHistory((route.data ?? []) as LocationHistoryRow[])
       setSavedPlaces((places.data ?? []) as SavedPlace[])
       setCalls((callEvents.data ?? []) as CallEvent[])
       setSosAlerts((alerts.data ?? []) as SosAlert[])
+      setCheckins((checkinRows.data ?? []) as SafetyCheckin[])
     }
     void load()
   }, [isAdmin, user])
@@ -497,6 +565,23 @@ export default function LocationScreen() {
         </ScrollView>
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
+          <View style={styles.checkinGrid}>
+            {([
+              ['safe', 'I am safe', colors.success],
+              ['need_help', 'I need help', colors.error],
+              ['home', 'I am home', colors.accent1],
+            ] as const).map(([type, label, color]) => (
+              <TouchableOpacity key={type} style={[styles.checkinButton, { backgroundColor: color }]} onPress={() => setCheckinType(type)}>
+                <Text style={styles.buttonText}>{label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+          {checkins.slice(0, 5).map((checkin) => (
+            <View key={checkin.id} style={styles.listItem}>
+              <Text style={styles.cardTitle}>{checkin.checkinType.replace('_', ' ')} · {checkin.status}</Text>
+              <Text style={styles.meta}>{new Date(checkin.createdAt).toLocaleString()}{checkin.expectedUntil ? ` · expected by ${new Date(checkin.expectedUntil).toLocaleString()}` : ''}</Text>
+            </View>
+          ))}
           <View style={[styles.sosCard, { backgroundColor: colors.cardBg, borderColor: colors.error }]}>
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Emergency SOS</Text>
             <Text style={[styles.meta, { color: colors.textSecondary }]}>
@@ -529,6 +614,16 @@ export default function LocationScreen() {
               <Text style={styles.meta}>
                 {alert.message ?? 'Safety alert'} · {new Date(alert.created_at).toLocaleString()}
               </Text>
+              {alert.resolved_at ? (
+                <Text style={[styles.meta, { color: colors.success }]}>
+                  Resolved {new Date(alert.resolved_at).toLocaleString()}
+                  {alert.resolution_note ? ` · ${alert.resolution_note}` : ''}
+                </Text>
+              ) : (
+                <TouchableOpacity style={[styles.button, { marginTop: 10 }]} onPress={() => setResolveModalAlert(alert)}>
+                  <Text style={styles.buttonText}>Resolve</Text>
+                </TouchableOpacity>
+              )}
             </View>
           ))}
           {!sosAlerts.length ? (
@@ -536,7 +631,45 @@ export default function LocationScreen() {
           ) : null}
         </ScrollView>
       )}
-      <Modal visible={placeModalOpen} transparent animationType="slide" onRequestClose={() => setPlaceModalOpen(false)}>
+        <Modal visible={Boolean(checkinType)} transparent animationType="slide" onRequestClose={() => setCheckinType(null)}>
+          <View style={styles.modalBackdrop}>
+            <View style={styles.modalCard}>
+              <Text style={styles.cardTitle}>{checkinType === 'safe' ? 'I am safe' : checkinType === 'home' ? 'I am home' : 'I need help'}</Text>
+              <TextInput style={[styles.input, styles.noteInput]} value={checkinNote} onChangeText={setCheckinNote} placeholder="Optional note" placeholderTextColor={colors.textSecondary} multiline maxLength={500} />
+              <TextInput style={styles.input} value={checkinExpected} onChangeText={setCheckinExpected} placeholder="Optional expected time" placeholderTextColor={colors.textSecondary} />
+              <View style={styles.modalActions}>
+                <TouchableOpacity onPress={() => setCheckinType(null)}><Text style={styles.meta}>Cancel</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={() => void submitCheckin()} disabled={checkinSending}>
+                  <Text style={styles.buttonText}>{checkinSending ? 'Sending...' : 'Send check-in'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        <Modal visible={Boolean(resolveModalAlert)} transparent animationType="slide" onRequestClose={() => setResolveModalAlert(null)}>
+          <View style={styles.modalBackdrop}>
+            <View style={styles.modalCard}>
+              <Text style={styles.cardTitle}>Resolve SOS</Text>
+              <Text style={styles.meta}>Add an optional note for the person who sent the alert.</Text>
+              <TextInput
+                style={[styles.input, styles.noteInput]}
+                value={resolutionNote}
+                onChangeText={setResolutionNote}
+                placeholder="Resolution note"
+                placeholderTextColor={colors.textSecondary}
+                multiline
+                maxLength={500}
+              />
+              <View style={styles.modalActions}>
+                <TouchableOpacity onPress={() => setResolveModalAlert(null)}><Text style={styles.meta}>Cancel</Text></TouchableOpacity>
+                <TouchableOpacity style={styles.button} onPress={() => void submitResolution()} disabled={resolving}>
+                  <Text style={styles.buttonText}>{resolving ? 'Resolving...' : 'Resolve SOS'}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </Modal>
+        <Modal visible={placeModalOpen} transparent animationType="slide" onRequestClose={() => setPlaceModalOpen(false)}>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <Text style={styles.cardTitle}>Add saved place</Text>
@@ -630,6 +763,18 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
   },
+  checkinGrid: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 12,
+  },
+  checkinButton: {
+    flex: 1,
+    alignItems: 'center',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 12,
+  },
   buttonText: { color: '#260f2d', fontWeight: '800' },
   danger: { color: '#fca5a5', fontWeight: '700', marginTop: 10 },
   input: {
@@ -640,6 +785,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     color: '#fff7fb',
     marginTop: 10,
+  },
+  noteInput: {
+    minHeight: 90,
+    textAlignVertical: 'top',
   },
   modalBackdrop: {
     flex: 1,

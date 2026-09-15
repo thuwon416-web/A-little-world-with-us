@@ -7,6 +7,9 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Heart, X } from 'lucide-react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
+import MemorySlideshow from '@/features/memories/MemorySlideshow'
+import SlideshowLaunchButton from '@/features/memories/SlideshowLaunchButton'
+const MemoryLocationPicker = dynamic(() => import('@/features/memories/MemoryLocationPicker'), { ssr: false })
 import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { validateUpload } from '@/lib/upload-validation'
@@ -76,6 +79,10 @@ function MemoriesPageContent() {
   const [error, setError] = useState('')
   const [coupleLinkId, setCoupleLinkId] = useState<string | null>(null)
   const [selectedMemory, setSelectedMemory] = useState<DisplayMemory | null>(null)
+  const [isSlideshowOpen, setIsSlideshowOpen] = useState(false)
+  const [isLocationOpen, setIsLocationOpen] = useState(false)
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null)
+  const [locationLabel, setLocationLabel] = useState('')
 
   const sortedMemories = useMemo(() => {
     const filtered = memories.filter((memory) => {
@@ -221,6 +228,9 @@ function MemoriesPageContent() {
             date: memoryDate,
             category: memoryCategory,
             visibility: 'shared',
+            latitude: location?.latitude ?? null,
+            longitude: location?.longitude ?? null,
+            location_label: locationLabel.trim() || null,
           })
           if (insertError) {
             await supabase.storage.from('memories').remove([path])
@@ -237,6 +247,8 @@ function MemoriesPageContent() {
       setMemoryDate(new Date().toISOString().slice(0, 10))
       setSelectedFiles([])
       setMemoryCategory('favorite')
+      setLocation(null)
+      setLocationLabel('')
       setUploadSummary(`${uploadedCount} ${uploadedCount === 1 ? 'photo' : 'photos'} uploaded${uploadErrors.length ? `; ${uploadErrors.length} failed` : ''}.`)
       if (uploadErrors.length) setError(uploadErrors.join(' '))
       await loadMemories()
@@ -274,11 +286,14 @@ function MemoriesPageContent() {
 
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-      <header>
-        <h1 className="text-3xl font-serif text-[var(--text-primary)]">Our Memories</h1>
+      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-serif text-[var(--text-primary)]">Our Memories</h1>
         <p className="mt-2 text-sm text-[var(--text-secondary)]">
           Keep the moments that feel like home.
         </p>
+        </div>
+        <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
       </header>
 
       <ExplicitAdviceControl
@@ -327,6 +342,7 @@ function MemoriesPageContent() {
             <option value="journal">Journal</option>
           </select>
           <input type="date" value={memoryDate} onChange={(event) => setMemoryDate(event.target.value)} className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" aria-label="Memory date" />
+          <button type="button" onClick={() => setIsLocationOpen(true)} className="rounded-2xl border border-[var(--accent-1)]/20 px-3 py-2 text-sm text-[var(--text-primary)]">{location ? 'Location added' : 'Add location (optional)'}</button>
           <button
             type="submit"
             disabled={isUploading || !isSupabaseConfigured}
@@ -344,6 +360,7 @@ function MemoriesPageContent() {
         {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
         {uploadSummary && <p className="mt-3 text-sm text-emerald-400">{uploadSummary}</p>}
       </section>
+      {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-3xl bg-[var(--card-bg)] p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-[var(--text-primary)]">Memory location</h2><button type="button" onClick={() => setIsLocationOpen(false)} className="text-sm text-[var(--text-secondary)]">Close</button></div><MemoryLocationPicker value={location} onChange={setLocation} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => setError('Unable to read your current location.'))} className="rounded-xl border border-[var(--accent-1)]/20 px-3 py-2 text-sm text-[var(--text-primary)]">Use current location</button><input value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" /><button type="button" onClick={() => setIsLocationOpen(false)} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)]">Save location</button></div></div> : null}
 
       <section className="glass-card p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -422,6 +439,7 @@ function MemoriesPageContent() {
         </div>
       )}
       {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-[var(--accent-1)]" /><p className="mt-4 text-lg text-[var(--text-primary)]">No memories yet. Start creating your little world together!</p></section>}
+      {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} /> : null}
       {selectedMemory && <MemoryDetail memory={selectedMemory} onClose={() => setSelectedMemory(null)} onSaved={(updated) => {
         setMemories((current) => current.map((memory) => memory.id === updated.id ? { ...memory, ...updated } : memory))
         setSelectedMemory((current) => current?.id === updated.id ? { ...current, ...updated } : current)

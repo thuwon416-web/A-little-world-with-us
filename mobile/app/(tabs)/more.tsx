@@ -21,6 +21,7 @@ import {
   ListChecks,
   Bell,
   BookHeart,
+  Languages,
 } from 'lucide-react-native'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -42,8 +43,10 @@ const sections = [
     items: [
       { href: '/(tabs)/our-story', key: 'ourStory', Icon: BookHeart },
       { href: '/(tabs)/memories', key: 'ourMemories', Icon: HeartPulse },
+      { href: '/(tabs)/memory-map', key: 'memoryMap', Icon: MapPin },
       { href: '/(tabs)/wellness', key: 'wellness', Icon: HeartPulse },
       { href: '/(tabs)/music', key: 'music', Icon: Music2 },
+      { href: '/(tabs)/learning', key: 'learning', Icon: Languages },
       { href: '/(tabs)/location', key: 'locationSafety', Icon: MapPin },
       { href: '/(tabs)/vault', key: 'privateVault', Icon: LockKeyhole },
     ],

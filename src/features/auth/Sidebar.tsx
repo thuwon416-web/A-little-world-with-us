@@ -25,6 +25,7 @@ import {
   MonitorPlay,
   BookHeart,
   Infinity,
+  Languages,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -33,6 +34,7 @@ import { supabase } from '@/lib/supabase'
 const baseNavItems = [
   { href: '/dashboard', key: 'home', icon: Home },
   { href: '/memories', key: 'memories', icon: Camera },
+  { href: '/memories/map', key: 'memoryMap', icon: MapPin },
   { href: '/our-story', key: 'ourStory', icon: BookHeart },
   { href: '/chat', key: 'whispers', icon: MessageCircleHeart },
   { href: '/calls', key: 'calls', icon: PhoneCall },
@@ -44,6 +46,7 @@ const baseNavItems = [
   { href: '/vault', key: 'vault', icon: LockKeyhole },
   { href: '/finance', key: 'finance', icon: DollarSign },
   { href: '/watch-together', key: 'watchTogether', icon: MonitorPlay },
+  { href: '/learning', key: 'learning', icon: Languages },
   { href: '/games', key: 'games', icon: Gamepad2 },
   { href: '/music', key: 'music', icon: Music },
   { href: '/gallery', key: 'gallery', icon: Image },

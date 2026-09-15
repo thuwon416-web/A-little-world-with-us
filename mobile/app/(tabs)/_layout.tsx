@@ -96,11 +96,14 @@ export default function TabsLayout() {
       <Tabs.Screen name="music" options={{ href: null }} />
       <Tabs.Screen name="finance" options={{ href: null }} />
       <Tabs.Screen name="memories" options={{ href: null }} />
+      <Tabs.Screen name="memory-map" options={{ href: null }} />
       <Tabs.Screen name="calendar" options={{ href: null }} />
       <Tabs.Screen name="lists" options={{ href: null }} />
       <Tabs.Screen name="vault" options={{ href: null }} />
       <Tabs.Screen name="astrology" options={{ href: null }} />
       <Tabs.Screen name="games" options={{ href: null }} />
+      <Tabs.Screen name="learning" options={{ href: null }} />
+      <Tabs.Screen name="quiz" options={{ href: null }} />
       <Tabs.Screen name="time-capsules" options={{ href: null }} />
       <Tabs.Screen name="calls" options={{ href: null }} />
       <Tabs.Screen name="couple-linking" options={{ href: null }} />

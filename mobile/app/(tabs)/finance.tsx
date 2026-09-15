@@ -11,6 +11,7 @@ import {
 } from 'react-native'
 
 import { useAuth } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 import {
   checkInStreak,
   getAdvancedData,
@@ -19,12 +20,21 @@ import {
   addBill,
 } from '@/services/advanced'
 import { addFinancialProgress, addFinancialGoal, type FinancialGoal } from '@/services/finance'
+import { deleteExpense, getExpenses, type Expense } from '@/services/finance-splitwise'
+import CategoryFilter from '@/features/finance/CategoryFilter'
+import ExpenseList from '@/features/finance/ExpenseList'
+import AddExpenseModal from '@/features/finance/AddExpenseModal'
 
 const mmk = (value: number) => `${Number(value).toLocaleString()} MMK`
 
 export default function FinanceScreen() {
   const { user } = useAuth()
   const [data, setData] = useState<any>()
+  const [partnerId, setPartnerId] = useState<string | null>(null)
+  const [splitExpenses, setSplitExpenses] = useState<Expense[]>([])
+  const [expenseFilter, setExpenseFilter] = useState('all')
+  const [showAddExpense, setShowAddExpense] = useState(false)
+  const [loadingExpenses, setLoadingExpenses] = useState(false)
   const [title, setTitle] = useState('')
   const [target, setTarget] = useState('')
   const [current, setCurrent] = useState('')
@@ -34,6 +44,17 @@ export default function FinanceScreen() {
   const [billDate, setBillDate] = useState('')
   const [ideas, setIdeas] = useState<any[]>([])
   const [error, setError] = useState('')
+  const loadSplitExpenses = async () => {
+    if (!user?.id) return
+    setLoadingExpenses(true)
+    try {
+      setSplitExpenses(await getExpenses())
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to load shared expenses.')
+    } finally {
+      setLoadingExpenses(false)
+    }
+  }
   const load = async () => {
     try {
       setData(await getAdvancedData())
@@ -45,6 +66,22 @@ export default function FinanceScreen() {
   useEffect(() => {
     void load()
   }, [])
+  useEffect(() => {
+    void loadSplitExpenses()
+  }, [user?.id])
+  useEffect(() => {
+    const loadPartner = async () => {
+      if (!user?.id) return
+      const { data: link } = await supabase
+        .from('couple_links')
+        .select('inviter_id, accepted_by')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
+      if (link) setPartnerId(link.inviter_id === user.id ? link.accepted_by : link.inviter_id)
+    }
+    void loadPartner()
+  }, [user?.id])
   const spent = useMemo(
     () => (data?.expenses ?? []).reduce((sum: number, item: any) => sum + Number(item.amount), 0),
     [data]
@@ -156,6 +193,39 @@ export default function FinanceScreen() {
           <Text style={styles.primaryText}>Save monthly budget</Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.card}>
+        <View style={styles.rowCentered}>
+          <Text style={styles.section}>Shared Expenses</Text>
+          <TouchableOpacity
+            style={styles.primarySmall}
+            onPress={() => setShowAddExpense(true)}
+            disabled={!user?.id || !partnerId}
+          >
+            <Text style={styles.primaryText}>+ Add Expense</Text>
+          </TouchableOpacity>
+        </View>
+        <CategoryFilter active={expenseFilter} onChange={setExpenseFilter} />
+        {loadingExpenses ? (
+          <Text style={styles.muted}>Loading expenses...</Text>
+        ) : (
+          <ExpenseList
+            expenses={splitExpenses.filter((expense) => expenseFilter === 'all' || expense.category === expenseFilter)}
+            currentUserId={user?.id ?? ''}
+            partnerId={partnerId}
+            onDelete={async (id) => {
+              await deleteExpense(id)
+              setSplitExpenses((previous) => previous.filter((expense) => expense.id !== id))
+            }}
+          />
+        )}
+      </View>
+      <AddExpenseModal
+        visible={showAddExpense}
+        currentUserId={user?.id ?? ''}
+        partnerId={partnerId}
+        onClose={() => setShowAddExpense(false)}
+        onSaved={() => { void loadSplitExpenses() }}
+      />
       <View style={styles.card}>
         <Text style={styles.section}>Savings goals</Text>
         <TextInput
@@ -297,6 +367,7 @@ const styles = StyleSheet.create({
     borderColor: '#2a2d35',
   },
   primary: { backgroundColor: '#d8b9c8', padding: 13, borderRadius: 12, alignItems: 'center' },
+  primarySmall: { backgroundColor: '#ff6b81', padding: 10, borderRadius: 10 },
   primaryText: { color: '#0f0f12', fontWeight: '800' },
   secondary: { backgroundColor: '#ff6b81', padding: 13, borderRadius: 12, alignItems: 'center' },
   muted: { color: '#c4c4ce', lineHeight: 20 },

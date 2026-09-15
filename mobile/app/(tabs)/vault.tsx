@@ -6,8 +6,18 @@ import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
 import { addVaultItem, deleteVaultItem, getContext, getVaultItems } from '@/services/secondary'
+import VaultTabs, { type VaultTab } from '@/components/vault/VaultTabs'
+import PasswordList from '@/components/vault/PasswordList'
+import VaultSetupModal from '@/components/vault/VaultSetupModal'
+import { VaultKeyProvider, useVaultKey } from '@/contexts/VaultKeyContext'
+import { loadWrappedKey } from '@/lib/vault-storage'
 
 export default function VaultScreen() {
+  return <VaultKeyProvider><VaultScreenContent /></VaultKeyProvider>
+}
+
+function VaultScreenContent() {
+  const { masterKey, isUnlocked: passwordUnlocked, unlockWithPassphrase, unlockWithBiometric } = useVaultKey()
   const [items, setItems] = useState<any[]>([])
   const [coupleId, setCoupleId] = useState('')
   const [userId, setUserId] = useState('')
@@ -17,6 +27,11 @@ export default function VaultScreen() {
   const [pin, setPin] = useState('')
   const [unlocked, setUnlocked] = useState(false)
   const [error, setError] = useState('')
+  const [tab, setTab] = useState<VaultTab>('letters')
+  const [hasWrappedKey, setHasWrappedKey] = useState<boolean | null>(null)
+  const [passphrase, setPassphrase] = useState('')
+  const [passwordError, setPasswordError] = useState('')
+  const [showSetup, setShowSetup] = useState(false)
   const load = async () => {
     try {
       const context = await getContext()
@@ -63,6 +78,9 @@ export default function VaultScreen() {
     )
     return () => clearTimeout(timeout)
   }, [unlocked])
+  useEffect(() => {
+    void loadWrappedKey().then((stored) => setHasWrappedKey(Boolean(stored)))
+  }, [passwordUnlocked])
   const add = async () => {
     if (!title.trim() || !content.trim() || content.length > 1000)
       return Alert.alert('Invalid item', 'Enter a title and content up to 1,000 characters.')
@@ -97,6 +115,9 @@ export default function VaultScreen() {
         </>
       ) : (
         <>
+          <VaultTabs tab={tab} onChange={setTab} />
+          {tab === 'letters' ? (
+            <>
           <TextInput
             style={s.input}
             value={title}
@@ -144,6 +165,32 @@ export default function VaultScreen() {
               </TouchableOpacity>
             </View>
           ))}
+            </>
+          ) : (
+            <>
+              {!hasWrappedKey ? (
+                <View style={s.card}>
+                  <Text style={s.buttonText}>Set up your password vault</Text>
+                  <Text style={s.muted}>Create a separate passphrase for encrypted credentials.</Text>
+                  <TouchableOpacity style={s.button} onPress={() => setShowSetup(true)}><Text style={s.buttonText}>Set up Vault Passphrase</Text></TouchableOpacity>
+                </View>
+              ) : !passwordUnlocked ? (
+                <View style={s.card}>
+                  <Text style={s.buttonText}>Unlock passwords</Text>
+                  <TextInput style={s.input} value={passphrase} onChangeText={setPassphrase} placeholder="Vault passphrase" placeholderTextColor="#8d8d99" secureTextEntry />
+                  {passwordError ? <Text style={s.danger}>{passwordError}</Text> : null}
+                  <TouchableOpacity style={s.button} onPress={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))}><Text style={s.buttonText}>Unlock passwords</Text></TouchableOpacity>
+                  <TouchableOpacity onPress={() => void unlockWithBiometric().catch((cause) => setPasswordError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))}><Text style={s.muted}>Use biometric unlock</Text></TouchableOpacity>
+                </View>
+              ) : masterKey ? (
+                <View>
+                  <Text style={s.muted}>Unlocked · password vault auto-locks after five minutes.</Text>
+                  <PasswordList masterKey={masterKey} />
+                </View>
+              ) : null}
+              <VaultSetupModal visible={showSetup} onClose={() => setShowSetup(false)} onReady={() => { setShowSetup(false); void loadWrappedKey().then((stored) => setHasWrappedKey(Boolean(stored))) }} />
+            </>
+          )}
         </>
       )}
     </SecondaryPage>

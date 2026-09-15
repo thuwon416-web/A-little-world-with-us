@@ -6,6 +6,11 @@ import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import AdvancedFinancePanel from '@/features/finance/AdvancedFinancePanel'
+import BalanceSummary from '@/features/finance/BalanceSummary'
+import AddExpenseModal from '@/features/finance/AddExpenseModal'
+import CategoryFilter from '@/features/finance/CategoryFilter'
+import ExpenseList from '@/features/finance/ExpenseList'
+import { deleteExpense, getExpenses, type Expense } from '@/services/finance-splitwise'
 
 interface FinancialGoal {
   id: string
@@ -21,13 +26,34 @@ export default function FinancialGoals() {
   const [newGoal, setNewGoal] = useState({ title: '', target: '', current: '' })
   const [userId, setUserId] = useState<string | null>(null)
   const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [partnerId, setPartnerId] = useState<string | null>(null)
+  const [expenses, setExpenses] = useState<Expense[]>([])
+  const [expenseFilter, setExpenseFilter] = useState('all')
+  const [showAddExpense, setShowAddExpense] = useState(false)
+  const [loadingExpenses, setLoadingExpenses] = useState(true)
 
   useEffect(() => {
     void Promise.all([getCurrentUserId(), getCoupleStatus()]).then(([id, status]) => {
       setUserId(id)
       setCoupleId(status.status === 'accepted' ? status.couple?.id ?? null : null)
+      setPartnerId(status.status === 'accepted' ? status.partner?.id ?? null : null)
     })
   }, [])
+
+  const loadExpenses = useCallback(async () => {
+    setLoadingExpenses(true)
+    try {
+      setExpenses(await getExpenses())
+    } catch {
+      setExpenses([])
+    } finally {
+      setLoadingExpenses(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    void loadExpenses()
+  }, [loadExpenses])
 
   const loadGoals = useCallback(async () => {
     if (!coupleId) return
@@ -90,6 +116,36 @@ export default function FinancialGoals() {
         description="Ask for a neutral conversation starter. AI never sees your finance records unless you type them here."
         placeholder="How can we discuss a shared goal or budget difference respectfully?"
       />
+      <BalanceSummary />
+      <section className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-2xl font-serif text-[var(--text-primary)]">Shared Expenses</h2>
+          <button
+            type="button"
+            onClick={() => setShowAddExpense(true)}
+            disabled={!userId || !partnerId}
+            className="glass-button inline-flex items-center gap-2 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            + Add Expense
+          </button>
+        </div>
+        <CategoryFilter active={expenseFilter} onChange={setExpenseFilter} />
+        {loadingExpenses ? (
+          <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 text-sm text-[var(--text-secondary)]">
+            Loading expenses…
+          </div>
+        ) : (
+          <ExpenseList
+            expenses={expenses.filter((expense) => expenseFilter === 'all' || expense.category === expenseFilter)}
+            currentUserId={userId ?? ''}
+            partnerId={partnerId}
+            onDelete={async (id) => {
+              await deleteExpense(id)
+              setExpenses((previous) => previous.filter((expense) => expense.id !== id))
+            }}
+          />
+        )}
+      </section>
       <AdvancedFinancePanel />
 
       {!coupleId && <p className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100">Link and accept a partner before creating shared financial goals.</p>}
@@ -113,6 +169,17 @@ export default function FinancialGoals() {
           )
         })}
       </div>
+
+      {showAddExpense && userId && (
+        <AddExpenseModal
+          currentUserId={userId}
+          partnerId={partnerId}
+          onClose={() => setShowAddExpense(false)}
+          onSaved={() => {
+            void loadExpenses()
+          }}
+        />
+      )}
     </div>
   )
 }

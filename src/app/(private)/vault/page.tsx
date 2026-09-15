@@ -4,8 +4,13 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock, Eye, Plus, X, Save, Sparkles } from 'lucide-react'
+import { Fingerprint, KeyRound, Lock, Eye, Plus, X, Save, Sparkles } from 'lucide-react'
 import VaultCard from '@/features/vault/VaultCard'
+import VaultTabs, { type VaultTab } from '@/features/vault/VaultTabs'
+import PasswordList from '@/features/vault/PasswordList'
+import VaultSetupModal from '@/features/vault/VaultSetupModal'
+import { VaultKeyProvider, useVaultKey } from '@/contexts/VaultKeyContext'
+import { loadWrappedKey } from '@/lib/vault-storage'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, insertRow, type VaultItem } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
@@ -14,13 +19,16 @@ type VaultCategory = 'all' | 'private' | 'celebration' | 'ritual' | 'travel'
 
 export default function VaultPage() {
   return (
-    <Suspense fallback={<VaultPageSkeleton />}>
-      <VaultPageContent />
-    </Suspense>
+    <VaultKeyProvider>
+      <Suspense fallback={<VaultPageSkeleton />}>
+        <VaultPageContent />
+      </Suspense>
+    </VaultKeyProvider>
   )
 }
 
 function VaultPageContent() {
+  const { masterKey, isUnlocked: isPasswordVaultUnlocked, unlockWithPassphrase, unlockWithBiometric } = useVaultKey()
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [letters, setLetters] = useState<VaultItem[]>([])
@@ -33,6 +41,11 @@ function VaultPageContent() {
   const [revealDate, setRevealDate] = useState('')
   const [pin, setPin] = useState('')
   const [unlockError, setUnlockError] = useState('')
+  const [tab, setTab] = useState<VaultTab>('letters')
+  const [hasWrappedKey, setHasWrappedKey] = useState<boolean | null>(null)
+  const [passphrase, setPassphrase] = useState('')
+  const [passwordVaultError, setPasswordVaultError] = useState('')
+  const [showVaultSetup, setShowVaultSetup] = useState(false)
   const isPinValid = /^\d{4,6}$/.test(pin)
 
   const filteredLetters = useMemo(() => {
@@ -64,6 +77,10 @@ function VaultPageContent() {
 
     checkAuth()
   }, [])
+
+  useEffect(() => {
+    void loadWrappedKey().then((stored) => setHasWrappedKey(Boolean(stored)))
+  }, [isPasswordVaultUnlocked])
 
   const fetchLetters = async () => {
     if (!coupleId) {
@@ -245,6 +262,10 @@ function VaultPageContent() {
         </div>
       </div>
 
+      <VaultTabs tab={tab} onChange={setTab} />
+
+      {tab === 'letters' ? (
+        <>
       {/* Stats and intro */}
       <div className="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-3xl p-6 border border-[var(--accent-1)]/20 bg-[var(--card-bg)] backdrop-blur">
@@ -436,6 +457,39 @@ function VaultPageContent() {
            <VaultCard key={letter.id} letter={letter} />
          ))}
        </div>
+      )}
+        </>
+      ) : (
+        <section>
+          <div className="mb-5 flex items-center justify-between rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 backdrop-blur-xl">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-secondary)]">Password security</p>
+              <p className="mt-1 text-sm text-[var(--text-primary)]">{isPasswordVaultUnlocked ? 'Unlocked · auto-locks after five minutes of inactivity' : 'Encrypted credentials stay locked separately from Love Vault letters.'}</p>
+            </div>
+            {isPasswordVaultUnlocked ? <Fingerprint className="h-5 w-5 text-emerald-400" /> : <KeyRound className="h-5 w-5 text-[var(--accent-1)]" />}
+          </div>
+          {!hasWrappedKey ? (
+            <div className="rounded-[28px] border border-dashed border-[var(--accent-1)]/30 bg-[var(--card-bg)] p-10 text-center">
+              <KeyRound className="mx-auto h-8 w-8 text-[var(--accent-1)]" />
+              <h2 className="mt-3 text-2xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>Set up your password vault</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">Create a passphrase before adding encrypted credentials. Your passphrase never leaves this device.</p>
+              <button type="button" onClick={() => setShowVaultSetup(true)} className="mt-5 rounded-2xl bg-[var(--button-bg)] px-4 py-2.5 text-sm text-[var(--text-primary)]">Set up Vault Passphrase</button>
+            </div>
+          ) : !isPasswordVaultUnlocked ? (
+            <div className="mx-auto max-w-md rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
+              <h2 className="text-2xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>Unlock passwords</h2>
+              <input type="password" value={passphrase} onChange={(event) => setPassphrase(event.target.value)} placeholder="Vault passphrase" className="mt-4 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-sm text-[var(--text-primary)]" />
+              {passwordVaultError ? <p className="mt-2 text-sm text-red-300">{passwordVaultError}</p> : null}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))} disabled={passphrase.length < 8} className="rounded-2xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">Unlock</button>
+                <button type="button" onClick={() => void unlockWithBiometric().catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))} className="inline-flex items-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 px-4 py-2 text-sm text-[var(--text-primary)]"><Fingerprint className="h-4 w-4" />Biometric</button>
+              </div>
+            </div>
+          ) : (
+            <PasswordList masterKey={masterKey!} />
+          )}
+          {showVaultSetup ? <VaultSetupModal onClose={() => { setShowVaultSetup(false); void loadWrappedKey().then((stored) => setHasWrappedKey(Boolean(stored))) }} /> : null}
+        </section>
       )}
     </div>
   )

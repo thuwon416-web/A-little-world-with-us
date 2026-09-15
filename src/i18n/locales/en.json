@@ -22,6 +22,7 @@
   "nav": {
     "home": "Home",
     "memories": "Memories",
+    "memoryMap": "Memory Map",
     "ourStory": "Our Story",
     "whispers": "Whispers",
     "calls": "Calls",
@@ -33,6 +34,7 @@
     "vault": "Vault",
     "finance": "Finance",
     "watchTogether": "Watch Together",
+    "learning": "Korean Tutor",
     "games": "Games",
     "music": "Music",
     "gallery": "Gallery",

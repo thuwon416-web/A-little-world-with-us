@@ -28,6 +28,9 @@ export interface Memory {
   storage_path: string | null
   date: string
   category: 'favorite' | 'travel' | 'ritual' | 'journal' | string
+  latitude: number | null
+  longitude: number | null
+  location_label: string | null
   created_at: string
   updated_at: string
 }

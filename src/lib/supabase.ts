@@ -129,6 +129,9 @@ export type Memory = {
   date: string
   user_id?: string | null
   category?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  location_label?: string | null
   reveal_at?: string | null
 }
 

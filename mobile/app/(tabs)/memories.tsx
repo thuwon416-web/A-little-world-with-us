@@ -6,6 +6,8 @@ import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import { useTheme } from '@/context/ThemeContext'
 import { supabase } from '@/lib/supabase'
 import { deleteMemory, getMemories, MemoryRecord } from '@/services/memories'
+import MemorySlideshow from '@/components/memories/MemorySlideshow'
+import SlideshowLaunchButton from '@/components/memories/SlideshowLaunchButton'
 
 const categories = ['all', 'favorite', 'travel', 'ritual', 'journal'] as const
 
@@ -25,6 +27,7 @@ export default function MemoriesScreen() {
   const [curationStory, setCurationStory] = useState('')
   const [curationError, setCurationError] = useState('')
   const [curationLoading, setCurationLoading] = useState(false)
+  const [isSlideshowOpen, setIsSlideshowOpen] = useState(false)
   useEffect(() => {
     void getMemories()
       .then(setMemories)
@@ -126,6 +129,7 @@ export default function MemoriesScreen() {
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.eyebrow, { color: colors.accent2 }]}>Memories</Text>
       <Text style={[styles.title, { color: colors.textPrimary }]}>Our story</Text>
+      <SlideshowLaunchButton memories={memories} onPress={() => setIsSlideshowOpen(true)} />
       <View style={[styles.mediatorCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
         <View style={styles.mediatorHeader}>
           <Sparkles color={colors.accent1} size={20} />
@@ -277,6 +281,7 @@ export default function MemoriesScreen() {
           </View>
         ))
       )}
+      {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} /> : null}
     </ScrollView>
   )
 }
