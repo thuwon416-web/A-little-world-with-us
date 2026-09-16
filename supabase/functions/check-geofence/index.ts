@@ -46,7 +46,6 @@ if (!supabaseUrl || !serviceRole) {
 }
 
 const supabase = createClient(supabaseUrl, serviceRole)
-const recentWindow = 30 * 60 * 1000
 
 function unauthorized(request: Request): boolean {
   return request.headers.get('Authorization') !== `Bearer ${serviceRole}`
@@ -120,18 +119,19 @@ async function processLocation(
       place.longitude,
     )
     const eventType = distance <= place.radius_meters ? 'entered' : 'exited'
-    const since = new Date(Date.now() - recentWindow).toISOString()
     const { data: recent, error: recentError } = await supabase
       .from('geofence_events')
-      .select('event_type')
+      .select('event_type,occurred_at')
       .eq('user_id', location.user_id)
       .eq('saved_place_id', place.id)
-      .gte('occurred_at', since)
       .order('occurred_at', { ascending: false })
       .limit(1)
 
     if (recentError) throw recentError
-    if (recent?.[0]?.event_type === eventType) continue
+    const previousEvent = recent?.[0]
+    const isInitialExit = !previousEvent && eventType === 'exited'
+    const isSameAsPrevious = previousEvent?.event_type === eventType
+    if (isSameAsPrevious) continue
 
     const { data: event, error: insertError } = await supabase
       .from('geofence_events')
@@ -142,12 +142,15 @@ async function processLocation(
         event_type: eventType,
         latitude: location.latitude,
         longitude: location.longitude,
+        notified: isInitialExit,
       })
       .select('id,couple_id,user_id,saved_place_id,event_type,latitude,longitude,occurred_at')
       .single()
 
     if (insertError) throw insertError
     inserted += 1
+
+    if (isInitialExit) continue
 
     const wasNotified = await notifyPartner(event as GeofenceEvent, place, partnerId, location.user_id)
     if (wasNotified) {
@@ -167,38 +170,46 @@ Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
   if (unauthorized(request)) return new Response('Unauthorized', { status: 401 })
 
-  const { data: places, error: placesError } = await supabase
-    .from('saved_places')
-    .select('id,couple_id,name,latitude,longitude,radius_meters')
-  if (placesError) return Response.json({ error: placesError.message }, { status: 500 })
+  try {
+    const { data: places, error: placesError } = await supabase
+      .from('saved_places')
+      .select('id,couple_id,name,latitude,longitude,radius_meters')
+    if (placesError) return Response.json({ error: placesError.message }, { status: 500 })
 
-  const { data: locations, error: locationsError } = await supabase
-    .from('user_locations')
-    .select('user_id,couple_id,latitude,longitude')
-  if (locationsError) return Response.json({ error: locationsError.message }, { status: 500 })
+    const { data: locations, error: locationsError } = await supabase
+      .from('user_locations')
+      .select('user_id,couple_id,latitude,longitude')
+    if (locationsError) return Response.json({ error: locationsError.message }, { status: 500 })
 
-  const { data: links, error: linksError } = await supabase
-    .from('couple_links')
-    .select('inviter_id,accepted_by')
-    .eq('status', 'accepted')
-  if (linksError) return Response.json({ error: linksError.message }, { status: 500 })
+    const { data: links, error: linksError } = await supabase
+      .from('couple_links')
+      .select('inviter_id,accepted_by')
+      .eq('status', 'accepted')
+    if (linksError) return Response.json({ error: linksError.message }, { status: 500 })
 
-  let inserted = 0
-  let notified = 0
-  for (const location of (locations ?? []) as UserLocation[]) {
-    const result = await processLocation(
-      location,
-      (places ?? []) as SavedPlace[],
-      (links ?? []) as CoupleLink[],
+    let inserted = 0
+    let notified = 0
+    for (const location of (locations ?? []) as UserLocation[]) {
+      const result = await processLocation(
+        location,
+        (places ?? []) as SavedPlace[],
+        (links ?? []) as CoupleLink[],
+      )
+      inserted += result.inserted
+      notified += result.notified
+    }
+
+    return Response.json({
+      checked: (locations ?? []).length,
+      places: (places ?? []).length,
+      inserted,
+      notified,
+    })
+  } catch (err) {
+    console.error('[check-geofence] Unhandled error:', err)
+    return Response.json(
+      { error: err instanceof Error ? err.message : 'Unknown error' },
+      { status: 500 },
     )
-    inserted += result.inserted
-    notified += result.notified
   }
-
-  return Response.json({
-    checked: (locations ?? []).length,
-    places: (places ?? []).length,
-    inserted,
-    notified,
-  })
 })

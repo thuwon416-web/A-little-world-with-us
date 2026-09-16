@@ -37,6 +37,11 @@
     "listen": "Listen (coming soon)"
   },
   "settings": {
-    "language": "Language"
+    "language": "Language",
+    "safetyNotifications": {
+      "geofence": "Saved-place arrival / departure",
+      "batteryLow": "Partner battery low",
+      "missedCheckin": "Partner missed check-in"
+    }
   }
 }

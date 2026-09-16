@@ -10,6 +10,10 @@ import {
   type NotificationSettings,
   getNotificationSettings,
   updateNotificationSettings,
+  updateSafetyNotificationPreference,
+  getSafetyNotificationPreferences,
+  hasRegisteredPushDevice,
+  type SafetyNotificationPreference,
 } from '@/lib/notifications'
 
 const toggleItems: Array<{
@@ -23,14 +27,27 @@ const toggleItems: Array<{
   { key: 'milestones', label: 'Milestones', description: 'Anniversaries and special moments.', icon: Sparkles },
   { key: 'wellness', label: 'Wellness', description: 'Daily check-ins and care prompts.', icon: Heart },
 ]
+const safetyToggleItems: Array<{ key: SafetyNotificationPreference; label: string; description: string }> = [
+  { key: 'geofence', label: 'Saved-place arrival / departure', description: 'Notify when your partner enters or leaves a saved place.' },
+  { key: 'battery_low', label: 'Partner battery low', description: 'Notify when your partner’s device battery is low.' },
+  { key: 'missed_checkin', label: 'Partner missed check-in', description: 'Notify when an expected safety check-in expires.' },
+]
 
 export default function NotificationSettingsPage() {
   const [settings, setSettings] = useState<NotificationSettings>(getNotificationSettings())
   const [permission, setPermission] = useState<NotificationPermissionState>('unsupported')
+  const [safetyPreferences, setSafetyPreferences] = useState<Record<SafetyNotificationPreference, boolean>>({
+    geofence: true,
+    battery_low: true,
+    missed_checkin: true,
+  })
+  const [hasPushDevice, setHasPushDevice] = useState<boolean | null>(null)
 
   useEffect(() => {
     setPermission(getNotificationPermission())
     setSettings(getNotificationSettings())
+    void getSafetyNotificationPreferences().then(setSafetyPreferences).catch(() => undefined)
+    void hasRegisteredPushDevice().then(setHasPushDevice).catch(() => setHasPushDevice(false))
   }, [])
 
   const handlePermissionRequest = async () => {
@@ -50,6 +67,16 @@ export default function NotificationSettingsPage() {
 
     setSettings(nextSettings)
     updateNotificationSettings(nextSettings)
+  }
+
+  const handleSafetyToggle = async (key: SafetyNotificationPreference, enabled: boolean) => {
+    setSafetyPreferences((current) => ({ ...current, [key]: enabled }))
+    try {
+      await updateSafetyNotificationPreference(key, enabled)
+    } catch (error) {
+      setSafetyPreferences((current) => ({ ...current, [key]: !enabled }))
+      alert(error instanceof Error ? error.message : 'Unable to save notification preference.')
+    }
   }
 
   return (
@@ -113,6 +140,37 @@ export default function NotificationSettingsPage() {
             </div>
           ))}
         </div>
+      </div>
+      <div className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+        <h2 className="mb-4 text-xl font-semibold text-[var(--text-primary)]">Safety notifications</h2>
+        <div className="space-y-3">
+          {safetyToggleItems.map(({ key, label, description }) => (
+            <div key={key} className="flex items-center justify-between gap-4 rounded-[22px] border border-white/10 bg-[var(--card-bg-strong)] p-4">
+              <div>
+                <p className="font-medium text-[var(--text-primary)]">{label}</p>
+                <p className="text-sm text-[var(--text-secondary)]">{description}</p>
+              </div>
+              <button
+                type="button"
+                aria-label={`Toggle ${label}`}
+                disabled={hasPushDevice !== true}
+                onClick={() => {
+                  if (hasPushDevice === true) void handleSafetyToggle(key, !safetyPreferences[key])
+                }}
+                className={`relative h-7 w-12 rounded-full transition ${safetyPreferences[key] ? 'bg-[var(--accent-1)]' : 'bg-white/10'} ${hasPushDevice !== true ? 'cursor-not-allowed opacity-50' : ''}`}
+              >
+                <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${safetyPreferences[key] ? 'left-6' : 'left-1'}`} />
+              </button>
+            </div>
+          ))}
+        </div>
+        {hasPushDevice === null ? (
+          <p className="mt-4 text-sm text-[var(--text-secondary)]">Checking push device registration...</p>
+        ) : hasPushDevice === false ? (
+          <p className="mt-4 text-sm text-[var(--text-secondary)]">
+            Enable push notifications on your mobile device to manage these preferences.
+          </p>
+        ) : null}
       </div>
     </div>
   )

@@ -5,7 +5,7 @@ import { Suspense, type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { Heart, X } from 'lucide-react'
+import { Frown, Heart, Meh, Pencil, Smile, Sparkles, Square, Trash2, TriangleAlert, Volume2, X } from 'lucide-react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
 import MemorySlideshow from '@/features/memories/MemorySlideshow'
 import SlideshowLaunchButton from '@/features/memories/SlideshowLaunchButton'
@@ -28,6 +28,17 @@ type MemoryCategory = 'all' | 'favorite' | 'travel' | 'ritual' | 'journal'
 type MemorySort = 'newest' | 'oldest'
 
 type DisplayMemory = Memory & { displayUrl: string }
+type JournalMemory = DisplayMemory & {
+  metadata?: { mood_tag?: string; ai_reflection?: string } | null
+}
+type JournalMood = 'happy' | 'okay' | 'sad' | 'loved' | 'anxious'
+const JOURNAL_MOODS: { id: JournalMood; label: string; Icon: typeof Smile }[] = [
+  { id: 'happy', label: 'Happy', Icon: Smile },
+  { id: 'okay', label: 'Okay', Icon: Meh },
+  { id: 'sad', label: 'Sad', Icon: Frown },
+  { id: 'loved', label: 'Loved', Icon: Heart },
+  { id: 'anxious', label: 'Anxious', Icon: TriangleAlert },
+]
 
 async function compressImage(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file)
@@ -64,7 +75,7 @@ export default function MemoriesPage() {
 }
 
 function MemoriesPageContent() {
-  const [memories, setMemories] = useState<DisplayMemory[]>([])
+  const [memories, setMemories] = useState<JournalMemory[]>([])
   const [caption, setCaption] = useState('')
   const [memoryDate, setMemoryDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
@@ -83,6 +94,14 @@ function MemoriesPageContent() {
   const [isLocationOpen, setIsLocationOpen] = useState(false)
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null)
   const [locationLabel, setLocationLabel] = useState('')
+  const [journalModalOpen, setJournalModalOpen] = useState(false)
+  const [editingJournalId, setEditingJournalId] = useState<string | null>(null)
+  const [journalTitle, setJournalTitle] = useState('')
+  const [journalBody, setJournalBody] = useState('')
+  const [journalMood, setJournalMood] = useState<JournalMood>('okay')
+  const [journalSaving, setJournalSaving] = useState(false)
+  const [reflectingId, setReflectingId] = useState<string | null>(null)
+  const [speakingJournalId, setSpeakingJournalId] = useState<string | null>(null)
 
   const sortedMemories = useMemo(() => {
     const filtered = memories.filter((memory) => {
@@ -162,6 +181,9 @@ function MemoriesPageContent() {
 
   useEffect(() => {
     loadMemories()
+  }, [])
+  useEffect(() => () => {
+    if (typeof window !== 'undefined') window.speechSynthesis.cancel()
   }, [])
 
   useEffect(() => {
@@ -284,6 +306,113 @@ function MemoriesPageContent() {
     setMemories((current) => current.filter((item) => item.id !== memory.id))
   }
 
+  const openNewJournal = () => {
+    setEditingJournalId(null)
+    setJournalTitle('')
+    setJournalBody('')
+    setJournalMood('okay')
+    setJournalModalOpen(true)
+  }
+
+  const openEditJournal = (memory: JournalMemory) => {
+    setEditingJournalId(memory.id)
+    setJournalTitle(memory.title ?? memory.caption ?? '')
+    setJournalBody(memory.description ?? '')
+    const tag = memory.metadata?.mood_tag
+    setJournalMood(JOURNAL_MOODS.some((mood) => mood.id === tag) ? (tag as JournalMood) : 'okay')
+    setJournalModalOpen(true)
+  }
+
+  const closeJournalModal = () => {
+    setJournalModalOpen(false)
+    setEditingJournalId(null)
+    setJournalTitle('')
+    setJournalBody('')
+    setJournalMood('okay')
+  }
+
+  const saveJournal = async () => {
+    if (!journalTitle.trim() || journalSaving) return
+    setJournalSaving(true)
+    setError('')
+    try {
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData.user) throw new Error('Please sign in before saving a journal entry.')
+      if (!coupleLinkId) throw new Error('Link with your partner before adding a journal entry.')
+      const payload = {
+        couple_id: coupleLinkId,
+        user_id: userData.user.id,
+        title: journalTitle.trim(),
+        description: journalBody.trim() || null,
+        category: 'journal' as const,
+        date: new Date().toISOString().slice(0, 10),
+        metadata: { mood_tag: journalMood },
+      }
+      const query = editingJournalId
+        ? supabase.from('memories').update(payload).eq('id', editingJournalId).select().single()
+        : supabase.from('memories').insert(payload).select().single()
+      const { data, error: saveError } = await query
+      if (saveError) throw new Error(saveError.message)
+      const saved = data as JournalMemory
+      setMemories((current) =>
+        editingJournalId
+          ? current.map((memory) => (memory.id === editingJournalId ? { ...memory, ...saved } : memory))
+          : [saved, ...current]
+      )
+      closeJournalModal()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to save journal entry.')
+    } finally {
+      setJournalSaving(false)
+    }
+  }
+
+  const deleteJournal = (memory: JournalMemory) => {
+    if (!window.confirm(`Delete journal entry "${memory.title}"?`)) return
+    void handleDelete(memory)
+  }
+
+  const requestReflection = async (memory: JournalMemory) => {
+    if (reflectingId) return
+    setReflectingId(memory.id)
+    setError('')
+    try {
+      const response = await fetch('/api/ai/journal-reflect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ journal_id: memory.id }),
+      })
+      const body = (await response.json()) as { reflection?: string; error?: string }
+      if (!response.ok || !body.reflection) throw new Error(body.error || 'Reflection failed.')
+      setMemories((current) => current.map((item) =>
+        item.id === memory.id
+          ? { ...item, metadata: { ...(item.metadata ?? {}), ai_reflection: body.reflection } }
+          : item
+      ))
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to reflect right now.')
+    } finally {
+      setReflectingId(null)
+    }
+  }
+  const speakReflection = (memory: JournalMemory) => {
+    const text = memory.metadata?.ai_reflection
+    if (!text || typeof window === 'undefined' || !window.speechSynthesis) return
+    if (speakingJournalId === memory.id) {
+      window.speechSynthesis.cancel()
+      setSpeakingJournalId(null)
+      return
+    }
+    window.speechSynthesis.cancel()
+    setSpeakingJournalId(memory.id)
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.lang = /[\uAC00-\uD7AF]/.test(text) ? 'ko-KR' : 'en-US'
+    utterance.rate = 0.95
+    utterance.onend = () => setSpeakingJournalId(null)
+    utterance.onerror = () => setSpeakingJournalId(null)
+    window.speechSynthesis.speak(utterance)
+  }
+
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -380,6 +509,15 @@ function MemoriesPageContent() {
               </button>
             ))}
           </div>
+          {filter === 'journal' ? (
+            <button
+              type="button"
+              onClick={openNewJournal}
+              className="rounded-2xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:opacity-90"
+            >
+              New journal entry
+            </button>
+          ) : null}
           <select
             value={sortBy}
             onChange={(event) => setSortBy(event.target.value as MemorySort)}
@@ -396,34 +534,85 @@ function MemoriesPageContent() {
       {isLoading && <p className="text-sm text-[var(--text-secondary)]">Loading memories...</p>}
       <section className="grid gap-4 md:grid-cols-2">
         {visibleMemories.map((memory, index) => (
-          <div key={memory.id} className="relative">
-            {memory.displayUrl ? (
-              <MemoryCard
-                id={memory.id}
-                imageUrl={memory.displayUrl}
-                caption={memory.caption ?? 'Memory'}
-                date={memory.date}
-                index={index}
-                onOpen={() => setSelectedMemory(memory)}
-              />
-            ) : (
-              <button type="button" onClick={() => setSelectedMemory(memory)} className="glass-card w-full bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20 p-6 text-left"><p className="font-serif text-xl text-[var(--text-primary)]">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-[var(--text-secondary)]">{new Date(memory.date).toLocaleDateString()}</p></button>
-            )}
-            {memory.category && (
-              <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-white">
-                {memory.category}
-              </span>
-            )}
-            {memory.user_id && (
-              <button
-                type="button"
-                onClick={() => handleDelete(memory)}
-                className="absolute right-3 top-3 rounded-full bg-red-500/80 px-3 py-1 text-xs text-white hover:bg-red-500"
-              >
-                Delete
-              </button>
-            )}
-          </div>
+          memory.category === 'journal' ? (
+            <article key={memory.id} className="glass-card relative space-y-3 p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-[var(--text-primary)]">{memory.title}</h3>
+                  <p className="mt-1 text-xs text-[var(--text-secondary)]">{memory.date}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {memory.metadata?.mood_tag ? (() => {
+                    const mood = JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
+                      JOURNAL_MOODS.find((item) => item.id === 'okay')
+                    if (!mood) return null
+                    const MoodIcon = mood.Icon
+                    return <MoodIcon className="h-5 w-5 text-[var(--accent-1)]" aria-label={mood.label} />
+                  })() : null}
+                  <button type="button" onClick={() => openEditJournal(memory)} className="text-[var(--accent-1)]" aria-label="Edit journal entry">
+                    <Pencil className="h-5 w-5" />
+                  </button>
+                  <button type="button" onClick={() => deleteJournal(memory)} className="text-red-400" aria-label="Delete journal entry">
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+              {memory.description ? <p className="line-clamp-2 text-sm text-[var(--text-secondary)]">{memory.description}</p> : null}
+              {memory.metadata?.ai_reflection ? (
+                <div className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] p-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--accent-1)]">
+                    <Sparkles className="h-4 w-4" />
+                    AI reflection
+                    <button type="button" onClick={() => speakReflection(memory)} aria-label="Read AI reflection aloud">
+                      {speakingJournalId === memory.id
+                        ? <Square className="h-4 w-4" />
+                        : <Volume2 className="h-4 w-4" />}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-sm text-[var(--text-primary)]">{memory.metadata.ai_reflection}</p>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void requestReflection(memory)}
+                  disabled={reflectingId !== null}
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 px-3 py-2 text-sm text-[var(--accent-1)] disabled:opacity-50"
+                >
+                  {reflectingId === memory.id ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--accent-1)] border-t-transparent" /> : <Sparkles className="h-4 w-4" />}
+                  {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
+                </button>
+              )}
+            </article>
+          ) : (
+            <div key={memory.id} className="relative">
+              {memory.displayUrl ? (
+                <MemoryCard
+                  id={memory.id}
+                  imageUrl={memory.displayUrl}
+                  caption={memory.caption ?? 'Memory'}
+                  date={memory.date}
+                  index={index}
+                  onOpen={() => setSelectedMemory(memory)}
+                />
+              ) : (
+                <button type="button" onClick={() => setSelectedMemory(memory)} className="glass-card w-full bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20 p-6 text-left"><p className="font-serif text-xl text-[var(--text-primary)]">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-[var(--text-secondary)]">{new Date(memory.date).toLocaleDateString()}</p></button>
+              )}
+              {memory.category && (
+                <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-white">
+                  {memory.category}
+                </span>
+              )}
+              {memory.user_id && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(memory)}
+                  className="absolute right-3 top-3 rounded-full bg-red-500/80 px-3 py-1 text-xs text-white hover:bg-red-500"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          )
         ))}
       </section>
 
@@ -444,6 +633,36 @@ function MemoriesPageContent() {
         setMemories((current) => current.map((memory) => memory.id === updated.id ? { ...memory, ...updated } : memory))
         setSelectedMemory((current) => current?.id === updated.id ? { ...current, ...updated } : current)
       }} />}
+      {journalModalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={editingJournalId ? 'Edit journal entry' : 'New journal entry'}>
+          <section className="glass-card w-full max-w-xl space-y-4 p-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-[var(--text-primary)]">{editingJournalId ? 'Edit journal entry' : 'New journal entry'}</h2>
+              <button type="button" onClick={closeJournalModal} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-white/10" aria-label="Close journal modal"><X className="h-5 w-5" /></button>
+            </div>
+            <input value={journalTitle} onChange={(event) => setJournalTitle(event.target.value)} placeholder="Title" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-[var(--text-primary)]" />
+            <textarea value={journalBody} onChange={(event) => setJournalBody(event.target.value)} placeholder="Write your thoughts..." rows={5} className="w-full resize-y rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-[var(--text-primary)]" />
+            <div>
+              <p className="mb-2 text-sm font-medium text-[var(--text-primary)]">How are you feeling?</p>
+              <div className="flex flex-wrap gap-2">
+                {JOURNAL_MOODS.map(({ id, label, Icon }) => {
+                  const selected = journalMood === id
+                  return (
+                    <button key={id} type="button" onClick={() => setJournalMood(id)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${selected ? 'border-[var(--accent-1)] bg-[var(--button-bg)] text-[var(--text-primary)]' : 'border-[var(--accent-1)]/20 text-[var(--text-secondary)]'}`}>
+                      <Icon className="h-5 w-5" />
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3">
+              <button type="button" onClick={closeJournalModal} className="rounded-xl px-4 py-2 text-sm text-[var(--text-secondary)]">Cancel</button>
+              <button type="button" onClick={() => void saveJournal()} disabled={journalSaving || !journalTitle.trim()} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">{journalSaving ? 'Saving...' : 'Save'}</button>
+            </div>
+          </section>
+        </div>
+      ) : null}
     </main>
   )
 }

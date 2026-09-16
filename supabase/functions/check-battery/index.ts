@@ -23,7 +23,8 @@ Deno.serve(async (request) => {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const { data: locations, error: locationsError } = await supabase
+  try {
+    const { data: locations, error: locationsError } = await supabase
     .from('user_locations')
     .select('user_id,couple_id,battery_level,is_charging')
   if (locationsError) return Response.json({ error: locationsError.message }, { status: 500 })
@@ -87,15 +88,22 @@ Deno.serve(async (request) => {
       if (!response.ok) return Response.json({ error: 'Expo Push API rejected the notification' }, { status: 502 })
       await response.json()
       sent += messages.length
-    }
 
-    const { error: insertError } = await supabase.from('battery_alert_log').insert({
-      couple_id: location.couple_id,
-      user_id: location.user_id,
-      battery_level: location.battery_level,
-    })
-    if (insertError) return Response.json({ error: insertError.message }, { status: 500 })
+      const { error: insertError } = await supabase.from('battery_alert_log').insert({
+        couple_id: location.couple_id,
+        user_id: location.user_id,
+        battery_level: location.battery_level,
+      })
+      if (insertError) return Response.json({ error: insertError.message }, { status: 500 })
+    }
   }
 
-  return Response.json({ checked, sent })
+    return Response.json({ checked, sent })
+  } catch (err) {
+    console.error('[check-battery] Unhandled error:', err)
+    return Response.json(
+      { error: err instanceof Error ? err.message : 'Unknown error' },
+      { status: 500 },
+    )
+  }
 })

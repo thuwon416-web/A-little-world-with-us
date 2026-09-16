@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  const response = await fetch(`${supabaseUrl}/functions/v1/check-battery`, {
+  const response = await fetch(`${supabaseUrl}/functions/v1/check-missed-checkin`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${serviceRole}`, 'Content-Type': 'application/json' },
     cache: 'no-store',

@@ -1,5 +1,9 @@
+import { supabase } from '@/lib/supabase'
+
 export type NotificationChannel = 'reminders' | 'messages' | 'milestones' | 'wellness'
 export type NotificationPermissionState = 'granted' | 'denied' | 'unsupported' | 'default'
+export type SafetyNotificationPreference = 'geofence' | 'battery_low' | 'missed_checkin'
+export type SafetyNotificationPreferences = Record<SafetyNotificationPreference, boolean>
 
 export interface NotificationSettings {
   reminders: boolean
@@ -80,6 +84,65 @@ export function updateNotificationSettings(settings: Partial<NotificationSetting
   const current = getNotificationSettings()
   const updated = { ...current, ...settings }
   localStorage.setItem('notificationSettings', JSON.stringify(updated))
+}
+
+export async function updateSafetyNotificationPreference(
+  key: SafetyNotificationPreference,
+  enabled: boolean
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('You must be signed in to update notification preferences.')
+
+  const { data: devices, error: devicesError } = await supabase
+    .from('push_devices')
+    .select('id,preferences')
+    .eq('user_id', user.id)
+  if (devicesError) throw new Error(devicesError.message)
+
+  for (const device of devices ?? []) {
+    const { error } = await supabase
+      .from('push_devices')
+      .update({ preferences: { ...(device.preferences ?? {}), [key]: enabled } })
+      .eq('id', device.id)
+      .eq('user_id', user.id)
+    if (error) throw new Error(error.message)
+  }
+}
+
+export async function getSafetyNotificationPreferences(): Promise<SafetyNotificationPreferences> {
+    const defaults: SafetyNotificationPreferences = { geofence: true, battery_low: true, missed_checkin: true }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (!user) return defaults
+    const { data, error } = await supabase
+      .from('push_devices')
+      .select('preferences')
+      .eq('user_id', user.id)
+    if (error) throw new Error(error.message)
+    for (const device of data ?? []) {
+      for (const key of Object.keys(defaults) as SafetyNotificationPreference[]) {
+        if (device.preferences?.[key] !== undefined) defaults[key] = device.preferences[key] !== false
+      }
+    }
+    return defaults
+
+}
+
+export async function hasRegisteredPushDevice(): Promise<boolean> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { count } = await supabase
+    .from('push_devices')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+
+  return (count ?? 0) > 0
 }
 
 export function scheduleBrowserReminder(title: string, time: string, delay?: number) {

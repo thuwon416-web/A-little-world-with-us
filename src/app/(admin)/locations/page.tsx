@@ -15,6 +15,16 @@ type LocationRow = { user_id: string; couple_id: string; latitude: number; longi
 type HistoryRow = { id: string; user_id: string; latitude: number; longitude: number; accuracy: number | null; captured_at: string }
 type EmergencyAlert = { id: string; reporter_id: string; latitude: number | null; longitude: number | null; created_at: string; resolved_at: string | null; resolved_by: string | null; resolution_note: string | null }
 type SavedPlace = { id: string; name: string; latitude: number; longitude: number; radius_meters: number }
+type GeofenceEvent = {
+  id: string
+  saved_place_id: string
+  user_id: string
+  event_type: 'entered' | 'exited'
+  latitude: number
+  longitude: number
+  occurred_at: string
+  notified: boolean
+}
 type CallEvent = { id: string; type: string; status: string; created_at: string; caller_id: string; receiver_id: string }
 type Tab = 'live' | 'timeline' | 'places' | 'device' | 'calls' | 'safety'
 
@@ -33,9 +43,12 @@ export default function AdminLocationsPage() {
   const [alerts, setAlerts] = useState<EmergencyAlert[]>([])
   const [checkins, setCheckins] = useState<SafetyCheckin[]>([])
   const [places, setPlaces] = useState<SavedPlace[]>([])
+  const [geofenceEvents, setGeofenceEvents] = useState<GeofenceEvent[]>([])
   const [calls, setCalls] = useState<CallEvent[]>([])
   const [placeForm, setPlaceForm] = useState({ name: '', latitude: '', longitude: '', radius: '100' })
+  const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null)
   const [selectedUser, setSelectedUser] = useState<string | null>(null)
+  const [authUserId, setAuthUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -44,13 +57,14 @@ export default function AdminLocationsPage() {
     const { data: authData } = await supabase.auth.getUser()
     const user = authData.user
     if (!user) { window.location.assign('/login'); return }
+    setAuthUserId(user.id)
     const { data: profile } = await supabase.from('profiles').select('role, email').eq('id', user.id).maybeSingle()
     if (profile?.role !== 'admin' || profile.email !== 'thuwon416@gmail.com') { window.location.assign('/dashboard'); return }
 
     const { data: link, error: linkError } = await supabase.from('couple_links').select('inviter_id, accepted_by, couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').maybeSingle()
     if (linkError || !link?.accepted_by || !link.couple_id) { setError('No accepted linked partner is available yet.'); setLoading(false); return }
     const userIds = [link.inviter_id, link.accepted_by]
-    const [profilesResult, locationResult, historyResult, alertsResult, placesResult, callsResult, checkinsResult] = await Promise.all([
+    const [profilesResult, locationResult, historyResult, alertsResult, placesResult, callsResult, checkinsResult, geofenceEventsResult] = await Promise.all([
       supabase.from('profiles').select('id,email,full_name,avatar_url').in('id', userIds),
       supabase.from('user_locations').select('*').eq('couple_id', link.couple_id).in('user_id', userIds),
       supabase.from('location_history').select('id,user_id,latitude,longitude,accuracy,captured_at').eq('couple_id', link.couple_id).gte('captured_at', new Date(Date.now() - 7 * 86400000).toISOString()).order('captured_at', { ascending: false }).limit(1500),
@@ -58,8 +72,9 @@ export default function AdminLocationsPage() {
       supabase.from('saved_places').select('id,name,latitude,longitude,radius_meters').eq('couple_id', link.couple_id).order('created_at', { ascending: false }),
       supabase.from('call_signals').select('id,type,status,created_at,caller_id,receiver_id').or(`caller_id.in.(${userIds.join(',')}),receiver_id.in.(${userIds.join(',')})`).order('created_at', { ascending: false }).limit(50),
       supabase.from('safety_checkins').select('*').eq('couple_id', link.couple_id).order('created_at', { ascending: false }).limit(20),
+      supabase.from('geofence_events').select('id,saved_place_id,user_id,event_type,latitude,longitude,occurred_at,notified').eq('couple_id', link.couple_id).order('occurred_at', { ascending: false }).limit(50),
     ])
-    if (profilesResult.error || locationResult.error || historyResult.error || alertsResult.error || placesResult.error || callsResult.error || checkinsResult.error) { setError(profilesResult.error?.message || locationResult.error?.message || historyResult.error?.message || alertsResult.error?.message || placesResult.error?.message || callsResult.error?.message || checkinsResult.error?.message || 'Unable to load location data.'); setLoading(false); return }
+    if (profilesResult.error || locationResult.error || historyResult.error || alertsResult.error || placesResult.error || callsResult.error || checkinsResult.error || geofenceEventsResult.error) { setError(profilesResult.error?.message || locationResult.error?.message || historyResult.error?.message || alertsResult.error?.message || placesResult.error?.message || callsResult.error?.message || checkinsResult.error?.message || geofenceEventsResult.error?.message || 'Unable to load location data.'); setLoading(false); return }
     setProfiles((profilesResult.data ?? []) as Profile[])
     setLocations((locationResult.data ?? []) as LocationRow[])
     setHistory((historyResult.data ?? []) as HistoryRow[])
@@ -67,6 +82,7 @@ export default function AdminLocationsPage() {
     setPlaces((placesResult.data ?? []) as SavedPlace[])
     setCalls((callsResult.data ?? []) as CallEvent[])
     setCheckins((checkinsResult.data ?? []) as SafetyCheckin[])
+    setGeofenceEvents((geofenceEventsResult.data ?? []) as GeofenceEvent[])
     setSelectedUser((current) => current && userIds.includes(current) ? current : user.id)
     setLoading(false)
   }, [])
@@ -82,9 +98,22 @@ export default function AdminLocationsPage() {
     const { data: authData } = await supabase.auth.getUser()
     const { data: link } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${authData.user?.id},accepted_by.eq.${authData.user?.id}`).eq('status', 'accepted').maybeSingle()
     if (!authData.user || !link?.couple_id) return
-    const { data, error: saveError } = await supabase.from('saved_places').insert({ couple_id: link.couple_id, created_by: authData.user.id, name: placeForm.name.trim(), latitude, longitude, radius_meters: radius }).select('id,name,latitude,longitude,radius_meters').single()
+    const { data, error: saveError } = editingPlaceId
+      ? await supabase.from('saved_places').update({ name: placeForm.name.trim(), radius_meters: radius }).eq('id', editingPlaceId).select('id,name,latitude,longitude,radius_meters').single()
+      : await supabase.from('saved_places').insert({ couple_id: link.couple_id, created_by: authData.user.id, name: placeForm.name.trim(), latitude, longitude, radius_meters: radius }).select('id,name,latitude,longitude,radius_meters').single()
     if (saveError) { setError(saveError.message); return }
-    setPlaces((current) => [data as SavedPlace, ...current])
+    setPlaces((current) => editingPlaceId ? current.map((place) => place.id === editingPlaceId ? data as SavedPlace : place) : [data as SavedPlace, ...current])
+    setPlaceForm({ name: '', latitude: '', longitude: '', radius: '100' })
+    setEditingPlaceId(null)
+  }
+
+  const editPlace = (place: SavedPlace) => {
+    setEditingPlaceId(place.id)
+    setPlaceForm({ name: place.name, latitude: String(place.latitude), longitude: String(place.longitude), radius: String(place.radius_meters) })
+  }
+
+  const cancelEditPlace = () => {
+    setEditingPlaceId(null)
     setPlaceForm({ name: '', latitude: '', longitude: '', radius: '100' })
   }
 
@@ -118,7 +147,8 @@ export default function AdminLocationsPage() {
       <section className="glass-card min-h-[520px] overflow-hidden p-4">
         {tab === 'live' && <><PairLocationMap locations={locations} history={history} selectedUser={selectedUser} names={profileNames} places={places} alerts={alerts} /><div className="mt-4 grid gap-3 sm:grid-cols-2">{locations.map((row) => { const person = profiles.find((item) => item.id === row.user_id); return <a key={row.user_id} href={`https://www.openstreetmap.org/?mlat=${row.latitude}&mlon=${row.longitude}#map=16/${row.latitude}/${row.longitude}`} target="_blank" rel="noreferrer" className="rounded-2xl border border-white/10 bg-[var(--bg-2)] p-4 hover:border-[var(--accent-1)]/40"><p className="font-medium text-[var(--text-primary)]">{person?.full_name || person?.email || 'Linked account'}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{row.latitude.toFixed(5)}, {row.longitude.toFixed(5)}</p><p className="mt-2 text-xs text-[var(--accent-2)]">Updated {relativeTime(row.updated_at)} · ±{Math.round(row.accuracy ?? 0)}m</p></a>})}</div></>}
         {tab === 'timeline' && <Timeline rows={selectedHistory} />}
-        {tab === 'places' && <div className="space-y-3 p-2"><h2 className="text-xl text-[var(--text-primary)]">Saved places</h2><div className="grid gap-2 rounded-2xl bg-[var(--bg-2)] p-4 sm:grid-cols-2"><input value={placeForm.name} onChange={(event) => setPlaceForm((form) => ({ ...form, name: event.target.value }))} placeholder="Name" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.latitude} onChange={(event) => setPlaceForm((form) => ({ ...form, latitude: event.target.value }))} placeholder="Latitude" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.longitude} onChange={(event) => setPlaceForm((form) => ({ ...form, longitude: event.target.value }))} placeholder="Longitude" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.radius} onChange={(event) => setPlaceForm((form) => ({ ...form, radius: event.target.value }))} placeholder="Radius (25-10000m)" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><button type="button" onClick={() => void savePlace()} className="glass-button sm:col-span-2">Add place</button></div>{places.map((place) => <div key={place.id} className="flex items-center justify-between rounded-2xl bg-[var(--bg-2)] p-4"><div><p className="font-medium text-[var(--text-primary)]">{place.name}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{place.latitude.toFixed(5)}, {place.longitude.toFixed(5)} · {place.radius_meters}m radius</p></div><button type="button" onClick={() => void deletePlace(place.id)} className="text-sm text-red-300">Delete</button></div>)}{!places.length ? <EmptyPanel title="No saved places" text="Add a safe zone above." /> : null}</div>}
+        {tab === 'places' && <div className="space-y-3 p-2"><h2 className="text-xl text-[var(--text-primary)]">Saved places</h2><div className="grid gap-2 rounded-2xl bg-[var(--bg-2)] p-4 sm:grid-cols-2"><input value={placeForm.name} onChange={(event) => setPlaceForm((form) => ({ ...form, name: event.target.value }))} placeholder="Name" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.latitude} disabled={Boolean(editingPlaceId)} onChange={(event) => setPlaceForm((form) => ({ ...form, latitude: event.target.value }))} placeholder="Latitude" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.longitude} disabled={Boolean(editingPlaceId)} onChange={(event) => setPlaceForm((form) => ({ ...form, longitude: event.target.value }))} placeholder="Longitude" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><input value={placeForm.radius} onChange={(event) => setPlaceForm((form) => ({ ...form, radius: event.target.value }))} placeholder="Radius (25-10000m)" className="rounded-xl border border-white/10 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" /><button type="button" onClick={() => void savePlace()} className="glass-button sm:col-span-2">{editingPlaceId ? 'Update place' : 'Add place'}</button>{editingPlaceId ? <button type="button" onClick={cancelEditPlace} className="text-sm text-[var(--text-secondary)] sm:col-span-2">Cancel edit</button> : null}</div>{places.map((place) => <div key={place.id} className="flex items-center justify-between rounded-2xl bg-[var(--bg-2)] p-4"><div><p className="font-medium text-[var(--text-primary)]">{place.name}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{place.latitude.toFixed(5)}, {place.longitude.toFixed(5)} · {place.radius_meters}m radius</p></div><div className="flex gap-3"><button type="button" onClick={() => editPlace(place)} className="text-sm text-[var(--accent-1)]">Edit</button><button type="button" onClick={() => void deletePlace(place.id)} className="text-sm text-red-300">Delete</button></div></div>)}{!places.length ? <EmptyPanel title="No saved places" text="Add a safe zone above." /> : null}</div>}
+        {tab === 'places' && <div className="mt-6 space-y-3"><h2 className="text-xl text-[var(--text-primary)]">Geofence events</h2>{geofenceEvents.length === 0 ? <EmptyPanel title="No geofence events" text="Enter/exit history will appear here." /> : geofenceEvents.map((event) => { const place = places.find((savedPlace) => savedPlace.id === event.saved_place_id); const isYou = event.user_id === authUserId; const direction = event.event_type === 'entered' ? 'Arrived at' : 'Left'; const when = new Date(event.occurred_at).toLocaleString(); return <div key={event.id} className="flex items-center justify-between rounded-2xl bg-[var(--bg-2)] p-4"><div><p className="font-medium text-[var(--text-primary)]">{isYou ? 'You' : 'Partner'} {direction} {place?.name ?? 'a saved place'}</p><p className="mt-1 text-sm text-[var(--text-secondary)]">{when}</p>{!event.notified ? <p className="mt-1 text-xs text-[var(--text-secondary)]">Notified: pending</p> : null}</div></div> })}</div>}
         {tab === 'device' && <DevicePanel location={selectedLocation} profile={selectedProfile} />}
         {tab === 'calls' && <div className="space-y-3 p-2"><h2 className="text-xl text-[var(--text-primary)]">App call history</h2>{calls.map((call) => <div key={call.id} className="flex items-center gap-3 rounded-2xl bg-[var(--bg-2)] p-4">{call.type === 'video' ? <Video className="h-5 w-5 text-[var(--accent-1)]" /> : <Phone className="h-5 w-5 text-[var(--accent-1)]" />}<div><p className="font-medium text-[var(--text-primary)]">{call.type === 'video' ? 'Video call' : 'Audio call'} · {call.status}</p><p className="text-sm text-[var(--text-secondary)]">{new Date(call.created_at).toLocaleString()}</p></div></div>)}{!calls.length ? <EmptyPanel title="No app calls" text="No in-app call events yet." /> : null}</div>}
         {tab === 'safety' && <SafetyPanel alerts={alerts} profiles={profiles} checkins={checkins} onChanged={load} />}

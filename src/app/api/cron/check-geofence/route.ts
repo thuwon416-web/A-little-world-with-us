@@ -25,5 +25,5 @@ export async function GET(request: Request) {
   })
 
   const payload = await response.json().catch(() => ({ error: 'Invalid Edge Function response' }))
-  return NextResponse.json(payload, { status: response.ok ? 200 : 502 })
+  return NextResponse.json(payload, { status: response.ok ? 200 : 500 })
 }

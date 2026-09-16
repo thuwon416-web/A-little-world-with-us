@@ -1,6 +1,7 @@
 import {
   Camera,
   CircleLayer,
+  FillLayer,
   LineLayer,
   MapView,
   PointAnnotation,
@@ -40,7 +41,23 @@ type LocationRow = {
   device_name: string | null
   app_version: string | null
 }
-type SavedPlace = { id: string; name: string; radius_meters: number }
+type SavedPlace = {
+  id: string
+  name: string
+  latitude: number
+  longitude: number
+  radius_meters: number
+}
+type GeofenceEvent = {
+  id: string
+  saved_place_id: string
+  user_id: string
+  event_type: 'entered' | 'exited'
+  latitude: number
+  longitude: number
+  occurred_at: string
+  notified: boolean
+}
 type CallEvent = { id: string; type: string; status: string; created_at: string }
 type SosAlert = {
   id: string
@@ -49,6 +66,33 @@ type SosAlert = {
   resolved_at: string | null
   resolved_by: string | null
   resolution_note: string | null
+}
+
+function buildCirclePolygon(
+  latitude: number,
+  longitude: number,
+  radiusMeters: number,
+  points = 64
+): GeoJSON.Feature<GeoJSON.Polygon> {
+  const coordinates: [number, number][] = []
+  const earthRadius = 6371000
+  const latRad = (latitude * Math.PI) / 180
+  const dLat = (radiusMeters / earthRadius) * (180 / Math.PI)
+  const dLon = dLat / Math.cos(latRad)
+
+  for (let index = 0; index < points; index += 1) {
+    const angle = (index / points) * 2 * Math.PI
+    const lat = latitude + dLat * Math.cos(angle)
+    const lon = longitude + dLon * Math.sin(angle)
+    coordinates.push([lon, lat])
+  }
+  coordinates.push(coordinates[0])
+
+  return {
+    type: 'Feature',
+    properties: {},
+    geometry: { type: 'Polygon', coordinates: [coordinates] },
+  }
 }
 
 const mapStyle = process.env.EXPO_PUBLIC_CARTO_STYLE_URL ?? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
@@ -81,6 +125,7 @@ export default function LocationScreen() {
   const [rows, setRows] = useState<LocationRow[]>([])
   const [history, setHistory] = useState<LocationHistoryRow[]>([])
   const [savedPlaces, setSavedPlaces] = useState<SavedPlace[]>([])
+  const [geofenceEvents, setGeofenceEvents] = useState<GeofenceEvent[]>([])
   const [calls, setCalls] = useState<CallEvent[]>([])
   const [sosAlerts, setSosAlerts] = useState<SosAlert[]>([])
   const [checkins, setCheckins] = useState<SafetyCheckin[]>([])
@@ -92,6 +137,7 @@ export default function LocationScreen() {
   const [placeModalOpen, setPlaceModalOpen] = useState(false)
   const [placeName, setPlaceName] = useState('')
   const [placeRadius, setPlaceRadius] = useState('100')
+  const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null)
   const [placeSaving, setPlaceSaving] = useState(false)
   const [resolveModalAlert, setResolveModalAlert] = useState<SosAlert | null>(null)
   const [resolutionNote, setResolutionNote] = useState('')
@@ -223,33 +269,67 @@ export default function LocationScreen() {
       Alert.alert('Invalid radius', 'Radius must be a whole number from 25 to 10,000 meters.')
       return
     }
+    setPlaceSaving(true)
     const point = currentLocation
-    if (!point) {
+    const result = editingPlaceId
+      ? await supabase
+        .from('saved_places')
+        .update({ name: placeName.trim(), radius_meters: radius })
+        .eq('id', editingPlaceId)
+        .select('id,name,latitude,longitude,radius_meters')
+        .single()
+      : point
+        ? await supabase
+          .from('saved_places')
+          .insert({
+            couple_id: coupleId,
+            created_by: user.id,
+            name: placeName.trim(),
+            latitude: point.latitude,
+            longitude: point.longitude,
+            radius_meters: radius,
+          })
+          .select('id,name,latitude,longitude,radius_meters')
+          .single()
+        : null
+    setPlaceSaving(false)
+    if (!result) {
       Alert.alert('Location unavailable', 'Refresh your device location before saving a place.')
       return
     }
-    setPlaceSaving(true)
-    const { data, error: saveError } = await supabase
-      .from('saved_places')
-      .insert({
-        couple_id: coupleId,
-        created_by: user.id,
-        name: placeName.trim(),
-        latitude: point.latitude,
-        longitude: point.longitude,
-        radius_meters: radius,
-      })
-      .select('id,name,radius_meters')
-      .single()
-    setPlaceSaving(false)
+    const { data, error: saveError } = result
     if (saveError) {
-      Alert.alert('Unable to save place', saveError.message)
+      Alert.alert(editingPlaceId ? 'Unable to update place' : 'Unable to save place', saveError.message)
       return
     }
-    setSavedPlaces((places) => [...places, data as SavedPlace])
+    setSavedPlaces((places) => editingPlaceId
+      ? places.map((place) => place.id === editingPlaceId ? data as SavedPlace : place)
+      : [...places, data as SavedPlace])
     setPlaceName('')
     setPlaceRadius('100')
+    setEditingPlaceId(null)
     setPlaceModalOpen(false)
+  }
+
+  const editPlace = (place: SavedPlace) => {
+    setEditingPlaceId(place.id)
+    setPlaceName(place.name)
+    setPlaceRadius(String(place.radius_meters))
+    setPlaceModalOpen(true)
+  }
+
+  const openAddPlace = () => {
+    setEditingPlaceId(null)
+    setPlaceName('')
+    setPlaceRadius('100')
+    setPlaceModalOpen(true)
+  }
+
+  const closePlaceModal = () => {
+    setPlaceModalOpen(false)
+    setEditingPlaceId(null)
+    setPlaceName('')
+    setPlaceRadius('100')
   }
 
   const deletePlace = (place: SavedPlace) => {
@@ -286,7 +366,7 @@ export default function LocationScreen() {
       }
       setCoupleId(link.couple_id)
       const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      const [latest, route, places, callEvents, alerts, checkinRows] = await Promise.all([
+      const [latest, route, places, events, callEvents, alerts, checkinRows] = await Promise.all([
         supabase
           .from('user_locations')
           .select('*')
@@ -300,9 +380,15 @@ export default function LocationScreen() {
           .order('captured_at'),
         supabase
           .from('saved_places')
-          .select('id,name,radius_meters')
+          .select('id,name,latitude,longitude,radius_meters')
           .eq('couple_id', link.couple_id)
           .order('created_at'),
+        supabase
+          .from('geofence_events')
+          .select('id,saved_place_id,user_id,event_type,latitude,longitude,occurred_at,notified')
+          .eq('couple_id', link.couple_id)
+          .order('occurred_at', { ascending: false })
+          .limit(50),
         supabase
           .from('call_signals')
           .select('id,type,status,created_at')
@@ -325,6 +411,7 @@ export default function LocationScreen() {
       setRows((latest.data ?? []) as LocationRow[])
       setHistory((route.data ?? []) as LocationHistoryRow[])
       setSavedPlaces((places.data ?? []) as SavedPlace[])
+      setGeofenceEvents((events.data ?? []) as GeofenceEvent[])
       setCalls((callEvents.data ?? []) as CallEvent[])
       setSosAlerts((alerts.data ?? []) as SosAlert[])
       setCheckins((checkinRows.data ?? []) as SafetyCheckin[])
@@ -472,6 +559,40 @@ export default function LocationScreen() {
                 </ShapeSource>
               ) : null
             )}
+            {savedPlaces.map((place) => (
+              <ShapeSource
+                key={`saved-place-${place.id}`}
+                id={`saved-place-${place.id}`}
+                shape={buildCirclePolygon(place.latitude, place.longitude, place.radius_meters)}
+              >
+                <FillLayer
+                  id={`saved-place-fill-${place.id}`}
+                  style={{
+                    fillColor: '#34d399',
+                    fillOpacity: 0.15,
+                  }}
+                />
+                <LineLayer
+                  id={`saved-place-line-${place.id}`}
+                  style={{
+                    lineColor: '#34d399',
+                    lineWidth: 1.5,
+                    lineOpacity: 0.7,
+                  }}
+                />
+              </ShapeSource>
+            ))}
+            {savedPlaces.map((place) => (
+              <PointAnnotation
+                key={`saved-place-label-${place.id}`}
+                id={`saved-place-label-${place.id}`}
+                coordinate={[place.longitude, place.latitude]}
+              >
+                <View style={styles.savedPlaceLabel}>
+                  <Text style={styles.savedPlaceLabelText}>{place.name}</Text>
+                </View>
+              </PointAnnotation>
+            ))}
           </MapView>
           <View style={styles.card}>
             <Text style={styles.cardTitle}>
@@ -533,13 +654,16 @@ export default function LocationScreen() {
         </ScrollView>
       ) : activeTab === 'Saved Places' ? (
         <ScrollView contentContainerStyle={styles.list}>
-          <TouchableOpacity style={styles.button} onPress={() => setPlaceModalOpen(true)}>
+          <TouchableOpacity style={styles.button} onPress={openAddPlace}>
             <Text style={styles.buttonText}>Add place from current location</Text>
           </TouchableOpacity>
           {savedPlaces.map((place) => (
             <View key={place.id} style={styles.listItem}>
               <Text style={styles.cardTitle}>{place.name}</Text>
               <Text style={styles.meta}>Safe zone · {place.radius_meters}m radius</Text>
+              <TouchableOpacity onPress={() => editPlace(place)}>
+                <Text style={styles.meta}>Edit</Text>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => deletePlace(place)}>
                 <Text style={styles.danger}>Delete</Text>
               </TouchableOpacity>
@@ -548,6 +672,30 @@ export default function LocationScreen() {
           {!savedPlaces.length ? (
             <Empty label="No saved places yet." />
           ) : null}
+          <View style={styles.eventsSection}>
+            <Text style={styles.cardTitle}>Geofence events</Text>
+            {geofenceEvents.length === 0 ? (
+              <Empty label="No geofence events yet." />
+            ) : (
+              geofenceEvents.map((event) => {
+                const place = savedPlaces.find((savedPlace) => savedPlace.id === event.saved_place_id)
+                const isYou = event.user_id === user?.id
+                const direction = event.event_type === 'entered' ? 'Arrived at' : 'Left'
+                const when = new Date(event.occurred_at).toLocaleString()
+                return (
+                  <View key={event.id} style={styles.listItem}>
+                    <Text style={styles.cardTitle}>
+                      {isYou ? 'You' : 'Partner'} {direction} {place?.name ?? 'a saved place'}
+                    </Text>
+                    <Text style={styles.meta}>{when}</Text>
+                    {!event.notified ? (
+                      <Text style={styles.meta}>Notified: pending</Text>
+                    ) : null}
+                  </View>
+                )
+              })
+            )}
+          </View>
         </ScrollView>
       ) : activeTab === 'App Calls' ? (
         <ScrollView contentContainerStyle={styles.list}>
@@ -669,19 +817,19 @@ export default function LocationScreen() {
             </View>
           </View>
         </Modal>
-        <Modal visible={placeModalOpen} transparent animationType="slide" onRequestClose={() => setPlaceModalOpen(false)}>
+        <Modal visible={placeModalOpen} transparent animationType="slide" onRequestClose={closePlaceModal}>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.cardTitle}>Add saved place</Text>
+            <Text style={styles.cardTitle}>{editingPlaceId ? 'Edit saved place' : 'Add saved place'}</Text>
             <TextInput style={styles.input} value={placeName} onChangeText={setPlaceName} placeholder="Name" placeholderTextColor={colors.textSecondary} />
             <TextInput style={styles.input} value={placeRadius} onChangeText={setPlaceRadius} placeholder="Radius in meters" placeholderTextColor={colors.textSecondary} keyboardType="numeric" />
             <Text style={styles.meta}>
               {currentLocation ? `Using current location: ${currentLocation.latitude.toFixed(5)}, ${currentLocation.longitude.toFixed(5)}` : 'Current location unavailable'}
             </Text>
             <View style={styles.modalActions}>
-              <TouchableOpacity onPress={() => setPlaceModalOpen(false)}><Text style={styles.meta}>Cancel</Text></TouchableOpacity>
+              <TouchableOpacity onPress={closePlaceModal}><Text style={styles.meta}>Cancel</Text></TouchableOpacity>
               <TouchableOpacity style={styles.button} onPress={() => void savePlace()} disabled={placeSaving}>
-                <Text style={styles.buttonText}>{placeSaving ? 'Saving...' : 'Save place'}</Text>
+                <Text style={styles.buttonText}>{placeSaving ? 'Saving...' : editingPlaceId ? 'Update place' : 'Save place'}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -752,6 +900,20 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 16,
     marginTop: 14,
+  },
+  savedPlaceLabel: {
+    backgroundColor: '#34d399',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  savedPlaceLabelText: {
+    color: '#052e16',
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  eventsSection: {
+    marginTop: 20,
   },
   cardTitle: { color: '#fff7fb', fontSize: 16, fontWeight: '700', marginBottom: 6 },
   meta: { color: '#d4bdd1', fontSize: 13, lineHeight: 19 },

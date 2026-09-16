@@ -19,7 +19,13 @@ import { useLocation } from '@/hooks/useLocation'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import { registerForPushNotifications, sendLocalNotification } from '@/services/notifications'
+import {
+  registerForPushNotifications,
+  sendLocalNotification,
+  updateSafetyNotificationPreference,
+  getSafetyNotificationPreferences,
+  type SafetyNotificationPreference,
+} from '@/services/notifications'
 import {
   exportSettingsData,
   getSettingsData,
@@ -38,6 +44,11 @@ type NotificationSettings = {
   milestones: boolean
   wellness: boolean
 }
+const safetyNotificationItems: Array<{ key: SafetyNotificationPreference; translationKey: string }> = [
+  { key: 'geofence', translationKey: 'settings.safetyNotifications.geofence' },
+  { key: 'battery_low', translationKey: 'settings.safetyNotifications.batteryLow' },
+  { key: 'missed_checkin', translationKey: 'settings.safetyNotifications.missedCheckin' },
+]
 const notificationKey = 'a-little-world-with-us-mobile-notification-settings'
 const defaults: NotificationSettings = {
   pushEnabled: false,
@@ -115,6 +126,11 @@ export default function SettingsScreen() {
   } = useLocation()
   const [data, setData] = useState<SettingsData | null>(null)
   const [notifications, setNotifications] = useState(defaults)
+  const [safetyNotifications, setSafetyNotifications] = useState<Record<SafetyNotificationPreference, boolean>>({
+    geofence: true,
+    battery_low: true,
+    missed_checkin: true,
+  })
   const [health, setHealth] = useState<SettingsData['health']>({
     age: '',
     weight: '',
@@ -133,9 +149,10 @@ export default function SettingsScreen() {
     try {
       setLoading(true)
       setError('')
-      const [next, savedNotifications] = await Promise.all([
+      const [next, savedNotifications, savedSafetyNotifications] = await Promise.all([
         getSettingsData(),
         AsyncStorage.getItem(notificationKey),
+        getSafetyNotificationPreferences(),
       ])
       setData(next)
       setHealth(next.health)
@@ -143,6 +160,7 @@ export default function SettingsScreen() {
       setName(next.coupleName ?? '')
       setAnniversary(next.anniversary ?? '')
       if (savedNotifications) setNotifications({ ...defaults, ...JSON.parse(savedNotifications) })
+      setSafetyNotifications(savedSafetyNotifications)
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Unable to load settings.')
     } finally {
@@ -155,6 +173,15 @@ export default function SettingsScreen() {
   useEffect(() => {
     if (!loading) void AsyncStorage.setItem(notificationKey, JSON.stringify(notifications))
   }, [loading, notifications])
+  const toggleSafetyNotification = async (key: SafetyNotificationPreference, value: boolean) => {
+    setSafetyNotifications((current) => ({ ...current, [key]: value }))
+    try {
+      await updateSafetyNotificationPreference(key, value)
+    } catch (caught) {
+      setSafetyNotifications((current) => ({ ...current, [key]: !value }))
+      Alert.alert('Notifications', caught instanceof Error ? caught.message : 'Unable to save preference.')
+    }
+  }
   const saveHealth = async () => {
     if (!user) return
     try {
@@ -267,6 +294,14 @@ export default function SettingsScreen() {
             label={key[0].toUpperCase() + key.slice(1)}
             value={notifications[key]}
             onChange={(value) => setNotifications((current) => ({ ...current, [key]: value }))}
+          />
+        ))}
+        {safetyNotificationItems.map(({ key, translationKey }) => (
+          <Toggle
+            key={key}
+            label={t(translationKey)}
+            value={safetyNotifications[key]}
+            onChange={(value) => void toggleSafetyNotification(key, value)}
           />
         ))}
       </Section>

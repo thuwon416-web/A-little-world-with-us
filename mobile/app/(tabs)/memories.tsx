@@ -1,8 +1,11 @@
 import { useRouter } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
-import { Check, Sparkles, Wand2 } from 'lucide-react-native'
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { Audio } from 'expo-av'
+import * as Speech from 'expo-speech'
+import { Check, Frown, Heart, Meh, Mic, Pause, Pencil, Play, Smile, Sparkles, Square, Trash2, TriangleAlert, Volume2, Wand2 } from 'lucide-react-native'
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
+import { Modal } from '@/components/ui/Modal'
 import { useTheme } from '@/context/ThemeContext'
 import { supabase } from '@/lib/supabase'
 import { deleteMemory, getMemories, MemoryRecord } from '@/services/memories'
@@ -10,11 +13,23 @@ import MemorySlideshow from '@/components/memories/MemorySlideshow'
 import SlideshowLaunchButton from '@/components/memories/SlideshowLaunchButton'
 
 const categories = ['all', 'favorite', 'travel', 'ritual', 'journal'] as const
+type JournalMood = 'happy' | 'okay' | 'sad' | 'loved' | 'anxious'
+type JournalMemory = MemoryRecord & {
+  description?: string | null
+  metadata?: { mood_tag?: string; ai_reflection?: string; voice_url?: string } | null
+}
+const JOURNAL_MOODS: { id: JournalMood; label: string; Icon: typeof Smile }[] = [
+  { id: 'happy', label: 'Happy', Icon: Smile },
+  { id: 'okay', label: 'Okay', Icon: Meh },
+  { id: 'sad', label: 'Sad', Icon: Frown },
+  { id: 'loved', label: 'Loved', Icon: Heart },
+  { id: 'anxious', label: 'Anxious', Icon: TriangleAlert },
+]
 
 export default function MemoriesScreen() {
   const { colors } = useTheme()
   const router = useRouter()
-  const [memories, setMemories] = useState<MemoryRecord[]>([])
+  const [memories, setMemories] = useState<JournalMemory[]>([])
   const [filter, setFilter] = useState<(typeof categories)[number]>('all')
   const [error, setError] = useState('')
   const [mediatorMessage, setMediatorMessage] = useState('')
@@ -28,13 +43,54 @@ export default function MemoriesScreen() {
   const [curationError, setCurationError] = useState('')
   const [curationLoading, setCurationLoading] = useState(false)
   const [isSlideshowOpen, setIsSlideshowOpen] = useState(false)
+  const [journalModalOpen, setJournalModalOpen] = useState(false)
+  const [editingJournalId, setEditingJournalId] = useState<string | null>(null)
+  const [journalTitle, setJournalTitle] = useState('')
+  const [journalBody, setJournalBody] = useState('')
+  const [journalMood, setJournalMood] = useState<JournalMood>('okay')
+  const [journalSaving, setJournalSaving] = useState(false)
+  const [reflectingId, setReflectingId] = useState<string | null>(null)
+  const [journalRecording, setJournalRecording] = useState<Audio.Recording | null>(null)
+  const [journalVoiceUri, setJournalVoiceUri] = useState<string | null>(null)
+  const [journalVoiceRemoteUrl, setJournalVoiceRemoteUrl] = useState<string | null>(null)
+  const [journalRecordingTime, setJournalRecordingTime] = useState(0)
+  const [journalPlaying, setJournalPlaying] = useState(false)
+  const [journalSound, setJournalSound] = useState<Audio.Sound | null>(null)
+  const [journalUploadingVoice, setJournalUploadingVoice] = useState(false)
+  const [speakingJournalId, setSpeakingJournalId] = useState<string | null>(null)
+
+  const loadMemories = async () => {
+    const records = await getMemories()
+    if (!records.length) return records
+    const { data, error: detailsError } = await supabase
+      .from('memories')
+      .select('id,description,metadata')
+      .in('id', records.map((memory) => memory.id))
+    if (detailsError) throw new Error(detailsError.message)
+    const details = new Map(
+      (data ?? []).map((item) => [
+        item.id,
+        {
+          description: item.description,
+          metadata: item.metadata as { mood_tag?: string } | null,
+        },
+      ])
+    )
+    return records.map((memory) => ({ ...memory, ...(details.get(memory.id) ?? {}) }))
+  }
+
   useEffect(() => {
-    void getMemories()
+    void loadMemories()
       .then(setMemories)
       .catch((caught) =>
         setError(caught instanceof Error ? caught.message : 'Unable to load memories.')
       )
   }, [])
+  useEffect(() => () => {
+    if (journalRecording) void journalRecording.stopAndUnloadAsync()
+    if (journalSound) void journalSound.unloadAsync()
+    void Speech.stop()
+  }, [journalRecording, journalSound])
   const visible = useMemo(
     () => (filter === 'all' ? memories : memories.filter((memory) => memory.category === filter)),
     [filter, memories]
@@ -53,6 +109,220 @@ export default function MemoriesScreen() {
             ),
       },
     ])
+  const openNewJournal = () => {
+    if (journalSound) void journalSound.unloadAsync()
+    setEditingJournalId(null)
+    setJournalTitle('')
+    setJournalBody('')
+    setJournalMood('okay')
+    setJournalRecording(null)
+    setJournalVoiceUri(null)
+    setJournalVoiceRemoteUrl(null)
+    setJournalRecordingTime(0)
+    setJournalPlaying(false)
+    setJournalSound(null)
+    setJournalModalOpen(true)
+  }
+  const openEditJournal = (memory: JournalMemory) => {
+    setEditingJournalId(memory.id)
+    setJournalTitle(memory.title)
+    setJournalBody(memory.description ?? '')
+    setJournalVoiceRemoteUrl(memory.metadata?.voice_url ?? null)
+    setJournalVoiceUri(null)
+    setJournalRecording(null)
+    setJournalRecordingTime(0)
+    setJournalPlaying(false)
+    const tag = memory.metadata?.mood_tag
+    setJournalMood(JOURNAL_MOODS.some((mood) => mood.id === tag) ? (tag as JournalMood) : 'okay')
+    setJournalModalOpen(true)
+  }
+  const closeJournalModal = () => {
+    if (journalRecording) void journalRecording.stopAndUnloadAsync()
+    if (journalSound) void journalSound.unloadAsync()
+    setJournalModalOpen(false)
+    setEditingJournalId(null)
+    setJournalTitle('')
+    setJournalBody('')
+    setJournalMood('okay')
+    setJournalRecording(null)
+    setJournalVoiceUri(null)
+    setJournalVoiceRemoteUrl(null)
+    setJournalRecordingTime(0)
+    setJournalPlaying(false)
+    setJournalSound(null)
+  }
+  const startJournalRecording = async () => {
+    const permission = await Audio.requestPermissionsAsync()
+    if (!permission.granted) {
+      Alert.alert('Permission needed', 'Allow microphone access to record a voice note.')
+      return
+    }
+    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true })
+    const result = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
+    result.recording.setOnRecordingStatusUpdate((status) => {
+      if (status.isRecording) setJournalRecordingTime(Math.floor(status.durationMillis / 1000))
+    })
+    setJournalRecording(result.recording)
+    setJournalRecordingTime(0)
+    setJournalVoiceUri(null)
+    setJournalVoiceRemoteUrl(null)
+  }
+  const stopJournalRecording = async () => {
+    if (!journalRecording) return
+    await journalRecording.stopAndUnloadAsync()
+    await Audio.setAudioModeAsync({ allowsRecordingIOS: false })
+    const uri = journalRecording.getURI()
+    setJournalVoiceUri(uri ?? null)
+    setJournalRecording(null)
+  }
+  const discardJournalVoice = async () => {
+    if (journalRecording) {
+      try {
+        await journalRecording.stopAndUnloadAsync()
+      } catch {
+        // The recording may already be unloaded after stopping.
+      }
+    }
+    if (journalSound) await journalSound.unloadAsync()
+    setJournalRecording(null)
+    setJournalVoiceUri(null)
+    setJournalVoiceRemoteUrl(null)
+    setJournalRecordingTime(0)
+    setJournalPlaying(false)
+    setJournalSound(null)
+  }
+  const playJournalVoice = async (source?: string) => {
+    const uri = source ?? journalVoiceUri ?? journalVoiceRemoteUrl
+    if (!uri) return
+    if (journalPlaying && journalSound) {
+      await journalSound.stopAsync()
+      await journalSound.unloadAsync()
+      setJournalSound(null)
+      setJournalPlaying(false)
+      return
+    }
+    const { sound } = await Audio.Sound.createAsync({ uri })
+    sound.setOnPlaybackStatusUpdate((status) => {
+      if (status.isLoaded && status.didJustFinish) {
+        void sound.unloadAsync()
+        setJournalSound(null)
+        setJournalPlaying(false)
+      }
+    })
+    setJournalSound(sound)
+    setJournalPlaying(true)
+    await sound.playAsync()
+  }
+  const saveJournal = async () => {
+    if (!journalTitle.trim() || journalSaving) return
+    setJournalSaving(true)
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) throw new Error('Please sign in again.')
+      const { data: coupleLink, error: coupleError } = await supabase
+        .from('couple_links')
+        .select('couple_id')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
+      if (coupleError || !coupleLink?.couple_id) {
+        throw new Error(coupleError?.message || 'No accepted couple is linked to this account.')
+      }
+      let voiceUrl = journalVoiceRemoteUrl
+      if (journalVoiceUri && !journalVoiceRemoteUrl) {
+        setJournalUploadingVoice(true)
+        const filePath = `journal/${coupleLink.couple_id}/${Date.now()}.m4a`
+        const arraybuffer = await fetch(journalVoiceUri).then((response) => response.arrayBuffer())
+        const { error: uploadError } = await supabase.storage
+          .from('memories')
+          .upload(filePath, arraybuffer, { contentType: 'audio/m4a', upsert: false })
+        if (uploadError) throw new Error(`Voice upload failed: ${uploadError.message}`)
+        const { data: urlData } = supabase.storage.from('memories').getPublicUrl(filePath)
+        voiceUrl = urlData.publicUrl
+        setJournalVoiceRemoteUrl(voiceUrl)
+      }
+      const existingMeta = editingJournalId
+        ? memories.find((memory) => memory.id === editingJournalId)?.metadata ?? {}
+        : {}
+      const payload = {
+        couple_id: coupleLink.couple_id,
+        user_id: user.id,
+        title: journalTitle.trim(),
+        description: journalBody.trim() || null,
+        category: 'journal' as const,
+        date: new Date().toISOString().slice(0, 10),
+        metadata: { ...existingMeta, mood_tag: journalMood, ...(voiceUrl ? { voice_url: voiceUrl } : {}) },
+      }
+      const query = editingJournalId
+        ? supabase.from('memories').update(payload).eq('id', editingJournalId).select().single()
+        : supabase.from('memories').insert(payload).select().single()
+      const { data, error: saveError } = await query
+      if (saveError) throw new Error(saveError.message)
+      const saved = data as JournalMemory
+      setMemories((current) =>
+        editingJournalId
+          ? current.map((memory) => (memory.id === editingJournalId ? { ...memory, ...saved } : memory))
+          : [saved, ...current]
+      )
+      closeJournalModal()
+    } catch (caught) {
+      Alert.alert('Unable to save journal', caught instanceof Error ? caught.message : 'Unable to save journal.')
+    } finally {
+      setJournalUploadingVoice(false)
+      setJournalSaving(false)
+    }
+  }
+  const requestReflection = async (memory: JournalMemory) => {
+    if (reflectingId) return
+    setReflectingId(memory.id)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+      if (!webUrl || !session?.access_token) throw new Error('Please sign in again.')
+      const response = await fetch(`${webUrl}/api/ai/journal-reflect`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ journal_id: memory.id }),
+      })
+      const body = (await response.json()) as { reflection?: string; error?: string }
+      if (!response.ok || !body.reflection) throw new Error(body.error || 'Reflection failed.')
+      setMemories((current) => current.map((item) =>
+        item.id === memory.id
+          ? { ...item, metadata: { ...(item.metadata ?? {}), ai_reflection: body.reflection } }
+          : item
+      ))
+    } catch (caught) {
+      Alert.alert('AI reflection', caught instanceof Error ? caught.message : 'Unable to reflect right now.')
+    } finally {
+      setReflectingId(null)
+    }
+  }
+  const speakReflection = async (memory: JournalMemory) => {
+    const text = memory.metadata?.ai_reflection
+    if (!text) return
+    try {
+      if (speakingJournalId === memory.id) {
+        await Speech.stop()
+        setSpeakingJournalId(null)
+        return
+      }
+      await Speech.stop()
+      setSpeakingJournalId(memory.id)
+      Speech.speak(text, {
+        language: /[\uAC00-\uD7AF]/.test(text) ? 'ko-KR' : 'en-US',
+        onDone: () => setSpeakingJournalId(null),
+        onStopped: () => setSpeakingJournalId(null),
+        onError: () => setSpeakingJournalId(null),
+      })
+    } catch {
+      setSpeakingJournalId(null)
+    }
+  }
   const createCuratedStory = async () => {
     if (!curationSelected.length || curationLoading) {
       if (!curationSelected.length) setCurationError('Choose at least one memory first.')
@@ -262,6 +532,11 @@ export default function MemoriesScreen() {
           </TouchableOpacity>
         ))}
       </ScrollView>
+      {filter === 'journal' ? (
+        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.accent1 }]} onPress={openNewJournal}>
+          <Text style={[styles.primaryButtonText, { color: colors.background }]}>New journal entry</Text>
+        </TouchableOpacity>
+      ) : null}
       {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
       {visible.length === 0 ? (
         <Text style={[styles.muted, { color: colors.textSecondary }]}>No structured memories in this category yet.</Text>
@@ -270,17 +545,146 @@ export default function MemoriesScreen() {
           <View key={memory.id} style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
             <View style={styles.row}>
               <Text style={[styles.memoryTitle, { color: colors.textPrimary }]}>{memory.title}</Text>
-              <TouchableOpacity onPress={() => remove(memory)}>
-                <Text style={[styles.delete, { color: colors.error }]}>Delete</Text>
-              </TouchableOpacity>
+              {memory.category === 'journal' ? (
+                <View style={styles.journalActions}>
+                  {memory.metadata?.mood_tag ? (() => {
+                    const mood = JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
+                      JOURNAL_MOODS.find((item) => item.id === 'okay')
+                    if (!mood) return null
+                    const MoodIcon = mood.Icon
+                    return <MoodIcon color={colors.accent2} size={20} />
+                  })() : null}
+                  <TouchableOpacity onPress={() => openEditJournal(memory)} accessibilityLabel="Edit journal entry">
+                    <Pencil color={colors.accent2} size={20} />
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => remove(memory)} accessibilityLabel="Delete journal entry">
+                    <Trash2 color={colors.error} size={20} />
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity onPress={() => remove(memory)}>
+                  <Text style={[styles.delete, { color: colors.error }]}>Delete</Text>
+                </TouchableOpacity>
+              )}
             </View>
             <Text style={[styles.meta, { color: colors.accent2 }]}>
               {memory.category} {memory.date ? `• ${memory.date}` : ''}
             </Text>
             {memory.caption ? <Text style={[styles.caption, { color: colors.textSecondary }]}>{memory.caption}</Text> : null}
+            {memory.category === 'journal' && memory.description ? (
+              <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={2}>{memory.description}</Text>
+            ) : null}
+            {memory.category === 'journal' ? (
+              memory.metadata?.ai_reflection ? (
+                <View style={[styles.reflectionCard, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+                  <View style={styles.reflectionHeader}>
+                    <Sparkles color={colors.accent1} size={16} />
+                    <Text style={[styles.reflectionLabel, { color: colors.accent1 }]}>AI reflection</Text>
+                    <TouchableOpacity onPress={() => void speakReflection(memory)} accessibilityLabel="Read AI reflection aloud">
+                      {speakingJournalId === memory.id
+                        ? <Square color={colors.accent1} size={16} />
+                        : <Volume2 color={colors.accent1} size={16} />}
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={[styles.caption, { color: colors.textPrimary }]}>{memory.metadata.ai_reflection}</Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={[styles.reflectButton, { borderColor: colors.cardBorder }]}
+                  onPress={() => void requestReflection(memory)}
+                  disabled={reflectingId !== null}
+                >
+                  {reflectingId === memory.id ? <ActivityIndicator color={colors.accent1} size="small" /> : <Sparkles color={colors.accent1} size={16} />}
+                  <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>
+                    {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
+                  </Text>
+                </TouchableOpacity>
+              )
+            ) : null}
+            {memory.category === 'journal' && memory.metadata?.voice_url ? (
+              <TouchableOpacity
+                style={[styles.voiceRow, { borderColor: colors.cardBorder }]}
+                onPress={() => void playJournalVoice(memory.metadata?.voice_url)}
+              >
+                <Play color={colors.accent1} size={16} />
+                <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>Play voice note</Text>
+              </TouchableOpacity>
+            ) : null}
           </View>
         ))
       )}
+      <Modal
+        visible={journalModalOpen}
+        onClose={closeJournalModal}
+        title={editingJournalId ? 'Edit journal entry' : 'New journal entry'}
+      >
+        <TextInput
+          value={journalTitle}
+          onChangeText={setJournalTitle}
+          placeholder="Title"
+          placeholderTextColor={colors.textSecondary}
+          style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+        />
+        <TextInput
+          value={journalBody}
+          onChangeText={setJournalBody}
+          placeholder="Write your thoughts..."
+          placeholderTextColor={colors.textSecondary}
+          multiline
+          numberOfLines={5}
+          style={[styles.input, styles.textArea, { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+        />
+        <Text style={[styles.label, { color: colors.textPrimary }]}>Voice note (optional)</Text>
+        {journalRecording ? (
+          <View style={[styles.voiceRow, { borderColor: colors.cardBorder }]}>
+            <Text style={{ color: colors.textPrimary }}>{journalRecordingTime}s</Text>
+            <TouchableOpacity onPress={() => void stopJournalRecording()}>
+              <Square color={colors.error} size={20} />
+            </TouchableOpacity>
+          </View>
+        ) : (journalVoiceUri || journalVoiceRemoteUrl) ? (
+          <View style={[styles.voiceRow, { borderColor: colors.cardBorder }]}>
+            <TouchableOpacity onPress={() => void playJournalVoice()}>
+              {journalPlaying ? <Pause color={colors.accent1} size={20} /> : <Play color={colors.accent1} size={20} />}
+            </TouchableOpacity>
+            <Text style={[styles.voiceText, { color: colors.textPrimary }]}>
+              {journalPlaying ? 'Playing...' : journalUploadingVoice ? 'Uploading...' : 'Voice attached'}
+            </Text>
+            <TouchableOpacity onPress={() => void discardJournalVoice()}>
+              <Trash2 color={colors.error} size={20} />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity style={[styles.voiceRow, { borderColor: colors.cardBorder }]} onPress={() => void startJournalRecording()}>
+            <Mic color={colors.accent1} size={20} />
+            <Text style={[styles.voiceText, { color: colors.accent1 }]}>Record voice note</Text>
+          </TouchableOpacity>
+        )}
+        <Text style={[styles.label, { color: colors.textPrimary }]}>How are you feeling?</Text>
+        <View style={styles.moodRow}>
+          {JOURNAL_MOODS.map(({ id, label, Icon }) => {
+            const selected = journalMood === id
+            return (
+              <TouchableOpacity
+                key={id}
+                onPress={() => setJournalMood(id)}
+                style={[styles.moodChip, { borderColor: colors.cardBorder }, selected && { backgroundColor: colors.accent1, borderColor: colors.accent1 }]}
+              >
+                <Icon color={selected ? colors.background : colors.textSecondary} size={20} />
+                <Text style={[styles.moodLabel, { color: colors.textSecondary }, selected && { color: colors.background }]}>{label}</Text>
+              </TouchableOpacity>
+            )
+          })}
+        </View>
+        <View style={styles.modalActions}>
+          <TouchableOpacity onPress={closeJournalModal}>
+            <Text style={{ color: colors.textSecondary }}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => void saveJournal()} disabled={journalSaving || !journalTitle.trim()}>
+            <Text style={{ color: colors.accent1 }}>{journalSaving ? 'Saving...' : 'Save'}</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
       {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} /> : null}
     </ScrollView>
   )
@@ -311,6 +715,23 @@ const styles = StyleSheet.create({
   muted: {},
   error: {},
   delete: { fontWeight: '700' },
+  journalActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  primaryButton: { borderRadius: 12, padding: 12, alignItems: 'center' },
+  primaryButtonText: { fontWeight: '700' },
+  input: { minHeight: 44, borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
+  textArea: { minHeight: 120, textAlignVertical: 'top' },
+  label: { fontWeight: '700' },
+  moodRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  moodChip: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 999, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8 },
+  moodLabel: { fontSize: 12 },
+  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 20, marginTop: 14 },
+  reflectionCard: { borderRadius: 12, borderWidth: 1, padding: 12, gap: 8 },
+  reflectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  reflectionLabel: { fontSize: 12, fontWeight: '700' },
+  reflectButton: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, borderRadius: 999, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
+  reflectButtonText: { fontSize: 12, fontWeight: '700' },
+  voiceRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 12, borderWidth: 1, padding: 10 },
+  voiceText: { flex: 1, fontSize: 13 },
   mediatorCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 12 },
   mediatorHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   mediatorHeaderText: { flex: 1, gap: 4 },
