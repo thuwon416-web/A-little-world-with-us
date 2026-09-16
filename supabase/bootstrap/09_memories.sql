@@ -1,3 +1,17 @@
+-- ----------------------------------------------------------------
+-- 09_memories.sql - Relationship memories
+-- ----------------------------------------------------------------
+-- Source files merged:
+--   20260914_relationship_memories.sql
+--   20260916_memories_metadata.sql
+--
+-- Depends on: 00_core.sql
+-- Run order: 00 -> 01 -> 02 -> ... -> 10
+-- ----------------------------------------------------------------
+
+-- ----------------------------------------------------------------
+-- SECTION - 20260914_relationship_memories.sql
+-- ----------------------------------------------------------------
 begin;
 
 create table if not exists public.relationship_memories (
@@ -39,3 +53,14 @@ comment on column public.relationship_memories.importance is
   'critical=First events, high=Promises/Conflicts, medium=General, low=Minor';
 
 commit;
+
+-- ----------------------------------------------------------------
+-- SECTION - 20260916_memories_metadata.sql
+-- ----------------------------------------------------------------
+-- Phase 17.0 - memories.metadata for journal entries (mood_tag, voice_url, ai_reflection)
+alter table public.memories
+  add column if not exists metadata jsonb not null default '{}'::jsonb;
+
+create index if not exists memories_journal_recent_idx
+  on public.memories(couple_id, date desc)
+  where category = 'journal';

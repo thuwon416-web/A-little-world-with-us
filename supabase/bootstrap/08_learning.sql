@@ -1,4 +1,16 @@
--- Phase 12.2c: Korean learning content, quizzes, and progress
+-- ----------------------------------------------------------------
+-- 08_learning.sql - Korean learning
+-- ----------------------------------------------------------------
+-- Source files merged:
+--   20260915_korean_learning.sql
+--
+-- Depends on: 00_core.sql
+-- Run order: 00 -> 01 -> 02 -> ... -> 10
+-- ----------------------------------------------------------------
+
+-- ----------------------------------------------------------------
+-- SECTION - 20260915_korean_learning.sql
+-- ----------------------------------------------------------------
 begin;
 
 create table if not exists public.korean_lessons (

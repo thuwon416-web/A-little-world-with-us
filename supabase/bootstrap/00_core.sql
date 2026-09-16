@@ -1,3 +1,23 @@
+-- ----------------------------------------------------------------
+-- 00_core.sql - Foundation schema (auto-consolidated from Phase 20.5)
+-- ----------------------------------------------------------------
+-- Source files merged:
+--   20260111_reset_and_bootstrap.sql
+--   20260111_repair_authenticated_grants.sql
+--   20260909_f1_f6_schema_upgrade.sql
+--   20260909_release2_upgrade.sql
+--   20260911_harden_function_grants.sql
+--   20260912_security_hardening.sql
+--
+-- WARNING: This file contains the destructive reset from
+--   20260111_reset_and_bootstrap.sql. Run ONLY on a fresh/dev database.
+--   Do NOT run on production data you want to keep.
+--
+-- Run order: 00 -> 01 -> 02 -> ... -> 10
+-- ----------------------------------------------------------------
+-- ----------------------------------------------------------------
+-- SECTION 1 - DESTRUCTIVE RESET (foundational schema)
+-- ----------------------------------------------------------------
 -- A Little World With Us: destructive clean reset for the CURRENT Supabase project.
 -- Keeps only the two verified auth.users records below. Run once in Supabase SQL Editor.
 -- WARNING: this permanently deletes all public-schema data.
@@ -87,7 +107,6 @@ create table public.couple_links (
 );
 create unique index couple_links_accepted_member_pair on public.couple_links (least(inviter_id, accepted_by), greatest(inviter_id, accepted_by)) where status = 'accepted' and accepted_by is not null;
 
-create or replace function public.touch_updated_at() returns trigger language plpgsql as $$ begin new.updated_at = now(); return new; end $$;
 create trigger profiles_touch before update on public.profiles for each row execute function public.touch_updated_at();
 create trigger couples_touch before update on public.couples for each row execute function public.touch_updated_at();
 create trigger couple_occasions_touch before update on public.couple_occasions for each row execute function public.touch_updated_at();
@@ -335,8 +354,8 @@ create policy shared_media_read on storage.objects for select using (bucket_id i
 create policy shared_media_insert on storage.objects for insert with check (bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages') and owner = auth.uid() and public.has_accepted_couple());
 create policy shared_media_update on storage.objects for update using (bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages') and owner = auth.uid());
 create policy shared_media_delete on storage.objects for delete using (bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages') and (owner = auth.uid() or public.has_accepted_couple()));
-create policy surprise_media_creator_access on storage.objects for all using (bucket_id = 'surprises' and owner = auth.uid()) with check (bucket_id = 'surprises' and owner = auth.uid() and public.has_accepted_couple());
-create policy surprise_media_recipient_read on storage.objects for select using (bucket_id = 'surprises' and exists (select 1 from public.time_capsule_attachments a join public.time_capsules c on c.id = a.capsule_id where a.storage_path = name and c.recipient_id = auth.uid() and c.status = 'revealed' and c.unlock_at <= now()));
+-- Duplicate policy omitted: surprise_media_creator_access is defined in SECTION 1.
+-- Duplicate policy omitted: surprise_media_recipient_read is defined in SECTION 1.
 
 -- Preserve the supplied accounts, create their profiles, and directly accept the pair.
 insert into public.profiles (id, email, role)
@@ -394,3 +413,325 @@ do $$ begin
 end $$;
 
 select 'Reset complete' as status, (select id from public.couples limit 1) as couple_id, (select count(*) from public.cycle_logs where source = 'flo_import') as imported_flo_periods;
+
+-- ----------------------------------------------------------------
+-- SECTION 2 - GRANT REPAIR (authenticated access)
+-- ----------------------------------------------------------------
+-- Emergency repair for the current project after the destructive bootstrap ran.
+-- Safe to run once in Supabase SQL Editor. It does not delete or modify app data.
+-- RLS remains enabled; this only restores PostgREST table/sequence privileges for
+-- authenticated users so existing policies can be applied.
+-- IMPORTANT: Run this file by itself. Do not append BEGIN, ROLLBACK, or SET ROLE.
+
+grant usage on schema public to postgres, anon, authenticated, service_role;
+grant all on schema public to postgres, service_role;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant usage, select on all sequences in schema public to authenticated;
+alter default privileges in schema public grant select, insert, update, delete on tables to authenticated;
+alter default privileges in schema public grant usage, select on sequences to authenticated;
+
+-- Verification: both rows should be true before browser testing.
+select
+  has_schema_privilege('authenticated', 'public', 'usage') as authenticated_can_use_public_schema,
+  has_table_privilege('authenticated', 'public.profiles', 'select') as authenticated_can_select_profiles,
+  has_table_privilege('authenticated', 'public.couple_links', 'select') as authenticated_can_select_couple_links;
+
+-- RLS verification. Each query must return exactly one accepted link row.
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '900da207-67b7-4433-a105-90c4e4e6d9a4', true);
+select id, email, role from public.profiles;
+select id, couple_id, status, inviter_id, accepted_by from public.couple_links;
+rollback;
+
+begin;
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '693b63dc-2262-47c9-ad81-ab9d3d0646c4', true);
+select id, email, role from public.profiles;
+select id, couple_id, status, inviter_id, accepted_by from public.couple_links;
+rollback;
+
+-- ----------------------------------------------------------------
+-- SECTION 3 - F1-F6 SCHEMA UPGRADE (time capsules + export jobs)
+-- ----------------------------------------------------------------
+-- NOTE: Duplicate table and policy definitions from SECTION 1 were omitted;
+-- non-duplicate upgrade and verification statements are preserved.
+-- F1-F6 live-project upgrade. Run this ONCE after 20260111_reset_and_bootstrap.sql.
+-- It is additive and does not reset accounts or shared data.
+begin;
+
+alter table public.time_capsules add column if not exists recipient_id uuid references public.profiles(id) on delete cascade;
+alter table public.time_capsules add column if not exists status text not null default 'scheduled' check (status in ('scheduled','revealed','cancelled'));
+alter table public.time_capsules add column if not exists revealed_at timestamptz;
+alter table public.time_capsules add column if not exists cancelled_at timestamptz;
+alter table public.time_capsules add column if not exists updated_at timestamptz not null default now();
+update public.time_capsules set content = coalesce(content, '') where content is null;
+alter table public.time_capsules alter column content set not null;
+
+update public.time_capsules c
+set recipient_id = case when cl.inviter_id = c.user_id then cl.accepted_by else cl.inviter_id end
+from public.couple_links cl
+where cl.couple_id = c.couple_id and cl.status = 'accepted' and c.recipient_id is null;
+
+alter table public.time_capsules alter column recipient_id set not null;
+-- Duplicate index omitted: time_capsules_recipient_unlock_idx is defined in SECTION 1.
+-- Duplicate table definitions omitted: both tables are defined in SECTION 1.
+
+alter table public.time_capsules enable row level security;
+drop policy if exists time_capsules_couple_access on public.time_capsules;
+alter table public.time_capsule_attachments enable row level security;
+alter table public.export_jobs enable row level security;
+create policy export_jobs_own_access on public.export_jobs for all using (requested_by = auth.uid() and public.is_couple_member(couple_id)) with check (requested_by = auth.uid() and public.is_couple_member(couple_id));
+
+insert into storage.buckets (id, name, public) values ('surprises','surprises',false) on conflict (id) do update set public = false;
+drop policy if exists surprise_media_creator_access on storage.objects;
+drop policy if exists surprise_media_recipient_read on storage.objects;
+-- Duplicate policy omitted: surprise_media_creator_access is defined in SECTION 1.
+-- Duplicate policy omitted: surprise_media_recipient_read is defined in SECTION 1.
+grant select, insert, update, delete on public.time_capsules, public.time_capsule_attachments, public.export_jobs to authenticated;
+commit;
+
+select 'F1-F6 schema upgrade complete' as status;
+
+-- ----------------------------------------------------------------
+-- SECTION 4 - RELEASE 2 UPGRADE (occasions + message voice transcripts)
+-- ----------------------------------------------------------------
+-- NOTE: Duplicate table and transcript definitions from SECTION 1 were omitted;
+-- the anniversary backfill is preserved.
+-- Release 2: private voice transcripts and shared occasion dates.
+-- Run once after 20260111_reset_and_bootstrap.sql and 20260909_f1_f6_schema_upgrade.sql.
+begin;
+
+-- Duplicate column omitted: messages.transcript is defined in SECTION 1.
+
+-- Duplicate table, trigger, RLS, policy, and grant omitted: couple_occasions is defined in SECTION 1.
+
+insert into public.couple_occasions (couple_id, title, month, day, kind)
+select id, 'Our anniversary', extract(month from anniversary)::smallint, extract(day from anniversary)::smallint, 'anniversary'
+from public.couples
+where anniversary is not null
+on conflict (couple_id, kind, title) do update set month = excluded.month, day = excluded.day;
+
+commit;
+select 'Release 2 schema upgrade complete' as status;
+
+-- ----------------------------------------------------------------
+-- SECTION 5 - FUNCTION GRANT HARDENING
+-- ----------------------------------------------------------------
+-- 20260911_harden_function_grants.sql
+--
+-- Security hardening for public schema functions.
+--
+-- Background (from Supabase database linter):
+--   * 0028_anon_security_definer_function_executable ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â SECURITY DEFINER functions
+--     in the `public` schema are reachable by the `anon` role through
+--     /rest/v1/rpc/<name>. The anon key ships in the browser bundle, so anything
+--     executable by `anon` is effectively executable by the whole internet.
+--   * 0011_function_search_path_mutable ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â public.touch_updated_at() had no pinned
+--     search_path, leaving it open to search_path injection.
+--
+-- What this migration changes:
+--   1. purge_expired_location_history() ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â HIGH severity. A SECURITY DEFINER
+--      function that DELETEs from public.location_history. Any unauthenticated
+--      caller could wipe location history older than 7 days over the REST API.
+--      EXECUTE is revoked from PUBLIC/anon/authenticated; only service_role and
+--      postgres (i.e. the scheduled job) may run it.
+--   2. handle_new_user(), assign_active_couple_id(), touch_updated_at() ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â trigger
+--      functions that were never meant to be callable as RPCs. EXECUTE is revoked
+--      from PUBLIC/anon/authenticated. PostgreSQL checks EXECUTE on a trigger
+--      function at CREATE TRIGGER time, not at fire time, so existing triggers
+--      keep working.
+--   3. touch_updated_at() is recreated with `set search_path = ''` and a
+--      schema-qualified body.
+--
+-- Deliberately NOT changed:
+--   is_couple_member(uuid), is_linked_user(uuid), is_location_admin(),
+--   has_accepted_couple(). These are RLS helpers referenced by all 49 policies in
+--   the public schema, and every policy is declared `TO public`. Policy
+--   expressions are evaluated with the caller's privileges, so revoking EXECUTE
+--   from `anon` would turn anonymous reads into "permission denied" errors
+--   instead of empty result sets. All four gate on auth.uid(), which is NULL for
+--   `anon`, so they return false and leak no data.
+
+begin;
+
+-- 1. Destructive maintenance function: service_role / postgres only.
+revoke all on function public.purge_expired_location_history() from public;
+revoke all on function public.purge_expired_location_history() from anon;
+revoke all on function public.purge_expired_location_history() from authenticated;
+grant execute on function public.purge_expired_location_history() to service_role;
+
+-- 2. Trigger functions: not part of the public API surface.
+revoke all on function public.handle_new_user() from public;
+revoke all on function public.handle_new_user() from anon;
+revoke all on function public.handle_new_user() from authenticated;
+
+revoke all on function public.assign_active_couple_id() from public;
+revoke all on function public.assign_active_couple_id() from anon;
+revoke all on function public.assign_active_couple_id() from authenticated;
+
+-- 3. Pin search_path on touch_updated_at, then lock it down too.
+create or replace function public.touch_updated_at()
+returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  new.updated_at = pg_catalog.now();
+  return new;
+end
+$$;
+
+revoke all on function public.touch_updated_at() from public;
+revoke all on function public.touch_updated_at() from anon;
+revoke all on function public.touch_updated_at() from authenticated;
+
+commit;
+
+-- ----------------------------------------------------------------
+-- SECTION 6 - SECURITY HARDENING (RLS policies on existing tables)
+-- ----------------------------------------------------------------
+-- Security hardening for the twenty tables identified in the security audit.
+-- Every identifier used below is defined by the bootstrap schema.  PostgreSQL
+-- has no CREATE POLICY IF NOT EXISTS, so each replacement is guarded by DROP
+-- POLICY IF EXISTS and is safe to run repeatedly.
+begin;
+
+-- Verified trigger/maintenance functions from the bootstrap schema.  These
+-- functions are not an application RPC surface.
+revoke all on function public.purge_expired_location_history() from public;
+revoke all on function public.purge_expired_location_history() from anon;
+revoke all on function public.purge_expired_location_history() from authenticated;
+grant execute on function public.purge_expired_location_history() to service_role;
+
+revoke all on function public.handle_new_user() from public;
+revoke all on function public.handle_new_user() from anon;
+revoke all on function public.handle_new_user() from authenticated;
+revoke all on function public.assign_active_couple_id() from public;
+revoke all on function public.assign_active_couple_id() from anon;
+revoke all on function public.assign_active_couple_id() from authenticated;
+revoke all on function public.touch_updated_at() from public;
+revoke all on function public.touch_updated_at() from anon;
+revoke all on function public.touch_updated_at() from authenticated;
+
+alter table public.astrology_profiles enable row level security;
+alter table public.bucket_list enable row level security;
+alter table public.calendar_events enable row level security;
+alter table public.call_signals enable row level security;
+alter table public.care_cycle_settings enable row level security;
+alter table public.care_daily_logs enable row level security;
+alter table public.care_logs enable row level security;
+alter table public.care_reminders enable row level security;
+alter table public.cycle_logs enable row level security;
+alter table public.emergency_alerts enable row level security;
+alter table public.favorites enable row level security;
+alter table public.financial_goals enable row level security;
+alter table public.goals enable row level security;
+alter table public.health_profiles enable row level security;
+alter table public.memories enable row level security;
+alter table public.mood_logs enable row level security;
+alter table public.plans enable row level security;
+alter table public.reminders enable row level security;
+alter table public.todos enable row level security;
+alter table public.vault_items enable row level security;
+
+-- Member reads are separated from owner mutations.  Owner columns below are
+-- verified in the bootstrap schema; care_cycle_settings is intentionally
+-- couple-wide because it has no owner column.
+do $$
+declare
+  table_name text;
+  owner_column text;
+begin
+  for table_name, owner_column in select * from (values
+    ('astrology_profiles','user_id'), ('bucket_list','user_id'),
+    ('calendar_events','user_id'), ('care_daily_logs','user_id'),
+    ('care_logs','user_id'), ('care_reminders','user_id'),
+    ('cycle_logs','user_id'), ('emergency_alerts','reporter_id'),
+    ('favorites','user_id'), ('financial_goals','user_id'),
+    ('goals','user_id'), ('health_profiles','user_id'),
+    ('memories','user_id'), ('mood_logs','user_id'), ('plans','user_id'),
+    ('reminders','user_id'), ('todos','user_id'), ('vault_items','user_id')
+  ) as verified(table_name, owner_column) loop
+    execute format('drop policy if exists %I on public.%I', table_name || '_couple_access', table_name);
+    execute format('drop policy if exists %I on public.%I', table_name || '_security_hardening', table_name);
+    execute format('drop policy if exists %I on public.%I', table_name || '_security_select', table_name);
+    execute format('drop policy if exists %I on public.%I', table_name || '_security_insert', table_name);
+    execute format('drop policy if exists %I on public.%I', table_name || '_security_update', table_name);
+    execute format('drop policy if exists %I on public.%I', table_name || '_security_delete', table_name);
+    execute format('create policy %I on public.%I for select using (public.is_couple_member(couple_id))', table_name || '_security_select', table_name);
+    execute format('create policy %I on public.%I for insert with check (%I = auth.uid() and public.is_couple_member(couple_id))', table_name || '_security_insert', table_name, owner_column);
+    execute format('create policy %I on public.%I for update using (%I = auth.uid() and public.is_couple_member(couple_id)) with check (%I = auth.uid() and public.is_couple_member(couple_id))', table_name || '_security_update', table_name, owner_column, owner_column);
+    execute format('create policy %I on public.%I for delete using (%I = auth.uid() and public.is_couple_member(couple_id))', table_name || '_security_delete', table_name, owner_column);
+  end loop;
+
+  -- call_signals has caller_id/receiver_id rather than a single owner column.
+  drop policy if exists call_signals_couple_access on public.call_signals;
+  drop policy if exists call_signals_security_hardening on public.call_signals;
+  drop policy if exists call_signals_security_select on public.call_signals;
+  drop policy if exists call_signals_security_insert on public.call_signals;
+  drop policy if exists call_signals_security_update on public.call_signals;
+  drop policy if exists call_signals_security_delete on public.call_signals;
+  create policy call_signals_security_select on public.call_signals for select using (public.is_couple_member(couple_id) and auth.uid() in (caller_id, receiver_id));
+  create policy call_signals_security_insert on public.call_signals for insert with check (public.is_couple_member(couple_id) and auth.uid() = caller_id);
+  create policy call_signals_security_update on public.call_signals for update using (public.is_couple_member(couple_id) and auth.uid() in (caller_id, receiver_id)) with check (public.is_couple_member(couple_id) and auth.uid() in (caller_id, receiver_id));
+  create policy call_signals_security_delete on public.call_signals for delete using (public.is_couple_member(couple_id) and auth.uid() = caller_id);
+
+  -- care_cycle_settings is explicitly couple-wide: it has no owner column.
+  drop policy if exists care_cycle_settings_couple_access on public.care_cycle_settings;
+  drop policy if exists care_cycle_settings_security_hardening on public.care_cycle_settings;
+  drop policy if exists care_cycle_settings_security_select on public.care_cycle_settings;
+  drop policy if exists care_cycle_settings_security_mutate on public.care_cycle_settings;
+  create policy care_cycle_settings_security_select on public.care_cycle_settings for select using (public.is_couple_member(couple_id));
+  create policy care_cycle_settings_security_mutate on public.care_cycle_settings for all using (public.is_couple_member(couple_id)) with check (public.is_couple_member(couple_id));
+end
+$$;
+
+-- Storage identifiers and predicates are taken from the verified bootstrap
+-- policies.  Replacing the permissive shared-media delete policy prevents a
+-- member from deleting another member's object.
+drop policy if exists shared_media_read on storage.objects;
+drop policy if exists shared_media_insert on storage.objects;
+drop policy if exists shared_media_update on storage.objects;
+drop policy if exists shared_media_delete on storage.objects;
+drop policy if exists storage_security_hardening_read on storage.objects;
+drop policy if exists storage_security_hardening_insert on storage.objects;
+drop policy if exists storage_security_hardening_update on storage.objects;
+drop policy if exists storage_security_hardening_delete on storage.objects;
+create policy storage_security_hardening_read on storage.objects
+  for select using (
+    bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages')
+    and public.has_accepted_couple()
+  );
+create policy storage_security_hardening_insert on storage.objects
+  for insert with check (
+    bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages')
+    and owner = auth.uid()
+    and public.has_accepted_couple()
+  );
+create policy storage_security_hardening_update on storage.objects
+  for update using (
+    bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages')
+    and owner = auth.uid()
+  ) with check (
+    bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages')
+    and owner = auth.uid()
+  );
+create policy storage_security_hardening_delete on storage.objects
+  for delete using (
+    bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages')
+    and owner = auth.uid()
+  );
+
+revoke all on function public.is_couple_member(uuid) from public, anon;
+revoke all on function public.is_location_admin() from public, anon;
+revoke all on function public.is_linked_user(uuid) from public, anon;
+revoke all on function public.has_accepted_couple() from public, anon;
+grant execute on function public.is_couple_member(uuid) to authenticated;
+grant execute on function public.is_location_admin() to authenticated;
+grant execute on function public.is_linked_user(uuid) to authenticated;
+grant execute on function public.has_accepted_couple() to authenticated;
+revoke all on function public.purge_expired_location_history() from public, anon, authenticated;
+grant execute on function public.purge_expired_location_history() to service_role;
+
+commit;

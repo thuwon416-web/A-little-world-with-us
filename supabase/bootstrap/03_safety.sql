@@ -1,3 +1,46 @@
+-- ----------------------------------------------------------------
+-- 03_safety.sql - Safety features
+-- ----------------------------------------------------------------
+-- Source files merged:
+--   20260915_battery_alert_log.sql
+--   20260915_safety_tables.sql
+--   20260915_sos_resolution.sql
+--
+-- Depends on: 00_core.sql
+-- Run order: 00 -> 01 -> 02 -> ... -> 10
+-- ----------------------------------------------------------------
+
+-- ----------------------------------------------------------------
+-- SECTION - 20260915_battery_alert_log.sql
+-- ----------------------------------------------------------------
+-- Phase 16.6: Debounced low-battery alert history
+begin;
+
+create table if not exists public.battery_alert_log (
+  id uuid primary key default gen_random_uuid(),
+  couple_id uuid not null references public.couples(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  battery_level integer not null check (battery_level between 0 and 100),
+  notified_at timestamptz not null default now()
+);
+
+create index if not exists battery_alert_log_user_notified_idx
+  on public.battery_alert_log(user_id, notified_at desc);
+
+alter table public.battery_alert_log enable row level security;
+drop policy if exists battery_alert_log_couple_access on public.battery_alert_log;
+create policy battery_alert_log_couple_access
+  on public.battery_alert_log
+  for all
+  using (public.is_couple_member(couple_id));
+
+grant select, insert on public.battery_alert_log to authenticated;
+
+commit;
+
+-- ----------------------------------------------------------------
+-- SECTION - 20260915_safety_tables.sql
+-- ----------------------------------------------------------------
 -- Phase 16.2: Safety tables for geofencing, SOS resolution, and check-ins
 -- Additive migration — preserves all existing data
 
@@ -116,5 +159,20 @@ create policy geofence_events_couple_access
   with check (public.is_couple_member(couple_id) and user_id = auth.uid());
 
 grant select, insert, update, delete on public.geofence_events to authenticated;
+
+commit;
+
+-- ----------------------------------------------------------------
+-- SECTION - 20260915_sos_resolution.sql
+-- ----------------------------------------------------------------
+-- Phase 16.4: SOS resolution notes
+begin;
+
+alter table public.emergency_alerts
+  add column if not exists resolution_note text
+  check (resolution_note is null or char_length(resolution_note) <= 500);
+
+comment on column public.emergency_alerts.resolution_note is
+  'Optional note added when a partner resolves the SOS';
 
 commit;
