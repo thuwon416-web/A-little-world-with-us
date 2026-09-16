@@ -88,3 +88,4 @@ Coding အားလုံး ပြီးမှ တစ်ဆင့်ချင�
 | Phase 13 (My Suggestions) | Existing generate+save flow is sufficient |
 
 | Phase 20.2 | docs/AI-CONTEXT.md created for future AI sessions | ✅ |
+| Phase 2.2b-6 | docs/WELLNESS-DESIGN.md created; wellness boards intentional dark design | ✅ |
