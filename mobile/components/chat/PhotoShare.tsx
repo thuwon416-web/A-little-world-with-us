@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Alert, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import type { ChatAttachment } from './chat-types'
+import { useTheme } from '@/context/ThemeContext'
 
 type Props = {
   visible: boolean
@@ -12,6 +13,8 @@ type Props = {
 }
 
 export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [photo, setPhoto] = useState<ChatAttachment | null>(null)
   const [sending, setSending] = useState(false)
 
@@ -56,7 +59,7 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
           <View style={styles.header}>
             <Text style={styles.title}>Share photo</Text>
             <TouchableOpacity onPress={onClose} accessibilityLabel="Close photo picker">
-              <X color="#f3f0f5" size={22} />
+              <X color={colors.textPrimary} size={22} />
             </TouchableOpacity>
           </View>
           {photo ? (
@@ -67,12 +70,12 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
                 onPress={() => setPhoto(null)}
                 accessibilityLabel="Remove selected photo"
               >
-                <X color="#fff" size={18} />
+                <X color={colors.background} size={18} />
               </TouchableOpacity>
             </View>
           ) : (
             <TouchableOpacity style={styles.dropzone} onPress={() => void choosePhoto()}>
-              <ImageIcon color="#b88ae5" size={42} />
+              <ImageIcon color={colors.accent1} size={42} />
               <Text style={styles.secondary}>Choose a photo</Text>
             </TouchableOpacity>
           )}
@@ -81,7 +84,7 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
             disabled={!photo || sending}
             onPress={() => void send()}
           >
-            <Send color="#fff" size={18} />
+            <Send color={colors.background} size={18} />
             <Text style={styles.sendText}>{sending ? 'Sending...' : 'Send photo'}</Text>
           </TouchableOpacity>
         </View>
@@ -90,22 +93,22 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: '#171b22', borderRadius: 24, padding: 20 },
+  card: { backgroundColor: colors.surface, borderRadius: 24, padding: 20 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  title: { color: '#f3f0f5', fontSize: 20, fontWeight: '700' },
-  secondary: { color: '#aaa7b2', marginTop: 12 },
+  title: { color: colors.textPrimary, fontSize: 20, fontWeight: '700' },
+  secondary: { color: colors.textSecondary, marginTop: 12 },
   dropzone: {
     height: 220,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#b88ae566',
+    borderColor: `${colors.accent1}66`,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
@@ -121,13 +124,13 @@ const styles = StyleSheet.create({
   },
   send: {
     marginTop: 16,
-    backgroundColor: '#b88ae5',
+    backgroundColor: colors.accent1,
     borderRadius: 14,
     padding: 14,
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
   },
-  sendText: { color: '#fff', fontWeight: '700' },
+  sendText: { color: colors.background, fontWeight: '700' },
   disabled: { opacity: 0.45 },
 })

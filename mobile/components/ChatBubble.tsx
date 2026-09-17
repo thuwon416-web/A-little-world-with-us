@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import type { ChatMessageType, NativeChatMessage } from './chat/chat-types'
+import { useTheme } from '@/context/ThemeContext'
 
 export type ChatMessage = NativeChatMessage & {
   sender: 'me' | 'them'
@@ -30,6 +31,8 @@ export function ChatBubble({
   highlighted,
   onDelete,
 }: Props) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [sound, setSound] = useState<Audio.Sound | null>(null)
   const [playing, setPlaying] = useState(false)
   const isMe = message.sender === 'me'
@@ -93,7 +96,7 @@ export function ChatBubble({
             }
           >
             <View style={styles.heading}>
-              <MapPin size={16} color="#f3f0f5" />
+              <MapPin size={16} color={colors.textPrimary} />
               <Text style={styles.locationTitle}>Shared location</Text>
             </View>
             <Text style={styles.text}>
@@ -102,7 +105,7 @@ export function ChatBubble({
           </TouchableOpacity>
         ) : message.type === 'sos' ? (
           <View style={styles.heading}>
-            <Siren size={16} color="#ffd3dc" />
+            <Siren size={16} color={colors.error} />
             <Text style={styles.sosText}>Emergency SOS</Text>
           </View>
         ) : message.type === 'photo' && message.mediaUrl ? (
@@ -114,7 +117,7 @@ export function ChatBubble({
         ) : message.type === 'voice' || message.type === 'audio' ? (
           <TouchableOpacity style={styles.mediaRow} onPress={() => void toggleAudio()}>
             <View style={styles.mediaIcon}>
-              {playing ? <Square color="#fff" size={15} /> : <Play color="#fff" size={15} />}
+              {playing ? <Square color={colors.background} size={15} /> : <Play color={colors.background} size={15} />}
             </View>
             <Text style={styles.text}>
               {playing
@@ -137,7 +140,7 @@ export function ChatBubble({
               )
             }
           >
-            <FileText color="#fff" size={20} />
+            <FileText color={colors.background} size={20} />
             <Text style={styles.text} numberOfLines={1}>
               {message.content || 'Open attachment'}
             </Text>
@@ -157,12 +160,12 @@ export function ChatBubble({
               onPress={() => onReply(message)}
               accessibilityLabel="Reply to message"
             >
-              <Reply color="#d9bfd7" size={15} />
+              <Reply color={colors.accent2} size={15} />
             </TouchableOpacity>
           )}
           {isMe && onDelete && message.type !== 'text' && (
             <TouchableOpacity onPress={remove} accessibilityLabel="Delete message">
-              <Trash2 color="#ffb5bd" size={15} />
+              <Trash2 color={colors.error} size={15} />
             </TouchableOpacity>
           )}
         </View>
@@ -172,22 +175,22 @@ export function ChatBubble({
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   row: { flexDirection: 'column', marginBottom: 8 },
   rowMe: { alignItems: 'flex-end' },
   rowThem: { alignItems: 'flex-start' },
   bubble: { maxWidth: '84%', paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
-  bubbleMe: { backgroundColor: '#8774E1', borderBottomRightRadius: 4 },
-  bubbleThem: { backgroundColor: '#212121', borderBottomLeftRadius: 4 },
-  text: { color: '#f3f0f5', fontSize: 15, lineHeight: 21, flexShrink: 1 },
+  bubbleMe: { backgroundColor: colors.accent1, borderBottomRightRadius: 4 },
+  bubbleThem: { backgroundColor: colors.surface, borderBottomLeftRadius: 4 },
+  text: { color: colors.textPrimary, fontSize: 15, lineHeight: 21, flexShrink: 1 },
   heading: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  locationTitle: { color: '#f3f0f5', fontSize: 15, fontWeight: '700', marginBottom: 4 },
-  sosText: { color: '#ffd3dc', fontSize: 15, fontWeight: '700' },
-  replyContext: { color: '#ead8f4', fontSize: 11, marginBottom: 6, fontStyle: 'italic' },
-  replyLabel: { color: '#ead8f4', fontSize: 11, fontStyle: 'italic' },
-  replyPreview: { color: '#f3f0f5', fontSize: 12, marginTop: 2 },
+  locationTitle: { color: colors.textPrimary, fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  sosText: { color: colors.error, fontSize: 15, fontWeight: '700' },
+  replyContext: { color: colors.accent2, fontSize: 11, marginBottom: 6, fontStyle: 'italic' },
+  replyLabel: { color: colors.accent2, fontSize: 11, fontStyle: 'italic' },
+  replyPreview: { color: colors.textPrimary, fontSize: 12, marginTop: 2 },
   highlightedRow: {
-    backgroundColor: '#b88ae522',
+    backgroundColor: `${colors.accent1}22`,
     borderRadius: 20,
     padding: 4,
     marginHorizontal: -4,
@@ -199,7 +202,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#6f4d8f',
+    backgroundColor: colors.accent2,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -213,7 +216,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   time: {
-    color: '#fff',
+    color: colors.background,
     fontSize: 10,
   },
   statusPlaceholder: {

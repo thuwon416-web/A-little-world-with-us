@@ -1,6 +1,7 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity } from 'react-native'
 
 import { EXPENSE_CATEGORIES } from './finance-constants'
+import { useTheme } from '@/context/ThemeContext'
 
 type CategoryFilterProps = {
   active: string
@@ -8,6 +9,8 @@ type CategoryFilterProps = {
 }
 
 export default function CategoryFilter({ active, onChange }: CategoryFilterProps) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.container}>
       {['all', ...EXPENSE_CATEGORIES.map((category) => category.value)].map((value) => {
@@ -25,11 +28,11 @@ export default function CategoryFilter({ active, onChange }: CategoryFilterProps
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: { gap: 8, paddingVertical: 2 },
   pill: { borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
-  active: { backgroundColor: '#ff6b81' },
-  inactive: { borderWidth: 1, borderColor: 'rgba(255,107,129,0.3)', backgroundColor: '#171b22' },
-  activeText: { color: '#fff', fontWeight: '700' },
-  inactiveText: { color: '#e0d5e8' },
+  active: { backgroundColor: colors.accent1 },
+  inactive: { borderWidth: 1, borderColor: `${colors.accent1}4d`, backgroundColor: colors.surface },
+  activeText: { color: colors.background, fontWeight: '700' },
+  inactiveText: { color: colors.textSecondary },
 })

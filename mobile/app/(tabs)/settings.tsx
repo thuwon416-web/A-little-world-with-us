@@ -315,7 +315,7 @@ export default function SettingsScreen() {
       <Section title="Appearance">
         <View style={styles.options}>
           {(
-            ['midnight', 'sunset', 'romantic', 'ocean', 'monochrome'] as ThemePreference[]
+            ['lavender-mist', 'peach-cream', 'mint-whisper', 'ocean-calm', 'monochrome'] as ThemePreference[]
           ).map((option) => (
             <TouchableOpacity
               key={option}
@@ -323,14 +323,14 @@ export default function SettingsScreen() {
               style={[styles.option, preference === option && styles.optionActive]}
             >
               <Text style={styles.buttonText}>
-                {option === 'midnight'
-                  ? 'Midnight Romance'
-                  : option === 'sunset'
-                    ? 'Sunset Glow'
-                    : option === 'romantic'
-                      ? 'Emergent Airy'
-                      : option === 'ocean'
-                        ? 'Ocean Breeze'
+                {option === 'lavender-mist'
+                  ? 'Lavender Mist'
+                  : option === 'peach-cream'
+                    ? 'Peach Cream'
+                    : option === 'mint-whisper'
+                      ? 'Mint Whisper'
+                      : option === 'ocean-calm'
+                        ? 'Ocean Calm'
                         : 'Monochrome'}
               </Text>
             </TouchableOpacity>

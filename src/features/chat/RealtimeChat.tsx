@@ -463,7 +463,7 @@ export default function RealtimeChat() {
   return (
     <div className="flex flex-col h-[600px] glass-card">
       <header className="flex items-center gap-3 border-b border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#8774E1] text-lg text-white"><Heart className="h-5 w-5 fill-current" /></div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-1)] text-lg text-[var(--bg-color)]"><Heart className="h-5 w-5 fill-current" /></div>
         <div><p className="font-semibold text-[var(--text-primary)]">Your love</p><p className="text-xs text-emerald-400">Online</p></div>
         <button type="button" onClick={() => setShowAIPanel((open) => !open)} className="ml-auto inline-flex items-center gap-1 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]" aria-label="Open AI Guardian">
           <Sparkles className="h-3.5 w-3.5" /> AI {contextCount > 0 ? `•${contextCount}` : ''}
@@ -474,7 +474,7 @@ export default function RealtimeChat() {
         <div className="flex items-center justify-between"><p className="text-sm font-semibold text-[var(--text-primary)]">AI Guardian context</p><button type="button" onClick={() => setShowAIPanel(false)} aria-label="Close AI Guardian"><X className="h-4 w-4 text-[var(--text-secondary)]" /></button></div>
         <p className="mt-2 text-xs text-[var(--text-secondary)]">{contextCount ? `${contextCount} unprocessed context hint${contextCount === 1 ? '' : 's'} detected.` : 'No unprocessed context hints.'}</p>
         {contexts.length > 0 && <ul className="mt-3 space-y-2">{contexts.map((context) => <li key={context.id} className="flex items-center justify-between rounded-lg bg-[var(--card-bg)] px-3 py-2 text-xs text-[var(--text-primary)]"><span>{context.category} · {context.sender_role}</span><button type="button" onClick={() => void deleteContext(context.id)} className="text-[var(--text-secondary)] underline">Delete</button></li>)}</ul>}
-        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-full bg-[#ff6b81] px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
+        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-full bg-[var(--accent-1)] px-4 py-2 text-xs font-semibold text-[var(--bg-color)] disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
         {aiResponse && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-primary)]">{aiResponse}</p>}
       </section>}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -490,8 +490,8 @@ export default function RealtimeChat() {
                 <div
                   className={`max-w-[70%] rounded-2xl px-4 py-2 ${
                     message.sender_id === currentUserId
-                      ? 'rounded-[18px] rounded-br-[4px] bg-[#8774E1] text-white'
-                      : 'rounded-[18px] rounded-bl-[4px] bg-[#181818] text-white'
+                      ? 'rounded-[18px] rounded-br-[4px] bg-[var(--accent-1)] text-[var(--bg-color)]'
+                      : 'rounded-[18px] rounded-bl-[4px] bg-[var(--card-bg)] text-[var(--text-primary)]'
                   }`}
                   onContextMenu={(e) => {
                     e.preventDefault()

@@ -93,7 +93,7 @@ export default function ChatInputBar({
           }}
           placeholder={placeholder}
           disabled={disabled}
-          className="flex-1 rounded-full border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-2 text-sm text-[var(--text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#8774E1] disabled:opacity-50"
+          className="flex-1 rounded-full border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-2 text-sm text-[var(--text-primary)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--accent-1)] disabled:opacity-50"
         />
         <button
           type="button"

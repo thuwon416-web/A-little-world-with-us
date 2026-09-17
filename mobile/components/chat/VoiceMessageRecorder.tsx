@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import type { ChatAttachment } from './chat-types'
+import { useTheme } from '@/context/ThemeContext'
 
 type Props = {
   visible: boolean
@@ -12,6 +13,8 @@ type Props = {
 }
 
 export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [recording, setRecording] = useState<Audio.Recording | null>(null)
   const [duration, setDuration] = useState(0)
   const [saving, setSaving] = useState(false)
@@ -69,7 +72,7 @@ export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
           <View style={styles.header}>
             <Text style={styles.title}>Voice note</Text>
             <TouchableOpacity onPress={onClose}>
-              <X color="#f3f0f5" size={22} />
+              <X color={colors.textPrimary} size={22} />
             </TouchableOpacity>
           </View>
           <Text style={styles.timer}>
@@ -80,7 +83,7 @@ export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
             onPress={() => void (recording ? stop() : start())}
             disabled={saving}
           >
-            {recording ? <Square color="#fff" size={30} /> : <Mic color="#fff" size={30} />}
+            {recording ? <Square color={colors.background} size={30} /> : <Mic color={colors.background} size={30} />}
           </TouchableOpacity>
           <Text style={styles.secondary}>{recording ? 'Tap to stop' : 'Tap to record'}</Text>
         </View>
@@ -89,18 +92,18 @@ export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: '#171b22', borderRadius: 24, padding: 24, alignItems: 'center' },
+  card: { backgroundColor: colors.surface, borderRadius: 24, padding: 24, alignItems: 'center' },
   header: {
     width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  title: { color: '#f3f0f5', fontSize: 20, fontWeight: '700' },
-  timer: { color: '#b88ae5', fontSize: 42, fontWeight: '700', marginVertical: 36 },
-  record: { backgroundColor: '#b88ae5', borderRadius: 42, padding: 24 },
-  stop: { backgroundColor: '#d95d68' },
-  secondary: { color: '#aaa7b2', marginTop: 12 },
+  title: { color: colors.textPrimary, fontSize: 20, fontWeight: '700' },
+  timer: { color: colors.accent1, fontSize: 42, fontWeight: '700', marginVertical: 36 },
+  record: { backgroundColor: colors.accent1, borderRadius: 42, padding: 24 },
+  stop: { backgroundColor: colors.error },
+  secondary: { color: colors.textSecondary, marginTop: 12 },
 })

@@ -10,6 +10,7 @@ import VaultTabs, { type VaultTab } from '@/components/vault/VaultTabs'
 import PasswordList from '@/components/vault/PasswordList'
 import VaultSetupModal from '@/components/vault/VaultSetupModal'
 import { VaultKeyProvider, useVaultKey } from '@/contexts/VaultKeyContext'
+import { useTheme } from '@/context/ThemeContext'
 import { loadWrappedKey } from '@/lib/vault-storage'
 
 export default function VaultScreen() {
@@ -17,6 +18,7 @@ export default function VaultScreen() {
 }
 
 function VaultScreenContent() {
+  const { colors } = useTheme()
   const { masterKey, isUnlocked: passwordUnlocked, unlockWithPassphrase, unlockWithBiometric } = useVaultKey()
   const [items, setItems] = useState<any[]>([])
   const [coupleId, setCoupleId] = useState('')
@@ -105,7 +107,7 @@ function VaultScreenContent() {
             value={pin}
             onChangeText={setPin}
             placeholder="PIN (if biometrics unavailable)"
-            placeholderTextColor="#8d8d99"
+            placeholderTextColor={colors.textSecondary}
             secureTextEntry
             keyboardType="number-pad"
           />
@@ -123,14 +125,14 @@ function VaultScreenContent() {
             value={title}
             onChangeText={setTitle}
             placeholder="Title"
-            placeholderTextColor="#8d8d99"
+            placeholderTextColor={colors.textSecondary}
           />
           <TextInput
             style={s.input}
             value={content}
             onChangeText={setContent}
             placeholder="Secret or note"
-            placeholderTextColor="#8d8d99"
+            placeholderTextColor={colors.textSecondary}
             multiline
           />
           <TextInput
@@ -138,7 +140,7 @@ function VaultScreenContent() {
             value={photoUrl}
             onChangeText={setPhotoUrl}
             placeholder="Photo URL (optional)"
-            placeholderTextColor="#8d8d99"
+            placeholderTextColor={colors.textSecondary}
             autoCapitalize="none"
           />
           <TouchableOpacity style={s.button} onPress={() => void add()}>
@@ -177,7 +179,7 @@ function VaultScreenContent() {
               ) : !passwordUnlocked ? (
                 <View style={s.card}>
                   <Text style={s.buttonText}>Unlock passwords</Text>
-                  <TextInput style={s.input} value={passphrase} onChangeText={setPassphrase} placeholder="Vault passphrase" placeholderTextColor="#8d8d99" secureTextEntry />
+                  <TextInput style={s.input} value={passphrase} onChangeText={setPassphrase} placeholder="Vault passphrase" placeholderTextColor={colors.textSecondary} secureTextEntry />
                   {passwordError ? <Text style={s.danger}>{passwordError}</Text> : null}
                   <TouchableOpacity style={s.button} onPress={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))}><Text style={s.buttonText}>Unlock passwords</Text></TouchableOpacity>
                   <TouchableOpacity onPress={() => void unlockWithBiometric().catch((cause) => setPasswordError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))}><Text style={s.muted}>Use biometric unlock</Text></TouchableOpacity>

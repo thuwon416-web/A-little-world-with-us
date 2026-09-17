@@ -7,10 +7,13 @@ import MemoryCard from './MemoryCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { RelationshipMemory } from '@/shared-types'
+import { useTheme } from '@/context/ThemeContext'
 
 const PAGE_SIZE = 50
 
 function Timeline({ coupleId }: { coupleId: string }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [memories, setMemories] = useState<RelationshipMemory[]>([])
   const [year, setYear] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
@@ -55,8 +58,8 @@ function Timeline({ coupleId }: { coupleId: string }) {
     return result
   }, {})
 
-  if (loading) return <Loading />
-  if (error) return <Message text={error} onRetry={() => void load()} />
+  if (loading) return <Loading colors={colors} />
+  if (error) return <Message text={error} colors={colors} onRetry={() => void load()} />
   if (!memories.length)
     return (
       <EmptyState
@@ -73,12 +76,13 @@ function Timeline({ coupleId }: { coupleId: string }) {
         keyExtractor={([key]) => key}
         ListHeaderComponent={
           <View style={styles.yearRow}>
-            <Chip label="All years" active={year === null} onPress={() => setYear(null)} />
+            <Chip colors={colors} label="All years" active={year === null} onPress={() => setYear(null)} />
             {years.map((item) => (
               <Chip
                 key={item}
                 label={String(item)}
                 active={year === item}
+                colors={colors}
                 onPress={() => setYear(item)}
               />
             ))}
@@ -117,14 +121,16 @@ function Timeline({ coupleId }: { coupleId: string }) {
 
 export default memo(Timeline)
 
-function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+function Chip({ colors, label, active, onPress }: { colors: ReturnType<typeof useTheme>['colors']; label: string; active: boolean; onPress: () => void }) {
+  const styles = createStyles(colors)
   return (
     <TouchableOpacity onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
       <Text style={styles.chipText}>{label}</Text>
     </TouchableOpacity>
   )
 }
-function Loading() {
+function Loading({ colors }: { colors: ReturnType<typeof useTheme>['colors'] }) {
+  const styles = createStyles(colors)
   return (
     <View style={styles.list}>
       {[1, 2, 3].map((item) => (
@@ -133,7 +139,8 @@ function Loading() {
     </View>
   )
 }
-function Message({ text, onRetry }: { text: string; onRetry?: () => void }) {
+function Message({ colors, text, onRetry }: { colors: ReturnType<typeof useTheme>['colors']; text: string; onRetry?: () => void }) {
+  const styles = createStyles(colors)
   return (
     <View style={styles.message}>
       <Text style={styles.muted}>{text}</Text>
@@ -146,22 +153,22 @@ function Message({ text, onRetry }: { text: string; onRetry?: () => void }) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   wrapper: { flex: 1 },
   list: { gap: 14, paddingBottom: 24 },
   yearRow: { flexDirection: 'row', gap: 8, paddingBottom: 6 },
-  chip: { backgroundColor: '#171b22', borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8 },
-  chipActive: { backgroundColor: '#6b425e' },
-  chipText: { color: '#f3f0f5', fontSize: 12 },
-  group: { borderLeftColor: '#d8b9c8', borderLeftWidth: 1, paddingLeft: 12 },
+  chip: { backgroundColor: colors.surface, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8 },
+  chipActive: { backgroundColor: colors.accent2 },
+  chipText: { color: colors.textPrimary, fontSize: 12 },
+  group: { borderLeftColor: colors.accent2, borderLeftWidth: 1, paddingLeft: 12 },
   timelineLine: { flexDirection: 'row', gap: 8 },
-  dot: { color: '#ff6b81', fontSize: 16, marginLeft: -19 },
+  dot: { color: colors.accent1, fontSize: 16, marginLeft: -19 },
   flex: { flex: 1, gap: 10 },
   groupHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  groupTitle: { color: '#f3f0f5', fontSize: 16, fontWeight: '700' },
-  count: { color: '#c4c4ce' },
-  muted: { color: '#c4c4ce', lineHeight: 22, textAlign: 'center' },
+  groupTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
+  count: { color: colors.textSecondary },
+  muted: { color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
   message: { alignItems: 'center', gap: 12, padding: 28 },
-  retry: { color: '#ffb5c3', fontWeight: '700' },
-  skeleton: { backgroundColor: '#171b22', borderRadius: 18, height: 150 },
+  retry: { color: colors.accent1, fontWeight: '700' },
+  skeleton: { backgroundColor: colors.surface, borderRadius: 18, height: 150 },
 })

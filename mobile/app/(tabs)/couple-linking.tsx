@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
+import { useTheme } from '@/context/ThemeContext'
 import { acceptLink, declineLink, getContext, unlinkCoupleLink } from '@/services/secondary'
 export default function CoupleLinkingScreen() {
+  const { colors } = useTheme()
   const [context, setContext] = useState<any>()
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
@@ -78,7 +80,7 @@ export default function CoupleLinkingScreen() {
         value={code}
         onChangeText={setCode}
         placeholder="Invitation code"
-        placeholderTextColor="#8d8d99"
+        placeholderTextColor={colors.textSecondary}
         autoCapitalize="none"
       />
       <TouchableOpacity style={s.button} onPress={() => void accept()}>

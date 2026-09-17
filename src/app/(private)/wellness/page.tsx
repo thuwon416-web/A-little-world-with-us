@@ -34,31 +34,50 @@ export default function WellnessPage() {
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([])
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null)
   const [completedGame, setCompletedGame] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const filteredBoards = wellnessBoards.filter(board => board.category === activeTab)
 
   const completeWorkout = async (workout: Workout) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await logWellnessActivity(user.id, workout.name)
-    setCompletedWorkouts([
-      ...completedWorkouts,
-      { ...workout, completedAt: new Date().toISOString() },
-    ])
-    setSelectedWorkout(null)
+    try {
+      await logWellnessActivity(user.id, workout.name)
+      setActionError(null)
+      setCompletedWorkouts([
+        ...completedWorkouts,
+        { ...workout, completedAt: new Date().toISOString() },
+      ])
+      setSelectedWorkout(null)
+    } catch (caught) {
+      console.error('[wellness] log failed:', caught)
+      setActionError(caught instanceof Error ? caught.message : 'Failed to save activity')
+    }
   }
 
   const completeQuest = async (questId: string) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await logWellnessActivity(user.id, questId, 'quest')
+    try {
+      await logWellnessActivity(user.id, questId, 'quest')
+      setActionError(null)
+    } catch (caught) {
+      console.error('[wellness] log failed:', caught)
+      setActionError(caught instanceof Error ? caught.message : 'Failed to save activity')
+    }
   }
 
   const completeGame = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    await logWellnessActivity(user.id, 'relationship-games', 'game')
-    setCompletedGame(true)
+    try {
+      await logWellnessActivity(user.id, 'relationship-games', 'game')
+      setActionError(null)
+      setCompletedGame(true)
+    } catch (caught) {
+      console.error('[wellness] log failed:', caught)
+      setActionError(caught instanceof Error ? caught.message : 'Failed to save activity')
+    }
   }
 
   return (
@@ -74,6 +93,15 @@ export default function WellnessPage() {
           21 curated boards for emotional wellness
         </p>
       </header>
+
+      {actionError ? (
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--error)]/30 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]" role="alert">
+          <span>{actionError}</span>
+          <button type="button" onClick={() => setActionError(null)} className="underline">
+            Dismiss
+          </button>
+        </div>
+      ) : null}
 
       <ExplicitAdviceControl
         title="Ask for a gentle reset"

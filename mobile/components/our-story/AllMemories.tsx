@@ -7,6 +7,7 @@ import MemoryCard from './MemoryCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { MemoryImportance, RelationshipMemory } from '@/shared-types'
+import { useTheme } from '@/context/ThemeContext'
 
 const PAGE_SIZE = 50
 
@@ -17,6 +18,8 @@ function AllMemories({
   coupleId: string
   initialCategory?: string
 }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [memories, setMemories] = useState<RelationshipMemory[]>([])
   const [search, setSearch] = useState('')
   const [importance, setImportance] = useState<MemoryImportance | 'all'>('all')
@@ -90,7 +93,7 @@ function AllMemories({
         value={search}
         onChangeText={setSearch}
         placeholder="Search Burmese or English…"
-        placeholderTextColor="#888"
+        placeholderTextColor={colors.textSecondary}
         style={styles.input}
       />
       <View style={styles.filters}>
@@ -139,23 +142,23 @@ function AllMemories({
 
 export default memo(AllMemories)
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   wrapper: { flex: 1, gap: 12 },
   input: {
-    backgroundColor: '#171b22',
-    borderColor: '#2a2d35',
+    backgroundColor: colors.surface,
+    borderColor: colors.cardBorder,
     borderRadius: 14,
     borderWidth: 1,
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     padding: 13,
   },
   filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: '#171b22', borderRadius: 15, paddingHorizontal: 12, paddingVertical: 8 },
-  active: { backgroundColor: '#6b425e' },
-  chipText: { color: '#f3f0f5', textTransform: 'capitalize' },
+  chip: { backgroundColor: colors.surface, borderRadius: 15, paddingHorizontal: 12, paddingVertical: 8 },
+  active: { backgroundColor: colors.accent2 },
+  chipText: { color: colors.textPrimary, textTransform: 'capitalize' },
   list: { gap: 12, paddingBottom: 24 },
-  muted: { color: '#c4c4ce', lineHeight: 22, textAlign: 'center' },
+  muted: { color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
   message: { alignItems: 'center', gap: 12, padding: 28 },
-  error: { color: '#ff9b9b', textAlign: 'center' },
-  retry: { color: '#ffb5c3', fontWeight: '700' },
+  error: { color: colors.error, textAlign: 'center' },
+  retry: { color: colors.accent1, fontWeight: '700' },
 })

@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
+import { useTheme } from '@/context/ThemeContext'
 import { addCapsule, deleteCapsule, getCapsules, getContext } from '@/services/secondary'
 export default function TimeCapsulesScreen() {
+  const { colors } = useTheme()
   const [items, setItems] = useState<any[]>([])
   const [context, setContext] = useState<any>()
   const [title, setTitle] = useState('')
@@ -59,14 +61,14 @@ export default function TimeCapsulesScreen() {
         value={title}
         onChangeText={setTitle}
         placeholder="Title"
-        placeholderTextColor="#8d8d99"
+        placeholderTextColor={colors.textSecondary}
       />
       <TextInput
         style={s.input}
         value={content}
         onChangeText={setContent}
         placeholder="Message"
-        placeholderTextColor="#8d8d99"
+        placeholderTextColor={colors.textSecondary}
         multiline
       />
       <TextInput
@@ -74,7 +76,7 @@ export default function TimeCapsulesScreen() {
         value={unlock}
         onChangeText={setUnlock}
         placeholder="Unlock date (YYYY-MM-DD or ISO)"
-        placeholderTextColor="#8d8d99"
+        placeholderTextColor={colors.textSecondary}
       />
       <TouchableOpacity style={s.button} onPress={() => void add()}>
         <Text style={s.buttonText}>Seal capsule</Text>

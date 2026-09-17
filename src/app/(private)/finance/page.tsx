@@ -31,6 +31,7 @@ export default function FinancialGoals() {
   const [expenseFilter, setExpenseFilter] = useState('all')
   const [showAddExpense, setShowAddExpense] = useState(false)
   const [loadingExpenses, setLoadingExpenses] = useState(true)
+  const [expensesError, setExpensesError] = useState<string | null>(null)
 
   useEffect(() => {
     void Promise.all([getCurrentUserId(), getCoupleStatus()]).then(([id, status]) => {
@@ -42,10 +43,12 @@ export default function FinancialGoals() {
 
   const loadExpenses = useCallback(async () => {
     setLoadingExpenses(true)
+    setExpensesError(null)
     try {
       setExpenses(await getExpenses())
-    } catch {
+    } catch (caught) {
       setExpenses([])
+      setExpensesError(caught instanceof Error ? caught.message : 'Unable to load expenses.')
     } finally {
       setLoadingExpenses(false)
     }
@@ -133,6 +136,12 @@ export default function FinancialGoals() {
         {loadingExpenses ? (
           <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 text-sm text-[var(--text-secondary)]">
             Loading expenses…
+          </div>
+        ) : expensesError ? (
+          <div className="rounded-2xl border border-[var(--error)]/30 bg-[var(--error)]/10 p-6 text-sm text-[var(--text-secondary)]">
+            <p className="text-[var(--error)]">Unable to load expenses</p>
+            <p className="mt-1">{expensesError}</p>
+            <button type="button" onClick={() => void loadExpenses()} className="glass-button mt-4 px-4 py-2 text-sm font-semibold">Retry</button>
           </div>
         ) : (
           <ExpenseList

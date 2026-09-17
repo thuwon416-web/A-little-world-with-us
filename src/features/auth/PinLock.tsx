@@ -132,7 +132,7 @@ export default function PinLock({
             key={i}
             animate={
               i < pin.length
-                ? { scale: [1, 1.3, 1], backgroundColor: '#FFB6C1' }
+                ? { scale: [1, 1.3, 1], backgroundColor: 'var(--accent-1)' }
                 : { scale: 1 }
             }
             className={`w-5 h-5 rounded-full border-2 transition-colors duration-300 ${

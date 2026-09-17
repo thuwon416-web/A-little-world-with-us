@@ -2,6 +2,7 @@ import * as LocalAuthentication from 'expo-local-authentication'
 import { Fingerprint, Lock, ShieldCheck } from 'lucide-react-native'
 import React, { useState, useEffect } from 'react'
 import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
 
 interface BiometricAuthProps {
   onSuccess: () => void
@@ -9,6 +10,8 @@ interface BiometricAuthProps {
 }
 
 export default function BiometricAuth({ onSuccess, onCancel }: BiometricAuthProps) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [isSupported, setIsSupported] = useState(false)
   const [biometricType, setBiometricType] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -72,16 +75,16 @@ export default function BiometricAuth({ onSuccess, onCancel }: BiometricAuthProp
 
   const getBiometricIcon = () => {
     if (biometricType === 'Face ID') {
-      return <ShieldCheck size={32} color="#B88AE5" />
+      return <ShieldCheck size={32} color={colors.accent1} />
     }
-    return <Fingerprint size={32} color="#B88AE5" />
+    return <Fingerprint size={32} color={colors.accent1} />
   }
 
   if (!isSupported) {
     return (
       <View style={styles.container}>
         <View style={styles.iconContainer}>
-          <Lock size={32} color="#D5C4D4" />
+          <Lock size={32} color={colors.accent2} />
         </View>
         <Text style={styles.title}>Biometric Not Available</Text>
         <Text style={styles.message}>
@@ -119,19 +122,19 @@ export default function BiometricAuth({ onSuccess, onCancel }: BiometricAuthProp
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-    backgroundColor: '#0F0F12',
+    backgroundColor: colors.background,
   },
   iconContainer: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#1F232A',
+    backgroundColor: colors.surface,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
@@ -139,19 +142,19 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#F3F0F5',
+    color: colors.textPrimary,
     marginBottom: 12,
     textAlign: 'center',
   },
   message: {
     fontSize: 14,
-    color: '#C4C4CE',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 20,
   },
   button: {
-    backgroundColor: '#B88AE5',
+    backgroundColor: colors.accent1,
     paddingHorizontal: 32,
     paddingVertical: 16,
     borderRadius: 12,
@@ -162,7 +165,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   buttonText: {
-    color: '#0F0F12',
+    color: colors.background,
     fontSize: 16,
     fontWeight: '600',
   },
@@ -171,7 +174,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   cancelButtonText: {
-    color: '#C4C4CE',
+    color: colors.textSecondary,
     fontSize: 14,
   },
 })

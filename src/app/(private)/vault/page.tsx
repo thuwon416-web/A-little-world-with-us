@@ -41,6 +41,7 @@ function VaultPageContent() {
   const [revealDate, setRevealDate] = useState('')
   const [pin, setPin] = useState('')
   const [unlockError, setUnlockError] = useState('')
+  const [lettersError, setLettersError] = useState<string | null>(null)
   const [tab, setTab] = useState<VaultTab>('letters')
   const [hasWrappedKey, setHasWrappedKey] = useState<boolean | null>(null)
   const [passphrase, setPassphrase] = useState('')
@@ -84,6 +85,7 @@ function VaultPageContent() {
 
   const fetchLetters = async () => {
     if (!coupleId) {
+      setLettersError(null)
       setLetters([])
       return
     }
@@ -95,10 +97,13 @@ function VaultPageContent() {
       .order('created_at', { ascending: false })
 
     if (error) {
+      console.error('[vault] letters load failed:', error)
+      setLettersError(error.message)
       setLetters([])
       return
     }
 
+    setLettersError(null)
     setLetters((data ?? []) as VaultItem[])
   }
 
@@ -436,7 +441,19 @@ function VaultPageContent() {
        ))}
       </div>
 
-      {filteredLetters.length === 0 ? (
+      {lettersError ? (
+        <div className="rounded-[32px] border border-[var(--error)]/30 bg-[var(--error)]/10 p-10 text-center shadow-lg backdrop-blur-xl" role="alert">
+          <h2 className="text-2xl text-[var(--text-primary)]">Unable to load vault letters</h2>
+          <p className="mt-2 text-sm text-[var(--error)]">{lettersError}</p>
+          <button
+            type="button"
+            onClick={() => void fetchLetters()}
+            className="mt-5 rounded-xl bg-[var(--accent-1)] px-4 py-2 font-semibold text-[var(--bg-color)]"
+          >
+            Retry
+          </button>
+        </div>
+      ) : filteredLetters.length === 0 ? (
        <div className="rounded-[32px] border border-dashed border-[var(--accent-1)]/35 bg-[var(--card-bg)]/65 p-10 text-center shadow-lg backdrop-blur-xl">
          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--button-bg)] text-[var(--text-primary)]">
            <Lock className="h-4 w-4" />

@@ -4,6 +4,7 @@ import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/context/ThemeContext'
 
 export default function ImageUpload({
   onUpload,
@@ -18,6 +19,8 @@ export default function ImageUpload({
   }) => void
   folder?: string
 }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [preview, setPreview] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [error, setError] = useState('')
@@ -122,17 +125,17 @@ export default function ImageUpload({
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   card: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     padding: 18,
     marginBottom: 18,
   },
   label: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 12,
     letterSpacing: 2,
     textTransform: 'uppercase',
@@ -143,12 +146,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 18,
     paddingVertical: 18,
-    backgroundColor: '#1f2530',
+    backgroundColor: colors.cardBg,
     borderWidth: 1,
-    borderColor: '#3d4556',
+    borderColor: colors.cardBorder,
   },
   selectButtonText: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontWeight: '700',
   },
   preview: {
@@ -158,7 +161,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   uploadButton: {
-    backgroundColor: '#d8b9c8',
+    backgroundColor: colors.accent2,
     borderRadius: 999,
     paddingVertical: 12,
     alignItems: 'center',
@@ -168,12 +171,12 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   uploadButtonText: {
-    color: '#0f0f12',
+    color: colors.background,
     fontWeight: '700',
     fontSize: 14,
   },
   error: {
-    color: '#ffb4c0',
+    color: colors.error,
     fontSize: 12,
     marginTop: 8,
   },

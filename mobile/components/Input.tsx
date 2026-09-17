@@ -1,10 +1,13 @@
 import { StyleSheet, TextInput, TextInputProps } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
 
 export function Input(props: TextInputProps) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <TextInput
       {...props}
-      placeholderTextColor="#8d8d99"
+      placeholderTextColor={colors.textSecondary}
       style={[styles.input, props.style]}
       autoCapitalize="sentences"
       autoCorrect={false}
@@ -12,13 +15,13 @@ export function Input(props: TextInputProps) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   input: {
-    backgroundColor: '#171b22',
-    borderColor: '#2a2d35',
+    backgroundColor: colors.surface,
+    borderColor: colors.cardBorder,
     borderWidth: 1,
     borderRadius: 12,
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     paddingHorizontal: 14,
     paddingVertical: 12,
     fontSize: 15,

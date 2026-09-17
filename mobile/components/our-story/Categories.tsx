@@ -17,6 +17,7 @@ import MemoryCard from './MemoryCard'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { RelationshipMemory } from '@/shared-types'
+import { useTheme } from '@/context/ThemeContext'
 
 const icons: Record<string, LucideIcon> = {
   promises: Handshake,
@@ -34,6 +35,8 @@ function Categories({
   coupleId: string
   onOpenCategory: (category: string) => void
 }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [stats, setStats] = useState<Record<string, number>>({})
   const [expanded, setExpanded] = useState<string | null>(null)
   const [memories, setMemories] = useState<RelationshipMemory[]>([])
@@ -89,7 +92,7 @@ function Categories({
           <TouchableOpacity onPress={() => void toggle(category)} style={styles.category}>
             {(() => {
               const Icon = icons[category] ?? MessageCircle
-              return <Icon color="#ffb5c3" size={28} />
+              return <Icon color={colors.accent1} size={28} />
             })()}
             <Text style={styles.name}>{category.replace(/_/g, ' ')}</Text>
             <Text style={styles.count}>{count}</Text>
@@ -112,12 +115,12 @@ function Categories({
 
 export default memo(Categories)
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   grid: { gap: 12, paddingBottom: 24 },
   row: { gap: 12 },
   card: {
-    backgroundColor: '#171b22',
-    borderColor: '#2a2d35',
+    backgroundColor: colors.surface,
+    borderColor: colors.cardBorder,
     borderRadius: 18,
     borderWidth: 1,
     flex: 1,
@@ -125,10 +128,10 @@ const styles = StyleSheet.create({
   },
   category: { alignItems: 'center', gap: 8, minHeight: 105, justifyContent: 'center' },
   icon: { fontSize: 28 },
-  name: { color: '#f3f0f5', fontSize: 13, textAlign: 'center', textTransform: 'capitalize' },
-  count: { color: '#d9bfd7', fontWeight: '700' },
+  name: { color: colors.textPrimary, fontSize: 13, textAlign: 'center', textTransform: 'capitalize' },
+  count: { color: colors.accent2, fontWeight: '700' },
   expanded: { gap: 8, width: 320 },
-  link: { color: '#ffb5c3', fontSize: 12 },
-  muted: { color: '#c4c4ce', padding: 28, textAlign: 'center' },
-  error: { color: '#ff9b9b', padding: 20, textAlign: 'center' },
+  link: { color: colors.accent1, fontSize: 12 },
+  muted: { color: colors.textSecondary, padding: 28, textAlign: 'center' },
+  error: { color: colors.error, padding: 20, textAlign: 'center' },
 })

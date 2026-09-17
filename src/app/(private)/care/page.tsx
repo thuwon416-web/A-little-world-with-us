@@ -27,12 +27,14 @@ export default function CarePage() {
   const [settings, setSettings] = useState<CycleSettings | null>(null)
   const [context, setContext] = useState<{ userId: string; coupleId: string } | null>(null)
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [logOpen, setLogOpen] = useState(false)
   const [calendarOpen, setCalendarOpen] = useState(false)
   const [initialSection, setInitialSection] = useState<Section | null>(null)
   const reload = async () => {
     setLoading(true)
-    try { const next = await getAcceptedCareContext(); setContext(next); if (next) { const [nextLogs, nextSettings] = await Promise.all([getCareLogs(next.coupleId), getCycleSettings(next.coupleId)]); setLogs(nextLogs); setSettings(nextSettings) } } finally { setLoading(false) }
+    setLoadError(null)
+    try { const next = await getAcceptedCareContext(); setContext(next); if (next) { const [nextLogs, nextSettings] = await Promise.all([getCareLogs(next.coupleId), getCycleSettings(next.coupleId)]); setLogs(nextLogs); setSettings(nextSettings) } } catch (caught) { console.error('[care] load failed:', caught); setLoadError(caught instanceof Error ? caught.message : 'Unable to load care data.') } finally { setLoading(false) }
   }
   useEffect(() => { void reload() }, [])
   const summary = useMemo(() => calculateCycleSummary(logs, settings ?? { couple_id: '', cycle_length: 28, period_length: 5, last_period_start: null, updated_at: '' }), [logs, settings])
@@ -40,6 +42,7 @@ export default function CarePage() {
   const daysUntil = summary.nextPeriodStart ? Math.max(0, Math.ceil((new Date(`${summary.nextPeriodStart}T12:00:00`).getTime() - Date.now()) / 86400000)) : null
 
   if (loading) return <div className="flex min-h-[420px] items-center justify-center"><div className="h-9 w-9 animate-spin rounded-full border-2 border-[var(--accent-1)]/25 border-t-[var(--accent-1)]" /></div>
+  if (loadError) return <section className="glass-card mx-auto max-w-xl p-7 text-center"><Heart className="mx-auto h-8 w-8 text-[var(--error)]" /><h1 className="mt-3 text-2xl text-[var(--text-primary)]">Unable to load care data</h1><p className="mt-2 text-sm text-[var(--text-secondary)]">{loadError}</p><button type="button" onClick={() => void reload()} className="glass-button mt-5 px-4 py-2 text-sm font-semibold">Retry</button></section>
   if (!context || !settings) return <section className="glass-card mx-auto max-w-xl p-7 text-center"><Heart className="mx-auto h-8 w-8 text-[var(--accent-1)]" /><h1 className="mt-3 text-2xl text-[var(--text-primary)]">Cycle Care is shared</h1><p className="mt-2 text-sm text-[var(--text-secondary)]">Accept your couple link before creating shared cycle records.</p></section>
 
   const tabs: Array<{ id: Tab; label: string; icon: typeof Sparkles }> = [{ id: 'today', label: 'Today', icon: Sparkles }, { id: 'insights', label: 'Insights', icon: Activity }, { id: 'calendar', label: 'Calendar', icon: CalendarDays }, { id: 'reminders', label: 'Reminders', icon: Bell }, { id: 'settings', label: 'Settings', icon: Settings2 }]

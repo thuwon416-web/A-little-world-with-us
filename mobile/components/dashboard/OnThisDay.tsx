@@ -44,6 +44,7 @@ type UnifiedMemory = {
 
 export default function OnThisDay({ coupleId }: { coupleId: string }) {
   const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [memories, setMemories] = useState<UnifiedMemory[]>([])
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
@@ -135,33 +136,33 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   card: {
-    backgroundColor: '#171b22',
-    borderColor: '#b88ae5',
+    backgroundColor: colors.surface,
+    borderColor: colors.accent1,
     borderRadius: 16,
     borderWidth: 1,
     gap: 10,
     padding: 24,
-    shadowColor: '#b88ae5',
+    shadowColor: colors.accent1,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 14,
     elevation: 5,
   },
   kicker: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
   },
-  item: { borderLeftColor: '#d8b9c8', borderLeftWidth: 2, gap: 4, paddingLeft: 10 },
-  meta: { color: '#888', fontSize: 12 },
+  item: { borderLeftColor: colors.accent2, borderLeftWidth: 2, gap: 4, paddingLeft: 10 },
+  meta: { color: colors.textSecondary, fontSize: 12 },
   icon: { fontSize: 20 },
-  quote: { color: '#f3f0f5', fontSize: 15, lineHeight: 22 },
-  muted: { color: '#c4c4ce', fontSize: 13, lineHeight: 20 },
-  skeleton: { backgroundColor: '#2a2d35', borderRadius: 12, height: 72 },
+  quote: { color: colors.textPrimary, fontSize: 15, lineHeight: 22 },
+  muted: { color: colors.textSecondary, fontSize: 13, lineHeight: 20 },
+  skeleton: { backgroundColor: colors.cardBorder, borderRadius: 12, height: 72 },
   photoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   thumbnail: { width: 56, height: 56, borderRadius: 12 },
 })

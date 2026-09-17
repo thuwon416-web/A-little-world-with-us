@@ -135,7 +135,7 @@ create table public.messages (
   couple_id uuid not null references public.couples(id) on delete cascade,
   sender_id uuid not null references public.profiles(id) on delete cascade,
   content text,
-  message_type text not null default 'text' check (message_type in ('text','voice','photo','sticker','gif','file','video','audio','location')),
+  message_type text not null default 'text' check (message_type in ('text','voice','photo','sticker','gif','file','video','audio','location','sos')),
   media_url text,
   media_duration integer,
   transcript text,

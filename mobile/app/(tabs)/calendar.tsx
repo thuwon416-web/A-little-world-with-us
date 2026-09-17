@@ -42,6 +42,7 @@ const daysUntil = (date: string) =>
 export default function CalendarScreen() {
   const { user } = useAuth()
   const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [wishlist, setWishlist] = useState<ListItem[]>([])
   const [coupleId, setCoupleId] = useState('')
@@ -208,7 +209,7 @@ export default function CalendarScreen() {
           const Icon = icons[event.type] ?? Star
           return (
             <TouchableOpacity key={event.id} style={styles.event} onPress={() => openEvent(event)}>
-              <Icon color="#ff9bba" size={18} />
+              <Icon color={colors.accent1} size={18} />
               <View style={styles.eventText}>
                 <Text style={styles.eventTitle}>{event.title}</Text>
                 <Text style={styles.muted}>
@@ -292,21 +293,21 @@ export default function CalendarScreen() {
               value={title}
               onChangeText={setTitle}
               placeholder="Title"
-              placeholderTextColor="#8d8d99"
+              placeholderTextColor={colors.textSecondary}
               style={styles.input}
             />
             <TextInput
               value={eventDate}
               onChangeText={setEventDate}
               placeholder="Date YYYY-MM-DD"
-              placeholderTextColor="#8d8d99"
+              placeholderTextColor={colors.textSecondary}
               style={styles.input}
             />
             <TextInput
               value={description}
               onChangeText={setDescription}
               placeholder="Description (optional)"
-              placeholderTextColor="#8d8d99"
+              placeholderTextColor={colors.textSecondary}
               multiline
               style={[styles.input, styles.notes]}
             />
@@ -365,7 +366,7 @@ export default function CalendarScreen() {
                     ])
                   }
                 >
-                  <Trash2 color="#fff" size={16} />
+                  <Trash2 color={colors.background} size={16} />
                   <Text style={styles.addText}>Delete</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setSelected(null)}>
@@ -379,7 +380,7 @@ export default function CalendarScreen() {
     </ScrollView>
   )
 }
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
   eyebrow: { letterSpacing: 2, fontSize: 12 },
   title: { fontSize: 30, fontWeight: '700' },
@@ -388,19 +389,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 10,
   },
-  nav: { color: '#ff9bba', fontSize: 32, paddingHorizontal: 12 },
-  month: { color: '#fff', fontSize: 17, fontWeight: '800' },
-  today: { backgroundColor: '#604582', borderRadius: 10, padding: 8 },
-  todayText: { color: '#fff', fontWeight: '700' },
+  nav: { color: colors.accent1, fontSize: 32, paddingHorizontal: 12 },
+  month: { color: colors.textPrimary, fontSize: 17, fontWeight: '800' },
+  today: { backgroundColor: colors.accent2, borderRadius: 10, padding: 8 },
+  todayText: { color: colors.background, fontWeight: '700' },
   row: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
-  muted: { color: '#c4c4ce', fontSize: 13 },
-  link: { color: '#ff9bba', fontWeight: '700' },
+  muted: { color: colors.textSecondary, fontSize: 13 },
+  link: { color: colors.accent1, fontWeight: '700' },
   week: { flexDirection: 'row' },
-  weekDay: { width: `${100 / 7}%`, textAlign: 'center', color: '#8d8d99' },
+  weekDay: { width: `${100 / 7}%`, textAlign: 'center', color: colors.textSecondary },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
   day: {
     width: `${100 / 7}%`,
@@ -409,21 +410,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderRadius: 12,
   },
-  todayDay: { borderWidth: 2, borderColor: '#ff9bba' },
-  dayText: { color: '#f3f0f5' },
-  dot: { backgroundColor: '#ff6b81', borderRadius: 8, minWidth: 15, alignItems: 'center' },
-  dotText: { color: '#fff', fontSize: 9 },
+  todayDay: { borderWidth: 2, borderColor: colors.accent1 },
+  dayText: { color: colors.textPrimary },
+  dot: { backgroundColor: colors.accent1, borderRadius: 8, minWidth: 15, alignItems: 'center' },
+  dotText: { color: colors.background, fontSize: 9 },
   events: { gap: 8 },
   event: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 12,
   },
   eventText: { flex: 1 },
-  eventTitle: { color: '#fff', fontWeight: '700' },
+  eventTitle: { color: colors.textPrimary, fontWeight: '700' },
   wishlistCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 12 },
   wishlistHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   wishlistTitle: { fontSize: 20, fontWeight: '700' },
@@ -434,23 +435,23 @@ const styles = StyleSheet.create({
   wishlistCheck: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
   wishlistText: { flex: 1, fontSize: 15 },
   wishlistDone: { textDecorationLine: 'line-through' },
-  add: { backgroundColor: '#ff6b81', padding: 14, borderRadius: 13, alignItems: 'center' },
-  addText: { color: '#fff', fontWeight: '800' },
+  add: { backgroundColor: colors.accent1, padding: 14, borderRadius: 13, alignItems: 'center' },
+  addText: { color: colors.background, fontWeight: '800' },
   overlay: { flex: 1, backgroundColor: '#0009', justifyContent: 'center', padding: 20 },
-  modal: { backgroundColor: '#171b22', borderRadius: 20, padding: 20, gap: 12 },
-  modalTitle: { color: '#fff', fontSize: 22, fontWeight: '800' },
+  modal: { backgroundColor: colors.surface, borderRadius: 20, padding: 20, gap: 12 },
+  modalTitle: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },
   typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  type: { padding: 9, backgroundColor: '#2a2d36', borderRadius: 10 },
-  typeActive: { backgroundColor: '#ff6b81' },
-  typeText: { color: '#fff', fontSize: 12 },
-  input: { backgroundColor: '#0f0f12', borderRadius: 11, color: '#fff', padding: 12 },
+  type: { padding: 9, backgroundColor: colors.cardBorder, borderRadius: 10 },
+  typeActive: { backgroundColor: colors.accent1 },
+  typeText: { color: colors.textPrimary, fontSize: 12 },
+  input: { backgroundColor: colors.background, borderRadius: 11, color: colors.textPrimary, padding: 12 },
   notes: { minHeight: 75, textAlignVertical: 'top' },
-  text: { color: '#f3f0f5' },
+  text: { color: colors.textPrimary },
   delete: {
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 8,
-    backgroundColor: '#8d3b52',
+    backgroundColor: colors.error,
     borderRadius: 11,
     padding: 12,
   },

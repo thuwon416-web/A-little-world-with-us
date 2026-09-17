@@ -31,6 +31,7 @@ const instructions: Record<'coach' | 'letter' | 'surprise', string> = {
 
 export default function AIAssistantScreen() {
   const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [tab, setTab] = useState<Tool>('gift')
   const [input, setInput] = useState('')
   const [customResult, setCustomResult] = useState('')
@@ -238,16 +239,16 @@ export default function AIAssistantScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     paddingTop: 72,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   title: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 16,
@@ -278,18 +279,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   refreshButton: {
-    backgroundColor: '#ff6b81',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
     marginBottom: 12,
   },
   refreshText: {
-    color: '#f3f0f5',
+    color: colors.background,
     fontWeight: '700',
   },
   error: {
-    color: '#ffb0bd',
+    color: colors.error,
     marginBottom: 12,
   },
   list: {
@@ -299,21 +300,21 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
   },
   badge: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 11,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 8,
   },
   content: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 16,
     lineHeight: 24,
   },
@@ -326,17 +327,17 @@ const styles = StyleSheet.create({
   actionButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#ff6b81',
+    borderColor: colors.accent1,
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
   actionText: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontWeight: '600',
   },
   empty: {
-    color: '#c4c4ce',
+    color: colors.textSecondary,
     fontSize: 14,
     lineHeight: 22,
   },

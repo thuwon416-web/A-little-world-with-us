@@ -2,6 +2,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera'
 import { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+import { useTheme } from '@/context/ThemeContext'
 import { useCall } from '@/hooks/useCall'
 
 function formatCallDuration(seconds: number) {
@@ -11,6 +12,7 @@ function formatCallDuration(seconds: number) {
 }
 
 export default function CallScreen() {
+  const { colors } = useTheme()
   const {
     state,
     callType,
@@ -34,6 +36,7 @@ export default function CallScreen() {
     }
   }, [callType, permission, requestPermission])
 
+  const styles = createStyles(colors)
   return (
     <View style={styles.container}>
       <Text style={styles.status}>
@@ -77,22 +80,22 @@ export default function CallScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     paddingTop: 72,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   status: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 26,
     fontWeight: '700',
     marginBottom: 8,
   },
   time: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 18,
     marginBottom: 18,
   },
@@ -104,21 +107,21 @@ const styles = StyleSheet.create({
   },
   placeholder: {
     flex: 1,
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: 240,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
   },
   placeholderTitle: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 22,
     fontWeight: '700',
   },
   placeholderSubtitle: {
-    color: '#c4c4ce',
+    color: colors.textSecondary,
     marginTop: 8,
   },
   controls: {
@@ -129,18 +132,18 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     flex: 1,
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
   },
   endButton: {
-    backgroundColor: '#d9534f',
+    backgroundColor: colors.error,
   },
   controlText: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontWeight: '700',
   },
 })

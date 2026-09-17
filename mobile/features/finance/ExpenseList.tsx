@@ -2,6 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import type { Expense } from '@/services/finance-splitwise'
 import { SPLIT_TYPES } from './finance-constants'
+import { useTheme } from '@/context/ThemeContext'
 
 type ExpenseListProps = {
   expenses: Expense[]
@@ -23,6 +24,8 @@ const CATEGORY_EMOJIS: Record<string, string> = {
 const formatMmk = (amount: number) => `${amount.toLocaleString()} MMK`
 
 export default function ExpenseList({ expenses, currentUserId, partnerId, onDelete }: ExpenseListProps) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   if (!expenses.length) return <Text style={styles.empty}>No expenses yet. Add your first one.</Text>
 
   return (
@@ -55,17 +58,17 @@ export default function ExpenseList({ expenses, currentUserId, partnerId, onDele
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   list: { gap: 10 },
-  card: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#171b22', borderRadius: 14, borderWidth: 1, borderColor: '#2a2d35', padding: 12 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.surface, borderRadius: 14, borderWidth: 1, borderColor: colors.cardBorder, padding: 12 },
   emoji: { fontSize: 24, width: 34, textAlign: 'center' },
   details: { flex: 1, minWidth: 0, gap: 4 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  title: { color: '#fff', fontSize: 15, fontWeight: '700', flexShrink: 1 },
-  meta: { color: '#c4c4ce', fontSize: 12 },
-  settled: { color: '#78e0a0', backgroundColor: 'rgba(120,224,160,0.15)', borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, fontSize: 10, fontWeight: '700' },
+  title: { color: colors.textPrimary, fontSize: 15, fontWeight: '700', flexShrink: 1 },
+  meta: { color: colors.textSecondary, fontSize: 12 },
+  settled: { color: colors.success, backgroundColor: `${colors.success}26`, borderRadius: 8, paddingHorizontal: 6, paddingVertical: 2, fontSize: 10, fontWeight: '700' },
   amountColumn: { alignItems: 'flex-end', gap: 5 },
-  amount: { color: '#fff', fontSize: 13, fontWeight: '700' },
-  delete: { color: '#ff9b9b', fontSize: 11, fontWeight: '700' },
-  empty: { color: '#c4c4ce', paddingVertical: 8 },
+  amount: { color: colors.textPrimary, fontSize: 13, fontWeight: '700' },
+  delete: { color: colors.error, fontSize: 11, fontWeight: '700' },
+  empty: { color: colors.textSecondary, paddingVertical: 8 },
 })

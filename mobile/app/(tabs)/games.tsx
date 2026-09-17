@@ -183,7 +183,7 @@ export default function GamesScreen() {
               setXNext(true)
             }}
           >
-            <Text style={styles.buttonText}>New game</Text>
+            <Text style={[styles.buttonText, { color: colors.background }]}>New game</Text>
           </TouchableOpacity>
         </View>
 
@@ -225,5 +225,5 @@ const styles = StyleSheet.create({
   cell: { width: 70, height: 70, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
   cellText: { fontSize: 28 },
   button: { borderRadius: 12, padding: 13, alignItems: 'center', marginTop: 8 },
-  buttonText: { color: '#fff', fontWeight: '800' },
+  buttonText: { fontWeight: '800' },
 })
