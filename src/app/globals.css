@@ -469,8 +469,8 @@ label {
 }
 
 .dashboard-shell {
-  width: min(100%, 72rem);
-  margin: 0 auto;
+  width: min(100%, 80rem);
+  margin-inline: auto;
   padding: 1.25rem 0 2.5rem;
   display: grid;
   gap: 1.5rem;
@@ -839,11 +839,11 @@ label {
 }
 
 .dashboard-grid--stats {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 
 .dashboard-grid--content {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
 }
 
 .dashboard-panel {

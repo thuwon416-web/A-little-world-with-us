@@ -83,10 +83,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('a-little-world-with-us-theme-preference', preference)
   }, [mode, mounted, preference])
 
-  if (!mounted) {
-    return <div className="min-h-screen bg-[var(--bg-1)]" />
-  }
-
   return (
     <ThemeContext.Provider
       value={{
@@ -96,8 +92,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
         },
         preference,
         setPreference: (nextPreference) => {
-          setModeState(nextPreference)
-          setPreferenceState(nextPreference)
+          const normalized = LEGACY_MAP[nextPreference] ?? nextPreference
+          setModeState(normalized)
+          setPreferenceState(normalized)
         },
       }}
     >

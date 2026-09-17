@@ -63,14 +63,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 try {
                   var pref = localStorage.getItem('a-little-world-with-us-theme-preference');
                   var mode = localStorage.getItem('a-little-world-with-us-theme-mode');
-                  var resolved = 'midnight';
-                  var modes = ['midnight','sunset','romantic','ocean','monochrome'];
-                  if (pref && modes.indexOf(pref) !== -1) {
-                    resolved = pref;
-                  } else if (mode && modes.indexOf(mode) !== -1) {
-                    resolved = mode;
+                  var legacy = {
+                    midnight: 'lavender-mist',
+                    sunset: 'peach-cream',
+                    romantic: 'mint-whisper',
+                    ocean: 'ocean-calm',
+                    monochrome: 'monochrome'
+                  };
+                  var modes = ['lavender-mist','peach-cream','mint-whisper','ocean-calm','monochrome'];
+                  var selected = pref || mode;
+                  var resolved = legacy[selected] || selected || 'lavender-mist';
+                  if (modes.indexOf(resolved) === -1) {
+                    resolved = 'lavender-mist';
                   }
                   document.documentElement.dataset.themeMode = resolved;
+                  document.documentElement.style.colorScheme =
+                    (resolved === 'peach-cream' || resolved === 'mint-whisper' || resolved === 'ocean-calm') ? 'light' : 'dark';
                 } catch (e) {}
               })();
             `,

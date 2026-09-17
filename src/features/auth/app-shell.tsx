@@ -48,7 +48,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className="mx-auto max-w-7xl"
+            className="w-full"
           >
             {children}
           </motion.div>

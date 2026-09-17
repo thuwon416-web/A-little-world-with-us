@@ -3,15 +3,15 @@
 import { Circle, MoonStar, Sparkles, SunMedium, Waves } from 'lucide-react'
 
 import { useTheme } from '@/contexts/ThemeContext'
-import type { ThemePreference } from '@/contexts/ThemeContext'
+import type { ThemeMode } from '@/contexts/ThemeContext'
 
-const themeOptions = [
-  { key: 'romantic', label: 'Emergent Airy', icon: Sparkles },
-  { key: 'midnight', label: 'Midnight Romance', icon: MoonStar },
-  { key: 'sunset', label: 'Sunset Glow', icon: SunMedium },
-  { key: 'ocean', label: 'Ocean Breeze', icon: Waves },
+const themeOptions: Array<{ key: ThemeMode; label: string; icon: typeof Sparkles }> = [
+  { key: 'lavender-mist', label: 'Lavender Mist', icon: MoonStar },
+  { key: 'peach-cream', label: 'Peach Cream', icon: SunMedium },
+  { key: 'mint-whisper', label: 'Mint Whisper', icon: Sparkles },
+  { key: 'ocean-calm', label: 'Ocean Calm', icon: Waves },
   { key: 'monochrome', label: 'Monochrome', icon: Circle },
-] as const
+]
 
 export default function ThemeToggle() {
   const { preference, setPreference } = useTheme()
@@ -34,7 +34,7 @@ export default function ThemeToggle() {
               key={key}
               type="button"
               onClick={() => {
-                setPreference(key as ThemePreference)
+                setPreference(key)
               }}
               className={`flex w-full items-center justify-between gap-2 rounded-full border px-3 py-2 text-left text-[11px] transition-all ${
                 isActive
