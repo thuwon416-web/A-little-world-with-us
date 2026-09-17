@@ -110,6 +110,7 @@ type Tab = (typeof tabs)[number]
 
 export default function LocationScreen() {
   const { colors } = useTheme()
+  const styles = createStyles(colors)
   const { isAdmin, loading: adminLoading } = useAdmin()
   const { user } = useAuth()
   const {
@@ -522,7 +523,7 @@ export default function LocationScreen() {
               <ShapeSource id="seven-day-route" shape={routeShape}>
                 <LineLayer
                   id="route-line"
-                  style={{ lineColor: '#ff6b9d', lineWidth: 4, lineOpacity: 0.82 }}
+                  style={{ lineColor: colors.accent1, lineWidth: 4, lineOpacity: 0.82 }}
                 />
               </ShapeSource>
             ) : null}
@@ -552,7 +553,7 @@ export default function LocationScreen() {
                     id={`${row.user_id}-accuracy-circle`}
                     style={{
                       circleRadius: Math.min(Math.max(row.accuracy / 2, 10), 50),
-                      circleColor: '#ff6b9d',
+                      circleColor: colors.accent1,
                       circleOpacity: 0.15,
                     }}
                   />
@@ -568,14 +569,14 @@ export default function LocationScreen() {
                 <FillLayer
                   id={`saved-place-fill-${place.id}`}
                   style={{
-                    fillColor: '#34d399',
+                    fillColor: colors.success,
                     fillOpacity: 0.15,
                   }}
                 />
                 <LineLayer
                   id={`saved-place-line-${place.id}`}
                   style={{
-                    lineColor: '#34d399',
+                    lineColor: colors.success,
                     lineWidth: 1.5,
                     lineOpacity: 0.7,
                   }}
@@ -841,6 +842,8 @@ export default function LocationScreen() {
 }
 
 function Empty({ label }: { label: string }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.card}>
       <Text style={styles.meta}>{label}</Text>
@@ -848,79 +851,79 @@ function Empty({ label }: { label: string }) {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a0b2e',
+    backgroundColor: colors.background,
     paddingTop: 64,
     paddingHorizontal: 16,
     paddingBottom: 18,
   },
   eyebrow: {
-    color: '#ffd700',
+    color: colors.accent3,
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 2,
     textTransform: 'uppercase',
   },
-  title: { color: '#fff7fb', fontSize: 31, fontWeight: '700', marginTop: 5, marginBottom: 12 },
+  title: { color: colors.textPrimary, fontSize: 31, fontWeight: '700', marginTop: 5, marginBottom: 12 },
   tabs: { gap: 8, paddingBottom: 12 },
   tab: {
     borderWidth: 1,
-    borderColor: '#5d416f',
+    borderColor: colors.cardBorder,
     borderRadius: 999,
     paddingHorizontal: 12,
     paddingVertical: 8,
   },
-  tabActive: { backgroundColor: '#ff6b9d', borderColor: '#ff6b9d' },
-  tabText: { color: '#e9d8e5', fontSize: 12, fontWeight: '600' },
-  tabTextActive: { color: '#260f2d' },
+  tabActive: { backgroundColor: colors.accent1, borderColor: colors.accent1 },
+  tabText: { color: colors.textSecondary, fontSize: 12, fontWeight: '600' },
+  tabTextActive: { color: colors.background },
   map: {
     height: 340,
     borderRadius: 22,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#765080',
+    borderColor: colors.cardBorder,
   },
   marker: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#ff6b9d',
+    backgroundColor: colors.accent1,
     borderWidth: 3,
-    borderColor: '#fff7fb',
+    borderColor: colors.textPrimary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  markerText: { color: '#260f2d', fontWeight: '800', fontSize: 12 },
+  markerText: { color: colors.background, fontWeight: '800', fontSize: 12 },
   card: {
-    backgroundColor: '#2b1745',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#5d416f',
+    borderColor: colors.cardBorder,
     borderRadius: 18,
     padding: 16,
     marginTop: 14,
   },
   savedPlaceLabel: {
-    backgroundColor: '#34d399',
+    backgroundColor: colors.success,
     paddingHorizontal: 6,
     paddingVertical: 2,
     borderRadius: 6,
   },
   savedPlaceLabelText: {
-    color: '#052e16',
+    color: colors.background,
     fontSize: 10,
     fontWeight: '600',
   },
   eventsSection: {
     marginTop: 20,
   },
-  cardTitle: { color: '#fff7fb', fontSize: 16, fontWeight: '700', marginBottom: 6 },
-  meta: { color: '#d4bdd1', fontSize: 13, lineHeight: 19 },
-  distance: { color: '#ffd700', marginTop: 10, fontWeight: '700' },
+  cardTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700', marginBottom: 6 },
+  meta: { color: colors.textSecondary, fontSize: 13, lineHeight: 19 },
+  distance: { color: colors.accent3, marginTop: 10, fontWeight: '700' },
   button: {
     marginTop: 14,
-    backgroundColor: '#ff6b9d',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -937,15 +940,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 12,
   },
-  buttonText: { color: '#260f2d', fontWeight: '800' },
-  danger: { color: '#fca5a5', fontWeight: '700', marginTop: 10 },
+  buttonText: { color: colors.background, fontWeight: '800' },
+  danger: { color: colors.error, fontWeight: '700', marginTop: 10 },
   input: {
     borderWidth: 1,
-    borderColor: '#5d416f',
+    borderColor: colors.cardBorder,
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: '#fff7fb',
+    color: colors.textPrimary,
     marginTop: 10,
   },
   noteInput: {
@@ -958,37 +961,37 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.55)',
   },
   modalCard: {
-    backgroundColor: '#2b1745',
+    backgroundColor: colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
   },
   modalActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 12 },
-  loading: { color: '#d4bdd1', textAlign: 'center', marginTop: 8, fontSize: 12 },
+  loading: { color: colors.textSecondary, textAlign: 'center', marginTop: 8, fontSize: 12 },
   sosCard: {
-    backgroundColor: '#32111d',
-    borderColor: '#ef4444',
+    backgroundColor: colors.surface,
+    borderColor: colors.error,
     borderWidth: 1,
     borderRadius: 20,
     padding: 16,
     gap: 10,
   },
   sosButton: {
-    backgroundColor: '#dc2626',
+    backgroundColor: colors.error,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
   },
-  sosButtonText: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  sosSuccess: { color: '#86efac', fontSize: 12 },
-  sosError: { color: '#fca5a5', fontSize: 12 },
+  sosButtonText: { color: colors.background, fontSize: 18, fontWeight: '800' },
+  sosSuccess: { color: colors.success, fontSize: 12 },
+  sosError: { color: colors.error, fontSize: 12 },
   list: { paddingBottom: 20 },
   listItem: {
-    backgroundColor: '#2b1745',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 14,
     marginTop: 10,
     borderWidth: 1,
-    borderColor: '#5d416f',
+    borderColor: colors.cardBorder,
   },
 })

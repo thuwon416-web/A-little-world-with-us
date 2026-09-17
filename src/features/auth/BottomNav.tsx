@@ -147,7 +147,7 @@ export default function BottomNav() {
 
             <button
               onClick={handleExit}
-              className="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-red-600/20 py-3 text-sm font-medium text-red-400 transition hover:bg-red-600/30"
+              className="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--error)]/20 py-3 text-sm font-medium text-[var(--error)] transition hover:bg-[var(--error)]/30"
             >
               <LogOut size={16} />
               Exit App

@@ -3,8 +3,11 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import BiometricAuth from '@/components/BiometricAuth'
 import { useAuth } from '@/lib/auth'
+import { useTheme } from '@/context/ThemeContext'
 
 export default function ProfileScreen() {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const { user, signOut } = useAuth()
   const [showBiometricAuth, setShowBiometricAuth] = useState(false)
 
@@ -54,87 +57,87 @@ export default function ProfileScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     paddingTop: 72,
     paddingHorizontal: 20,
   },
   eyebrow: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 12,
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: 8,
   },
   title: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 30,
     fontWeight: '700',
     marginBottom: 8,
   },
   subtitle: {
-    color: '#c4c4ce',
+    color: colors.textSecondary,
     fontSize: 15,
     lineHeight: 22,
     marginBottom: 22,
   },
   card: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     marginBottom: 16,
   },
   metaCard: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 18,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     marginBottom: 20,
   },
   secondaryButton: {
-    backgroundColor: '#2a2d35',
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 16,
     alignItems: 'center',
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#B88AE5',
+    borderColor: colors.accent1,
   },
   secondaryButtonText: {
-    color: '#B88AE5',
+    color: colors.accent1,
     fontSize: 16,
     fontWeight: '600',
   },
   cardLabel: {
-    color: '#8d8d99',
+    color: colors.textSecondary,
     fontSize: 12,
     letterSpacing: 1.3,
     textTransform: 'uppercase',
     marginBottom: 8,
   },
   cardValue: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 20,
     fontWeight: '600',
   },
   metaValue: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 15,
     fontWeight: '500',
   },
   button: {
-    backgroundColor: '#ff6b81',
+    backgroundColor: colors.accent1,
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: colors.background,
     fontWeight: '700',
     fontSize: 16,
   },

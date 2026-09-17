@@ -108,7 +108,7 @@ export default function LearningPage() {
               }}
               className={`shrink-0 rounded-full border px-4 py-2 text-left transition ${
                 selectedLevel === level
-                  ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-white'
+                  ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-[var(--bg-color)]'
                   : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10'
               }`}
               aria-selected={selectedLevel === level}
@@ -138,7 +138,7 @@ export default function LearningPage() {
               <button
                 type="button"
                 onClick={() => setQuizLevel(selectedLevel)}
-                className="rounded-xl bg-[var(--accent-1)] px-4 py-2 text-sm font-semibold text-white"
+                className="rounded-xl bg-[var(--accent-1)] px-4 py-2 text-sm font-semibold text-[var(--bg-color)]"
               >
                 Start Quiz
               </button>
@@ -204,7 +204,7 @@ export default function LearningPage() {
                                 {vocab.korean}
                               </span>
                               {masteredIds.has(vocab.id) && (
-                                <Check className="h-5 w-5 text-emerald-400" aria-label="Mastered" />
+                                <Check className="h-5 w-5 text-[var(--success)]" aria-label="Mastered" />
                               )}
                             </div>
                             <p className="mt-1 text-xs text-[var(--accent-1)]">{vocab.romanization}</p>

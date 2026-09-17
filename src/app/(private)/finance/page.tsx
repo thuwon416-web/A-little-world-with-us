@@ -150,7 +150,7 @@ export default function FinancialGoals() {
 
       {!coupleId && <p className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100">Link and accept a partner before creating shared financial goals.</p>}
 
-      <section className="grid gap-4 rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 md:grid-cols-4">
+      <section className="grid gap-4 rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 sm:grid-cols-2 md:grid-cols-4">
         <input value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} placeholder="Goal name (e.g., Vacation)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
         <input type="number" min="0" value={newGoal.target} onChange={(event) => setNewGoal({ ...newGoal, target: event.target.value })} placeholder="Target (MMK)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
         <input type="number" min="0" value={newGoal.current} onChange={(event) => setNewGoal({ ...newGoal, current: event.target.value })} placeholder="Current (MMK)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />

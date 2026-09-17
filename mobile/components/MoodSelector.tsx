@@ -1,6 +1,7 @@
 import { Frown, Heart, Moon, Smile, Sparkles, Zap } from 'lucide-react-native'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
 
 const moods = [
   { value: 'happy', Icon: Smile, label: 'Happy' },
@@ -17,20 +18,25 @@ interface MoodSelectorProps {
 }
 
 export function MoodSelector({ value, onSelect }: MoodSelectorProps) {
+  const { colors } = useTheme()
   return (
     <View style={styles.row}>
       {moods.map((mood) => (
         <TouchableOpacity
           key={mood.value}
           onPress={() => onSelect?.(mood.value)}
-          style={[styles.pill, value === mood.value && styles.pillActive]}
+          style={[
+            styles.pill,
+            { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+            value === mood.value && { backgroundColor: colors.accent1, borderColor: colors.accent1 },
+          ]}
         >
           <mood.Icon
             size={22}
-            color={value === mood.value ? '#0f0f12' : '#f3f0f5'}
+            color={value === mood.value ? colors.background : colors.textPrimary}
             accessibilityLabel={`${mood.label} mood`}
           />
-          <Text style={[styles.label, value === mood.value && styles.labelActive]}>
+          <Text style={[styles.label, { color: value === mood.value ? colors.background : colors.textPrimary }]}>
             {mood.label}
           </Text>
         </TouchableOpacity>
@@ -50,25 +56,15 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#2a2d35',
-    backgroundColor: '#11161d',
     alignItems: 'center',
     minWidth: 84,
-  },
-  pillActive: {
-    backgroundColor: '#ff6b81',
-    borderColor: '#ff6b81',
   },
   emoji: {
     fontSize: 22,
     marginBottom: 4,
   },
   label: {
-    color: '#f3f0f5',
     fontSize: 11,
     fontWeight: '600',
-  },
-  labelActive: {
-    color: '#0f0f12',
   },
 })

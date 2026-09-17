@@ -92,7 +92,7 @@ export default function CoupleLinkingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0f0f13] via-[#1a1a26] to-[#0f0f13] p-4 md:p-6">
+    <div className="min-h-screen bg-[var(--bg-color)] p-4 md:p-6">
       <div className="mx-auto max-w-2xl">
         {/* Header */}
         <motion.div
@@ -101,10 +101,10 @@ export default function CoupleLinkingPage() {
           className="mb-8 text-center"
         >
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Heart className="h-8 w-8 text-[#d8b9c8]" />
-            <h1 className="text-3xl md:text-4xl font-bold text-white">Couple Link</h1>
+            <Heart className="h-8 w-8 text-[var(--accent-1)]" />
+            <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Couple Link</h1>
           </div>
-          <p className="text-[#c9bdcf]">Connect with your partner to share experiences</p>
+          <p className="text-[var(--text-secondary)]">Connect with your partner to share experiences</p>
         </motion.div>
 
         {/* States */}
@@ -159,24 +159,24 @@ function CreateInviteState({
       animate={{ opacity: 1, scale: 1 }}
       className="space-y-6"
     >
-      <div className="rounded-2xl border border-[#d8b9c8]/20 bg-gradient-to-br from-[#1a1a26] to-[#0f0f13] p-8 text-center">
+      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-8 text-center">
         <div className="mb-6 flex justify-center">
-          <div className="rounded-full bg-[#d8b9c8]/10 p-4">
-            <Heart className="h-8 w-8 text-[#d8b9c8]" />
+          <div className="rounded-full bg-[var(--accent-1)]/10 p-4">
+            <Heart className="h-8 w-8 text-[var(--accent-1)]" />
           </div>
         </div>
-        <h2 className="mb-2 text-2xl font-bold text-white">Ready to connect?</h2>
-        <p className="mb-6 text-[#c9bdcf]">
+        <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">Ready to connect?</h2>
+        <p className="mb-6 text-[var(--text-secondary)]">
           Create an invite code to share with your partner. They can use it to link their account to yours.
         </p>
         <button
           onClick={onCreateInvite}
           disabled={isCreating}
-          className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#d8b9c8] to-[#b7c3f0] px-8 py-3 font-semibold text-[#0f0f13] transition hover:shadow-lg hover:shadow-[#d8b9c8]/20 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-1)] px-8 py-3 font-semibold text-[var(--bg-color)] transition hover:shadow-lg hover:shadow-[var(--accent-1)]/20 disabled:opacity-50"
         >
           {isCreating ? (
             <>
-              <div className="h-4 w-4 rounded-full border-2 border-[#0f0f13] border-t-transparent animate-spin" />
+              <div className="h-4 w-4 rounded-full border-2 border-[var(--bg-color)] border-t-transparent animate-spin" />
               Creating...
             </>
           ) : (
@@ -188,9 +188,9 @@ function CreateInviteState({
         </button>
       </div>
 
-      <div className="rounded-2xl border border-[#b7c3f0]/20 bg-[#1a1a26]/50 p-6">
-        <h3 className="font-semibold text-[#b7c3f0] mb-3">How it works:</h3>
-        <ol className="space-y-2 text-sm text-[#c9bdcf]">
+      <div className="rounded-2xl border border-[var(--accent-2)]/20 bg-[var(--card-bg)]/50 p-6">
+        <h3 className="font-semibold text-[var(--accent-2)] mb-3">How it works:</h3>
+        <ol className="space-y-2 text-sm text-[var(--text-secondary)]">
           <li>1. Click &quot;Create Invite Code&quot; to generate a unique code</li>
           <li>2. Share the code with your partner</li>
           <li>3. They&apos;ll accept the link from their app</li>
@@ -216,18 +216,18 @@ function PendingState({
       animate={{ opacity: 1, scale: 1 }}
       className="space-y-6"
     >
-      <div className="rounded-2xl border border-[#d8b9c8]/20 bg-gradient-to-br from-[#1a1a26] to-[#0f0f13] p-8 text-center">
+      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-8 text-center">
         <div className="mb-6 flex justify-center">
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="rounded-full bg-[#d8b9c8]/10 p-4"
+            className="rounded-full bg-[var(--accent-1)]/10 p-4"
           >
-            <Heart className="h-8 w-8 text-[#d8b9c8]" />
+            <Heart className="h-8 w-8 text-[var(--accent-1)]" />
           </motion.div>
         </div>
-        <h2 className="mb-2 text-2xl font-bold text-white">Invite Code Ready!</h2>
-        <p className="mb-6 text-[#c9bdcf]">
+        <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">Invite Code Ready!</h2>
+        <p className="mb-6 text-[var(--text-secondary)]">
           Share this code with your partner to complete the connection.
         </p>
 
@@ -235,29 +235,29 @@ function PendingState({
         <div className="mb-6 space-y-3">
           <div
             onClick={onCopyCode}
-            className="relative rounded-xl border-2 border-[#d8b9c8] bg-[#0f0f13]/50 p-6 cursor-pointer transition hover:bg-[#0f0f13]/80"
+            className="relative rounded-xl border-2 border-[var(--accent-1)] bg-[var(--bg-color)]/50 p-6 cursor-pointer transition hover:bg-[var(--bg-color)]/80"
           >
-            <div className="font-mono text-4xl font-bold tracking-widest text-[#d8b9c8]">
+            <div className="font-mono text-4xl font-bold tracking-widest text-[var(--accent-1)]">
               {inviteCode}
             </div>
           </div>
           <button
             onClick={onCopyCode}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-[#2a2131] hover:bg-[#3a3141] px-4 py-3 text-[#f4edf5] transition"
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-[var(--card-bg)] hover:bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] transition"
           >
             <Copy className="h-4 w-4" />
             {copied ? 'Copied!' : 'Copy Code'}
           </button>
         </div>
 
-        <div className="rounded-lg bg-[#1c2a25]/50 border border-[#b0d8c5]/20 p-4 text-sm text-[#b0d8c5]">
+        <div className="rounded-lg bg-[var(--card-bg)]/50 border border-[var(--success)]/20 p-4 text-sm text-[var(--success)]">
           <p>Waiting for your partner to accept...</p>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[#b7c3f0]/20 bg-[#1a1a26]/50 p-6">
-        <h3 className="font-semibold text-[#b7c3f0] mb-3">Sharing tips:</h3>
-        <ul className="space-y-2 text-sm text-[#c9bdcf]">
+      <div className="rounded-2xl border border-[var(--accent-2)]/20 bg-[var(--card-bg)]/50 p-6">
+        <h3 className="font-semibold text-[var(--accent-2)] mb-3">Sharing tips:</h3>
+        <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
           <li>• Share via message, email, or in person</li>
           <li>• The code is case-insensitive</li>
           <li>• Each code can only be used once</li>
@@ -273,30 +273,30 @@ function LinkedState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-2xl border border-[#b0d8c5]/20 bg-gradient-to-br from-[#1a1a26] to-[#0f0f13] p-8 text-center"
+      className="rounded-2xl border border-[var(--success)]/20 bg-[var(--card-bg)] p-8 text-center"
     >
       <div className="mb-6 flex justify-center">
         <motion.div
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 0.6 }}
         >
-          <CheckCircle className="h-16 w-16 text-[#b0d8c5]" />
+          <CheckCircle className="h-16 w-16 text-[var(--success)]" />
         </motion.div>
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-white">Connected!</h2>
-      <p className="mb-6 text-[#c9bdcf]">
+      <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">Connected!</h2>
+      <p className="mb-6 text-[var(--text-secondary)]">
         You&apos;re now linked with your partner. Start sharing experiences together.
       </p>
       <div className="flex gap-3 justify-center">
         <a
           href="/chat"
-          className="rounded-lg bg-[#d8b9c8] px-6 py-2 font-semibold text-[#0f0f13] hover:shadow-lg hover:shadow-[#d8b9c8]/20 transition"
+          className="rounded-lg bg-[var(--accent-1)] px-6 py-2 font-semibold text-[var(--bg-color)] hover:shadow-lg hover:shadow-[var(--accent-1)]/20 transition"
         >
           Send Message
         </a>
         <a
           href="/couple-linking"
-          className="rounded-lg bg-[#2a2131] px-6 py-2 font-semibold text-[#f4edf5] hover:bg-[#3a3141] transition"
+          className="rounded-lg bg-[var(--card-bg)] px-6 py-2 font-semibold text-[var(--text-primary)] hover:bg-[var(--card-bg-strong)] transition"
         >
           Back
         </a>
@@ -316,16 +316,16 @@ function ErrorState({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-2xl border border-[#d8b9c8]/20 bg-gradient-to-br from-[#1a1a26] to-[#0f0f13] p-8 text-center"
+      className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-8 text-center"
     >
       <div className="mb-6 flex justify-center">
-        <AlertCircle className="h-16 w-16 text-[#d8b9c8]" />
+        <AlertCircle className="h-16 w-16 text-[var(--accent-1)]" />
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-white">Something went wrong</h2>
-      <p className="mb-6 text-[#c9bdcf]">{error}</p>
+      <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">Something went wrong</h2>
+      <p className="mb-6 text-[var(--text-secondary)]">{error}</p>
       <button
         onClick={onRetry}
-        className="rounded-lg bg-[#d8b9c8] px-6 py-2 font-semibold text-[#0f0f13] hover:shadow-lg hover:shadow-[#d8b9c8]/20 transition"
+        className="rounded-lg bg-[var(--accent-1)] px-6 py-2 font-semibold text-[var(--bg-color)] hover:shadow-lg hover:shadow-[var(--accent-1)]/20 transition"
       >
         Try Again
       </button>

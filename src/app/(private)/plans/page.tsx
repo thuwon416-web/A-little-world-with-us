@@ -126,12 +126,12 @@ export default function PlansPage() {
                       key={item.id}
                       type="button"
                       onClick={() => toggleItem(plan.id, item.id)}
-                      className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-[var(--card-bg-strong)] px-3 py-2 text-left text-[var(--text-primary)]"
+                      className="flex w-full items-center gap-3 rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg-strong)] px-3 py-2 text-left text-[var(--text-primary)]"
                     >
                       <span
                         className={`flex h-5 w-5 items-center justify-center rounded-full border ${
                           item.done
-                            ? 'border-emerald-400 bg-emerald-500/20 text-emerald-300'
+                            ? 'border-[var(--success)] bg-[var(--success)]/20 text-[var(--success)]'
                             : 'border-[var(--text-secondary)] text-transparent'
                         }`}
                       >
@@ -156,7 +156,7 @@ export default function PlansPage() {
             <p className="mt-2 text-sm text-[var(--text-secondary)]">Shared dreams are moving forward.</p>
           </div>
 
-          <div className="rounded-[24px] border border-white/10 bg-[var(--card-bg)] p-5">
+          <div className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
             <div className="flex items-center gap-3 text-[var(--accent-2)]">
               <Sparkles className="h-5 w-5" />
               <span className="text-sm font-medium">Bucket list</span>

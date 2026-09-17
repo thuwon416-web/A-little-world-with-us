@@ -1,6 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { Animated, Easing, View, type ViewStyle } from 'react-native'
 
+import { useTheme } from '@/context/ThemeContext'
+
 export function Skeleton({
   width = '100%',
   height = 20,
@@ -10,6 +12,7 @@ export function Skeleton({
   height?: ViewStyle['height']
   style?: ViewStyle
 }) {
+  const { colors } = useTheme()
   const shimmer = useRef(new Animated.Value(-1)).current
 
   useEffect(() => {
@@ -35,7 +38,7 @@ export function Skeleton({
     <View
       accessibilityLabel="Loading"
       style={[
-        { width, height, borderRadius: 8, backgroundColor: '#242832', overflow: 'hidden' },
+        { width, height, borderRadius: 8, backgroundColor: colors.surface, overflow: 'hidden' },
         style,
       ]}
     >

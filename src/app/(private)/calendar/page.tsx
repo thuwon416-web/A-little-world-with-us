@@ -131,7 +131,7 @@ export default function CalendarPage() {
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-white' : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}
+              className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-[var(--bg-color)]' : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}
             >
               {tab}
             </button>

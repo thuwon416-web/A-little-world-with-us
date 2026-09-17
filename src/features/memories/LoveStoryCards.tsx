@@ -84,7 +84,7 @@ export default function LoveStoryCards() {
         ))}
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/30 bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80">
+      <div className="rounded-2xl border border-[var(--accent-1)]/30 bg-[var(--card-bg-strong)] p-3 text-sm text-[var(--text-primary)]">
         <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">
           <Sparkles className="h-4 w-4" />
           Highlighted chapter

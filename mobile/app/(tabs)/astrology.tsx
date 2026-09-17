@@ -5,6 +5,7 @@ import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
 import { supabase } from '@/lib/supabase'
 import { moonPhase } from '@/services/secondary'
 import { calculateSynastry, createAstrologyProfile } from '@/services/astrology'
+import { useTheme } from '@/context/ThemeContext'
 
 const signs = [
   'Aries',
@@ -21,6 +22,7 @@ const signs = [
   'Pisces',
 ]
 export default function AstrologyScreen() {
+  const { colors } = useTheme()
   const [sign, setSign] = useState('Aries')
   const [advice, setAdvice] = useState('')
   const [score, setScore] = useState<number | null>(null)
@@ -73,7 +75,7 @@ export default function AstrologyScreen() {
       </Text>
       <View style={s.card}>
         <Text style={s.buttonText}>Compatibility</Text>
-        <Text style={{ color: '#ff9bba', fontSize: 38, fontWeight: '800' }}>{score ?? '—'}%</Text>
+        <Text style={{ color: colors.accent1, fontSize: 38, fontWeight: '800' }}>{score ?? '—'}%</Text>
         <Text style={s.muted}>Based on both partners&apos; saved birth dates.</Text>
       </View>
       <View style={s.card}>
@@ -83,12 +85,12 @@ export default function AstrologyScreen() {
             <TouchableOpacity
               key={item}
               style={[
-                { backgroundColor: '#2a2d36', padding: 8, borderRadius: 9 },
-                sign === item && { backgroundColor: '#ff6b81' },
+                { backgroundColor: colors.cardBorder, padding: 8, borderRadius: 9 },
+                sign === item && { backgroundColor: colors.accent1 },
               ]}
               onPress={() => setSign(item)}
             >
-              <Text style={{ color: '#fff', fontSize: 12 }}>{item}</Text>
+              <Text style={{ color: colors.background, fontSize: 12 }}>{item}</Text>
             </TouchableOpacity>
           ))}
         </View>

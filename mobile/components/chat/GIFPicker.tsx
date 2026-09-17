@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
 
 type Props = { visible: boolean; onClose: () => void; onSelect: (url: string) => Promise<void> }
 const fallbackGifs = [
@@ -20,6 +21,7 @@ const fallbackGifs = [
 ]
 
 export function GIFPicker({ visible, onClose, onSelect }: Props) {
+  const { colors } = useTheme()
   const [query, setQuery] = useState('')
   const [gifs, setGifs] = useState(fallbackGifs)
   const [sending, setSending] = useState(false)
@@ -56,29 +58,29 @@ export function GIFPicker({ visible, onClose, onSelect }: Props) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.surface }]}>
           <View style={styles.header}>
-            <Text style={styles.title}>Choose a GIF</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>Choose a GIF</Text>
             <TouchableOpacity onPress={onClose}>
-              <X color="#f3f0f5" size={22} />
+              <X color={colors.textPrimary} size={22} />
             </TouchableOpacity>
           </View>
-          <View style={styles.search}>
-            <Search color="#aaa7b2" size={18} />
+          <View style={[styles.search, { backgroundColor: colors.surface }]}>
+            <Search color={colors.textSecondary} size={18} />
             <TextInput
               value={query}
               onChangeText={setQuery}
               onSubmitEditing={() => void search()}
               placeholder="Search GIFs"
-              placeholderTextColor="#8d8d99"
-              style={styles.input}
+              placeholderTextColor={colors.textSecondary}
+              style={[styles.input, { color: colors.textPrimary }]}
             />
           </View>
           <ScrollView contentContainerStyle={styles.grid}>
             {gifs.map((url) => (
               <TouchableOpacity
                 key={url}
-                style={styles.gif}
+                style={[styles.gif, { backgroundColor: colors.surface }]}
                 onPress={() => void select(url)}
                 disabled={sending}
               >
@@ -86,8 +88,10 @@ export function GIFPicker({ visible, onClose, onSelect }: Props) {
                   <Image source={{ uri: url }} style={styles.gifThumbnail} />
                 ) : (
                   <View style={styles.placeholder}>
-                    <Text style={styles.gifText}>GIF</Text>
-                    <Text style={styles.placeholderText}>Add a GIPHY API key for previews</Text>
+                    <Text style={[styles.gifText, { color: colors.accent1 }]}>GIF</Text>
+                    <Text style={[styles.placeholderText, { color: colors.textSecondary }]}>
+                      Add a GIPHY API key for previews
+                    </Text>
                   </View>
                 )}
               </TouchableOpacity>
@@ -103,7 +107,6 @@ const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'flex-end' },
   card: {
     maxHeight: '75%',
-    backgroundColor: '#171b22',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
@@ -114,20 +117,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 14,
   },
-  title: { color: '#f3f0f5', fontSize: 20, fontWeight: '700' },
+  title: { fontSize: 20, fontWeight: '700' },
   search: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: '#252a34',
     borderRadius: 12,
     paddingHorizontal: 12,
   },
-  input: { flex: 1, color: '#fff', paddingVertical: 11 },
+  input: { flex: 1, paddingVertical: 11 },
   grid: { gap: 10, paddingVertical: 14 },
-  gif: { backgroundColor: '#252a34', borderRadius: 12, overflow: 'hidden' },
-  gifThumbnail: { width: '100%', height: 150, backgroundColor: '#252a34' },
+  gif: { borderRadius: 12, overflow: 'hidden' },
+  gifThumbnail: { width: '100%', height: 150 },
   placeholder: { height: 100, alignItems: 'center', justifyContent: 'center', padding: 14 },
-  gifText: { color: '#b88ae5', fontWeight: '800', fontSize: 18 },
-  placeholderText: { color: '#aaa7b2', fontSize: 11, marginTop: 6, textAlign: 'center' },
+  gifText: { fontWeight: '800', fontSize: 18 },
+  placeholderText: { fontSize: 11, marginTop: 6, textAlign: 'center' },
 })

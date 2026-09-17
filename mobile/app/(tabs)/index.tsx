@@ -105,6 +105,8 @@ function nextAnniversary() {
 }
 
 function StatCard({ title, value }: { title: string; value: number }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.statCard}>
       <Text style={styles.statTitle}>{title}</Text>
@@ -116,6 +118,7 @@ function StatCard({ title, value }: { title: string; value: number }) {
 export default function DashboardScreen() {
   const router = useRouter()
   const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [care, setCare] = useState<CareData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -246,7 +249,7 @@ export default function DashboardScreen() {
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Memory of the day</Text>
             <TouchableOpacity accessibilityRole="button" accessibilityLabel="Refresh memory of the day" onPress={() => void load()}>
-              <RefreshCw color="#d9bfd7" size={18} />
+              <RefreshCw color={colors.accent2} size={18} />
             </TouchableOpacity>
           </View>
           {dashboard?.memory?.image_url ? <Image source={{ uri: dashboard.memory.image_url }} style={styles.memoryImage} /> : null}
@@ -281,7 +284,7 @@ export default function DashboardScreen() {
           setPlaying((value) => !value)
           if (dashboard?.playlistSong?.external_id) void Linking.openURL(`https://www.youtube.com/watch?v=${dashboard.playlistSong.external_id}`)
         }}>
-          {playing ? <Pause color="#fff" size={18} /> : <Play color="#fff" size={18} />}
+          {playing ? <Pause color={colors.background} size={18} /> : <Play color={colors.background} size={18} />}
           <Text style={styles.primaryText}>{playing ? 'Pause' : 'Play'}</Text>
         </TouchableOpacity>
       </View>
@@ -291,7 +294,7 @@ export default function DashboardScreen() {
   if (loading)
     return (
       <View style={styles.center}>
-        <RefreshCw color="#d9bfd7" size={24} />
+        <RefreshCw color={colors.accent2} size={24} />
         <Text style={styles.muted}>Loading your little world...</Text>
       </View>
     )
@@ -361,7 +364,7 @@ export default function DashboardScreen() {
             style={styles.action}
             onPress={() => router.push(route)}
           >
-            <Icon color="#ff9bba" size={22} />
+            <Icon color={colors.accent1} size={22} />
             <Text style={styles.actionText}>{label}</Text>
           </TouchableOpacity>
         ))}
@@ -422,121 +425,121 @@ export default function DashboardScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 72,
     paddingBottom: 48,
-    backgroundColor: '#0f0f12',
-    gap: 14,
+    backgroundColor: colors.background,
+    gap: 16,
   },
   center: {
     flex: 1,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 14,
+    gap: 16,
     padding: 24,
   },
-  eyebrow: { color: '#d9bfd7', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700' },
-  subtitle: { color: '#c4c4ce', fontSize: 15, lineHeight: 22 },
+  eyebrow: { color: colors.accent2, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { color: colors.textPrimary, fontSize: 30, fontWeight: '700' },
+  subtitle: { color: colors.textSecondary, fontSize: 15, lineHeight: 22 },
   heroCard: {
-    backgroundColor: '#2d1b4e',
+    backgroundColor: colors.surface,
     borderRadius: 24,
-    padding: 22,
+    padding: 24,
     borderWidth: 1,
-    borderColor: '#ff9bba66',
+    borderColor: `${colors.accent1}66`,
     alignItems: 'center',
   },
-  heroLabel: { color: '#d9bfd7', fontSize: 11, letterSpacing: 1.6 },
-  heroValue: { color: '#ffd7a8', fontSize: 42, fontWeight: '800', marginTop: 6 },
-  heroText: { color: '#f3f0f5', fontSize: 15 },
+  heroLabel: { color: colors.accent2, fontSize: 11, letterSpacing: 1.6 },
+  heroValue: { color: colors.accent3, fontSize: 42, fontWeight: '800', marginTop: 6 },
+  heroText: { color: colors.textPrimary, fontSize: 15 },
   infoCard: {
     borderWidth: 1,
     borderRadius: 16,
     padding: 16,
     marginTop: 12,
-    gap: 6,
+    gap: 8,
   },
   infoLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
   infoText: { fontSize: 14, lineHeight: 21 },
-  sectionTitle: { color: '#f3f0f5', fontSize: 18, fontWeight: '800', marginTop: 8 },
-  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  sectionTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '800', marginTop: 8 },
+  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   statCard: {
     width: '48%',
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 15,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
   },
-  statTitle: { color: '#c4c4ce', fontSize: 12, textTransform: 'uppercase' },
-  statValue: { color: '#ff9bba', fontSize: 26, fontWeight: '800', marginTop: 8 },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  statTitle: { color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase' },
+  statValue: { color: colors.accent1, fontSize: 26, fontWeight: '800', marginTop: 8 },
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   action: {
     width: '31%',
     minHeight: 74,
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 7,
+    gap: 8,
     padding: 8,
   },
-  actionText: { color: '#f3f0f5', fontSize: 11, textAlign: 'center', fontWeight: '700' },
+  actionText: { color: colors.textPrimary, fontSize: 11, textAlign: 'center', fontWeight: '700' },
   card: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 20,
-    padding: 18,
+    padding: 16,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
   },
   shareCard: {
-    backgroundColor: '#3a1d35',
+    backgroundColor: colors.surface,
     borderRadius: 20,
-    padding: 18,
+    padding: 16,
     borderWidth: 1,
-    borderColor: '#ff9bba66',
+    borderColor: `${colors.accent1}66`,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { color: '#f3f0f5', fontSize: 17, fontWeight: '800' },
-  countdown: { color: '#ffd7a8', fontSize: 25, fontWeight: '800', marginTop: 12 },
+  cardTitle: { color: colors.textPrimary, fontSize: 17, fontWeight: '800' },
+  countdown: { color: colors.accent3, fontSize: 25, fontWeight: '800', marginTop: 12 },
   memoryImage: { width: '100%', height: 170, borderRadius: 14, marginTop: 12 },
-  memoryTitle: { color: '#f3f0f5', fontSize: 18, fontWeight: '700', marginTop: 12 },
-  careValue: { color: '#8ed0c4', fontSize: 24, fontWeight: '800', marginTop: 10 },
-  musicTitle: { color: '#f3f0f5', fontSize: 18, fontWeight: '700', marginTop: 12 },
-  anniversary: { color: '#ffd7a8', fontSize: 25, fontWeight: '800', marginTop: 10 },
-  muted: { color: '#c4c4ce', fontSize: 13, marginTop: 6 },
-  error: { color: '#ff9b9b', textAlign: 'center' },
+  memoryTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700', marginTop: 12 },
+  careValue: { color: colors.success, fontSize: 24, fontWeight: '800', marginTop: 10 },
+  musicTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700', marginTop: 12 },
+  anniversary: { color: colors.accent3, fontSize: 25, fontWeight: '800', marginTop: 10 },
+  muted: { color: colors.textSecondary, fontSize: 13, marginTop: 6 },
+  error: { color: colors.error, textAlign: 'center' },
   primaryButton: {
-    backgroundColor: '#ff6b81',
+    backgroundColor: colors.accent1,
     paddingHorizontal: 22,
     paddingVertical: 12,
     borderRadius: 12,
   },
-  primaryText: { color: '#fff', fontWeight: '800' },
+  primaryText: { color: colors.background, fontWeight: '800' },
   secondaryButton: {
     alignSelf: 'flex-start',
-    backgroundColor: '#604582',
+    backgroundColor: colors.accent2,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 11,
     marginTop: 14,
   },
-  secondaryText: { color: '#fff', fontWeight: '800' },
+  secondaryText: { color: colors.background, fontWeight: '800' },
   playButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     alignSelf: 'flex-start',
-    backgroundColor: '#ff6b81',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginTop: 14,
   },
-  link: { color: '#ff9bba', fontWeight: '700' },
+  link: { color: colors.accent1, fontWeight: '700' },
   customizeButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -563,7 +566,7 @@ const styles = StyleSheet.create({
   widgetRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
     borderBottomWidth: 1,
     paddingVertical: 10,
   },

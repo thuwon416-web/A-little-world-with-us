@@ -24,6 +24,7 @@ import { deleteExpense, getExpenses, type Expense } from '@/services/finance-spl
 import CategoryFilter from '@/features/finance/CategoryFilter'
 import ExpenseList from '@/features/finance/ExpenseList'
 import AddExpenseModal from '@/features/finance/AddExpenseModal'
+import { EmptyState } from '@/components/ui/EmptyState'
 
 const mmk = (value: number) => `${Number(value).toLocaleString()} MMK`
 
@@ -85,6 +86,9 @@ export default function FinanceScreen() {
   const spent = useMemo(
     () => (data?.expenses ?? []).reduce((sum: number, item: any) => sum + Number(item.amount), 0),
     [data]
+  )
+  const filteredExpenses = splitExpenses.filter(
+    (expense) => expenseFilter === 'all' || expense.category === expenseFilter
   )
   const addGoal = async () => {
     const targetAmount = Number(target)
@@ -207,9 +211,15 @@ export default function FinanceScreen() {
         <CategoryFilter active={expenseFilter} onChange={setExpenseFilter} />
         {loadingExpenses ? (
           <Text style={styles.muted}>Loading expenses...</Text>
+        ) : filteredExpenses.length === 0 ? (
+          <EmptyState
+            icon={Flame}
+            title="No expenses yet"
+            description="Add one above to get started."
+          />
         ) : (
           <ExpenseList
-            expenses={splitExpenses.filter((expense) => expenseFilter === 'all' || expense.category === expenseFilter)}
+            expenses={filteredExpenses}
             currentUserId={user?.id ?? ''}
             partnerId={partnerId}
             onDelete={async (id) => {
@@ -254,7 +264,13 @@ export default function FinanceScreen() {
         <TouchableOpacity style={styles.primary} onPress={() => void addGoal()}>
           <Text style={styles.primaryText}>Add goal</Text>
         </TouchableOpacity>
-        {(data?.goals ?? []).map((goal: FinancialGoal) => (
+        {(data?.goals ?? []).length === 0 ? (
+          <EmptyState
+            icon={Flame}
+            title="No savings goals yet"
+            description="Add one above to start planning together."
+          />
+        ) : (data?.goals ?? []).map((goal: FinancialGoal) => (
           <View key={goal.id} style={styles.goal}>
             <View style={styles.row}>
               <Text style={styles.goalTitle}>{goal.title}</Text>
@@ -313,7 +329,13 @@ export default function FinanceScreen() {
         <TouchableOpacity style={styles.primary} onPress={() => void createBill()}>
           <Text style={styles.primaryText}>Add bill reminder</Text>
         </TouchableOpacity>
-        {(data?.bills ?? []).map((bill: any) => (
+        {(data?.bills ?? []).length === 0 ? (
+          <EmptyState
+            icon={Flame}
+            title="No bills yet"
+            description="Add a bill reminder above to stay on track."
+          />
+        ) : (data?.bills ?? []).map((bill: any) => (
           <Text key={bill.id} style={styles.muted}>
             {bill.title} · {mmk(bill.amount)} · due {bill.due_date}
           </Text>
@@ -336,7 +358,13 @@ export default function FinanceScreen() {
         <TouchableOpacity style={styles.primary} onPress={() => void generateIdeas()}>
           <Text style={styles.primaryText}>Suggest a date</Text>
         </TouchableOpacity>
-        {ideas.map((idea, index) => (
+        {ideas.length === 0 ? (
+          <EmptyState
+            icon={Flame}
+            title="No ideas yet"
+            description="Suggest a date to get ideas for your next outing."
+          />
+        ) : ideas.map((idea, index) => (
           <Text key={index} style={styles.muted}>
             • {typeof idea === 'string' ? idea : (idea.title ?? idea.description)}
           </Text>

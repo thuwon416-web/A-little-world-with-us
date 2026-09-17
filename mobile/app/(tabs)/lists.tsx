@@ -11,6 +11,7 @@ import {
 } from 'react-native'
 
 import { useAuth } from '@/lib/auth'
+import { useTheme } from '@/context/ThemeContext'
 import {
   getCalendarData,
   saveListItem,
@@ -20,6 +21,8 @@ import {
 } from '@/services/calendar'
 
 export default function ListsScreen() {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const { user } = useAuth()
   const [tab, setTab] = useState<'bucket' | 'wishlist'>('bucket')
   const [items, setItems] = useState<ListItem[]>([])
@@ -73,7 +76,7 @@ export default function ListsScreen() {
           value={draft}
           onChangeText={setDraft}
           placeholder={tab === 'bucket' ? 'A dream to share' : 'A gift idea'}
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <TouchableOpacity style={styles.add} onPress={() => void add()}>
@@ -86,7 +89,7 @@ export default function ListsScreen() {
             style={styles.check}
             onPress={() => void toggleListItem(tab, item.id, !item.completed).then(load)}
           >
-            <Check color={item.completed ? '#fff' : '#8d8d99'} size={18} />
+            <Check color={item.completed ? colors.background : colors.textSecondary} size={18} />
           </TouchableOpacity>
           <Text style={[styles.itemText, item.completed && styles.done]}>
             {item.item || item.title}
@@ -103,36 +106,36 @@ export default function ListsScreen() {
               ])
             }
           >
-            <Trash2 color="#ff9b9b" size={17} />
+            <Trash2 color={colors.error} size={17} />
           </TouchableOpacity>
         </View>
       ))}
     </ScrollView>
   )
 }
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0f0f12', padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { color: '#d9bfd7', letterSpacing: 2, fontSize: 12 },
-  title: { color: '#fff', fontSize: 29, fontWeight: '700' },
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+  container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 14 },
+  eyebrow: { color: colors.accent2, letterSpacing: 2, fontSize: 12 },
+  title: { color: colors.textPrimary, fontSize: 29, fontWeight: '700' },
   tabs: { flexDirection: 'row', gap: 8 },
-  tab: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: '#2a2d36', alignItems: 'center' },
-  active: { backgroundColor: '#ff6b81' },
-  tabText: { color: '#fff', fontWeight: '700' },
-  error: { color: '#ff9b9b' },
+  tab: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: colors.cardBorder, alignItems: 'center' },
+  active: { backgroundColor: colors.accent1 },
+  tabText: { color: colors.background, fontWeight: '700' },
+  error: { color: colors.error },
   form: { flexDirection: 'row', gap: 8 },
-  input: { flex: 1, backgroundColor: '#171b22', color: '#fff', borderRadius: 12, padding: 12 },
+  input: { flex: 1, backgroundColor: colors.surface, color: colors.textPrimary, borderRadius: 12, padding: 12 },
   add: {
-    backgroundColor: '#ff6b81',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingHorizontal: 18,
     justifyContent: 'center',
   },
-  addText: { color: '#fff', fontWeight: '800' },
+  addText: { color: colors.background, fontWeight: '800' },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 14,
   },
@@ -140,10 +143,10 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#2a2d36',
+    backgroundColor: colors.cardBorder,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  itemText: { flex: 1, color: '#fff', fontSize: 15 },
-  done: { color: '#8d8d99', textDecorationLine: 'line-through' },
+  itemText: { flex: 1, color: colors.textPrimary, fontSize: 15 },
+  done: { color: colors.textSecondary, textDecorationLine: 'line-through' },
 })

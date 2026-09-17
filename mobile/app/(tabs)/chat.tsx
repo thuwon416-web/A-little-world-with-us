@@ -52,6 +52,7 @@ function formatMessageTime(value: string) {
 export default function ChatScreen() {
   const { user } = useAuth()
   const { colors } = useTheme()
+  const styles = createStyles(colors)
   const { state: callState, placeCall } = useCall()
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -584,16 +585,16 @@ export default function ChatScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     paddingTop: 72,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   title: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 12,
@@ -607,19 +608,19 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   online: {
-    backgroundColor: '#1b2d25',
+    backgroundColor: colors.surface,
   },
   offline: {
-    backgroundColor: '#2f1f22',
+    backgroundColor: colors.surface,
   },
   syncText: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 12,
     fontWeight: '600',
   },
   list: {
     flex: 1,
-    backgroundColor: '#11161d',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 16,
   },
@@ -635,7 +636,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#ff6b81',
+    borderColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -644,7 +645,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#ff6b81',
+    borderColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
@@ -653,11 +654,11 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   callButtonText: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontWeight: '700',
   },
   callStatus: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 12,
     marginBottom: 10,
   },
@@ -684,7 +685,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
   },
-  error: { color: '#ff9b9b', marginBottom: 8, fontSize: 13 },
+  error: { color: colors.error, marginBottom: 8, fontSize: 13 },
   attachmentOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#0008' },
   attachmentSheet: { borderTopWidth: 1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
   attachmentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },

@@ -1,7 +1,10 @@
 import { Link } from 'expo-router'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
 
 export default function NotFoundScreen() {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.container}>
       <Text style={styles.eyebrow}>A LITTLE WORLD WITH US</Text>
@@ -16,39 +19,39 @@ export default function NotFoundScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     padding: 24,
   },
   title: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 30,
     fontWeight: '700',
     marginBottom: 8,
   },
   eyebrow: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 12,
     letterSpacing: 2,
     marginBottom: 12,
   },
   text: {
-    color: '#c4c4ce',
+    color: colors.textSecondary,
     fontSize: 16,
     marginBottom: 20,
   },
   button: {
-    backgroundColor: '#8ed0c4',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingHorizontal: 20,
     paddingVertical: 12,
   },
   buttonText: {
-    color: '#101317',
+    color: colors.background,
     fontWeight: '700',
   },
 })

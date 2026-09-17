@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modal as RNModal, Pressable, StyleSheet, Text } from 'react-native'
 
-import { designTokens } from '@/design-tokens'
+import { useTheme } from '@/context/ThemeContext'
 
 interface ModalProps {
   visible: boolean
@@ -11,11 +11,15 @@ interface ModalProps {
 }
 
 export function Modal({ visible, onClose, title, children }: ModalProps) {
+  const { colors } = useTheme()
   return (
     <RNModal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
-        <Pressable style={styles.container} onPress={() => undefined}>
-          {title ? <Text style={styles.title}>{title}</Text> : null}
+        <Pressable
+          style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+          onPress={() => undefined}
+        >
+          {title ? <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text> : null}
           {children}
         </Pressable>
       </Pressable>
@@ -31,16 +35,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   container: {
-    backgroundColor: designTokens.colors.surface,
-    borderRadius: designTokens.radii.lg,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: designTokens.colors.border,
-    padding: designTokens.spacing.xl,
+    padding: 20,
   },
   title: {
-    color: designTokens.colors.text,
     fontSize: 18,
     fontWeight: '700',
-    marginBottom: designTokens.spacing.md,
+    marginBottom: 12,
   },
 })

@@ -85,7 +85,7 @@ export default function NotificationSettingsPage() {
         <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Notifications</p>
         <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">Stay gently connected</h1>
 
-        <div className="mt-5 flex flex-col gap-4 rounded-[24px] border border-white/10 bg-[var(--card-bg-strong)] p-4 md:flex-row md:items-center md:justify-between">
+        <div className="mt-5 flex flex-col gap-4 rounded-[24px] border border-[var(--card-border)] bg-[var(--card-bg-strong)] p-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm text-[var(--text-secondary)]">Browser notifications</p>
             <p className="mt-1 text-lg font-medium text-[var(--text-primary)]">
@@ -103,10 +103,10 @@ export default function NotificationSettingsPage() {
         </div>
       </div>
 
-      <div className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+      <div className="rounded-[28px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">What to notify me about</h2>
-          <span className="rounded-full border border-white/10 bg-[var(--card-bg-strong)] px-3 py-1 text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+          <span className="rounded-full border border-[var(--card-border)] bg-[var(--card-bg-strong)] px-3 py-1 text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">
             {Object.values(settings).filter(Boolean).length - 1}/{toggleItems.length + 1}
           </span>
         </div>
@@ -115,7 +115,7 @@ export default function NotificationSettingsPage() {
           {toggleItems.map(({ key, label, description, icon: Icon }) => (
             <div
               key={key}
-              className="flex items-center justify-between gap-4 rounded-[22px] border border-white/10 bg-[var(--card-bg-strong)] p-4"
+              className="flex items-center justify-between gap-4 rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg-strong)] p-4"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
@@ -131,21 +131,21 @@ export default function NotificationSettingsPage() {
                 type="button"
                 aria-label={`Toggle ${label}`}
                 onClick={() => handleToggle(key, !settings[key])}
-                className={`relative h-7 w-12 rounded-full transition ${settings[key] ? 'bg-[var(--accent-1)]' : 'bg-white/10'}`}
+                className={`relative h-7 w-12 rounded-full transition ${settings[key] ? 'bg-[var(--accent-1)]' : 'bg-[var(--card-bg)]/10'}`}
               >
                 <span
-                  className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${settings[key] ? 'left-6' : 'left-1'}`}
+                  className={`absolute top-1 h-5 w-5 rounded-full bg-[var(--text-primary)] transition ${settings[key] ? 'left-6' : 'left-1'}`}
                 />
               </button>
             </div>
           ))}
         </div>
       </div>
-      <div className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+      <div className="rounded-[28px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
         <h2 className="mb-4 text-xl font-semibold text-[var(--text-primary)]">Safety notifications</h2>
         <div className="space-y-3">
           {safetyToggleItems.map(({ key, label, description }) => (
-            <div key={key} className="flex items-center justify-between gap-4 rounded-[22px] border border-white/10 bg-[var(--card-bg-strong)] p-4">
+            <div key={key} className="flex items-center justify-between gap-4 rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg-strong)] p-4">
               <div>
                 <p className="font-medium text-[var(--text-primary)]">{label}</p>
                 <p className="text-sm text-[var(--text-secondary)]">{description}</p>
@@ -157,9 +157,9 @@ export default function NotificationSettingsPage() {
                 onClick={() => {
                   if (hasPushDevice === true) void handleSafetyToggle(key, !safetyPreferences[key])
                 }}
-                className={`relative h-7 w-12 rounded-full transition ${safetyPreferences[key] ? 'bg-[var(--accent-1)]' : 'bg-white/10'} ${hasPushDevice !== true ? 'cursor-not-allowed opacity-50' : ''}`}
+                className={`relative h-7 w-12 rounded-full transition ${safetyPreferences[key] ? 'bg-[var(--accent-1)]' : 'bg-[var(--card-bg)]/10'} ${hasPushDevice !== true ? 'cursor-not-allowed opacity-50' : ''}`}
               >
-                <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${safetyPreferences[key] ? 'left-6' : 'left-1'}`} />
+                <span className={`absolute top-1 h-5 w-5 rounded-full bg-[var(--text-primary)] transition ${safetyPreferences[key] ? 'left-6' : 'left-1'}`} />
               </button>
             </div>
           ))}

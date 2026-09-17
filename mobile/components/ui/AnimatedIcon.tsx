@@ -10,6 +10,8 @@ import Animated, {
 import * as LucideIcons from 'lucide-react-native'
 import type { LucideIcon } from 'lucide-react-native'
 
+import { useTheme } from '@/context/ThemeContext'
+
 export type IconAnimation = 'draw' | 'bounce' | 'pulse' | 'wiggle' | 'spin' | 'none'
 
 export interface AnimatedIconHandle {
@@ -32,6 +34,7 @@ export const AnimatedIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(fu
   { name, size = 24, animation = 'none', trigger = 'mount', color = 'currentColor' },
   ref
 ) {
+  const { colors } = useTheme()
   const scale = useSharedValue(1)
   const opacity = useSharedValue(1)
   const rotation = useSharedValue(0)
@@ -89,7 +92,7 @@ export const AnimatedIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(fu
   const Icon = LucideIcons[name] as LucideIcon
   const content = (
     <AnimatedView style={animatedStyle}>
-      <Icon size={size} color={color} />
+      <Icon size={size} color={color === 'currentColor' ? colors.textPrimary : color} />
     </AnimatedView>
   )
 

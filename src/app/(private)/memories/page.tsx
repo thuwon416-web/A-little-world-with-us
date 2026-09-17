@@ -432,7 +432,7 @@ function MemoriesPageContent() {
       />
 
       {birthdayReveal && (
-        <section className="glass-card rounded-[28px] border border-rose-400/30 bg-gradient-to-r from-rose-500/10 via-pink-500/10 to-amber-300/10 p-5">
+        <section className="glass-card rounded-[28px] border border-[var(--error)]/30 bg-gradient-to-r from-[var(--error)]/10 via-[var(--accent-1)]/10 to-[var(--warning)]/10 p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">
             {birthdayReveal.title}
           </p>
@@ -486,8 +486,8 @@ function MemoriesPageContent() {
             Configure Supabase to upload new memories.
           </p>
         )}
-        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
-        {uploadSummary && <p className="mt-3 text-sm text-emerald-400">{uploadSummary}</p>}
+        {error && <p className="mt-3 text-sm text-[var(--error)]">{error}</p>}
+        {uploadSummary && <p className="mt-3 text-sm text-[var(--success)]">{uploadSummary}</p>}
       </section>
       {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-3xl bg-[var(--card-bg)] p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-[var(--text-primary)]">Memory location</h2><button type="button" onClick={() => setIsLocationOpen(false)} className="text-sm text-[var(--text-secondary)]">Close</button></div><MemoryLocationPicker value={location} onChange={setLocation} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => setError('Unable to read your current location.'))} className="rounded-xl border border-[var(--accent-1)]/20 px-3 py-2 text-sm text-[var(--text-primary)]">Use current location</button><input value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" /><button type="button" onClick={() => setIsLocationOpen(false)} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)]">Save location</button></div></div> : null}
 
@@ -552,7 +552,7 @@ function MemoriesPageContent() {
                   <button type="button" onClick={() => openEditJournal(memory)} className="text-[var(--accent-1)]" aria-label="Edit journal entry">
                     <Pencil className="h-5 w-5" />
                   </button>
-                  <button type="button" onClick={() => deleteJournal(memory)} className="text-red-400" aria-label="Delete journal entry">
+                  <button type="button" onClick={() => deleteJournal(memory)} className="text-[var(--error)]" aria-label="Delete journal entry">
                     <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
@@ -598,7 +598,7 @@ function MemoriesPageContent() {
                 <button type="button" onClick={() => setSelectedMemory(memory)} className="glass-card w-full bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20 p-6 text-left"><p className="font-serif text-xl text-[var(--text-primary)]">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-[var(--text-secondary)]">{new Date(memory.date).toLocaleDateString()}</p></button>
               )}
               {memory.category && (
-                <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-white">
+                <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-[var(--text-primary)]">
                   {memory.category}
                 </span>
               )}
@@ -606,7 +606,7 @@ function MemoriesPageContent() {
                 <button
                   type="button"
                   onClick={() => handleDelete(memory)}
-                  className="absolute right-3 top-3 rounded-full bg-red-500/80 px-3 py-1 text-xs text-white hover:bg-red-500"
+                  className="absolute right-3 top-3 rounded-full bg-[var(--error)]/80 px-3 py-1 text-xs text-[var(--text-primary)] hover:bg-[var(--error)]"
                 >
                   Delete
                 </button>
@@ -638,7 +638,7 @@ function MemoriesPageContent() {
           <section className="glass-card w-full max-w-xl space-y-4 p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold text-[var(--text-primary)]">{editingJournalId ? 'Edit journal entry' : 'New journal entry'}</h2>
-              <button type="button" onClick={closeJournalModal} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-white/10" aria-label="Close journal modal"><X className="h-5 w-5" /></button>
+              <button type="button" onClick={closeJournalModal} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--card-bg)]/10" aria-label="Close journal modal"><X className="h-5 w-5" /></button>
             </div>
             <input value={journalTitle} onChange={(event) => setJournalTitle(event.target.value)} placeholder="Title" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-[var(--text-primary)]" />
             <textarea value={journalBody} onChange={(event) => setJournalBody(event.target.value)} placeholder="Write your thoughts..." rows={5} className="w-full resize-y rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-[var(--text-primary)]" />
@@ -680,7 +680,7 @@ function MemoryDetail({ memory, onClose, onSaved }: { memory: DisplayMemory; onC
     else onSaved({ id: memory.id, title, caption: title, date, category })
     setSaving(false)
   }
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-white/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative h-[55vh] w-full overflow-hidden rounded-2xl"><Image src={memory.displayUrl} alt={memory.caption || 'Memory'} fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover" /></div> : <div className="h-64 rounded-2xl bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-lg font-serif text-[var(--text-primary)]" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-red-400">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--card-bg)]/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative h-[55vh] w-full overflow-hidden rounded-2xl"><Image src={memory.displayUrl} alt={memory.caption || 'Memory'} fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover" /></div> : <div className="h-64 rounded-2xl bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-lg font-serif text-[var(--text-primary)]" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-[var(--error)]">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
 }
 
 function MemoriesSkeleton() {

@@ -178,9 +178,9 @@
       overflow: hidden;
       background: linear-gradient(
         90deg,
-        rgba(23, 27, 34, 0.6) 0%,
-        rgba(139, 120, 188, 0.18) 50%,
-        rgba(23, 27, 34, 0.6) 100%
+        var(--bg-2) 25%,
+        var(--bg-3) 50%,
+        var(--bg-2) 75%
       );
       background-size: 200% 100%;
       animation: shimmer 1.5s ease-in-out infinite;
@@ -197,111 +197,141 @@
   }
 }
 
-/* ===== CINEMATIC THEME VARIABLES (MIDNIGHT DEFAULT) ===== */
+/* ===== CINEMATIC THEME VARIABLES (LAVENDER MIST DEFAULT) ===== */
 :root {
-  --bg-color: #0f0f12;
+  --bg-color: #1a1525;
   --bg-gradient: linear-gradient(
     160deg,
-    #0f0f12 0%,
-    #171b22 45%,
-    #241d2d 100%
+    #1a1525 0%,
+    #252033 45%,
+    #302743 100%
   );
-  --card-bg: rgba(23, 27, 34, 0.82);
-  --card-bg-strong: rgba(23, 27, 34, 0.96);
-  --text-primary: #f3f0f5;
-  --text-secondary: #c4c4ce;
-  --accent-1: #b88ae5;
-  --accent-2: #d9bfd7;
-  --soft-pink: #ff8fb1;
-  --warm-gold: #ffd700;
-  --cream: #1f1830;
-  --deep-rose: #ff6b9d;
-  --midnight-purple: #f8e7ff;
+  --card-bg: rgba(37, 32, 51, 0.82);
+  --card-bg-strong: rgba(37, 32, 51, 0.96);
+  --card-border: #3d3450;
+  --text-primary: #f0e8f5;
+  --text-secondary: #c4b8d4;
+  --accent-1: #c5a8e8;
+  --accent-2: #e0c8f0;
+  --accent-3: #d4b8e8;
+  --success: #a8d4b8;
+  --warning: #f0d4a0;
+  --error: #e8a8a8;
+  --soft-pink: #d4b8e8;
+  --warm-gold: #f0d4a0;
+  --cream: #252033;
+  --deep-rose: #c5a8e8;
+  --midnight-purple: #f0e8f5;
   --glass-alpha: 0.5;
-  --bg-1: linear-gradient(135deg, #120d1c 0%, #2d1b2e 38%, #1d223c 100%);
-  --bg-2: rgba(142, 115, 255, 0.12);
-  --bg-3: rgba(255, 107, 157, 0.12);
-  --text-main: rgba(250, 244, 255, 0.95);
-  --card-glow: rgba(159, 122, 255, 0.26);
-  --button-bg: linear-gradient(90deg, rgba(209, 146, 255, 0.18), rgba(255, 215, 0, 0.1));
+  --bg-1: linear-gradient(135deg, #1a1525 0%, #302743 38%, #252033 100%);
+  --bg-2: rgba(197, 168, 232, 0.12);
+  --bg-3: rgba(224, 200, 240, 0.12);
+  --text-main: rgba(240, 232, 245, 0.95);
+  --card-glow: rgba(197, 168, 232, 0.26);
+  --button-bg: linear-gradient(90deg, rgba(197, 168, 232, 0.18), rgba(240, 212, 160, 0.1));
 }
 
-/* ===== SUNSET THEME MODE ===== */
-:root[data-theme-mode='sunset'] {
-  --bg-color: #1a0f0a;
-  --bg-gradient: linear-gradient(135deg, #1a0f0a 0%, #2a1810 48%, #4a202c 100%);
-  --card-bg: rgba(42, 24, 16, 0.86);
-  --card-bg-strong: rgba(42, 24, 16, 0.96);
-  --text-primary: #fff5ec;
-  --text-secondary: #f1c7ae;
-  --accent-1: #ff9a56;
-  --accent-2: #ff6b9d;
-  --soft-pink: #ff7a8a;
-  --warm-gold: #ffcc70;
-  --cream: #fff5ec;
-  --deep-rose: #e45757;
-  --midnight-purple: #4a2b2f;
+/* ===== PEACH CREAM THEME MODE ===== */
+:root[data-theme-mode='peach-cream'] {
+  --bg-color: #fff5ed;
+  --bg-gradient: linear-gradient(135deg, #fff5ed 0%, #fffaf6 48%, #fce5d8 100%);
+  --card-bg: rgba(255, 248, 242, 0.85);
+  --card-bg-strong: rgba(255, 248, 242, 0.95);
+  --card-border: #f0d5c0;
+  --text-primary: #3a2a2a;
+  --text-secondary: #7a5a5a;
+  --accent-1: #c9603b;
+  --accent-2: #c95c45;
+  --accent-3: #f7b8a8;
+  --success: #3a8a4a;
+  --warning: #d9a03a;
+  --error: #c95050;
+  --soft-pink: #f7b8a8;
+  --warm-gold: #d9a03a;
+  --cream: #fff5ed;
+  --deep-rose: #c95050;
+  --midnight-purple: #3a2a2a;
   --glass-alpha: 0.7;
-  --bg-1: linear-gradient(135deg, #ffefe6 0%, #ffd7b8 38%, #ffc1b6 100%);
-  --bg-2: rgba(255, 185, 131, 0.12);
-  --bg-3: rgba(255, 138, 117, 0.12);
-  --text-main: rgba(73, 38, 36, 0.96);
-  --card-glow: rgba(255, 184, 133, 0.2);
-  --button-bg: linear-gradient(90deg, rgba(255, 158, 108, 0.18), rgba(255, 215, 0, 0.1));
+  --bg-1: linear-gradient(135deg, #fff5ed 0%, #fffaf6 38%, #fce5d8 100%);
+  --bg-2: rgba(247, 184, 168, 0.12);
+  --bg-3: rgba(201, 96, 59, 0.12);
+  --text-main: rgba(58, 42, 42, 0.96);
+  --card-glow: rgba(240, 213, 192, 0.2);
+  --button-bg: linear-gradient(90deg, rgba(201, 96, 59, 0.18), rgba(247, 184, 168, 0.1));
 }
 
-/* ===== ROMANTIC THEME MODE (EMERGENT AIRY â€” LIGHT YELLOW) ===== */
-:root[data-theme-mode='romantic'] {
-  --bg-color: #fffbf0;
-  --bg-gradient: linear-gradient(135deg, #fffbf0 0%, #fff4d9 45%, #ffe9c7 100%);
-  --card-bg: rgba(255, 251, 240, 0.82);
-  --card-bg-strong: rgba(255, 248, 226, 0.95);
-  --text-primary: #4a3d1f;
-  --text-secondary: #7d6b42;
-  --accent-1: #f4c04f;
-  --accent-2: #ffd97a;
-  --soft-pink: #ffb8a6;
-  --warm-gold: #ffe08a;
-  --cream: #fffbf0;
-  --deep-rose: #e5a04d;
-  --midnight-purple: #4a3d1f;
+/* ===== MINT WHISPER THEME MODE ===== */
+:root[data-theme-mode='mint-whisper'] {
+  --bg-color: #f0faf5;
+  --bg-gradient: linear-gradient(135deg, #f0faf5 0%, #e8f5ee 45%, #dff2e6 100%);
+  --card-bg: rgba(232, 245, 238, 0.82);
+  --card-bg-strong: rgba(224, 242, 232, 0.95);
+  --card-border: #a8d8b8;
+  --text-primary: #1a3a28;
+  --text-secondary: #4a6e58;
+  --accent-1: #2c8a5c;
+  --accent-2: #4db88a;
+  --accent-3: #7dd4aa;
+  --success: #2c8a5c;
+  --warning: #e0a84a;
+  --error: #c97070;
+  --soft-pink: #7dd4aa;
+  --warm-gold: #e0a84a;
+  --cream: #f0faf5;
+  --deep-rose: #2c8a5c;
+  --midnight-purple: #1a3a28;
   --glass-alpha: 0.72;
-  --bg-1: linear-gradient(135deg, #fffbf0 0%, #fff4d9 38%, #ffe9c7 100%);
+  --bg-1: linear-gradient(135deg, #f0faf5 0%, #e8f5ee 38%, #dff2e6 100%);
+  --bg-2: rgba(77, 184, 138, 0.1);
+  --bg-3: rgba(125, 212, 170, 0.12);
+  --text-main: rgba(26, 58, 40, 0.96);
+  --card-glow: rgba(77, 184, 138, 0.2);
+  --button-bg: linear-gradient(90deg, rgba(44, 138, 92, 0.2), rgba(125, 212, 170, 0.12));
 }
 
-/* ===== OCEAN THEME MODE ===== */
-:root[data-theme-mode='ocean'] {
+/* ===== OCEAN CALM THEME MODE ===== */
+:root[data-theme-mode='ocean-calm'] {
   --bg-color: #edf8ff;
-  --bg-gradient: linear-gradient(135deg, #edf8ff 0%, #d7f1ff 45%, #cfe7ff 100%);
-  --card-bg: rgba(255, 255, 255, 0.78);
-  --card-bg-strong: rgba(246, 252, 255, 0.92);
+  --bg-gradient: linear-gradient(135deg, #edf8ff 0%, #f6fcff 45%, #dff3ff 100%);
+  --card-bg: rgba(246, 252, 255, 0.82);
+  --card-bg-strong: rgba(246, 252, 255, 0.95);
+  --card-border: #a7d8f0;
   --text-primary: #133a52;
   --text-secondary: #4c6f89;
-  --accent-1: #4a90e2;
-  --accent-2: #87ceeb;
-  --soft-pink: #ff9fc5;
-  --warm-gold: #b7e4ff;
+  --accent-1: #2c6fb3;
+  --accent-2: #5cc3d5;
+  --accent-3: #87ceeb;
+  --success: #5cc3d5;
+  --warning: #e6b84a;
+  --error: #d97070;
+  --soft-pink: #87ceeb;
+  --warm-gold: #e6b84a;
   --cream: #edf8ff;
   --deep-rose: #5cc3d5;
   --midnight-purple: #133a52;
   --glass-alpha: 0.72;
-  --bg-1: linear-gradient(135deg, #ebfaff 0%, #d7f1ff 38%, #cfe7ff 100%);
-  --bg-2: rgba(131, 196, 255, 0.1);
-  --bg-3: rgba(119, 196, 212, 0.12);
+  --bg-1: linear-gradient(135deg, #edf8ff 0%, #f6fcff 38%, #dff3ff 100%);
+  --bg-2: rgba(92, 195, 213, 0.1);
+  --bg-3: rgba(135, 206, 235, 0.12);
   --text-main: rgba(19, 58, 82, 0.96);
-  --card-glow: rgba(136, 211, 255, 0.2);
-  --button-bg: linear-gradient(90deg, rgba(142, 210, 255, 0.2), rgba(181, 225, 255, 0.12));
+  --card-glow: rgba(92, 195, 213, 0.2);
+  --button-bg: linear-gradient(90deg, rgba(44, 111, 179, 0.2), rgba(135, 206, 235, 0.12));
 }
 
 :root[data-theme-mode='monochrome'] {
   --bg-color: #050505;
   --bg-gradient: linear-gradient(180deg, #050505 0%, #0e0e10 28%, #151619 62%, #090909 100%);
-  --card-bg: rgba(17, 17, 19, 0.78);
+  --card-bg: rgba(17, 18, 20, 0.78);
   --card-bg-strong: rgba(10, 10, 12, 0.92);
+  --card-border: #2a2d30;
   --text-primary: #f5f5f3;
   --text-secondary: #b7b8bb;
   --accent-1: #e6e7e9;
   --accent-2: #a9adb3;
+  --accent-3: #c5c7ca;
+  --success: #a3c586;
+  --warning: #e6b84a;
+  --error: #d97070;
   --soft-pink: #d8d9dc;
   --warm-gold: #c5c7ca;
   --cream: #111214;
@@ -488,8 +518,20 @@ label {
 
 .dashboard-grid--dynamic {
   display: grid;
-  gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 640px) {
+  .dashboard-grid--dynamic {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid--dynamic {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .dashboard-toolbar {
@@ -993,6 +1035,19 @@ p {
   transition:
     transform 180ms ease,
     box-shadow 180ms ease;
+}
+
+/* Card density variants:
+   - .glass-card         -> p-6 (24px) default
+   - .glass-card--compact -> p-4 (16px) for dense lists
+   - .glass-card--hero    -> p-7 (28px) for hero/empty states
+ */
+.glass-card--compact {
+  padding: 16px;
+}
+
+.glass-card--hero {
+  padding: 28px;
 }
 
 .glass-card:hover {

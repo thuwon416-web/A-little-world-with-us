@@ -56,7 +56,7 @@ export default function GalleryPage() {
 
       <ImageUpload onUpload={handleUpload} />
 
-      {error && <div className="rounded-[20px] border border-rose-200/20 bg-rose-500/10 p-4 text-sm text-rose-200">{error}</div>}
+      {error && <div className="rounded-[20px] border border-[var(--error)]/20 bg-[var(--error)]/10 p-4 text-sm text-[var(--error)]">{error}</div>}
 
       {loading ? (
         <>
@@ -64,13 +64,13 @@ export default function GalleryPage() {
           <LoadingState label="Fetching gallery..." />
         </>
       ) : images.length === 0 ? (
-        <div className="rounded-[28px] border border-dashed border-white/10 bg-[var(--card-bg)] p-8 text-center text-[var(--text-secondary)]">
+        <div className="rounded-[28px] border border-dashed border-[var(--card-border)] bg-[var(--card-bg)] p-8 text-center text-[var(--text-secondary)]">
           No images yet. Add your first memory to start the gallery.
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {images.map((image) => (
-            <div key={image.id} className="overflow-hidden rounded-[24px] border border-white/10 bg-[var(--card-bg)] shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
+            <div key={image.id} className="overflow-hidden rounded-[24px] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
               <Image src={image.url} alt={image.name} width={256} height={256} className="h-64 w-full object-cover" />
               <div className="flex items-center justify-between gap-3 p-4">
                 <span className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">
@@ -79,7 +79,7 @@ export default function GalleryPage() {
                 <button
                   type="button"
                   onClick={() => void handleDelete(image)}
-                  className="rounded-full border border-rose-200/30 bg-rose-500/10 px-3 py-1 text-xs font-medium text-rose-200"
+                  className="rounded-full border border-[var(--error)]/30 bg-[var(--error)]/10 px-3 py-1 text-xs font-medium text-[var(--error)]"
                 >
                   Delete
                 </button>

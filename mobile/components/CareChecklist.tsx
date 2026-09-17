@@ -1,6 +1,7 @@
 import React from 'react'
 import { Check } from 'lucide-react-native'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
 
 const careItems = [
   { key: 'water', label: 'Water' },
@@ -15,14 +16,15 @@ interface CareChecklistProps {
 }
 
 export function CareChecklist({ values = {}, onToggle }: CareChecklistProps) {
+  const { colors } = useTheme()
   return (
     <View style={styles.container}>
       {careItems.map((item) => (
         <TouchableOpacity key={item.key} style={styles.row} onPress={() => onToggle?.(item.key)}>
-          <View style={[styles.check, values[item.key] && styles.checkDone]}>
-            {values[item.key] ? <Check size={14} color="#f3f0f5" /> : null}
+          <View style={[styles.check, { borderColor: colors.accent2 }, values[item.key] && { backgroundColor: colors.success, borderColor: colors.success }]}>
+            {values[item.key] ? <Check size={14} color={colors.background} /> : null}
           </View>
-          <Text style={[styles.label, values[item.key] && styles.labelDone]}>{item.label}</Text>
+          <Text style={[styles.label, { color: values[item.key] ? colors.success : colors.textPrimary }, values[item.key] && styles.labelDone]}>{item.label}</Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -43,20 +45,13 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#d9bfd7',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkDone: {
-    backgroundColor: '#2f8f66',
-    borderColor: '#2f8f66',
-  },
   label: {
-    color: '#f3f0f5',
     fontSize: 15,
   },
   labelDone: {
-    color: '#8ed0c4',
     textDecorationLine: 'line-through',
   },
 })

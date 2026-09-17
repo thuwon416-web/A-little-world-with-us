@@ -1,5 +1,6 @@
 import { Smile, X } from 'lucide-react-native'
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
 
 type Props = { visible: boolean; onClose: () => void; onSelect: (emoji: string) => Promise<void> }
 const stickers = [
@@ -22,24 +23,25 @@ const stickers = [
 ]
 
 export function StickerPicker({ visible, onClose, onSelect }: Props) {
+  const { colors } = useTheme()
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.surface }]}>
           <View style={styles.header}>
             <View style={styles.heading}>
-              <Smile color="#b88ae5" size={20} />
-              <Text style={styles.title}>Stickers</Text>
+              <Smile color={colors.accent1} size={20} />
+              <Text style={[styles.title, { color: colors.textPrimary }]}>Stickers</Text>
             </View>
             <TouchableOpacity onPress={onClose}>
-              <X color="#f3f0f5" size={22} />
+              <X color={colors.textPrimary} size={22} />
             </TouchableOpacity>
           </View>
           <View style={styles.grid}>
             {stickers.map((sticker) => (
               <TouchableOpacity
                 key={sticker}
-                style={styles.sticker}
+                style={[styles.sticker, { backgroundColor: colors.surface }]}
                 onPress={() => void onSelect(sticker)}
                 accessibilityLabel={`Send ${sticker} sticker`}
               >
@@ -56,7 +58,6 @@ export function StickerPicker({ visible, onClose, onSelect }: Props) {
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'flex-end' },
   card: {
-    backgroundColor: '#171b22',
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
@@ -68,12 +69,11 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   heading: { flexDirection: 'row', gap: 8, alignItems: 'center' },
-  title: { color: '#f3f0f5', fontSize: 20, fontWeight: '700' },
+  title: { fontSize: 20, fontWeight: '700' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   sticker: {
     width: '21%',
     aspectRatio: 1,
-    backgroundColor: '#252a34',
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',

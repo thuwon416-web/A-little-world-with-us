@@ -3,6 +3,7 @@ import { FileUp, X } from 'lucide-react-native'
 import { useState } from 'react'
 import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
+import { useTheme } from '@/context/ThemeContext'
 import type { ChatAttachment } from './chat-types'
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 }
 
 export function FileUpload({ visible, onClose, onFileSelect }: Props) {
+  const { colors } = useTheme()
   const [file, setFile] = useState<ChatAttachment | null>(null)
   const [sending, setSending] = useState(false)
   const choose = async () => {
@@ -44,23 +46,26 @@ export function FileUpload({ visible, onClose, onFileSelect }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, { backgroundColor: colors.surface }]}>
           <View style={styles.header}>
-            <Text style={styles.title}>Send file</Text>
+            <Text style={[styles.title, { color: colors.textPrimary }]}>Send file</Text>
             <TouchableOpacity onPress={onClose}>
-              <X color="#f3f0f5" size={22} />
+              <X color={colors.textPrimary} size={22} />
             </TouchableOpacity>
           </View>
-          <TouchableOpacity style={styles.dropzone} onPress={() => void choose()}>
-            <FileUp color="#b88ae5" size={38} />
-            <Text style={styles.secondary}>{file?.name || 'Choose a file'}</Text>
+          <TouchableOpacity
+            style={[styles.dropzone, { borderColor: `${colors.accent1}66` }]}
+            onPress={() => void choose()}
+          >
+            <FileUp color={colors.accent1} size={38} />
+            <Text style={[styles.secondary, { color: colors.textSecondary }]}>{file?.name || 'Choose a file'}</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={[styles.send, !file && styles.disabled]}
+            style={[styles.send, { backgroundColor: colors.accent1 }, !file && styles.disabled]}
             disabled={!file || sending}
             onPress={() => void send()}
           >
-            <Text style={styles.sendText}>{sending ? 'Sending...' : 'Send file'}</Text>
+            <Text style={[styles.sendText, { color: colors.background }]}>{sending ? 'Sending...' : 'Send file'}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -70,31 +75,29 @@ export function FileUpload({ visible, onClose, onFileSelect }: Props) {
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: '#171b22', borderRadius: 24, padding: 20 },
+  card: { borderRadius: 24, padding: 20 },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  title: { color: '#f3f0f5', fontSize: 20, fontWeight: '700' },
+  title: { fontSize: 20, fontWeight: '700' },
   dropzone: {
     height: 160,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: '#b88ae566',
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  secondary: { color: '#aaa7b2', marginTop: 12, textAlign: 'center' },
+  secondary: { marginTop: 12, textAlign: 'center' },
   send: {
     marginTop: 16,
-    backgroundColor: '#b88ae5',
     borderRadius: 14,
     padding: 14,
     alignItems: 'center',
   },
-  sendText: { color: '#fff', fontWeight: '700' },
+  sendText: { fontWeight: '700' },
   disabled: { opacity: 0.45 },
 })

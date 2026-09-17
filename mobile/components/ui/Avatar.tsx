@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, Text, View, type ViewProps } from 'react-native'
 
-import { designTokens } from '@/design-tokens'
+import { useTheme } from '@/context/ThemeContext'
 
 interface AvatarProps extends ViewProps {
   label?: string
@@ -9,24 +9,29 @@ interface AvatarProps extends ViewProps {
 }
 
 export function Avatar({ label = 'A', size = 42, style, ...props }: AvatarProps) {
+  const { colors } = useTheme()
   return (
     <View
       {...props}
-      style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }, style]}
+      style={[
+        styles.avatar,
+        { width: size, height: size, borderRadius: size / 2, backgroundColor: colors.accent1 },
+        style,
+      ]}
     >
-      <Text style={[styles.text, { fontSize: Math.max(12, size * 0.35) }]}>{label}</Text>
+      <Text style={[styles.text, { color: colors.background, fontSize: Math.max(12, size * 0.35) }]}>
+        {label}
+      </Text>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   avatar: {
-    backgroundColor: designTokens.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   text: {
-    color: '#110D1A',
     fontWeight: '700',
   },
 })

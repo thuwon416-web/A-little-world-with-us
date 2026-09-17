@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
-export type ThemeName = 'midnight' | 'sunset' | 'romantic' | 'ocean' | 'monochrome'
+type CanonicalThemeName = 'lavender-mist' | 'peach-cream' | 'mint-whisper' | 'ocean-calm' | 'monochrome'
+type LegacyThemeName = 'midnight' | 'sunset' | 'romantic' | 'ocean'
+export type ThemeName = CanonicalThemeName | LegacyThemeName
 export type ThemePreference = ThemeName
 export type ThemeColors = {
   background: string
@@ -55,59 +57,59 @@ export const spacing = {
   '4xl': 64,
 } as const
 
-export const themes: Record<ThemeName, ThemeColors> = {
-  midnight: {
-    background: '#0f0f12',
-    surface: '#171b22',
-    cardBg: '#171b22',
-    cardBorder: '#2a2d35',
-    textPrimary: '#f3f0f5',
-    textSecondary: '#c4c4ce',
-    accent1: '#b88ae5',
-    accent2: '#d9bfd7',
-    accent3: '#f4e4c1',
-    success: '#7ad7a4',
-    warning: '#ffc857',
-    error: '#ff9b9b',
+export const themes: Record<CanonicalThemeName, ThemeColors> = {
+  'lavender-mist': {
+    background: '#1a1525',
+    surface: '#252033',
+    cardBg: '#252033',
+    cardBorder: '#3d3450',
+    textPrimary: '#f0e8f5',
+    textSecondary: '#c4b8d4',
+    accent1: '#c5a8e8',
+    accent2: '#e0c8f0',
+    accent3: '#d4b8e8',
+    success: '#a8d4b8',
+    warning: '#f0d4a0',
+    error: '#e8a8a8',
   },
-  sunset: {
-    background: '#1a0f0a',
-    surface: '#2a1810',
-    cardBg: '#2a1810',
-    cardBorder: '#543126',
-    textPrimary: '#fff5ec',
-    textSecondary: '#f1c7ae',
-    accent1: '#ff9a56',
-    accent2: '#ff6b9d',
-    accent3: '#ffd93d',
-    success: '#91d7a4',
-    warning: '#ffd166',
-    error: '#ff8f8f',
+  'peach-cream': {
+    background: '#fff5ed',
+    surface: '#ffffff',
+    cardBg: '#fff8f2',
+    cardBorder: '#f0d5c0',
+    textPrimary: '#3a2a2a',
+    textSecondary: '#7a5a5a',
+    accent1: '#c9603b',
+    accent2: '#c95c45',
+    accent3: '#f7b8a8',
+    success: '#3a8a4a',
+    warning: '#d9a03a',
+    error: '#c95050',
   },
-  romantic: {
-    background: '#fffbf0',
-    surface: '#fff4d9',
-    cardBg: '#fff8e6',
-    cardBorder: '#e8d99a',
-    textPrimary: '#4a3d1f',
-    textSecondary: '#7d6b42',
-    accent1: '#f4c04f',
-    accent2: '#ffd97a',
-    accent3: '#ffe08a',
-    success: '#a3c586',
-    warning: '#e6b84a',
-    error: '#d97070',
+  'mint-whisper': {
+    background: '#f0faf5',
+    surface: '#e8f5ee',
+    cardBg: '#e8f5ee',
+    cardBorder: '#a8d8b8',
+    textPrimary: '#1a3a28',
+    textSecondary: '#4a6e58',
+    accent1: '#2c8a5c',
+    accent2: '#4db88a',
+    accent3: '#7dd4aa',
+    success: '#2c8a5c',
+    warning: '#e0a84a',
+    error: '#c97070',
   },
-  ocean: {
+  'ocean-calm': {
     background: '#edf8ff',
-    surface: '#d7f1ff',
+    surface: '#f6fcff',
     cardBg: '#f6fcff',
     cardBorder: '#a7d8f0',
     textPrimary: '#133a52',
     textSecondary: '#4c6f89',
-    accent1: '#4a90e2',
-    accent2: '#87ceeb',
-    accent3: '#b7e4ff',
+    accent1: '#2c6fb3',
+    accent2: '#5cc3d5',
+    accent3: '#87ceeb',
     success: '#5cc3d5',
     warning: '#e6b84a',
     error: '#d97070',
@@ -136,41 +138,55 @@ type ThemeContextValue = {
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
-  preference: 'midnight',
-  theme: 'midnight',
-  colors: themes.midnight,
+  preference: 'lavender-mist',
+  theme: 'lavender-mist',
+  colors: themes['lavender-mist'],
   setPreference: () => undefined,
 })
 
 const STORAGE_KEY = 'a-little-world-with-us-mobile-theme'
+const LEGACY_MAP: Record<string, ThemeName> = {
+  midnight: 'lavender-mist',
+  sunset: 'peach-cream',
+  romantic: 'mint-whisper',
+  ocean: 'ocean-calm',
+  monochrome: 'monochrome',
+}
 
-function resolveTheme(preference: ThemePreference): ThemeName {
+function resolveTheme(preference: ThemePreference): CanonicalThemeName {
+  if (preference === 'midnight') return 'lavender-mist'
+  if (preference === 'sunset') return 'peach-cream'
+  if (preference === 'romantic') return 'mint-whisper'
+  if (preference === 'ocean') return 'ocean-calm'
   return preference
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>('midnight')
-  const [theme, setTheme] = useState<ThemeName>('midnight')
+  const [preference, setPreferenceState] = useState<ThemePreference>('lavender-mist')
+  const [theme, setTheme] = useState<CanonicalThemeName>('lavender-mist')
 
   useEffect(() => {
     void AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
+      const migrated = stored !== null && LEGACY_MAP[stored] ? LEGACY_MAP[stored] : stored
       const next: ThemePreference =
-        stored === 'midnight' ||
-        stored === 'sunset' ||
-        stored === 'romantic' ||
-        stored === 'ocean' ||
-        stored === 'monochrome'
-          ? stored
-          : 'midnight'
+        migrated === 'lavender-mist' ||
+        migrated === 'peach-cream' ||
+        migrated === 'mint-whisper' ||
+        migrated === 'ocean-calm' ||
+        migrated === 'monochrome'
+          ? migrated
+          : 'lavender-mist'
       setPreferenceState(next)
       setTheme(resolveTheme(next))
+      void AsyncStorage.setItem(STORAGE_KEY, next)
     })
   }, [])
 
   const setPreference = (next: ThemePreference) => {
-    setPreferenceState(next)
-    setTheme(next)
-    void AsyncStorage.setItem(STORAGE_KEY, next)
+    const canonical = resolveTheme(next)
+    setPreferenceState(canonical)
+    setTheme(canonical)
+    void AsyncStorage.setItem(STORAGE_KEY, canonical)
   }
 
   const value = useMemo(

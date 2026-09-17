@@ -4,6 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { PlanItem } from '@/components/PlanItem'
 import { ProgressBar } from '@/components/ProgressBar'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useTheme } from '@/context/ThemeContext'
 import type { PlanRecord } from '@/services/plans'
 import { ListChecks } from 'lucide-react-native'
 
@@ -27,25 +28,26 @@ function getDaysUntil(dateString?: string | null) {
 }
 
 export function PlanCard({ plan, onPress, onToggleItem }: PlanCardProps) {
+  const { colors } = useTheme()
   const items = plan.plan_items ?? []
   const doneCount = items.filter((item) => item.completed).length
   const progress = items.length === 0 ? 0 : (doneCount / items.length) * 100
 
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
+    <TouchableOpacity style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]} onPress={onPress} activeOpacity={0.9}>
       <View style={styles.headerRow}>
         <View>
-          <Text style={styles.type}>{plan.type}</Text>
-          <Text style={styles.title}>{plan.title}</Text>
+          <Text style={[styles.type, { color: colors.accent2 }]}>{plan.type}</Text>
+          <Text style={[styles.title, { color: colors.textPrimary }]}>{plan.title}</Text>
         </View>
-        <Text style={styles.status}>{plan.status}</Text>
+        <Text style={[styles.status, { color: colors.success }]}>{plan.status}</Text>
       </View>
 
-      {plan.description ? <Text style={styles.description}>{plan.description}</Text> : null}
+      {plan.description ? <Text style={[styles.description, { color: colors.textSecondary }]}>{plan.description}</Text> : null}
 
       <View style={styles.metaRow}>
-        <Text style={styles.meta}>{getDaysUntil(plan.due_date)}</Text>
-        <Text style={styles.meta}>
+        <Text style={[styles.meta, { color: colors.textSecondary }]}>{getDaysUntil(plan.due_date)}</Text>
+        <Text style={[styles.meta, { color: colors.textSecondary }]}>
           {doneCount}/{items.length || 0} done
         </Text>
       </View>
@@ -78,9 +80,7 @@ export function PlanCard({ plan, onPress, onToggleItem }: PlanCardProps) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#171b22',
     borderWidth: 1,
-    borderColor: '#2a2d35',
     borderRadius: 20,
     padding: 18,
     marginBottom: 14,
@@ -91,25 +91,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   type: {
-    color: '#d9bfd7',
     fontSize: 11,
     fontWeight: '700',
     textTransform: 'uppercase',
     marginBottom: 4,
   },
   title: {
-    color: '#f3f0f5',
     fontSize: 20,
     fontWeight: '700',
   },
   status: {
-    color: '#8ed0c4',
     fontSize: 12,
     fontWeight: '700',
     textTransform: 'capitalize',
   },
   description: {
-    color: '#c4c4ce',
     fontSize: 14,
     marginTop: 12,
     marginBottom: 12,
@@ -120,14 +116,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   meta: {
-    color: '#c4c4ce',
     fontSize: 12,
   },
   itemList: {
     marginTop: 12,
   },
   empty: {
-    color: '#c4c4ce',
     fontSize: 13,
   },
 })

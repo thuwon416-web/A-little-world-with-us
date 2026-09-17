@@ -28,23 +28,26 @@ class ErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
-      return (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorTitle}>Something went wrong</Text>
-          <Text style={styles.errorMessage}>
-            {this.state.error?.message || 'An unexpected error occurred'}
-          </Text>
-        </View>
-      )
+      return <ErrorFallback message={this.state.error?.message || 'An unexpected error occurred'} />
     }
 
     return this.props.children
   }
 }
 
+function ErrorFallback({ message }: { message: string }) {
+  const { colors } = useTheme()
+  return (
+    <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
+      <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>Something went wrong</Text>
+      <Text style={[styles.errorMessage, { color: colors.textSecondary }]}>{message}</Text>
+    </View>
+  )
+}
+
 function ThemedStatusBar() {
   const { theme, colors } = useTheme()
-  const isDark = theme === 'midnight' || theme === 'sunset' || theme === 'monochrome'
+  const isDark = theme === 'lavender-mist' || theme === 'monochrome'
 
   return <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background} />
 }
@@ -71,19 +74,16 @@ export default function RootLayout() {
 const styles = StyleSheet.create({
   errorContainer: {
     flex: 1,
-    backgroundColor: '#0f0f12',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   errorTitle: {
-    color: '#f3f0f5',
     fontSize: 24,
     fontWeight: '700',
     marginBottom: 12,
   },
   errorMessage: {
-    color: '#d9bfd7',
     fontSize: 16,
     textAlign: 'center',
   },

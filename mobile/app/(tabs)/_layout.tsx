@@ -5,6 +5,7 @@ import { Heart, Home, MessageCircle, MoreHorizontal, Sparkles } from 'lucide-rea
 import { useEffect } from 'react'
 
 import { useAdmin } from '@/hooks/useAdmin'
+import { useTheme } from '@/context/ThemeContext'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 
@@ -12,6 +13,7 @@ export default function TabsLayout() {
   const { user, loading } = useAuth()
   const { loading: adminLoading } = useAdmin()
   const { t } = useTranslation()
+  const { colors } = useTheme()
   useQuickActionRouting()
   useEffect(() => {
     void QuickActions.setItems([
@@ -33,12 +35,12 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#ff6b81',
-        tabBarInactiveTintColor: '#888',
+        tabBarActiveTintColor: colors.accent1,
+        tabBarInactiveTintColor: colors.textSecondary,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#1a1a1f',
-          borderTopColor: '#2a2a2f',
+          backgroundColor: colors.surface,
+          borderTopColor: colors.cardBorder,
           borderTopWidth: 1,
           height: 72,
           paddingBottom: 10,

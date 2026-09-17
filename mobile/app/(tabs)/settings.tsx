@@ -69,6 +69,8 @@ const privacyLabels = [
 ] as const
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -85,13 +87,15 @@ function Toggle({
   value: boolean
   onChange: (value: boolean) => void
 }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.row}>
       <Text style={styles.label}>{label}</Text>
       <Switch
         value={value}
         onValueChange={onChange}
-        trackColor={{ false: '#34313e', true: '#d8b9c8' }}
+        trackColor={{ false: colors.cardBorder, true: colors.accent2 }}
       />
     </View>
   )
@@ -105,6 +109,8 @@ function Button({
   onPress: () => void
   danger?: boolean
 }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <TouchableOpacity style={[styles.button, danger && styles.dangerButton]} onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
@@ -115,7 +121,8 @@ function Button({
 export default function SettingsScreen() {
   const { user, signOut } = useAuth()
   const router = useRouter()
-  const { preference, setPreference } = useTheme()
+  const { preference, setPreference, colors } = useTheme()
+  const styles = createStyles(colors)
   const { locale, setLocale, t } = useTranslation()
   const {
     isSharing,
@@ -337,14 +344,14 @@ export default function SettingsScreen() {
           value={name}
           onChangeText={setName}
           placeholder="Couple name"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <TextInput
           value={anniversary}
           onChangeText={setAnniversary}
           placeholder="Anniversary (YYYY-MM-DD)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <Button title="Save couple settings" onPress={() => void saveCoupleSettings()} />
@@ -387,7 +394,7 @@ export default function SettingsScreen() {
           value={health.age}
           onChangeText={(value) => setHealth((current) => ({ ...current, age: value }))}
           placeholder="Age (1-120)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           keyboardType="numeric"
           style={styles.input}
         />
@@ -395,7 +402,7 @@ export default function SettingsScreen() {
           value={health.weight}
           onChangeText={(value) => setHealth((current) => ({ ...current, weight: value }))}
           placeholder="Weight kg (1-300)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           keyboardType="decimal-pad"
           style={styles.input}
         />
@@ -403,7 +410,7 @@ export default function SettingsScreen() {
           value={health.height}
           onChangeText={(value) => setHealth((current) => ({ ...current, height: value }))}
           placeholder="Height cm (50-250)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           keyboardType="decimal-pad"
           style={styles.input}
         />
@@ -413,7 +420,7 @@ export default function SettingsScreen() {
             value={health[key]}
             onChangeText={(value) => setHealth((current) => ({ ...current, [key]: value }))}
             placeholder={`${key[0].toUpperCase() + key.slice(1)} (comma separated)`}
-            placeholderTextColor="#8d8d99"
+            placeholderTextColor={colors.textSecondary}
             style={styles.input}
           />
         ))}
@@ -452,7 +459,7 @@ export default function SettingsScreen() {
               value={pin}
               onChangeText={setPin}
               placeholder="New PIN (4-6 digits)"
-              placeholderTextColor="#8d8d99"
+              placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
               secureTextEntry
               style={styles.input}
@@ -541,10 +548,10 @@ export default function SettingsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     paddingTop: 72,
     paddingBottom: 40,
     paddingHorizontal: 20,
@@ -552,23 +559,23 @@ const styles = StyleSheet.create({
   },
   center: {
     flex: 1,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
     gap: 14,
     padding: 24,
   },
-  eyebrow: { color: '#d9bfd7', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700' },
+  eyebrow: { color: colors.accent2, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { color: colors.textPrimary, fontSize: 30, fontWeight: '700' },
   section: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 20,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     gap: 10,
   },
-  sectionTitle: { color: '#f3f0f5', fontSize: 18, fontWeight: '700', marginBottom: 4 },
+  sectionTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700', marginBottom: 4 },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -576,32 +583,33 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 8,
   },
-  label: { color: '#f3f0f5', flex: 1 },
-  muted: { color: '#c4c4ce', fontSize: 13 },
-  error: { color: '#ff9b9b' },
+  label: { color: colors.textPrimary, flex: 1 },
+  muted: { color: colors.textSecondary, fontSize: 13 },
+  error: { color: colors.error },
   input: {
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.surface,
     borderRadius: 12,
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
   },
   button: {
-    backgroundColor: '#d8b9c8',
+    backgroundColor: colors.accent1,
     padding: 13,
     borderRadius: 12,
     alignItems: 'center',
     marginTop: 4,
   },
-  dangerButton: { backgroundColor: '#8d3b52' },
-  buttonText: { color: '#f3f0f5', fontWeight: '800' },
+  dangerButton: { backgroundColor: colors.error },
+  buttonText: { color: colors.background, fontWeight: '800' },
   options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   option: {
-    backgroundColor: '#2a2d36',
+    backgroundColor: colors.surface,
+    minWidth: 90,
     paddingHorizontal: 13,
     paddingVertical: 10,
     borderRadius: 12,
   },
-  optionActive: { backgroundColor: '#d8b9c8' },
+  optionActive: { backgroundColor: colors.accent1 },
 })

@@ -8,7 +8,7 @@ import {
   type ViewStyle,
 } from 'react-native'
 
-import { designTokens } from '@/design-tokens'
+import { useTheme } from '@/context/ThemeContext'
 
 export interface EmptyStateProps {
   icon: LucideIcon
@@ -22,18 +22,23 @@ export interface EmptyStateProps {
 }
 
 export function EmptyState({ icon: Icon, title, description, action, style }: EmptyStateProps) {
+  const { colors } = useTheme()
   return (
-    <View style={[styles.card, style]}>
+    <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }, style]}>
       <View style={styles.iconWrap}>
-        <Icon color={designTokens.colors.secondary} size={30} />
+        <Icon color={colors.accent1} size={30} />
       </View>
 
-      <Text style={styles.title}>{title}</Text>
-      {description ? <Text style={styles.description}>{description}</Text> : null}
+      <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+      {description ? <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text> : null}
 
       {action ? (
-        <TouchableOpacity accessibilityRole="button" style={styles.button} onPress={action.onPress}>
-          <Text style={styles.buttonText}>{action.label}</Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          style={[styles.button, { backgroundColor: colors.accent1 }]}
+          onPress={action.onPress}
+        >
+          <Text style={[styles.buttonText, { color: colors.background }]}>{action.label}</Text>
         </TouchableOpacity>
       ) : null}
     </View>
@@ -43,10 +48,9 @@ export function EmptyState({ icon: Icon, title, description, action, style }: Em
 const styles = StyleSheet.create({
   card: {
     alignItems: 'center',
-    backgroundColor: 'rgba(23, 27, 34, 0.72)',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: 'rgba(184, 138, 229, 0.28)',
+    borderColor: 'transparent',
     gap: 12,
     justifyContent: 'center',
     padding: 28,
@@ -58,8 +62,8 @@ const styles = StyleSheet.create({
   },
   iconWrap: {
     alignItems: 'center',
-    backgroundColor: 'rgba(23, 27, 34, 0.96)',
-    borderColor: 'rgba(184, 138, 229, 0.28)',
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
     borderRadius: 999,
     borderWidth: 1,
     height: 64,
@@ -67,27 +71,23 @@ const styles = StyleSheet.create({
     width: 64,
   },
   title: {
-    color: designTokens.colors.text,
     fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
   },
   description: {
-    color: designTokens.colors.muted,
     fontSize: 14,
     lineHeight: 21,
     textAlign: 'center',
   },
   button: {
     alignItems: 'center',
-    backgroundColor: designTokens.colors.secondary,
-    borderRadius: designTokens.radii.md,
+    borderRadius: 12,
     marginTop: 4,
     paddingHorizontal: 18,
     paddingVertical: 12,
   },
   buttonText: {
-    color: '#fff',
     fontWeight: '700',
   },
 })

@@ -74,14 +74,14 @@ export default function CallsPage() {
             <button
               type="button"
               onClick={() => setIsMuted((prev) => !prev)}
-              className="rounded-full border border-white/10 bg-[var(--card-bg-strong)] px-4 py-3 text-sm text-[var(--text-primary)]"
+              className="rounded-full border border-[var(--card-border)] bg-[var(--card-bg-strong)] px-4 py-3 text-sm text-[var(--text-primary)]"
             >
               <span className="inline-flex items-center gap-2"><Mic className="h-4 w-4" /> {isMuted ? 'Unmute' : 'Mute'}</span>
             </button>
             <button
               type="button"
               onClick={() => setIsVideo((prev) => !prev)}
-              className="rounded-full border border-white/10 bg-[var(--card-bg-strong)] px-4 py-3 text-sm text-[var(--text-primary)]"
+              className="rounded-full border border-[var(--card-border)] bg-[var(--card-bg-strong)] px-4 py-3 text-sm text-[var(--text-primary)]"
             >
               <span className="inline-flex items-center gap-2"><Camera className="h-4 w-4" /> {isVideo ? 'Video on' : 'Video off'}</span>
             </button>
@@ -89,7 +89,7 @@ export default function CallsPage() {
               <button
                 type="button"
                 onClick={endCall}
-                className="rounded-full bg-red-500 px-4 py-3 text-sm font-medium text-white"
+                className="rounded-full bg-[var(--error)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]"
               >
                 <span className="inline-flex items-center gap-2"><PhoneOff className="h-4 w-4" /> End call</span>
               </button>
@@ -120,7 +120,7 @@ export default function CallsPage() {
             </div>
           </div>
 
-          <div className="rounded-[24px] border border-white/10 bg-[var(--card-bg)] p-5">
+          <div className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
             <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Recent calls</p>
             <ul className="mt-4 space-y-3 text-sm text-[var(--text-primary)]">
               <li className="flex items-center justify-between rounded-xl bg-[var(--card-bg-strong)] px-3 py-2">

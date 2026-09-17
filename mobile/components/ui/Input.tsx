@@ -1,7 +1,7 @@
 import React from 'react'
 import { StyleSheet, Text, TextInput, View, type TextInputProps } from 'react-native'
 
-import { designTokens } from '@/design-tokens'
+import { useTheme } from '@/context/ThemeContext'
 
 interface InputProps extends TextInputProps {
   label?: string
@@ -9,43 +9,41 @@ interface InputProps extends TextInputProps {
 }
 
 export function Input({ label, error, style, ...props }: InputProps) {
+  const { colors } = useTheme()
   return (
     <View style={styles.container}>
-      {label ? <Text style={styles.label}>{label}</Text> : null}
+      {label ? <Text style={[styles.label, { color: colors.textPrimary }]}>{label}</Text> : null}
       <TextInput
         {...props}
-        style={[styles.input, style, error ? styles.inputError : null]}
-        placeholderTextColor={designTokens.colors.muted}
+        style={[
+          styles.input,
+          { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.cardBorder },
+          style,
+          error ? { borderColor: colors.error } : null,
+        ]}
+        placeholderTextColor={colors.textSecondary}
         accessibilityLabel={label ?? props.placeholder}
       />
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      {error ? <Text style={[styles.errorText, { color: colors.error }]}>{error}</Text> : null}
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  container: { marginBottom: designTokens.spacing.md },
+  container: { marginBottom: 12 },
   label: {
-    color: designTokens.colors.text,
     fontSize: 13,
     marginBottom: 8,
     fontWeight: '600',
   },
   input: {
-    backgroundColor: designTokens.colors.surface,
-    color: designTokens.colors.text,
-    borderRadius: designTokens.radii.md,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: designTokens.colors.border,
     paddingHorizontal: 12,
     paddingVertical: 12,
     fontSize: 15,
   },
-  inputError: {
-    borderColor: designTokens.colors.danger,
-  },
   errorText: {
-    color: designTokens.colors.danger,
     fontSize: 12,
     marginTop: 6,
   },

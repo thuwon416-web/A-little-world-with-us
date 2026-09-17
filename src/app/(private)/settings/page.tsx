@@ -69,7 +69,7 @@ export default function SettingsPage() {
       <NotificationPermission />
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="space-y-5 rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+        <section className="space-y-5 rounded-[28px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Preferences</p>
@@ -86,7 +86,7 @@ export default function SettingsPage() {
             ].map(({ label, value, onChange }) => (
               <div
                 key={label}
-                className="flex items-center justify-between gap-4 rounded-[22px] border border-white/10 bg-[var(--card-bg-strong)] p-4"
+                className="flex items-center justify-between gap-4 rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg-strong)] p-4"
               >
                 <div>
                   <p className="font-medium text-[var(--text-primary)]">{label}</p>
@@ -98,11 +98,11 @@ export default function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => onChange(!value)}
-                  className={`relative h-7 w-12 rounded-full transition ${value ? 'bg-[var(--accent-1)]' : 'bg-white/10'}`}
+                  className={`relative h-7 w-12 rounded-full transition ${value ? 'bg-[var(--accent-1)]' : 'bg-[var(--card-bg)]/10'}`}
                   aria-label={`Toggle ${label}`}
                 >
                   <span
-                    className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${value ? 'left-6' : 'left-1'}`}
+                    className={`absolute top-1 h-5 w-5 rounded-full bg-[var(--text-primary)] transition ${value ? 'left-6' : 'left-1'}`}
                   />
                 </button>
               </div>
@@ -112,7 +112,7 @@ export default function SettingsPage() {
           <AIPrivacySettings />
         </section>
 
-        <aside className="space-y-5 rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+        <aside className="space-y-5 rounded-[28px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
           <div>
             <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Theme</p>
             <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">Atmosphere</h2>
@@ -124,7 +124,7 @@ export default function SettingsPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {settingCards.map(({ icon: Icon, title, description }) => (
-          <div key={title} className="rounded-[24px] border border-white/10 bg-[var(--card-bg)] p-4">
+          <div key={title} className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card-bg)] p-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
               <Icon className="h-5 w-5" />
             </div>
@@ -134,7 +134,7 @@ export default function SettingsPage() {
         ))}
       </section>
 
-      <section className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+      <section className="rounded-[28px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
         <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Account</p>
         <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">Manage your couple space</h2>
 
@@ -150,7 +150,7 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+      <section className="rounded-[28px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
         <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">Data & Export</p>
         <h2 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">Your data, in one place</h2>
 
@@ -163,14 +163,14 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="rounded-[28px] border border-red-500/20 bg-red-500/5 p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-red-500">Danger Zone</p>
-        <h2 className="mt-1 text-xl font-semibold text-red-500">Data Management</h2>
+      <section className="rounded-[28px] border border-[var(--error)]/20 bg-[var(--error)]/5 p-5">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--error)]">Danger Zone</p>
+        <h2 className="mt-1 text-xl font-semibold text-[var(--error)]">Data Management</h2>
 
         <div className="mt-4 space-y-3">
           <button
             onClick={() => alert('Use the Data & Export section above to download your available exports.')}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-red-500/30 py-3 font-medium text-red-500 transition hover:bg-red-500/10"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--error)]/30 py-3 font-medium text-[var(--error)] transition hover:bg-[var(--error)]/10"
           >
             <Download className="h-4 w-4" />
             <span>Export All My Data</span>
@@ -182,7 +182,7 @@ export default function SettingsPage() {
                 alert('Account deletion requires authentication. Please contact support for assistance.')
               }
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-500 py-3 font-medium text-white transition hover:bg-red-600"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-[var(--error)] py-3 font-medium text-[var(--text-primary)] transition hover:bg-[var(--error)]/80"
           >
             <Trash2 className="h-4 w-4" />
             <span>Delete My Account</span>

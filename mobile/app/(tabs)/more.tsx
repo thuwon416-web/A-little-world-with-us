@@ -27,6 +27,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
+import { useTheme } from '@/context/ThemeContext'
 
 const sections = [
   {
@@ -87,6 +88,8 @@ const sections = [
 export default function MoreScreen() {
   const { signOut } = useAuth()
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const { t } = useTranslation()
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -107,7 +110,7 @@ export default function MoreScreen() {
                   style={styles.card}
                   onPress={() => router.push(href)}
                 >
-                  <Icon size={22} color="#d9bfd7" />
+                  <Icon size={22} color={colors.accent2} />
                   <Text style={styles.label}>{label}</Text>
                 </TouchableOpacity>
               )
@@ -122,23 +125,23 @@ export default function MoreScreen() {
         onPress={() => void signOut()}
         style={styles.logout}
       >
-        <LogOut size={18} color="#ff9b9b" />
+        <LogOut size={18} color={colors.error} />
         <Text style={styles.logoutText}>{t('nav.signOut')}</Text>
       </TouchableOpacity>
     </ScrollView>
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0f0f12', padding: 20, paddingTop: 72 },
-  eyebrow: { color: '#d9bfd7', fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700', marginTop: 8, marginBottom: 22 },
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+  container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72 },
+  eyebrow: { color: colors.accent2, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { color: colors.textPrimary, fontSize: 30, fontWeight: '700', marginTop: 8, marginBottom: 22 },
   section: { marginTop: 20 },
   sectionHeader: {
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 1.2,
-    color: '#7d6b42',
+    color: colors.accent3,
     marginBottom: 10,
     textTransform: 'uppercase',
     paddingHorizontal: 4,
@@ -149,20 +152,20 @@ const styles = StyleSheet.create({
     minHeight: 105,
     padding: 18,
     borderRadius: 18,
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     gap: 12,
   },
-  label: { color: '#f3f0f5', fontSize: 14, fontWeight: '600' },
+  label: { color: colors.textPrimary, fontSize: 14, fontWeight: '600' },
   logout: {
     marginTop: 24,
     padding: 16,
     borderRadius: 14,
-    backgroundColor: '#2f1f22',
+    backgroundColor: colors.surface,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  logoutText: { color: '#ff9b9b', fontWeight: '700' },
+  logoutText: { color: colors.error, fontWeight: '700' },
 })

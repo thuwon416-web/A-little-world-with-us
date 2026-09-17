@@ -12,10 +12,13 @@ import {
 
 import { Button } from '@/components/Button'
 import { PlanCard } from '@/components/PlanCard'
+import { useTheme } from '@/context/ThemeContext'
 import { usePlans } from '@/hooks/usePlans'
 
 export default function PlansScreen() {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const { plans, loading, error, createPlan, togglePlanItem, updatePlan } = usePlans()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -77,14 +80,14 @@ export default function PlansScreen() {
             value={title}
             onChangeText={setTitle}
             placeholder="Plan title"
-            placeholderTextColor="#c4c4ce"
+            placeholderTextColor={colors.textSecondary}
             style={styles.input}
           />
           <TextInput
             value={description}
             onChangeText={setDescription}
             placeholder="What are you planning?"
-            placeholderTextColor="#c4c4ce"
+            placeholderTextColor={colors.textSecondary}
             style={[styles.input, styles.textArea]}
             multiline
           />
@@ -117,21 +120,21 @@ export default function PlansScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 72,
     paddingBottom: 40,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
   },
   title: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 30,
     fontWeight: '700',
     marginBottom: 8,
   },
   subtitle: {
-    color: '#c4c4ce',
+    color: colors.textSecondary,
     fontSize: 15,
     marginBottom: 20,
   },
@@ -145,30 +148,30 @@ const styles = StyleSheet.create({
   secondaryButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   secondaryButtonText: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontWeight: '700',
     fontSize: 14,
   },
   composer: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     padding: 18,
     marginBottom: 20,
   },
   input: {
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     borderRadius: 12,
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     paddingHorizontal: 12,
     paddingVertical: 12,
     marginBottom: 12,
@@ -188,32 +191,32 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: '#2a2d35',
-    backgroundColor: '#11161d',
+    borderColor: colors.cardBorder,
+    backgroundColor: colors.surface,
   },
   typeButtonActive: {
-    backgroundColor: '#ff6b81',
-    borderColor: '#ff6b81',
+    backgroundColor: colors.accent1,
+    borderColor: colors.accent1,
   },
   typeButtonText: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 12,
     textTransform: 'capitalize',
   },
   typeButtonTextActive: {
-    color: '#0f0f12',
+    color: colors.background,
     fontWeight: '700',
   },
   error: {
-    color: '#ff8a8a',
+    color: colors.error,
     marginBottom: 12,
   },
   loading: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     marginBottom: 12,
   },
   empty: {
-    color: '#c4c4ce',
+    color: colors.textSecondary,
     marginTop: 12,
   },
 })

@@ -8,7 +8,7 @@ import {
   type ViewStyle,
 } from 'react-native'
 
-import { designTokens } from '@/design-tokens'
+import { useTheme } from '@/context/ThemeContext'
 import { haptics } from '@/lib/haptics'
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline'
@@ -32,20 +32,22 @@ export function Button({
   style,
   textStyle,
 }: ButtonProps) {
+  const { colors } = useTheme()
   const containerStyle = [
     styles.baseButton,
-    variant === 'primary' ? styles.primaryButton : undefined,
-    variant === 'secondary' ? styles.secondaryButton : undefined,
+    variant === 'primary' ? { backgroundColor: colors.accent1 } : undefined,
+    variant === 'secondary' ? { backgroundColor: colors.accent2 } : undefined,
     variant === 'outline' ? styles.outlineButton : undefined,
+    variant === 'outline' ? { borderColor: colors.cardBorder } : undefined,
     disabled ? styles.disabledButton : undefined,
     style,
   ]
 
   const textStyles = [
     styles.baseText,
-    variant === 'primary' ? styles.primaryText : undefined,
-    variant === 'secondary' ? styles.secondaryText : undefined,
-    variant === 'outline' ? styles.outlineText : undefined,
+    variant === 'primary' ? { color: colors.background } : undefined,
+    variant === 'secondary' ? { color: colors.background } : undefined,
+    variant === 'outline' ? { color: colors.textPrimary } : undefined,
     textStyle,
   ]
 
@@ -71,7 +73,7 @@ export function Button({
 
 const styles = StyleSheet.create({
   baseButton: {
-    borderRadius: designTokens.radii.md,
+    borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
     alignItems: 'center',
@@ -86,25 +88,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 15,
   },
-  primaryButton: {
-    backgroundColor: designTokens.colors.primary,
-  },
-  secondaryButton: {
-    backgroundColor: designTokens.colors.secondary,
-  },
   outlineButton: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: designTokens.colors.border,
-  },
-  primaryText: {
-    color: '#110D1A',
-  },
-  secondaryText: {
-    color: designTokens.colors.text,
-  },
-  outlineText: {
-    color: designTokens.colors.text,
   },
   disabledButton: {
     opacity: 0.6,

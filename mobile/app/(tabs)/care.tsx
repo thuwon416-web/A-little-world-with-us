@@ -106,6 +106,8 @@ function Chips({
   onToggle: (value: string) => void
   tone?: 'pink' | 'purple' | 'green'
 }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.chips}>
       {options.map((option) => (
@@ -132,6 +134,8 @@ function Chips({
 }
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
@@ -141,6 +145,8 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function Insights({ logs, summary, savedCycleLength }: { logs: CareLog[]; summary: NativeCycleSummary; savedCycleLength: number }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const moodCounts = useMemo(
     () =>
       Object.entries(
@@ -228,6 +234,8 @@ function Insights({ logs, summary, savedCycleLength }: { logs: CareLog[]; summar
 }
 
 function Stat({ label, value }: { label: string; value: string }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.stat}>
       <Text style={styles.statValue}>{value}</Text>
@@ -245,6 +253,8 @@ function Calendar({
   summary: NativeCycleSummary
   onLog: (date: string) => void
 }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [month, setMonth] = useState(new Date())
   const year = month.getFullYear()
   const monthIndex = month.getMonth()
@@ -334,6 +344,8 @@ function Calendar({
 }
 
 function Reminders() {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [enabled, setEnabled] = useState({
     period: true,
     fertile: true,
@@ -399,7 +411,7 @@ function Reminders() {
           value={time}
           onChangeText={updateTime}
           placeholder="09:00"
-          placeholderTextColor="#bcaed1"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
       </Card>
@@ -416,6 +428,8 @@ function Reminder({
   value: boolean
   onChange: () => void
 }) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   return (
     <View style={styles.reminder}>
       <Text style={styles.text}>{label}</Text>
@@ -424,13 +438,15 @@ function Reminder({
         accessibilityHint="Toggles this reminder"
         value={value}
         onValueChange={onChange}
-        trackColor={{ false: '#4b3764', true: '#ff5d89' }}
+        trackColor={{ false: colors.cardBorder, true: colors.accent1 }}
       />
     </View>
   )
 }
 
 function HealthProfile() {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [profile, setProfile] = useState({
     age: '',
     weight: '',
@@ -459,7 +475,7 @@ function HealthProfile() {
         value={profile.age}
         onChangeText={(value) => update('age', value)}
         placeholder="Age"
-        placeholderTextColor="#bcaed1"
+        placeholderTextColor={colors.textSecondary}
         keyboardType="numeric"
         style={styles.input}
       />
@@ -467,7 +483,7 @@ function HealthProfile() {
         value={profile.weight}
         onChangeText={(value) => update('weight', value)}
         placeholder="Weight (kg)"
-        placeholderTextColor="#bcaed1"
+        placeholderTextColor={colors.textSecondary}
         keyboardType="decimal-pad"
         style={styles.input}
       />
@@ -475,7 +491,7 @@ function HealthProfile() {
         value={profile.height}
         onChangeText={(value) => update('height', value)}
         placeholder="Height (cm)"
-        placeholderTextColor="#bcaed1"
+        placeholderTextColor={colors.textSecondary}
         keyboardType="decimal-pad"
         style={styles.input}
       />
@@ -483,14 +499,14 @@ function HealthProfile() {
         value={profile.conditions}
         onChangeText={(value) => update('conditions', value)}
         placeholder="Medical conditions"
-        placeholderTextColor="#bcaed1"
+        placeholderTextColor={colors.textSecondary}
         style={styles.input}
       />
       <TextInput
         value={profile.medications}
         onChangeText={(value) => update('medications', value)}
         placeholder="Medications"
-        placeholderTextColor="#bcaed1"
+        placeholderTextColor={colors.textSecondary}
         style={styles.input}
       />
     </Card>
@@ -499,6 +515,7 @@ function HealthProfile() {
 
 export default function CareScreen() {
   const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [activeTab, setActiveTab] = useState<
     'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
   >('Today')
@@ -673,7 +690,7 @@ export default function CareScreen() {
   if (loading)
     return (
       <View style={styles.center}>
-        <ActivityIndicator color="#ff5d89" />
+        <ActivityIndicator color={colors.accent1} />
         <Text style={styles.muted}>Loading Care...</Text>
       </View>
     )
@@ -783,7 +800,7 @@ export default function CareScreen() {
               onChangeText={setCycleLength}
               keyboardType="numeric"
               placeholder="Average cycle length (days)"
-              placeholderTextColor="#bcaed1"
+              placeholderTextColor={colors.textSecondary}
               style={styles.input}
             />
             <TextInput
@@ -791,14 +808,14 @@ export default function CareScreen() {
               onChangeText={setPeriodLength}
               keyboardType="numeric"
               placeholder="Average period length (days)"
-              placeholderTextColor="#bcaed1"
+              placeholderTextColor={colors.textSecondary}
               style={styles.input}
             />
             <TextInput
               value={lastPeriodStart}
               onChangeText={setLastPeriodStart}
               placeholder="Last period start (YYYY-MM-DD)"
-              placeholderTextColor="#bcaed1"
+              placeholderTextColor={colors.textSecondary}
               style={styles.input}
             />
             <TouchableOpacity style={styles.saveButton} onPress={() => void saveSettings()}>
@@ -914,7 +931,7 @@ export default function CareScreen() {
               onChangeText={setWater}
               keyboardType="numeric"
               placeholder="Water (ml)"
-              placeholderTextColor="#bcaed1"
+              placeholderTextColor={colors.textSecondary}
               style={styles.input}
             />
             <TextInput
@@ -922,7 +939,7 @@ export default function CareScreen() {
               onChangeText={setWeight}
               keyboardType="decimal-pad"
               placeholder="Weight (kg)"
-              placeholderTextColor="#bcaed1"
+              placeholderTextColor={colors.textSecondary}
               style={styles.input}
             />
             <TextInput
@@ -930,7 +947,7 @@ export default function CareScreen() {
               onChangeText={setBasalTemp}
               keyboardType="decimal-pad"
               placeholder="Basal temperature (°C)"
-              placeholderTextColor="#bcaed1"
+              placeholderTextColor={colors.textSecondary}
               style={styles.input}
             />
             <TextInput
@@ -938,7 +955,7 @@ export default function CareScreen() {
               onChangeText={setNotes}
               multiline
               placeholder="Notes"
-              placeholderTextColor="#bcaed1"
+              placeholderTextColor={colors.textSecondary}
               style={[styles.input, styles.notes]}
             />
           </Card>
@@ -948,7 +965,7 @@ export default function CareScreen() {
             onPress={() => void save()}
           >
             {saving ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color={colors.background} />
             ) : (
               <Text style={styles.saveText}>Save shared daily log</Text>
             )}
@@ -959,8 +976,8 @@ export default function CareScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#1A0B2E' },
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+  screen: { flex: 1, backgroundColor: colors.background },
   intimacyContainer: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 4 },
   intimacyCard: { borderRadius: 22, borderWidth: 1, padding: 18, gap: 12 },
   intimacyHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
@@ -978,67 +995,67 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingTop: 24, paddingBottom: 50 },
   center: {
     flex: 1,
-    backgroundColor: '#1A0B2E',
+    backgroundColor: colors.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
     gap: 12,
   },
-  eyebrow: { color: '#c9b9dd', fontWeight: '700', letterSpacing: 1.3, fontSize: 10 },
-  title: { color: '#fff8ff', fontWeight: '800', fontSize: 30, marginTop: 6 },
+  eyebrow: { color: colors.textSecondary, fontWeight: '700', letterSpacing: 1.3, fontSize: 10 },
+  title: { color: colors.textPrimary, fontWeight: '800', fontSize: 30, marginTop: 6 },
   tabRow: {
     gap: 8,
     paddingHorizontal: 20,
     paddingTop: 62,
     paddingBottom: 12,
-    backgroundColor: '#1A0B2E',
+    backgroundColor: colors.background,
   },
-  tab: { borderRadius: 16, backgroundColor: '#39235a', paddingHorizontal: 14, paddingVertical: 9 },
-  tabActive: { backgroundColor: '#ff5d89' },
-  tabText: { color: '#fff', fontWeight: '700', fontSize: 12 },
+  tab: { borderRadius: 16, backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 9 },
+  tabActive: { backgroundColor: colors.accent1 },
+  tabText: { color: colors.background, fontWeight: '700', fontSize: 12 },
   hero: {
     marginTop: 18,
     borderRadius: 28,
     padding: 24,
     alignItems: 'center',
-    backgroundColor: '#2d1b4e',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#ffffff20',
+    borderColor: colors.cardBorder,
   },
-  heroLabel: { color: '#c9b9dd', fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
-  days: { color: '#FFD700', fontWeight: '800', fontSize: 38, marginTop: 8 },
+  heroLabel: { color: colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
+  days: { color: colors.accent3, fontWeight: '800', fontSize: 38, marginTop: 8 },
   heroNote: {
-    color: '#f7eaf4',
+    color: colors.textPrimary,
     fontSize: 15,
     fontWeight: '600',
     marginTop: 10,
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#2d1b4e',
+    backgroundColor: colors.surface,
     borderRadius: 22,
     padding: 18,
     marginTop: 16,
     borderWidth: 1,
-    borderColor: '#ffffff1a',
+    borderColor: colors.cardBorder,
   },
-  cardTitle: { color: '#fff8ff', fontSize: 19, fontWeight: '800' },
-  muted: { color: '#c9b9dd', fontSize: 13, marginTop: 5 },
-  text: { color: '#f7eaf4', fontSize: 14 },
-  accentText: { color: '#ff9bba', fontWeight: '700' },
+  cardTitle: { color: colors.textPrimary, fontSize: 19, fontWeight: '800' },
+  muted: { color: colors.textSecondary, fontSize: 13, marginTop: 5 },
+  text: { color: colors.textPrimary, fontSize: 14 },
+  accentText: { color: colors.accent1, fontWeight: '700' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  chip: { borderRadius: 20, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: '#40245f' },
-  purpleChip: { backgroundColor: '#39235a' },
-  greenChip: { backgroundColor: '#184c45' },
-  chipSelected: { backgroundColor: '#ff5d89' },
-  chipText: { color: '#f0e7f7', fontWeight: '600', fontSize: 13 },
-  chipTextSelected: { color: '#fff' },
+  chip: { borderRadius: 20, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: colors.surface },
+  purpleChip: { backgroundColor: colors.surface },
+  greenChip: { backgroundColor: colors.accent2 },
+  chipSelected: { backgroundColor: colors.accent1 },
+  chipText: { color: colors.textPrimary, fontWeight: '600', fontSize: 13 },
+  chipTextSelected: { color: colors.background },
   input: {
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#ffffff24',
-    backgroundColor: '#1f1037',
-    color: '#fff8ff',
+    borderColor: colors.cardBorder,
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
     paddingHorizontal: 12,
     paddingVertical: 11,
     marginTop: 10,
@@ -1048,17 +1065,17 @@ const styles = StyleSheet.create({
     marginTop: 16,
     alignItems: 'center',
     borderRadius: 16,
-    backgroundColor: '#ff5d89',
+    backgroundColor: colors.accent1,
     paddingVertical: 15,
   },
   secondaryButton: {
     alignItems: 'center',
     borderRadius: 16,
-    backgroundColor: '#604582',
+    backgroundColor: colors.accent2,
     paddingVertical: 14,
     marginTop: 14,
   },
-  saveText: { color: '#fff', fontWeight: '800' },
+  saveText: { color: colors.background, fontWeight: '800' },
   disabled: { opacity: 0.6 },
   reminder: {
     flexDirection: 'row',
@@ -1067,29 +1084,29 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#ffffff12',
+    borderBottomColor: colors.cardBorder,
   },
   statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 },
-  stat: { width: '47%', backgroundColor: '#1f1037', borderRadius: 12, padding: 12 },
-  statValue: { color: '#ffb6c9', fontSize: 17, fontWeight: '800' },
+  stat: { width: '48%', backgroundColor: colors.surface, borderRadius: 12, padding: 12 },
+  statValue: { color: colors.accent1, fontSize: 17, fontWeight: '800' },
   barRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
-  barLabel: { color: '#f7eaf4', width: 105, fontSize: 12 },
+  barLabel: { color: colors.textPrimary, width: 105, fontSize: 12 },
   barTrack: {
     flex: 1,
     height: 10,
     borderRadius: 5,
-    backgroundColor: '#1f1037',
+    backgroundColor: colors.surface,
     overflow: 'hidden',
   },
-  bar: { height: '100%', backgroundColor: '#ff5d89', borderRadius: 5 },
-  barValue: { color: '#c9b9dd', width: 20, textAlign: 'right' },
+  bar: { height: '100%', backgroundColor: colors.accent1, borderRadius: 5 },
+  barValue: { color: colors.textSecondary, width: 20, textAlign: 'right' },
   frequencyRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     gap: 8,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ffffff12',
+    borderBottomColor: colors.cardBorder,
   },
   calendarHeader: {
     flexDirection: 'row',
@@ -1097,10 +1114,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
   },
-  calendarMonth: { color: '#fff', fontWeight: '800' },
-  nav: { color: '#ff9bba', fontSize: 32, paddingHorizontal: 12 },
+  calendarMonth: { color: colors.textPrimary, fontWeight: '800' },
+  nav: { color: colors.accent1, fontSize: 32, paddingHorizontal: 12 },
   weekRow: { flexDirection: 'row', marginTop: 14 },
-  weekDay: { color: '#c9b9dd', width: `${100 / 7}%`, textAlign: 'center', fontWeight: '700' },
+  weekDay: { color: colors.textSecondary, width: `${100 / 7}%`, textAlign: 'center', fontWeight: '700' },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
   dayCell: {
     width: `${100 / 7}%`,
@@ -1111,12 +1128,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  dayText: { color: '#f7eaf4', fontSize: 13 },
-  periodDay: { backgroundColor: '#e84b72' },
-  predictedDay: { borderColor: '#ff9bba', borderStyle: 'dotted' },
-  fertileDay: { backgroundColor: '#276b8a' },
-  ovulationDay: { backgroundColor: '#34815a' },
-  todayDay: { borderColor: '#fff', borderWidth: 2 },
+  dayText: { color: colors.textPrimary, fontSize: 13 },
+  periodDay: { backgroundColor: colors.accent1 },
+  predictedDay: { borderColor: colors.accent2, borderStyle: 'dotted' },
+  fertileDay: { backgroundColor: colors.accent2 },
+  ovulationDay: { backgroundColor: colors.success },
+  todayDay: { borderColor: colors.textPrimary, borderWidth: 2 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 16 },
-  legendText: { color: '#c9b9dd', fontSize: 11 },
+  legendText: { color: colors.textSecondary, fontSize: 11 },
 })

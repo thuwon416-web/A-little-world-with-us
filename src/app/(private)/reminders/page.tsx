@@ -70,7 +70,7 @@ export default function RemindersPage() {
         </button>
       </div>
 
-      {!coupleId && <p className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100">Accept a couple link to create reminders shared by both accounts.</p>}
+      {!coupleId && <p className="rounded-2xl border border-[var(--warning)]/30 bg-[var(--warning)]/10 p-4 text-sm text-[var(--warning)]">Accept a couple link to create reminders shared by both accounts.</p>}
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
         <div className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
@@ -80,21 +80,21 @@ export default function RemindersPage() {
               type="button"
               onClick={() => void addReminder()}
               disabled={!coupleId}
-              className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-[var(--card-bg-strong)] px-3 py-2 text-sm text-[var(--text-primary)]"
+              className="inline-flex items-center gap-2 rounded-full border border-[var(--card-border)] bg-[var(--card-bg-strong)] px-3 py-2 text-sm text-[var(--text-primary)]"
             >
               <Plus className="h-4 w-4" /> Add
             </button>
           </div>
 
           <div className="mb-4 grid gap-2 sm:grid-cols-3">
-            <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Reminder title" className="rounded-xl border border-white/10 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
-            <input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="A short note" className="rounded-xl border border-white/10 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
-            <input type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} className="rounded-xl border border-white/10 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
+            <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Reminder title" className="rounded-xl border border-[var(--card-border)] bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
+            <input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="A short note" className="rounded-xl border border-[var(--card-border)] bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
+            <input type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} className="rounded-xl border border-[var(--card-border)] bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
           </div>
 
           <div className="space-y-3">
             {reminders.map((reminder) => (
-              <div key={reminder.id} className="rounded-[22px] border border-white/10 bg-[var(--card-bg-strong)] p-4">
+              <div key={reminder.id} className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg-strong)] p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-lg font-semibold text-[var(--text-primary)]">{reminder.title}</p>
@@ -105,7 +105,7 @@ export default function RemindersPage() {
                     onClick={() => void handleToggle(reminder)}
                     className={`rounded-full px-3 py-1 text-xs font-medium ${
                       reminder.enabled
-                        ? 'bg-emerald-500/15 text-emerald-300'
+                        ? 'bg-[var(--success)]/15 text-[var(--success)]'
                         : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
                     }`}
                   >
@@ -128,7 +128,7 @@ export default function RemindersPage() {
             <p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">Tonight, 8:00 PM</p>
           </div>
 
-          <div className="rounded-[24px] border border-white/10 bg-[var(--card-bg)] p-5">
+          <div className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
             <div className="flex items-center gap-3 text-[var(--accent-1)]">
               <Sparkles className="h-5 w-5" />
               <span className="text-sm font-medium">Gentle pacing</span>

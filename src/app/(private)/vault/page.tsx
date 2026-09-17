@@ -206,7 +206,7 @@ function VaultPageContent() {
             className="mt-5 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-transparent px-4 py-3 text-center text-[var(--text-primary)]"
           />
           <p className="mt-2 text-xs text-[var(--text-secondary)]">PIN must be 4-6 digits</p>
-          {unlockError ? <p className="mt-2 text-sm text-red-400">{unlockError}</p> : null}
+          {unlockError ? <p className="mt-2 text-sm text-[var(--error)]">{unlockError}</p> : null}
 
           <motion.button
             whileHover={{ scale: 1.02 }}
@@ -270,7 +270,7 @@ function VaultPageContent() {
       <div className="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-3xl p-6 border border-[var(--accent-1)]/20 bg-[var(--card-bg)] backdrop-blur">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-1)] text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-1)] text-[var(--bg-color)]">
               <Lock className="h-5 w-5" />
             </div>
             <div>
@@ -466,7 +466,7 @@ function VaultPageContent() {
               <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-secondary)]">Password security</p>
               <p className="mt-1 text-sm text-[var(--text-primary)]">{isPasswordVaultUnlocked ? 'Unlocked · auto-locks after five minutes of inactivity' : 'Encrypted credentials stay locked separately from Love Vault letters.'}</p>
             </div>
-            {isPasswordVaultUnlocked ? <Fingerprint className="h-5 w-5 text-emerald-400" /> : <KeyRound className="h-5 w-5 text-[var(--accent-1)]" />}
+            {isPasswordVaultUnlocked ? <Fingerprint className="h-5 w-5 text-[var(--success)]" /> : <KeyRound className="h-5 w-5 text-[var(--accent-1)]" />}
           </div>
           {!hasWrappedKey ? (
             <div className="rounded-[28px] border border-dashed border-[var(--accent-1)]/30 bg-[var(--card-bg)] p-10 text-center">
@@ -479,7 +479,7 @@ function VaultPageContent() {
             <div className="mx-auto max-w-md rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
               <h2 className="text-2xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>Unlock passwords</h2>
               <input type="password" value={passphrase} onChange={(event) => setPassphrase(event.target.value)} placeholder="Vault passphrase" className="mt-4 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-sm text-[var(--text-primary)]" />
-              {passwordVaultError ? <p className="mt-2 text-sm text-red-300">{passwordVaultError}</p> : null}
+              {passwordVaultError ? <p className="mt-2 text-sm text-[var(--error)]">{passwordVaultError}</p> : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))} disabled={passphrase.length < 8} className="rounded-2xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">Unlock</button>
                 <button type="button" onClick={() => void unlockWithBiometric().catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))} className="inline-flex items-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 px-4 py-2 text-sm text-[var(--text-primary)]"><Fingerprint className="h-4 w-4" />Biometric</button>

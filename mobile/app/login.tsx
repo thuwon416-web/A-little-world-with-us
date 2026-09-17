@@ -3,8 +3,11 @@ import { useState } from 'react'
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
 import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/context/ThemeContext'
 
 export default function LoginScreen() {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -48,7 +51,7 @@ export default function LoginScreen() {
           value={email}
           onChangeText={setEmail}
           placeholder="Email"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           keyboardType="email-address"
           autoCapitalize="none"
           style={styles.input}
@@ -58,7 +61,7 @@ export default function LoginScreen() {
           value={password}
           onChangeText={setPassword}
           placeholder="Password"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           secureTextEntry
           style={styles.input}
         />
@@ -75,29 +78,29 @@ export default function LoginScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 80,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     justifyContent: 'center',
   },
   eyebrow: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 12,
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: 8,
   },
   title: {
-    color: '#f4f0f5',
+    color: colors.textPrimary,
     fontSize: 36,
     fontWeight: '700',
     marginBottom: 12,
   },
   subtitle: {
-    color: '#c6c6d0',
+    color: colors.textSecondary,
     fontSize: 16,
     lineHeight: 24,
     marginBottom: 32,
@@ -107,17 +110,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#2a2d35',
-    color: '#f3f0f5',
+    borderColor: colors.cardBorder,
+    color: colors.textPrimary,
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
   },
   primaryButton: {
-    backgroundColor: '#b88ae5',
+    backgroundColor: colors.accent1,
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
@@ -127,7 +130,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   primaryButtonText: {
-    color: '#110d1a',
+    color: colors.background,
     fontWeight: '700',
     fontSize: 16,
   },

@@ -7,10 +7,13 @@ import Categories from '@/components/our-story/Categories'
 import Timeline from '@/components/our-story/Timeline'
 import { haptics } from '@/lib/haptics'
 import { supabase } from '@/lib/supabase'
+import { useTheme } from '@/context/ThemeContext'
 
 type Tab = 'timeline' | 'all' | 'categories'
 
 export default function OurStoryScreen() {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('timeline')
   const [loading, setLoading] = useState(true)
@@ -39,7 +42,7 @@ export default function OurStoryScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <BookHeart color="#ff6b81" size={25} />
+        <BookHeart color={colors.accent1} size={25} />
         <View>
           <Text style={styles.title}>Our Story</Text>
           <Text style={styles.subtitle}>Every memory we&apos;ve made together</Text>
@@ -69,7 +72,7 @@ export default function OurStoryScreen() {
                 }}
                 style={[styles.tab, tab === value && styles.tabActive]}
               >
-                <Icon color={tab === value ? '#ff6b81' : '#c4c4ce'} size={16} />
+                <Icon color={tab === value ? colors.accent1 : colors.textSecondary} size={16} />
                 <Text style={styles.tabText}>{label}</Text>
               </TouchableOpacity>
             ))}
@@ -96,11 +99,11 @@ export default function OurStoryScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0f0f12', padding: 20, paddingTop: 72, gap: 18 },
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+  container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 18 },
   header: { alignItems: 'center', flexDirection: 'row', gap: 12 },
-  title: { color: '#f3f0f5', fontSize: 28, fontWeight: '700' },
-  subtitle: { color: '#c4c4ce', marginTop: 3 },
+  title: { color: colors.textPrimary, fontSize: 28, fontWeight: '700' },
+  subtitle: { color: colors.textSecondary, marginTop: 3 },
   content: { flex: 1, gap: 16 },
   tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   tab: {
@@ -111,9 +114,9 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 14,
   },
-  tabActive: { backgroundColor: '#442d40' },
-  tabText: { color: '#f3f0f5', fontSize: 12 },
-  muted: { color: '#c4c4ce', padding: 24, textAlign: 'center' },
-  error: { color: '#ff9b9b', padding: 24, textAlign: 'center' },
-  filterNote: { color: '#d9bfd7', fontSize: 12 },
+  tabActive: { backgroundColor: colors.surface },
+  tabText: { color: colors.textPrimary, fontSize: 12 },
+  muted: { color: colors.textSecondary, padding: 24, textAlign: 'center' },
+  error: { color: colors.error, padding: 24, textAlign: 'center' },
+  filterNote: { color: colors.accent2, fontSize: 12 },
 })

@@ -12,8 +12,11 @@ import {
 
 import { useNotifications } from '@/hooks/useNotifications'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useTheme } from '@/context/ThemeContext'
 
 export default function RemindersScreen() {
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const { permissionStatus, reminders, addReminder, triggerTest } = useNotifications()
   const [draftTitle, setDraftTitle] = useState('')
   const [draftMessage, setDraftMessage] = useState('')
@@ -48,7 +51,7 @@ export default function RemindersScreen() {
           value={draftTitle}
           onChangeText={setDraftTitle}
           placeholder="Daily check-in"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <Text style={styles.label}>Message</Text>
@@ -56,7 +59,7 @@ export default function RemindersScreen() {
           value={draftMessage}
           onChangeText={setDraftMessage}
           placeholder="Take a moment to check in with each other."
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
       </View>
@@ -88,68 +91,68 @@ export default function RemindersScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0f12',
+    backgroundColor: colors.background,
     paddingTop: 72,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   title: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 10,
   },
   pill: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 12,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 14,
   },
   primaryButton: {
-    backgroundColor: '#b88ae5',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
     marginBottom: 16,
   },
   primaryText: {
-    color: '#110d1a',
+    color: colors.background,
     fontWeight: '700',
   },
   form: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
     marginBottom: 16,
   },
   label: {
-    color: '#8d8d99',
+    color: colors.textSecondary,
     fontSize: 12,
     letterSpacing: 1,
     textTransform: 'uppercase',
     marginBottom: 6,
   },
   input: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontSize: 15,
     paddingVertical: 8,
     marginBottom: 12,
   },
   secondaryButton: {
-    backgroundColor: '#ff6b81',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
     marginBottom: 16,
   },
   secondaryText: {
-    color: '#f3f0f5',
+    color: colors.background,
     fontWeight: '700',
   },
   list: {
@@ -159,29 +162,29 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   empty: {
-    color: '#c4c4ce',
+    color: colors.textSecondary,
     lineHeight: 22,
   },
   card: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#2a2d35',
+    borderColor: colors.cardBorder,
   },
   cardTitle: {
-    color: '#f3f0f5',
+    color: colors.textPrimary,
     fontWeight: '700',
     fontSize: 16,
     marginBottom: 6,
   },
   cardMessage: {
-    color: '#c4c4ce',
+    color: colors.textSecondary,
     fontSize: 14,
     marginBottom: 8,
   },
   cardTime: {
-    color: '#d9bfd7',
+    color: colors.accent2,
     fontSize: 12,
   },
 })

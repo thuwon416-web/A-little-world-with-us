@@ -24,9 +24,12 @@ import {
   subscribeToWatchSync,
   type WatchlistItem,
 } from '@/services/watchTogether'
+import { useTheme } from '@/context/ThemeContext'
 
 export default function WatchTogetherScreen() {
   const router = useRouter()
+  const { colors } = useTheme()
+  const styles = createStyles(colors)
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [items, setItems] = useState<WatchlistItem[]>([])
@@ -123,7 +126,7 @@ export default function WatchTogetherScreen() {
           value={input}
           onChangeText={setInput}
           placeholder="YouTube URL or video ID"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
           autoCapitalize="none"
         />
@@ -131,7 +134,7 @@ export default function WatchTogetherScreen() {
           value={title}
           onChangeText={setTitle}
           placeholder="Title (optional)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <TouchableOpacity style={styles.button} onPress={() => void add()}>
@@ -177,35 +180,35 @@ export default function WatchTogetherScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0f0f12', padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { color: '#d9bfd7', letterSpacing: 2, textTransform: 'uppercase', fontSize: 12 },
-  title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700' },
-  player: { backgroundColor: '#171b22', borderRadius: 18, overflow: 'hidden', paddingBottom: 14 },
-  now: { color: '#fff', fontWeight: '700', padding: 14 },
-  card: { backgroundColor: '#171b22', borderRadius: 18, padding: 16, gap: 10 },
-  section: { color: '#fff', fontSize: 20, fontWeight: '700' },
-  input: { backgroundColor: '#242832', color: '#fff', borderRadius: 10, padding: 12 },
-  button: { backgroundColor: '#ff6b81', borderRadius: 10, padding: 12, alignItems: 'center' },
-  buttonText: { color: '#fff', fontWeight: '700' },
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+  container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 14 },
+  eyebrow: { color: colors.accent2, letterSpacing: 2, textTransform: 'uppercase', fontSize: 12 },
+  title: { color: colors.textPrimary, fontSize: 30, fontWeight: '700' },
+  player: { backgroundColor: colors.surface, borderRadius: 18, overflow: 'hidden', paddingBottom: 14 },
+  now: { color: colors.textPrimary, fontWeight: '700', padding: 14 },
+  card: { backgroundColor: colors.surface, borderRadius: 18, padding: 16, gap: 10 },
+  section: { color: colors.textPrimary, fontSize: 20, fontWeight: '700' },
+  input: { backgroundColor: colors.surface, color: colors.textPrimary, borderRadius: 10, padding: 12 },
+  button: { backgroundColor: colors.accent1, borderRadius: 10, padding: 12, alignItems: 'center' },
+  buttonText: { color: colors.background, fontWeight: '700' },
   item: {
-    backgroundColor: '#171b22',
+    backgroundColor: colors.surface,
     borderRadius: 14,
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  thumb: { width: 90, height: 54, borderRadius: 6, backgroundColor: '#242832' },
+  thumb: { width: 90, height: 54, borderRadius: 6, backgroundColor: colors.surface },
   itemText: { flex: 1 },
-  itemTitle: { color: '#fff', fontWeight: '600' },
-  muted: { color: '#a8a4ad' },
-  remove: { color: '#ff9b9b', fontSize: 12 },
-  error: { color: '#ff9b9b' },
+  itemTitle: { color: colors.textPrimary, fontWeight: '600' },
+  muted: { color: colors.textSecondary },
+  remove: { color: colors.error, fontSize: 12 },
+  error: { color: colors.error },
   chatLink: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: '#ff6b81',
+    borderColor: colors.accent1,
     borderRadius: 10,
     padding: 14,
     alignItems: 'center',
