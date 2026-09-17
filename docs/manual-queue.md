@@ -109,12 +109,14 @@ $job$);
 
 After pg_cron jobs are confirmed healthy, remove the `crons` array from `vercel.json`, commit, push, and redeploy. Confirm there are no duplicate Vercel and pg_cron schedules.
 
+Vercel Hobby limit was the reason for migration. pg_cron verified working 2026-09-17.
+
 | ID | Task | Status |
 |----|------|--------|
-| M-PGCRON-1 | Enable `pg_cron` and `pg_net` | ⏸️ |
-| M-PGCRON-2 | Add `project_url` and `cron_secret` to Supabase Vault | ⏸️ |
-| M-PGCRON-3 | Schedule geofence, battery, and missed-checkin jobs | ⏸️ |
-| M-PGCRON-4 | Remove the three Vercel cron entries | ⏸️ |
+| M-PGCRON-1 | Enable `pg_cron` and `pg_net` | ✅ |
+| M-PGCRON-2 | Add `project_url` and `cron_secret` to Supabase Vault | ✅ |
+| M-PGCRON-3 | Schedule geofence, battery, and missed-checkin jobs | ✅ |
+| M-PGCRON-4 | Remove the three Vercel cron entries | 🔴 |
 | M-PGCRON-5 | Verify no duplicate scheduling and inspect `cron.job_run_details` | ⏸️ |
 
 ## 4. Environment Variables

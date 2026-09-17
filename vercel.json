@@ -3,19 +3,5 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "outputDirectory": ".next",
-  "crons": [
-    {
-      "path": "/api/cron/check-geofence",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/check-battery",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/check-missed-checkin",
-      "schedule": "*/5 * * * *"
-    }
-  ]
+  "outputDirectory": ".next"
 }
