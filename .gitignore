@@ -69,6 +69,7 @@ web_modules/
 .env
 .env.local
 .env.*
+!.env.production.example
 .env.*.local
 !.env.example
 
