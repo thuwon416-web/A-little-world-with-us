@@ -46,15 +46,15 @@ export function QuizEngine({
   const [checking, setChecking] = useState(false)
   const [complete, setComplete] = useState(false)
 
-  if (questions.length === 0) return <p className="text-sm text-[var(--text-secondary)]">No vocabulary is available for this level yet.</p>
+  if (questions.length === 0) return <p className="text-sm text-text-2">No vocabulary is available for this level yet.</p>
   if (complete) {
     const percent = Math.round((score / questions.length) * 100)
     return (
       <div className="space-y-4 text-center">
-        <Trophy className="mx-auto text-[var(--accent-1)]" size={42} />
-        <h3 className="text-2xl font-bold text-[var(--text-primary)]">Quiz complete</h3>
-        <p className="text-[var(--text-secondary)]">{score} / {questions.length} correct ({percent}%)</p>
-        <button type="button" onClick={() => onComplete(score)} className="rounded-xl bg-[var(--accent-1)] px-5 py-3 font-semibold text-white">Done</button>
+        <Trophy className="mx-auto text-accent-1" size={42} />
+        <h3 className="text-2xl font-bold text-text-1">Quiz complete</h3>
+        <p className="text-text-2">{score} / {questions.length} correct ({percent}%)</p>
+        <button type="button" onClick={() => onComplete(score)} className="rounded-xl bg-accent-1 px-5 py-3 font-semibold text-white">Done</button>
       </div>
     )
   }
@@ -90,7 +90,7 @@ export function QuizEngine({
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between text-sm text-[var(--text-secondary)]">
+      <div className="flex items-center justify-between text-sm text-text-2">
         <span>Question {index + 1} of {questions.length}</span>
         <span className="flex items-center gap-1"><CheckCircle2 size={16} /> {score} correct</span>
       </div>

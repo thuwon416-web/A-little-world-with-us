@@ -1,5 +1,15 @@
 import { supabase } from '@/lib/supabase'
 
+/**
+ * Finance math helpers - use integer arithmetic for MMK (Myanmar Kyat)
+ * MMK has 0 decimals (no cents), so amounts are stored as integers.
+ * Math.round() ensures no floating-point precision errors.
+ */
+
+function roundToInteger(amount: number): number {
+  return Math.round(amount)
+}
+
 export type SplitType = 'equal' | 'percentage' | 'custom'
 
 export type Expense = {
@@ -162,7 +172,7 @@ export async function createExpense(input: CreateExpenseInput): Promise<Expense>
       couple_id: coupleId,
       user_id: userId,
       title: input.title,
-      amount: input.amount,
+      amount: roundToInteger(input.amount),
       spent_at: input.spentAt,
       category: input.category ?? 'other',
       paid_by: input.paidBy ?? userId,
@@ -181,7 +191,7 @@ export async function updateExpense(id: string, input: UpdateExpenseInput): Prom
   const { coupleId } = await getContext()
   const updates: Record<string, unknown> = {}
   if (input.title !== undefined) updates.title = input.title
-  if (input.amount !== undefined) updates.amount = input.amount
+  if (input.amount !== undefined) updates.amount = roundToInteger(input.amount)
   if (input.spentAt !== undefined) updates.spent_at = input.spentAt
   if (input.category !== undefined) updates.category = input.category
   if (input.paidBy !== undefined) updates.paid_by = input.paidBy
@@ -236,7 +246,7 @@ export async function createSettlement(input: CreateSettlementInput): Promise<Se
       couple_id: coupleId,
       from_user: input.fromUser,
       to_user: input.toUser,
-      amount: input.amount,
+      amount: roundToInteger(input.amount),
       notes: input.notes ?? null,
       settled_at: input.settledAt,
     })
@@ -257,21 +267,22 @@ export function calculateBalance(
   let expensesCount = 0
 
   for (const expense of expenses) {
-    totalExpenses += expense.amount
+    const amount = roundToInteger(expense.amount)
+    totalExpenses += amount
     expensesCount += 1
     if (expense.isSettled || !expense.paidBy || ![myUserId, partnerUserId].includes(expense.paidBy)) continue
     if (expense.splitWith === myUserId || expense.splitWith === partnerUserId) continue
 
     const share = expense.splitType === 'percentage'
-      ? (expense.splitPercentage ?? 50) / 100
-      : 0.5
-    const debt = expense.amount * share
-    netBalance += expense.paidBy === myUserId ? debt : -debt
+      ? Math.round(amount * (expense.splitPercentage ?? 50) / 100)
+      : Math.round(amount / 2)
+    netBalance += expense.paidBy === myUserId ? share : -share
   }
 
   for (const settlement of settlements) {
-    if (settlement.fromUser === myUserId && settlement.toUser === partnerUserId) netBalance -= settlement.amount
-    if (settlement.fromUser === partnerUserId && settlement.toUser === myUserId) netBalance += settlement.amount
+    const amount = roundToInteger(settlement.amount)
+    if (settlement.fromUser === myUserId && settlement.toUser === partnerUserId) netBalance -= amount
+    if (settlement.fromUser === partnerUserId && settlement.toUser === myUserId) netBalance += amount
   }
 
   return {

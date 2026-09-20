@@ -70,26 +70,26 @@ export default function LearningPage() {
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--accent-1)]/15 text-[var(--accent-1)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-btn bg-accent-1/15 text-accent-1">
               <Languages size={26} aria-hidden="true" />
             </div>
             <div>
               <h1
-                className="text-4xl text-[var(--text-primary)]"
+                className="text-4xl text-text-1"
                 style={{ fontFamily: 'var(--font-display)' }}
               >
                 Korean Tutor
               </h1>
-              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              <p className="mt-1 text-sm text-text-2">
                 Learn Korean together, one step at a time.
               </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-3 text-right">
-          <p className="text-xs text-[var(--text-secondary)]">Your progress</p>
-          <p className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
+        <div className="rounded-btn border border-accent-1/20 bg-card px-4 py-3 text-right">
+          <p className="text-xs text-text-2">Your progress</p>
+          <p className="mt-1 text-lg font-semibold text-text-1">
             {masteredIds.size} / {KOREAN_VOCAB.length} words mastered
           </p>
         </div>
@@ -108,8 +108,8 @@ export default function LearningPage() {
               }}
               className={`shrink-0 rounded-full border px-4 py-2 text-left transition ${
                 selectedLevel === level
-                  ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-[var(--bg-color)]'
-                  : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10'
+                  ? 'border-accent-1 bg-accent-1 text-white'
+                  : 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
               }`}
               aria-selected={selectedLevel === level}
             >
@@ -122,23 +122,23 @@ export default function LearningPage() {
       <section className="space-y-4" aria-live="polite">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="flex items-center gap-2 text-2xl font-bold text-[var(--text-primary)]">
-              <BookOpen className="h-6 w-6 text-[var(--accent-1)]" aria-hidden="true" />
+            <h2 className="flex items-center gap-2 text-2xl font-bold text-text-1">
+              <BookOpen className="h-6 w-6 text-accent-1" aria-hidden="true" />
               Level {selectedLevel}
             </h2>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            <p className="mt-1 text-sm text-text-2">
               {levelVocab.length} words and phrases to explore
             </p>
           </div>
           {levelVocab.length > 0 && (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-[var(--text-secondary)]">
+              <span className="text-sm text-text-2">
                 {levelVocab.filter((vocab) => masteredIds.has(vocab.id)).length} mastered
               </span>
               <button
                 type="button"
                 onClick={() => setQuizLevel(selectedLevel)}
-                className="rounded-xl bg-[var(--accent-1)] px-4 py-2 text-sm font-semibold text-[var(--bg-color)]"
+                className="rounded-xl bg-accent-1 px-4 py-2 text-sm font-semibold text-white"
               >
                 Start Quiz
               </button>
@@ -156,60 +156,60 @@ export default function LearningPage() {
               return (
                 <article
                   key={lesson.id}
-                  className="overflow-hidden rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-lg backdrop-blur-xl"
+                  className="overflow-hidden rounded-panel border border-accent-1/20 bg-card shadow-lg backdrop-blur-xl"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenLessonId(isOpen ? null : lesson.id)}
-                    className="w-full p-5 text-left transition hover:bg-[var(--accent-1)]/5"
+                    className="w-full p-5 text-left transition hover:bg-accent-1/5"
                     aria-expanded={isOpen}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <p className="text-xs uppercase tracking-wider text-[var(--accent-1)]">
+                        <p className="text-xs uppercase tracking-wider text-accent-1">
                           Lesson {lesson.order}
                         </p>
-                        <h3 className="mt-1 text-xl font-semibold text-[var(--text-primary)]">
+                        <h3 className="mt-1 text-xl font-semibold text-text-1">
                           {lesson.title}
                         </h3>
-                        <p className="mt-1 text-sm text-[var(--accent-1)]">{lesson.titleMy}</p>
+                        <p className="mt-1 text-sm text-accent-1">{lesson.titleMy}</p>
                       </div>
                       {isOpen ? (
-                        <ChevronUp className="mt-1 shrink-0 text-[var(--accent-1)]" aria-hidden="true" />
+                        <ChevronUp className="mt-1 shrink-0 text-accent-1" aria-hidden="true" />
                       ) : (
-                        <ChevronDown className="mt-1 shrink-0 text-[var(--accent-1)]" aria-hidden="true" />
+                        <ChevronDown className="mt-1 shrink-0 text-accent-1" aria-hidden="true" />
                       )}
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
+                    <p className="mt-3 text-sm leading-relaxed text-text-2">
                       {lesson.description}
                     </p>
-                    <div className="mt-4 flex items-center justify-between text-xs text-[var(--text-secondary)]">
+                    <div className="mt-4 flex items-center justify-between text-xs text-text-2">
                       <span>{lessonVocab.length} vocabulary items</span>
                       <span>{mastered} mastered</span>
                     </div>
                   </button>
 
                   {isOpen && (
-                    <div className="border-t border-[var(--accent-1)]/15 p-4">
+                    <div className="border-t border-accent-1/15 p-4">
                       <div className="grid gap-3 sm:grid-cols-2">
                         {lessonVocab.map((vocab) => (
                           <button
                             key={vocab.id}
                             type="button"
                             onClick={() => setSelectedVocab(vocab)}
-                            className="rounded-2xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-4 text-left transition hover:border-[var(--accent-1)]/40"
+                            className="rounded-btn border border-accent-1/15 bg-card p-4 text-left transition hover:border-accent-1/40"
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <span className="text-2xl font-semibold text-[var(--text-primary)]">
+                              <span className="text-2xl font-semibold text-text-1">
                                 {vocab.korean}
                               </span>
                               {masteredIds.has(vocab.id) && (
-                                <Check className="h-5 w-5 text-[var(--success)]" aria-label="Mastered" />
+                                <Check className="h-5 w-5 text-success" aria-label="Mastered" />
                               )}
                             </div>
-                            <p className="mt-1 text-xs text-[var(--accent-1)]">{vocab.romanization}</p>
-                            <p className="mt-2 text-sm text-[var(--text-primary)]">{vocab.english}</p>
-                            <p className="mt-1 text-sm text-[var(--text-secondary)]">{vocab.myanmar}</p>
+                            <p className="mt-1 text-xs text-accent-1">{vocab.romanization}</p>
+                            <p className="mt-2 text-sm text-text-1">{vocab.english}</p>
+                            <p className="mt-1 text-sm text-text-2">{vocab.myanmar}</p>
                           </button>
                         ))}
                       </div>
@@ -220,9 +220,9 @@ export default function LearningPage() {
             })}
           </div>
         ) : (
-          <div className="rounded-3xl border border-dashed border-[var(--accent-1)]/25 bg-[var(--card-bg)] p-10 text-center">
-            <p className="font-medium text-[var(--text-primary)]">This level is coming soon.</p>
-            <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          <div className="rounded-panel border border-dashed border-accent-1/25 bg-card p-10 text-center">
+            <p className="font-medium text-text-1">This level is coming soon.</p>
+            <p className="mt-2 text-sm text-text-2">
               We are preparing more Korean lessons for you to enjoy together.
             </p>
           </div>
@@ -231,13 +231,13 @@ export default function LearningPage() {
 
       {quizLevel !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
-          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-2xl">
+          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-panel border border-accent-1/20 bg-card p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
-                <p className="text-xs uppercase tracking-wider text-[var(--accent-1)]">Level {quizLevel}</p>
-                <h2 className="text-2xl font-bold text-[var(--text-primary)]">Korean Quiz</h2>
+                <p className="text-xs uppercase tracking-wider text-accent-1">Level {quizLevel}</p>
+                <h2 className="text-2xl font-bold text-text-1">Korean Quiz</h2>
               </div>
-              <button type="button" onClick={() => setQuizLevel(null)} className="rounded-lg px-3 py-2 text-sm text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10">
+              <button type="button" onClick={() => setQuizLevel(null)} className="rounded-lg px-3 py-2 text-sm text-text-2 hover:bg-accent-1/10">
                 Close
               </button>
             </div>
@@ -253,7 +253,7 @@ export default function LearningPage() {
           onClick={() => setSelectedVocab(null)}
         >
           <section
-            className="relative w-full max-w-lg rounded-3xl border border-[var(--accent-1)]/25 bg-[var(--card-bg-strong)] p-6 shadow-2xl"
+            className="relative w-full max-w-lg rounded-panel border border-accent-1/25 bg-card p-6 shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="vocab-title"
@@ -262,24 +262,24 @@ export default function LearningPage() {
             <button
               type="button"
               onClick={() => setSelectedVocab(null)}
-              className="absolute right-4 top-4 rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10 hover:text-[var(--text-primary)]"
+              className="absolute right-4 top-4 rounded-full p-2 text-text-2 hover:bg-accent-1/10 hover:text-text-1"
               aria-label="Close vocabulary details"
             >
               <X size={18} />
             </button>
-            <p className="text-sm text-[var(--accent-1)]">{selectedVocab.romanization}</p>
-            <h2 id="vocab-title" className="mt-2 text-5xl font-semibold text-[var(--text-primary)]">
+            <p className="text-sm text-accent-1">{selectedVocab.romanization}</p>
+            <h2 id="vocab-title" className="mt-2 text-5xl font-semibold text-text-1">
               {selectedVocab.korean}
             </h2>
-            <p className="mt-4 text-xl text-[var(--text-primary)]">{selectedVocab.english}</p>
-            <p className="mt-1 text-lg text-[var(--text-secondary)]">{selectedVocab.myanmar}</p>
+            <p className="mt-4 text-xl text-text-1">{selectedVocab.english}</p>
+            <p className="mt-1 text-lg text-text-2">{selectedVocab.myanmar}</p>
             {selectedVocab.exampleSentence && (
-              <div className="mt-6 rounded-2xl bg-[var(--bg-3)] p-4">
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+              <div className="mt-6 rounded-btn bg-soft-tint p-4">
+                <p className="text-sm font-medium text-text-1">
                   {selectedVocab.exampleSentence}
                 </p>
                 {selectedVocab.exampleTranslation && (
-                  <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                  <p className="mt-2 text-sm text-text-2">
                     {selectedVocab.exampleTranslation}
                   </p>
                 )}
@@ -293,7 +293,7 @@ export default function LearningPage() {
                 setSpeakingVocabId(selectedVocab.id)
                 window.speechSynthesis?.addEventListener('end', () => setSpeakingVocabId(null), { once: true })
               }}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--accent-1)]/20 px-4 py-3 text-sm text-[var(--text-secondary)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-accent-1/20 px-4 py-3 text-sm text-text-2 disabled:cursor-not-allowed disabled:opacity-60"
               title={ttsSupported ? 'Play Korean pronunciation' : 'Speech synthesis is not supported'}
             >
               <Volume2 size={18} aria-hidden="true" />

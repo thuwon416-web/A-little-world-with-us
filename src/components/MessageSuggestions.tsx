@@ -39,18 +39,18 @@ export default function MessageSuggestions() {
   }
 
   return (
-    <div className="p-4 bg-[var(--card-bg-strong)] rounded-2xl border border-[var(--accent-1)]/20">
-      <h3 className="mb-2 flex items-center gap-2 font-bold text-[var(--text-primary)]"><MessageCircle className="h-4 w-4" /> Message Suggestions</h3>
+    <div className="p-4 bg-card rounded-btn border border-accent-1/20">
+      <h3 className="mb-2 flex items-center gap-2 font-bold text-text-1"><MessageCircle className="h-4 w-4" /> Message Suggestions</h3>
       <input
         value={context}
         onChange={(e) => setContext(e.target.value)}
         placeholder="E.g., Good morning message for anniversary"
-        className="w-full px-3 py-2 rounded-lg border border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)] mb-3"
+        className="w-full px-3 py-2 rounded-lg border border-accent-1/20 bg-card text-text-1 placeholder:text-text-2 mb-3"
       />
       <button
         onClick={generateSuggestions}
         disabled={isLoading}
-        className="w-full bg-[var(--accent-1)] text-white py-2 rounded-lg font-medium disabled:opacity-50 hover:opacity-90 transition"
+        className="w-full bg-accent-1 text-white py-2 rounded-lg font-medium disabled:opacity-50 hover:opacity-90 transition"
       >
         {isLoading ? 'Generating...' : 'Generate Suggestions'}
       </button>
@@ -59,7 +59,7 @@ export default function MessageSuggestions() {
           {suggestions.map((suggestion, i) => (
             <div
               key={i}
-              className="p-3 bg-[var(--card-bg)] rounded-lg border border-[var(--accent-1)]/10 cursor-pointer hover:bg-[var(--card-bg-strong)] transition"
+              className="p-3 bg-card rounded-lg border border-accent-1/10 cursor-pointer hover:bg-card/60 transition"
               onClick={() => copyToClipboard(suggestion)}
             >
               {suggestion}

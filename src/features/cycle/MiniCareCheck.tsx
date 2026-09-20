@@ -44,7 +44,7 @@ export default function MiniCareCheck() {
 
   return (
     <div className="dashboard-card-interactive dashboard-card-glow dashboard-fade-in space-y-4 rounded-[1.5rem] p-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <Heart className="h-5 w-5" />
         <h3 className="font-dancing text-2xl">Mini Care Check</h3>
       </div>
@@ -52,17 +52,17 @@ export default function MiniCareCheck() {
       {isLoading ? (
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
-            <div className="dashboard-shimmer h-11 rounded-2xl" />
-            <div className="dashboard-shimmer h-11 rounded-2xl" />
-            <div className="dashboard-shimmer h-11 rounded-2xl" />
-            <div className="dashboard-shimmer h-11 rounded-2xl" />
+            <div className="dashboard-shimmer h-11 rounded-btn" />
+            <div className="dashboard-shimmer h-11 rounded-btn" />
+            <div className="dashboard-shimmer h-11 rounded-btn" />
+            <div className="dashboard-shimmer h-11 rounded-btn" />
           </div>
-          <div className="dashboard-shimmer h-20 rounded-2xl" />
+          <div className="dashboard-shimmer h-20 rounded-btn" />
         </div>
       ) : hasError ? (
-        <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/50 p-4">
-          <p className="text-sm text-[var(--text-primary)]">We couldn&apos;t load your care summary</p>
-          <button type="button" onClick={() => setHasError(false)} className="mt-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]">
+        <div className="rounded-btn border border-accent-1/20 bg-card/50 p-4">
+          <p className="text-sm text-text-1">We couldn&apos;t load your care summary</p>
+          <button type="button" onClick={() => setHasError(false)} className="mt-3 inline-flex items-center gap-2 rounded-full border border-accent-1/25 bg-accent-1/10 px-3 py-2 text-sm font-medium text-text-1">
             Retry <ArrowRight className="h-4 w-4" />
           </button>
         </div>
@@ -74,10 +74,10 @@ export default function MiniCareCheck() {
                 key={option.id}
                 type="button"
                 onClick={() => setSelected(option.id)}
-                className={`rounded-2xl border px-3 py-2 text-sm transition ${
+                className={`rounded-btn border px-3 py-2 text-sm transition ${
                   selected === option.id
-                    ? 'border-[var(--accent-1)]/20 bg-[var(--accent-1)]/20 text-[var(--accent-1)]'
-                    : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)]/25 text-[var(--text-primary)]/80'
+                    ? 'border-accent-1/20 bg-accent-1/20 text-accent-1'
+                    : 'border-accent-1/20 bg-card/25 text-text-1/80'
                 }`}
               >
                 {option.label}
@@ -90,16 +90,16 @@ export default function MiniCareCheck() {
             onChange={(event) => setNote(event.target.value)}
             rows={3}
             placeholder="What does your body and heart need today?"
-            className="glass-input w-full rounded-2xl px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
+            className="glass-input w-full rounded-btn px-3 py-2 text-sm text-text-1 placeholder:text-text-1/40"
           />
 
           <motion.div
             key={selected}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80"
+            className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-text-1/80"
           >
-            <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">
+            <div className="mb-1 flex items-center gap-2 font-medium text-accent-2">
               <Sparkles className="h-4 w-4" />
               Care note
             </div>
@@ -113,7 +113,7 @@ export default function MiniCareCheck() {
 
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+            className="inline-flex items-center gap-2 rounded-full border border-accent-1/25 bg-accent-1/10 px-3 py-2 text-sm font-medium text-text-1"
           >
             Check in <ArrowRight className="h-4 w-4" />
           </button>

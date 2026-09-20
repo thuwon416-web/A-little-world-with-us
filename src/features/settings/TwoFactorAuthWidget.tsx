@@ -50,31 +50,31 @@ export default function TwoFactorAuthWidget() {
 
   return (
     <div className="glass-card p-5">
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <Shield className="h-5 w-5 text-[var(--accent-1)]" />
+      <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
+        <Shield className="h-5 w-5 text-accent-1" />
         Two-Factor Authentication
       </h3>
 
       {enabled ? (
         <div className="space-y-3">
-          <p className="text-sm text-[var(--text-secondary)]">
+          <p className="text-sm text-text-2">
             2FA is enabled. Your account is protected with two-factor authentication.
           </p>
           <button
             onClick={handleDisable}
-            className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500"
+            className="w-full rounded-xl border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
           >
             Disable 2FA
           </button>
         </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-sm text-[var(--text-secondary)]">
+          <p className="text-sm text-text-2">
             Add an extra layer of security to your account with two-factor authentication.
           </p>
           <button
             onClick={handleEnable}
-            className="w-full rounded-xl bg-[var(--button-bg)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+            className="w-full rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white"
           >
             Enable 2FA
           </button>
@@ -86,17 +86,17 @@ export default function TwoFactorAuthWidget() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="glass-card p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+              <h3 className="text-lg font-semibold text-text-1">
                 Setup 2FA
               </h3>
-              <button onClick={() => setShowSetupModal(false)} className="text-[var(--text-secondary)]">
+              <button onClick={() => setShowSetupModal(false)} className="text-text-2">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-[var(--text-secondary)] mb-2">
+                <p className="text-sm text-text-2 mb-2">
                   Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
                 </p>
                 {qrCode && (
@@ -112,37 +112,37 @@ export default function TwoFactorAuthWidget() {
               </div>
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Enter verification code *</label>
+                <label className="text-sm text-text-2">Enter verification code *</label>
                 <input
                   type="text"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   placeholder="123456"
                   maxLength={6}
                 />
               </div>
 
               {error && (
-                <p className="text-sm text-red-500">{error}</p>
+                <p className="text-sm text-error">{error}</p>
               )}
 
               <button
                 onClick={handleVerify}
                 disabled={!verificationCode}
-                className="w-full rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] disabled:opacity-50"
+                className="w-full rounded-xl bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 Verify & Enable
               </button>
 
               {backupCodes.length > 0 && (
                 <div className="mt-4">
-                  <p className="text-sm text-[var(--text-secondary)] mb-2">
+                  <p className="text-sm text-text-2 mb-2">
                     Backup codes (save these in a safe place):
                   </p>
-                  <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-[var(--bg-2)] p-3 rounded-xl">
+                  <div className="grid grid-cols-2 gap-2 text-xs font-mono bg-soft-tint p-3 rounded-xl">
                     {backupCodes.map((code, i) => (
-                      <div key={i} className="text-[var(--text-primary)]">
+                      <div key={i} className="text-text-1">
                         {code}
                       </div>
                     ))}

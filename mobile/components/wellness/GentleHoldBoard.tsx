@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 import { WellnessBoardShell } from './WellnessBoardShell'
 
@@ -44,6 +46,8 @@ const prompts = [
 ]
 
 export default function GentleHoldBoard() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [items, setItems] = useState<HoldItem[]>(starterItems)
   const [title, setTitle] = useState('')
   const [tone, setTone] = useState<HoldItem['tone']>('hold')
@@ -130,7 +134,7 @@ export default function GentleHoldBoard() {
           value={title}
           onChangeText={setTitle}
           placeholder="Add a holding cue"
-          placeholderTextColor="#8f8393"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <Pressable onPress={addItem} style={styles.button}>
@@ -151,30 +155,30 @@ export default function GentleHoldBoard() {
   )
 }
 
-const styles = StyleSheet.create({
-  progressBox: { backgroundColor: '#1b1c29', borderRadius: 14, padding: 12, marginBottom: 12 },
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  progressBox: { backgroundColor: colors.cardBg, borderRadius: 14, padding: 12, marginBottom: 12 },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
   },
-  progressLabel: { color: '#d0c3d2', fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
-  progressValue: { color: '#f4edf5', fontSize: 11, fontWeight: '700' },
-  progressTrack: { height: 10, backgroundColor: '#121821', borderRadius: 999, overflow: 'hidden' },
-  progressFill: { height: '100%', backgroundColor: '#d5b0c7', borderRadius: 999 },
+  progressLabel: { color: colors.textSecondary, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
+  progressValue: { color: colors.textPrimary, fontSize: 11, fontWeight: '700' },
+  progressTrack: { height: 10, backgroundColor: colors.surface, borderRadius: 999, overflow: 'hidden' },
+  progressFill: { height: '100%', backgroundColor: colors.accent1, borderRadius: 999 },
   list: { gap: 10, marginBottom: 12 },
   item: {
-    backgroundColor: '#1a1d29',
+    backgroundColor: colors.cardBg,
     borderWidth: 1,
-    borderColor: '#313146',
+    borderColor: colors.cardBorder,
     borderRadius: 14,
     padding: 12,
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: 10,
   },
-  itemDone: { backgroundColor: '#222536' },
+  itemDone: { backgroundColor: colors.cardBg },
   pill: {
     borderWidth: 1,
     borderRadius: 999,
@@ -184,74 +188,74 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   pillText: { fontSize: 9, letterSpacing: 1.3, textTransform: 'uppercase', fontWeight: '700' },
-  itemText: { color: '#f4edf5', fontSize: 13, lineHeight: 18 },
+  itemText: { color: colors.textPrimary, fontSize: 13, lineHeight: 18 },
   itemTextDone: { textDecorationLine: 'line-through', opacity: 0.7 },
   itemState: {
-    color: '#c8b6cc',
+    color: colors.textSecondary,
     fontSize: 9,
     letterSpacing: 1.3,
     textTransform: 'uppercase',
     marginTop: 4,
   },
   form: {
-    backgroundColor: '#1a1b26',
+    backgroundColor: colors.cardBg,
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#2f3346',
+    borderColor: colors.cardBorder,
     marginBottom: 12,
   },
   toneRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
   modeButton: {
     flexBasis: '22%',
-    backgroundColor: '#121821',
+    backgroundColor: colors.surface,
     borderWidth: 1,
-    borderColor: '#31384c',
+    borderColor: colors.cardBorder,
     borderRadius: 10,
     paddingVertical: 8,
     alignItems: 'center',
   },
-  modeButtonActive: { borderColor: '#d8b9c8', backgroundColor: '#2a2131' },
-  modeText: { color: '#f3edf4', fontSize: 10, letterSpacing: 1.0, textTransform: 'uppercase' },
-  modeTextActive: { color: '#f8dfe8' },
+  modeButtonActive: { borderColor: colors.accent1, backgroundColor: colors.cardBg },
+  modeText: { color: colors.textPrimary, fontSize: 10, letterSpacing: 1.0, textTransform: 'uppercase' },
+  modeTextActive: { color: colors.textPrimary },
   input: {
-    backgroundColor: '#121821',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#31384c',
-    color: '#f5edf5',
+    borderColor: colors.cardBorder,
+    color: colors.textPrimary,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 10,
     fontSize: 14,
   },
   button: {
-    backgroundColor: '#d5b0c7',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
   },
-  buttonText: { color: '#181821', fontWeight: '700', fontSize: 14 },
-  promptCard: { backgroundColor: '#2a2131', borderRadius: 14, padding: 12 },
+  buttonText: { color: colors.background, fontWeight: '700', fontSize: 14 },
+  promptCard: { backgroundColor: colors.cardBg, borderRadius: 14, padding: 12 },
   promptHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 8,
   },
-  promptLabel: { color: '#f0c9d9', fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
+  promptLabel: { color: colors.accent2, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
   promptButton: {
-    backgroundColor: '#d5b0c7',
+    backgroundColor: colors.accent1,
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 6,
   },
   promptButtonText: {
-    color: '#181821',
+    color: colors.background,
     fontSize: 9,
     fontWeight: '700',
     letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
-  promptText: { color: '#f5edf4', fontSize: 13, lineHeight: 18 },
+  promptText: { color: colors.textPrimary, fontSize: 13, lineHeight: 18 },
 })

@@ -27,12 +27,12 @@ export default memo(function DaysCounter() {
       <motion.div
         animate={{ scale: [1, 1.3, 1], rotate: [0, 10, -10, 0] }}
         transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-        className="absolute top-4 right-4 text-[var(--accent-1)]/40"
+        className="absolute top-4 right-4 text-accent-1/40"
       >
         <Heart className="w-10 h-10 fill-current" />
       </motion.div>
 
-      <h2 className="font-dancing text-3xl text-[var(--accent-2)] mb-1">Days Together</h2>
+      <h2 className="font-dancing text-3xl text-accent-2 mb-1">Days Together</h2>
       <p className="text-xs opacity-60 mb-6 uppercase tracking-widest">Since {getRelationshipStartDate()}</p>
 
       <div className="flex items-center justify-center gap-3">
@@ -40,7 +40,7 @@ export default memo(function DaysCounter() {
           key={days}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-6xl font-bold text-[var(--accent-1)] drop-shadow-sm"
+          className="text-6xl font-bold text-accent-1 drop-shadow-sm"
         >
           {days}
         </motion.span>
@@ -48,7 +48,7 @@ export default memo(function DaysCounter() {
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ repeat: Infinity, duration: 1.2 }}
         >
-          <Heart className="w-8 h-8 text-[var(--accent-1)] fill-current" />
+          <Heart className="w-8 h-8 text-accent-1 fill-current" />
         </motion.div>
       </div>
 

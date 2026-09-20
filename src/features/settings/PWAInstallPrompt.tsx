@@ -46,22 +46,22 @@ export default function PWAInstallPrompt() {
   if (!showPrompt) return null
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 max-w-sm rounded-2xl bg-[var(--bg-2)] p-4 shadow-lg border border-[var(--accent-1)]/20">
+    <div className="fixed bottom-4 right-4 z-50 max-w-sm rounded-btn bg-soft-tint p-4 shadow-lg border border-accent-1/20">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Download className="h-6 w-6 text-[var(--accent-1)]" />
+          <Download className="h-6 w-6 text-accent-1" />
           <div>
-            <h3 className="font-semibold text-[var(--text-primary)]">
+            <h3 className="font-semibold text-text-1">
               Install App
             </h3>
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-xs text-text-2">
               Add to home screen for quick access
             </p>
           </div>
         </div>
         <button
           onClick={handleDismiss}
-          className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="text-text-2 hover:text-text-1"
           aria-label="Dismiss"
         >
           <X className="h-4 w-4" />
@@ -69,7 +69,7 @@ export default function PWAInstallPrompt() {
       </div>
       <button
         onClick={handleInstall}
-        className="mt-3 w-full rounded-xl bg-[var(--button-bg)] px-3 py-2 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--button-bg)]/90"
+        className="mt-3 w-full rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-accent-1/90"
       >
         Install
       </button>

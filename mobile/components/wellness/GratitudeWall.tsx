@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 import { WellnessBoardShell } from './WellnessBoardShell'
 
@@ -10,6 +12,8 @@ const starterEntries = [
 ]
 
 export default function GratitudeWall() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [entries, setEntries] = useState(starterEntries)
   const [draft, setDraft] = useState('')
 
@@ -36,7 +40,7 @@ export default function GratitudeWall() {
           value={draft}
           onChangeText={setDraft}
           placeholder="What do you want to thank them for today?"
-          placeholderTextColor="#8f8393"
+          placeholderTextColor={colors.textSecondary}
           multiline
           numberOfLines={3}
           style={[styles.input, styles.textArea]}
@@ -49,36 +53,36 @@ export default function GratitudeWall() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   list: {
     gap: 10,
     marginBottom: 14,
   },
   entry: {
-    backgroundColor: '#1d1d2a',
+    backgroundColor: colors.cardBg,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#2f3346',
+    borderColor: colors.cardBorder,
     padding: 12,
   },
   entryText: {
-    color: '#e7dbe7',
+    color: colors.textPrimary,
     fontSize: 13,
     lineHeight: 18,
   },
   form: {
-    backgroundColor: '#1a1b26',
+    backgroundColor: colors.cardBg,
     borderRadius: 14,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#2f3346',
+    borderColor: colors.cardBorder,
   },
   input: {
-    backgroundColor: '#121821',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#31384c',
-    color: '#f5edf5',
+    borderColor: colors.cardBorder,
+    color: colors.textPrimary,
     paddingHorizontal: 12,
     paddingVertical: 10,
     marginBottom: 10,
@@ -89,13 +93,13 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#d5b0c7',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#181821',
+    color: colors.background,
     fontWeight: '700',
     fontSize: 14,
   },

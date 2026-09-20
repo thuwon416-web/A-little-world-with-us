@@ -35,19 +35,19 @@ export default function AIPrivacySettings() {
   }
 
   return (
-    <section className="space-y-4 rounded-[22px] border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4">
+    <section className="space-y-4 rounded-[22px] border border-accent-1/20 bg-card p-4">
       <div className="flex items-start gap-3">
-        <ShieldCheck className="mt-0.5 h-5 w-5 text-[var(--accent-2)]" />
+        <ShieldCheck className="mt-0.5 h-5 w-5 text-accent-2" />
         <div>
-          <h3 className="font-semibold text-[var(--text-primary)]">AI Guardian privacy</h3>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          <h3 className="font-semibold text-text-1">AI Guardian privacy</h3>
+          <p className="mt-1 text-sm text-text-2">
             Choose which personal information Guardian may use. All permissions are off by default.
           </p>
         </div>
       </div>
 
       {(error || saveError) && (
-        <div className="flex items-start gap-2 rounded-xl bg-red-500/10 p-3 text-sm text-red-400">
+        <div className="flex items-start gap-2 rounded-xl bg-error/10 p-3 text-sm text-error">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <p>{saveError || error}</p>
         </div>
@@ -58,17 +58,17 @@ export default function AIPrivacySettings() {
           const enabled = privacy[key]
           const saving = savingKey === key
           return (
-            <div key={key} className="flex items-center justify-between gap-4 rounded-[18px] border border-white/10 p-3">
+            <div key={key} className="flex items-center justify-between gap-4 rounded-[18px] border border-border/20 p-3">
               <div>
-                <p className="font-medium text-[var(--text-primary)]">{label}</p>
-                <p className="text-sm text-[var(--text-secondary)]">{description}</p>
-                <p className="mt-1 text-xs text-[var(--text-secondary)]">{enabled ? 'Enabled' : 'Disabled'}</p>
+                <p className="font-medium text-text-1">{label}</p>
+                <p className="text-sm text-text-2">{description}</p>
+                <p className="mt-1 text-xs text-text-2">{enabled ? 'Enabled' : 'Disabled'}</p>
               </div>
               <button
                 type="button"
                 disabled={loading || saving}
                 onClick={() => void toggle(key)}
-                className={`relative h-7 w-12 shrink-0 rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${enabled ? 'bg-[var(--accent-1)]' : 'bg-white/10'}`}
+                className={`relative h-7 w-12 shrink-0 rounded-full transition disabled:cursor-not-allowed disabled:opacity-50 ${enabled ? 'bg-accent-1' : 'bg-soft-tint/20'}`}
                 aria-label={`Toggle AI access to ${label}`}
                 aria-pressed={enabled}
               >

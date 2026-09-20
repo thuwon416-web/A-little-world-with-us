@@ -70,20 +70,20 @@ export default function WellnessBoard({ board }: WellnessBoardProps) {
   const Icon = boardIconMap[board.icon] ?? Sparkles
 
   return (
-    <Card className="bg-white/70 backdrop-blur-sm border-rose-200 shadow-sm hover:shadow-md transition-all">
+    <Card className="bg-card/70 backdrop-blur-sm border-accent-1/20 shadow-sm hover:shadow-md transition-all">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-2xl font-serif text-rose-900">
-          <Icon className="h-7 w-7 text-rose-600" />
+        <CardTitle className="flex items-center gap-2 text-2xl font-serif text-card-title">
+          <Icon className="h-7 w-7 text-accent-1" />
           {board.title}
         </CardTitle>
-        <CardDescription className="text-rose-700">{board.description}</CardDescription>
+        <CardDescription className="text-text-2">{board.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {board.content && board.content.length > 0 ? (
           board.content.map((item, index) => (
             <div
               key={index}
-              className="border-l-4 border-rose-300 pl-4 py-2 bg-rose-50/50 rounded-r-lg"
+              className="border-l-4 border-accent-1/30 pl-4 py-2 bg-accent-1/5 rounded-r-lg"
             >
               <p className="text-stone-800 italic font-medium">&ldquo;{item}&rdquo;</p>
             </div>

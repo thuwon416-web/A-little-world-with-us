@@ -28,8 +28,8 @@ export default function LoveCalculatorMigrated() {
 
   return (
     <div className="space-y-5">
-      <div className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
-        <div className="mb-4 text-[10px] uppercase tracking-widest text-[var(--text-secondary)]">
+      <div className="rounded-panel border border-accent-1/20 bg-card p-6">
+        <div className="mb-4 text-[10px] uppercase tracking-widest text-text-2">
           Who&apos;s calculating?
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -37,32 +37,32 @@ export default function LoveCalculatorMigrated() {
             ['Their name', her, setHer],
             ['Your name', me, setMe],
           ].map(([label, value, setter]) => (
-            <label key={label as string} className="text-xs text-[var(--text-secondary)]">
+            <label key={label as string} className="text-xs text-text-2">
               <span className="mb-1.5 block">{label as string}</span>
               <input
                 value={value as string}
                 onChange={(event) => (setter as (next: string) => void)(event.target.value)}
-                className="w-full rounded-xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] px-4 py-2.5 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]"
+                className="w-full rounded-xl border border-accent-1/15 bg-card px-4 py-2.5 text-sm text-text-1 outline-none focus:border-accent-1"
               />
             </label>
           ))}
         </div>
       </div>
 
-      <div className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
+      <div className="rounded-panel border border-accent-1/20 bg-card p-6">
         <div className="mb-5 flex items-center justify-between">
           <div>
-            <div className="mb-0.5 text-[10px] uppercase tracking-widest text-[var(--text-secondary)]">
+            <div className="mb-0.5 text-[10px] uppercase tracking-widest text-text-2">
               Rate your love
             </div>
-            <div className="text-lg font-semibold text-[var(--text-primary)]">
+            <div className="text-lg font-semibold text-text-1">
               Five little sliders
             </div>
           </div>
           <button
             type="button"
             onClick={randomize}
-            className="flex items-center gap-1.5 rounded-full bg-[var(--bg-3)] px-3 py-1.5 text-xs font-medium text-[var(--accent-1)]"
+            className="flex items-center gap-1.5 rounded-full bg-soft-tint px-3 py-1.5 text-xs font-medium text-accent-1"
           >
             <Shuffle size={11} /> Random
           </button>
@@ -71,8 +71,8 @@ export default function LoveCalculatorMigrated() {
           {factors.map((factor, index) => (
             <label key={factor}>
               <div className="mb-2 flex items-center justify-between text-sm">
-                <span className="text-[var(--text-secondary)]">{factor}</span>
-                <span className="font-semibold text-[var(--text-primary)]">{values[index]}%</span>
+                <span className="text-text-2">{factor}</span>
+                <span className="font-semibold text-text-1">{values[index]}%</span>
               </div>
               <input
                 type="range"
@@ -86,24 +86,24 @@ export default function LoveCalculatorMigrated() {
                     )
                   )
                 }
-                className="w-full accent-[var(--accent-1)]"
+                className="w-full accent-accent-1"
               />
             </label>
           ))}
         </div>
       </div>
 
-      <div className="flex flex-col items-center rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--bg-3)] p-6">
-        <div className="mb-5 flex items-center gap-2 self-start text-[10px] uppercase tracking-widest text-[var(--accent-1)]">
+      <div className="flex flex-col items-center rounded-panel border border-accent-1/20 bg-soft-tint p-6">
+        <div className="mb-5 flex items-center gap-2 self-start text-[10px] uppercase tracking-widest text-accent-1">
           <Sparkles className="h-3.5 w-3.5" />
           <span>Result</span>
         </div>
         <div className="mb-6 flex items-center gap-2">
-          <span className="rounded-full bg-[var(--accent-1)]/20 px-3 py-1 text-sm font-medium text-[var(--accent-1)]">
+          <span className="rounded-full bg-accent-1/20 px-3 py-1 text-sm font-medium text-accent-1">
             {her || 'Them'}
           </span>
-          <Heart className="h-4 w-4 fill-current text-[var(--accent-1)]" />
-          <span className="rounded-full bg-[var(--accent-2)]/25 px-3 py-1 text-sm font-medium text-[var(--accent-2)]">
+          <Heart className="h-4 w-4 fill-current text-accent-1" />
+          <span className="rounded-full bg-accent-2/25 px-3 py-1 text-sm font-medium text-accent-2">
             {me || 'You'}
           </span>
         </div>
@@ -125,19 +125,19 @@ export default function LoveCalculatorMigrated() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="text-4xl font-bold text-[var(--text-primary)]">{average}<span className="text-xl font-normal">%</span></div>
-            <div className="text-[9px] uppercase tracking-widest text-[var(--text-secondary)]">Compatibility</div>
+            <div className="text-4xl font-bold text-text-1">{average}<span className="text-xl font-normal">%</span></div>
+            <div className="text-[9px] uppercase tracking-widest text-text-2">Compatibility</div>
           </div>
         </div>
         <div className="text-center">
-          <div className="mb-1 text-lg font-semibold text-[var(--text-primary)]">
+          <div className="mb-1 text-lg font-semibold text-text-1">
             A love that lasts. <Heart className="inline h-4 w-4" />
           </div>
-          <p className="text-xs text-[var(--text-secondary)]">Based on 5 totally-not-scientific factors.</p>
+          <p className="text-xs text-text-2">Based on 5 totally-not-scientific factors.</p>
         </div>
       </div>
 
-      <div className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
+      <div className="rounded-panel border border-accent-1/20 bg-card p-5">
         <LoveCalculator />
       </div>
     </div>

@@ -151,21 +151,21 @@ export default function DailyHoroscope() {
   ]
 
   return (
-    <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-6">
+    <div className="rounded-btn border border-accent-1/20 bg-card p-6">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
+          <div className="rounded-xl bg-accent-1/15 p-2 text-accent-1">
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Daily Horoscope</p>
-            <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">မနေ့မနက် နတ်မျက်နှာ</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Daily Horoscope</p>
+            <p className="mt-1 text-sm font-medium text-text-1">မနေ့မနက် နတ်မျက်နှာ</p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setShowMyanmar(!showMyanmar)}
-          className="rounded-full border border-[var(--accent-1)]/20 px-3 py-1 text-xs text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/10"
+          className="rounded-full border border-accent-1/20 px-3 py-1 text-xs text-accent-1 transition hover:bg-accent-1/10"
         >
           {showMyanmar ? 'English' : 'မြန်မာ'}
         </button>
@@ -180,8 +180,8 @@ export default function DailyHoroscope() {
             onClick={() => setSelectedSign(sign)}
             className={`rounded-lg border px-3 py-2 text-center text-sm transition ${
               selectedSign === sign
-                ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/10 text-[var(--accent-1)]'
-                : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] hover:border-[var(--accent-1)]/40'
+                ? 'border-accent-1 bg-accent-1/10 text-accent-1'
+                : 'border-accent-1/20 bg-card text-text-1 hover:border-accent-1/40'
             }`}
           >
             {sign}
@@ -196,16 +196,16 @@ export default function DailyHoroscope() {
           return (
             <div
               key={category.key}
-              className="flex items-start gap-3 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4"
+              className="flex items-start gap-3 rounded-xl border border-accent-1/20 bg-card p-4"
             >
-              <div className="rounded-lg bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
+              <div className="rounded-lg bg-accent-1/15 p-2 text-accent-1">
                 <Icon className="h-4 w-4" />
               </div>
               <div className="flex-1">
-                <p className="text-xs font-medium text-[var(--text-secondary)]">
+                <p className="text-xs font-medium text-text-2">
                   {showMyanmar ? category.labelMy : category.label}
                 </p>
-                <p className="mt-1 text-sm text-[var(--text-primary)]">
+                <p className="mt-1 text-sm text-text-1">
                   {showMyanmar ? currentHoroscope[`${category.key}My` as keyof HoroscopeData] : currentHoroscope[category.key]}
                 </p>
               </div>

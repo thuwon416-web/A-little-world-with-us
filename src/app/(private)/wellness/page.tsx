@@ -84,18 +84,18 @@ export default function WellnessPage() {
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8 animate-fade-in">
       <header>
         <h1
-          className="text-4xl text-[var(--text-primary)]"
+          className="text-4xl text-text-1"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           Wellness Boards
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+        <p className="mt-2 text-sm text-text-2">
           21 curated boards for emotional wellness
         </p>
       </header>
 
       {actionError ? (
-        <div className="flex items-center justify-between gap-4 rounded-xl border border-[var(--error)]/30 bg-[var(--error)]/10 px-4 py-3 text-sm text-[var(--error)]" role="alert">
+        <div className="flex items-center justify-between gap-4 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error" role="alert">
           <span>{actionError}</span>
           <button type="button" onClick={() => setActionError(null)} className="underline">
             Dismiss
@@ -118,8 +118,8 @@ export default function WellnessPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${
               activeTab === tab.id
-                ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-white'
-                : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10'
+                ? 'border-accent-1 bg-accent-1 text-white'
+                : 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
             }`}
             aria-selected={activeTab === tab.id}
           >
@@ -129,27 +129,27 @@ export default function WellnessPage() {
       </nav>
 
       {activeTab === 'quests' ? (
-        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5"><RelationshipQuests onQuestComplete={completeQuest} /></section>
+        <section className="rounded-panel border border-accent-1/20 bg-card p-5"><RelationshipQuests onQuestComplete={completeQuest} /></section>
       ) : activeTab === 'games' ? (
-        <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
+        <section className="rounded-panel border border-accent-1/20 bg-card p-6">
           <div className="flex items-center gap-3">
-            <Gamepad2 className="h-6 w-6 text-[var(--accent-1)]" />
-            <h2 className="text-2xl font-bold text-[var(--text-primary)]">Games</h2>
+            <Gamepad2 className="h-6 w-6 text-accent-1" />
+            <h2 className="text-2xl font-bold text-text-1">Games</h2>
           </div>
-          <p className="mt-2 text-[var(--text-secondary)]">Playful ways to reconnect are coming together here.</p>
+          <p className="mt-2 text-text-2">Playful ways to reconnect are coming together here.</p>
           <button
             type="button"
             onClick={() => void completeGame()}
             disabled={completedGame}
-            className="mt-4 rounded-xl bg-[var(--accent-1)] px-4 py-3 font-bold text-[var(--bg-color)] disabled:opacity-60"
+            className="mt-4 rounded-xl bg-accent-1 px-4 py-3 font-bold text-white disabled:opacity-60"
           >
             {completedGame ? 'Game completed' : 'Complete a game'}
           </button>
         </section>
       ) : activeTab === 'physical' ? (
         <div className="space-y-6">
-          <h2 className="flex items-center gap-3 text-2xl font-bold text-[var(--text-primary)]">
-            <Dumbbell className="h-6 w-6 text-[var(--accent-1)]" />
+          <h2 className="flex items-center gap-3 text-2xl font-bold text-text-1">
+            <Dumbbell className="h-6 w-6 text-accent-1" />
             <span>Health & movement</span>
           </h2>
 
@@ -159,10 +159,10 @@ export default function WellnessPage() {
               <button
                 key={i}
                 onClick={() => setSelectedWorkout(workout)}
-                className="border border-[var(--accent-1)]/20 rounded-xl p-4 text-left bg-[var(--card-bg)] hover:bg-[var(--accent-1)]/10 transition"
+                className="border border-accent-1/20 rounded-xl p-4 text-left bg-card hover:bg-accent-1/10 transition"
               >
-                <h3 className="font-bold text-lg text-[var(--text-primary)]">{workout.name}</h3>
-                <p className="text-[var(--text-secondary)] text-sm">
+                <h3 className="font-bold text-lg text-text-1">{workout.name}</h3>
+                <p className="text-text-2 text-sm">
                   {workout.duration} min -  {workout.calories} cal
                 </p>
               </button>
@@ -171,22 +171,22 @@ export default function WellnessPage() {
 
           {/* Selected Workout */}
           {selectedWorkout && (
-            <div className="border border-[var(--accent-1)]/20 rounded-xl p-6 bg-[var(--card-bg)]">
-              <h2 className="font-bold text-xl mb-4 text-[var(--text-primary)]">{selectedWorkout.name}</h2>
-              <p className="text-[var(--text-secondary)] mb-4">
+            <div className="border border-accent-1/20 rounded-xl p-6 bg-card">
+              <h2 className="font-bold text-xl mb-4 text-text-1">{selectedWorkout.name}</h2>
+              <p className="text-text-2 mb-4">
                 Duration: {selectedWorkout.duration} min -  Calories: {selectedWorkout.calories}
               </p>
               <div className="flex gap-2">
                 <button
                   onClick={() => completeWorkout(selectedWorkout)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--accent-1)] py-3 font-bold text-[var(--bg-color)]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent-1 py-3 font-bold text-white"
                 >
                   <Check className="h-4 w-4" />
                   <span>Complete Workout</span>
                 </button>
                 <button
                   onClick={() => setSelectedWorkout(null)}
-                  className="px-6 py-3 border border-[var(--accent-1)]/20 rounded-xl text-[var(--text-primary)]"
+                  className="px-6 py-3 border border-accent-1/20 rounded-xl text-text-1"
                 >
                   Cancel
                 </button>
@@ -197,12 +197,12 @@ export default function WellnessPage() {
           {/* Completed Workouts */}
           {completedWorkouts.length > 0 && (
             <div>
-              <h2 className="font-bold text-xl mb-4 text-[var(--text-primary)]">Completed Today</h2>
+              <h2 className="font-bold text-xl mb-4 text-text-1">Completed Today</h2>
               <div className="space-y-2">
                 {completedWorkouts.map((workout, i) => (
-                  <div key={i} className="flex justify-between items-center p-3 bg-[var(--accent-1)]/10 rounded-xl">
-                    <span className="text-[var(--text-primary)]">{workout.name}</span>
-                    <span className="text-[var(--text-secondary)] text-sm">
+                  <div key={i} className="flex justify-between items-center p-3 bg-accent-1/10 rounded-xl">
+                    <span className="text-text-1">{workout.name}</span>
+                    <span className="text-text-2 text-sm">
                       {workout.duration} min -  {workout.calories} cal
                     </span>
                   </div>

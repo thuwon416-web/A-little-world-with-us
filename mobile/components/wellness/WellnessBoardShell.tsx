@@ -1,5 +1,7 @@
-import React, { type ReactNode } from 'react'
+import React, { useMemo, type ReactNode } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 interface WellnessBoardShellProps {
   title: string
@@ -18,11 +20,14 @@ export function WellnessBoardShell({
   onPress,
   selected = false,
 }: WellnessBoardShellProps) {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
+
   return (
     <Pressable
       onPress={onPress}
       style={[styles.card, selected && styles.cardSelected]}
-      android_ripple={{ color: '#f6d5d9' }}
+      android_ripple={{ color: colors.accent2 }}
     >
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
@@ -34,12 +39,12 @@ export function WellnessBoardShell({
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   card: {
-    backgroundColor: '#171722',
+    backgroundColor: colors.cardBg,
     borderRadius: 18,
     borderWidth: 1,
-    borderColor: '#2b2c3e',
+    borderColor: colors.cardBorder,
     padding: 16,
     minHeight: 180,
     shadowColor: '#000',
@@ -49,8 +54,8 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   cardSelected: {
-    borderColor: '#d5b0c7',
-    backgroundColor: '#1d1a2d',
+    borderColor: colors.accent1,
+    backgroundColor: colors.cardBg,
   },
   header: {
     flexDirection: 'row',
@@ -60,21 +65,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    color: '#f4edf5',
+    color: colors.textPrimary,
     fontSize: 18,
     fontWeight: '700',
     flex: 1,
   },
   subtitle: {
-    color: '#d7c7d6',
+    color: colors.textSecondary,
     fontSize: 12,
     letterSpacing: 0.6,
     textTransform: 'uppercase',
     marginBottom: 12,
   },
   badge: {
-    color: '#f0c9d9',
-    backgroundColor: '#2a2131',
+    color: colors.accent2,
+    backgroundColor: colors.cardBg,
     borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 4,

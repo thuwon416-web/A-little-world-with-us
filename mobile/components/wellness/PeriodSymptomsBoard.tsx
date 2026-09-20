@@ -1,9 +1,14 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 export default function PeriodSymptomsBoard() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
+
   return (
     <WellnessBoardShell title="Period Symptoms" subtitle="Care & cycle" badge="coming soon">
       <View style={styles.content}>
@@ -16,8 +21,8 @@ export default function PeriodSymptomsBoard() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   content: { gap: 8 },
-  title: { color: '#fff', fontSize: 16, fontWeight: '700' },
-  description: { color: '#d5c4d4', lineHeight: 20 },
+  title: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
+  description: { color: colors.textSecondary, lineHeight: 20 },
 })

@@ -93,7 +93,7 @@ export default function MemorySlideshow({ memories, onClose }: Props) {
           </button>
           <AnimatePresence mode="wait">
             <motion.div key={current.id} initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.02 }} transition={{ duration: 0.35 }} className="flex h-full w-full items-center justify-center">
-              {currentUrl ? <img src={currentUrl} alt={current.title || 'Memory'} className="max-h-full max-w-[85%] rounded-2xl object-contain" /> : <p className="text-sm text-white/70">Loading photo…</p>}
+              {currentUrl ? <img src={currentUrl} alt={current.title || 'Memory'} className="max-h-full max-w-[85%] rounded-btn object-contain" /> : <p className="text-sm text-white/70">Loading photo…</p>}
             </motion.div>
           </AnimatePresence>
           <button type="button" onClick={() => setIndex((value) => (value + 1) % photos.length)} className="absolute right-0 z-10 rounded-full bg-white/10 p-3 text-white" aria-label="Next photo">

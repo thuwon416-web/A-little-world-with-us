@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 import { WellnessBoardShell } from './WellnessBoardShell'
 
@@ -10,6 +12,8 @@ const templates = [
 ]
 
 export default function ApologyCorner() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [draft, setDraft] = useState(templates[0])
   const [submitted, setSubmitted] = useState(false)
 
@@ -32,7 +36,7 @@ export default function ApologyCorner() {
         value={draft}
         onChangeText={setDraft}
         placeholder="Write your own apology..."
-        placeholderTextColor="#8f8393"
+        placeholderTextColor={colors.textSecondary}
         multiline
         numberOfLines={4}
         style={[styles.input, styles.textArea]}
@@ -45,29 +49,29 @@ export default function ApologyCorner() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   list: {
     gap: 10,
     marginBottom: 12,
   },
   templateItem: {
-    backgroundColor: '#1d1d2a',
+    backgroundColor: colors.cardBg,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#2f3346',
+    borderColor: colors.cardBorder,
     padding: 12,
   },
   templateText: {
-    color: '#e7dbe7',
+    color: colors.textPrimary,
     fontSize: 13,
     lineHeight: 18,
   },
   input: {
-    backgroundColor: '#121821',
+    backgroundColor: colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#31384c',
-    color: '#f5edf5',
+    borderColor: colors.cardBorder,
+    color: colors.textPrimary,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 14,
@@ -79,13 +83,13 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 12,
-    backgroundColor: '#d5b0c7',
+    backgroundColor: colors.accent1,
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
   },
   buttonText: {
-    color: '#181821',
+    color: colors.background,
     fontWeight: '700',
     fontSize: 14,
   },

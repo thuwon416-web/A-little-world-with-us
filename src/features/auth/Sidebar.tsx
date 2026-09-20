@@ -65,20 +65,20 @@ export default function Sidebar() {
   const navItems = [...baseNavItems, ...infoNavItems]
 
   return (
-    <aside className="flex h-full w-full flex-col rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-6 shadow-lg backdrop-blur-xl">
+    <aside className="flex h-full w-full flex-col rounded-panel border border-accent-1/20 bg-card px-3 py-6 shadow-lg backdrop-blur-xl">
       <Link href="/dashboard" className="mb-7 flex items-center gap-3 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-lg">
+        <div className="flex h-10 w-10 items-center justify-center rounded-btn bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-lg">
           <Infinity size={22} aria-hidden="true" />
         </div>
 
         <div>
           <p
-            className="text-lg text-[var(--text-primary)]"
+            className="text-lg text-text-1"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             A Little World with Us
           </p>
-          <p className="text-[10px] text-[var(--text-secondary)]">KoKo × Pu Tuu</p>
+          <p className="text-[10px] text-text-2">KoKo × Pu Tuu</p>
         </div>
       </Link>
 
@@ -92,8 +92,8 @@ export default function Sidebar() {
               href={href}
               className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
                 active
-                  ? 'bg-[var(--accent-1)]/15 font-medium text-[var(--accent-1)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--bg-3)] hover:text-[var(--text-primary)]'
+                  ? 'bg-accent-1/15 font-medium text-accent-1'
+                  : 'text-text-2 hover:bg-soft-tint hover:text-text-1'
               }`}
             >
               <Icon size={17} />
@@ -109,17 +109,17 @@ export default function Sidebar() {
           await supabase.auth.signOut()
           window.location.href = '/login'
         }}
-        className="mt-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-3)] hover:text-[var(--text-primary)]"
+        className="mt-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-text-2 hover:bg-soft-tint hover:text-text-1"
       >
         <LogOut size={17} /> {t('nav.logout')}
       </button>
 
-      <div className="mt-5 rounded-2xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-3">
-        <div className="mb-1 flex items-center gap-1 text-[10px] text-[var(--text-secondary)]">
+      <div className="mt-5 rounded-btn border border-accent-1/15 bg-card p-3">
+        <div className="mb-1 flex items-center gap-1 text-[10px] text-text-2">
           <Sparkles size={11} />
           {t('nav.todaysWhisper')}
         </div>
-        <p className="text-xs italic leading-relaxed text-[var(--text-primary)]">
+        <p className="text-xs italic leading-relaxed text-text-1">
           “You are my favorite hello and hardest goodbye.”
         </p>
       </div>

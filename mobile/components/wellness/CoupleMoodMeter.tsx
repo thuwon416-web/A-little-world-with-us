@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type MoodId = 'blissful' | 'happy' | 'calm' | 'deep' | 'tired'
@@ -52,6 +55,7 @@ const moodOptions: MoodOption[] = [
 ]
 
 export default function CoupleMoodMeter() {
+  const { colors } = useTheme()
   const [selectedMood, setSelectedMood] = useState<MoodId>('blissful')
   const [intensity, setIntensity] = useState(72)
   const [note, setNote] = useState('')
@@ -60,6 +64,8 @@ export default function CoupleMoodMeter() {
     () => moodOptions.find((mood) => mood.id === selectedMood) ?? moodOptions[0],
     [selectedMood]
   )
+
+  const styles = useMemo(() => createStyles(colors), [colors])
 
   return (
     <WellnessBoardShell title="Couple Mood Meter" subtitle="Today’s vibe" badge="mood">
@@ -86,7 +92,7 @@ export default function CoupleMoodMeter() {
                 selected && styles.optionSelected,
                 {
                   backgroundColor: mood.backgroundColor,
-                  borderColor: selected ? mood.borderColor : '#2f3346',
+                  borderColor: selected ? mood.borderColor : colors.cardBorder,
                 },
               ]}
             >
@@ -119,7 +125,7 @@ export default function CoupleMoodMeter() {
         value={note}
         onChangeText={setNote}
         placeholder="What made today feel this way?"
-        placeholderTextColor="#8f8393"
+        placeholderTextColor={colors.textSecondary}
         multiline
         numberOfLines={3}
         style={[styles.input, styles.textArea]}
@@ -136,99 +142,100 @@ export default function CoupleMoodMeter() {
   )
 }
 
-const styles = StyleSheet.create({
-  progressCard: {
-    backgroundColor: '#1a1b26',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#2f3346',
-    marginBottom: 14,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  progressLabel: { color: '#d5c6d5', fontSize: 10, letterSpacing: 1.1, textTransform: 'uppercase' },
-  progressValue: { color: '#f4cbd8', fontSize: 11, fontWeight: '700' },
-  barTrack: { height: 8, backgroundColor: '#101721', borderRadius: 999, overflow: 'hidden' },
-  barFill: { height: '100%', borderRadius: 999, backgroundColor: '#d5b0c7' },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
-  option: {
-    flexBasis: '31%',
-    minWidth: 90,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    alignItems: 'center',
-  },
-  optionSelected: { borderWidth: 1 },
-  optionText: { fontSize: 12, fontWeight: '600' },
-  sliderWrap: {
-    backgroundColor: '#1a1b26',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#2f3346',
-    marginBottom: 14,
-  },
-  sliderLabel: {
-    color: '#d5c6d5',
-    fontSize: 10,
-    letterSpacing: 1.1,
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  intensityControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  intensityValue: {
-    color: '#f4cbd8',
-    fontSize: 16,
-    fontWeight: '700',
-    flex: 1,
-    textAlign: 'center',
-  },
-  input: {
-    backgroundColor: '#121821',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#31384c',
-    color: '#f5edf5',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 14,
-    fontSize: 14,
-  },
-  textArea: { minHeight: 88, textAlignVertical: 'top' },
-  button: {
-    backgroundColor: '#d5b0c7',
-    borderRadius: 10,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  buttonText: { color: '#181821', fontWeight: '700', fontSize: 16 },
-  featureCard: {
-    backgroundColor: '#2a2131',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#d8b9c8',
-  },
-  featureLabel: {
-    color: '#f0c9d9',
-    fontSize: 10,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: 6,
-  },
-  featureText: { color: '#f5edf4', fontSize: 13, lineHeight: 18 },
-})
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    progressCard: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      marginBottom: 14,
+    },
+    progressHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    progressLabel: { color: colors.textSecondary, fontSize: 10, letterSpacing: 1.1, textTransform: 'uppercase' },
+    progressValue: { color: colors.accent2, fontSize: 11, fontWeight: '700' },
+    barTrack: { height: 8, backgroundColor: colors.surface, borderRadius: 999, overflow: 'hidden' },
+    barFill: { height: '100%', borderRadius: 999, backgroundColor: colors.accent1 },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
+    option: {
+      flexBasis: '31%',
+      minWidth: 90,
+      borderWidth: 1,
+      borderRadius: 12,
+      paddingVertical: 10,
+      paddingHorizontal: 8,
+      alignItems: 'center',
+    },
+    optionSelected: { borderWidth: 1 },
+    optionText: { fontSize: 12, fontWeight: '600' },
+    sliderWrap: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      marginBottom: 14,
+    },
+    sliderLabel: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      letterSpacing: 1.1,
+      textTransform: 'uppercase',
+      marginBottom: 8,
+    },
+    intensityControl: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    intensityValue: {
+      color: colors.accent2,
+      fontSize: 16,
+      fontWeight: '700',
+      flex: 1,
+      textAlign: 'center',
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      color: colors.textPrimary,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      marginBottom: 14,
+      fontSize: 14,
+    },
+    textArea: { minHeight: 88, textAlignVertical: 'top' },
+    button: {
+      backgroundColor: colors.accent1,
+      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    buttonText: { color: colors.textPrimary, fontWeight: '700', fontSize: 16 },
+    featureCard: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.accent1,
+    },
+    featureLabel: {
+      color: colors.accent2,
+      fontSize: 10,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+      marginBottom: 6,
+    },
+    featureText: { color: colors.textPrimary, fontSize: 13, lineHeight: 18 },
+  })

@@ -18,16 +18,16 @@ export default function FuturePredictions() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <Star className="w-5 h-5" />
         <h3 className="font-dancing text-2xl">Future Predictions</h3>
       </div>
 
-      <motion.div layout className="glass-card rounded-2xl p-3">
-        <div className="text-xs uppercase tracking-[0.2em] text-[var(--accent-1)] mb-2">
+      <motion.div layout className="glass-card rounded-btn p-3">
+        <div className="text-xs uppercase tracking-[0.2em] text-accent-1 mb-2">
           Next reading
         </div>
-        <p className="text-sm leading-relaxed text-[var(--text-primary)]/80">{prediction}</p>
+        <p className="text-sm leading-relaxed text-text-1/80">{prediction}</p>
       </motion.div>
 
       <button

@@ -31,7 +31,7 @@ function VideoItem({ src }: { src: string }) {
       {visible ? (
         <video className="w-full rounded" src={src} controls playsInline preload="metadata" />
       ) : (
-        <div className="w-full h-40 bg-[var(--card-bg)]/10 flex items-center justify-center">
+        <div className="w-full h-40 bg-card/10 flex items-center justify-center">
           Loading preview…
         </div>
       )}

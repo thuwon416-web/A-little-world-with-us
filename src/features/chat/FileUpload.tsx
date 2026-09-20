@@ -116,14 +116,18 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
 
       if (uploadError) throw uploadError
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Get signed URL (1 hour expiry)
+      const { data: signedUrlData } = await supabase.storage
         .from('chat_files')
-        .getPublicUrl(filePath)
+        .createSignedUrl(filePath, 3600)
+      
+      if (!signedUrlData?.signedUrl) {
+        throw new Error('Failed to generate signed URL for chat file')
+      }
 
       // Call parent callback with file info
       onFileUpload({
-        url: publicUrl,
+        url: signedUrlData.signedUrl,
         type: selectedFile.type,
         name: selectedFile.name,
         size: selectedFile.size,
@@ -147,17 +151,17 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
+      <div className="w-full max-w-md rounded-modal border border-accent-1/20 bg-card shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--accent-1)]/20 p-4">
+        <div className="flex items-center justify-between border-b border-accent-1/20 p-4">
           <div className="flex items-center gap-2">
-            <Upload className="h-5 w-5 text-[var(--accent-1)]" />
-            <h2 className="text-lg font-serif text-[var(--text-primary)]">Upload File</h2>
+            <Upload className="h-5 w-5 text-accent-1" />
+            <h2 className="text-lg font-serif text-text-1">Upload File</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10 hover:text-[var(--accent-1)] transition"
+            className="rounded-full p-2 text-text-2 hover:bg-accent-1/10 hover:text-accent-1 transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -166,7 +170,7 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
         <div className="p-4 space-y-4">
           {/* File Input */}
           <div>
-            <label className="block text-sm font-medium text-[var(--text-primary)] mb-2">
+            <label className="block text-sm font-medium text-text-1 mb-2">
               Select a file
             </label>
             <input
@@ -174,24 +178,24 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
               type="file"
               onChange={handleFileSelect}
               accept="image/*,application/pdf,.txt"
-              className="w-full rounded-xl border-2 border-dashed border-[var(--accent-1)]/30 bg-[var(--card-bg-strong)] px-4 py-8 text-sm text-[var(--text-secondary)] hover:border-[var(--accent-1)]/50 transition cursor-pointer"
+              className="w-full rounded-input border-2 border-dashed border-accent-1/30 bg-card px-4 py-8 text-sm text-text-2 hover:border-accent-1/50 transition cursor-pointer"
             />
-            <p className="text-xs text-[var(--text-secondary)] mt-2">
+            <p className="text-xs text-text-2 mt-2">
               Max file size: 5MB • Images, PDF, TXT
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-start gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30">
-              <AlertCircle className="h-4 w-4 text-rose-500 flex-shrink-0 mt-0.5" />
-              <p className="text-sm text-rose-500">{error}</p>
+            <div className="flex items-start gap-2 p-3 rounded-input bg-error/10 border border-error/30">
+              <AlertCircle className="h-4 w-4 text-error flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-error">{error}</p>
             </div>
           )}
 
           {/* File Preview */}
           {selectedFile && (
-            <div className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4 space-y-3">
+            <div className="rounded-input border border-accent-1/20 bg-card p-4 space-y-3">
               {preview && (
                 <div className="relative">
                   <Image
@@ -206,17 +210,17 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
               )}
 
               <div className="flex items-start gap-3">
-                <div className="rounded-lg bg-[var(--accent-1)]/10 p-2">
+                <div className="rounded-lg bg-accent-1/10 p-2">
                   {(() => {
                     const Icon = getFileIcon(selectedFile.type)
-                    return <Icon className="h-5 w-5 text-[var(--accent-1)]" />
+                    return <Icon className="h-5 w-5 text-accent-1" />
                   })()}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-[var(--text-primary)] truncate">
+                  <p className="text-sm font-medium text-text-1 truncate">
                     {selectedFile.name}
                   </p>
-                  <p className="text-xs text-[var(--text-secondary)]">
+                  <p className="text-xs text-text-2">
                     {formatFileSize(selectedFile.size)}
                   </p>
                 </div>
@@ -226,12 +230,12 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
               {uploading && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-[var(--text-secondary)]">Uploading...</span>
-                    <span className="text-[var(--accent-1)]">Processing</span>
+                    <span className="text-text-2">Uploading...</span>
+                    <span className="text-accent-1">Processing</span>
                   </div>
-                  <div className="h-2 rounded-full bg-[var(--accent-1)]/20 overflow-hidden">
+                  <div className="h-2 rounded-full bg-accent-1/20 overflow-hidden">
                     <div
-                      className="h-full bg-[var(--accent-1)] animate-pulse"
+                      className="h-full bg-accent-1 animate-pulse"
                       style={{ width: '100%' }}
                     />
                   </div>
@@ -245,7 +249,7 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
             type="button"
             onClick={handleUpload}
             disabled={!selectedFile || uploading}
-            className="w-full rounded-xl bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] px-6 py-3 text-base font-medium text-[var(--bg-color)] transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full rounded-btn bg-gradient-to-r from-accent-1 to-accent-2 px-6 py-3 text-base font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {uploading ? (
               <>

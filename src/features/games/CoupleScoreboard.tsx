@@ -41,7 +41,7 @@ export default function CoupleScoreboard() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[var(--accent-2)]">
+        <div className="flex items-center gap-2 text-accent-2">
           <Award className="w-5 h-5" />
           <h3 className="font-dancing text-2xl">Couple Scoreboard</h3>
         </div>
@@ -50,7 +50,7 @@ export default function CoupleScoreboard() {
 
       <div className="space-y-3">
         {stats.map((stat, index) => (
-          <div key={stat.label} className="glass-card p-3 rounded-2xl">
+          <div key={stat.label} className="glass-card p-3 rounded-btn">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">{stat.label}</span>
               <div className="flex gap-2 text-xs opacity-70">
@@ -63,21 +63,21 @@ export default function CoupleScoreboard() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs">
-              <div className="rounded-xl bg-[var(--card-bg-strong)] p-2">
+              <div className="rounded-xl bg-card p-2">
                 <span className="opacity-60">You</span>
-                <div className="font-semibold text-[var(--text-primary)]">{stat.me}</div>
+                <div className="font-semibold text-text-1">{stat.me}</div>
               </div>
-              <div className="rounded-xl bg-[var(--bg-2)] p-2">
+              <div className="rounded-xl bg-soft-tint p-2">
                 <span className="opacity-60">Her</span>
-                <div className="font-semibold text-[var(--text-primary)]">{stat.her}</div>
+                <div className="font-semibold text-text-1">{stat.her}</div>
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      <div className="glass-card p-3 rounded-2xl">
-        <div className="flex items-center gap-2 mb-2 text-[var(--accent-1)]">
+      <div className="glass-card p-3 rounded-btn">
+        <div className="flex items-center gap-2 mb-2 text-accent-1">
           <Sparkles className="w-4 h-4" />
           <span className="text-sm font-medium">Achievement Badges</span>
         </div>

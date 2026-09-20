@@ -43,7 +43,7 @@ export default function LoveQuiz() {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
       {QUESTIONS.map((q, qi) => (
-        <div key={qi} className="p-3 rounded border border-[var(--accent-1)]/10">
+        <div key={qi} className="p-3 rounded border border-accent-1/10">
           <div className="font-medium text-sm mb-2">{q.q}</div>
           <div className="flex flex-wrap gap-2">
             {q.options.map((opt, oi) => (
@@ -51,7 +51,7 @@ export default function LoveQuiz() {
                 key={oi}
                 onClick={() => handleSelect(qi, oi)}
                 disabled={submitted}
-                className={`px-3 py-1 rounded ${answers[qi] === oi ? 'bg-[var(--accent-1)] text-[var(--text-primary)]' : 'bg-[var(--card-bg)]/60'}`}
+                className={`px-3 py-1 rounded ${answers[qi] === oi ? 'bg-accent-1 text-white' : 'bg-card/60'}`}
               >
                 {opt}
               </button>
@@ -65,8 +65,8 @@ export default function LoveQuiz() {
           See Score
         </button>
       ) : (
-        <div className="p-3 bg-[var(--bg-color)] rounded">
-          <div className="font-dancing text-xl text-[var(--accent-2)]">
+        <div className="p-3 bg-bg rounded">
+          <div className="font-dancing text-xl text-accent-2">
             Your Love Quiz Score: {score}/{QUESTIONS.length}
           </div>
           <div className="text-sm opacity-70 mt-2">

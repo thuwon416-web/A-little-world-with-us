@@ -103,7 +103,7 @@ export function YouTubePlayer({
 
   if (error) {
     return (
-      <div className={`rounded-2xl border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-100 ${className}`}>
+      <div className={`rounded-btn border border-red-400/30 bg-red-500/10 p-4 text-sm text-red-100 ${className}`}>
         <div className="flex items-center gap-2 font-medium"><AlertCircle className="h-4 w-4" /> Unable to play this video</div>
         <p className="mt-1 text-xs opacity-80">{error}</p>
       </div>
@@ -111,7 +111,7 @@ export function YouTubePlayer({
   }
 
   return (
-    <div className={`overflow-hidden rounded-2xl border border-[var(--accent-1)]/20 bg-black/30 ${className}`}>
+    <div className={`overflow-hidden rounded-btn border border-accent-1/20 bg-black/30 ${className}`}>
       <div className="aspect-video w-full">
         <iframe
           ref={frameRef}
@@ -135,18 +135,18 @@ export function YouTubePlayer({
       </div>
       <div className="space-y-2 p-3">
         <div className="flex items-center gap-2">
-          <button type="button" onClick={togglePlaying} aria-label={playing ? 'Pause' : 'Play'} className="rounded-full bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
+          <button type="button" onClick={togglePlaying} aria-label={playing ? 'Pause' : 'Play'} className="rounded-full bg-accent-1/15 p-2 text-accent-1">
             {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current" />}
           </button>
-          <input aria-label="Playback progress" type="range" min={0} max={duration || 100} value={Math.min(elapsed, duration || 100)} onChange={(event) => seek(Number(event.target.value))} className="min-w-0 flex-1 accent-[var(--accent-1)]" />
-          <span className="min-w-[74px] text-right text-[11px] text-[var(--text-secondary)]">{formatTime(elapsed)} / {duration ? formatTime(duration) : '--:--'}</span>
+          <input aria-label="Playback progress" type="range" min={0} max={duration || 100} value={Math.min(elapsed, duration || 100)} onChange={(event) => seek(Number(event.target.value))} className="min-w-0 flex-1 accent-accent-1" />
+          <span className="min-w-[74px] text-right text-[11px] text-text-2">{formatTime(elapsed)} / {duration ? formatTime(duration) : '--:--'}</span>
         </div>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={() => { setMuted(!muted); sendCommand(muted ? 'unMute' : 'mute') }} aria-label={muted ? 'Unmute' : 'Mute'} className="text-[var(--text-secondary)]">
+          <button type="button" onClick={() => { setMuted(!muted); sendCommand(muted ? 'unMute' : 'mute') }} aria-label={muted ? 'Unmute' : 'Mute'} className="text-text-2">
             {muted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
           </button>
-          <input aria-label="Volume" type="range" min={0} max={100} value={muted ? 0 : volume} onChange={(event) => changeVolume(Number(event.target.value))} className="w-24 accent-[var(--accent-1)]" />
-          <span className="ml-auto text-[11px] text-[var(--text-secondary)]">{formatTime(elapsed)}</span>
+          <input aria-label="Volume" type="range" min={0} max={100} value={muted ? 0 : volume} onChange={(event) => changeVolume(Number(event.target.value))} className="w-24 accent-accent-1" />
+          <span className="ml-auto text-[11px] text-text-2">{formatTime(elapsed)}</span>
         </div>
       </div>
     </div>

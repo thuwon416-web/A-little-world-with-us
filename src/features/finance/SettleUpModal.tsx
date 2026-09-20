@@ -65,22 +65,22 @@ export default function SettleUpModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="settle-up-title">
-      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-2xl">
+      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-modal border border-accent-1/20 bg-card p-6 shadow-2xl">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Settle up</p>
-            <h2 id="settle-up-title" className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">Record a payment</h2>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Settle up</p>
+            <h2 id="settle-up-title" className="mt-2 text-2xl font-semibold text-text-1">Record a payment</h2>
           </div>
-          <button type="button" onClick={onClose} aria-label="Close settle up dialog" className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--card-bg-strong)]">
+          <button type="button" onClick={onClose} aria-label="Close settle up dialog" className="rounded-full p-2 text-text-2 hover:bg-card">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <p className="mt-4 rounded-2xl bg-[var(--card-bg-strong)] p-4 text-sm text-[var(--text-secondary)]">
-          Current balance: <strong className="text-[var(--text-primary)]">{formatMmk(amount)}</strong>
+        <p className="mt-4 rounded-btn bg-card p-4 text-sm text-text-2">
+          Current balance: <strong className="text-text-1">{formatMmk(amount)}</strong>
         </p>
 
-        <label className="mt-5 block text-sm font-medium text-[var(--text-primary)]">
+        <label className="mt-5 block text-sm font-medium text-text-1">
           Amount
           <input
             type="number"
@@ -89,28 +89,28 @@ export default function SettleUpModal({
             step="0.01"
             value={settlementAmount}
             onChange={(event) => setSettlementAmount(event.target.value)}
-            className="mt-2 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)]"
+            className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1"
           />
         </label>
 
-        <label className="mt-4 block text-sm font-medium text-[var(--text-primary)]">
-          Note <span className="font-normal text-[var(--text-secondary)]">(optional)</span>
+        <label className="mt-4 block text-sm font-medium text-text-1">
+          Note <span className="font-normal text-text-2">(optional)</span>
           <textarea
             value={notes}
             onChange={(event) => setNotes(event.target.value)}
             maxLength={500}
             rows={3}
-            className="mt-2 w-full resize-none rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)]"
+            className="mt-2 w-full resize-none rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1"
           />
         </label>
 
         {error && <p className="mt-3 text-sm text-rose-300" role="alert">{error}</p>}
 
         <div className="mt-6 flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="rounded-xl border border-[var(--accent-1)]/20 px-4 py-3 text-sm text-[var(--text-primary)]">
+          <button type="button" onClick={onClose} className="rounded-xl border border-accent-1/20 px-4 py-3 text-sm text-text-1">
             Cancel
           </button>
-          <button type="submit" disabled={submitting} className="rounded-xl bg-[var(--accent-1)] px-4 py-3 text-sm font-semibold text-[var(--bg-color)] disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="submit" disabled={submitting} className="rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
             {submitting ? 'Saving…' : 'Confirm'}
           </button>
         </div>

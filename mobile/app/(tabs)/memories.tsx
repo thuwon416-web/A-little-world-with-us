@@ -239,8 +239,11 @@ export default function MemoriesScreen() {
           .from('memories')
           .upload(filePath, arraybuffer, { contentType: 'audio/m4a', upsert: false })
         if (uploadError) throw new Error(`Voice upload failed: ${uploadError.message}`)
-        const { data: urlData } = supabase.storage.from('memories').getPublicUrl(filePath)
-        voiceUrl = urlData.publicUrl
+        const { data: urlData } = await supabase.storage.from('memories').createSignedUrl(filePath, 3600)
+        if (!urlData?.signedUrl) {
+          throw new Error('Failed to generate signed URL for voice memo')
+        }
+        voiceUrl = urlData.signedUrl
         setJournalVoiceRemoteUrl(voiceUrl)
       }
       const existingMeta = editingJournalId

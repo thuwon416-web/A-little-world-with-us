@@ -112,34 +112,34 @@ export default function RetrogradeAlert() {
 
   return (
     <div
-      className={`rounded-2xl border p-6 ${
+      className={`rounded-btn border p-6 ${
         isActive
           ? 'border-amber-500/50 bg-amber-500/10'
-          : 'border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)]'
+          : 'border-accent-1/20 bg-card'
       }`}
     >
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
-          <div className={`rounded-xl p-2 ${isActive ? 'bg-amber-500/20 text-amber-500' : 'bg-[var(--accent-1)]/15 text-[var(--accent-1)]'}`}>
+          <div className={`rounded-xl p-2 ${isActive ? 'bg-amber-500/20 text-amber-500' : 'bg-accent-1/15 text-accent-1'}`}>
             {isActive ? <AlertTriangle className="h-5 w-5" /> : <Clock className="h-5 w-5" />}
           </div>
           <div className="flex-1">
             <div className="mb-2 flex items-center gap-2">
-              <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+              <p className="text-xs uppercase tracking-[0.2em] text-text-2">
                 {isActive ? 'Active Retrograde' : 'Upcoming Retrograde'}
               </p>
               <button
                 type="button"
                 onClick={() => setShowMyanmar(!showMyanmar)}
-                className="rounded-full border border-[var(--accent-1)]/20 px-2 py-0.5 text-xs text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/10"
+                className="rounded-full border border-accent-1/20 px-2 py-0.5 text-xs text-accent-1 transition hover:bg-accent-1/10"
               >
                 {showMyanmar ? 'English' : 'မြန်မာ'}
               </button>
             </div>
-            <h3 className="text-xl font-bold text-[var(--text-primary)]">
+            <h3 className="text-xl font-bold text-text-1">
               {showMyanmar ? currentRetrograde.planetMy : currentRetrograde.planet} Retrograde
             </h3>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            <p className="mt-1 text-sm text-text-2">
               {isActive
                 ? `${daysRemaining} days remaining (${currentRetrograde.endDate.toLocaleDateString()})`
                 : `Starting in ${daysUntil} days (${currentRetrograde.startDate.toLocaleDateString()})`}
@@ -149,7 +149,7 @@ export default function RetrogradeAlert() {
         <button
           type="button"
           onClick={() => setDismissed(true)}
-          className="rounded-lg p-1 text-[var(--text-secondary)] transition hover:bg-[var(--accent-1)]/10 hover:text-[var(--text-primary)]"
+          className="rounded-lg p-1 text-text-2 transition hover:bg-accent-1/10 hover:text-text-1"
         >
           <X className="h-5 w-5" />
         </button>
@@ -157,12 +157,12 @@ export default function RetrogradeAlert() {
 
       {/* What to Avoid */}
       <div className="mt-4">
-        <p className="mb-2 text-sm font-medium text-[var(--text-secondary)]">
+        <p className="mb-2 text-sm font-medium text-text-2">
           {showMyanmar ? 'ရှောင်ရှားရန်အရာများ' : 'What to Avoid'}
         </p>
         <div className="grid gap-2 sm:grid-cols-2">
           {(showMyanmar ? currentRetrograde.whatToAvoidMy : currentRetrograde.whatToAvoid).map((item, index) => (
-            <div key={index} className="flex items-start gap-2 text-sm text-[var(--text-primary)]">
+            <div key={index} className="flex items-start gap-2 text-sm text-text-1">
               <AlertTriangle className="h-4 w-4 text-amber-500 flex-shrink-0 mt-0.5" />
               <span>{item}</span>
             </div>
@@ -171,11 +171,11 @@ export default function RetrogradeAlert() {
       </div>
 
       {/* Advice */}
-      <div className="mt-4 flex items-start gap-3 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--accent-1)]/5 p-4">
-        <CheckCircle className="h-5 w-5 text-[var(--accent-1)] flex-shrink-0 mt-0.5" />
+      <div className="mt-4 flex items-start gap-3 rounded-xl border border-accent-1/20 bg-accent-1/5 p-4">
+        <CheckCircle className="h-5 w-5 text-accent-1 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-xs font-medium text-[var(--accent-1)]">{showMyanmar ? 'အကြံပြုချက်' : 'Advice'}</p>
-          <p className="mt-1 text-sm text-[var(--text-primary)]">
+          <p className="text-xs font-medium text-accent-1">{showMyanmar ? 'အကြံပြုချက်' : 'Advice'}</p>
+          <p className="mt-1 text-sm text-text-1">
             {showMyanmar ? currentRetrograde.adviceMy : currentRetrograde.advice}
           </p>
         </div>

@@ -196,33 +196,33 @@ export default function SharedPlaylist({ coupleId: requestedCoupleId, realtime, 
     }
   }
 
-  if (loading) return <div className={`flex items-center justify-center gap-2 rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-8 text-sm text-[var(--text-secondary)] ${className}`}><Loader2 className="icon-pulse-soft h-4 w-4 animate-spin" /> Loading your playlist…</div>
-  if (!coupleId) return <div className={`rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 text-sm text-[var(--text-secondary)] ${className}`}>Link your partner to start a shared playlist.</div>
+  if (loading) return <div className={`flex items-center justify-center gap-2 rounded-panel border border-accent-1/20 bg-card p-8 text-sm text-text-2 ${className}`}><Loader2 className="icon-pulse-soft h-4 w-4 animate-spin" /> Loading your playlist…</div>
+  if (!coupleId) return <div className={`rounded-panel border border-accent-1/20 bg-card p-6 text-sm text-text-2 ${className}`}>Link your partner to start a shared playlist.</div>
 
   return (
     <div className={`space-y-5 ${className}`}>
-      {error && <div role="alert" className="flex items-start justify-between gap-3 rounded-2xl border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-100"><span>{error}</span><button type="button" onClick={() => setError(null)} aria-label="Dismiss error"><X className="h-4 w-4" /></button></div>}
+      {error && <div role="alert" className="flex items-start justify-between gap-3 rounded-btn border border-red-400/30 bg-red-500/10 p-3 text-sm text-red-100"><span>{error}</span><button type="button" onClick={() => setError(null)} aria-label="Dismiss error"><X className="h-4 w-4" /></button></div>}
 
-      <form onSubmit={addTrack} className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-        <div className="mb-4 flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]"><AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} className="text-[var(--accent-1)]" /> Add a song for us</div>
+      <form onSubmit={addTrack} className="rounded-panel border border-accent-1/20 bg-card p-5">
+        <div className="mb-4 flex items-center gap-2 text-sm font-medium text-text-1"><AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} className="text-accent-1" /> Add a song for us</div>
         <div className="grid gap-3 sm:grid-cols-2">
-          <input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="YouTube URL or video ID" aria-label="YouTube URL or video ID" className="sm:col-span-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]" />
-          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Song title" aria-label="Song title" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]" />
-          <input value={artist} onChange={(event) => setArtist(event.target.value)} placeholder="Artist (optional)" aria-label="Artist" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]" />
-          <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="A note for your partner (optional)" aria-label="Song notes" rows={2} className="sm:col-span-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]" />
+          <input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="YouTube URL or video ID" aria-label="YouTube URL or video ID" className="sm:col-span-2 rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1" />
+          <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Song title" aria-label="Song title" className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1" />
+          <input value={artist} onChange={(event) => setArtist(event.target.value)} placeholder="Artist (optional)" aria-label="Artist" className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1" />
+          <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="A note for your partner (optional)" aria-label="Song notes" rows={2} className="sm:col-span-2 rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1" />
         </div>
         {previewId && <div className="mt-4"><YouTubePlayer videoId={previewId} title={title || 'Song preview'} /></div>}
-        <button type="submit" disabled={saving || !previewId || !title.trim()} className="mt-4 inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />} {saving ? 'Adding…' : 'Add to playlist'}</button>
+        <button type="submit" disabled={saving || !previewId || !title.trim()} className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />} {saving ? 'Adding…' : 'Add to playlist'}</button>
       </form>
 
       <div className="space-y-3">
-        {playlist.length === 0 ? <div className="rounded-3xl border border-dashed border-[var(--accent-1)]/30 bg-[var(--card-bg)] p-8 text-center text-sm text-[var(--text-secondary)]">Your playlist is waiting for its first song.</div> : playlist.map((track) => (
-          <article key={track.id} className="rounded-3xl border border-[var(--accent-1)]/15 bg-[var(--card-bg)] p-4">
+        {playlist.length === 0 ? <div className="rounded-panel border border-dashed border-accent-1/30 bg-card p-8 text-center text-sm text-text-2">Your playlist is waiting for its first song.</div> : playlist.map((track) => (
+          <article key={track.id} className="rounded-panel border border-accent-1/15 bg-card p-4">
             <div className="flex items-start justify-between gap-3">
-              <div><h3 className="font-medium text-[var(--text-primary)]">{track.title}</h3><p className="text-xs text-[var(--text-secondary)]">{track.artist || 'YouTube'} </p>{track.whyAdded && <p className="mt-2 text-sm text-[var(--text-secondary)]">{track.whyAdded}</p>}</div>
+              <div><h3 className="font-medium text-text-1">{track.title}</h3><p className="text-xs text-text-2">{track.artist || 'YouTube'} </p>{track.whyAdded && <p className="mt-2 text-sm text-text-2">{track.whyAdded}</p>}</div>
               <div className="flex items-center gap-1">
-                <button type="button" onClick={() => void toggleAnniversary(track)} className={`rounded-full px-2 py-1 text-xs ${track.isAnniversarySong ? 'bg-[var(--accent-1)]/20 text-[var(--text-primary)]' : 'text-[var(--text-secondary)]'}`}>{track.isAnniversarySong ? 'Anniversary song' : 'Mark anniversary'}</button>
-                <button type="button" onClick={() => void removeTrack(track.id)} aria-label={`Remove ${track.title}`} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-red-500/10 hover:text-red-300"><Trash2 className="h-4 w-4" /></button>
+                <button type="button" onClick={() => void toggleAnniversary(track)} className={`rounded-full px-2 py-1 text-xs ${track.isAnniversarySong ? 'bg-accent-1/20 text-text-1' : 'text-text-2'}`}>{track.isAnniversarySong ? 'Anniversary song' : 'Mark anniversary'}</button>
+                <button type="button" onClick={() => void removeTrack(track.id)} aria-label={`Remove ${track.title}`} className="rounded-full p-2 text-text-2 hover:bg-red-500/10 hover:text-red-300"><Trash2 className="h-4 w-4" /></button>
               </div>
             </div>
             <YouTubePlayer videoId={track.externalId} title={track.title} className="mt-3" />
@@ -230,9 +230,9 @@ export default function SharedPlaylist({ coupleId: requestedCoupleId, realtime, 
         ))}
       </div>
 
-      <form onSubmit={saveAnniversary} className="flex flex-col gap-3 rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 sm:flex-row sm:items-end">
-        <label className="flex-1 text-sm text-[var(--text-secondary)]"><span className="mb-2 flex items-center gap-2 text-[var(--text-primary)]"><CalendarHeart className="h-4 w-4 text-[var(--accent-1)]" /> Our anniversary</span><input type="date" value={anniversary} onChange={(event) => setAnniversary(event.target.value)} className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" /></label>
-        <button type="submit" disabled={savingAnniversary} className="rounded-full border border-[var(--accent-1)]/30 px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">{savingAnniversary ? 'Saving…' : 'Save date'}</button>
+      <form onSubmit={saveAnniversary} className="flex flex-col gap-3 rounded-panel border border-accent-1/20 bg-card p-5 sm:flex-row sm:items-end">
+        <label className="flex-1 text-sm text-text-2"><span className="mb-2 flex items-center gap-2 text-text-1"><CalendarHeart className="h-4 w-4 text-accent-1" /> Our anniversary</span><input type="date" value={anniversary} onChange={(event) => setAnniversary(event.target.value)} className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /></label>
+        <button type="submit" disabled={savingAnniversary} className="rounded-full border border-accent-1/30 px-4 py-2 text-sm text-text-1 disabled:opacity-50">{savingAnniversary ? 'Saving…' : 'Save date'}</button>
       </form>
     </div>
   )

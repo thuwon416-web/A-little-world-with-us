@@ -56,10 +56,10 @@ export default function BottomNav() {
       if (!user) return
       const { data } = await supabase
         .from('profiles')
-        .select('role,email')
+        .select('role')
         .eq('id', user.id)
         .maybeSingle()
-      setIsAdmin(data?.role === 'admin' && data.email === 'thuwon416@gmail.com')
+      setIsAdmin(data?.role === 'admin')
     })
   }, [])
 
@@ -71,7 +71,7 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav className="flex items-center justify-around border-t border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-2 py-2.5 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur-xl">
+      <nav className="flex items-center justify-around border-t border-accent-1/20 bg-card px-2 py-2.5 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur-xl">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href
 
@@ -80,7 +80,7 @@ export default function BottomNav() {
               key={href}
               href={href}
               className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[10px] transition ${
-                active ? 'text-[var(--accent-1)]' : 'text-[var(--text-secondary)]'
+                active ? 'text-accent-1' : 'text-text-2'
               }`}
             >
               <Icon size={19} />
@@ -93,7 +93,7 @@ export default function BottomNav() {
           type="button"
           onClick={() => setMoreMenuOpen(true)}
           className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[10px] transition ${
-            pathname === '/planning' ? 'text-[var(--accent-1)]' : 'text-[var(--text-secondary)]'
+            pathname === '/planning' ? 'text-accent-1' : 'text-text-2'
           }`}
           aria-label="More menu"
         >
@@ -104,7 +104,7 @@ export default function BottomNav() {
         <button
           type="button"
           onClick={handleExit}
-          className="flex min-w-12 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[10px] text-[var(--text-secondary)] transition hover:text-[var(--accent-1)]"
+          className="flex min-w-12 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[10px] text-text-2 transition hover:text-accent-1"
           aria-label="Lock and exit"
         >
           <LogOut size={18} />
@@ -115,15 +115,15 @@ export default function BottomNav() {
       {/* More Menu Modal */}
       {moreMenuOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-t-3xl bg-[var(--card-bg-strong)] p-6 pb-8">
+          <div className="w-full max-w-md rounded-t-3xl bg-card p-6 pb-8">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">More</h2>
+              <h2 className="text-lg font-semibold text-text-1">More</h2>
               <button
                 onClick={() => setMoreMenuOpen(false)}
-                className="rounded-full p-2 hover:bg-[var(--accent-1)]/10"
+                className="rounded-full p-2 hover:bg-accent-1/10"
                 aria-label="Close menu"
               >
-                <X size={20} className="text-[var(--text-primary)]" />
+                <X size={20} className="text-text-1" />
               </button>
             </div>
 
@@ -135,10 +135,10 @@ export default function BottomNav() {
                     key={page.name}
                     href={page.href}
                     onClick={() => setMoreMenuOpen(false)}
-                    className="flex flex-col items-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4 transition hover:bg-[var(--card-bg)]/60"
+                    className="flex flex-col items-center gap-2 rounded-btn border border-accent-1/20 bg-card p-4 transition hover:bg-card/60"
                   >
-                    <page.icon size={24} className="text-[var(--accent-1)]" />
-                    <span className="text-xs font-medium text-[var(--text-primary)]">
+                    <page.icon size={24} className="text-accent-1" />
+                    <span className="text-xs font-medium text-text-1">
                       {page.name}
                     </span>
                   </Link>
@@ -147,7 +147,7 @@ export default function BottomNav() {
 
             <button
               onClick={handleExit}
-              className="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--error)]/20 py-3 text-sm font-medium text-[var(--error)] transition hover:bg-[var(--error)]/30"
+              className="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-error/20 py-3 text-sm font-medium text-error transition hover:bg-error/30"
             >
               <LogOut size={16} />
               Exit App

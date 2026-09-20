@@ -146,8 +146,8 @@ export default function HealthProfileWidget() {
     return (
       <div className="glass-card p-5">
         <div className="animate-pulse">
-          <div className="h-5 w-1/3 rounded bg-[var(--accent-1)]/10" />
-          <div className="mt-4 h-20 rounded bg-[var(--accent-1)]/10" />
+          <div className="h-5 w-1/3 rounded bg-accent-1/10" />
+          <div className="mt-4 h-20 rounded bg-accent-1/10" />
         </div>
       </div>
     )
@@ -157,13 +157,13 @@ export default function HealthProfileWidget() {
     <div className="glass-card p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <Heart className="h-5 w-5 text-[var(--accent-1)]" />
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">Health Profile</h3>
+          <Heart className="h-5 w-5 text-accent-1" />
+          <h3 className="text-lg font-semibold text-text-1">Health Profile</h3>
         </div>
         {profile && !editing && (
           <button
             onClick={() => setEditing(true)}
-            className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            className="text-xs text-text-2 hover:text-text-1"
           >
             Edit
           </button>
@@ -171,14 +171,14 @@ export default function HealthProfileWidget() {
       </div>
 
       {error && (
-        <div className="mb-4 flex items-start gap-2 rounded-xl bg-red-500/10 p-3 text-sm text-red-400">
+        <div className="mb-4 flex items-start gap-2 rounded-xl bg-error/10 p-3 text-sm text-error">
           <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
           <p>{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="mb-4 rounded-xl bg-green-500/10 p-3 text-sm text-green-400">
+        <div className="mb-4 rounded-xl bg-success/10 p-3 text-sm text-success">
           {success}
         </div>
       )}
@@ -188,29 +188,29 @@ export default function HealthProfileWidget() {
           {/* Basic Info */}
           <div className="grid gap-4 md:grid-cols-2">
             {profile.blood_type && (
-              <div className="rounded-xl bg-[var(--bg-2)] p-3">
-                <p className="text-xs text-[var(--text-secondary)]">Blood Type</p>
-                <p className="text-sm font-medium text-[var(--text-primary)]">{profile.blood_type}</p>
+              <div className="rounded-xl bg-soft-tint p-3">
+                <p className="text-xs text-text-2">Blood Type</p>
+                <p className="text-sm font-medium text-text-1">{profile.blood_type}</p>
               </div>
             )}
             {bmi && (
-              <div className="rounded-xl bg-[var(--bg-2)] p-3">
-                <p className="text-xs text-[var(--text-secondary)]">BMI</p>
-                <p className={`text-sm font-medium ${bmiCategory?.color || 'text-[var(--text-primary)]'}`}>
+              <div className="rounded-xl bg-soft-tint p-3">
+                <p className="text-xs text-text-2">BMI</p>
+                <p className={`text-sm font-medium ${bmiCategory?.color || 'text-text-1'}`}>
                   {bmi} ({bmiCategory?.category})
                 </p>
               </div>
             )}
             {profile.height_cm && (
-              <div className="rounded-xl bg-[var(--bg-2)] p-3">
-                <p className="text-xs text-[var(--text-secondary)]">Height</p>
-                <p className="text-sm font-medium text-[var(--text-primary)]">{profile.height_cm} cm</p>
+              <div className="rounded-xl bg-soft-tint p-3">
+                <p className="text-xs text-text-2">Height</p>
+                <p className="text-sm font-medium text-text-1">{profile.height_cm} cm</p>
               </div>
             )}
             {profile.weight_kg && (
-              <div className="rounded-xl bg-[var(--bg-2)] p-3">
-                <p className="text-xs text-[var(--text-secondary)]">Weight</p>
-                <p className="text-sm font-medium text-[var(--text-primary)]">{profile.weight_kg} kg</p>
+              <div className="rounded-xl bg-soft-tint p-3">
+                <p className="text-xs text-text-2">Weight</p>
+                <p className="text-sm font-medium text-text-1">{profile.weight_kg} kg</p>
               </div>
             )}
           </div>
@@ -220,20 +220,20 @@ export default function HealthProfileWidget() {
             <div className="space-y-2">
               {profile.allergies?.length && (
                 <div>
-                  <p className="text-xs text-[var(--text-secondary)]">Allergies</p>
-                  <p className="text-sm text-[var(--text-primary)]">{profile.allergies.join(', ')}</p>
+                  <p className="text-xs text-text-2">Allergies</p>
+                  <p className="text-sm text-text-1">{profile.allergies.join(', ')}</p>
                 </div>
               )}
               {profile.medications?.length && (
                 <div>
-                  <p className="text-xs text-[var(--text-secondary)]">Medications</p>
-                  <p className="text-sm text-[var(--text-primary)]">{profile.medications.join(', ')}</p>
+                  <p className="text-xs text-text-2">Medications</p>
+                  <p className="text-sm text-text-1">{profile.medications.join(', ')}</p>
                 </div>
               )}
               {profile.conditions?.length && (
                 <div>
-                  <p className="text-xs text-[var(--text-secondary)]">Conditions</p>
-                  <p className="text-sm text-[var(--text-primary)]">{profile.conditions.join(', ')}</p>
+                  <p className="text-xs text-text-2">Conditions</p>
+                  <p className="text-sm text-text-1">{profile.conditions.join(', ')}</p>
                 </div>
               )}
             </div>
@@ -241,20 +241,20 @@ export default function HealthProfileWidget() {
 
           {/* Emergency Contact */}
           {profile.emergency_contact?.name && (
-            <div className="rounded-xl bg-[var(--bg-2)] p-3">
-              <p className="text-xs text-[var(--text-secondary)]">Emergency Contact</p>
-              <p className="text-sm font-medium text-[var(--text-primary)]">{profile.emergency_contact.name}</p>
-              <p className="text-xs text-[var(--text-secondary)]">{profile.emergency_contact.phone}</p>
-              <p className="text-xs text-[var(--text-secondary)]">{profile.emergency_contact.relationship}</p>
+            <div className="rounded-xl bg-soft-tint p-3">
+              <p className="text-xs text-text-2">Emergency Contact</p>
+              <p className="text-sm font-medium text-text-1">{profile.emergency_contact.name}</p>
+              <p className="text-xs text-text-2">{profile.emergency_contact.phone}</p>
+              <p className="text-xs text-text-2">{profile.emergency_contact.relationship}</p>
             </div>
           )}
 
           {/* Partner Profile */}
           {partnerProfile && (
-            <div className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] p-3">
+            <div className="rounded-xl border border-accent-1/20 bg-soft-tint p-3">
               <button
                 onClick={() => setShowPartnerData(!showPartnerData)}
-                className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]"
+                className="flex items-center gap-2 text-sm font-medium text-text-1"
               >
                 {showPartnerData ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 {showPartnerData ? 'Hide' : 'View'} Partner&apos;s Profile
@@ -263,20 +263,20 @@ export default function HealthProfileWidget() {
                 <div className="mt-3 space-y-2 text-sm">
                   {partnerProfile.blood_type && (
                     <div>
-                      <span className="text-[var(--text-secondary)]">Blood Type: </span>
-                      <span className="text-[var(--text-primary)]">{partnerProfile.blood_type}</span>
+                      <span className="text-text-2">Blood Type: </span>
+                      <span className="text-text-1">{partnerProfile.blood_type}</span>
                     </div>
                   )}
                   {partnerProfile.allergies?.length && (
                     <div>
-                      <span className="text-[var(--text-secondary)]">Allergies: </span>
-                      <span className="text-[var(--text-primary)]">{partnerProfile.allergies.join(', ')}</span>
+                      <span className="text-text-2">Allergies: </span>
+                      <span className="text-text-1">{partnerProfile.allergies.join(', ')}</span>
                     </div>
                   )}
                   {partnerProfile.emergency_contact?.name && (
                     <div>
-                      <span className="text-[var(--text-secondary)]">Emergency: </span>
-                      <span className="text-[var(--text-primary)]">{partnerProfile.emergency_contact.name} ({partnerProfile.emergency_contact.phone})</span>
+                      <span className="text-text-2">Emergency: </span>
+                      <span className="text-text-1">{partnerProfile.emergency_contact.name} ({partnerProfile.emergency_contact.phone})</span>
                     </div>
                   )}
                 </div>
@@ -286,7 +286,7 @@ export default function HealthProfileWidget() {
 
           <button
             onClick={handleDelete}
-            className="w-full rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400 hover:bg-red-500/20"
+            className="w-full rounded-xl border border-error/20 bg-error/10 px-3 py-2 text-sm font-medium text-error hover:bg-error/20"
           >
             Delete Profile
           </button>
@@ -303,11 +303,11 @@ export default function HealthProfileWidget() {
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-3">
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Blood Type</label>
+                <label className="text-sm text-text-2">Blood Type</label>
                 <select
                   value={bloodType}
                   onChange={(e) => setBloodType(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 >
                   <option value="">Select</option>
                   {BLOOD_TYPES.map((bt) => (
@@ -320,30 +320,30 @@ export default function HealthProfileWidget() {
 
               <div className="grid gap-3 md:grid-cols-2">
                 <div>
-                  <label className="text-sm text-[var(--text-secondary)]">Height (cm)</label>
+                  <label className="text-sm text-text-2">Height (cm)</label>
                   <input
                     type="number"
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
                     placeholder="170"
-                    className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                    className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-[var(--text-secondary)]">Weight (kg)</label>
+                  <label className="text-sm text-text-2">Weight (kg)</label>
                   <input
                     type="number"
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
                     placeholder="65"
-                    className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                    className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   />
                 </div>
               </div>
 
               {bmi && bmiCategory && (
-                <div className="rounded-xl bg-[var(--bg-2)] p-3">
-                  <p className="text-xs text-[var(--text-secondary)]">Calculated BMI</p>
+                <div className="rounded-xl bg-soft-tint p-3">
+                  <p className="text-xs text-text-2">Calculated BMI</p>
                   <p className={`text-sm font-medium ${bmiCategory.color}`}>
                     {bmi} ({bmiCategory.category})
                   </p>
@@ -351,61 +351,61 @@ export default function HealthProfileWidget() {
               )}
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Allergies (comma-separated)</label>
+                <label className="text-sm text-text-2">Allergies (comma-separated)</label>
                 <input
                   type="text"
                   value={allergies}
                   onChange={(e) => setAllergies(e.target.value)}
                   placeholder="Peanuts, Shellfish"
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Medications (comma-separated)</label>
+                <label className="text-sm text-text-2">Medications (comma-separated)</label>
                 <input
                   type="text"
                   value={medications}
                   onChange={(e) => setMedications(e.target.value)}
                   placeholder="Aspirin, Insulin"
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Conditions (comma-separated)</label>
+                <label className="text-sm text-text-2">Conditions (comma-separated)</label>
                 <input
                   type="text"
                   value={conditions}
                   onChange={(e) => setConditions(e.target.value)}
                   placeholder="Diabetes, Asthma"
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 />
               </div>
 
-              <div className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] p-3">
-                <p className="text-xs font-medium text-[var(--text-primary)] mb-2">Emergency Contact</p>
+              <div className="rounded-xl border border-accent-1/20 bg-soft-tint p-3">
+                <p className="text-xs font-medium text-text-1 mb-2">Emergency Contact</p>
                 <div className="space-y-2">
                   <input
                     type="text"
                     value={emergencyName}
                     onChange={(e) => setEmergencyName(e.target.value)}
                     placeholder="Name"
-                    className="w-full rounded-lg border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-2 py-1.5 text-sm text-[var(--text-primary)]"
+                    className="w-full rounded-lg border border-accent-1/20 bg-soft-tint px-2 py-1.5 text-sm text-text-1"
                   />
                   <input
                     type="text"
                     value={emergencyPhone}
                     onChange={(e) => setEmergencyPhone(e.target.value)}
                     placeholder="Phone"
-                    className="w-full rounded-lg border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-2 py-1.5 text-sm text-[var(--text-primary)]"
+                    className="w-full rounded-lg border border-accent-1/20 bg-soft-tint px-2 py-1.5 text-sm text-text-1"
                   />
                   <input
                     type="text"
                     value={emergencyRelationship}
                     onChange={(e) => setEmergencyRelationship(e.target.value)}
                     placeholder="Relationship (e.g., Spouse, Parent)"
-                    className="w-full rounded-lg border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-2 py-1.5 text-sm text-[var(--text-primary)]"
+                    className="w-full rounded-lg border border-accent-1/20 bg-soft-tint px-2 py-1.5 text-sm text-text-1"
                   />
                 </div>
               </div>
@@ -413,7 +413,7 @@ export default function HealthProfileWidget() {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[var(--button-bg)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white"
                 >
                   <Save className="h-4 w-4" />
                   Save
@@ -421,7 +421,7 @@ export default function HealthProfileWidget() {
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm font-medium text-text-1"
                 >
                   <X className="h-4 w-4" />
                   Cancel

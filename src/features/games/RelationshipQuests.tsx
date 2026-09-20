@@ -46,7 +46,7 @@ export default function RelationshipQuests({ onQuestComplete }: RelationshipQues
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <Gift className="w-5 h-5" />
         <h3 className="font-dancing text-2xl">Relationship Quests</h3>
       </div>
@@ -56,7 +56,7 @@ export default function RelationshipQuests({ onQuestComplete }: RelationshipQues
           <motion.div
             key={quest.id}
             layout
-            className={`glass-card p-3 rounded-2xl ${quest.done ? 'ring-1 ring-[var(--accent-1)]/50' : ''}`}
+            className={`glass-card p-3 rounded-btn ${quest.done ? 'ring-1 ring-accent-1/50' : ''}`}
           >
             <div className="flex items-center justify-between gap-3">
               <div>

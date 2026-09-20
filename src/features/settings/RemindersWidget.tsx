@@ -65,8 +65,8 @@ export default function RemindersWidget() {
 
   return (
     <div className="glass-card p-5">
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <Bell className="h-5 w-5 text-[var(--accent-1)]" />
+      <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
+        <Bell className="h-5 w-5 text-accent-1" />
         Reminders
       </h3>
 
@@ -74,28 +74,28 @@ export default function RemindersWidget() {
         {reminders.map(reminder => (
           <div
             key={reminder.id}
-            className="flex items-center justify-between gap-3 rounded-xl bg-[var(--bg-2)] p-3"
+            className="flex items-center justify-between gap-3 rounded-xl bg-soft-tint p-3"
           >
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-[var(--accent-1)]" />
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <Calendar className="h-4 w-4 text-accent-1" />
+                <p className="text-sm font-medium text-text-1">
                   {reminder.title}
                 </p>
               </div>
-              <p className="text-xs text-[var(--text-secondary)] mt-1">
+              <p className="text-xs text-text-2 mt-1">
                 {reminder.reminder_date}
                 {reminder.repeat_interval && ` • ${reminder.repeat_interval}`}
               </p>
               {reminder.description && (
-                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                <p className="text-xs text-text-2 mt-1">
                   {reminder.description}
                 </p>
               )}
             </div>
             <button
               onClick={() => handleDelete(reminder.id)}
-              className="p-2 text-[var(--text-secondary)] hover:text-red-500"
+              className="p-2 text-text-2 hover:text-error"
             >
               <X className="h-4 w-4" />
             </button>
@@ -112,7 +112,7 @@ export default function RemindersWidget() {
 
       <button
         onClick={() => setShowAddModal(true)}
-        className="w-full rounded-xl border border-dashed border-[var(--accent-1)]/30 bg-[var(--bg-2)] px-3 py-3 text-sm text-[var(--text-secondary)] flex items-center justify-center gap-2"
+        className="w-full rounded-xl border border-dashed border-accent-1/30 bg-soft-tint px-3 py-3 text-sm text-text-2 flex items-center justify-center gap-2"
       >
         <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />
         Add Reminder
@@ -123,53 +123,53 @@ export default function RemindersWidget() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="glass-card p-6 max-w-md w-full mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+              <h3 className="text-lg font-semibold text-text-1">
                 Add Reminder
               </h3>
-              <button onClick={() => setShowAddModal(false)} className="text-[var(--text-secondary)]">
+              <button onClick={() => setShowAddModal(false)} className="text-text-2">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Title *</label>
+                <label className="text-sm text-text-2">Title *</label>
                 <input
                   type="text"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   placeholder="e.g., Anniversary"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Description</label>
+                <label className="text-sm text-text-2">Description</label>
                 <textarea
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   placeholder="Additional notes..."
                   rows={2}
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Date *</label>
+                <label className="text-sm text-text-2">Date *</label>
                 <input
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Type</label>
+                <label className="text-sm text-text-2">Type</label>
                 <select
                   value={newType}
                   onChange={(e) => setNewType(e.target.value as 'custom' | 'anniversary' | 'birthday' | 'cycle' | 'medication')}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 >
                   <option value="custom">Custom</option>
                   <option value="anniversary">Anniversary</option>
@@ -180,11 +180,11 @@ export default function RemindersWidget() {
               </div>
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Repeat</label>
+                <label className="text-sm text-text-2">Repeat</label>
                 <select
                   value={newRepeat}
                   onChange={(e) => setNewRepeat(e.target.value as 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly')}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 >
                   <option value="once">Once</option>
                   <option value="daily">Daily</option>
@@ -197,7 +197,7 @@ export default function RemindersWidget() {
               <button
                 onClick={handleAdd}
                 disabled={!newTitle.trim() || !newDate}
-                className="w-full rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] disabled:opacity-50"
+                className="w-full rounded-xl bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 Add Reminder
               </button>

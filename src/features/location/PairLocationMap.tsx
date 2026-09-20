@@ -10,6 +10,18 @@ export type MapPlace = { id: string; name: string; latitude: number; longitude: 
 export type MapAlert = { id: string; reporter_id: string; latitude: number | null; longitude: number | null; created_at: string }
 const tileUrl = process.env.NEXT_PUBLIC_CARTO_TILE_URL ?? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 
+// MARKER COLORS — Intentionally hardcoded (not B2 theme tokens).
+// Reason: Map markers need DISTINCT, high-contrast colors that are
+// instantly recognizable. B2 accent-1/accent-2 vary per theme and
+// become indistinguishable in some themes (e.g., Monochrome:
+// #e0e0e4 vs #888890).
+// Functional/semantic colors:
+//   - User marker (pink) — you
+//   - Partner marker (purple) — partner
+//   - Safe zone (green) — location safety
+//   - Route (gold) — travel path
+//   - SOS (red) — emergency
+//   - Border (white) — neutral outline
 const marker = (label: string, color: string) => divIcon({ className: 'pair-map-marker', html: `<span style="display:grid;place-items:center;width:34px;height:34px;border-radius:9999px;border:2px solid #fff;background:${color};box-shadow:0 4px 16px rgba(0,0,0,.45);font-size:16px">${label}</span>`, iconSize: [34, 34], iconAnchor: [17, 17] })
 
 function FocusMap({ point }: { point: LatLngExpression | null }) {
@@ -22,7 +34,7 @@ export default function PairLocationMap({ locations, history, selectedUser, name
   const selected = locations.find((item) => item.user_id === selectedUser) ?? locations[0]
   const focus: LatLngExpression | null = selected ? [selected.latitude, selected.longitude] : null
   const route = history.filter((row) => row.user_id === selectedUser).slice().reverse().map((row) => [row.latitude, row.longitude] as LatLngExpression)
-  return <MapContainer center={focus ?? [16.8661, 96.1951]} zoom={focus ? 13 : 4} scrollWheelZoom className="h-[430px] w-full rounded-2xl" aria-label="Live pair location map">
+  return <MapContainer center={focus ?? [16.8661, 96.1951]} zoom={focus ? 13 : 4} scrollWheelZoom className="h-[430px] w-full rounded-btn" aria-label="Live pair location map">
     <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' url={tileUrl} />
     <FocusMap point={focus} />
     {route.length > 1 && <Polyline positions={route} pathOptions={{ color: '#FFD700', weight: 4, opacity: 0.75 }} />}

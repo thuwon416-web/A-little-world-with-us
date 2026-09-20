@@ -26,18 +26,18 @@ export default function OfflinePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--bg-1)] to-[var(--bg-2)]">
         <div className="text-center max-w-md px-4">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--accent-1)]/10 text-[var(--accent-1)]">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
             <Home className="h-8 w-8" />
           </div>
-          <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-2">
+          <h1 className="text-2xl font-bold text-text-1 mb-2">
             You&apos;re back online!
           </h1>
-          <p className="text-[var(--text-secondary)] mb-4">
+          <p className="text-text-2 mb-4">
             အင်တာနက် ပြန်လည်ချိတ်ဆက်ပြီးပါပြီ
           </p>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-xl bg-[var(--accent-1)] px-6 py-3 text-sm font-medium text-[var(--bg-color)] transition-colors hover:bg-[var(--accent-1)]/90"
+            className="inline-flex items-center gap-2 rounded-xl bg-accent-1 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-1/90"
           >
             Go to Dashboard
           </Link>
@@ -49,16 +49,16 @@ export default function OfflinePage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[var(--bg-1)] to-[var(--bg-2)]">
       <div className="text-center max-w-md px-4">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--accent-1)]/10 text-[var(--accent-1)]">
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
           <WifiOff className="h-10 w-10" />
         </div>
-        <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-2">
+        <h1 className="text-3xl font-bold text-text-1 mb-2">
           You&apos;re Offline
         </h1>
-        <p className="text-lg text-[var(--text-secondary)] mb-2">
+        <p className="text-lg text-text-2 mb-2">
           အင်တာနက် မချိတ်ဆက်ထားပါ
         </p>
-        <p className="text-sm text-[var(--text-secondary)] mb-8">
+        <p className="text-sm text-text-2 mb-8">
           No internet connection. Some features may not work until you&apos;re back online.
           <br />
           <span className="text-xs">
@@ -68,7 +68,7 @@ export default function OfflinePage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={() => window.location.reload()}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--button-bg)] px-6 py-3 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--button-bg)]/90"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-accent-1 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-1/90"
           >
             <RefreshCw className="h-4 w-4" />
             Retry
@@ -76,14 +76,14 @@ export default function OfflinePage() {
           </button>
           <Link
             href="/dashboard"
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-[var(--accent-1)]/30 bg-[var(--bg-2)] px-6 py-3 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-2)]/80"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-accent-1/30 bg-soft-tint px-6 py-3 text-sm text-text-2 transition-colors hover:bg-soft-tint/80"
           >
             <Home className="h-4 w-4" />
             Dashboard
             <span className="text-xs opacity-70">/ ဒက်ရှ်ဘုတ်</span>
           </Link>
         </div>
-        <p className="mt-8 text-xs text-[var(--text-secondary)]/60">
+        <p className="mt-8 text-xs text-text-2/60">
           Cached content is available for offline viewing
           <br />
           <span className="text-xs">

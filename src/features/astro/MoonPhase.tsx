@@ -105,54 +105,54 @@ export default function MoonPhase() {
   }, [])
 
   return (
-    <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-6">
+    <div className="rounded-btn border border-accent-1/20 bg-card p-6">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
+          <div className="rounded-xl bg-accent-1/15 p-2 text-accent-1">
             <Moon className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Moon Phase</p>
-            <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">လညွှန်း</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Moon Phase</p>
+            <p className="mt-1 text-sm font-medium text-text-1">လညွှန်း</p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setShowMyanmar(!showMyanmar)}
-          className="rounded-full border border-[var(--accent-1)]/20 px-3 py-1 text-xs text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/10"
+          className="rounded-full border border-accent-1/20 px-3 py-1 text-xs text-accent-1 transition hover:bg-accent-1/10"
         >
           {showMyanmar ? 'English' : 'မြန်မာ'}
         </button>
       </div>
 
       {/* Current Moon Phase Display */}
-      <div className="mb-6 flex items-center gap-4 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
-        <div className="text-[var(--accent-1)]" style={{ transform: `rotate(${currentPhase.illumination * 1.8}deg)` }}>
+      <div className="mb-6 flex items-center gap-4 rounded-xl border border-accent-1/20 bg-card p-6">
+        <div className="text-accent-1" style={{ transform: `rotate(${currentPhase.illumination * 1.8}deg)` }}>
           <Moon className="h-12 w-12" />
         </div>
         <div className="flex-1">
-          <h3 className="text-2xl font-bold text-[var(--text-primary)]">
+          <h3 className="text-2xl font-bold text-text-1">
             {showMyanmar ? currentPhase.phaseMy : currentPhase.phase}
           </h3>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+          <p className="mt-1 text-sm text-text-2">
             {currentPhase.illumination}% Illumination
           </p>
         </div>
       </div>
 
       {/* Description */}
-      <div className="mb-4 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4">
-        <p className="text-sm text-[var(--text-primary)]">
+      <div className="mb-4 rounded-xl border border-accent-1/20 bg-card p-4">
+        <p className="text-sm text-text-1">
           {showMyanmar ? currentPhase.descriptionMy : currentPhase.description}
         </p>
       </div>
 
       {/* Relationship Impact */}
-      <div className="flex items-start gap-3 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--accent-1)]/5 p-4">
-        <Heart className="h-5 w-5 text-[var(--accent-1)] flex-shrink-0 mt-0.5" />
+      <div className="flex items-start gap-3 rounded-xl border border-accent-1/20 bg-accent-1/5 p-4">
+        <Heart className="h-5 w-5 text-accent-1 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-xs font-medium text-[var(--accent-1)]">Relationship Impact</p>
-          <p className="mt-1 text-sm text-[var(--text-primary)]">
+          <p className="text-xs font-medium text-accent-1">Relationship Impact</p>
+          <p className="mt-1 text-sm text-text-1">
             {showMyanmar ? currentPhase.relationshipImpactMy : currentPhase.relationshipImpact}
           </p>
         </div>
@@ -160,7 +160,7 @@ export default function MoonPhase() {
 
       {/* All Moon Phases */}
       <div className="mt-6">
-        <p className="mb-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-[0.2em]">
+        <p className="mb-3 text-xs font-medium text-text-2 uppercase tracking-[0.2em]">
           All Phases
         </p>
         <div className="grid grid-cols-4 gap-2">
@@ -171,12 +171,12 @@ export default function MoonPhase() {
               onClick={() => setCurrentPhase(phase)}
               className={`flex flex-col items-center gap-1 rounded-lg border p-3 text-center transition ${
                 currentPhase.phase === phase.phase
-                  ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/10'
-                  : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
+                  ? 'border-accent-1 bg-accent-1/10'
+                  : 'border-accent-1/20 bg-card hover:border-accent-1/40'
               }`}
             >
-              <Moon className="h-6 w-6 text-[var(--accent-1)]" style={{ transform: `rotate(${phase.illumination * 1.8}deg)` }} />
-              <span className="text-xs text-[var(--text-primary)]">
+              <Moon className="h-6 w-6 text-accent-1" style={{ transform: `rotate(${phase.illumination * 1.8}deg)` }} />
+              <span className="text-xs text-text-1">
                 {showMyanmar ? phase.phaseMy : phase.phase}
               </span>
             </button>

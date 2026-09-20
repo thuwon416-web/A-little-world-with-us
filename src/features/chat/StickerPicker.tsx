@@ -127,38 +127,38 @@ export default function StickerPicker({ onStickerSelect, onClose }: StickerPicke
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-lg max-h-[80vh] rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)] flex flex-col">
+      <div className="w-full max-w-lg max-h-[80vh] rounded-modal border border-accent-1/20 bg-card shadow-[0_20px_40px_rgba(19,10,33,0.28)] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--accent-1)]/20 p-4">
+        <div className="flex items-center justify-between border-b border-accent-1/20 p-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-[var(--accent-1)]" />
-            <h2 className="text-lg font-serif text-[var(--text-primary)]">Stickers</h2>
+            <Sparkles className="h-5 w-5 text-accent-1" />
+            <h2 className="text-lg font-serif text-text-1">Stickers</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10 hover:text-[var(--accent-1)] transition"
+            className="rounded-full p-2 text-text-2 hover:bg-accent-1/10 hover:text-accent-1 transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="p-4 border-b border-[var(--accent-1)]/20">
+        <div className="p-4 border-b border-accent-1/20">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-2" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search stickers..."
-              className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] pl-10 pr-4 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--accent-1)]/50"
+              className="w-full rounded-input border border-accent-1/20 bg-card pl-10 pr-4 py-2 text-sm text-text-1 placeholder:text-text-2/50 focus:outline-none focus:ring-2 focus:ring-accent-1/50"
             />
           </div>
         </div>
 
         {/* Categories */}
-        <div className="flex gap-2 p-4 border-b border-[var(--accent-1)]/20 overflow-x-auto">
+        <div className="flex gap-2 p-4 border-b border-accent-1/20 overflow-x-auto">
           {categories.map((category) => {
             const Icon = categoryIcons[category]
             return (
@@ -166,10 +166,10 @@ export default function StickerPicker({ onStickerSelect, onClose }: StickerPicke
                 key={category}
                 type="button"
                 onClick={() => setSelectedCategory(category)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-pill text-sm font-medium whitespace-nowrap transition ${
                   selectedCategory === category
-                    ? 'bg-[var(--accent-1)] text-[var(--bg-color)]'
-                    : 'bg-[var(--card-bg-strong)] text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10'
+                    ? 'bg-accent-1 text-white'
+                    : 'bg-card text-text-2 hover:bg-accent-1/10'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -187,21 +187,21 @@ export default function StickerPicker({ onStickerSelect, onClose }: StickerPicke
                 key={sticker.id}
                 type="button"
                 onClick={() => onStickerSelect(sticker)}
-                className="aspect-square rounded-xl border-2 border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] hover:border-[var(--accent-1)]/50 hover:bg-[var(--accent-1)]/10 transition flex items-center justify-center text-4xl"
+                className="aspect-square rounded-input border-2 border-accent-1/20 bg-card hover:border-accent-1/50 hover:bg-accent-1/10 transition flex items-center justify-center text-4xl"
               >
                 {sticker.emoji}
               </button>
             ))}
           </div>
           {filteredStickers.length === 0 && (
-            <div className="text-center py-8 text-[var(--text-secondary)]">
+            <div className="text-center py-8 text-text-2">
               <p>No stickers found</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[var(--accent-1)]/20 p-4 text-center text-xs text-[var(--text-secondary)]">
+        <div className="border-t border-accent-1/20 p-4 text-center text-xs text-text-2">
           {filteredStickers.length} stickers available
         </div>
       </div>

@@ -55,14 +55,14 @@ export default function MoodChart() {
 
   if (loading) {
     return (
-      <div className="rounded-lg bg-[var(--card-bg)] p-4">
-        <div className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-[var(--accent-1)]"></div>
+      <div className="rounded-lg bg-card p-4">
+        <div className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-accent-1"></div>
       </div>
     )
   }
 
   return (
-    <div className="rounded-lg bg-[var(--card-bg)] p-4">
+    <div className="rounded-lg bg-card p-4">
       <h3 className="font-medium mb-4">Mood This Week</h3>
       {moods.length > 0 ? (
         <div className="flex justify-between gap-2">
@@ -70,8 +70,8 @@ export default function MoodChart() {
             const Icon = moodIcons[log.mood || ''] || Meh
             return (
               <div key={i} className="flex flex-col items-center">
-                <Icon className="h-7 w-7 text-[var(--accent-1)]" />
-                <span className="mt-1 text-xs text-[var(--text-secondary)]">
+                <Icon className="h-7 w-7 text-accent-1" />
+                <span className="mt-1 text-xs text-text-2">
                   {new Date(log.log_date).toLocaleDateString('en-US', { weekday: 'short' })}
                 </span>
               </div>
@@ -79,7 +79,7 @@ export default function MoodChart() {
           })}
         </div>
       ) : (
-        <p className="text-sm text-[var(--text-secondary)]">No mood data yet</p>
+        <p className="text-sm text-text-2">No mood data yet</p>
       )}
     </div>
   )

@@ -20,19 +20,19 @@ const starterItems: MemoryItem[] = [
 const kindMeta = {
   favorite: {
     label: 'favorite',
-    tone: 'border-[var(--accent-1)]/20 bg-[var(--bg-2)] text-[var(--accent-1)]',
+    tone: 'border-accent-1/20 bg-soft-tint text-accent-1',
   },
   ritual: {
     label: 'ritual',
-    tone: 'border-[var(--accent-1)]/20 bg-[var(--bg-2)] text-[var(--accent-1)]',
+    tone: 'border-accent-1/20 bg-soft-tint text-accent-1',
   },
   moments: {
     label: 'moments',
-    tone: 'border-[var(--accent-1)]/20 bg-[var(--bg-2)] text-[var(--text-secondary)]',
+    tone: 'border-accent-1/20 bg-soft-tint text-text-2',
   },
   reflection: {
     label: 'reflection',
-    tone: 'border-[var(--accent-1)]/20 bg-[var(--bg-2)] text-[var(--text-secondary)]',
+    tone: 'border-accent-1/20 bg-soft-tint text-text-2',
   },
 } as const
 
@@ -101,23 +101,23 @@ export default function MemoryKeepingBoard() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-[var(--accent-2)]">
+        <div className="flex items-center gap-2 text-accent-2">
           <BookHeart className="h-5 w-5" />
           <h3 className="font-dancing text-2xl">Memory Keeping</h3>
         </div>
-        <div className="rounded-full border border-[var(--accent-1)]/30 bg-[var(--accent-1)]/20 px-2 py-1 text-[10px] font-medium text-[var(--accent-1)]">
+        <div className="rounded-pill border border-accent-1/30 bg-accent-1/20 px-2 py-1 text-[10px] font-medium text-accent-1">
           {doneCount}/{items.length}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3">
-        <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-[var(--text-primary)]/60">
+      <div className="rounded-btn border border-accent-1/20 bg-card p-3">
+        <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-text-1/60">
           <span>Memory rhythm</span>
           <span>{progress}%</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-[var(--card-bg-strong)]">
+        <div className="h-2 overflow-hidden rounded-full bg-card">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-1)] to-[var(--accent-2)]"
+            className="h-full rounded-full bg-gradient-to-r from-accent-1 via-accent-1 to-accent-2"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.45 }}
@@ -131,7 +131,7 @@ export default function MemoryKeepingBoard() {
             key={item.id}
             whileTap={{ scale: 0.98 }}
             onClick={() => toggleItem(item.id)}
-            className="flex w-full items-start justify-between gap-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/25 p-3 text-left text-sm text-[var(--text-primary)]/80 transition hover:border-[var(--accent-1)]/30"
+            className="flex w-full items-start justify-between gap-2 rounded-btn border border-accent-1/20 bg-card/25 p-3 text-left text-sm text-text-1/80 transition hover:border-accent-1/30"
           >
             <div className="flex-1">
               <span
@@ -141,24 +141,24 @@ export default function MemoryKeepingBoard() {
               </span>
               <p className={`mt-2 ${item.done ? 'line-through opacity-75' : ''}`}>{item.title}</p>
             </div>
-            <span className="text-[9px] uppercase tracking-[0.18em] text-[var(--text-primary)]/60">
+            <span className="text-[9px] uppercase tracking-[0.18em] text-text-1/60">
               {item.done ? 'done' : 'later'}
             </span>
           </motion.button>
         ))}
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/15 p-3">
+      <div className="rounded-btn border border-accent-1/20 bg-card/15 p-3">
         <div className="mb-2 flex gap-2 overflow-x-auto">
           {(['favorite', 'ritual', 'moments', 'reflection'] as MemoryItem['kind'][]).map(
             (option) => (
               <button
                 key={option}
                 onClick={() => setKind(option)}
-                className={`flex-1 rounded-xl border px-2 py-1 text-[10px] uppercase tracking-[0.18em] transition ${
+                className={`flex-1 rounded-input border px-2 py-1 text-[10px] uppercase tracking-[0.18em] transition ${
                   option === kind
-                    ? 'border-[var(--accent-1)]/20 bg-[var(--accent-1)]/20 text-[var(--accent-1)]'
-                    : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)]/70'
+                    ? 'border-accent-1/20 bg-accent-1/20 text-accent-1'
+                    : 'border-accent-1/20 bg-card text-text-1/70'
                 }`}
               >
                 {option}
@@ -172,7 +172,7 @@ export default function MemoryKeepingBoard() {
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             placeholder="Add a memory to keep close"
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
+            className="w-full rounded-input border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1 placeholder:text-text-1/40"
           />
           <button
             onClick={addItem}
@@ -184,9 +184,9 @@ export default function MemoryKeepingBoard() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/30 bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] p-3">
+      <div className="rounded-btn border border-accent-1/30 bg-gradient-to-r from-accent-1 to-accent-2 p-3">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 font-medium text-[var(--accent-2)]">
+          <div className="flex items-center gap-2 font-medium text-accent-2">
             <Sparkles className="h-4 w-4" />
             Memory prompt
           </div>
@@ -197,11 +197,11 @@ export default function MemoryKeepingBoard() {
             Next
           </button>
         </div>
-        <p className="text-sm text-[var(--text-primary)]/80">{prompts[promptIndex]}</p>
+        <p className="text-sm text-text-1/80">{prompts[promptIndex]}</p>
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80">
-        <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">
+      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-accent-2 to-accent-1 p-3 text-sm text-text-1/80">
+        <div className="mb-1 flex items-center gap-2 font-medium text-accent-2">
           <Heart className="h-4 w-4" />
           Remember this
         </div>

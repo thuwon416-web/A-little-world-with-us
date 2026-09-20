@@ -92,7 +92,7 @@ export default function PinLock({
             }}
             className="absolute"
           >
-            <Heart className="w-8 h-8 text-[var(--accent-1)]/30 fill-current" />
+            <Heart className="w-8 h-8 text-accent-1/30 fill-current" />
           </motion.div>
         ))}
       </div>
@@ -105,7 +105,7 @@ export default function PinLock({
         className="text-center mb-12 z-10"
       >
         {isLocked && (
-          <p className="mb-4 text-sm text-[var(--text-secondary)]">
+          <p className="mb-4 text-sm text-text-2">
             Locked for {Math.ceil(autoLockMs / 60000)} minute{Math.ceil(autoLockMs / 60000) > 1 ? 's' : ''}
           </p>
         )}
@@ -113,9 +113,9 @@ export default function PinLock({
           animate={{ scale: [1, 1.15, 1] }}
           transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
         >
-          <Heart className="w-20 h-20 text-[var(--accent-1)] mx-auto mb-6 fill-current drop-shadow-lg" />
+          <Heart className="w-20 h-20 text-accent-1 mx-auto mb-6 fill-current drop-shadow-lg" />
         </motion.div>
-        <h1 className="font-dancing text-5xl text-[var(--accent-2)] mb-3 drop-shadow-sm">
+        <h1 className="font-dancing text-5xl text-accent-2 mb-3 drop-shadow-sm">
           A Little World With Us
         </h1>
         <p className="text-sm opacity-70 tracking-wide">Enter PIN to unlock our world</p>
@@ -132,13 +132,13 @@ export default function PinLock({
             key={i}
             animate={
               i < pin.length
-                ? { scale: [1, 1.3, 1], backgroundColor: 'var(--accent-1)' }
+                ? { scale: [1, 1.3, 1], backgroundColor: 'accent-1' }
                 : { scale: 1 }
             }
             className={`w-5 h-5 rounded-full border-2 transition-colors duration-300 ${
               i < pin.length
-                ? 'bg-[var(--accent-1)] border-[var(--accent-1)] shadow-[0_0_10px_rgba(255,182,193,0.6)]'
-                : 'border-[var(--accent-1)]/20 bg-transparent'
+                ? 'bg-accent-1 border-accent-1 shadow-[0_0_10px_rgba(255,182,193,0.6)]'
+                : 'border-accent-1/20 bg-transparent'
             }`}
           />
         ))}
@@ -151,20 +151,20 @@ export default function PinLock({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg-2)]/40 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center bg-bg/80 backdrop-blur-md"
           >
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: [0, 1.5, 1.2] }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
             >
-              <Heart className="w-32 h-32 text-[var(--accent-1)] fill-current drop-shadow-[0_0_30px_rgba(255,182,193,0.8)]" />
+              <Heart className="w-32 h-32 text-accent-1 fill-current drop-shadow-[0_0_30px_rgba(255,182,193,0.8)]" />
             </motion.div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="absolute mt-40 font-dancing text-3xl text-[var(--accent-2)]"
+              className="absolute mt-40 font-dancing text-3xl text-accent-2"
             >
               Welcome back, my love
             </motion.p>
@@ -181,10 +181,10 @@ export default function PinLock({
             whileTap={{ scale: 0.9 }}
             onClick={() => (key === 'del' ? handleDelete() : key && handleNumber(key))}
             disabled={!key || isUnlocked || isLocked}
-            className={`aspect-square rounded-2xl text-2xl font-semibold flex items-center justify-center transition-all ${
+            className={`aspect-square rounded-btn text-2xl font-semibold flex items-center justify-center transition-all ${
               key === ''
                 ? 'pointer-events-none opacity-0'
-                : 'glass-card hover:bg-[var(--card-bg)] active:bg-[var(--card-bg)]/40 shadow-lg'
+                : 'glass-card hover:bg-card active:bg-card/40 shadow-lg'
             }`}
           >
             {key === 'del' ? <Delete className="w-7 h-7 opacity-80" /> : key}

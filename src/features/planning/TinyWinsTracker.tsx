@@ -56,21 +56,21 @@ export default function TinyWinsTracker() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 text-[var(--accent-2)]">
+        <div className="flex items-center gap-2 text-accent-2">
           <Star className="h-5 w-5" />
           <h3 className="font-dancing text-2xl">Tiny Wins Tracker</h3>
         </div>
-        <div className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--accent-2)]/20 px-2 py-1 text-[10px] font-medium text-[var(--text-secondary)]">
+        <div className="rounded-full border border-accent-1/20 bg-accent-2/20 px-2 py-1 text-[10px] font-medium text-text-2">
           {doneCount}/{wins.length}
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3">
-        <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-[var(--text-primary)]/60">
+      <div className="rounded-btn border border-accent-1/20 bg-card p-3">
+        <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-text-1/60">
           <span>Progress</span>
           <span>{ratio}%</span>
         </div>
-        <div className="h-2 overflow-hidden rounded-full bg-[var(--card-bg-strong)]">
+        <div className="h-2 overflow-hidden rounded-full bg-card">
           <motion.div
             className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-1)] to-[var(--accent-2)]"
             initial={{ width: 0 }}
@@ -86,10 +86,10 @@ export default function TinyWinsTracker() {
             key={win.id}
             whileTap={{ scale: 0.98 }}
             onClick={() => toggleWin(win.id)}
-            className={`flex w-full items-center justify-between rounded-2xl border px-3 py-2 text-left text-sm transition ${
+            className={`flex w-full items-center justify-between rounded-btn border px-3 py-2 text-left text-sm transition ${
               win.done
-                ? 'border-[var(--accent-1)]/20 bg-[var(--accent-2)]/20 text-[var(--text-primary)]'
-                : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)]/25 text-[var(--text-primary)]/80'
+                ? 'border-accent-1/20 bg-accent-2/20 text-text-1'
+                : 'border-accent-1/20 bg-card/25 text-text-1/80'
             }`}
           >
             <span className="flex items-center gap-2">
@@ -108,7 +108,7 @@ export default function TinyWinsTracker() {
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Add a tiny win"
-          className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40 outline-none"
+          className="w-full rounded-btn border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1 placeholder:text-text-1/40 outline-none"
         />
         <button
           onClick={addWin}
@@ -119,8 +119,8 @@ export default function TinyWinsTracker() {
         </button>
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80">
-        <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">
+      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-text-1/80">
+        <div className="mb-1 flex items-center gap-2 font-medium text-accent-2">
           <Sparkles className="h-4 w-4" />
           Kind reminder
         </div>

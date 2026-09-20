@@ -66,15 +66,15 @@ export default function ImageUpload({
   }
 
   return (
-    <div className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+    <div className="rounded-modal border border-border/20 bg-card p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Upload</p>
-          <h2 className="mt-2 text-xl font-semibold text-[var(--text-primary)]">Share a moment</h2>
+          <p className="text-xs uppercase tracking-[0.22em] text-text-2">Upload</p>
+          <h2 className="mt-2 text-xl font-semibold text-text-1">Share a moment</h2>
         </div>
       </div>
 
-      <label className="block cursor-pointer rounded-[22px] border border-dashed border-[var(--accent-1)]/40 bg-[var(--card-bg-strong)] p-4 text-center text-sm text-[var(--text-secondary)]">
+      <label className="block cursor-pointer rounded-[22px] border border-dashed border-accent-1/40 bg-card p-4 text-center text-sm text-text-2">
         <input
           ref={inputRef}
           type="file"
@@ -86,7 +86,7 @@ export default function ImageUpload({
       </label>
 
       {preview && (
-        <div className="mt-4 overflow-hidden rounded-[20px] border border-white/10">
+        <div className="mt-4 overflow-hidden rounded-[20px] border border-border/20">
           <Image
             src={preview}
             alt="Selected upload preview"
@@ -104,7 +104,7 @@ export default function ImageUpload({
         type="button"
         onClick={() => void handleUpload()}
         disabled={!selectedFile || isUploading}
-        className="mt-4 w-full rounded-full bg-[var(--accent-1)] px-4 py-3 text-sm font-semibold text-[var(--bg-color)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-4 w-full rounded-full bg-accent-1 px-4 py-3 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isUploading ? 'Uploading...' : 'Upload to gallery'}
       </button>

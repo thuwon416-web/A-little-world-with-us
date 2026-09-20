@@ -69,17 +69,17 @@ export default function ReplyThread({ message, currentUserId, onReply, onClose }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
+      <div className="w-full max-w-lg rounded-modal border border-accent-1/20 bg-card shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--accent-1)]/20 p-4">
+        <div className="flex items-center justify-between border-b border-accent-1/20 p-4">
           <div className="flex items-center gap-2">
-            <ReplyIcon className="h-5 w-5 text-[var(--accent-1)]" />
-            <h2 className="text-lg font-serif text-[var(--text-primary)]">Reply to Message</h2>
+            <ReplyIcon className="h-5 w-5 text-accent-1" />
+            <h2 className="text-lg font-serif text-text-1">Reply to Message</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10 hover:text-[var(--accent-1)] transition"
+            className="rounded-full p-2 text-text-2 hover:bg-accent-1/10 hover:text-accent-1 transition"
           >
             <X className="h-5 w-5" />
           </button>
@@ -87,18 +87,18 @@ export default function ReplyThread({ message, currentUserId, onReply, onClose }
 
         <div className="p-4 space-y-4">
           {/* Reply Context */}
-          <div className="rounded-xl border-l-4 border-[var(--accent-1)] bg-[var(--accent-1)]/5 p-4">
+          <div className="rounded-xl border-l-4 border-accent-1 bg-accent-1/5 p-4">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-medium text-[var(--accent-1)]">
+              <span className="text-xs font-medium text-accent-1">
                 {message.sender_id === currentUserId ? 'You' : 'Partner'}
               </span>
-              <span className="text-xs text-[var(--text-secondary)]">
+              <span className="text-xs text-text-2">
                 {new Date(message.created_at).toLocaleTimeString()}
               </span>
             </div>
-            <p className="text-sm text-[var(--text-primary)]">{getMessagePreview()}</p>
+            <p className="text-sm text-text-1">{getMessagePreview()}</p>
             {message.content && message.message_type === 'text' && (
-              <p className="text-sm text-[var(--text-secondary)] mt-1 line-clamp-2">
+              <p className="text-sm text-text-2 mt-1 line-clamp-2">
                 {message.content}
               </p>
             )}
@@ -106,7 +106,7 @@ export default function ReplyThread({ message, currentUserId, onReply, onClose }
 
           {/* Reply Input */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-[var(--text-primary)]">
+            <label className="block text-sm font-medium text-text-1">
               Your reply
             </label>
             <textarea
@@ -115,9 +115,9 @@ export default function ReplyThread({ message, currentUserId, onReply, onClose }
               onKeyPress={handleKeyPress}
               placeholder="Type your reply..."
               rows={4}
-              className="w-full rounded-xl border-2 border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 resize-none focus:outline-none focus:ring-2 focus:ring-[var(--accent-1)]/50"
+              className="w-full rounded-input border-2 border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 placeholder:text-text-2/50 resize-none focus:outline-none focus:ring-2 focus:ring-accent-1/50"
             />
-            <p className="text-xs text-[var(--text-secondary)]">
+            <p className="text-xs text-text-2">
               Press Enter to send, Shift+Enter for new line
             </p>
           </div>
@@ -127,7 +127,7 @@ export default function ReplyThread({ message, currentUserId, onReply, onClose }
             type="button"
             onClick={handleSendReply}
             disabled={!replyText.trim()}
-            className="w-full rounded-xl bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] px-6 py-3 text-base font-medium text-[var(--bg-color)] transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full rounded-btn bg-gradient-to-r from-accent-1 to-accent-2 px-6 py-3 text-base font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             <Send className="h-4 w-4" />
             Send Reply

@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 import { WellnessBoardShell } from './WellnessBoardShell'
 
@@ -25,6 +27,8 @@ const toneStyles: Record<Tone, { backgroundColor: string; borderColor: string }>
 }
 
 export default function AffirmationDeck() {
+  const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [items] = useState<Affirmation[]>(starterAffirmations)
   const [selectedId, setSelectedId] = useState(starterAffirmations[0]?.id ?? '')
 
@@ -63,14 +67,14 @@ export default function AffirmationDeck() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
   stack: {
     gap: 10,
   },
   cardItem: {
-    backgroundColor: '#1d1d2a',
+    backgroundColor: colors.cardBg,
     borderWidth: 1,
-    borderColor: '#313146',
+    borderColor: colors.cardBorder,
     borderRadius: 14,
     padding: 12,
     flexDirection: 'row',
@@ -79,11 +83,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   cardItemSelected: {
-    borderColor: '#d8b9c8',
-    backgroundColor: '#242333',
+    borderColor: colors.accent1,
+    backgroundColor: colors.cardBg,
   },
   itemText: {
-    color: '#f4edf5',
+    color: colors.textPrimary,
     fontSize: 14,
     lineHeight: 20,
     flex: 1,
@@ -96,26 +100,26 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   pillText: {
-    color: '#f4edf5',
+    color: colors.textPrimary,
     fontSize: 9,
     letterSpacing: 1.2,
     textTransform: 'uppercase',
   },
   featureCard: {
     marginTop: 14,
-    backgroundColor: '#2b2130',
+    backgroundColor: colors.cardBg,
     borderRadius: 14,
     padding: 12,
   },
   featureLabel: {
-    color: '#f0c9d9',
+    color: colors.accent2,
     fontSize: 11,
     letterSpacing: 1.3,
     textTransform: 'uppercase',
     marginBottom: 6,
   },
   featureText: {
-    color: '#f5edf4',
+    color: colors.textPrimary,
     fontSize: 14,
     lineHeight: 20,
   },

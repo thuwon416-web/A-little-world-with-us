@@ -89,7 +89,7 @@ export default function CoupleLinkStatusPage() {
   const isInviter = currentUserId === coupleInfo?.inviter_id
 
   return (
-    <div className="min-h-screen bg-[var(--bg-color)] p-4 md:p-6">
+    <div className="min-h-screen bg-card p-4 md:p-6">
       <div className="mx-auto max-w-2xl">
         {/* Header */}
         <motion.div
@@ -98,8 +98,8 @@ export default function CoupleLinkStatusPage() {
           className="mb-8 text-center"
         >
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Heart className="h-8 w-8 text-[var(--accent-1)]" />
-            <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Link Status</h1>
+            <Heart className="h-8 w-8 text-accent-1" />
+            <h1 className="text-3xl md:text-4xl font-bold text-text-1">Link Status</h1>
           </div>
         </motion.div>
 
@@ -124,7 +124,7 @@ function LoadingState() {
       animate={{ opacity: 1 }}
       className="flex items-center justify-center py-16"
     >
-      <div className="h-8 w-8 rounded-full border-2 border-[var(--accent-1)] border-t-transparent animate-spin" />
+      <div className="h-8 w-8 rounded-full border-2 border-accent-1 border-t-transparent animate-spin" />
     </motion.div>
   )
 }
@@ -140,16 +140,16 @@ function ErrorState({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-8 text-center"
+      className="rounded-btn border border-accent-1/20 bg-card p-8 text-center"
     >
       <div className="mb-6 flex justify-center">
-        <XCircle className="h-16 w-16 text-[var(--accent-1)]" />
+        <XCircle className="h-16 w-16 text-accent-1" />
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">Error</h2>
-      <p className="mb-6 text-[var(--text-secondary)]">{error}</p>
+      <h2 className="mb-2 text-2xl font-bold text-text-1">Error</h2>
+      <p className="mb-6 text-text-2">{error}</p>
       <button
         onClick={onRetry}
-        className="rounded-lg bg-[var(--accent-1)] px-6 py-2 font-semibold text-[var(--bg-color)] hover:shadow-lg hover:shadow-[var(--accent-1)]/20 transition"
+        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-white hover:shadow-lg hover:shadow-accent-1/20 transition"
       >
         Try Again
       </button>
@@ -182,13 +182,13 @@ function StatusCards({
     >
       {/* Status Overview */}
       <div
-        className="rounded-2xl border p-8 text-center"
+        className="rounded-btn border p-8 text-center"
         style={{ backgroundColor: statusConfig.bg, borderColor: statusConfig.border }}
       >
         <div className="mb-4 flex justify-center">
           <StatusIcon className="h-12 w-12" style={{ color: statusConfig.text }} />
         </div>
-        <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">
+        <h2 className="mb-2 text-2xl font-bold text-text-1">
           {coupleInfo.status === 'pending' && 'Waiting for Acceptance'}
           {coupleInfo.status === 'accepted' && 'Connected!'}
           {coupleInfo.status === 'declined' && 'Invite Declined'}
@@ -203,15 +203,15 @@ function StatusCards({
       </div>
 
       {/* Details */}
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/50 p-6 space-y-4">
+      <div className="rounded-btn border border-accent-1/20 bg-card/50 p-6 space-y-4">
         <div>
-          <h3 className="text-sm font-semibold text-[var(--accent-2)] mb-1">Invite Code</h3>
-          <p className="font-mono text-lg text-[var(--accent-1)]">{coupleInfo.invite_code}</p>
+          <h3 className="text-sm font-semibold text-accent-2 mb-1">Invite Code</h3>
+          <p className="font-mono text-lg text-accent-1">{coupleInfo.invite_code}</p>
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-[var(--accent-2)] mb-1">Created</h3>
-          <p className="text-[var(--text-secondary)]">
+          <h3 className="text-sm font-semibold text-accent-2 mb-1">Created</h3>
+          <p className="text-text-2">
             {new Date(coupleInfo.created_at).toLocaleDateString()} at{' '}
             {new Date(coupleInfo.created_at).toLocaleTimeString()}
           </p>
@@ -219,8 +219,8 @@ function StatusCards({
 
         {coupleInfo.accepted_at && (
           <div>
-            <h3 className="text-sm font-semibold text-[var(--success)] mb-1">Accepted</h3>
-            <p className="text-[var(--text-secondary)]">
+            <h3 className="text-sm font-semibold text-success mb-1">Accepted</h3>
+            <p className="text-text-2">
               {new Date(coupleInfo.accepted_at).toLocaleDateString()} at{' '}
               {new Date(coupleInfo.accepted_at).toLocaleTimeString()}
             </p>
@@ -229,27 +229,27 @@ function StatusCards({
       </div>
 
       {/* Participants */}
-      <div className="rounded-2xl border border-[var(--success)]/20 bg-[var(--card-bg)]/50 p-6">
-        <h3 className="font-semibold text-[var(--success)] mb-4 flex items-center gap-2">
+      <div className="rounded-btn border border-success/20 bg-card/50 p-6">
+        <h3 className="font-semibold text-success mb-4 flex items-center gap-2">
           <Users className="h-5 w-5" />
           Participants
         </h3>
         <div className="space-y-3">
-          <div className="flex items-center justify-between rounded-lg bg-[var(--bg-color)]/30 p-3">
+          <div className="flex items-center justify-between rounded-lg bg-card/30 p-3">
             <div>
-              <p className="text-sm text-[var(--text-secondary)]">Inviter</p>
-              <p className="text-[var(--text-primary)]">{coupleInfo.inviter_email || 'Unknown'}</p>
+              <p className="text-sm text-text-2">Inviter</p>
+              <p className="text-text-1">{coupleInfo.inviter_email || 'Unknown'}</p>
             </div>
-            {isInviter && <span className="text-xs font-semibold text-[var(--accent-1)]">You</span>}
+            {isInviter && <span className="text-xs font-semibold text-accent-1">You</span>}
           </div>
 
           {coupleInfo.accepted_by && coupleInfo.acceptor_email && (
-            <div className="flex items-center justify-between rounded-lg bg-[var(--bg-color)]/30 p-3">
+            <div className="flex items-center justify-between rounded-lg bg-card/30 p-3">
               <div>
-                <p className="text-sm text-[var(--text-secondary)]">Acceptor</p>
-                <p className="text-[var(--text-primary)]">{coupleInfo.acceptor_email}</p>
+                <p className="text-sm text-text-2">Acceptor</p>
+                <p className="text-text-1">{coupleInfo.acceptor_email}</p>
               </div>
-              {!isInviter && <span className="text-xs font-semibold text-[var(--success)]">You</span>}
+              {!isInviter && <span className="text-xs font-semibold text-success">You</span>}
             </div>
           )}
         </div>
@@ -259,13 +259,13 @@ function StatusCards({
       <div className="flex gap-3">
         <a
           href="/couple-linking"
-          className="flex-1 rounded-lg bg-[var(--accent-1)] px-4 py-3 text-center font-semibold text-[var(--bg-color)] hover:shadow-lg hover:shadow-[var(--accent-1)]/20 transition"
+          className="flex-1 rounded-lg bg-accent-1 px-4 py-3 text-center font-semibold text-white hover:shadow-lg hover:shadow-accent-1/20 transition"
         >
           Back to Linking
         </a>
         <a
           href="/chat"
-          className="flex-1 rounded-lg bg-[var(--card-bg)] px-4 py-3 text-center font-semibold text-[var(--text-primary)] hover:bg-[var(--card-bg-strong)] transition"
+          className="flex-1 rounded-lg bg-card px-4 py-3 text-center font-semibold text-text-1 hover:bg-card transition"
         >
           Send Message
         </a>

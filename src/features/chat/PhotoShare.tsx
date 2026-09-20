@@ -36,10 +36,10 @@ export default function PhotoShare({ onClose, onPhotoSelect }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="glass-card p-6 max-w-md w-full mx-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+          <h3 className="text-lg font-semibold text-text-1">
             Share Photo
           </h3>
-          <button onClick={onClose} className="text-[var(--text-secondary)]">
+          <button onClick={onClose} className="text-text-2">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -68,10 +68,10 @@ export default function PhotoShare({ onClose, onPhotoSelect }: Props) {
           ) : (
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="border-2 border-dashed border-[var(--accent-1)]/30 rounded-lg p-8 text-center cursor-pointer hover:bg-[var(--bg-2)]"
+              className="border-2 border-dashed border-accent-1/30 rounded-lg p-8 text-center cursor-pointer hover:bg-soft-tint"
             >
-              <ImageIcon className="h-12 w-12 mx-auto mb-2 text-[var(--accent-1)]" />
-              <p className="text-sm text-[var(--text-secondary)]">
+              <ImageIcon className="h-12 w-12 mx-auto mb-2 text-accent-1" />
+              <p className="text-sm text-text-2">
                 Tap to select photo
               </p>
             </div>
@@ -88,7 +88,7 @@ export default function PhotoShare({ onClose, onPhotoSelect }: Props) {
           <button
             onClick={handleSend}
             disabled={!selectedFile}
-            className="w-full rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] disabled:opacity-50"
+            className="w-full rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
             Send
           </button>

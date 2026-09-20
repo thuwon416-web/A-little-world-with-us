@@ -10,6 +10,7 @@
     "lint": "eslint . --config .eslintrc.js",
     "lint:fix": "eslint . --config .eslintrc.js --fix",
     "test": "jest",
+    "test:coverage": "jest --coverage",
     "typecheck": "tsc --noEmit",
     "build:android": "eas build --platform android",
     "build:preview": "eas build --platform android --profile preview"

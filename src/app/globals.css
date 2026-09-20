@@ -92,6 +92,41 @@
     --font-display: var(--font-playfair);
     --font-body: var(--font-poppins);
     --font-accent: var(--font-dancing);
+
+    /* B2 Size Variables */
+    --text-ui-xs: 12px;
+    --text-ui-sm: 14px;
+    --text-body: 15px;
+    --text-body-lg: 17px;
+    --text-h-sm: 20px;
+    --text-h-md: 24px;
+    --text-h-lg: 28px;
+    --text-d-sm: 36px;
+    --text-d-lg: 48px;
+
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 24px;
+    --space-2xl: 32px;
+    --space-3xl: 40px;
+    --space-4xl: 48px;
+
+    --radius-input: 12px;
+    --radius-btn: 16px;
+    --radius-card: 20px;
+    --radius-panel: 24px;
+    --radius-modal: 28px;
+    --radius-pill: 999px;
+
+    --icon-inline: 14px;
+    --icon-ui: 16px;
+    --icon-btn: 20px;
+    --icon-nav: 24px;
+    --icon-card: 28px;
+    --icon-hero: 36px;
+    --icon-mega: 48px;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -119,49 +154,6 @@
     button:not(:disabled):active,
     .glass-button:active {
       transform: translateY(0);
-    }
-
-    .glass-card {
-      background: rgba(23, 27, 34, 0.72);
-      border: 1px solid rgba(184, 138, 229, 0.22);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-md);
-      transition: all var(--transition-normal);
-    }
-
-    .glass-card:hover {
-      box-shadow: var(--shadow-lg);
-      border-color: rgba(184, 138, 229, 0.4);
-      transform: translateY(-2px);
-    }
-
-    .glass-card-strong {
-      background: rgba(32, 36, 45, 0.82);
-      border: 1px solid rgba(184, 138, 229, 0.3);
-      backdrop-filter: blur(30px);
-      -webkit-backdrop-filter: blur(30px);
-      box-shadow: var(--shadow-lg), 0 0 20px rgba(184, 138, 229, 0.12);
-    }
-
-    .gradient-border {
-      position: relative;
-      background: rgba(23, 27, 34, 0.72);
-      border-radius: var(--radius-lg);
-    }
-
-    .gradient-border::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: inherit;
-      padding: 1px;
-      background: linear-gradient(135deg, rgba(184, 138, 229, 0.9), rgba(217, 191, 215, 0.9));
-      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-      -webkit-mask-composite: xor;
-      mask-composite: exclude;
-      pointer-events: none;
     }
 
     .smooth-hover {
@@ -199,21 +191,21 @@
 
 /* ===== CINEMATIC THEME VARIABLES (LAVENDER MIST DEFAULT) ===== */
 :root {
-  --bg-color: #1a1525;
+  --bg-color: rgb(var(--bg));
   --bg-gradient: linear-gradient(
     160deg,
-    #1a1525 0%,
-    #252033 45%,
-    #302743 100%
+    rgb(var(--bg)) 0%,
+    rgb(var(--soft-tint)) 45%,
+    rgb(var(--bg)) 100%
   );
-  --card-bg: rgba(37, 32, 51, 0.82);
-  --card-bg-strong: rgba(37, 32, 51, 0.96);
-  --card-border: #3d3450;
-  --text-primary: #f0e8f5;
-  --text-secondary: #c4b8d4;
-  --accent-1: #c5a8e8;
-  --accent-2: #e0c8f0;
-  --accent-3: #d4b8e8;
+  --card-bg: rgb(var(--card) / 0.82);
+  --card-bg-strong: rgb(var(--card) / 0.96);
+  --card-border: rgb(var(--border));
+  --text-primary: rgb(var(--text-1));
+  --text-secondary: rgb(var(--text-2));
+  --accent-1: rgb(var(--accent-1));
+  --accent-2: rgb(var(--accent-2));
+  --accent-3: rgb(var(--accent-3));
   --success: #a8d4b8;
   --warning: #f0d4a0;
   --error: #e8a8a8;
@@ -223,26 +215,44 @@
   --deep-rose: #c5a8e8;
   --midnight-purple: #f0e8f5;
   --glass-alpha: 0.5;
-  --bg-1: linear-gradient(135deg, #1a1525 0%, #302743 38%, #252033 100%);
+  --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(197, 168, 232, 0.12);
   --bg-3: rgba(224, 200, 240, 0.12);
   --text-main: rgba(240, 232, 245, 0.95);
   --card-glow: rgba(197, 168, 232, 0.26);
   --button-bg: linear-gradient(90deg, rgba(197, 168, 232, 0.18), rgba(240, 212, 160, 0.1));
+
+  /* B2 Theme Token CSS Variables (RGB format for Tailwind) */
+  --bg: 243 236 250;
+  --card: 255 255 255;
+  --border: 221 200 234;
+  --text-1: 74 56 96;
+  --text-2: 107 82 132;
+  --label: 168 142 196;
+  --accent-1: 125 92 168;
+  --accent-2: 188 160 212;
+  --accent-3: 220 200 232;
+  --card-title: 107 74 148;
+  --stat-bg: 251 247 254;
+  --stat-border: 232 221 243;
+  --soft-tint: 237 224 245;
+  --success: 133 201 154;
+  --warning: 224 192 120;
+  --error: 208 138 138;
 }
 
 /* ===== PEACH CREAM THEME MODE ===== */
 :root[data-theme-mode='peach-cream'] {
-  --bg-color: #fff5ed;
-  --bg-gradient: linear-gradient(135deg, #fff5ed 0%, #fffaf6 48%, #fce5d8 100%);
-  --card-bg: rgba(255, 248, 242, 0.85);
-  --card-bg-strong: rgba(255, 248, 242, 0.95);
-  --card-border: #f0d5c0;
-  --text-primary: #3a2a2a;
-  --text-secondary: #7a5a5a;
-  --accent-1: #c9603b;
-  --accent-2: #c95c45;
-  --accent-3: #f7b8a8;
+  --bg-color: rgb(var(--bg));
+  --bg-gradient: linear-gradient(160deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 45%, rgb(var(--bg)) 100%);
+  --card-bg: rgb(var(--card) / 0.82);
+  --card-bg-strong: rgb(var(--card) / 0.96);
+  --card-border: rgb(var(--border));
+  --text-primary: rgb(var(--text-1));
+  --text-secondary: rgb(var(--text-2));
+  --accent-1: rgb(var(--accent-1));
+  --accent-2: rgb(var(--accent-2));
+  --accent-3: rgb(var(--accent-3));
   --success: #3a8a4a;
   --warning: #d9a03a;
   --error: #c95050;
@@ -252,26 +262,44 @@
   --deep-rose: #c95050;
   --midnight-purple: #3a2a2a;
   --glass-alpha: 0.7;
-  --bg-1: linear-gradient(135deg, #fff5ed 0%, #fffaf6 38%, #fce5d8 100%);
+  --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(247, 184, 168, 0.12);
   --bg-3: rgba(201, 96, 59, 0.12);
   --text-main: rgba(58, 42, 42, 0.96);
   --card-glow: rgba(240, 213, 192, 0.2);
   --button-bg: linear-gradient(90deg, rgba(201, 96, 59, 0.18), rgba(247, 184, 168, 0.1));
+
+  /* B2 Theme Token CSS Variables (RGB format for Tailwind) */
+  --bg: 253 242 232;
+  --card: 255 255 255;
+  --border: 240 208 176;
+  --text-1: 95 59 42;
+  --text-2: 138 100 80;
+  --label: 216 154 120;
+  --accent-1: 204 111 69;
+  --accent-2: 239 176 144;
+  --accent-3: 248 213 192;
+  --card-title: 179 90 52;
+  --stat-bg: 255 250 245;
+  --stat-border: 245 221 196;
+  --soft-tint: 251 228 208;
+  --success: 133 201 154;
+  --warning: 224 192 120;
+  --error: 208 138 138;
 }
 
 /* ===== MINT WHISPER THEME MODE ===== */
 :root[data-theme-mode='mint-whisper'] {
-  --bg-color: #f0faf5;
-  --bg-gradient: linear-gradient(135deg, #f0faf5 0%, #e8f5ee 45%, #dff2e6 100%);
-  --card-bg: rgba(232, 245, 238, 0.82);
-  --card-bg-strong: rgba(224, 242, 232, 0.95);
-  --card-border: #a8d8b8;
-  --text-primary: #1a3a28;
-  --text-secondary: #4a6e58;
-  --accent-1: #2c8a5c;
-  --accent-2: #4db88a;
-  --accent-3: #7dd4aa;
+  --bg-color: rgb(var(--bg));
+  --bg-gradient: linear-gradient(160deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 45%, rgb(var(--bg)) 100%);
+  --card-bg: rgb(var(--card) / 0.82);
+  --card-bg-strong: rgb(var(--card) / 0.96);
+  --card-border: rgb(var(--border));
+  --text-primary: rgb(var(--text-1));
+  --text-secondary: rgb(var(--text-2));
+  --accent-1: rgb(var(--accent-1));
+  --accent-2: rgb(var(--accent-2));
+  --accent-3: rgb(var(--accent-3));
   --success: #2c8a5c;
   --warning: #e0a84a;
   --error: #c97070;
@@ -281,26 +309,44 @@
   --deep-rose: #2c8a5c;
   --midnight-purple: #1a3a28;
   --glass-alpha: 0.72;
-  --bg-1: linear-gradient(135deg, #f0faf5 0%, #e8f5ee 38%, #dff2e6 100%);
+  --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(77, 184, 138, 0.1);
   --bg-3: rgba(125, 212, 170, 0.12);
   --text-main: rgba(26, 58, 40, 0.96);
   --card-glow: rgba(77, 184, 138, 0.2);
   --button-bg: linear-gradient(90deg, rgba(44, 138, 92, 0.2), rgba(125, 212, 170, 0.12));
+
+  /* B2 Theme Token CSS Variables (RGB format for Tailwind) */
+  --bg: 236 246 239;
+  --card: 255 255 255;
+  --border: 196 220 205;
+  --text-1: 38 72 56;
+  --text-2: 80 120 102;
+  --label: 120 184 144;
+  --accent-1: 61 144 104;
+  --accent-2: 130 196 152;
+  --accent-3: 178 220 194;
+  --card-title: 46 114 80;
+  --stat-bg: 245 251 247;
+  --stat-border: 212 235 220;
+  --soft-tint: 216 235 222;
+  --success: 133 201 154;
+  --warning: 224 192 120;
+  --error: 208 138 138;
 }
 
 /* ===== OCEAN CALM THEME MODE ===== */
 :root[data-theme-mode='ocean-calm'] {
-  --bg-color: #edf8ff;
-  --bg-gradient: linear-gradient(135deg, #edf8ff 0%, #f6fcff 45%, #dff3ff 100%);
-  --card-bg: rgba(246, 252, 255, 0.82);
-  --card-bg-strong: rgba(246, 252, 255, 0.95);
-  --card-border: #a7d8f0;
-  --text-primary: #133a52;
-  --text-secondary: #4c6f89;
-  --accent-1: #2c6fb3;
-  --accent-2: #5cc3d5;
-  --accent-3: #87ceeb;
+  --bg-color: rgb(var(--bg));
+  --bg-gradient: linear-gradient(160deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 45%, rgb(var(--bg)) 100%);
+  --card-bg: rgb(var(--card) / 0.82);
+  --card-bg-strong: rgb(var(--card) / 0.96);
+  --card-border: rgb(var(--border));
+  --text-primary: rgb(var(--text-1));
+  --text-secondary: rgb(var(--text-2));
+  --accent-1: rgb(var(--accent-1));
+  --accent-2: rgb(var(--accent-2));
+  --accent-3: rgb(var(--accent-3));
   --success: #5cc3d5;
   --warning: #e6b84a;
   --error: #d97070;
@@ -310,25 +356,43 @@
   --deep-rose: #5cc3d5;
   --midnight-purple: #133a52;
   --glass-alpha: 0.72;
-  --bg-1: linear-gradient(135deg, #edf8ff 0%, #f6fcff 38%, #dff3ff 100%);
+  --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(92, 195, 213, 0.1);
   --bg-3: rgba(135, 206, 235, 0.12);
   --text-main: rgba(19, 58, 82, 0.96);
   --card-glow: rgba(92, 195, 213, 0.2);
   --button-bg: linear-gradient(90deg, rgba(44, 111, 179, 0.2), rgba(135, 206, 235, 0.12));
+
+  /* B2 Theme Token CSS Variables (RGB format for Tailwind) */
+  --bg: 234 243 250;
+  --card: 255 255 255;
+  --border: 192 216 236;
+  --text-1: 31 58 84;
+  --text-2: 78 118 148;
+  --label: 109 160 204;
+  --accent-1: 61 122 180;
+  --accent-2: 136 184 218;
+  --accent-3: 184 216 234;
+  --card-title: 45 95 146;
+  --stat-bg: 245 250 253;
+  --stat-border: 208 228 242;
+  --soft-tint: 212 230 242;
+  --success: 133 201 154;
+  --warning: 224 192 120;
+  --error: 208 138 138;
 }
 
 :root[data-theme-mode='monochrome'] {
-  --bg-color: #050505;
-  --bg-gradient: linear-gradient(180deg, #050505 0%, #0e0e10 28%, #151619 62%, #090909 100%);
-  --card-bg: rgba(17, 18, 20, 0.78);
-  --card-bg-strong: rgba(10, 10, 12, 0.92);
-  --card-border: #2a2d30;
-  --text-primary: #f5f5f3;
-  --text-secondary: #b7b8bb;
-  --accent-1: #e6e7e9;
-  --accent-2: #a9adb3;
-  --accent-3: #c5c7ca;
+  --bg-color: rgb(var(--bg));
+  --bg-gradient: linear-gradient(160deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 45%, rgb(var(--bg)) 100%);
+  --card-bg: rgb(var(--card) / 0.82);
+  --card-bg-strong: rgb(var(--card) / 0.96);
+  --card-border: rgb(var(--border));
+  --text-primary: rgb(var(--text-1));
+  --text-secondary: rgb(var(--text-2));
+  --accent-1: rgb(var(--accent-1));
+  --accent-2: rgb(var(--accent-2));
+  --accent-3: rgb(var(--accent-3));
   --success: #a3c586;
   --warning: #e6b84a;
   --error: #d97070;
@@ -338,12 +402,30 @@
   --deep-rose: #d2d4d8;
   --midnight-purple: #f3f3f2;
   --glass-alpha: 0.7;
-  --bg-1: linear-gradient(135deg, #050505 0%, #111214 35%, #1a1b1d 100%);
+  --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(255, 255, 255, 0.05);
   --bg-3: rgba(255, 255, 255, 0.03);
   --text-main: rgba(245, 245, 243, 0.96);
   --card-glow: rgba(255, 255, 255, 0.08);
   --button-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(180, 182, 186, 0.06));
+
+  /* B2 Theme Token CSS Variables (RGB format for Tailwind) */
+  --bg: 15 15 18;
+  --card: 26 26 30;
+  --border: 42 42 48;
+  --text-1: 240 240 244;
+  --text-2: 168 168 176;
+  --label: 160 160 168;
+  --accent-1: 224 224 228;
+  --accent-2: 136 136 144;
+  --accent-3: 58 58 69;
+  --card-title: 240 240 244;
+  --stat-bg: 22 22 26;
+  --stat-border: 38 38 44;
+  --soft-tint: 34 34 42;
+  --success: 133 201 154;
+  --warning: 224 192 120;
+  --error: 216 136 136; /* Monochrome-specific error override */
 }
 
 :root[data-theme-mode='monochrome'] .glass-input:focus {
@@ -441,11 +523,11 @@ html {
 }
 
 body {
-  background: var(--bg-gradient);
+  background: rgb(var(--bg));
   background-attachment: fixed;
   min-height: 100vh;
   font-family: 'Noto Sans Myanmar', 'Padauk', 'Myanmar Text', system-ui, sans-serif;
-  color: var(--text-primary);
+  color: rgb(var(--text-1));
   transition:
     background 240ms ease,
     color 240ms ease;
@@ -1024,10 +1106,10 @@ p {
 }
 
 .glass-card {
-  background: var(--card-bg);
+  background: rgb(var(--card) / 0.72);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgb(var(--border) / 0.6);
   border-radius: 1.5rem;
   box-shadow:
     0 8px 32px -8px rgba(26, 11, 46, 0.5),
@@ -1052,17 +1134,18 @@ p {
 
 .glass-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px -8px rgba(26, 11, 46, 0.6);
+  box-shadow: 0 12px 40px -8px rgb(var(--text-1) / 0.12);
+  border-color: rgb(var(--border));
 }
 
 .glass-card-solid {
-  background: var(--card-bg-strong);
+  background: rgb(var(--card) / 0.96);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgb(var(--border));
   border-radius: 1.5rem;
   box-shadow:
-    0 8px 32px -8px rgba(26, 11, 46, 0.6),
+    0 8px 32px -8px rgb(var(--text-1) / 0.12),
     inset 0 1px 1px rgba(255, 255, 255, 0.12);
 }
 

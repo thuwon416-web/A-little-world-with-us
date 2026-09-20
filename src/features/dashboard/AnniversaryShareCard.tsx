@@ -15,6 +15,10 @@ function createCard(name: string, anniversary: string): Promise<Blob> {
     canvas.height = 630
     const context = canvas.getContext('2d')
     if (!context) { reject(new Error('Image generation is unavailable.')); return }
+    // NOTE: These colors are intentionally hardcoded (not B2 tokens).
+    // The Canvas 2D API (ctx.fillStyle, ctx.strokeStyle) does not accept
+    // CSS custom properties. To theme these, use getComputedStyle() to
+    // read the CSS variable at runtime.
     const gradient = context.createLinearGradient(0, 0, canvas.width, canvas.height)
     gradient.addColorStop(0, '#1a0b2e')
     gradient.addColorStop(0.5, '#43265e')

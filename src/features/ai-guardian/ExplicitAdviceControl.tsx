@@ -42,12 +42,12 @@ export default function ExplicitAdviceControl({
   }
 
   return (
-    <section className="rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
+    <section className="rounded-panel border border-accent-1/20 bg-card p-5">
       <div className="flex items-start gap-3">
-        <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-[var(--accent-1)]" />
+        <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-accent-1" />
         <div>
-          <h2 className="font-semibold text-[var(--text-primary)]">{title}</h2>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">{description}</p>
+          <h2 className="font-semibold text-text-1">{title}</h2>
+          <p className="mt-1 text-sm text-text-2">{description}</p>
         </div>
       </div>
       <textarea
@@ -55,25 +55,25 @@ export default function ExplicitAdviceControl({
         onChange={(event) => setMessage(event.target.value)}
         maxLength={2000}
         placeholder={placeholder}
-        className="mt-4 min-h-24 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-3 text-sm text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)] focus:border-[var(--accent-1)]"
+        className="mt-4 min-h-24 w-full rounded-btn border border-accent-1/20 bg-card p-3 text-sm text-text-1 outline-none placeholder:text-text-2 focus:border-accent-1"
       />
       <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-        <span className="text-xs text-[var(--text-secondary)]">Nothing is shared until you press Ask.</span>
+        <span className="text-xs text-text-2">Nothing is shared until you press Ask.</span>
         <button
           type="button"
           onClick={() => void ask()}
           disabled={!message.trim() || loading}
-          className="rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-semibold text-[var(--bg-color)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-accent-1 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Thinking…' : mode === 'intimacy' ? 'Ask intimacy guide' : 'Ask mediator'}
         </button>
       </div>
       {error && <p className="mt-3 text-sm text-rose-300">{error}</p>}
       {result && (
-        <div className="mt-4 rounded-2xl border border-[var(--accent-1)]/15 bg-[var(--card-bg-strong)] p-4">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-primary)]">{result.response}</p>
+        <div className="mt-4 rounded-btn border border-accent-1/15 bg-card p-4">
+          <p className="whitespace-pre-wrap text-sm leading-relaxed text-text-1">{result.response}</p>
           {result.riskLevel && (
-            <p className="mt-3 text-xs text-[var(--text-secondary)]">
+            <p className="mt-3 text-xs text-text-2">
               Guidance level: {result.riskLevel}
             </p>
           )}

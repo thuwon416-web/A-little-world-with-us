@@ -2,6 +2,9 @@ import React, { useMemo, useState } from 'react'
 import { Heart } from 'lucide-react-native'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+
 import { EmptyState } from '@/components/ui/EmptyState'
 import { WellnessBoardShell } from './WellnessBoardShell'
 
@@ -37,12 +40,15 @@ const moodStyles: Record<NoteMood, { backgroundColor: string; borderColor: strin
 }
 
 export default function LoveNotesBoard() {
+  const { colors } = useTheme()
   const [notes, setNotes] = useState<Note[]>(starterNotes)
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
   const [mood, setMood] = useState<NoteMood>('sweet')
 
   const latest = useMemo(() => notes[notes.length - 1], [notes])
+
+  const styles = useMemo(() => createStyles(colors), [colors])
 
   const addNote = () => {
     const trimmedTitle = title.trim() || 'Untitled note'
@@ -89,14 +95,14 @@ export default function LoveNotesBoard() {
           value={title}
           onChangeText={setTitle}
           placeholder="Title"
-          placeholderTextColor="#8f8393"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <TextInput
           value={text}
           onChangeText={setText}
           placeholder="Write a note for your favorite person..."
-          placeholderTextColor="#8f8393"
+          placeholderTextColor={colors.textSecondary}
           multiline
           numberOfLines={3}
           style={[styles.input, styles.textArea]}
@@ -114,111 +120,112 @@ export default function LoveNotesBoard() {
   )
 }
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: '#1b1c29',
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: '#2f3346',
-  },
-  label: {
-    color: '#d1bfd2',
-    fontSize: 10,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  latestBody: {
-    backgroundColor: '#222535',
-    borderRadius: 12,
-    padding: 10,
-  },
-  latestHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 4,
-  },
-  latestTitle: {
-    color: '#f3edf5',
-    fontSize: 14,
-    fontWeight: '600',
-    flex: 1,
-  },
-  pill: {
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  pillText: {
-    color: '#f4edf5',
-    fontSize: 9,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  latestText: {
-    color: '#e6d9eb',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  empty: {
-    color: '#cabed2',
-    fontSize: 13,
-  },
-  form: {
-    backgroundColor: '#1a1b26',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#2f3346',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  input: {
-    backgroundColor: '#121821',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#31384c',
-    color: '#f5edf5',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 10,
-    fontSize: 14,
-  },
-  textArea: {
-    minHeight: 82,
-    textAlignVertical: 'top',
-  },
-  selectWrap: {
-    flex: 1,
-    backgroundColor: '#121821',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#31384c',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  selectLabel: {
-    color: '#f5edf5',
-    fontSize: 14,
-    textTransform: 'capitalize',
-  },
-  button: {
-    backgroundColor: '#d5b0c7',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  buttonText: {
-    color: '#181821',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-})
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      padding: 12,
+      marginBottom: 14,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    label: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+      marginBottom: 8,
+    },
+    latestBody: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 12,
+      padding: 10,
+    },
+    latestHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 4,
+    },
+    latestTitle: {
+      color: colors.textPrimary,
+      fontSize: 14,
+      fontWeight: '600',
+      flex: 1,
+    },
+    pill: {
+      borderWidth: 1,
+      borderRadius: 999,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+    },
+    pillText: {
+      color: colors.textPrimary,
+      fontSize: 9,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+    },
+    latestText: {
+      color: colors.textPrimary,
+      fontSize: 13,
+      lineHeight: 18,
+    },
+    empty: {
+      color: colors.textSecondary,
+      fontSize: 13,
+    },
+    form: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      color: colors.textPrimary,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      marginBottom: 10,
+      fontSize: 14,
+    },
+    textArea: {
+      minHeight: 82,
+      textAlignVertical: 'top',
+    },
+    selectWrap: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    selectLabel: {
+      color: colors.textPrimary,
+      fontSize: 14,
+      textTransform: 'capitalize',
+    },
+    button: {
+      backgroundColor: colors.accent1,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    buttonText: {
+      color: colors.textPrimary,
+      fontWeight: '700',
+      fontSize: 14,
+    },
+  })

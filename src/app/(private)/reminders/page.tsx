@@ -58,63 +58,63 @@ export default function RemindersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Reminders</p>
-          <h1 className="mt-2 text-3xl font-serif text-[var(--text-primary)]">Gentle nudges</h1>
+          <p className="text-xs uppercase tracking-[0.22em] text-text-2">Reminders</p>
+          <h1 className="mt-2 text-3xl font-serif text-text-1">Gentle nudges</h1>
         </div>
         <button
           type="button"
           onClick={enableNotifications}
-          className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-[var(--bg-color)]"
+          className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white"
         >
           <AnimatedIcon name="Bell" animation="wiggle" trigger="hover" size={16} /> Enable alerts
         </button>
       </div>
 
-      {!coupleId && <p className="rounded-2xl border border-[var(--warning)]/30 bg-[var(--warning)]/10 p-4 text-sm text-[var(--warning)]">Accept a couple link to create reminders shared by both accounts.</p>}
+      {!coupleId && <p className="rounded-btn border border-warning/30 bg-warning/10 p-4 text-sm text-warning">Accept a couple link to create reminders shared by both accounts.</p>}
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
-        <div className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
+        <div className="rounded-modal border border-accent-1/20 bg-card p-5">
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-[var(--text-secondary)]">Upcoming reminders</p>
+            <p className="text-sm text-text-2">Upcoming reminders</p>
             <button
               type="button"
               onClick={() => void addReminder()}
               disabled={!coupleId}
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--card-border)] bg-[var(--card-bg-strong)] px-3 py-2 text-sm text-[var(--text-primary)]"
+              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-text-1"
             >
               <Plus className="h-4 w-4" /> Add
             </button>
           </div>
 
           <div className="mb-4 grid gap-2 sm:grid-cols-3">
-            <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Reminder title" className="rounded-xl border border-[var(--card-border)] bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
-            <input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="A short note" className="rounded-xl border border-[var(--card-border)] bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
-            <input type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} className="rounded-xl border border-[var(--card-border)] bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" />
+            <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Reminder title" className="rounded-xl border border-border bg-soft-tint px-3 py-2 text-sm text-text-1" />
+            <input value={message} onChange={(event) => setMessage(event.target.value)} placeholder="A short note" className="rounded-xl border border-border bg-soft-tint px-3 py-2 text-sm text-text-1" />
+            <input type="datetime-local" value={scheduledAt} onChange={(event) => setScheduledAt(event.target.value)} className="rounded-xl border border-border bg-soft-tint px-3 py-2 text-sm text-text-1" />
           </div>
 
           <div className="space-y-3">
             {reminders.map((reminder) => (
-              <div key={reminder.id} className="rounded-[22px] border border-[var(--card-border)] bg-[var(--card-bg-strong)] p-4">
+              <div key={reminder.id} className="rounded-[22px] border border-border bg-card p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <p className="text-lg font-semibold text-[var(--text-primary)]">{reminder.title}</p>
-                    <p className="mt-1 text-sm text-[var(--text-secondary)]">{reminder.message}</p>
+                    <p className="text-lg font-semibold text-text-1">{reminder.title}</p>
+                    <p className="mt-1 text-sm text-text-2">{reminder.message}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => void handleToggle(reminder)}
                     className={`rounded-full px-3 py-1 text-xs font-medium ${
                       reminder.enabled
-                        ? 'bg-[var(--success)]/15 text-[var(--success)]'
-                        : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
+                        ? 'bg-success/15 text-success'
+                        : 'bg-soft-tint text-text-2'
                     }`}
                   >
                     {reminder.enabled ? 'On' : 'Off'}
                   </button>
                 </div>
 
-                <div className="mt-4 flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                  <Clock3 className="h-4 w-4 text-[var(--accent-2)]" />
+                <div className="mt-4 flex items-center gap-2 text-sm text-text-2">
+                  <Clock3 className="h-4 w-4 text-accent-2" />
                   {new Date(reminder.scheduled_at).toLocaleString()}
                 </div>
               </div>
@@ -123,17 +123,17 @@ export default function RemindersPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-[24px] border border-[var(--accent-2)]/20 bg-[var(--card-bg)] p-5">
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Next trigger</p>
-            <p className="mt-2 text-2xl font-semibold text-[var(--text-primary)]">Tonight, 8:00 PM</p>
+          <div className="rounded-[24px] border border-accent-2/20 bg-card p-5">
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Next trigger</p>
+            <p className="mt-2 text-2xl font-semibold text-text-1">Tonight, 8:00 PM</p>
           </div>
 
-          <div className="rounded-[24px] border border-[var(--card-border)] bg-[var(--card-bg)] p-5">
-            <div className="flex items-center gap-3 text-[var(--accent-1)]">
+          <div className="rounded-[24px] border border-border bg-card p-5">
+            <div className="flex items-center gap-3 text-accent-1">
               <Sparkles className="h-5 w-5" />
               <span className="text-sm font-medium">Gentle pacing</span>
             </div>
-            <p className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]">
+            <p className="mt-3 text-sm leading-relaxed text-text-2">
               Reminders are designed to encourage connection without creating pressure.
             </p>
           </div>

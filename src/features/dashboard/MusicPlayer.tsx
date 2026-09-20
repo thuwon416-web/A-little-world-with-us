@@ -54,20 +54,20 @@ export default memo(function MusicPlayer() {
 
   if (audioError) {
     return (
-      <div className="dashboard-card-interactive dashboard-card-glow flex items-center justify-between gap-3 rounded-[1.5rem] border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/60 p-3">
+      <div className="dashboard-card-interactive dashboard-card-glow flex items-center justify-between gap-3 rounded-panel border border-accent-1/20 bg-card/60 p-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-1)]/10 text-[var(--accent-1)]">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
             <AlertCircle className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-medium text-[var(--text-primary)]">Music isn&apos;t available right now</p>
-            <p className="text-xs text-[var(--text-secondary)]">Try again in a moment</p>
+            <p className="text-sm font-medium text-text-1">Music isn&apos;t available right now</p>
+            <p className="text-xs text-text-2">Try again in a moment</p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setAudioError(false)}
-          className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+          className="inline-flex items-center gap-2 rounded-pill border border-accent-1/25 bg-accent-1/10 px-3 py-2 text-sm font-medium text-text-1"
         >
           Retry
           <AnimatedIcon name="Play" animation="bounce" trigger="hover" size={16} />
@@ -77,7 +77,7 @@ export default memo(function MusicPlayer() {
   }
 
   return (
-    <div className="dashboard-card-interactive dashboard-card-glow flex items-center justify-between gap-3 rounded-[1.5rem] border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/60 p-3">
+    <div className="dashboard-card-interactive dashboard-card-glow flex items-center justify-between gap-3 rounded-panel border border-accent-1/20 bg-card/60 p-3">
       <div className="flex items-center gap-3">
         <motion.button
           whileHover={{ scale: 1.04 }}
@@ -100,7 +100,7 @@ export default memo(function MusicPlayer() {
                   animation="pulse"
                   trigger="hover"
                   size={20}
-                  className="text-[var(--accent-1)]"
+                  className="text-accent-1"
                 />
               </motion.div>
             ) : (
@@ -116,7 +116,7 @@ export default memo(function MusicPlayer() {
                   animation="bounce"
                   trigger="hover"
                   size={20}
-                  className="ml-0.5 text-[var(--accent-1)]"
+                  className="ml-0.5 text-accent-1"
                 />
               </motion.div>
             )}
@@ -124,11 +124,11 @@ export default memo(function MusicPlayer() {
         </motion.button>
 
         <div>
-          <div className="flex items-center gap-2 text-sm font-medium text-[var(--text-primary)]">
-            <Music className="h-3.5 w-3.5 text-[var(--accent-2)]" />
+          <div className="flex items-center gap-2 text-sm font-medium text-text-1">
+            <Music className="h-3.5 w-3.5 text-accent-2" />
             {isPlaying ? 'Now playing' : 'Our song'}
           </div>
-          <p className="text-xs text-[var(--text-secondary)]">
+          <p className="text-xs text-text-2">
             {isPlaying ? 'A little world soundtrack' : 'Tap to play'}
           </p>
         </div>
@@ -137,7 +137,7 @@ export default memo(function MusicPlayer() {
       <button
         type="button"
         onClick={togglePlay}
-        className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+        className="inline-flex items-center gap-2 rounded-pill border border-accent-1/25 bg-accent-1/10 px-3 py-2 text-sm font-medium text-text-1"
       >
         {isPlaying ? 'Pause' : 'Play'}
         {isPlaying ? (

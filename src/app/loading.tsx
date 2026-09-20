@@ -8,7 +8,7 @@ export default function Loading() {
         <div className="absolute bottom-1/4 right-1/4 h-52 w-52 rounded-full bg-amber-100/70 blur-3xl" />
       </div>
 
-      <div className="relative z-10 w-full max-w-md rounded-[28px] border border-rose-200/70 bg-white/70 p-8 text-center shadow-[0_18px_60px_rgba(180,120,130,0.12)] backdrop-blur-xl">
+      <div className="relative z-10 w-full max-w-md rounded-modal border border-rose-200/70 bg-soft-tint/70 p-8 text-center shadow-[0_18px_60px_rgba(180,120,130,0.12)] backdrop-blur-xl">
         <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-rose-100 via-white to-rose-200 shadow-inner shadow-rose-200">
           <Heart className="h-7 w-7 text-rose-500" aria-hidden="true" />
         </div>

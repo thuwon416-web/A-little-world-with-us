@@ -92,38 +92,38 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-lg max-h-[80vh] rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] shadow-[0_20px_40px_rgba(19,10,33,0.28)] flex flex-col">
+      <div className="w-full max-w-lg max-h-[80vh] rounded-modal border border-accent-1/20 bg-card shadow-[0_20px_40px_rgba(19,10,33,0.28)] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[var(--accent-1)]/20 p-4">
+        <div className="flex items-center justify-between border-b border-accent-1/20 p-4">
           <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-[var(--accent-1)]" />
-            <h2 className="text-lg font-serif text-[var(--text-primary)]">GIFs</h2>
+            <Sparkles className="h-5 w-5 text-accent-1" />
+            <h2 className="text-lg font-serif text-text-1">GIFs</h2>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10 hover:text-[var(--accent-1)] transition"
+            className="rounded-full p-2 text-text-2 hover:bg-accent-1/10 hover:text-accent-1 transition"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Search */}
-        <div className="p-4 border-b border-[var(--accent-1)]/20">
+        <div className="p-4 border-b border-accent-1/20">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--text-secondary)]" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-2" />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Search GIFs..."
-              className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] pl-10 pr-4 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50 focus:outline-none focus:ring-2 focus:ring-[var(--accent-1)]/50"
+              className="w-full rounded-input border border-accent-1/20 bg-card pl-10 pr-4 py-2 text-sm text-text-1 placeholder:text-text-2/50 focus:outline-none focus:ring-2 focus:ring-accent-1/50"
             />
             <button
               type="button"
               onClick={handleSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-lg bg-[var(--accent-1)] text-[var(--bg-color)] text-xs font-medium hover:opacity-90 transition"
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-input bg-accent-1 text-white text-xs font-medium hover:opacity-90 transition"
             >
               Search
             </button>
@@ -131,14 +131,14 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
         </div>
 
         {/* Trending Button */}
-        <div className="p-4 border-b border-[var(--accent-1)]/20">
+        <div className="p-4 border-b border-accent-1/20">
           <button
             type="button"
             onClick={() => {
               setSearchTerm('')
               searchGIFs('trending')
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--accent-2)]/10 text-[var(--accent-2)] hover:bg-[var(--accent-2)]/20 transition"
+            className="flex items-center gap-2 px-4 py-2 rounded-input bg-accent-2/10 text-accent-2 hover:bg-accent-2/20 transition"
           >
             <TrendingUp className="h-4 w-4" />
             <span className="text-sm font-medium">View Trending GIFs</span>
@@ -150,17 +150,17 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
           {loading ? (
             <div className="flex items-center justify-center h-40">
               <div className="text-center">
-                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-[var(--accent-1)] border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">Loading GIFs...</p>
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-accent-1 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" />
+                <p className="mt-2 text-sm text-text-2">Loading GIFs...</p>
               </div>
             </div>
           ) : error ? (
             <div className="text-center py-8">
-              <p className="text-sm text-[var(--text-secondary)]">{error}</p>
+              <p className="text-sm text-text-2">{error}</p>
               <button
                 type="button"
                 onClick={() => searchGIFs('trending')}
-                className="mt-2 px-4 py-2 rounded-lg bg-[var(--accent-1)] text-[var(--bg-color)] text-sm font-medium hover:opacity-90 transition"
+                className="mt-2 px-4 py-2 rounded-input bg-accent-1 text-white text-sm font-medium hover:opacity-90 transition"
               >
                 Retry
               </button>
@@ -172,7 +172,7 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
                   key={gif.id}
                   type="button"
                   onClick={() => onGIFSelect(gif)}
-                  className="relative aspect-square overflow-hidden rounded-xl border-2 border-[var(--accent-1)]/20 transition hover:border-[var(--accent-1)]/50"
+                  className="relative aspect-square overflow-hidden rounded-input border-2 border-accent-1/20 transition hover:border-accent-1/50"
                 >
                   <Image
                     src={gif.url}
@@ -188,14 +188,14 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
             </div>
           )}
           {!loading && !error && gifs.length === 0 && (
-            <div className="text-center py-8 text-[var(--text-secondary)]">
+            <div className="text-center py-8 text-text-2">
               <p>No GIFs found</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[var(--accent-1)]/20 p-4 text-center text-xs text-[var(--text-secondary)]">
+        <div className="border-t border-accent-1/20 p-4 text-center text-xs text-text-2">
           {gifs.length} GIFs available • Powered by Giphy
         </div>
       </div>

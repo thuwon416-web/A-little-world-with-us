@@ -58,26 +58,26 @@ function Timeline({ coupleId }: { coupleId: string }) {
 
   return (
     <div className="space-y-6">
-      <label className="flex items-center gap-3 text-sm text-[var(--text-secondary)]">
+      <label className="flex items-center gap-3 text-sm text-text-2">
         Filter by year
-        <select value={year} onChange={(event) => setYear(event.target.value)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-[var(--text-primary)]">
+        <select value={year} onChange={(event) => setYear(event.target.value)} className="rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-text-1">
           <option value="all">All years</option>
           {years.map((item) => <option key={item} value={item}>{item}</option>)}
         </select>
       </label>
       <div className="space-y-8">
         {Object.entries(groups).map(([label, entries]) => (
-          <section key={label} className="relative border-l border-[var(--accent-1)]/30 pl-5">
-            <div className="absolute -left-2 top-1 h-4 w-4 rounded-full bg-[var(--accent-1)]" />
+          <section key={label} className="relative border-l border-accent-1/30 pl-5">
+            <div className="absolute -left-2 top-1 h-4 w-4 rounded-full bg-accent-1" />
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="font-medium text-[var(--text-primary)]">{label}</h3>
-              <span className="text-xs text-[var(--text-secondary)]">{entries.length} memories</span>
+              <h3 className="font-medium text-text-1">{label}</h3>
+              <span className="text-xs text-text-2">{entries.length} memories</span>
             </div>
             <div className="grid gap-4 md:grid-cols-2">{entries.map((memory) => <MemoryCard key={memory.id} memory={memory} />)}</div>
           </section>
         ))}
       </div>
-      {memories.length >= PAGE_SIZE ? <button type="button" onClick={() => void load(false)} disabled={loadingMore} className="rounded-xl border border-[var(--accent-1)]/25 px-4 py-2 text-sm text-[var(--text-primary)]">{loadingMore ? 'Loading…' : 'Load more highlights'}</button> : null}
+      {memories.length >= PAGE_SIZE ? <button type="button" onClick={() => void load(false)} disabled={loadingMore} className="rounded-xl border border-accent-1/25 px-4 py-2 text-sm text-text-1">{loadingMore ? 'Loading…' : 'Load more highlights'}</button> : null}
     </div>
   )
 }
@@ -85,8 +85,10 @@ function Timeline({ coupleId }: { coupleId: string }) {
 export default memo(Timeline)
 
 export function LoadingCards() {
-  return <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map((item) => <div key={item} className="h-36 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />)}</div>
+  return <div className="grid gap-4 md:grid-cols-2">{[1, 2, 3, 4].map((item) => <div key={item} className="h-36 animate-pulse rounded-panel bg-card" />)}</div>
 }
+
+
 
 export function EmptyState() {
   return (
@@ -99,5 +101,5 @@ export function EmptyState() {
 }
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
-  return <div className="rounded-3xl border border-rose-400/30 bg-rose-400/5 p-6 text-center"><p className="text-sm text-rose-300">{message}</p><button type="button" onClick={onRetry} className="mt-4 rounded-xl border border-rose-300/30 px-4 py-2 text-sm text-[var(--text-primary)]">Retry</button></div>
+  return <div className="rounded-panel border border-rose-400/30 bg-rose-400/5 p-6 text-center"><p className="text-sm text-rose-300">{message}</p><button type="button" onClick={onRetry} className="mt-4 rounded-xl border border-rose-300/30 px-4 py-2 text-sm text-text-1">Retry</button></div>
 }

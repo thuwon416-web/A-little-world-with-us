@@ -40,19 +40,19 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">
-      <section className="w-full max-w-md rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-7 shadow-xl backdrop-blur-xl">
+      <section className="w-full max-w-md rounded-modal border border-accent-1/20 bg-card p-7 shadow-xl backdrop-blur-xl">
         <div className="mb-6 text-center">
-          <Heart className="mx-auto mb-4 h-12 w-12 fill-current text-[var(--accent-1)]" />
+          <Heart className="mx-auto mb-4 h-12 w-12 fill-current text-accent-1" />
           <h1
-            className="text-4xl text-[var(--text-primary)]"
+            className="text-4xl text-text-1"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Welcome back
           </h1>
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">Sign in to your little world.</p>
+          <p className="mt-2 text-sm text-text-2">Sign in to your little world.</p>
         </div>
         {sessionExpired && (
-          <p className="mb-4 rounded-xl border border-amber-400/30 bg-amber-400/10 px-4 py-3 text-sm text-amber-200">
+          <p className="mb-4 rounded-xl border border-warning/30 bg-warning/10 px-4 py-3 text-sm text-warning">
             Session expired. Please sign in again.
           </p>
         )}
@@ -65,7 +65,7 @@ export default function LoginPage() {
             onChange={(event) => setEmail(event.target.value)}
             placeholder="Email"
             autoComplete="email"
-            className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]"
+            className="w-full rounded-input border border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 outline-none focus:border-accent-1"
           />
           <input
             required
@@ -75,21 +75,21 @@ export default function LoginPage() {
             onChange={(event) => setPassword(event.target.value)}
             placeholder="Password"
             autoComplete="current-password"
-            className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]"
+            className="w-full rounded-input border border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 outline-none focus:border-accent-1"
           />
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-error">{error}</p>}
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full rounded-2xl bg-[var(--button-bg)] px-4 py-3 text-sm font-medium text-[var(--text-primary)] transition hover:opacity-90 disabled:opacity-60"
+            className="w-full rounded-btn bg-accent-1 px-4 py-3 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-60"
           >
             {isSubmitting ? 'Signing in...' : 'Sign in'}
           </button>
         </form>
 
-        <p className="mt-5 text-center text-sm text-[var(--text-secondary)]">
+        <p className="mt-5 text-center text-sm text-text-2">
           Need an account?{' '}
-          <Link href="/signup" className="text-[var(--accent-1)] hover:underline">
+          <Link href="/signup" className="text-accent-1 hover:underline">
             Create one
           </Link>
         </p>

@@ -63,10 +63,10 @@ export default function AcceptCoupleLinkPage() {
           className="mb-8 text-center"
         >
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Heart className="h-8 w-8 text-[var(--accent-1)]" />
-            <h1 className="text-3xl md:text-4xl font-bold text-[var(--text-primary)]">Accept Invite</h1>
+            <Heart className="h-8 w-8 text-accent-1" />
+            <h1 className="text-3xl md:text-4xl font-bold text-text-1">Accept Invite</h1>
           </div>
-          <p className="text-[var(--text-secondary)]">Connect with your partner</p>
+          <p className="text-text-2">Connect with your partner</p>
         </motion.div>
 
         {/* States */}
@@ -108,14 +108,14 @@ function InputState({
       animate={{ opacity: 1, scale: 1 }}
       className="space-y-6"
     >
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-color)] p-8">
+      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-color)] p-8">
         <div className="mb-6 flex justify-center">
-          <div className="rounded-full bg-[var(--accent-1)]/10 p-4">
-            <Heart className="h-8 w-8 text-[var(--accent-1)]" />
+          <div className="rounded-full bg-accent-1/10 p-4">
+            <Heart className="h-8 w-8 text-accent-1" />
           </div>
         </div>
         
-        <p className="mb-8 text-center text-[var(--text-secondary)]">
+        <p className="mb-8 text-center text-text-2">
           Enter the invite code your partner shared with you
         </p>
 
@@ -126,17 +126,17 @@ function InputState({
             onChange={(e) => onCodeChange(e.target.value.toUpperCase())}
             placeholder="Enter 6-character code"
             maxLength={6}
-            className="w-full rounded-lg border border-[var(--accent-1)]/20 bg-[var(--bg-color)] px-4 py-3 text-center font-mono text-2xl font-bold tracking-widest text-[var(--accent-1)] placeholder-[var(--text-secondary)] transition focus:border-[var(--accent-1)] focus:outline-none focus:ring-1 focus:ring-[var(--accent-1)]/30"
+            className="w-full rounded-lg border border-accent-1/20 bg-card px-4 py-3 text-center font-mono text-2xl font-bold tracking-widest text-accent-1 placeholder-text-text-2 transition focus:border-accent-1 focus:outline-none focus:ring-1 focus:ring-accent-1/30"
           />
           
           <button
             type="submit"
             disabled={isSubmitting || code.length !== 6}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] px-8 py-3 font-semibold text-[var(--bg-color)] transition hover:shadow-lg hover:shadow-[var(--accent-1)]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] px-8 py-3 font-semibold text-white transition hover:shadow-lg hover:shadow-accent-1/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>
-                <div className="h-4 w-4 rounded-full border-2 border-[var(--bg-color)] border-t-transparent animate-spin" />
+                <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
                 Connecting...
               </>
             ) : (
@@ -149,9 +149,9 @@ function InputState({
         </form>
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-2)]/20 bg-[var(--card-bg)]/50 p-6">
-        <h3 className="font-semibold text-[var(--accent-2)] mb-3">Need help?</h3>
-        <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
+      <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">
+        <h3 className="font-semibold text-accent-2 mb-3">Need help?</h3>
+        <ul className="space-y-2 text-sm text-text-2">
           <li>• Check that the code is exactly 6 characters</li>
           <li>• Make sure you&apos;re using the latest code</li>
           <li>• Ask your partner to resend if needed</li>
@@ -172,9 +172,9 @@ function AcceptingState() {
         animate={{ scale: [1, 1.1, 1] }}
         transition={{ duration: 2, repeat: Infinity }}
       >
-        <Heart className="h-16 w-16 text-[var(--accent-1)]" />
+        <Heart className="h-16 w-16 text-accent-1" />
       </motion.div>
-      <p className="text-center text-[var(--text-secondary)]">Connecting your hearts...</p>
+      <p className="text-center text-text-2">Connecting your hearts...</p>
     </motion.div>
   )
 }
@@ -184,23 +184,23 @@ function SuccessState() {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-2xl border border-[var(--success)]/20 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-color)] p-8 text-center"
+      className="rounded-btn border border-success/20 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-color)] p-8 text-center"
     >
       <div className="mb-6 flex justify-center">
         <motion.div
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 0.6 }}
         >
-          <CheckCircle className="h-16 w-16 text-[var(--success)]" />
+          <CheckCircle className="h-16 w-16 text-success" />
         </motion.div>
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">Connected!</h2>
-      <p className="mb-6 text-[var(--text-secondary)]">
+      <h2 className="mb-2 text-2xl font-bold text-text-1">Connected!</h2>
+      <p className="mb-6 text-text-2">
         You&apos;re now linked with your partner. Welcome to A Little World With Us!
       </p>
       <button
         onClick={() => window.location.href = '/couple-linking'}
-        className="rounded-lg bg-[var(--accent-1)] px-8 py-3 font-semibold text-[var(--bg-color)] hover:shadow-lg hover:shadow-[var(--accent-1)]/20 transition"
+        className="rounded-lg bg-accent-1 px-8 py-3 font-semibold text-white hover:shadow-lg hover:shadow-accent-1/20 transition"
       >
         Go to Your Dashboard
       </button>
@@ -219,16 +219,16 @@ function ErrorState({
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-color)] p-8 text-center"
+      className="rounded-btn border border-accent-1/20 bg-gradient-to-br from-[var(--card-bg)] to-[var(--bg-color)] p-8 text-center"
     >
       <div className="mb-6 flex justify-center">
-        <AlertCircle className="h-16 w-16 text-[var(--accent-1)]" />
+        <AlertCircle className="h-16 w-16 text-accent-1" />
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-[var(--text-primary)]">Invalid Code</h2>
-      <p className="mb-6 text-[var(--text-secondary)]">{error}</p>
+      <h2 className="mb-2 text-2xl font-bold text-text-1">Invalid Code</h2>
+      <p className="mb-6 text-text-2">{error}</p>
       <button
         onClick={onRetry}
-        className="rounded-lg bg-[var(--accent-1)] px-6 py-2 font-semibold text-[var(--bg-color)] hover:shadow-lg hover:shadow-[var(--accent-1)]/20 transition"
+        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-white hover:shadow-lg hover:shadow-accent-1/20 transition"
       >
         Try Again
       </button>

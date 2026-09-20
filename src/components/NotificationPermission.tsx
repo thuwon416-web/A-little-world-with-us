@@ -23,14 +23,14 @@ export default function NotificationPermission() {
   }
 
   return (
-    <div className="p-4 bg-[var(--accent-1)]/10 rounded-2xl border border-[var(--accent-1)]/20">
-      <h3 className="mb-2 flex items-center gap-2 font-medium text-[var(--text-primary)]"><Bell className="icon-wiggle-once h-4 w-4" /> Enable Notifications</h3>
-      <p className="text-sm text-[var(--text-secondary)] mb-4">
+    <div className="p-4 bg-accent-1/10 rounded-btn border border-accent-1/20">
+      <h3 className="mb-2 flex items-center gap-2 font-medium text-text-1"><Bell className="icon-wiggle-once h-4 w-4" /> Enable Notifications</h3>
+      <p className="text-sm text-text-2 mb-4">
         Stay updated with reminders and important alerts
       </p>
       <button
         onClick={handleRequest}
-        className="px-4 py-2 bg-[var(--accent-1)] hover:bg-[var(--accent-1)]/60 rounded-lg text-sm transition text-white"
+        className="px-4 py-2 bg-accent-1 hover:bg-accent-1/60 rounded-lg text-sm transition text-white"
       >
         Enable Notifications
       </button>

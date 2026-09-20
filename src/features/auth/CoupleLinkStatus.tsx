@@ -13,7 +13,7 @@ export default function CoupleLinkStatus() {
   }, [])
 
   if (!status || status === 'not_linked') {
-    return <p className="text-sm text-[var(--text-secondary)]">No couple link yet</p>
+    return <p className="text-sm text-text-2">No couple link yet</p>
   }
 
   if (status === 'accepted') {

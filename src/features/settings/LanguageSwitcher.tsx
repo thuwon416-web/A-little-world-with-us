@@ -8,8 +8,8 @@ export default function LanguageSwitcher() {
 
   return (
     <div className="glass-card p-5">
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <Globe className="h-5 w-5 text-[var(--accent-1)]" />
+      <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
+        <Globe className="h-5 w-5 text-accent-1" />
         Language / ဘာသာစကား
       </h3>
 
@@ -19,8 +19,8 @@ export default function LanguageSwitcher() {
           onClick={() => setLanguage('my')}
           className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium ${
             language === 'my'
-              ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
-              : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
+              ? 'bg-accent-1 text-white'
+              : 'bg-soft-tint text-text-2'
           }`}
         >
           မြန်မာ
@@ -30,8 +30,8 @@ export default function LanguageSwitcher() {
           onClick={() => setLanguage('en')}
           className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium ${
             language === 'en'
-              ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
-              : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
+              ? 'bg-accent-1 text-white'
+              : 'bg-soft-tint text-text-2'
           }`}
         >
           English

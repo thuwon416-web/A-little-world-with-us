@@ -19,10 +19,10 @@ export default function ThemeToggle() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-primary)]/70">
+        <span className="text-[10px] uppercase tracking-[0.2em] text-text-1/70">
           Theme
         </span>
-        <span className="text-[10px] text-[var(--text-primary)]/60">{preference}</span>
+        <span className="text-[10px] text-text-1/60">{preference}</span>
       </div>
 
       <div className="space-y-2">
@@ -38,8 +38,8 @@ export default function ThemeToggle() {
               }}
               className={`flex w-full items-center justify-between gap-2 rounded-full border px-3 py-2 text-left text-[11px] transition-all ${
                 isActive
-                  ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/12 text-[var(--text-primary)] shadow-[0_0_18px_rgba(255,182,193,0.2)]'
-                  : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)]/80 hover:bg-[var(--card-bg)]'
+                  ? 'border-accent-1 bg-accent-1/12 text-text-1 shadow-[0_0_18px_rgba(255,182,193,0.2)]'
+                  : 'border-accent-1/20 bg-card text-text-1/80 hover:bg-card'
               }`}
               aria-label={`Set ${label} theme`}
             >
@@ -47,7 +47,7 @@ export default function ThemeToggle() {
                 <Icon className="h-3.5 w-3.5" />
                 {label}
               </span>
-              {isActive ? <span className="h-2 w-2 rounded-full bg-[var(--accent-2)]" /> : null}
+              {isActive ? <span className="h-2 w-2 rounded-full bg-accent-2" /> : null}
             </button>
           )
         })}

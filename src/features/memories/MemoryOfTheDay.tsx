@@ -48,8 +48,8 @@ export default function MemoryOfTheDay() {
   const showEmptyState = !isLoading && !memory && !hasError
 
   return (
-    <div className="dashboard-card-interactive dashboard-card-glow dashboard-fade-in space-y-4 rounded-[1.5rem] p-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+    <div className="dashboard-card-interactive dashboard-card-glow dashboard-fade-in space-y-4 rounded-panel p-4">
+      <div className="flex items-center gap-2 text-accent-2">
         <CalendarDays className="w-5 h-5" />
         <h3 className="font-dancing text-2xl">Memory of the Day</h3>
       </div>
@@ -57,7 +57,7 @@ export default function MemoryOfTheDay() {
       {isLoading ? (
         <div className="space-y-3">
           <div className="dashboard-shimmer h-4 w-20 rounded-full" />
-          <div className="dashboard-shimmer h-20 w-full rounded-2xl" />
+          <div className="dashboard-shimmer h-20 w-full rounded-btn" />
           <div className="dashboard-shimmer h-10 w-32 rounded-full" />
         </div>
       ) : showEmptyState ? (
@@ -68,27 +68,27 @@ export default function MemoryOfTheDay() {
           action={{ label: 'Add one', onClick: () => { window.location.href = '/memories' } }}
         />
       ) : hasError ? (
-        <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/50 p-4">
-          <p className="text-sm text-[var(--text-primary)]">No memory today yet</p>
+        <div className="rounded-btn border border-accent-1/20 bg-card/50 p-4">
+          <p className="text-sm text-text-1">No memory today yet</p>
           <Link
             href="/memories"
-            className="mt-3 inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+            className="mt-3 inline-flex items-center gap-2 rounded-pill border border-accent-1/25 bg-accent-1/10 px-3 py-2 text-sm font-medium text-text-1"
           >
             Add one
             <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
       ) : (
-        <div className="glass-card rounded-2xl p-3">
-          <div className="mb-2 flex items-center gap-2 text-[var(--accent-1)]">
+        <div className="glass-card rounded-btn p-3">
+          <div className="mb-2 flex items-center gap-2 text-accent-1">
             <Sparkles className="w-4 h-4" />
             <span className="text-[10px] uppercase tracking-[0.2em]">{todayLabel}</span>
           </div>
-          <p className="text-sm leading-relaxed text-[var(--text-primary)]/80">{memory}</p>
+          <p className="text-sm leading-relaxed text-text-1/80">{memory}</p>
           <div className="mt-4">
             <Link
               href="/memories"
-              className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/25 bg-[var(--accent-1)]/10 px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+              className="inline-flex items-center gap-2 rounded-pill border border-accent-1/25 bg-accent-1/10 px-3 py-2 text-sm font-medium text-text-1"
             >
               Open memory
               <ArrowRight className="h-4 w-4" />

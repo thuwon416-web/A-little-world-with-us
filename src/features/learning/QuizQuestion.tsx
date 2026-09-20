@@ -32,13 +32,13 @@ export function QuizQuestion({
 
   return (
     <div className="space-y-5">
-      <p className="text-lg font-semibold text-[var(--text-primary)]">{question.prompt}</p>
+      <p className="text-lg font-semibold text-text-1">{question.prompt}</p>
       {question.questionType === 'listening' && (
         <button
           type="button"
           disabled={!ttsSupported}
           onClick={() => speakKorean(question.vocab.korean)}
-          className="flex items-center gap-2 rounded-xl border border-[var(--accent-1)]/20 px-4 py-3 text-sm text-[var(--text-secondary)] opacity-70"
+          className="flex items-center gap-2 rounded-xl border border-accent-1/20 px-4 py-3 text-sm text-text-2 opacity-70"
         >
           <Volume2 size={18} /> Listen
         </button>
@@ -51,7 +51,7 @@ export function QuizQuestion({
             if (event.key === 'Enter') submit()
           }}
           placeholder={question.questionType === 'typing' ? 'Type Korean or romanization' : 'Type your answer'}
-          className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]"
+          className="w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 outline-none focus:border-accent-1"
           disabled={disabled}
           autoFocus
         />
@@ -65,8 +65,8 @@ export function QuizQuestion({
               onClick={() => setSelected(option)}
               className={`rounded-xl border px-4 py-3 text-left text-sm transition ${
                 selected === option
-                  ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/15 text-[var(--text-primary)]'
-                  : 'border-[var(--accent-1)]/20 text-[var(--text-secondary)] hover:bg-[var(--accent-1)]/10'
+                  ? 'border-accent-1 bg-accent-1/15 text-text-1'
+                  : 'border-accent-1/20 text-text-2 hover:bg-accent-1/10'
               }`}
             >
               {option}
@@ -78,7 +78,7 @@ export function QuizQuestion({
         type="button"
         disabled={disabled || (!value.trim() && !selected)}
         onClick={submit}
-        className="rounded-xl bg-[var(--accent-1)] px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
+        className="rounded-xl bg-accent-1 px-5 py-3 text-sm font-semibold text-white disabled:opacity-50"
       >
         Check answer
       </button>

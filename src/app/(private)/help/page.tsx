@@ -86,31 +86,31 @@ export default function HelpPage() {
 
   return (
     <main className="space-y-6 p-4 md:p-6">
-      <section className="rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
+      <section className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-1)]/10 text-[var(--accent-1)]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
             <HelpCircle className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+            <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">
               Support
             </p>
-            <h1 className="mt-1 text-3xl font-serif text-[var(--text-primary)]">Help & FAQ</h1>
+            <h1 className="mt-1 text-3xl font-serif text-text-1">Help & FAQ</h1>
           </div>
         </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-[28px] border border-white/10 bg-[var(--card-bg)] p-5">
+        <section className="rounded-modal border border-border/20 bg-card p-5">
           <div className="relative mb-4">
-            <Search className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-[var(--text-secondary)]" />
+            <Search className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-text-2" />
             <input
               ref={searchRef}
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Search help articles"
-              className="w-full rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] py-3 pl-11 pr-4 text-sm text-[var(--text-primary)] outline-none ring-0 placeholder:text-[var(--text-secondary)]"
+              className="w-full rounded-full border border-accent-1/20 bg-card py-3 pl-11 pr-4 text-sm text-text-1 outline-none ring-0 placeholder:text-text-2"
             />
           </div>
 
@@ -119,14 +119,14 @@ export default function HelpPage() {
               filteredFaq.map(({ question, answer }) => (
                 <div
                   key={question}
-                  className="rounded-[22px] border border-white/10 bg-[var(--card-bg-strong)] p-4"
+                  className="rounded-[22px] border border-border/20 bg-card p-4"
                 >
-                  <p className="font-medium text-[var(--text-primary)]">{question}</p>
-                  <p className="mt-2 text-sm text-[var(--text-secondary)]">{answer}</p>
+                  <p className="font-medium text-text-1">{question}</p>
+                  <p className="mt-2 text-sm text-text-2">{answer}</p>
                 </div>
               ))
             ) : (
-              <div className="rounded-[22px] border border-dashed border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4 text-sm text-[var(--text-secondary)]">
+              <div className="rounded-[22px] border border-dashed border-accent-1/20 bg-card p-4 text-sm text-text-2">
                 No matches found. Try another keyword.
               </div>
             )}
@@ -136,73 +136,73 @@ export default function HelpPage() {
         <div className="space-y-5">
           {showShortcuts ? <KeyboardShortcutsHelp /> : null}
 
-          <div className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-            <h2 className="text-lg font-semibold text-[var(--text-primary)]">Troubleshooting</h2>
+          <div className="rounded-modal border border-accent-1/20 bg-card p-5">
+            <h2 className="text-lg font-semibold text-text-1">Troubleshooting</h2>
             <div className="mt-4 space-y-3 text-sm">
               <p>
-                <strong className="text-[var(--text-primary)]">Cannot log in?</strong> Check your
+                <strong className="text-text-1">Cannot log in?</strong> Check your
                 connection, confirm your email, and try the password reset flow.
               </p>
               <p>
-                <strong className="text-[var(--text-primary)]">
+                <strong className="text-text-1">
                   Cannot link with your partner?
                 </strong>{' '}
                 Confirm both accounts are registered and that the invite has not expired.
               </p>
               <p>
-                <strong className="text-[var(--text-primary)]">App is slow or not loading?</strong>{' '}
+                <strong className="text-text-1">App is slow or not loading?</strong>{' '}
                 Refresh the page, check your connection, and try again with the latest browser
                 version.
               </p>
               <p>
-                <strong className="text-[var(--text-primary)]">Notifications not working?</strong>{' '}
+                <strong className="text-text-1">Notifications not working?</strong>{' '}
                 Review notification permissions in Settings and in your device or browser settings.
               </p>
               <p>
-                <strong className="text-[var(--text-primary)]">Location not sharing?</strong>{' '}
+                <strong className="text-text-1">Location not sharing?</strong>{' '}
                 Confirm location permission is enabled and that sharing has been turned on for your
                 accepted partner.
               </p>
               <p>
-                <strong className="text-[var(--text-primary)]">AI not responding?</strong> Check
+                <strong className="text-text-1">AI not responding?</strong> Check
                 your connection, submit a shorter request, and try again.
               </p>
             </div>
           </div>
 
-          <div className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
+          <div className="rounded-modal border border-accent-1/20 bg-card p-5">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">
                   Need more help?
                 </p>
-                <h2 className="text-lg font-semibold text-[var(--text-primary)]">
+                <h2 className="text-lg font-semibold text-text-1">
                   Contact support
                 </h2>
               </div>
             </div>
 
-            <p className="mt-4 text-sm text-[var(--text-secondary)]">
+            <p className="mt-4 text-sm text-text-2">
               Send a message through the support link for issues, setup help, or feature requests.
             </p>
 
             <a
               href="mailto:support@alittleworldwithus.com"
-              className="mt-4 inline-flex rounded-full bg-[var(--accent-1)] px-4 py-2 text-sm font-medium text-[var(--bg-color)]"
+              className="mt-4 inline-flex rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white"
             >
               support@alittleworldwithus.com
             </a>
             <div className="mt-4 flex flex-wrap gap-3 text-sm">
-              <Link href="/about" className="text-[var(--accent-1)] hover:underline">
+              <Link href="/about" className="text-accent-1 hover:underline">
                 About & FAQ
               </Link>
-              <Link href="/privacy" className="text-[var(--accent-1)] hover:underline">
+              <Link href="/privacy" className="text-accent-1 hover:underline">
                 Privacy Policy
               </Link>
-              <Link href="/terms" className="text-[var(--accent-1)] hover:underline">
+              <Link href="/terms" className="text-accent-1 hover:underline">
                 Terms of Service
               </Link>
             </div>

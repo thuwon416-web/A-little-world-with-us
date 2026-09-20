@@ -32,7 +32,7 @@ const RollingNumber = memo(function RollingNumber({ value }: { value: number }) 
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 12, opacity: 0 }}
           transition={{ duration: 0.45, ease: 'easeOut' }}
-          className="text-2xl font-bold text-[var(--accent-1)]"
+          className="text-2xl font-bold text-accent-1"
         >
           {String(value).padStart(2, '0')}
         </motion.div>
@@ -95,14 +95,14 @@ export default memo(function Countdown({ targetDate, label, icon = <Cake classNa
       transition={{ duration: 0.7 }}
       className="glass-card p-4 text-center relative"
     >
-      <div className="flex justify-center mb-2 text-[var(--accent-2)]">{icon}</div>
-      <h3 className="font-dancing text-lg mb-3 text-[var(--accent-2)]/90">{label}</h3>
+      <div className="flex justify-center mb-2 text-accent-2">{icon}</div>
+      <h3 className="font-dancing text-lg mb-3 text-accent-2/90">{label}</h3>
 
       <div className="grid grid-cols-4 gap-3 items-center justify-center">
         {units.map((unit) => (
           <div key={unit.label} className="flex flex-col items-center">
             {unit.label === 'Days' && unit.value === 0 ? (
-              <span className="flex h-10 items-center text-sm font-semibold text-[var(--accent-1)]">
+              <span className="flex h-10 items-center text-sm font-semibold text-accent-1">
                 Expected today
               </span>
             ) : (

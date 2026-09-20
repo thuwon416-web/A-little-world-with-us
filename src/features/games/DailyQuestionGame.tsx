@@ -48,15 +48,15 @@ export default function DailyQuestionGame() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[var(--accent-2)]">
+        <div className="flex items-center gap-2 text-accent-2">
           <MessageSquareQuote className="w-5 h-5" />
           <h3 className="font-dancing text-2xl">Daily Question</h3>
         </div>
         <span className="text-xs opacity-70">Streak: {streak}</span>
       </div>
 
-      <div className="glass-card p-3 rounded-2xl">
-        <div className="flex items-center gap-2 mb-2 text-[var(--accent-1)]">
+      <div className="glass-card p-3 rounded-btn">
+        <div className="flex items-center gap-2 mb-2 text-accent-1">
           <Sparkles className="w-4 h-4" />
           <span className="text-xs uppercase tracking-[0.2em]">Today’s prompt</span>
         </div>
@@ -68,7 +68,7 @@ export default function DailyQuestionGame() {
         onChange={(e) => setAnswer(e.target.value)}
         rows={4}
         placeholder="Tell me your answer..."
-        className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-3 text-sm outline-none"
+        className="w-full rounded-btn border border-accent-1/20 bg-card p-3 text-sm outline-none"
       />
 
       <div className="flex items-center justify-between gap-3">

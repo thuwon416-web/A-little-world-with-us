@@ -28,5 +28,5 @@ export default function FinanceExport() {
     }
   }
 
-  return <button type="button" onClick={() => void exportFinance()} disabled={loading} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">{loading ? 'Exporting...' : 'Export Finance Data'}</button>
+  return <button type="button" onClick={() => void exportFinance()} disabled={loading} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{loading ? 'Exporting...' : 'Export Finance Data'}</button>
 }

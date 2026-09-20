@@ -55,7 +55,7 @@ export default function GiftRecommender() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <Gift className="w-5 h-5" />
         <h3 className="font-dancing text-2xl">AI Gift Recommender</h3>
       </div>
@@ -81,8 +81,8 @@ export default function GiftRecommender() {
             onClick={() => setVibe(option)}
             className={`rounded-full px-3 py-2 text-[11px] capitalize ${
               vibe === option
-                ? 'bg-[var(--accent-1)] text-[var(--text-primary)] shadow-md'
-                : 'bg-[var(--card-bg)]/35 text-[var(--text-primary)]'
+                ? 'bg-accent-1 text-white shadow-md'
+                : 'bg-card/35 text-text-1'
             }`}
           >
             {option}
@@ -96,15 +96,15 @@ export default function GiftRecommender() {
             <motion.div
               key={gift.name}
               whileHover={{ y: -2 }}
-              className="glass-card rounded-2xl p-3"
+              className="glass-card rounded-btn p-3"
             >
               <div className="flex items-center justify-between gap-3">
-                <div className="font-medium text-[var(--text-primary)]">{gift.name}</div>
-                <div className="rounded-full bg-[var(--card-bg)]/40 px-2 py-1 text-[10px] uppercase tracking-[0.15em]">
+                <div className="font-medium text-text-1">{gift.name}</div>
+                <div className="rounded-full bg-card/40 px-2 py-1 text-[10px] uppercase tracking-[0.15em]">
                   {gift.range}
                 </div>
               </div>
-              <div className="mt-2 flex items-center gap-2 text-[var(--accent-1)] text-[11px] uppercase tracking-[0.15em]">
+              <div className="mt-2 flex items-center gap-2 text-accent-1 text-[11px] uppercase tracking-[0.15em]">
                 <Sparkles className="w-3.5 h-3.5" />
                 {gift.vibe}
               </div>
@@ -112,7 +112,7 @@ export default function GiftRecommender() {
             </motion.div>
           ))
         ) : (
-          <div className="rounded-2xl bg-[var(--card-bg)]/25 p-3 text-sm opacity-70">
+          <div className="rounded-btn bg-card/25 p-3 text-sm opacity-70">
             No match in this budget right now—try a wider range or a softer vibe.
           </div>
         )}

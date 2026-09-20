@@ -62,9 +62,9 @@ const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.El
 
 function DashboardPanelSkeleton() {
   return (
-    <div className="space-y-3 rounded-[1.5rem] border border-[var(--accent-1)]/10 bg-[var(--card-bg)]/40 p-4">
+    <div className="space-y-3 rounded-panel border border-accent-1/10 bg-card/40 p-4">
       <div className="dashboard-shimmer h-5 w-24 rounded-full" />
-      <div className="dashboard-shimmer h-20 w-full rounded-2xl" />
+      <div className="dashboard-shimmer h-20 w-full rounded-btn" />
       <div className="dashboard-shimmer h-10 w-32 rounded-full" />
     </div>
   )

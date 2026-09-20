@@ -23,7 +23,7 @@ export default function LoveCalculator() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <Heart className="w-5 h-5" />
         <h3 className="font-dancing text-2xl">Love Calculator</h3>
       </div>
@@ -60,12 +60,12 @@ export default function LoveCalculator() {
         />
       </div>
 
-      <div className="glass-card p-3 rounded-2xl">
+      <div className="glass-card p-3 rounded-btn">
         <div className="flex items-center justify-between text-sm">
           <span className="opacity-60">Compatibility</span>
-          <span className="font-semibold text-[var(--text-primary)]">{compatibility}%</span>
+          <span className="font-semibold text-text-1">{compatibility}%</span>
         </div>
-        <div className="mt-2 h-2 rounded-full bg-[var(--bg-2)] overflow-hidden">
+        <div className="mt-2 h-2 rounded-full bg-soft-tint overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${compatibility}%` }}
@@ -81,7 +81,7 @@ export default function LoveCalculator() {
           value={guess}
           onChange={(e) => setGuess(e.target.value)}
           placeholder="What would she say?"
-          className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-3 text-sm text-[var(--text-primary)] outline-none"
+          className="w-full rounded-xl border border-accent-1/20 bg-card p-3 text-sm text-text-1 outline-none"
         />
         <p className="text-[11px] opacity-60">Hint: the answer is usually “more time with you.”</p>
       </div>

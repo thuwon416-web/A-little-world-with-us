@@ -18,7 +18,7 @@ const MemoryCurationAI = dynamic(
   () => import('@/features/memories/MemoryCurationAI'),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-2xl bg-[var(--card-bg-strong)]" />,
+    loading: () => <div className="h-64 animate-pulse rounded-btn bg-card" />,
   }
 )
 
@@ -417,8 +417,8 @@ function MemoriesPageContent() {
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-3xl font-serif text-[var(--text-primary)]">Our Memories</h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          <h1 className="text-3xl font-serif text-text-1">Our Memories</h1>
+        <p className="mt-2 text-sm text-text-2">
           Keep the moments that feel like home.
         </p>
         </div>
@@ -432,64 +432,64 @@ function MemoriesPageContent() {
       />
 
       {birthdayReveal && (
-        <section className="glass-card rounded-[28px] border border-[var(--error)]/30 bg-gradient-to-r from-[var(--error)]/10 via-[var(--accent-1)]/10 to-[var(--warning)]/10 p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+        <section className="glass-card rounded-modal border border-error/30 bg-gradient-to-r from-error/10 via-accent-1/10 to-warning/10 p-5">
+          <p className="text-xs uppercase tracking-[0.2em] text-text-2">
             {birthdayReveal.title}
           </p>
-          <h2 className="mt-2 text-xl font-semibold text-[var(--text-primary)]">
+          <h2 className="mt-2 text-xl font-semibold text-text-1">
             Celebrate the everyday magic of us.
           </h2>
-          <p className="mt-2 max-w-2xl text-sm text-[var(--text-secondary)]">{birthdayReveal.text}</p>
+          <p className="mt-2 max-w-2xl text-sm text-text-2">{birthdayReveal.text}</p>
         </section>
       )}
 
       <section className="glass-card p-5">
-        <h2 className="text-xl text-[var(--text-primary)]">Add a memory</h2>
+        <h2 className="text-xl text-text-1">Add a memory</h2>
         <form className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr_0.8fr_0.7fr_auto]" onSubmit={handleUpload}>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
             multiple
             onChange={handleFileChange}
-            className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
           />
           <input
             type="text"
             value={caption}
             onChange={(event) => setCaption(event.target.value)}
             placeholder="Caption (optional)"
-            className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]"
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 outline-none focus:border-accent-1"
           />
           <select
             value={memoryCategory}
             onChange={(event) => setMemoryCategory(event.target.value as MemoryCategory)}
-            className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--accent-1)]"
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1"
           >
             <option value="favorite">Favorite</option>
             <option value="travel">Travel</option>
             <option value="ritual">Ritual</option>
             <option value="journal">Journal</option>
           </select>
-          <input type="date" value={memoryDate} onChange={(event) => setMemoryDate(event.target.value)} className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" aria-label="Memory date" />
-          <button type="button" onClick={() => setIsLocationOpen(true)} className="rounded-2xl border border-[var(--accent-1)]/20 px-3 py-2 text-sm text-[var(--text-primary)]">{location ? 'Location added' : 'Add location (optional)'}</button>
+          <input type="date" value={memoryDate} onChange={(event) => setMemoryDate(event.target.value)} className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" aria-label="Memory date" />
+          <button type="button" onClick={() => setIsLocationOpen(true)} className="rounded-btn border border-accent-1/20 px-3 py-2 text-sm text-text-1">{location ? 'Location added' : 'Add location (optional)'}</button>
           <button
             type="submit"
             disabled={isUploading || !isSupabaseConfigured}
-            className="rounded-2xl bg-[var(--button-bg)] px-5 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-btn bg-accent-1 px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isUploading ? `Uploading ${uploadProgress}%` : 'Upload'}
           </button>
         </form>
-        {isUploading ? <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--bg-2)]" role="progressbar" aria-valuenow={uploadProgress} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-[var(--accent-1)] transition-all" style={{ width: `${uploadProgress}%` }} /></div> : null}
+        {isUploading ? <div className="mt-3 h-2 overflow-hidden rounded-full bg-soft-tint" role="progressbar" aria-valuenow={uploadProgress} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-accent-1 transition-all" style={{ width: `${uploadProgress}%` }} /></div> : null}
         {!isSupabaseConfigured && (
-          <p className="mt-3 text-xs text-[var(--text-secondary)]">
+          <p className="mt-3 text-xs text-text-2">
             Configure Supabase to upload new memories.
           </p>
         )}
-        {error && <p className="mt-3 text-sm text-[var(--error)]">{error}</p>}
-        {uploadSummary && <p className="mt-3 text-sm text-[var(--success)]">{uploadSummary}</p>}
+        {error && <p className="mt-3 text-sm text-error">{error}</p>}
+        {uploadSummary && <p className="mt-3 text-sm text-success">{uploadSummary}</p>}
       </section>
-      {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-3xl bg-[var(--card-bg)] p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-[var(--text-primary)]">Memory location</h2><button type="button" onClick={() => setIsLocationOpen(false)} className="text-sm text-[var(--text-secondary)]">Close</button></div><MemoryLocationPicker value={location} onChange={setLocation} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => setError('Unable to read your current location.'))} className="rounded-xl border border-[var(--accent-1)]/20 px-3 py-2 text-sm text-[var(--text-primary)]">Use current location</button><input value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" /><button type="button" onClick={() => setIsLocationOpen(false)} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)]">Save location</button></div></div> : null}
+      {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-panel bg-card p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-text-1">Memory location</h2><button type="button" onClick={() => setIsLocationOpen(false)} className="text-sm text-text-2">Close</button></div><MemoryLocationPicker value={location} onChange={setLocation} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => setError('Unable to read your current location.'))} className="rounded-xl border border-accent-1/20 px-3 py-2 text-sm text-text-1">Use current location</button><input value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><button type="button" onClick={() => setIsLocationOpen(false)} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white">Save location</button></div></div> : null}
 
       <section className="glass-card p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -501,8 +501,8 @@ function MemoriesPageContent() {
                 onClick={() => setFilter(option)}
                 className={`rounded-full px-3 py-1.5 text-xs capitalize transition ${
                   filter === option
-                    ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
-                    : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
+                    ? 'bg-accent-1 text-white'
+                    : 'bg-soft-tint text-text-2'
                 }`}
               >
                 {option}
@@ -513,7 +513,7 @@ function MemoriesPageContent() {
             <button
               type="button"
               onClick={openNewJournal}
-              className="rounded-2xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] transition hover:opacity-90"
+              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
             >
               New journal entry
             </button>
@@ -521,7 +521,7 @@ function MemoriesPageContent() {
           <select
             value={sortBy}
             onChange={(event) => setSortBy(event.target.value as MemorySort)}
-            className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
           >
             <option value="newest">Newest first</option>
             <option value="oldest">Oldest first</option>
@@ -531,15 +531,15 @@ function MemoriesPageContent() {
 
       <MemoryCurationAI memories={memories.map((memory) => ({ id: memory.id, title: memory.title ?? memory.caption ?? 'A memory together', date: memory.date }))} />
 
-      {isLoading && <p className="text-sm text-[var(--text-secondary)]">Loading memories...</p>}
+      {isLoading && <p className="text-sm text-text-2">Loading memories...</p>}
       <section className="grid gap-4 md:grid-cols-2">
         {visibleMemories.map((memory, index) => (
           memory.category === 'journal' ? (
             <article key={memory.id} className="glass-card relative space-y-3 p-5">
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0">
-                  <h3 className="font-semibold text-[var(--text-primary)]">{memory.title}</h3>
-                  <p className="mt-1 text-xs text-[var(--text-secondary)]">{memory.date}</p>
+                  <h3 className="font-semibold text-text-1">{memory.title}</h3>
+                  <p className="mt-1 text-xs text-text-2">{memory.date}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   {memory.metadata?.mood_tag ? (() => {
@@ -547,20 +547,20 @@ function MemoriesPageContent() {
                       JOURNAL_MOODS.find((item) => item.id === 'okay')
                     if (!mood) return null
                     const MoodIcon = mood.Icon
-                    return <MoodIcon className="h-5 w-5 text-[var(--accent-1)]" aria-label={mood.label} />
+                    return <MoodIcon className="h-5 w-5 text-accent-1" aria-label={mood.label} />
                   })() : null}
-                  <button type="button" onClick={() => openEditJournal(memory)} className="text-[var(--accent-1)]" aria-label="Edit journal entry">
+                  <button type="button" onClick={() => openEditJournal(memory)} className="text-accent-1" aria-label="Edit journal entry">
                     <Pencil className="h-5 w-5" />
                   </button>
-                  <button type="button" onClick={() => deleteJournal(memory)} className="text-[var(--error)]" aria-label="Delete journal entry">
+                  <button type="button" onClick={() => deleteJournal(memory)} className="text-error" aria-label="Delete journal entry">
                     <Trash2 className="h-5 w-5" />
                   </button>
                 </div>
               </div>
-              {memory.description ? <p className="line-clamp-2 text-sm text-[var(--text-secondary)]">{memory.description}</p> : null}
+              {memory.description ? <p className="line-clamp-2 text-sm text-text-2">{memory.description}</p> : null}
               {memory.metadata?.ai_reflection ? (
-                <div className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] p-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-[var(--accent-1)]">
+                <div className="rounded-xl border border-accent-1/20 bg-soft-tint p-3">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-accent-1">
                     <Sparkles className="h-4 w-4" />
                     AI reflection
                     <button type="button" onClick={() => speakReflection(memory)} aria-label="Read AI reflection aloud">
@@ -569,16 +569,16 @@ function MemoriesPageContent() {
                         : <Volume2 className="h-4 w-4" />}
                     </button>
                   </div>
-                  <p className="mt-2 text-sm text-[var(--text-primary)]">{memory.metadata.ai_reflection}</p>
+                  <p className="mt-2 text-sm text-text-1">{memory.metadata.ai_reflection}</p>
                 </div>
               ) : (
                 <button
                   type="button"
                   onClick={() => void requestReflection(memory)}
                   disabled={reflectingId !== null}
-                  className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 px-3 py-2 text-sm text-[var(--accent-1)] disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-2 text-sm text-accent-1 disabled:opacity-50"
                 >
-                  {reflectingId === memory.id ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--accent-1)] border-t-transparent" /> : <Sparkles className="h-4 w-4" />}
+                  {reflectingId === memory.id ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-1 border-t-transparent" /> : <Sparkles className="h-4 w-4" />}
                   {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
                 </button>
               )}
@@ -595,10 +595,10 @@ function MemoriesPageContent() {
                   onOpen={() => setSelectedMemory(memory)}
                 />
               ) : (
-                <button type="button" onClick={() => setSelectedMemory(memory)} className="glass-card w-full bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20 p-6 text-left"><p className="font-serif text-xl text-[var(--text-primary)]">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-[var(--text-secondary)]">{new Date(memory.date).toLocaleDateString()}</p></button>
+                <button type="button" onClick={() => setSelectedMemory(memory)} className="glass-card w-full bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20 p-6 text-left"><p className="font-serif text-xl text-text-1">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-text-2">{new Date(memory.date).toLocaleDateString()}</p></button>
               )}
               {memory.category && (
-                <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-[var(--text-primary)]">
+                <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-text-1">
                   {memory.category}
                 </span>
               )}
@@ -606,7 +606,7 @@ function MemoriesPageContent() {
                 <button
                   type="button"
                   onClick={() => handleDelete(memory)}
-                  className="absolute right-3 top-3 rounded-full bg-[var(--error)]/80 px-3 py-1 text-xs text-[var(--text-primary)] hover:bg-[var(--error)]"
+                  className="absolute right-3 top-3 rounded-full bg-error/80 px-3 py-1 text-xs text-text-1 hover:bg-error"
                 >
                   Delete
                 </button>
@@ -621,13 +621,13 @@ function MemoriesPageContent() {
           <button
             type="button"
             onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
-            className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-5 py-2 text-sm text-[var(--text-primary)]"
+            className="rounded-full border border-accent-1/20 bg-soft-tint px-5 py-2 text-sm text-text-1"
           >
             Load more memories
           </button>
         </div>
       )}
-      {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-[var(--accent-1)]" /><p className="mt-4 text-lg text-[var(--text-primary)]">No memories yet. Start creating your little world together!</p></section>}
+      {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-accent-1" /><p className="mt-4 text-lg text-text-1">No memories yet. Start creating your little world together!</p></section>}
       {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} /> : null}
       {selectedMemory && <MemoryDetail memory={selectedMemory} onClose={() => setSelectedMemory(null)} onSaved={(updated) => {
         setMemories((current) => current.map((memory) => memory.id === updated.id ? { ...memory, ...updated } : memory))
@@ -637,18 +637,18 @@ function MemoriesPageContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={editingJournalId ? 'Edit journal entry' : 'New journal entry'}>
           <section className="glass-card w-full max-w-xl space-y-4 p-5">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-[var(--text-primary)]">{editingJournalId ? 'Edit journal entry' : 'New journal entry'}</h2>
-              <button type="button" onClick={closeJournalModal} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--card-bg)]/10" aria-label="Close journal modal"><X className="h-5 w-5" /></button>
+              <h2 className="text-lg font-semibold text-text-1">{editingJournalId ? 'Edit journal entry' : 'New journal entry'}</h2>
+              <button type="button" onClick={closeJournalModal} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close journal modal"><X className="h-5 w-5" /></button>
             </div>
-            <input value={journalTitle} onChange={(event) => setJournalTitle(event.target.value)} placeholder="Title" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-[var(--text-primary)]" />
-            <textarea value={journalBody} onChange={(event) => setJournalBody(event.target.value)} placeholder="Write your thoughts..." rows={5} className="w-full resize-y rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-[var(--text-primary)]" />
+            <input value={journalTitle} onChange={(event) => setJournalTitle(event.target.value)} placeholder="Title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
+            <textarea value={journalBody} onChange={(event) => setJournalBody(event.target.value)} placeholder="Write your thoughts..." rows={5} className="w-full resize-y rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
             <div>
-              <p className="mb-2 text-sm font-medium text-[var(--text-primary)]">How are you feeling?</p>
+              <p className="mb-2 text-sm font-medium text-text-1">How are you feeling?</p>
               <div className="flex flex-wrap gap-2">
                 {JOURNAL_MOODS.map(({ id, label, Icon }) => {
                   const selected = journalMood === id
                   return (
-                    <button key={id} type="button" onClick={() => setJournalMood(id)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${selected ? 'border-[var(--accent-1)] bg-[var(--button-bg)] text-[var(--text-primary)]' : 'border-[var(--accent-1)]/20 text-[var(--text-secondary)]'}`}>
+                    <button key={id} type="button" onClick={() => setJournalMood(id)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${selected ? 'border-accent-1 bg-accent-1 text-white' : 'border-accent-1/20 text-text-2'}`}>
                       <Icon className="h-5 w-5" />
                       {label}
                     </button>
@@ -657,8 +657,8 @@ function MemoriesPageContent() {
               </div>
             </div>
             <div className="flex justify-end gap-3">
-              <button type="button" onClick={closeJournalModal} className="rounded-xl px-4 py-2 text-sm text-[var(--text-secondary)]">Cancel</button>
-              <button type="button" onClick={() => void saveJournal()} disabled={journalSaving || !journalTitle.trim()} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">{journalSaving ? 'Saving...' : 'Save'}</button>
+              <button type="button" onClick={closeJournalModal} className="rounded-xl px-4 py-2 text-sm text-text-2">Cancel</button>
+              <button type="button" onClick={() => void saveJournal()} disabled={journalSaving || !journalTitle.trim()} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{journalSaving ? 'Saving...' : 'Save'}</button>
             </div>
           </section>
         </div>
@@ -680,19 +680,19 @@ function MemoryDetail({ memory, onClose, onSaved }: { memory: DisplayMemory; onC
     else onSaved({ id: memory.id, title, caption: title, date, category })
     setSaving(false)
   }
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--card-bg)]/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative h-[55vh] w-full overflow-hidden rounded-2xl"><Image src={memory.displayUrl} alt={memory.caption || 'Memory'} fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover" /></div> : <div className="h-64 rounded-2xl bg-gradient-to-br from-[var(--accent-1)]/25 via-[var(--bg-2)] to-[var(--accent-2)]/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-lg font-serif text-[var(--text-primary)]" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-[var(--error)]">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative h-[55vh] w-full overflow-hidden rounded-btn"><Image src={memory.displayUrl} alt={memory.caption || 'Memory'} fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover" /></div> : <div className="h-64 rounded-btn bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-lg font-serif text-text-1" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-error">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
 }
 
 function MemoriesSkeleton() {
   return (
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-      <div className="h-8 w-48 animate-pulse rounded-full bg-[var(--card-bg-strong)]" />
-      <div className="h-20 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
-      <div className="h-12 animate-pulse rounded-full bg-[var(--card-bg-strong)]" />
+      <div className="h-8 w-48 animate-pulse rounded-full bg-card" />
+      <div className="h-20 animate-pulse rounded-panel bg-card" />
+      <div className="h-12 animate-pulse rounded-full bg-card" />
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="h-60 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
-        <div className="h-60 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
-        <div className="h-60 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
+        <div className="h-60 animate-pulse rounded-panel bg-card" />
+        <div className="h-60 animate-pulse rounded-panel bg-card" />
+        <div className="h-60 animate-pulse rounded-panel bg-card" />
       </div>
     </main>
   )

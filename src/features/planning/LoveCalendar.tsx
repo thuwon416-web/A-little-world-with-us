@@ -30,10 +30,10 @@ const fromCanonicalType: Record<CanonicalEventType, Entry['type']> = {
 }
 
 const moodColors: Record<Entry['mood'], string> = {
-  sweet: 'bg-[var(--accent-1)]/20 text-[var(--accent-1)]',
-  adventure: 'bg-[var(--bg-2)] text-[var(--accent-1)]',
-  quiet: 'bg-[var(--bg-2)] text-[var(--text-secondary)]',
-  special: 'bg-[var(--bg-2)] text-[var(--text-secondary)]',
+  sweet: 'bg-accent-1/20 text-accent-1',
+  adventure: 'bg-soft-tint text-accent-1',
+  quiet: 'bg-soft-tint text-text-2',
+  special: 'bg-soft-tint text-text-2',
 }
 
 export default function LoveCalendar() {
@@ -97,13 +97,13 @@ export default function LoveCalendar() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <CalendarDays className="h-5 w-5" />
         <h3 className="font-dancing text-2xl">Love Calendar</h3>
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3">
-        <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-[var(--text-primary)]/60">
+      <div className="rounded-btn border border-accent-1/20 bg-card p-3">
+        <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.2em] text-text-1/60">
           <span>Upcoming little moments</span>
           <span>{upcoming.length}</span>
         </div>
@@ -111,10 +111,10 @@ export default function LoveCalendar() {
           {upcoming.map((entry) => (
             <div
               key={entry.id}
-              className="flex items-center justify-between rounded-2xl bg-[var(--card-bg)] px-3 py-2"
+              className="flex items-center justify-between rounded-btn bg-card px-3 py-2"
             >
               <div>
-                <div className="text-sm font-medium text-[var(--text-primary)]">{entry.label}</div>
+                <div className="text-sm font-medium text-text-1">{entry.label}</div>
                 <div className="text-[11px] opacity-70">{entry.date}</div>
               </div>
               <div className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export default function LoveCalendar() {
                 >
                   {entry.mood}
                 </span>
-                <span className="rounded-full bg-[var(--card-bg)]/35 px-2 py-1 text-[9px] uppercase tracking-[0.15em]">
+                <span className="rounded-full bg-card/35 px-2 py-1 text-[9px] uppercase tracking-[0.15em]">
                   {entry.type}
                 </span>
               </div>
@@ -132,18 +132,18 @@ export default function LoveCalendar() {
         </div>
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/15 p-3">
+      <div className="space-y-2 rounded-btn border border-accent-1/20 bg-card/15 p-3">
         <div className="flex gap-2">
           <input
             type="date"
             value={selectedDate}
             onChange={(event) => setSelectedDate(event.target.value)}
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1"
           />
           <select
             value={mood}
             onChange={(event) => setMood(event.target.value as Entry['mood'])}
-            className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-2 py-2 text-sm text-[var(--text-primary)]"
+            className="rounded-xl border border-accent-1/20 bg-card px-2 py-2 text-sm text-text-1"
           >
             <option value="sweet">Sweet</option>
             <option value="adventure">Adventure</option>
@@ -153,7 +153,7 @@ export default function LoveCalendar() {
           <select
             value={type}
             onChange={(event) => setType(event.target.value as Entry['type'])}
-            className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-2 py-2 text-sm text-[var(--text-primary)]"
+            className="rounded-xl border border-accent-1/20 bg-card px-2 py-2 text-sm text-text-1"
           >
             <option value="anniversary">Anniversary</option>
             <option value="plan">Plan</option>
@@ -165,7 +165,7 @@ export default function LoveCalendar() {
             value={label}
             onChange={(event) => setLabel(event.target.value)}
             placeholder="Add a date idea"
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
+            className="w-full rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1 placeholder:text-text-1/40"
           />
           <button
             onClick={() => void addEntry()}
@@ -178,13 +178,13 @@ export default function LoveCalendar() {
       </div>
 
       {!coupleId && (
-        <p className="text-sm text-amber-200">
+        <p className="text-sm text-warning">
           Accept a couple link to save plans shared by both accounts.
         </p>
       )}
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80">
-        <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">
+      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-text-1/80">
+        <div className="mb-1 flex items-center gap-2 font-medium text-accent-2">
           <Sparkles className="h-4 w-4" />
           Tiny reminder
         </div>

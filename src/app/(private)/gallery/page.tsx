@@ -49,14 +49,14 @@ export default function GalleryPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <div className="rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Gallery</p>
-        <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">Shared memories</h1>
+      <div className="rounded-modal border border-accent-1/20 bg-card p-6">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Gallery</p>
+        <h1 className="mt-3 text-3xl font-serif text-text-1">Shared memories</h1>
       </div>
 
       <ImageUpload onUpload={handleUpload} />
 
-      {error && <div className="rounded-[20px] border border-[var(--error)]/20 bg-[var(--error)]/10 p-4 text-sm text-[var(--error)]">{error}</div>}
+      {error && <div className="rounded-btn border border-error/20 bg-error/10 p-4 text-sm text-error">{error}</div>}
 
       {loading ? (
         <>
@@ -64,22 +64,22 @@ export default function GalleryPage() {
           <LoadingState label="Fetching gallery..." />
         </>
       ) : images.length === 0 ? (
-        <div className="rounded-[28px] border border-dashed border-[var(--card-border)] bg-[var(--card-bg)] p-8 text-center text-[var(--text-secondary)]">
+        <div className="rounded-modal border border-dashed border-border bg-card p-8 text-center text-text-2">
           No images yet. Add your first memory to start the gallery.
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {images.map((image) => (
-            <div key={image.id} className="overflow-hidden rounded-[24px] border border-[var(--card-border)] bg-[var(--card-bg)] shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
+            <div key={image.id} className="overflow-hidden rounded-btn border border-border bg-card shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
               <Image src={image.url} alt={image.name} width={256} height={256} className="h-64 w-full object-cover" />
               <div className="flex items-center justify-between gap-3 p-4">
-                <span className="text-xs uppercase tracking-[0.16em] text-[var(--text-secondary)]">
+                <span className="text-xs uppercase tracking-[0.16em] text-text-2">
                   {new Date(image.created_at).toLocaleDateString()}
                 </span>
                 <button
                   type="button"
                   onClick={() => void handleDelete(image)}
-                  className="rounded-full border border-[var(--error)]/30 bg-[var(--error)]/10 px-3 py-1 text-xs font-medium text-[var(--error)]"
+                  className="rounded-pill border border-error/30 bg-error/10 px-3 py-1 text-xs font-medium text-error"
                 >
                   Delete
                 </button>

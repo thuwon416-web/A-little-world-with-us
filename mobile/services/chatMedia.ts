@@ -6,6 +6,10 @@ export type ChatMediaBucket = 'chat_photos' | 'voice_messages' | 'chat_files'
 const MAX_FILE_SIZE = 5 * 1024 * 1024
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 
+// In-memory cache for signed URLs with expiry
+// 500-entry limit prevents memory leak (cache evicts oldest entries)
+const signedUrlCache = new Map<string, { url: string; expiresAt: number }>()
+
 function validateAttachment(attachment: ChatAttachment) {
   const type = attachment.mimeType.toLowerCase()
   if (attachment.size !== undefined && attachment.size > MAX_FILE_SIZE) {
@@ -58,8 +62,37 @@ export async function uploadChatMedia(
 export async function getChatMediaUrl(bucket: ChatMediaBucket, path: string | null) {
   if (!path) return null
   if (/^https?:\/\//i.test(path)) return path
+  
+  const cacheKey = `${bucket}:${path}`
+  const now = Date.now()
+  const FIVE_MINUTES_MS = 5 * 60 * 1000
+
+  // Check cache with 5-minute buffer before expiry
+  const cached = signedUrlCache.get(cacheKey)
+  if (cached) {
+    if (cached.expiresAt <= now) {
+      signedUrlCache.delete(cacheKey)
+    } else if (cached.expiresAt > now + FIVE_MINUTES_MS) {
+      return cached.url
+    }
+  }
+
+  // Enforce cache size limit to prevent memory leak
+  while (signedUrlCache.size >= 500) {
+    const firstKey = signedUrlCache.keys().next().value
+    if (!firstKey) break
+    signedUrlCache.delete(firstKey)
+  }
+
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60)
   if (error || !data?.signedUrl) return null
+  
+  // Cache with 55-minute expiry (5-minute buffer)
+  signedUrlCache.set(cacheKey, {
+    url: data.signedUrl,
+    expiresAt: now + (55 * 60 * 1000),
+  })
+
   return data.signedUrl
 }
 

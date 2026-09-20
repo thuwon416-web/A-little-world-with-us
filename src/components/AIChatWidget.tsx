@@ -37,7 +37,7 @@ export default function AIChatWidget() {
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 z-50 rounded-full bg-[var(--accent-1)] p-4 text-white shadow-lg transition hover:opacity-90"
+        className="fixed bottom-4 right-4 z-50 rounded-full bg-accent-1 p-4 text-white shadow-lg transition hover:opacity-90"
         aria-label="Open AI assistant"
       >
         <MessageCircle className="h-5 w-5" />
@@ -45,9 +45,9 @@ export default function AIChatWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-4 w-80 bg-[var(--card-bg)] rounded-2xl shadow-xl z-50 overflow-hidden border border-[var(--accent-1)]/20">
+        <div className="fixed bottom-20 right-4 w-80 bg-card rounded-btn shadow-xl z-50 overflow-hidden border border-accent-1/20">
           {/* Header */}
-          <div className="bg-[var(--accent-1)] text-white p-4">
+          <div className="bg-accent-1 text-white p-4">
             <h3 className="font-bold">AI Assistant</h3>
             <p className="text-sm opacity-80">Your relationship companion</p>
           </div>
@@ -55,8 +55,8 @@ export default function AIChatWidget() {
           {/* Messages */}
           <div className="h-64 overflow-y-auto p-4 space-y-3">
             {messages.length === 0 && (
-              <div className="text-center text-sm text-[var(--text-secondary)]">
-                <div className="mb-2 flex items-center justify-center gap-2 text-[var(--text-primary)]">
+              <div className="text-center text-sm text-text-2">
+                <div className="mb-2 flex items-center justify-center gap-2 text-text-1">
                   <Hand className="h-4 w-4" />
                   <p>Hi! I&apos;m your AI assistant.</p>
                 </div>
@@ -66,34 +66,34 @@ export default function AIChatWidget() {
             {messages.map((msg, i) => (
               <div
                 key={i}
-                className={`p-3 rounded-2xl max-w-[80%] ${
+                className={`p-3 rounded-btn max-w-[80%] ${
                   msg.role === 'user'
-                    ? 'bg-[var(--accent-1)] text-white ml-auto'
-                    : 'bg-[var(--card-bg-strong)] text-[var(--text-primary)] mr-auto'
+                    ? 'bg-accent-1 text-white ml-auto'
+                    : 'bg-card text-text-1 mr-auto'
                 }`}
               >
                 {msg.content}
               </div>
             ))}
             {isLoading && (
-              <div className="text-[var(--text-secondary)] text-sm animate-pulse">AI is typing...</div>
+              <div className="text-text-2 text-sm animate-pulse">AI is typing...</div>
             )}
           </div>
 
           {/* Input */}
-          <div className="p-3 border-t border-[var(--accent-1)]/20">
+          <div className="p-3 border-t border-accent-1/20">
             <div className="flex gap-2">
               <input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
                 placeholder="Ask me anything..."
-                className="flex-1 px-3 py-2 rounded-lg border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
+                className="flex-1 px-3 py-2 rounded-lg border border-accent-1/20 bg-card text-text-1 placeholder:text-text-2"
               />
               <button
                 onClick={sendMessage}
                 disabled={isLoading}
-                className="bg-[var(--accent-1)] text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 hover:opacity-90 transition"
+                className="bg-accent-1 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 hover:opacity-90 transition"
               >
                 Send
               </button>

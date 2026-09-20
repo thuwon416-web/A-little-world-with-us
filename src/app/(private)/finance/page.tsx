@@ -106,10 +106,10 @@ export default function FinancialGoals() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 animate-fade-in">
-      <section className="rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Goals</p>
-        <h1 className="mt-3 flex items-center gap-3 text-3xl font-serif text-[var(--text-primary)]">
-          <DollarSign className="h-7 w-7 text-[var(--accent-1)]" />
+      <section className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Goals</p>
+        <h1 className="mt-3 flex items-center gap-3 text-3xl font-serif text-text-1">
+          <DollarSign className="h-7 w-7 text-accent-1" />
           <span>Financial Goals</span>
         </h1>
       </section>
@@ -122,7 +122,7 @@ export default function FinancialGoals() {
       <BalanceSummary />
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-2xl font-serif text-[var(--text-primary)]">Shared Expenses</h2>
+          <h2 className="text-2xl font-serif text-text-1">Shared Expenses</h2>
           <button
             type="button"
             onClick={() => setShowAddExpense(true)}
@@ -134,12 +134,12 @@ export default function FinancialGoals() {
         </div>
         <CategoryFilter active={expenseFilter} onChange={setExpenseFilter} />
         {loadingExpenses ? (
-          <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 text-sm text-[var(--text-secondary)]">
+          <div className="rounded-btn border border-accent-1/20 bg-card p-6 text-sm text-text-2">
             Loading expenses…
           </div>
         ) : expensesError ? (
-          <div className="rounded-2xl border border-[var(--error)]/30 bg-[var(--error)]/10 p-6 text-sm text-[var(--text-secondary)]">
-            <p className="text-[var(--error)]">Unable to load expenses</p>
+          <div className="rounded-btn border border-error/30 bg-error/10 p-6 text-sm text-text-2">
+            <p className="text-error">Unable to load expenses</p>
             <p className="mt-1">{expensesError}</p>
             <button type="button" onClick={() => void loadExpenses()} className="glass-button mt-4 px-4 py-2 text-sm font-semibold">Retry</button>
           </div>
@@ -157,23 +157,23 @@ export default function FinancialGoals() {
       </section>
       <AdvancedFinancePanel />
 
-      {!coupleId && <p className="rounded-2xl border border-amber-300/30 bg-amber-300/10 p-4 text-sm text-amber-100">Link and accept a partner before creating shared financial goals.</p>}
+      {!coupleId && <p className="rounded-btn border border-warning/30 bg-warning/10 p-4 text-sm text-warning">Link and accept a partner before creating shared financial goals.</p>}
 
-      <section className="grid gap-4 rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 sm:grid-cols-2 md:grid-cols-4">
-        <input value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} placeholder="Goal name (e.g., Vacation)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
-        <input type="number" min="0" value={newGoal.target} onChange={(event) => setNewGoal({ ...newGoal, target: event.target.value })} placeholder="Target (MMK)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
-        <input type="number" min="0" value={newGoal.current} onChange={(event) => setNewGoal({ ...newGoal, current: event.target.value })} placeholder="Current (MMK)" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" />
-        <button type="button" onClick={addGoal} className="rounded-xl bg-[var(--accent-1)] px-4 py-3 font-medium text-[var(--bg-color)]">+ Add Goal</button>
+      <section className="grid gap-4 rounded-modal border border-accent-1/20 bg-card p-5 sm:grid-cols-2 md:grid-cols-4">
+        <input value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} placeholder="Goal name (e.g., Vacation)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
+        <input type="number" min="0" value={newGoal.target} onChange={(event) => setNewGoal({ ...newGoal, target: event.target.value })} placeholder="Target (MMK)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
+        <input type="number" min="0" value={newGoal.current} onChange={(event) => setNewGoal({ ...newGoal, current: event.target.value })} placeholder="Current (MMK)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
+        <button type="button" onClick={addGoal} className="rounded-xl bg-accent-1 px-4 py-3 font-medium text-white">+ Add Goal</button>
       </section>
 
       <div className="space-y-4">
         {goals.map((goal) => {
           const progress = Math.min(100, Math.max(0, (goal.current_amount / goal.target_amount) * 100))
           return (
-            <section key={goal.id} className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-              <div className="mb-3 flex items-center justify-between gap-4"><h2 className="text-xl font-bold text-[var(--text-primary)]">{goal.title}</h2><span className="text-sm text-[var(--text-secondary)]">{formatMmk(goal.current_amount)} / {formatMmk(goal.target_amount)}</span></div>
-              <div className="mb-4 h-3 w-full overflow-hidden rounded-full bg-[var(--accent-1)]/10"><div className="h-full rounded-full bg-[var(--accent-1)] transition-all" style={{ width: `${progress}%` }} /></div>
-              <input type="number" min="0" placeholder="Add amount" className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]" onBlur={(event) => { void updateProgress(goal, event.target.value); event.target.value = '' }} />
+            <section key={goal.id} className="rounded-[24px] border border-accent-1/20 bg-card p-5">
+              <div className="mb-3 flex items-center justify-between gap-4"><h2 className="text-xl font-bold text-text-1">{goal.title}</h2><span className="text-sm text-text-2">{formatMmk(goal.current_amount)} / {formatMmk(goal.target_amount)}</span></div>
+              <div className="mb-4 h-3 w-full overflow-hidden rounded-full bg-accent-1/10"><div className="h-full rounded-full bg-accent-1 transition-all" style={{ width: `${progress}%` }} /></div>
+              <input type="number" min="0" placeholder="Add amount" className="w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" onBlur={(event) => { void updateProgress(goal, event.target.value); event.target.value = '' }} />
             </section>
           )
         })}

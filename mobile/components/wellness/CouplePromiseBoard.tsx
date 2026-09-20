@@ -1,6 +1,9 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+
 import { WellnessBoardShell } from './WellnessBoardShell'
 
 type PromiseItem = {
@@ -49,6 +52,7 @@ const dreamDates: DreamDateIdea[] = [
 ]
 
 export default function CouplePromiseBoard() {
+  const { colors } = useTheme()
   const [promises, setPromises] = useState<PromiseItem[]>(starterPromises)
   const [draft, setDraft] = useState('')
   const [dateIndex, setDateIndex] = useState(0)
@@ -56,6 +60,8 @@ export default function CouplePromiseBoard() {
   const doneCount = useMemo(() => promises.filter((item) => item.done).length, [promises])
   const progress = promises.length ? Math.round((doneCount / promises.length) * 100) : 0
   const currentDate = dreamDates[dateIndex] ?? dreamDates[0]
+
+  const styles = useMemo(() => createStyles(colors), [colors])
 
   const togglePromise = (id: string) => {
     setPromises((current) =>
@@ -113,7 +119,7 @@ export default function CouplePromiseBoard() {
           value={draft}
           onChangeText={setDraft}
           placeholder="Add a promise to keep"
-          placeholderTextColor="#8f8393"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <Pressable onPress={addPromise} style={styles.button}>
@@ -142,173 +148,174 @@ export default function CouplePromiseBoard() {
   )
 }
 
-const styles = StyleSheet.create({
-  progressCard: {
-    backgroundColor: '#1b1a29',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#2f3346',
-    padding: 12,
-    marginBottom: 14,
-  },
-  progressHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  progressLabel: {
-    color: '#d5c6d5',
-    fontSize: 10,
-    letterSpacing: 1.1,
-    textTransform: 'uppercase',
-  },
-  progressValue: {
-    color: '#f4cbd8',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  barTrack: {
-    height: 8,
-    backgroundColor: '#101721',
-    borderRadius: 999,
-    overflow: 'hidden',
-    marginBottom: 6,
-  },
-  barFill: {
-    height: '100%',
-    borderRadius: 999,
-    backgroundColor: '#d5b0c7',
-  },
-  count: {
-    color: '#c9bdcf',
-    fontSize: 11,
-  },
-  list: {
-    gap: 10,
-    marginBottom: 14,
-  },
-  promiseItem: {
-    backgroundColor: '#1d1d2a',
-    borderWidth: 1,
-    borderColor: '#2f3346',
-    borderRadius: 14,
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-  promiseDone: {
-    backgroundColor: '#2b2134',
-    borderColor: '#d8b9c8',
-  },
-  promiseText: {
-    color: '#f3edf5',
-    fontSize: 13,
-    flex: 1,
-  },
-  promiseTextDone: {
-    opacity: 0.7,
-    textDecorationLine: 'line-through',
-  },
-  promiseState: {
-    color: '#d1bfd2',
-    fontSize: 9,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  formRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 14,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#121821',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#31384c',
-    color: '#f5edf5',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-  },
-  button: {
-    backgroundColor: '#d5b0c7',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  buttonText: {
-    color: '#181821',
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  dreamCard: {
-    backgroundColor: '#2b213b',
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#d8b9c8',
-  },
-  dreamHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginBottom: 8,
-  },
-  dreamLabel: {
-    color: '#f0c9d9',
-    fontSize: 10,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  shuffleButton: {
-    backgroundColor: '#1e1a2b',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderWidth: 1,
-    borderColor: '#534a60',
-  },
-  shuffleText: {
-    color: '#f4edf5',
-    fontSize: 9,
-    letterSpacing: 1.1,
-    textTransform: 'uppercase',
-  },
-  dreamTitle: {
-    color: '#f4edf5',
-    fontSize: 22,
-    fontWeight: '700',
-    marginBottom: 6,
-  },
-  dreamDetail: {
-    color: '#e7dbe7',
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  tagsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 10,
-  },
-  tag: {
-    backgroundColor: '#1a1d2a',
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: '#423d60',
-  },
-  tagText: {
-    color: '#f0c9d9',
-    fontSize: 9,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-})
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    progressCard: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      padding: 12,
+      marginBottom: 14,
+    },
+    progressHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 8,
+    },
+    progressLabel: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      letterSpacing: 1.1,
+      textTransform: 'uppercase',
+    },
+    progressValue: {
+      color: colors.accent2,
+      fontSize: 11,
+      fontWeight: '700',
+    },
+    barTrack: {
+      height: 8,
+      backgroundColor: colors.surface,
+      borderRadius: 999,
+      overflow: 'hidden',
+      marginBottom: 6,
+    },
+    barFill: {
+      height: '100%',
+      borderRadius: 999,
+      backgroundColor: colors.accent1,
+    },
+    count: {
+      color: colors.textSecondary,
+      fontSize: 11,
+    },
+    list: {
+      gap: 10,
+      marginBottom: 14,
+    },
+    promiseItem: {
+      backgroundColor: colors.cardBg,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      borderRadius: 14,
+      padding: 12,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 10,
+    },
+    promiseDone: {
+      backgroundColor: colors.cardBg,
+      borderColor: colors.accent1,
+    },
+    promiseText: {
+      color: colors.textPrimary,
+      fontSize: 13,
+      flex: 1,
+    },
+    promiseTextDone: {
+      opacity: 0.7,
+      textDecorationLine: 'line-through',
+    },
+    promiseState: {
+      color: colors.textSecondary,
+      fontSize: 9,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+    },
+    formRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginBottom: 14,
+    },
+    input: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      color: colors.textPrimary,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 14,
+    },
+    button: {
+      backgroundColor: colors.accent1,
+      borderRadius: 12,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    buttonText: {
+      color: colors.textPrimary,
+      fontWeight: '700',
+      fontSize: 14,
+    },
+    dreamCard: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.accent1,
+    },
+    dreamHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 10,
+      marginBottom: 8,
+    },
+    dreamLabel: {
+      color: colors.accent2,
+      fontSize: 10,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+    },
+    shuffleButton: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 999,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    shuffleText: {
+      color: colors.textPrimary,
+      fontSize: 9,
+      letterSpacing: 1.1,
+      textTransform: 'uppercase',
+    },
+    dreamTitle: {
+      color: colors.textPrimary,
+      fontSize: 22,
+      fontWeight: '700',
+      marginBottom: 6,
+    },
+    dreamDetail: {
+      color: colors.textPrimary,
+      fontSize: 13,
+      lineHeight: 18,
+    },
+    tagsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginTop: 10,
+    },
+    tag: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 999,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    tagText: {
+      color: colors.accent2,
+      fontSize: 9,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+    },
+  })

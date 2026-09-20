@@ -70,8 +70,8 @@ export default function PhotoExport({ photos }: Props) {
 
   return (
     <div className="glass-card p-5">
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <Download className="h-5 w-5 text-[var(--accent-1)]" />
+      <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
+        <Download className="h-5 w-5 text-accent-1" />
         Export Photos
       </h3>
 
@@ -79,12 +79,12 @@ export default function PhotoExport({ photos }: Props) {
       <div className="mb-4">
         <button
           onClick={checkQuota}
-          className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="text-xs text-text-2 hover:text-text-1"
         >
           Check Storage Usage
         </button>
         {quotaUsage && (
-          <div className="mt-2 text-xs text-[var(--text-secondary)]">
+          <div className="mt-2 text-xs text-text-2">
             Storage: {(quotaUsage.usage / 1024 / 1024).toFixed(2)} MB / {(quotaUsage.quota / 1024 / 1024).toFixed(0)} MB ({quotaUsage.percentUsed.toFixed(1)}%)
           </div>
         )}
@@ -98,8 +98,8 @@ export default function PhotoExport({ photos }: Props) {
             onClick={() => togglePhoto(photo.id)}
             className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer ${
               selectedPhotos.has(photo.id)
-                ? 'ring-2 ring-[var(--accent-1)]'
-                : 'ring-1 ring-[var(--accent-1)]/20'
+                ? 'ring-2 ring-accent-1'
+                : 'ring-1 ring-accent-1/20'
             }`}
           >
             <Image
@@ -110,7 +110,7 @@ export default function PhotoExport({ photos }: Props) {
               className="object-cover"
             />
             {selectedPhotos.has(photo.id) && (
-              <div className="absolute top-1 right-1 bg-[var(--accent-1)] text-white rounded-full p-1">
+              <div className="absolute top-1 right-1 bg-accent-1 text-white rounded-full p-1">
                 <ImageIcon className="h-3 w-3" />
               </div>
             )}
@@ -122,18 +122,18 @@ export default function PhotoExport({ photos }: Props) {
       <div className="flex gap-2 mb-4">
         <button
           onClick={selectAll}
-          className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="text-xs text-text-2 hover:text-text-1"
         >
           Select All
         </button>
-        <span className="text-xs text-[var(--text-secondary)]">|</span>
+        <span className="text-xs text-text-2">|</span>
         <button
           onClick={deselectAll}
-          className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="text-xs text-text-2 hover:text-text-1"
         >
           Deselect All
         </button>
-        <span className="text-xs text-[var(--text-secondary)] flex-1 text-right">
+        <span className="text-xs text-text-2 flex-1 text-right">
           {selectedPhotos.size} / {photos.length} selected
         </span>
       </div>
@@ -142,7 +142,7 @@ export default function PhotoExport({ photos }: Props) {
       <button
         onClick={handleExport}
         disabled={selectedPhotos.size === 0 || exporting}
-        className="w-full rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] disabled:opacity-50 flex items-center justify-center gap-2"
+        className="w-full rounded-input bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <Download className="h-4 w-4" />
         {exporting ? 'Exporting...' : `Export ${selectedPhotos.size} Photos as ZIP`}

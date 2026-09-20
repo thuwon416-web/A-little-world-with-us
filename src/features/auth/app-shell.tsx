@@ -37,7 +37,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }, [router])
 
   return (
-    <div className="min-h-screen text-[var(--text-primary)]">
+    <div className="min-h-screen text-text-1">
       <div className="mx-auto flex min-h-screen max-w-[1600px]">
         <aside className="hidden w-72 shrink-0 p-4 lg:flex lg:flex-col">
           <Sidebar />

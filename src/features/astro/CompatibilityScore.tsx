@@ -155,20 +155,20 @@ export default function CompatibilityScore() {
   const displayScore = overallScore ?? 50
 
   return (
-    <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-6">
+    <div className="rounded-btn border border-accent-1/20 bg-card p-6">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
+          <div className="rounded-xl bg-accent-1/15 p-2 text-accent-1">
             <Heart className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Compatibility</p>
-            <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">ချစ်ကြိုက်မှုတွက်နည်း</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Compatibility</p>
+            <p className="mt-1 text-sm font-medium text-text-1">ချစ်ကြိုက်မှုတွက်နည်း</p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-3xl font-bold text-[var(--accent-1)]">{displayScore}%</p>
-          <p className="text-xs text-[var(--text-secondary)]">Overall</p>
+          <p className="text-3xl font-bold text-accent-1">{displayScore}%</p>
+          <p className="text-xs text-text-2">Overall</p>
         </div>
       </div>
 
@@ -183,42 +183,42 @@ export default function CompatibilityScore() {
               onClick={() => setSelectedMethod(method.id as 'western' | 'vedic' | 'chinese' | 'myanmar')}
               className={`flex items-center gap-2 rounded-lg border p-3 text-left transition ${
                 selectedMethod === method.id
-                  ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/10'
-                  : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] hover:border-[var(--accent-1)]/40'
+                  ? 'border-accent-1 bg-accent-1/10'
+                  : 'border-accent-1/20 bg-card hover:border-accent-1/40'
               }`}
             >
-              <Icon className="h-4 w-4 text-[var(--accent-1)]" />
+              <Icon className="h-4 w-4 text-accent-1" />
               <div className="flex-1">
-                <p className="text-sm font-medium text-[var(--text-primary)]">{method.name}</p>
-                <p className="text-xs text-[var(--text-secondary)]">{method.nameMy}</p>
+                <p className="text-sm font-medium text-text-1">{method.name}</p>
+                <p className="text-xs text-text-2">{method.nameMy}</p>
               </div>
-              <p className="text-sm font-bold text-[var(--accent-1)]">{displayScore}%</p>
+              <p className="text-sm font-bold text-accent-1">{displayScore}%</p>
             </button>
           )
         })}
       </div>
 
       {/* Selected Method Details */}
-      <div className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4">
+      <div className="rounded-xl border border-accent-1/20 bg-card p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h3 className="font-medium text-[var(--text-primary)]">
+          <h3 className="font-medium text-text-1">
             {methods.find((m) => m.id === selectedMethod)?.name} Astrology
           </h3>
-          <span className="text-xs text-[var(--text-secondary)]">
+          <span className="text-xs text-text-2">
             {methods.find((m) => m.id === selectedMethod)?.description}
           </span>
         </div>
 
         {selectedMethod === 'western' && (
           <div className="space-y-2">
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-text-2">
               Based on zodiac sign compatibility. Your signs complement each other with strong romantic chemistry.
             </p>
             <div className="flex gap-2">
-              <span className="rounded-full bg-[var(--accent-1)]/10 px-3 py-1 text-xs text-[var(--accent-1)]">
+              <span className="rounded-full bg-accent-1/10 px-3 py-1 text-xs text-accent-1">
                 Leo & Libra
               </span>
-              <span className="rounded-full bg-[var(--accent-1)]/10 px-3 py-1 text-xs text-[var(--accent-1)]">
+              <span className="rounded-full bg-accent-1/10 px-3 py-1 text-xs text-accent-1">
                 Fire & Air
               </span>
             </div>
@@ -227,11 +227,11 @@ export default function CompatibilityScore() {
 
         {selectedMethod === 'vedic' && (
           <div className="space-y-2">
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-text-2">
               Based on Nakshatra (lunar mansion) compatibility. Your stars align harmoniously for long-term partnership.
             </p>
             <div className="flex gap-2">
-              <span className="rounded-full bg-[var(--accent-1)]/10 px-3 py-1 text-xs text-[var(--accent-1)]">
+              <span className="rounded-full bg-accent-1/10 px-3 py-1 text-xs text-accent-1">
                 Magha & Purva Phalguni
               </span>
             </div>
@@ -240,11 +240,11 @@ export default function CompatibilityScore() {
 
         {selectedMethod === 'chinese' && (
           <div className="space-y-2">
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-text-2">
               Based on Chinese zodiac animals. Your animal signs create excellent harmony and mutual understanding.
             </p>
             <div className="flex gap-2">
-              <span className="rounded-full bg-[var(--accent-1)]/10 px-3 py-1 text-xs text-[var(--accent-1)]">
+              <span className="rounded-full bg-accent-1/10 px-3 py-1 text-xs text-accent-1">
                 Dragon & Monkey
               </span>
             </div>
@@ -253,11 +253,11 @@ export default function CompatibilityScore() {
 
         {selectedMethod === 'myanmar' && (
           <div className="space-y-2">
-            <p className="text-sm text-[var(--text-secondary)]">
+            <p className="text-sm text-text-2">
               Based on Myanmar Thadinne (37 Nats). Your birth nats are auspiciously matched for a blessed union.
             </p>
             <div className="flex gap-2">
-              <span className="rounded-full bg-[var(--accent-1)]/10 px-3 py-1 text-xs text-[var(--accent-1)]">
+              <span className="rounded-full bg-accent-1/10 px-3 py-1 text-xs text-accent-1">
                 Mahagiri & Shwenawrah
               </span>
             </div>

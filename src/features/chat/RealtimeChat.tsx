@@ -54,6 +54,13 @@ export default function RealtimeChat() {
   const [aiResponse, setAiResponse] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
   const [loadError, setLoadError] = useState<string | null>(null)
+  const [hasMore, setHasMore] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  // Pagination cursor: uses created_at timestamp only.
+  // Note: In extremely rare cases where 2 messages share the same
+  // microsecond timestamp, one may be skipped. Acceptable for 2-user
+  // app with PostgreSQL now() microsecond precision.
+  const [oldestCreatedAt, setOldestCreatedAt] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -87,7 +94,8 @@ export default function RealtimeChat() {
       .from('messages')
       .select('*')
       .eq('couple_id', couple.id)
-      .order('created_at', { ascending: true })
+      .order('created_at', { ascending: false })
+      .limit(50)
 
     const chatKey = await deriveChatKey(couple.id)
     const decryptedMessages = await Promise.all(
@@ -114,7 +122,19 @@ export default function RealtimeChat() {
       })
     )
 
-    setMessages(Array.from(new Map(decryptedMessages.map((message) => [message.id, message])).values()))
+    // Sort ascending for display (oldest first)
+    const sortedMessages = decryptedMessages.sort((a, b) => 
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    )
+    setMessages(sortedMessages)
+
+    // Set pagination state
+    if (loadedMessages && loadedMessages.length > 0) {
+      setOldestCreatedAt(loadedMessages[loadedMessages.length - 1].created_at)
+      setHasMore(loadedMessages.length === 50)
+    } else {
+      setHasMore(false)
+    }
 
     const channel = supabase
       .channel(`chat-${couple.id}`)
@@ -152,6 +172,8 @@ export default function RealtimeChat() {
           } else {
             setMessages((prev) => prev.some((message) => message.id === newMessage.id) ? prev : [...prev, newMessage])
           }
+          // Scroll to bottom on new message
+          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
         }
       )
       .on(
@@ -187,6 +209,59 @@ export default function RealtimeChat() {
 
     return () => {
       supabase.removeChannel(channel)
+    }
+  }
+
+  const loadMoreMessages = async () => {
+    if (!coupleId || !oldestCreatedAt || loadingMore || !hasMore) return
+
+    setLoadingMore(true)
+    try {
+      const { data: olderMessages } = await supabase
+        .from('messages')
+        .select('*')
+        .eq('couple_id', coupleId)
+        .lt('created_at', oldestCreatedAt)
+        .order('created_at', { ascending: false })
+        .limit(50)
+
+      if (olderMessages && olderMessages.length > 0) {
+        const chatKey = await deriveChatKey(coupleId)
+        const decryptedMessages = await Promise.all(
+          olderMessages.map(async (msg: Message) => {
+            let mediaUrl = msg.media_url
+            try {
+              mediaUrl = msg.message_type === 'voice'
+                ? await resolveChatMediaUrl(msg.media_url, 'voice')
+                : msg.message_type === 'photo'
+                  ? await resolveChatMediaUrl(msg.media_url, 'photo')
+                  : msg.media_url
+            } catch {
+              mediaUrl = null
+            }
+            if (msg.encrypted && msg.content) {
+              try {
+                const decrypted = await decryptMessage(msg.content, chatKey)
+                return { ...msg, content: decrypted, media_url: mediaUrl }
+              } catch {
+                return { ...msg, media_url: mediaUrl }
+              }
+            }
+            return { ...msg, media_url: mediaUrl }
+          })
+        )
+
+        // Prepend older messages
+        setMessages((prev) => [...decryptedMessages.reverse(), ...prev])
+        setOldestCreatedAt(olderMessages[olderMessages.length - 1].created_at)
+        setHasMore(olderMessages.length === 50)
+      } else {
+        setHasMore(false)
+      }
+    } catch (error) {
+      console.error('Error loading more messages:', error)
+    } finally {
+      setLoadingMore(false)
     }
   }
 
@@ -453,7 +528,7 @@ export default function RealtimeChat() {
   if (!coupleId) {
     return (
       <div className="flex items-center justify-center h-[600px] glass-card">
-        <p className="text-[var(--text-secondary)]">
+        <p className="text-text-2">
           Link with your partner to start chatting
         </p>
       </div>
@@ -462,23 +537,35 @@ export default function RealtimeChat() {
 
   return (
     <div className="flex flex-col h-[600px] glass-card">
-      <header className="flex items-center gap-3 border-b border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--accent-1)] text-lg text-[var(--bg-color)]"><Heart className="h-5 w-5 fill-current" /></div>
-        <div><p className="font-semibold text-[var(--text-primary)]">Your love</p><p className="text-xs text-emerald-400">Online</p></div>
-        <button type="button" onClick={() => setShowAIPanel((open) => !open)} className="ml-auto inline-flex items-center gap-1 rounded-full border border-[var(--accent-1)]/20 px-3 py-1.5 text-xs text-[var(--text-primary)]" aria-label="Open AI Guardian">
+      <header className="flex items-center gap-3 border-b border-accent-1/20 bg-card px-4 py-3">
+        <div className="flex h-10 w-10 items-center justify-center rounded-pill bg-accent-1 text-lg text-white"><Heart className="h-5 w-5 fill-current" /></div>
+        <div><p className="font-semibold text-text-1">Your love</p><p className="text-xs text-emerald-400">Online</p></div>
+        <button type="button" onClick={() => setShowAIPanel((open) => !open)} className="ml-auto inline-flex items-center gap-1 rounded-pill border border-accent-1/20 px-3 py-1.5 text-xs text-text-1" aria-label="Open AI Guardian">
           <Sparkles className="h-3.5 w-3.5" /> AI {contextCount > 0 ? `•${contextCount}` : ''}
         </button>
       </header>
-      {loadError && <div role="alert" className="border-b border-rose-400/30 bg-rose-500/10 px-4 py-2 text-sm text-rose-200">{loadError}</div>}
-      {showAIPanel && <section className="border-b border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-4">
-        <div className="flex items-center justify-between"><p className="text-sm font-semibold text-[var(--text-primary)]">AI Guardian context</p><button type="button" onClick={() => setShowAIPanel(false)} aria-label="Close AI Guardian"><X className="h-4 w-4 text-[var(--text-secondary)]" /></button></div>
-        <p className="mt-2 text-xs text-[var(--text-secondary)]">{contextCount ? `${contextCount} unprocessed context hint${contextCount === 1 ? '' : 's'} detected.` : 'No unprocessed context hints.'}</p>
-        {contexts.length > 0 && <ul className="mt-3 space-y-2">{contexts.map((context) => <li key={context.id} className="flex items-center justify-between rounded-lg bg-[var(--card-bg)] px-3 py-2 text-xs text-[var(--text-primary)]"><span>{context.category} · {context.sender_role}</span><button type="button" onClick={() => void deleteContext(context.id)} className="text-[var(--text-secondary)] underline">Delete</button></li>)}</ul>}
-        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-full bg-[var(--accent-1)] px-4 py-2 text-xs font-semibold text-[var(--bg-color)] disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
-        {aiResponse && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-[var(--text-primary)]">{aiResponse}</p>}
+      {loadError && <div role="alert" className="border-b border-error/30 bg-error/10 px-4 py-2 text-sm text-error">{loadError}</div>}
+      {showAIPanel && <section className="border-b border-accent-1/20 bg-card p-4">
+        <div className="flex items-center justify-between"><p className="text-sm font-semibold text-text-1">AI Guardian context</p><button type="button" onClick={() => setShowAIPanel(false)} aria-label="Close AI Guardian"><X className="h-4 w-4 text-text-2" /></button></div>
+        <p className="mt-2 text-xs text-text-2">{contextCount ? `${contextCount} unprocessed context hint${contextCount === 1 ? '' : 's'} detected.` : 'No unprocessed context hints.'}</p>
+        {contexts.length > 0 && <ul className="mt-3 space-y-2">{contexts.map((context) => <li key={context.id} className="flex items-center justify-between rounded-input bg-card px-3 py-2 text-xs text-text-1"><span>{context.category} · {context.sender_role}</span><button type="button" onClick={() => void deleteContext(context.id)} className="text-text-2 underline">Delete</button></li>)}</ul>}
+        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-pill bg-accent-1 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
+        {aiResponse && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-text-1">{aiResponse}</p>}
       </section>}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {messages.length === 0 ? <div className="flex h-full items-center justify-center text-center text-[var(--text-secondary)]"><p>Say hello to your love <Heart className="inline h-4 w-4" /></p></div> : messages.map((message) => {
+        {hasMore && (
+          <div className="flex justify-center py-2">
+            <button
+              type="button"
+              onClick={() => void loadMoreMessages()}
+              disabled={loadingMore}
+              className="rounded-pill bg-card px-4 py-2 text-xs text-text-2 disabled:opacity-50"
+            >
+              {loadingMore ? 'Loading...' : 'Load more messages'}
+            </button>
+          </div>
+        )}
+        {messages.length === 0 ? <div className="flex h-full items-center justify-center text-center text-text-2"><p>Say hello to your love <Heart className="inline h-4 w-4" /></p></div> : messages.map((message) => {
           const replyToMessage = message.reply_to ? messages.find((m) => m.id === message.reply_to) : null
 
           return (
@@ -488,10 +575,10 @@ export default function RealtimeChat() {
             >
               <div className="flex flex-col gap-1">
                 <div
-                  className={`max-w-[70%] rounded-2xl px-4 py-2 ${
+                  className={`max-w-[70%] rounded-btn px-4 py-2 ${
                     message.sender_id === currentUserId
-                      ? 'rounded-[18px] rounded-br-[4px] bg-[var(--accent-1)] text-[var(--bg-color)]'
-                      : 'rounded-[18px] rounded-bl-[4px] bg-[var(--card-bg)] text-[var(--text-primary)]'
+                      ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-white'
+                      : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1'
                   }`}
                   onContextMenu={(e) => {
                     e.preventDefault()
@@ -499,11 +586,11 @@ export default function RealtimeChat() {
                   }}
                 >
                   {replyToMessage && (
-                    <div className="mb-2 pb-2 border-b border-[var(--accent-1)]/20">
-                      <p className="text-xs text-[var(--text-secondary)] mb-1">
+                    <div className="mb-2 pb-2 border-b border-accent-1/20">
+                      <p className="text-xs text-text-2 mb-1">
                         Replying to {replyToMessage.sender_id === currentUserId ? 'yourself' : 'partner'}
                       </p>
-                      <p className="text-xs text-[var(--text-secondary)] line-clamp-1">
+                      <p className="text-xs text-text-2 line-clamp-1">
                         {replyToMessage.message_type === 'text' ? replyToMessage.content : 'Message'}
                       </p>
                     </div>
@@ -511,7 +598,7 @@ export default function RealtimeChat() {
 
                   {message.message_type === 'text' && <p className="text-sm">{message.content}</p>}
                   {message.message_type === 'voice' && message.media_url && (
-                    <div className="space-y-2"><audio controls src={message.media_url} className="h-8 max-w-full" /><button type="button" onClick={() => void handleTranscribe(message)} className="inline-flex items-center gap-1 text-xs text-[var(--accent-2)] hover:underline"><Captions className="h-3.5 w-3.5" />{message.transcript ? 'Refresh transcript' : 'Transcribe'}</button>{message.transcript ? <p className="rounded-lg bg-black/10 p-2 text-xs leading-relaxed text-[var(--text-secondary)]">{message.transcript}</p> : null}</div>
+                    <div className="space-y-2"><audio controls src={message.media_url} className="h-8 max-w-full" /><button type="button" onClick={() => void handleTranscribe(message)} className="inline-flex items-center gap-1 text-xs text-accent-2 hover:underline"><Captions className="h-3.5 w-3.5" />{message.transcript ? 'Refresh transcript' : 'Transcribe'}</button>{message.transcript ? <p className="rounded-lg bg-black/10 p-2 text-xs leading-relaxed text-text-2">{message.transcript}</p> : null}</div>
                   )}
                   {message.message_type === 'photo' && message.media_url && (
                     <Image
@@ -549,7 +636,7 @@ export default function RealtimeChat() {
                     </div>
                   )}
                   {message.message_type === 'location' && message.location_payload && (
-                    <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl bg-[var(--bg-3)] p-3 text-sm hover:bg-[var(--accent-1)]/10"><MapPin className="h-5 w-5 text-[var(--accent-1)]" /><span><strong>Shared location</strong><br />{message.location_payload.latitude.toFixed(5)}, {message.location_payload.longitude.toFixed(5)} · ±{Math.round(message.location_payload.accuracy ?? 0)}m</span></a>
+                    <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-input bg-soft-tint p-3 text-sm hover:bg-accent-1/10"><MapPin className="h-5 w-5 text-accent-1" /><span><strong>Shared location</strong><br />{message.location_payload.latitude.toFixed(5)}, {message.location_payload.longitude.toFixed(5)} · ±{Math.round(message.location_payload.accuracy ?? 0)}m</span></a>
                   )}
                   {message.message_type === 'sos' && message.location_payload && (
                     <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 p-3 text-sm text-red-100 hover:bg-red-500/25"><MapPin className="h-5 w-5 text-red-300" /><span><strong>🆘 Emergency SOS</strong><br />Open the sender’s current location.</span></a>
@@ -567,7 +654,7 @@ export default function RealtimeChat() {
                       setSelectedMessage(message)
                       setShowReplyThread(true)
                     }}
-                    className="p-1 rounded-full bg-[var(--accent-1)]/10 hover:bg-[var(--accent-1)]/20 text-[var(--accent-1)]"
+                    className="p-1 rounded-pill bg-accent-1/10 hover:bg-accent-1/20 text-accent-1"
                   >
                     <ReplyIcon className="h-3 w-3" />
                   </button>

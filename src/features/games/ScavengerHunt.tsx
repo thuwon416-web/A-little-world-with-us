@@ -52,7 +52,7 @@ export default function ScavengerHunt({ totalClues = 3 }: { totalClues?: number 
       className="glass-card p-4"
     >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-dancing text-lg text-[var(--accent-2)]">Scavenger Hunt</h3>
+        <h3 className="font-dancing text-lg text-accent-2">Scavenger Hunt</h3>
         <div className="text-sm opacity-60">
           Progress: {found.length}/{totalClues}
         </div>
@@ -67,7 +67,7 @@ export default function ScavengerHunt({ totalClues = 3 }: { totalClues?: number 
 
       <div className="flex gap-2 items-center">
         {found.map((f) => (
-          <div key={f} className="px-3 py-1 rounded bg-[var(--accent-1)]/10 text-[13px]">
+          <div key={f} className="px-3 py-1 rounded bg-accent-1/10 text-[13px]">
             {f}
           </div>
         ))}
@@ -75,7 +75,7 @@ export default function ScavengerHunt({ totalClues = 3 }: { totalClues?: number 
 
       {unlocked ? (
         <div className="mt-4 p-3 bg-gradient-to-r from-[var(--accent-1)]/10 to-[var(--accent-2)]/6 rounded">
-          <div className="font-medium text-[var(--accent-1)]">Surprise unlocked! <Gift className="inline h-4 w-4" /></div>
+          <div className="font-medium text-accent-1">Surprise unlocked! <Gift className="inline h-4 w-4" /></div>
           <div className="text-sm opacity-70">
             You can now visit the secret page in the dashboard.
           </div>

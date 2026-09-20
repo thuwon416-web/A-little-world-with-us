@@ -110,12 +110,12 @@ export default function CalendarPage() {
     <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header>
         <h1
-          className="text-4xl text-[var(--text-primary)]"
+          className="text-4xl text-text-1"
           style={{ fontFamily: 'var(--font-display)' }}
         >
           Calendar & Plans
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">Our events, goals, and dreams</p>
+        <p className="mt-2 text-sm text-text-2">Our events, goals, and dreams</p>
       </header>
 
       <ExplicitAdviceControl
@@ -131,7 +131,7 @@ export default function CalendarPage() {
               key={tab}
               type="button"
               onClick={() => setActiveTab(tab)}
-              className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-[var(--accent-1)] bg-[var(--accent-1)] text-[var(--bg-color)]' : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-secondary)]'}`}
+              className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-accent-1 bg-accent-1 text-white' : 'border-accent-1/20 bg-card text-text-2'}`}
             >
               {tab}
             </button>
@@ -170,7 +170,7 @@ export default function CalendarPage() {
             <div className="glass-card p-5">
               <button
                 onClick={() => setShowSharedCalendar(!showSharedCalendar)}
-                className="w-full text-[var(--text-primary)] font-medium p-3 border border-[var(--accent-1)]/20 rounded-xl hover:bg-[var(--accent-1)]/10"
+                className="w-full text-text-1 font-medium p-3 border border-accent-1/20 rounded-xl hover:bg-accent-1/10"
               >
                 {showSharedCalendar ? 'Hide Shared Calendar' : 'Show Shared Calendar'}
               </button>
@@ -185,12 +185,12 @@ export default function CalendarPage() {
                           new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
                         )
                       }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-2 text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
+                      className="inline-flex items-center gap-2 rounded-xl border border-accent-1/20 bg-card px-4 py-2 text-text-1 hover:bg-accent-1/10"
                     >
                       <ChevronLeft className="h-4 w-4" />
                       <span>Previous</span>
                     </button>
-                    <h2 className="text-xl font-bold text-[var(--text-primary)]">
+                    <h2 className="text-xl font-bold text-text-1">
                       {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </h2>
                     <button
@@ -199,7 +199,7 @@ export default function CalendarPage() {
                           new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
                         )
                       }}
-                      className="inline-flex items-center gap-2 rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-2 text-[var(--text-primary)] hover:bg-[var(--accent-1)]/10"
+                      className="inline-flex items-center gap-2 rounded-xl border border-accent-1/20 bg-card px-4 py-2 text-text-1 hover:bg-accent-1/10"
                     >
                       <span>Next</span>
                       <ChevronRight className="h-4 w-4" />
@@ -211,7 +211,7 @@ export default function CalendarPage() {
                     {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
                       <div
                         key={day}
-                        className="text-center font-bold text-[var(--text-secondary)] py-2"
+                        className="text-center font-bold text-text-2 py-2"
                       >
                         {day}
                       </div>
@@ -234,15 +234,15 @@ export default function CalendarPage() {
                           onClick={() => setSelectedDate(date)}
                           className={`p-2 border rounded-xl min-h-[80px] ${
                             dayEvents.length > 0
-                              ? 'border-[var(--accent-1)]/30 bg-[var(--accent-1)]/10'
-                              : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)]'
-                          } text-[var(--text-primary)] hover:border-[var(--accent-1)]/50`}
+                              ? 'border-accent-1/30 bg-accent-1/10'
+                              : 'border-accent-1/20 bg-card'
+                          } text-text-1 hover:border-accent-1/50`}
                         >
                           <div className="font-bold">{day}</div>
                           {dayEvents.map((event) => (
                             <div
                               key={event.id}
-                              className="text-xs mt-1 truncate text-[var(--text-secondary)]"
+                              className="text-xs mt-1 truncate text-text-2"
                             >
                               {event.title}
                             </div>
@@ -254,8 +254,8 @@ export default function CalendarPage() {
 
                   {/* Add Event */}
                   {selectedDate && (
-                    <div className="rounded-[24px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5">
-                      <h3 className="font-bold text-xl mb-2 text-[var(--text-primary)]">
+                    <div className="rounded-[24px] border border-accent-1/20 bg-card p-5">
+                      <h3 className="font-bold text-xl mb-2 text-text-1">
                         {selectedDate.toLocaleDateString('en-US', {
                           month: 'long',
                           day: 'numeric',
@@ -264,7 +264,7 @@ export default function CalendarPage() {
                       </h3>
                       <button
                         onClick={() => void addEvent()}
-                        className="w-full bg-[var(--accent-1)] text-[var(--bg-color)] py-3 rounded-xl font-medium"
+                        className="w-full bg-accent-1 text-white py-3 rounded-xl font-medium"
                       >
                         + Add Event
                       </button>

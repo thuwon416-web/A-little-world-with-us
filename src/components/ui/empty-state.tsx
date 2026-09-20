@@ -18,18 +18,18 @@ export function EmptyState({ icon: Icon, title, description, action, className }
   return (
     <div
       className={cn(
-        'glass-card flex flex-col items-center justify-center gap-4 rounded-2xl p-8 text-center',
+        'glass-card flex flex-col items-center justify-center gap-4 rounded-btn p-8 text-center',
         className
       )}
     >
-      <div className="icon-bounce-once flex h-16 w-16 items-center justify-center rounded-full border border-[var(--accent-1)]/25 bg-[var(--card-bg-strong)] text-[var(--accent-1)] shadow-[0_0_20px_rgba(184,138,229,0.12)]">
+      <div className="icon-bounce-once flex h-16 w-16 items-center justify-center rounded-full border border-accent-1/25 bg-card text-accent-1 shadow-[0_0_20px_rgba(184,138,229,0.12)]">
         <Icon className="h-8 w-8" aria-hidden="true" />
       </div>
 
       <div className="space-y-2">
-        <h3 className="font-serif text-xl text-[var(--text-primary)]">{title}</h3>
+        <h3 className="font-serif text-xl text-text-1">{title}</h3>
         {description ? (
-          <p className="max-w-md text-sm leading-6 text-[var(--text-secondary)]">{description}</p>
+          <p className="max-w-md text-sm leading-6 text-text-2">{description}</p>
         ) : null}
       </div>
 

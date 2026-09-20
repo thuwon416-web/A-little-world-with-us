@@ -83,31 +83,31 @@ export default function PINLockWidget() {
 
   return (
     <div className="glass-card p-5">
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <Lock className="h-5 w-5 text-[var(--accent-1)]" />
+      <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
+        <Lock className="h-5 w-5 text-accent-1" />
         PIN Lock
       </h3>
 
       {hasPin ? (
         <div className="space-y-3">
-          <p className="text-sm text-[var(--text-secondary)]">
+          <p className="text-sm text-text-2">
             PIN lock is enabled. You&apos;ll be asked for your PIN when opening the app.
           </p>
           <button
             onClick={handleRemovePIN}
-            className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-500"
+            className="w-full rounded-xl border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
           >
             Remove PIN
           </button>
         </div>
       ) : (
         <div className="space-y-3">
-          <p className="text-sm text-[var(--text-secondary)]">
+          <p className="text-sm text-text-2">
             Set a PIN to protect your app and private vault.
           </p>
           <button
             onClick={() => setShowModal(true)}
-            className="w-full rounded-xl bg-[var(--button-bg)] px-3 py-2 text-sm font-medium text-[var(--text-primary)]"
+            className="w-full rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white"
           >
             Set PIN
           </button>
@@ -119,47 +119,47 @@ export default function PINLockWidget() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <div className="glass-card p-6 max-w-sm w-full mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[var(--text-primary)]">
+              <h3 className="text-lg font-semibold text-text-1">
                 Set PIN
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-[var(--text-secondary)]">
+              <button onClick={() => setShowModal(false)} className="text-text-2">
                 <X className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">PIN (4-6 digits) *</label>
+                <label className="text-sm text-text-2">PIN (4-6 digits) *</label>
                 <input
                   type="password"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   placeholder="- - - - "
                   maxLength={6}
                 />
               </div>
 
               <div>
-                <label className="text-sm text-[var(--text-secondary)]">Confirm PIN *</label>
+                <label className="text-sm text-text-2">Confirm PIN *</label>
                 <input
                   type="password"
                   value={confirmPin}
                   onChange={(e) => setConfirmPin(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-3 py-2 text-sm text-[var(--text-primary)]"
+                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   placeholder="- - - - "
                   maxLength={6}
                 />
               </div>
 
               {error && (
-                <p className="text-sm text-red-500">{error}</p>
+                <p className="text-sm text-error">{error}</p>
               )}
 
               <button
                 onClick={handleSetPIN}
                 disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin}
-                className="w-full rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] disabled:opacity-50"
+                className="w-full rounded-xl bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
               >
                 Set PIN
               </button>

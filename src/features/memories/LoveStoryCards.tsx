@@ -33,10 +33,10 @@ const starterStories: StoryCard[] = [
 ]
 
 const moodColors: Record<StoryCard['mood'], string> = {
-  sweet: 'bg-[var(--accent-1)]/20 text-[var(--accent-1)]',
-  adventurous: 'bg-[var(--bg-2)] text-[var(--accent-1)]',
-  quiet: 'bg-[var(--bg-2)] text-[var(--text-secondary)]',
-  deep: 'bg-[var(--bg-2)] text-[var(--text-secondary)]',
+  sweet: 'bg-accent-1/20 text-accent-1',
+  adventurous: 'bg-soft-tint text-accent-1',
+  quiet: 'bg-soft-tint text-text-2',
+  deep: 'bg-soft-tint text-text-2',
 }
 
 export default function LoveStoryCards() {
@@ -54,7 +54,7 @@ export default function LoveStoryCards() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <BookHeart className="h-5 w-5" />
         <h3 className="font-dancing text-2xl">Love Story Cards</h3>
       </div>
@@ -65,27 +65,27 @@ export default function LoveStoryCards() {
             key={story.id}
             whileTap={{ scale: 0.98 }}
             onClick={() => setActiveId(story.id)}
-            className={`rounded-2xl border p-3 text-left transition ${
+            className={`rounded-btn border p-3 text-left transition ${
               activeId === story.id
-                ? 'border-[var(--accent-1)]/20 bg-[var(--bg-2)]'
-                : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)]/25'
+                ? 'border-accent-1/20 bg-soft-tint'
+                : 'border-accent-1/20 bg-card/25'
             }`}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-[var(--text-primary)]">{story.title}</span>
+              <span className="font-medium text-text-1">{story.title}</span>
               <span
                 className={`rounded-full px-2 py-1 text-[9px] uppercase tracking-[0.15em] ${moodColors[story.mood]}`}
               >
                 {story.mood}
               </span>
             </div>
-            <p className="mt-1 text-sm text-[var(--text-primary)]/75">{story.summary}</p>
+            <p className="mt-1 text-sm text-text-1/75">{story.summary}</p>
           </motion.button>
         ))}
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/30 bg-[var(--card-bg-strong)] p-3 text-sm text-[var(--text-primary)]">
-        <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">
+      <div className="rounded-btn border border-accent-1/30 bg-card p-3 text-sm text-text-1">
+        <div className="mb-1 flex items-center gap-2 font-medium text-accent-2">
           <Sparkles className="h-4 w-4" />
           Highlighted chapter
         </div>

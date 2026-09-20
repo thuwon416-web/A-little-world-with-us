@@ -83,7 +83,7 @@ export default function SharedWishlist() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <Gift className="w-5 h-5" />
         <h3 className="font-dancing text-2xl">Shared Wishlist</h3>
       </div>
@@ -93,11 +93,11 @@ export default function SharedWishlist() {
           <motion.div
             key={item.id}
             whileHover={{ y: -2 }}
-            className="rounded-2xl bg-[var(--card-bg)] p-3"
+            className="rounded-btn bg-card p-3"
           >
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="font-medium text-[var(--text-primary)]">
+                <div className="font-medium text-text-1">
                   {item.secret ? 'Secret gift' : item.name}
                 </div>
                 <div className="text-[11px] opacity-60">
@@ -113,7 +113,7 @@ export default function SharedWishlist() {
               </button>
             </div>
             {item.reservedBy && (
-              <div className="mt-2 flex items-center gap-2 text-[11px] text-[var(--accent-1)]">
+              <div className="mt-2 flex items-center gap-2 text-[11px] text-accent-1">
                 <ShieldCheck className="w-3.5 h-3.5" />
                 Reserved by {item.reservedBy}
               </div>
@@ -127,20 +127,20 @@ export default function SharedWishlist() {
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Gift idea"
-          className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3 text-sm outline-none"
+          className="w-full rounded-btn border border-accent-1/20 bg-card p-3 text-sm outline-none"
         />
         <div className="grid grid-cols-2 gap-2">
           <input
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="Price"
-            className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3 text-sm outline-none"
+            className="rounded-btn border border-accent-1/20 bg-card p-3 text-sm outline-none"
           />
           <input
             value={link}
             onChange={(e) => setLink(e.target.value)}
             placeholder="Link"
-            className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3 text-sm outline-none"
+            className="rounded-btn border border-accent-1/20 bg-card p-3 text-sm outline-none"
           />
         </div>
         <label className="flex items-center gap-2 text-sm">

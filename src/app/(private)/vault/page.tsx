@@ -166,7 +166,7 @@ function VaultPageContent() {
     return (
       <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-10">
         <div className="text-center">
-          <p className="text-sm text-[var(--text-secondary)]">Checking authentication...</p>
+          <p className="text-sm text-text-2">Checking authentication...</p>
         </div>
       </div>
     )
@@ -178,9 +178,9 @@ function VaultPageContent() {
         <motion.div
           initial={{ opacity: 0, y: 20, scale: 0.97 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="w-full rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-7 text-center shadow-xl backdrop-blur-xl"
+          className="w-full rounded-[32px] border border-accent-1/20 bg-card p-7 text-center shadow-xl backdrop-blur-xl"
         >
-          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-[var(--button-bg)] text-[var(--text-primary)] shadow-lg">
+          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-1 text-text-1 shadow-lg">
             <motion.div
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ repeat: Infinity, duration: 3 }}
@@ -189,16 +189,16 @@ function VaultPageContent() {
             </motion.div>
           </div>
 
-          <p className="text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-text-2">
             Private keepsake
           </p>
           <h1
-            className="mt-2 text-4xl text-[var(--text-primary)]"
+            className="mt-2 text-4xl text-text-1"
             style={{ fontFamily: 'var(--font-display)' }}
           >
             Love Vault
           </h1>
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+          <p className="mt-2 text-sm text-text-2">
             Your private letters and memories, sealed until the right moment.
           </p>
           <input
@@ -208,17 +208,17 @@ function VaultPageContent() {
             maxLength={6}
             type="password"
             placeholder="Enter your 4-digit PIN"
-            className="mt-5 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-transparent px-4 py-3 text-center text-[var(--text-primary)]"
+            className="mt-5 w-full rounded-btn border border-accent-1/20 bg-transparent px-4 py-3 text-center text-text-1"
           />
-          <p className="mt-2 text-xs text-[var(--text-secondary)]">PIN must be 4-6 digits</p>
-          {unlockError ? <p className="mt-2 text-sm text-[var(--error)]">{unlockError}</p> : null}
+          <p className="mt-2 text-xs text-text-2">PIN must be 4-6 digits</p>
+          {unlockError ? <p className="mt-2 text-sm text-error">{unlockError}</p> : null}
 
           <motion.button
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={handleUnlock}
             disabled={!isPinValid}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--button-bg)] px-4 py-3 text-sm font-medium text-[var(--text-primary)]"
+            className="mt-5 flex w-full items-center justify-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-3 text-sm font-medium text-text-1"
           >
             <Eye className="h-4 w-4" />
             Unlock Vault
@@ -233,33 +233,33 @@ function VaultPageContent() {
     <div className="mx-auto min-h-screen max-w-6xl px-4 py-6">
       {/* Breadcrumb + header */}
       <div className="mb-6">
-        <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)] mb-4">
+        <div className="flex items-center gap-2 text-xs text-text-2 mb-4">
           <Link
             href="/dashboard"
-            className="flex items-center gap-1 hover:text-[var(--text-primary)]"
+            className="flex items-center gap-1 hover:text-text-1"
           >
             <Lock className="h-3.5 w-3.5" /> Home
           </Link>
-          <span className="text-[var(--text-secondary)]">/</span>
-          <span className="text-[var(--text-primary)]">Vault</span>
+          <span className="text-text-2">/</span>
+          <span className="text-text-1">Vault</span>
         </div>
 
         <div className="flex items-start justify-between">
           <div>
             <h1
-              className="text-3xl font-bold text-[var(--text-primary)] mb-1"
+              className="text-3xl font-bold text-text-1 mb-1"
               style={{ fontFamily: "'Playfair Display',serif'" }}
             >
               Love Vault
             </h1>
-            <p className="text-[var(--text-secondary)] text-sm">
+            <p className="text-text-2 text-sm">
               Letters, promises, and little surprises — locked until the moment they matter most.
             </p>
           </div>
 
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="px-4 py-2 rounded-full text-sm font-medium text-[var(--text-primary)] shadow-md hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)]"
+            className="px-4 py-2 rounded-full text-sm font-medium text-text-1 shadow-md hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)]"
           >
             <Lock className="h-4 w-4" />
             {showForm ? 'Cancel' : 'Seal a new letter'}
@@ -273,22 +273,22 @@ function VaultPageContent() {
         <>
       {/* Stats and intro */}
       <div className="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-3xl p-6 border border-[var(--accent-1)]/20 bg-[var(--card-bg)] backdrop-blur">
+        <div className="rounded-panel p-6 border border-accent-1/20 bg-card backdrop-blur">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-1)] text-[var(--bg-color)]">
+            <div className="flex h-12 w-12 items-center justify-center rounded-btn bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-1)] text-white">
               <Lock className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">
+              <div className="text-[10px] uppercase tracking-[0.22em] text-text-2">
                 Private keepsake
               </div>
               <div
-                className="text-xl font-semibold text-[var(--text-primary)]"
+                className="text-xl font-semibold text-text-1"
                 style={{ fontFamily: "'Playfair Display',serif'" }}
               >
                 Some words are worth the wait.
               </div>
-              <p className="text-sm text-[var(--text-secondary)] mt-1">
+              <p className="text-sm text-text-2 mt-1">
                 Every letter opens only on its promised day — the future you writes to the future
                 us.
               </p>
@@ -299,51 +299,51 @@ function VaultPageContent() {
             <button
               type="button"
               onClick={() => setShowForm((value) => !value)}
-              className="inline-flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium bg-[var(--bg-2)] hover:bg-[var(--bg-3)] backdrop-blur border border-[var(--accent-1)]/20"
+              className="inline-flex items-center gap-2 rounded-btn px-4 py-2.5 text-sm font-medium bg-soft-tint hover:bg-soft-tint backdrop-blur border border-accent-1/20"
             >
               {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
               {showForm ? 'Cancel' : 'Write a letter'}
             </button>
-            <div className="inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-widest text-[var(--text-secondary)] rounded-2xl bg-[var(--bg-2)] border border-[var(--accent-1)]/20">
+            <div className="inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-widest text-text-2 rounded-btn bg-soft-tint border border-accent-1/20">
               <Sparkles className="h-3.5 w-3.5" />
               {letters.length === 0 ? 'Fresh start' : 'Keepsakes saved'}
             </div>
           </div>
         </div>
 
-        <div className="rounded-3xl p-5 border border-[var(--accent-1)]/20 bg-[var(--card-bg)] backdrop-blur">
-          <div className="text-[10px] uppercase tracking-[0.22em] text-[var(--text-secondary)]">
+        <div className="rounded-panel p-5 border border-accent-1/20 bg-card backdrop-blur">
+          <div className="text-[10px] uppercase tracking-[0.22em] text-text-2">
             Archive
           </div>
           <div className="mt-4 grid grid-cols-3 gap-3">
-            <div className="rounded-2xl p-3 bg-[var(--bg-2)] border border-[var(--accent-1)]/15 text-center">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+            <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">
                 Letters
               </p>
               <p
-                className="mt-2 text-2xl text-[var(--text-primary)]"
+                className="mt-2 text-2xl text-text-1"
                 style={{ fontFamily: "'Playfair Display',serif'" }}
               >
                 {stats.total}
               </p>
             </div>
-            <div className="rounded-2xl p-3 bg-[var(--bg-2)] border border-[var(--accent-1)]/15 text-center">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+            <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">
                 Sealed
               </p>
               <p
-                className="mt-2 text-2xl text-[var(--text-primary)]"
+                className="mt-2 text-2xl text-text-1"
                 style={{ fontFamily: "'Playfair Display',serif'" }}
               >
                 {stats.sealed}
               </p>
             </div>
-            <div className="rounded-2xl p-3 bg-[var(--bg-2)] border border-[var(--accent-1)]/15 text-center">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-secondary)]">
+            <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">
                 Latest
               </p>
               <p
-                className="mt-2 text-base text-[var(--text-primary)]"
+                className="mt-2 text-base text-text-1"
                 style={{ fontFamily: "'Playfair Display',serif'" }}
               >
                 {stats.newest}
@@ -362,34 +362,34 @@ function VaultPageContent() {
             transition={{ duration: 0.25, ease: 'easeInOut' }}
             className="mb-6 overflow-hidden"
           >
-            <div className="rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 shadow-xl backdrop-blur-xl">
+            <div className="rounded-[32px] border border-accent-1/20 bg-card p-5 shadow-xl backdrop-blur-xl">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <label className="text-sm text-[var(--text-secondary)]">Title</label>
+                  <label className="text-sm text-text-2">Title</label>
                   <input
                     type="text"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
                     placeholder="A note for her heart"
-                    className="mt-2 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-base text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)]/80"
+                    className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-sm text-[var(--text-secondary)]">Message</label>
+                  <label className="text-sm text-text-2">Message</label>
                   <textarea
                     value={newContent}
                     onChange={(e) => setNewContent(e.target.value)}
                     placeholder="Write your heart out..."
                     rows={6}
-                    className="mt-2 w-full resize-none rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-base text-[var(--text-primary)] outline-none placeholder:text-[var(--text-secondary)]/80"
+                    className="mt-2 w-full resize-none rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
                   />
                 </div>
                <div>
-                 <label className="text-sm text-[var(--text-secondary)]">Category</label>
+                 <label className="text-sm text-text-2">Category</label>
                  <select
                    value={vaultCategory === 'all' ? 'private' : vaultCategory}
                    onChange={(e) => setVaultCategory(e.target.value as Exclude<VaultCategory, 'all'>)}
-                   className="mt-2 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none"
+                   className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1 outline-none"
                  >
                    <option value="private">Private</option>
                    <option value="celebration">Celebration</option>
@@ -398,12 +398,12 @@ function VaultPageContent() {
                  </select>
                </div>
                <div>
-                 <label className="text-sm text-[var(--text-secondary)]">Reveal date</label>
+                 <label className="text-sm text-text-2">Reveal date</label>
                  <input
                    type="date"
                    value={revealDate}
                    onChange={(e) => setRevealDate(e.target.value)}
-                   className="mt-2 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none"
+                   className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1 outline-none"
                  />
                </div>
              </div>
@@ -413,7 +413,7 @@ function VaultPageContent() {
                  type="button"
                  onClick={handleCreate}
                  disabled={!newTitle.trim() || !newContent.trim()}
-                 className="inline-flex items-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--button-bg)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] disabled:opacity-50"
+                 className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-2.5 text-sm font-medium text-text-1 disabled:opacity-50"
                >
                  <Save className="h-4 w-4" />
                  Seal & Save
@@ -432,8 +432,8 @@ function VaultPageContent() {
            onClick={() => setVaultCategory(option)}
            className={`rounded-full px-3 py-1.5 text-xs capitalize ${
              vaultCategory === option
-               ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
-               : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
+               ? 'bg-accent-1 text-text-1'
+               : 'bg-soft-tint text-text-2'
            }`}
          >
            {option}
@@ -442,29 +442,29 @@ function VaultPageContent() {
       </div>
 
       {lettersError ? (
-        <div className="rounded-[32px] border border-[var(--error)]/30 bg-[var(--error)]/10 p-10 text-center shadow-lg backdrop-blur-xl" role="alert">
-          <h2 className="text-2xl text-[var(--text-primary)]">Unable to load vault letters</h2>
-          <p className="mt-2 text-sm text-[var(--error)]">{lettersError}</p>
+        <div className="rounded-[32px] border border-error/30 bg-error/10 p-10 text-center shadow-lg backdrop-blur-xl" role="alert">
+          <h2 className="text-2xl text-text-1">Unable to load vault letters</h2>
+          <p className="mt-2 text-sm text-error">{lettersError}</p>
           <button
             type="button"
             onClick={() => void fetchLetters()}
-            className="mt-5 rounded-xl bg-[var(--accent-1)] px-4 py-2 font-semibold text-[var(--bg-color)]"
+            className="mt-5 rounded-xl bg-accent-1 px-4 py-2 font-semibold text-white"
           >
             Retry
           </button>
         </div>
       ) : filteredLetters.length === 0 ? (
-       <div className="rounded-[32px] border border-dashed border-[var(--accent-1)]/35 bg-[var(--card-bg)]/65 p-10 text-center shadow-lg backdrop-blur-xl">
-         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--button-bg)] text-[var(--text-primary)]">
+       <div className="rounded-[32px] border border-dashed border-accent-1/35 bg-card/65 p-10 text-center shadow-lg backdrop-blur-xl">
+         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent-1 text-text-1">
            <Lock className="h-4 w-4" />
          </div>
          <h2
-           className="text-3xl text-[var(--text-primary)]"
+           className="text-3xl text-text-1"
            style={{ fontFamily: 'var(--font-display)' }}
          >
            Your first letter is waiting
          </h2>
-         <p className="mt-2 text-sm text-[var(--text-secondary)]">
+         <p className="mt-2 text-sm text-text-2">
            Write a note for the version of your relationship that keeps getting sweeter.
          </p>
        </div>
@@ -478,28 +478,28 @@ function VaultPageContent() {
         </>
       ) : (
         <section>
-          <div className="mb-5 flex items-center justify-between rounded-3xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-5 backdrop-blur-xl">
+          <div className="mb-5 flex items-center justify-between rounded-panel border border-accent-1/20 bg-card p-5 backdrop-blur-xl">
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-[var(--text-secondary)]">Password security</p>
-              <p className="mt-1 text-sm text-[var(--text-primary)]">{isPasswordVaultUnlocked ? 'Unlocked · auto-locks after five minutes of inactivity' : 'Encrypted credentials stay locked separately from Love Vault letters.'}</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-text-2">Password security</p>
+              <p className="mt-1 text-sm text-text-1">{isPasswordVaultUnlocked ? 'Unlocked · auto-locks after five minutes of inactivity' : 'Encrypted credentials stay locked separately from Love Vault letters.'}</p>
             </div>
-            {isPasswordVaultUnlocked ? <Fingerprint className="h-5 w-5 text-[var(--success)]" /> : <KeyRound className="h-5 w-5 text-[var(--accent-1)]" />}
+            {isPasswordVaultUnlocked ? <Fingerprint className="h-5 w-5 text-success" /> : <KeyRound className="h-5 w-5 text-accent-1" />}
           </div>
           {!hasWrappedKey ? (
-            <div className="rounded-[28px] border border-dashed border-[var(--accent-1)]/30 bg-[var(--card-bg)] p-10 text-center">
-              <KeyRound className="mx-auto h-8 w-8 text-[var(--accent-1)]" />
-              <h2 className="mt-3 text-2xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>Set up your password vault</h2>
-              <p className="mx-auto mt-2 max-w-md text-sm text-[var(--text-secondary)]">Create a passphrase before adding encrypted credentials. Your passphrase never leaves this device.</p>
-              <button type="button" onClick={() => setShowVaultSetup(true)} className="mt-5 rounded-2xl bg-[var(--button-bg)] px-4 py-2.5 text-sm text-[var(--text-primary)]">Set up Vault Passphrase</button>
+            <div className="rounded-modal border border-dashed border-accent-1/30 bg-card p-10 text-center">
+              <KeyRound className="mx-auto h-8 w-8 text-accent-1" />
+              <h2 className="mt-3 text-2xl text-text-1" style={{ fontFamily: 'var(--font-display)' }}>Set up your password vault</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-text-2">Create a passphrase before adding encrypted credentials. Your passphrase never leaves this device.</p>
+              <button type="button" onClick={() => setShowVaultSetup(true)} className="mt-5 rounded-btn bg-accent-1 px-4 py-2.5 text-sm text-text-1">Set up Vault Passphrase</button>
             </div>
           ) : !isPasswordVaultUnlocked ? (
-            <div className="mx-auto max-w-md rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6">
-              <h2 className="text-2xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>Unlock passwords</h2>
-              <input type="password" value={passphrase} onChange={(event) => setPassphrase(event.target.value)} placeholder="Vault passphrase" className="mt-4 w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-sm text-[var(--text-primary)]" />
-              {passwordVaultError ? <p className="mt-2 text-sm text-[var(--error)]">{passwordVaultError}</p> : null}
+            <div className="mx-auto max-w-md rounded-modal border border-accent-1/20 bg-card p-6">
+              <h2 className="text-2xl text-text-1" style={{ fontFamily: 'var(--font-display)' }}>Unlock passwords</h2>
+              <input type="password" value={passphrase} onChange={(event) => setPassphrase(event.target.value)} placeholder="Vault passphrase" className="mt-4 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1" />
+              {passwordVaultError ? <p className="mt-2 text-sm text-error">{passwordVaultError}</p> : null}
               <div className="mt-4 flex flex-wrap gap-2">
-                <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))} disabled={passphrase.length < 8} className="rounded-2xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-50">Unlock</button>
-                <button type="button" onClick={() => void unlockWithBiometric().catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))} className="inline-flex items-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 px-4 py-2 text-sm text-[var(--text-primary)]"><Fingerprint className="h-4 w-4" />Biometric</button>
+                <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))} disabled={passphrase.length < 8} className="rounded-btn bg-accent-1 px-4 py-2 text-sm text-text-1 disabled:opacity-50">Unlock</button>
+                <button type="button" onClick={() => void unlockWithBiometric().catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))} className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1"><Fingerprint className="h-4 w-4" />Biometric</button>
               </div>
             </div>
           ) : (
@@ -515,11 +515,11 @@ function VaultPageContent() {
 function VaultPageSkeleton() {
   return (
     <div className="mx-auto min-h-screen max-w-6xl px-4 py-8">
-      <div className="mb-6 h-6 w-32 animate-pulse rounded-full bg-[var(--card-bg-strong)]" />
-      <div className="mb-6 h-16 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
+      <div className="mb-6 h-6 w-32 animate-pulse rounded-full bg-card" />
+      <div className="mb-6 h-16 animate-pulse rounded-panel bg-card" />
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="h-52 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
-        <div className="h-52 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
+        <div className="h-52 animate-pulse rounded-panel bg-card" />
+        <div className="h-52 animate-pulse rounded-panel bg-card" />
       </div>
     </div>
   )

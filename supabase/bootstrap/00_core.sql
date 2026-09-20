@@ -24,12 +24,24 @@
 -- Empty every Storage bucket manually in the Supabase Dashboard before running this script.
 
 do $$
+declare admin_email text := current_setting('app.admin_seed_email', true);
+declare admin_uuid text := current_setting('app.admin_seed_uuid', true);
+declare partner_email text := current_setting('app.partner_seed_email', true);
+declare partner_uuid text := current_setting('app.partner_seed_uuid', true);
 begin
-  if not exists (select 1 from auth.users where id = '900da207-67b7-4433-a105-90c4e4e6d9a4' and email = 'thuwon416@gmail.com') then
-    raise exception 'Admin auth account does not match the supplied ID/email; reset cancelled.';
+  if admin_email is null or admin_email = '' then
+    raise notice 'ADMIN_SEED_EMAIL not set, skipping admin seed. Set with: ALTER DATABASE postgres SET app.admin_seed_email = '\''...'\''';
+    return;
   end if;
-  if not exists (select 1 from auth.users where id = '693b63dc-2262-47c9-ad81-ab9d3d0646c4' and email = 'myintmyatthu.3792@gmail.com') then
-    raise exception 'Partner auth account does not match the supplied ID/email; reset cancelled.';
+  if admin_uuid is not null and admin_uuid != '' then
+    if not exists (select 1 from auth.users where id = admin_uuid::uuid and email = admin_email) then
+      raise exception 'Admin auth account does not match the supplied ID/email. Reset cancelled.';
+    end if;
+  end if;
+  if partner_email is not null and partner_email != '' and partner_uuid is not null and partner_uuid != '' then
+    if not exists (select 1 from auth.users where id = partner_uuid::uuid and email = partner_email) then
+      raise exception 'Partner auth account does not match the supplied ID/email. Reset cancelled.';
+    end if;
   end if;
 end $$;
 
@@ -123,7 +135,9 @@ create or replace function public.is_couple_member(target_couple_id uuid) return
   select exists (select 1 from public.couple_links cl where cl.couple_id = target_couple_id and cl.status = 'accepted' and auth.uid() in (cl.inviter_id, cl.accepted_by));
 $$;
 create or replace function public.is_location_admin() returns boolean language sql stable security definer set search_path = public as $$
-  select exists (select 1 from public.profiles where id = auth.uid() and email = 'thuwon416@gmail.com' and role = 'admin');
+-- NOTE: This function is also created in 12_admin_roles.sql
+-- Keep both in sync when changing admin logic.
+  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
 $$;
 create or replace function public.is_linked_user(target_user_id uuid) returns boolean language sql stable security definer set search_path = public as $$
   select auth.uid() = target_user_id or exists (select 1 from public.couple_links cl where cl.status = 'accepted' and ((cl.inviter_id = auth.uid() and cl.accepted_by = target_user_id) or (cl.accepted_by = auth.uid() and cl.inviter_id = target_user_id)));
@@ -359,11 +373,18 @@ create policy shared_media_delete on storage.objects for delete using (bucket_id
 
 -- Preserve the supplied accounts, create their profiles, and directly accept the pair.
 insert into public.profiles (id, email, role)
-select id, email, case when email = 'thuwon416@gmail.com' then 'admin' else 'user' end
-from auth.users where id in ('900da207-67b7-4433-a105-90c4e4e6d9a4','693b63dc-2262-47c9-ad81-ab9d3d0646c4');
+select id, email, case when email = current_setting('app.admin_seed_email', true) then 'admin' else 'user' end
+from auth.users 
+where id in (
+  current_setting('app.admin_seed_uuid', true)::uuid,
+  current_setting('app.partner_seed_uuid', true)::uuid
+);
 insert into public.couples (name) values ('A Little World With Us');
 insert into public.couple_links (couple_id, inviter_id, accepted_by, status, accepted_at)
-select id, '900da207-67b7-4433-a105-90c4e4e6d9a4', '693b63dc-2262-47c9-ad81-ab9d3d0646c4', 'accepted', now()
+select id, 
+  current_setting('app.admin_seed_uuid', true)::uuid, 
+  current_setting('app.partner_seed_uuid', true)::uuid, 
+  'accepted', now()
 from public.couples order by created_at desc limit 1;
 
 -- Flo import. Adjacent or overlapping entries are merged into one menstrual range.
@@ -378,18 +399,18 @@ with flo_raw(start_date, end_date) as (
   select min(start_date) as start_date, max(end_date) as end_date from marked group by grp
 )
 insert into public.cycle_logs (couple_id,user_id,start_date,end_date,phase,notes,source)
-select pair.couple_id,'693b63dc-2262-47c9-ad81-ab9d3d0646c4',period.start_date,period.end_date,'menstrual','Imported from Flo','flo_import'
+select pair.couple_id,current_setting('app.partner_seed_uuid', true)::uuid,period.start_date,period.end_date,'menstrual','Imported from Flo','flo_import'
 from flo_periods period cross join (select id as couple_id from public.couples order by created_at desc limit 1) pair;
 insert into public.care_daily_logs (couple_id,user_id,log_date,period_day,created_by,updated_by)
 select period.couple_id,period.user_id,days::date,true,period.user_id,period.user_id
 from public.cycle_logs period cross join lateral generate_series(period.start_date,period.end_date,'1 day'::interval) days
 where period.source = 'flo_import';
 insert into public.care_cycle_settings (couple_id,cycle_length,period_length,last_period_start,updated_by)
-select id,28,5,(select max(start_date) from public.cycle_logs where source = 'flo_import'),'693b63dc-2262-47c9-ad81-ab9d3d0646c4'
+select id,28,5,(select max(start_date) from public.cycle_logs where source = 'flo_import'),current_setting('app.partner_seed_uuid', true)::uuid
 from public.couples order by created_at desc limit 1;
 
 insert into public.location_sharing_settings (user_id, enabled, last_permission_state)
-values ('900da207-67b7-4433-a105-90c4e4e6d9a4', false, 'unknown'), ('693b63dc-2262-47c9-ad81-ab9d3d0646c4', false, 'unknown');
+values (current_setting('app.admin_seed_uuid', true)::uuid, false, 'unknown'), (current_setting('app.partner_seed_uuid', true)::uuid, false, 'unknown');
 
 create or replace function public.purge_expired_location_history() returns void language sql security definer set search_path = public as $$ delete from public.location_history where captured_at < now() - interval '7 days'; $$;
 commit;
@@ -439,14 +460,14 @@ select
 -- RLS verification. Each query must return exactly one accepted link row.
 begin;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', '900da207-67b7-4433-a105-90c4e4e6d9a4', true);
+select set_config('request.jwt.claim.sub', current_setting('app.admin_seed_uuid', true)::uuid, true);
 select id, email, role from public.profiles;
 select id, couple_id, status, inviter_id, accepted_by from public.couple_links;
 rollback;
 
 begin;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', '693b63dc-2262-47c9-ad81-ab9d3d0646c4', true);
+select set_config('request.jwt.claim.sub', current_setting('app.partner_seed_uuid', true)::uuid, true);
 select id, email, role from public.profiles;
 select id, couple_id, status, inviter_id, accepted_by from public.couple_links;
 rollback;

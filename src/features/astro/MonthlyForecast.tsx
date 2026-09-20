@@ -257,21 +257,21 @@ export default function MonthlyForecast() {
   ]
 
   return (
-    <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] p-6">
+    <div className="rounded-btn border border-accent-1/20 bg-card p-6">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="rounded-xl bg-[var(--accent-1)]/15 p-2 text-[var(--accent-1)]">
+          <div className="rounded-xl bg-accent-1/15 p-2 text-accent-1">
             <Calendar className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">Monthly Forecast</p>
-            <p className="mt-1 text-sm font-medium text-[var(--text-primary)]">ဒီလ ဘာလုပ်ရမလဲ</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Monthly Forecast</p>
+            <p className="mt-1 text-sm font-medium text-text-1">ဒီလ ဘာလုပ်ရမလဲ</p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setShowMyanmar(!showMyanmar)}
-          className="rounded-full border border-[var(--accent-1)]/20 px-3 py-1 text-xs text-[var(--accent-1)] transition hover:bg-[var(--accent-1)]/10"
+          className="rounded-full border border-accent-1/20 px-3 py-1 text-xs text-accent-1 transition hover:bg-accent-1/10"
         >
           {showMyanmar ? 'English' : 'မြန်မာ'}
         </button>
@@ -286,8 +286,8 @@ export default function MonthlyForecast() {
             onClick={() => setSelectedMonth(month)}
             className={`rounded-lg border px-3 py-2 text-center text-sm transition ${
               selectedMonth === month
-                ? 'border-[var(--accent-1)] bg-[var(--accent-1)]/10 text-[var(--accent-1)]'
-                : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)] text-[var(--text-primary)] hover:border-[var(--accent-1)]/40'
+                ? 'border-accent-1 bg-accent-1/10 text-accent-1'
+                : 'border-accent-1/20 bg-card text-text-1 hover:border-accent-1/40'
             }`}
           >
             {month}
@@ -302,21 +302,21 @@ export default function MonthlyForecast() {
           return (
             <div
               key={category.key}
-              className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-4"
+              className="rounded-xl border border-accent-1/20 bg-card p-4"
             >
               <div className="mb-2 flex items-center gap-2">
-                <Icon className="h-4 w-4 text-[var(--accent-1)]" />
-                <p className="text-sm font-medium text-[var(--text-primary)]">
+                <Icon className="h-4 w-4 text-accent-1" />
+                <p className="text-sm font-medium text-text-1">
                   {showMyanmar ? category.labelMy : category.label}
                 </p>
               </div>
-              <p className="mb-2 text-sm text-[var(--text-primary)]">
+              <p className="mb-2 text-sm text-text-1">
                 {showMyanmar ? forecast[`${category.key}My` as keyof ForecastData] : forecast[category.key]}
               </p>
-              <div className="flex items-start gap-2 rounded-lg bg-[var(--accent-1)]/5 p-3">
-                <TrendingUp className="h-4 w-4 text-[var(--accent-1)] flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-[var(--text-secondary)]">
-                  <span className="font-medium text-[var(--accent-1)]">Advice: </span>
+              <div className="flex items-start gap-2 rounded-lg bg-accent-1/5 p-3">
+                <TrendingUp className="h-4 w-4 text-accent-1 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-text-2">
+                  <span className="font-medium text-accent-1">Advice: </span>
                   {showMyanmar ? forecast[`${category.key}AdviceMy` as keyof ForecastData] : forecast[`${category.key}Advice` as keyof ForecastData]}
                 </p>
               </div>

@@ -9,7 +9,7 @@ import { getCoupleStatus } from '@/lib/couples'
 
 type Tab = 'timeline' | 'all' | 'categories'
 
-const TabSkeleton = () => <div className="h-96 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" />
+const TabSkeleton = () => <div className="h-96 animate-pulse rounded-panel bg-card" />
 const Timeline = dynamic(() => import('@/features/our-story/Timeline'), { loading: TabSkeleton })
 const AllMemories = dynamic(() => import('@/features/our-story/AllMemories'), { loading: TabSkeleton })
 const Categories = dynamic(() => import('@/features/our-story/Categories'), { loading: TabSkeleton })
@@ -35,20 +35,20 @@ export default function OurStoryPage() {
       transition={{ duration: 0.3, ease: 'easeOut' }}
       className="space-y-6 p-4 md:p-6"
     >
-      <header className="rounded-3xl border border-[var(--accent-1)]/15 bg-[var(--card-bg)] p-6 shadow-lg backdrop-blur-xl">
+      <header className="rounded-panel border border-accent-1/15 bg-card p-6 shadow-lg backdrop-blur-xl">
         <div className="flex items-center gap-3">
-          <AnimatedIcon name="BookHeart" animation="bounce" trigger="hover" size={24} className="text-[var(--accent-1)]" />
+          <AnimatedIcon name="BookHeart" animation="bounce" trigger="hover" size={24} className="text-accent-1" />
           <div>
-            <h1 className="text-2xl font-semibold text-[var(--text-primary)]">Our Story</h1>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">Every memory we&apos;ve made together</p>
+            <h1 className="text-2xl font-semibold text-text-1">Our Story</h1>
+            <p className="mt-1 text-sm text-text-2">Every memory we&apos;ve made together</p>
           </div>
         </div>
       </header>
 
-      {loading ? <div className="h-64 animate-pulse rounded-3xl bg-[var(--card-bg-strong)]" /> : error ? (
-        <div className="rounded-3xl border border-rose-400/30 p-6 text-rose-300">{error}</div>
+      {loading ? <div className="h-64 animate-pulse rounded-panel bg-card" /> : error ? (
+        <div className="rounded-panel border border-rose-400/30 p-6 text-rose-300">{error}</div>
       ) : !coupleId ? (
-        <div className="rounded-3xl border border-dashed border-[var(--accent-1)]/25 p-10 text-center text-[var(--text-secondary)]">Link with your partner to see your shared story.</div>
+        <div className="rounded-panel border border-dashed border-accent-1/25 p-10 text-center text-text-2">Link with your partner to see your shared story.</div>
       ) : (
         <>
           <nav className="flex flex-wrap gap-2" aria-label="Our Story sections">
@@ -57,7 +57,7 @@ export default function OurStoryPage() {
               ['all', 'All Memories', Heart],
               ['categories', 'Categories', Layers],
             ] as const).map(([value, label, Icon]) => (
-              <button key={value} type="button" onClick={() => setTab(value)} className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm transition ${tab === value ? 'bg-[var(--accent-1)]/15 text-[var(--accent-1)]' : 'text-[var(--text-secondary)] hover:bg-[var(--bg-3)]'}`}>
+              <button key={value} type="button" onClick={() => setTab(value)} className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm transition ${tab === value ? 'bg-accent-1/15 text-accent-1' : 'text-text-2 hover:bg-soft-tint'}`}>
                 <Icon size={16} /> {label}
               </button>
             ))}

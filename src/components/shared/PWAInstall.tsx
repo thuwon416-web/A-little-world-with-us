@@ -47,9 +47,9 @@ export default function PWAInstall() {
     <button
       type="button"
       onClick={handleInstall}
-      className="inline-flex items-center gap-2 rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:border-[var(--accent-1)]/40"
+      className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm font-medium text-text-1 shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:border-accent-1/40"
     >
-      <Sparkles className="h-4 w-4 text-[var(--accent-2)]" />
+      <Sparkles className="h-4 w-4 text-accent-2" />
       <Download className="h-4 w-4" />
       Install app
     </button>

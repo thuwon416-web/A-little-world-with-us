@@ -46,22 +46,22 @@ export default function PasswordGenerator({ onSelect, onClose }: PasswordGenerat
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
-      <div className="w-full max-w-lg rounded-[28px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-2xl backdrop-blur-xl">
+      <div className="w-full max-w-lg rounded-modal border border-accent-1/20 bg-card p-6 shadow-2xl backdrop-blur-xl">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl text-[var(--text-primary)]" style={{ fontFamily: 'var(--font-display)' }}>Password generator</h2>
-          <button type="button" onClick={onClose} aria-label="Close generator" className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-2)]"><X className="h-5 w-5" /></button>
+          <h2 className="text-2xl text-text-1" style={{ fontFamily: 'var(--font-display)' }}>Password generator</h2>
+          <button type="button" onClick={onClose} aria-label="Close generator" className="rounded-full p-2 text-text-2 hover:bg-soft-tint"><X className="h-5 w-5" /></button>
         </div>
-        <div className="mt-5 rounded-2xl bg-[var(--bg-2)] p-4">
-          <p className="break-all font-mono text-lg text-[var(--text-primary)]">{password}</p>
-          <div className="mt-3 flex items-center justify-between text-xs text-[var(--text-secondary)]">
+        <div className="mt-5 rounded-btn bg-soft-tint p-4">
+          <p className="break-all font-mono text-lg text-text-1">{password}</p>
+          <div className="mt-3 flex items-center justify-between text-xs text-text-2">
             <span className={strength(length, sets) === 'Strong' ? 'text-emerald-400' : strength(length, sets) === 'Medium' ? 'text-amber-400' : 'text-red-400'}>{strength(length, sets)}</span>
-            <button type="button" onClick={copyPassword} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-[var(--bg-3)]"><Copy className="h-3.5 w-3.5" />{copied ? 'Copied' : 'Copy'}</button>
+            <button type="button" onClick={copyPassword} className="inline-flex items-center gap-1 rounded-lg px-2 py-1 hover:bg-soft-tint"><Copy className="h-3.5 w-3.5" />{copied ? 'Copied' : 'Copy'}</button>
           </div>
         </div>
-        <label className="mt-5 block text-sm text-[var(--text-secondary)]">Length: {length}
-          <input type="range" min={8} max={64} value={length} onChange={(event) => setLength(Number(event.target.value))} className="mt-2 w-full accent-[var(--accent-1)]" />
+        <label className="mt-5 block text-sm text-text-2">Length: {length}
+          <input type="range" min={8} max={64} value={length} onChange={(event) => setLength(Number(event.target.value))} className="mt-2 w-full accent-accent-1" />
         </label>
-        <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-[var(--text-primary)]">
+        <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-text-1">
           {[
             ['Uppercase', uppercase, setUppercase],
             ['Lowercase', lowercase, setLowercase],
@@ -76,8 +76,8 @@ export default function PasswordGenerator({ onSelect, onClose }: PasswordGenerat
           ))}
         </div>
         <div className="mt-6 flex justify-end gap-2">
-          <button type="button" onClick={() => setSeed((value) => value + 1)} className="inline-flex items-center gap-2 rounded-2xl border border-[var(--accent-1)]/20 px-4 py-2 text-sm text-[var(--text-primary)]"><RefreshCw className="h-4 w-4" />Regenerate</button>
-          <button type="button" onClick={() => { onSelect(password); onClose() }} className="rounded-2xl bg-[var(--button-bg)] px-4 py-2 text-sm text-[var(--text-primary)]">Use password</button>
+          <button type="button" onClick={() => setSeed((value) => value + 1)} className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1"><RefreshCw className="h-4 w-4" />Regenerate</button>
+          <button type="button" onClick={() => { onSelect(password); onClose() }} className="rounded-btn bg-accent-1 px-4 py-2 text-sm text-white">Use password</button>
         </div>
       </div>
     </div>

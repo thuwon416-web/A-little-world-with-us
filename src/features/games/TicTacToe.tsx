@@ -57,7 +57,7 @@ export default function TicTacToe() {
           <button
             key={i}
             onClick={() => play(i)}
-            className="h-12 bg-[var(--card-bg)]/80 rounded shadow flex items-center justify-center text-lg font-bold"
+            className="h-12 bg-card/80 rounded shadow flex items-center justify-center text-lg font-bold"
           >
             {c}
           </button>

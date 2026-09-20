@@ -53,41 +53,41 @@ export default function ChatHistoryExport() {
 
   return (
     <div className="glass-card p-5">
-      <h3 className="text-lg font-semibold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-        <Download className="h-5 w-5 text-[var(--accent-1)]" />
+      <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
+        <Download className="h-5 w-5 text-accent-1" />
         Export Chat History
       </h3>
 
       <div className="space-y-3">
         <div>
-          <label className="text-sm text-[var(--text-secondary)]">Date Range</label>
+          <label className="text-sm text-text-2">Date Range</label>
           <div className="flex gap-2 mt-2">
             <button
               onClick={() => setDateRange('7d')}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm ${
+              className={`flex-1 rounded-input px-3 py-2 text-sm ${
                 dateRange === '7d'
-                  ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
-                  : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
+                  ? 'bg-accent-1 text-white'
+                  : 'bg-soft-tint text-text-2'
               }`}
             >
               Last 7 days
             </button>
             <button
               onClick={() => setDateRange('30d')}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm ${
+              className={`flex-1 rounded-input px-3 py-2 text-sm ${
                 dateRange === '30d'
-                  ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
-                  : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
+                  ? 'bg-accent-1 text-white'
+                  : 'bg-soft-tint text-text-2'
               }`}
             >
               Last 30 days
             </button>
             <button
               onClick={() => setDateRange('all')}
-              className={`flex-1 rounded-xl px-3 py-2 text-sm ${
+              className={`flex-1 rounded-input px-3 py-2 text-sm ${
                 dateRange === 'all'
-                  ? 'bg-[var(--button-bg)] text-[var(--text-primary)]'
-                  : 'bg-[var(--bg-2)] text-[var(--text-secondary)]'
+                  ? 'bg-accent-1 text-white'
+                  : 'bg-soft-tint text-text-2'
               }`}
             >
               All time
@@ -98,7 +98,7 @@ export default function ChatHistoryExport() {
         <button
           onClick={handleExport}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-[var(--button-bg)] px-4 py-2 text-sm font-medium text-[var(--text-primary)] disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 rounded-input bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
         >
           <Download className="h-4 w-4" />
           {loading ? 'Exporting...' : 'Export as JSON'}

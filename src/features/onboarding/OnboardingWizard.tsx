@@ -123,19 +123,19 @@ export default function OnboardingWizard() {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-[var(--accent-1)] border-t-transparent" />
-          <p className="text-[var(--text-secondary)]">Loading...</p>
+          <div className="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-accent-1 border-t-transparent" />
+          <p className="text-text-2">Loading...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-[var(--bg-1)] to-[var(--bg-2)] p-4 md:p-6">
+    <main className="min-h-screen bg-gradient-to-br from-bg to-soft-tint p-4 md:p-6">
       <div className="mx-auto max-w-2xl">
         {/* Progress Indicator */}
         <div className="mb-6 flex items-center justify-between gap-2">
-          <p className="text-xs uppercase tracking-[0.2em] text-[var(--text-secondary)]">
+          <p className="text-xs uppercase tracking-[0.2em] text-text-2">
             Step {currentStep}/{TOTAL_STEPS}
           </p>
           <div className="flex gap-2">
@@ -148,10 +148,10 @@ export default function OnboardingWizard() {
                   key={index}
                   className={`h-2.5 w-2.5 rounded-full transition-all ${
                     isCompleted
-                      ? 'bg-[var(--accent-1)]'
+                      ? 'bg-accent-1'
                       : isCurrent
-                      ? 'bg-[var(--accent-1)] scale-125'
-                      : 'bg-white/10'
+                      ? 'bg-accent-1 scale-125'
+                      : 'bg-soft-tint/20'
                   }`}
                 />
               )
@@ -160,7 +160,7 @@ export default function OnboardingWizard() {
         </div>
 
         {/* Step Content */}
-        <div className="rounded-[32px] border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
+        <div className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
           {currentStep === 1 && <WelcomeStep onNext={handleNext} />}
           {currentStep === 2 && (
             <ProfileStep
@@ -211,23 +211,23 @@ export default function OnboardingWizard() {
 function WelcomeStep({ onNext }: { onNext: () => void }) {
   return (
     <div className="space-y-6">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--accent-1)]/10 text-[var(--accent-1)]">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
         <Heart className="h-8 w-8" />
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Welcome</p>
-        <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Welcome</p>
+        <h1 className="mt-3 text-3xl font-serif text-text-1">
           Welcome to your little world
         </h1>
-        <p className="mt-3 text-[var(--text-secondary)]">
+        <p className="mt-3 text-text-2">
           A private space for you and your partner to share memories, stay connected, and care for each other.
         </p>
       </div>
 
       <button
         onClick={onNext}
-        className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-6 py-3 text-sm font-medium text-[var(--bg-color)] transition-colors hover:bg-[var(--accent-1)]/90"
+        className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-1/90"
       >
         Get Started
         <ChevronRight className="h-4 w-4" />
@@ -251,48 +251,48 @@ function ProfileStep({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
         <User className="h-6 w-6" />
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Profile</p>
-        <h1 className="mt-3 text-2xl font-serif text-[var(--text-primary)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Profile</p>
+        <h1 className="mt-3 text-2xl font-serif text-text-1">
           Tell us about yourself
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+        <p className="mt-2 text-sm text-text-2">
           This helps us personalize your experience.
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm text-[var(--text-secondary)]">Name</label>
+          <label className="mb-2 block text-sm text-text-2">Name</label>
           <input
             type="text"
             value={data.name || ''}
             onChange={(e) => onChange({ ...data, name: e.target.value })}
             placeholder="Your name"
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50"
+            className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1 placeholder:text-text-2/50"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-[var(--text-secondary)]">Birth Date</label>
+          <label className="mb-2 block text-sm text-text-2">Birth Date</label>
           <input
             type="date"
             value={data.birth_date || ''}
             onChange={(e) => onChange({ ...data, birth_date: e.target.value })}
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)]"
+            className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-[var(--text-secondary)]">Gender (Optional)</label>
+          <label className="mb-2 block text-sm text-text-2">Gender (Optional)</label>
           <select
             value={data.gender || ''}
             onChange={(e) => onChange({ ...data, gender: e.target.value as 'male' | 'female' | 'other' | 'prefer_not_to_say' })}
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)]"
+            className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1"
           >
             <option value="">Select...</option>
             <option value="male">Male</option>
@@ -307,7 +307,7 @@ function ProfileStep({
         <button
           onClick={onBack}
           disabled={saving}
-          className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-40"
+          className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-1 disabled:opacity-40"
         >
           <ChevronLeft className="mr-2 inline h-4 w-4" />
           Back
@@ -315,7 +315,7 @@ function ProfileStep({
         <button
           onClick={onNext}
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-6 py-2 text-sm font-medium text-[var(--bg-color)] disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
         >
           {saving ? 'Saving...' : 'Next'}
           <ChevronRight className="h-4 w-4" />
@@ -342,28 +342,28 @@ function PairReadyStep({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
         <Heart className="h-6 w-6" />
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Your shared space</p>
-        <h1 className="mt-3 text-2xl font-serif text-[var(--text-primary)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Your shared space</p>
+        <h1 className="mt-3 text-2xl font-serif text-text-1">
           Your pair is ready
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+        <p className="mt-2 text-sm text-text-2">
           Your shared memories, plans, and Care updates stay visible only to your accepted pair.
         </p>
       </div>
 
       <div className="space-y-3">
-        <label className="flex cursor-pointer gap-3 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] p-4">
+        <label className="flex cursor-pointer gap-3 rounded-btn border border-accent-1/20 bg-soft-tint p-4">
           <input type="checkbox" checked={data.notifications_enabled ?? false} onChange={(event) => onChange({ ...data, notifications_enabled: event.target.checked })} />
-          <span><strong className="block text-sm text-[var(--text-primary)]">Allow gentle notifications</strong><span className="mt-1 block text-xs text-[var(--text-secondary)]">Reminders and scheduled surprises can notify this device.</span></span>
+          <span><strong className="block text-sm text-text-1">Allow gentle notifications</strong><span className="mt-1 block text-xs text-text-2">Reminders and scheduled surprises can notify this device.</span></span>
         </label>
-        <label className="flex cursor-pointer gap-3 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] p-4">
+        <label className="flex cursor-pointer gap-3 rounded-btn border border-accent-1/20 bg-soft-tint p-4">
           <input type="checkbox" checked={data.location_consent ?? false} onChange={(event) => onChange({ ...data, location_consent: event.target.checked })} />
-          <span><strong className="block text-sm text-[var(--text-primary)]">Review location sharing later</strong><span className="mt-1 block text-xs text-[var(--text-secondary)]">Background sharing always needs separate device permission and can be stopped in Privacy.</span></span>
+          <span><strong className="block text-sm text-text-1">Review location sharing later</strong><span className="mt-1 block text-xs text-text-2">Background sharing always needs separate device permission and can be stopped in Privacy.</span></span>
         </label>
       </div>
 
@@ -371,7 +371,7 @@ function PairReadyStep({
         <button
           onClick={onBack}
           disabled={saving}
-          className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-40"
+          className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-1 disabled:opacity-40"
         >
           <ChevronLeft className="mr-2 inline h-4 w-4" />
           Back
@@ -380,14 +380,14 @@ function PairReadyStep({
           <button
             onClick={onSkip}
             disabled={saving}
-            className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-secondary)] disabled:opacity-40"
+            className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-2 disabled:opacity-40"
           >
             Skip for now
           </button>
           <button
             onClick={onNext}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-6 py-2 text-sm font-medium text-[var(--bg-color)] disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Continue'}
             <ChevronRight className="h-4 w-4" />
@@ -415,27 +415,27 @@ function HealthStep({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
         <Activity className="h-6 w-6" />
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Health</p>
-        <h1 className="mt-3 text-2xl font-serif text-[var(--text-primary)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Health</p>
+        <h1 className="mt-3 text-2xl font-serif text-text-1">
           Health Profile
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+        <p className="mt-2 text-sm text-text-2">
           Optional - helps with wellness features.
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm text-[var(--text-secondary)]">Blood Type</label>
+          <label className="mb-2 block text-sm text-text-2">Blood Type</label>
           <select
             value={data.blood_type || ''}
             onChange={(e) => onChange({ ...data, blood_type: e.target.value })}
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)]"
+            className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1"
           >
             <option value="">Select...</option>
             <option value="A+">A+</option>
@@ -451,23 +451,23 @@ function HealthStep({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-2 block text-sm text-[var(--text-secondary)]">Height (cm)</label>
+            <label className="mb-2 block text-sm text-text-2">Height (cm)</label>
             <input
               type="number"
               value={data.height_cm || ''}
               onChange={(e) => onChange({ ...data, height_cm: parseInt(e.target.value) || undefined })}
               placeholder="170"
-              className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50"
+              className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1 placeholder:text-text-2/50"
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm text-[var(--text-secondary)]">Weight (kg)</label>
+            <label className="mb-2 block text-sm text-text-2">Weight (kg)</label>
             <input
               type="number"
               value={data.weight_kg || ''}
               onChange={(e) => onChange({ ...data, weight_kg: parseFloat(e.target.value) || undefined })}
               placeholder="70"
-              className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50"
+              className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1 placeholder:text-text-2/50"
             />
           </div>
         </div>
@@ -477,7 +477,7 @@ function HealthStep({
         <button
           onClick={onBack}
           disabled={saving}
-          className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-40"
+          className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-1 disabled:opacity-40"
         >
           <ChevronLeft className="mr-2 inline h-4 w-4" />
           Back
@@ -486,14 +486,14 @@ function HealthStep({
           <button
             onClick={onSkip}
             disabled={saving}
-            className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-secondary)] disabled:opacity-40"
+            className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-2 disabled:opacity-40"
           >
             Skip for now
           </button>
           <button
             onClick={onNext}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-6 py-2 text-sm font-medium text-[var(--bg-color)] disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Next'}
             <ChevronRight className="h-4 w-4" />
@@ -521,39 +521,39 @@ function CycleStep({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
         <Moon className="h-6 w-6" />
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Cycle</p>
-        <h1 className="mt-3 text-2xl font-serif text-[var(--text-primary)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Cycle</p>
+        <h1 className="mt-3 text-2xl font-serif text-text-1">
           Cycle Tracking
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+        <p className="mt-2 text-sm text-text-2">
           Optional - for female users.
         </p>
       </div>
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm text-[var(--text-secondary)]">Last Period Start</label>
+          <label className="mb-2 block text-sm text-text-2">Last Period Start</label>
           <input
             type="date"
             value={data.last_period_date || ''}
             onChange={(e) => onChange({ ...data, last_period_date: e.target.value })}
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)]"
+            className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1"
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-[var(--text-secondary)]">Cycle Length (days)</label>
+          <label className="mb-2 block text-sm text-text-2">Cycle Length (days)</label>
           <input
             type="number"
             value={data.cycle_length || ''}
             onChange={(e) => onChange({ ...data, cycle_length: parseInt(e.target.value) || undefined })}
             placeholder="28"
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--bg-2)] px-4 py-3 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]/50"
+            className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1 placeholder:text-text-2/50"
           />
         </div>
       </div>
@@ -562,7 +562,7 @@ function CycleStep({
         <button
           onClick={onBack}
           disabled={saving}
-          className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-40"
+          className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-1 disabled:opacity-40"
         >
           <ChevronLeft className="mr-2 inline h-4 w-4" />
           Back
@@ -571,14 +571,14 @@ function CycleStep({
           <button
             onClick={onSkip}
             disabled={saving}
-            className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-secondary)] disabled:opacity-40"
+            className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-2 disabled:opacity-40"
           >
             Skip for now
           </button>
           <button
             onClick={onNext}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-6 py-2 text-sm font-medium text-[var(--bg-color)] disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Next'}
             <ChevronRight className="h-4 w-4" />
@@ -606,22 +606,22 @@ function _AstrologyStep({
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-2)]/10 text-[var(--accent-2)]">
+      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
         <Zap className="h-6 w-6" />
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Astrology</p>
-        <h1 className="mt-3 text-2xl font-serif text-[var(--text-primary)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Astrology</p>
+        <h1 className="mt-3 text-2xl font-serif text-text-1">
           Astrology Profile
         </h1>
-        <p className="mt-2 text-sm text-[var(--text-secondary)]">
+        <p className="mt-2 text-sm text-text-2">
           Optional - birth date already collected.
         </p>
       </div>
 
-      <div className="rounded-xl bg-[var(--bg-2)] p-4">
-        <p className="text-sm text-[var(--text-secondary)]">
+      <div className="rounded-xl bg-soft-tint p-4">
+        <p className="text-sm text-text-2">
           Your astrology profile will be automatically calculated from your birth date. You can view it in the wellness section.
         </p>
       </div>
@@ -630,7 +630,7 @@ function _AstrologyStep({
         <button
           onClick={onBack}
           disabled={saving}
-          className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-primary)] disabled:opacity-40"
+          className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-1 disabled:opacity-40"
         >
           <ChevronLeft className="mr-2 inline h-4 w-4" />
           Back
@@ -639,14 +639,14 @@ function _AstrologyStep({
           <button
             onClick={onSkip}
             disabled={saving}
-            className="rounded-full border border-[var(--accent-1)]/20 bg-[var(--card-bg-strong)] px-4 py-2 text-sm text-[var(--text-secondary)] disabled:opacity-40"
+            className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-2 disabled:opacity-40"
           >
             Skip for now
           </button>
           <button
             onClick={onNext}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-6 py-2 text-sm font-medium text-[var(--bg-color)] disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
           >
             Next
             <ChevronRight className="h-4 w-4" />
@@ -660,39 +660,39 @@ function _AstrologyStep({
 function CompleteStep({ onFinish, saving }: { onFinish: () => void; saving: boolean }) {
   return (
     <div className="space-y-6 text-center">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--accent-1)]/10 text-[var(--accent-1)]">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
         <Sparkles className="h-8 w-8" />
       </div>
 
       <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-[var(--text-secondary)]">Complete</p>
-        <h1 className="mt-3 text-3xl font-serif text-[var(--text-primary)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Complete</p>
+        <h1 className="mt-3 text-3xl font-serif text-text-1">
           You&apos;re all set!
         </h1>
-        <p className="mt-3 text-[var(--text-secondary)]">
+        <p className="mt-3 text-text-2">
           Your little world is ready. Start exploring and create beautiful moments together.
         </p>
       </div>
 
       <div className="grid gap-3">
-        <div className="flex items-center gap-3 rounded-xl bg-[var(--bg-2)] p-3 text-left">
-          <Check className="h-5 w-5 text-[var(--accent-1)]" />
-          <span className="text-sm text-[var(--text-primary)]">Profile created</span>
+        <div className="flex items-center gap-3 rounded-xl bg-soft-tint p-3 text-left">
+          <Check className="h-5 w-5 text-accent-1" />
+          <span className="text-sm text-text-1">Profile created</span>
         </div>
-        <div className="flex items-center gap-3 rounded-xl bg-[var(--bg-2)] p-3 text-left">
-          <Check className="h-5 w-5 text-[var(--accent-1)]" />
-          <span className="text-sm text-[var(--text-primary)]">Ready to connect</span>
+        <div className="flex items-center gap-3 rounded-xl bg-soft-tint p-3 text-left">
+          <Check className="h-5 w-5 text-accent-1" />
+          <span className="text-sm text-text-1">Ready to connect</span>
         </div>
-        <div className="flex items-center gap-3 rounded-xl bg-[var(--bg-2)] p-3 text-left">
-          <Check className="h-5 w-5 text-[var(--accent-1)]" />
-          <span className="text-sm text-[var(--text-primary)]">Wellness features enabled</span>
+        <div className="flex items-center gap-3 rounded-xl bg-soft-tint p-3 text-left">
+          <Check className="h-5 w-5 text-accent-1" />
+          <span className="text-sm text-text-1">Wellness features enabled</span>
         </div>
       </div>
 
       <button
         onClick={onFinish}
         disabled={saving}
-        className="inline-flex items-center gap-2 rounded-full bg-[var(--accent-1)] px-6 py-3 text-sm font-medium text-[var(--bg-color)] disabled:opacity-40"
+        className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-3 text-sm font-medium text-white disabled:opacity-40"
       >
         {saving ? 'Finishing...' : 'Go to Dashboard'}
         <Star className="h-4 w-4" />

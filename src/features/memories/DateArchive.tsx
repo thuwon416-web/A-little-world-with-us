@@ -59,7 +59,7 @@ export default function DateArchive() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <CalendarClock className="w-5 h-5" />
         <h3 className="font-dancing text-2xl">Date Archive</h3>
       </div>
@@ -69,11 +69,11 @@ export default function DateArchive() {
           <motion.div
             key={entry.id}
             whileHover={{ y: -2 }}
-            className="rounded-2xl bg-[var(--card-bg)] p-3"
+            className="rounded-btn bg-card p-3"
           >
             <div className="flex items-center justify-between gap-3">
-              <div className="font-medium text-[var(--text-primary)]">{entry.title}</div>
-              <div className="flex items-center gap-1 text-[var(--accent-2)]">
+              <div className="font-medium text-text-1">{entry.title}</div>
+              <div className="flex items-center gap-1 text-accent-2">
                 {[...Array(5)].map((_, index) => (
                   <Star
                     key={index}
@@ -93,13 +93,13 @@ export default function DateArchive() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Date name"
-          className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3 text-sm outline-none"
+          className="w-full rounded-btn border border-accent-1/20 bg-card p-3 text-sm outline-none"
         />
         <input
           type="date"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3 text-sm outline-none"
+          className="w-full rounded-btn border border-accent-1/20 bg-card p-3 text-sm outline-none"
         />
         <input
           type="range"
@@ -114,7 +114,7 @@ export default function DateArchive() {
           onChange={(e) => setNote(e.target.value)}
           rows={2}
           placeholder="One-line memory"
-          className="w-full rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] p-3 text-sm outline-none"
+          className="w-full rounded-btn border border-accent-1/20 bg-card p-3 text-sm outline-none"
         />
         <button onClick={addEntry} className="glass-button w-full text-sm">
           Add date

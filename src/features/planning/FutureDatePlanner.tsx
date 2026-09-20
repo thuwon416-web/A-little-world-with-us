@@ -65,7 +65,7 @@ export default function FutureDatePlanner() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <CalendarHeart className="h-5 w-5" />
         <h3 className="font-dancing text-2xl">Future Date Planner</h3>
       </div>
@@ -74,32 +74,32 @@ export default function FutureDatePlanner() {
         {plans.map((plan) => (
           <div
             key={plan.id}
-            className="rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/25 p-3"
+            className="rounded-btn border border-accent-1/20 bg-card/25 p-3"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-[var(--text-primary)]">{plan.title}</span>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-[var(--text-primary)]/60">
+              <span className="font-medium text-text-1">{plan.title}</span>
+              <span className="text-[10px] uppercase tracking-[0.18em] text-text-1/60">
                 {plan.date}
               </span>
             </div>
-            <p className="mt-1 text-sm text-[var(--text-primary)]/75">{plan.note}</p>
+            <p className="mt-1 text-sm text-text-1/75">{plan.note}</p>
           </div>
         ))}
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/15 p-3">
+      <div className="space-y-2 rounded-btn border border-accent-1/20 bg-card/15 p-3">
         <input
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           placeholder="Plan title"
-          className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
+          className="w-full rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1 placeholder:text-text-1/40"
         />
         <div className="flex gap-2">
           <input
             type="date"
             value={date}
             onChange={(event) => setDate(event.target.value)}
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1"
           />
           <button
             onClick={addPlan}
@@ -114,12 +114,12 @@ export default function FutureDatePlanner() {
           onChange={(event) => setNote(event.target.value)}
           rows={2}
           placeholder="Add a little note for the date..."
-          className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
+          className="w-full rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1 placeholder:text-text-1/40"
         />
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80">
-        <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">
+      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-text-1/80">
+        <div className="mb-1 flex items-center gap-2 font-medium text-accent-2">
           <Sparkles className="h-4 w-4" />
           Future promise
         </div>

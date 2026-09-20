@@ -58,13 +58,13 @@ export default function ExportData() {
   }
 
   return (
-    <div className="p-4 bg-white/10 rounded-lg">
+    <div className="p-4 bg-soft-tint/20 rounded-lg">
       <h3 className="font-medium mb-2">Export Data</h3>
       <p className="text-sm text-gray-400 mb-3">Download your care data as CSV</p>
       <button
         type="button"
         onClick={handleExport}
-        className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-sm transition"
+        className="px-4 py-2 bg-accent-1 hover:bg-accent-1/90 text-white rounded-lg text-sm transition"
       >
         <Download className="mr-2 inline h-4 w-4" /> Download CSV
       </button>

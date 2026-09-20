@@ -68,17 +68,17 @@ function AllMemories({ coupleId, initialCategory = 'all' }: { coupleId: string; 
   return (
     <div className="space-y-5">
       <div className="grid gap-3 md:grid-cols-2">
-        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search Burmese or English…" className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-4 py-3 text-sm text-[var(--text-primary)] outline-none" />
-        <select value={category} onChange={(event) => setCategory(event.target.value)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]"><option value="all">All categories</option>{categories.map((item) => <option key={item} value={item}>{item.replace(/_/g, ' ')}</option>)}</select>
+        <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search Burmese or English…" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 outline-none" />
+        <select value={category} onChange={(event) => setCategory(event.target.value)} className="rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1"><option value="all">All categories</option>{categories.map((item) => <option key={item} value={item}>{item.replace(/_/g, ' ')}</option>)}</select>
       </div>
       <div className="grid gap-3 sm:grid-cols-3">
-        <select value={importance} onChange={(event) => setImportance(event.target.value as MemoryImportance | 'all')} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]"><option value="all">All importance</option>{['critical', 'high', 'medium', 'low'].map((item) => <option key={item} value={item}>{item}</option>)}</select>
-        <input type="date" value={from} onChange={(event) => setFrom(event.target.value)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" />
-        <input type="date" value={to} onChange={(event) => setTo(event.target.value)} className="rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]" />
+        <select value={importance} onChange={(event) => setImportance(event.target.value as MemoryImportance | 'all')} className="rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1"><option value="all">All importance</option>{['critical', 'high', 'medium', 'low'].map((item) => <option key={item} value={item}>{item}</option>)}</select>
+        <input type="date" value={from} onChange={(event) => setFrom(event.target.value)} className="rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1" />
+        <input type="date" value={to} onChange={(event) => setTo(event.target.value)} className="rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1" />
       </div>
-      <p className="text-sm text-[var(--text-secondary)]">Showing {filtered.length} of {memories.length} loaded memories</p>
+      <p className="text-sm text-text-2">Showing {filtered.length} of {memories.length} loaded memories</p>
       <div className="grid gap-4 md:grid-cols-2">{filtered.map((memory) => <MemoryCard key={memory.id} memory={memory} />)}</div>
-      {hasMore ? <button type="button" onClick={() => void load(memories.length)} disabled={loadingMore} className="rounded-xl border border-[var(--accent-1)]/25 px-4 py-2 text-sm text-[var(--text-primary)]">{loadingMore ? 'Loading…' : 'Load more'}</button> : null}
+      {hasMore ? <button type="button" onClick={() => void load(memories.length)} disabled={loadingMore} className="rounded-xl border border-accent-1/25 px-4 py-2 text-sm text-text-1">{loadingMore ? 'Loading…' : 'Load more'}</button> : null}
     </div>
   )
 }

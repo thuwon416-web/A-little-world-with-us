@@ -59,7 +59,7 @@ export default function MemoryAlarm() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-[var(--accent-2)]">
+      <div className="flex items-center gap-2 text-accent-2">
         <Clock3 className="h-5 w-5" />
         <h3 className="font-dancing text-2xl">Memory Alarm</h3>
       </div>
@@ -70,36 +70,36 @@ export default function MemoryAlarm() {
             key={alarm.id}
             whileTap={{ scale: 0.98 }}
             onClick={() => toggleAlarm(alarm.id)}
-            className={`w-full rounded-2xl border p-3 text-left transition ${
+            className={`w-full rounded-btn border p-3 text-left transition ${
               alarm.active
-                ? 'border-[var(--accent-1)]/20 bg-[var(--bg-2)]'
-                : 'border-[var(--accent-1)]/20 bg-[var(--card-bg)]/25'
+                ? 'border-accent-1/20 bg-soft-tint'
+                : 'border-accent-1/20 bg-card/25'
             }`}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-[var(--text-primary)]">{alarm.label}</span>
-              <span className="text-[9px] uppercase tracking-[0.18em] text-[var(--text-primary)]/60">
+              <span className="font-medium text-text-1">{alarm.label}</span>
+              <span className="text-[9px] uppercase tracking-[0.18em] text-text-1/60">
                 {alarm.active ? 'on' : 'off'}
               </span>
             </div>
-            <p className="mt-1 text-sm text-[var(--text-primary)]/75">{alarm.time}</p>
+            <p className="mt-1 text-sm text-text-1/75">{alarm.time}</p>
           </motion.button>
         ))}
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)]/15 p-3">
+      <div className="space-y-2 rounded-btn border border-accent-1/20 bg-card/15 p-3">
         <input
           value={label}
           onChange={(event) => setLabel(event.target.value)}
           placeholder="Alarm label"
-          className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-primary)]/40"
+          className="w-full rounded-input border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1 placeholder:text-text-1/40"
         />
         <div className="flex gap-2">
           <input
             type="time"
             value={time}
             onChange={(event) => setTime(event.target.value)}
-            className="w-full rounded-xl border border-[var(--accent-1)]/20 bg-[var(--card-bg)] px-3 py-2 text-sm text-[var(--text-primary)]"
+            className="w-full rounded-input border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1"
           />
           <button onClick={addAlarm} className="glass-button px-3 py-2 text-sm">
             Add
@@ -107,8 +107,8 @@ export default function MemoryAlarm() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-[var(--accent-1)]/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-[var(--text-primary)]/80">
-        <div className="mb-1 flex items-center gap-2 font-medium text-[var(--accent-2)]">
+      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-accent-2 to-accent-1 p-3 text-sm text-text-1/80">
+        <div className="mb-1 flex items-center gap-2 font-medium text-accent-2">
           <Sparkles className="h-4 w-4" />
           Gentle reminder
         </div>

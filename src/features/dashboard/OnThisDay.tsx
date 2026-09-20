@@ -102,10 +102,10 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
   const visibleMemories = useMemo(() => memories.slice(0, 3), [memories])
 
   return (
-    <section className="glass-card dashboard-panel rounded-2xl p-6">
+    <section className="glass-card dashboard-panel rounded-btn p-6">
       <p className="dashboard-kicker">On This Day</p>
       {loading ? (
-        <div className="mt-3 h-20 animate-pulse rounded-2xl bg-[var(--card-bg-strong)]" />
+        <div className="mt-3 h-20 animate-pulse rounded-btn bg-card" />
       ) : memories.length === 0 ? (
         <div className="mt-3">
           <EmptyState
@@ -117,24 +117,24 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
       ) : (
         <div className="mt-3 space-y-4">
           {visibleMemories.map((memory) => (
-            <article key={memory.id} className="border-l-2 border-[var(--accent-1)]/40 pl-3">
-              <p className="text-xs text-[var(--text-secondary)]">
+            <article key={memory.id} className="border-l-2 border-accent-1/40 pl-3">
+              <p className="text-xs text-text-2">
                   {memory.yearsAgo} years ago today
               </p>
               {(() => {
                   const Icon = memory.source === 'photo' ? Camera : icons[memory.category ?? ''] ?? MessageCircle
-                return <Icon size={20} aria-hidden="true" className="mt-1 text-[var(--accent-1)]" />
+                return <Icon size={20} aria-hidden="true" className="mt-1 text-accent-1" />
               })()}
                 {memory.source === 'photo' ? (
                   <div className="mt-2 flex items-center gap-3">
                     {memory.imageUrl ? <img src={memory.imageUrl} alt="" className="h-14 w-14 rounded-xl object-cover" /> : null}
-                    <p className="text-sm text-[var(--text-primary)]">{memory.title}</p>
+                    <p className="text-sm text-text-1">{memory.title}</p>
                   </div>
                 ) : memory.quote ? (
-                  <p className="mt-1 text-sm text-[var(--text-primary)]">{memory.quote}</p>
+                  <p className="mt-1 text-sm text-text-1">{memory.quote}</p>
                 ) : null}
                 {memory.context ? (
-                <p className="mt-1 text-xs leading-relaxed text-[var(--text-secondary)]">
+                <p className="mt-1 text-xs leading-relaxed text-text-2">
                   {memory.context}
                 </p>
               ) : null}
