@@ -41,7 +41,7 @@ export default function AmbientBackground({ density = 'medium' }: AmbientBackgro
   }, [count])
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 hidden md:block">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 hidden md:block">
       {/* Soft glowing orbs */}
       <div className="absolute top-10 left-10 w-72 h-72 rounded-full bg-rose-deep/10 blur-3xl animate-glow-pulse" />
       <div
