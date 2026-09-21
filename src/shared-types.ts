@@ -67,6 +67,7 @@ export interface ChatMessage {
   transcript: string | null
   location_payload: Record<string, unknown> | null
   encrypted: boolean
+  encryption_version: number | null
   created_at: string
   updated_at: string
 }

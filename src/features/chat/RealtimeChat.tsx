@@ -10,6 +10,7 @@ import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
 import { resolveChatMediaUrl } from '@/lib/chatMedia'
 import { detectContextKeywords } from '@/features/ai-guardian/context/detector'
+import { enqueueMessage, processQueue, getQueueCount } from '@/lib/offline-queue'
 import ChatInputBar from './ChatInputBar'
 
 const VoiceMessageRecorder = dynamic(() => import('./VoiceMessageRecorder'), { ssr: false })
@@ -29,6 +30,10 @@ interface Message {
   encrypted: boolean
   reply_to: string | null
   created_at: string
+  edited_at: string | null
+  deleted_at: string | null
+  delivered_at: string | null
+  seen_at: string | null
   location_payload?: { latitude: number; longitude: number; accuracy?: number; label?: string } | null
   transcript?: string | null
 }
@@ -48,6 +53,8 @@ export default function RealtimeChat() {
   const [showFileUpload, setShowFileUpload] = useState(false)
   const [showReplyThread, setShowReplyThread] = useState(false)
   const [selectedMessage, setSelectedMessage] = useState<Message | null>(null)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editContent, setEditContent] = useState('')
   const [contextCount, setContextCount] = useState(0)
   const [contexts, setContexts] = useState<Array<{ id: string; category: string; sender_role: string; matched_keywords: string[] }>>([])
   const [showAIPanel, setShowAIPanel] = useState(false)
@@ -56,6 +63,8 @@ export default function RealtimeChat() {
   const [loadError, setLoadError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [isOnline, setIsOnline] = useState(true)
+  const [pendingCount, setPendingCount] = useState(0)
   // Pagination cursor: uses created_at timestamp only.
   // Note: In extremely rare cases where 2 messages share the same
   // microsecond timestamp, one may be skipped. Acceptable for 2-user
@@ -75,6 +84,35 @@ export default function RealtimeChat() {
   // This loader is intentionally run once to establish the realtime subscription.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // Online/offline detection
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true)
+      if (coupleId) {
+        void processQueue(supabase, coupleId).then((processed) => {
+          if (processed > 0) {
+            void getQueueCount().then(setPendingCount)
+          }
+        })
+      }
+    }
+    const handleOffline = () => setIsOnline(false)
+
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    setIsOnline(navigator.onLine)
+
+    // Load initial pending count
+    if (coupleId) {
+      void getQueueCount().then(setPendingCount)
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [coupleId])
 
   const loadCoupleAndMessages = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -112,7 +150,7 @@ export default function RealtimeChat() {
         }
         if (msg.encrypted && msg.content) {
           try {
-            const decrypted = await decryptMessage(msg.content, chatKey)
+            const decrypted = await decryptMessage(msg.content, chatKey, couple.id)
             return { ...msg, content: decrypted, media_url: mediaUrl }
           } catch {
             return { ...msg, media_url: mediaUrl }
@@ -122,11 +160,25 @@ export default function RealtimeChat() {
       })
     )
 
+    // Filter out deleted messages
+    const activeMessages = decryptedMessages.filter(msg => !msg.deleted_at)
+
     // Sort ascending for display (oldest first)
-    const sortedMessages = decryptedMessages.sort((a, b) => 
+    const sortedMessages = activeMessages.sort((a, b) => 
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     )
     setMessages(sortedMessages)
+
+    // Mark messages from partner as seen
+    const partnerMessages = activeMessages.filter(
+      msg => msg.sender_id !== currentUserId && !msg.seen_at
+    )
+    if (partnerMessages.length > 0) {
+      void supabase
+        .from('messages')
+        .update({ seen_at: new Date().toISOString() })
+        .in('id', partnerMessages.map(m => m.id))
+    }
 
     // Set pagination state
     if (loadedMessages && loadedMessages.length > 0) {
@@ -162,7 +214,7 @@ export default function RealtimeChat() {
 
           if (newMessage.encrypted && newMessage.content) {
             try {
-              const decrypted = await decryptMessage(newMessage.content, chatKey)
+              const decrypted = await decryptMessage(newMessage.content, chatKey, couple.id)
               setMessages((prev) => prev.some((message) => message.id === newMessage.id)
                 ? prev.map((message) => message.id === newMessage.id ? { ...message, ...newMessage, content: decrypted } : message)
                 : [...prev, { ...newMessage, content: decrypted }])
@@ -241,7 +293,7 @@ export default function RealtimeChat() {
             }
             if (msg.encrypted && msg.content) {
               try {
-                const decrypted = await decryptMessage(msg.content, chatKey)
+                const decrypted = await decryptMessage(msg.content, chatKey, coupleId)
                 return { ...msg, content: decrypted, media_url: mediaUrl }
               } catch {
                 return { ...msg, media_url: mediaUrl }
@@ -272,6 +324,24 @@ export default function RealtimeChat() {
     const chatKey = await deriveChatKey(coupleId)
     const encryptedContent = await encryptMessage(messageText, chatKey)
 
+    if (!isOnline) {
+      // Queue message for offline
+      await enqueueMessage({
+        id: crypto.randomUUID(),
+        couple_id: coupleId,
+        sender_id: currentUserId,
+        content: encryptedContent,
+        message_type: 'text',
+        encrypted: true,
+        reply_to: null,
+        created_at: new Date().toISOString(),
+        timestamp: Date.now(),
+      })
+      setPendingCount(await getQueueCount())
+      setInput('')
+      return
+    }
+
     const { data: savedMessage, error } = await supabase.from('messages').insert({
       couple_id: coupleId,
       sender_id: currentUserId,
@@ -282,6 +352,19 @@ export default function RealtimeChat() {
 
     if (error || !savedMessage) {
       console.error('Error sending message:', error)
+      // Queue if send fails
+      await enqueueMessage({
+        id: crypto.randomUUID(),
+        couple_id: coupleId,
+        sender_id: currentUserId,
+        content: encryptedContent,
+        message_type: 'text',
+        encrypted: true,
+        reply_to: null,
+        created_at: new Date().toISOString(),
+        timestamp: Date.now(),
+      })
+      setPendingCount(await getQueueCount())
       return
     }
 
@@ -521,6 +604,59 @@ export default function RealtimeChat() {
     setShowReplyThread(true)
   }
 
+  const handleEditMessage = async (message: Message) => {
+    if (!message.content || !coupleId || !currentUserId) return
+    setEditContent(message.content)
+    setShowEditModal(true)
+    setShowReplyThread(false)
+  }
+
+  const handleEditMessageSync = async (message: Message) => {
+    await handleEditMessage(message)
+  }
+
+  const handleDeleteMessageSync = async (message: Message) => {
+    await handleDeleteMessage(message)
+  }
+
+  const saveEdit = async () => {
+    if (!selectedMessage || !editContent.trim() || !coupleId) return
+    const chatKey = await deriveChatKey(coupleId)
+    const encryptedContent = await encryptMessage(editContent.trim(), chatKey)
+
+    const { error } = await supabase
+      .from('messages')
+      .update({ 
+        content: encryptedContent,
+        edited_at: new Date().toISOString()
+      })
+      .eq('id', selectedMessage.id)
+
+    if (error) {
+      console.error('Failed to edit message:', error)
+    } else {
+      setShowEditModal(false)
+      setSelectedMessage(null)
+      setEditContent('')
+    }
+  }
+
+  const handleDeleteMessage = async (message: Message) => {
+    if (!confirm('Delete this message?')) return
+
+    const { error } = await supabase
+      .from('messages')
+      .update({ deleted_at: new Date().toISOString() })
+      .eq('id', message.id)
+
+    if (error) {
+      console.error('Failed to delete message:', error)
+    } else {
+      setShowReplyThread(false)
+      setSelectedMessage(null)
+    }
+  }
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
@@ -539,7 +675,7 @@ export default function RealtimeChat() {
     <div className="flex flex-col h-[600px] glass-card">
       <header className="flex items-center gap-3 border-b border-accent-1/20 bg-card px-4 py-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-pill bg-accent-1 text-lg text-white"><Heart className="h-5 w-5 fill-current" /></div>
-        <div><p className="font-semibold text-text-1">Your love</p><p className="text-xs text-emerald-400">Online</p></div>
+        <div><p className="font-semibold text-text-1">Your love</p><p className="text-xs text-emerald-400">{isOnline ? 'Online' : 'Offline'}{pendingCount > 0 && ` (${pendingCount} pending)`}</p></div>
         <button type="button" onClick={() => setShowAIPanel((open) => !open)} className="ml-auto inline-flex items-center gap-1 rounded-pill border border-accent-1/20 px-3 py-1.5 text-xs text-text-1" aria-label="Open AI Guardian">
           <Sparkles className="h-3.5 w-3.5" /> AI {contextCount > 0 ? `•${contextCount}` : ''}
         </button>
@@ -643,6 +779,18 @@ export default function RealtimeChat() {
                   )}
                   <div className="mt-1 flex items-center justify-end gap-1 text-[10px] opacity-70">
                     <span>{new Date(message.created_at).toLocaleTimeString()}</span>
+                    {message.edited_at && <span className="text-accent-2">(edited)</span>}
+                    {message.sender_id === currentUserId && (
+                      <span className="flex items-center gap-0.5">
+                        {message.seen_at ? (
+                          <span className="text-blue-400">✓✓</span>
+                        ) : message.delivered_at ? (
+                          <span>✓✓</span>
+                        ) : (
+                          <span>✓</span>
+                        )}
+                      </span>
+                    )}
                     <span aria-hidden="true" />
                   </div>
                 </div>
@@ -711,11 +859,62 @@ export default function RealtimeChat() {
           message={selectedMessage}
           currentUserId={currentUserId}
           onReply={handleReply}
+          onEdit={handleEditMessageSync}
+          onDelete={handleDeleteMessageSync}
           onClose={() => {
             setShowReplyThread(false)
             setSelectedMessage(null)
           }}
         />
+      )}
+      {showEditModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-modal border border-accent-1/20 bg-card shadow-[0_20px_40px_rgba(19,10,33,0.28)]">
+            <div className="flex items-center justify-between border-b border-accent-1/20 p-4">
+              <h2 className="text-lg font-serif text-text-1">Edit Message</h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowEditModal(false)
+                  setSelectedMessage(null)
+                  setEditContent('')
+                }}
+                className="rounded-full p-2 text-text-2 hover:bg-accent-1/10 hover:text-accent-1 transition"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <textarea
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                rows={4}
+                className="w-full rounded-input border-2 border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 placeholder:text-text-2/50 resize-none focus:outline-none focus:ring-2 focus:ring-accent-1/50"
+              />
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={saveEdit}
+                  disabled={!editContent.trim()}
+                  className="flex-1 rounded-btn bg-gradient-to-r from-accent-1 to-accent-2 px-6 py-3 text-base font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setSelectedMessage(null)
+                    setEditContent('')
+                  }}
+                  className="flex-1 rounded-btn border border-accent-1/30 px-6 py-3 text-base font-medium text-text-1 hover:bg-accent-1/10 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

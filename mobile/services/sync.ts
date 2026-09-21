@@ -18,6 +18,8 @@ type MessageFields = {
   location_payload: string
   created_at: number
   synced: boolean
+  encrypted: boolean
+  encryption_version: number | null
 }
 type LocalMessage = MessageModel & MessageFields & { _get<T>(column: string): T }
 
@@ -89,6 +91,8 @@ export async function pushPendingMessages() {
       media_url: rawMessage._get('media_url') || null,
       media_duration: rawMessage._get('media_duration') || null,
       reply_to: rawMessage._get('reply_to') || null,
+      encrypted: rawMessage._get('encrypted') || false,
+      encryption_version: rawMessage._get('encryption_version') || null,
     }
 
     const { error } = await supabase.from('messages').upsert(payload).select()
@@ -192,6 +196,8 @@ export async function syncMessages(lastSyncAt?: string) {
             fields.media_duration = remoteMessage.media_duration ?? null
             fields.reply_to = remoteMessage.reply_to ?? ''
             fields.synced = true
+            fields.encrypted = remoteMessage.encrypted ?? false
+            fields.encryption_version = remoteMessage.encryption_version ?? null
           })
         } else {
           // Update existing message if remote is newer
@@ -214,6 +220,8 @@ export async function syncMessages(lastSyncAt?: string) {
               fields.media_duration = remoteMessage.media_duration ?? fields.media_duration
               fields.reply_to = remoteMessage.reply_to ?? fields.reply_to
               fields.synced = true
+              fields.encrypted = remoteMessage.encrypted ?? fields.encrypted
+              fields.encryption_version = remoteMessage.encryption_version ?? fields.encryption_version
             })
           }
         }

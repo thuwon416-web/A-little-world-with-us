@@ -18,10 +18,10 @@ export function setAuthenticated(value: boolean): void {
   try {
     if (value) {
       localStorage.setItem(AUTH_STORAGE_KEY, 'true')
-      document.cookie = `${COOKIE_NAME}=true; Path=/; SameSite=Lax; Max-Age=2592000`
+      document.cookie = `${COOKIE_NAME}=true; Path=/; SameSite=Lax; Max-Age=2592000; Secure`
     } else {
       localStorage.removeItem(AUTH_STORAGE_KEY)
-      document.cookie = `${COOKIE_NAME}=; Path=/; SameSite=Lax; Max-Age=0`
+      document.cookie = `${COOKIE_NAME}=; Path=/; SameSite=Lax; Max-Age=0; Secure`
     }
   } catch {
     return

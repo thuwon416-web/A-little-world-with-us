@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Image as ImageIcon, Mic, Music, Paperclip, Smile, Video, X, Reply as ReplyIcon, Send } from 'lucide-react'
+import { Image as ImageIcon, Mic, Music, Paperclip, Smile, Video, X, Reply as ReplyIcon, Send, Edit2, Trash2 } from 'lucide-react'
 
 interface Message {
   id: string
@@ -13,16 +13,22 @@ interface Message {
   encrypted: boolean
   reply_to: string | null
   created_at: string
+  edited_at: string | null
+  deleted_at: string | null
+  delivered_at: string | null
+  seen_at: string | null
 }
 
 interface ReplyThreadProps {
   message: Message
   currentUserId: string | null
   onReply: (replyData: { text: string; replyTo: string }) => void
+  onEdit?: (message: Message) => Promise<void>
+  onDelete?: (message: Message) => Promise<void>
   onClose: () => void
 }
 
-export default function ReplyThread({ message, currentUserId, onReply, onClose }: ReplyThreadProps) {
+export default function ReplyThread({ message, currentUserId, onReply, onEdit, onDelete, onClose }: ReplyThreadProps) {
   const [replyText, setReplyText] = useState('')
 
   const handleSendReply = () => {
@@ -132,6 +138,32 @@ export default function ReplyThread({ message, currentUserId, onReply, onClose }
             <Send className="h-4 w-4" />
             Send Reply
           </button>
+
+          {/* Edit/Delete Actions (only for own messages) */}
+          {message.sender_id === currentUserId && (
+            <div className="flex gap-2 pt-4 border-t border-accent-1/20">
+              {message.message_type === 'text' && onEdit && (
+                <button
+                  type="button"
+                  onClick={() => { void onEdit(message) }}
+                  className="flex-1 rounded-btn border border-accent-1/30 px-4 py-2 text-sm font-medium text-text-1 hover:bg-accent-1/10 transition flex items-center justify-center gap-2"
+                >
+                  <Edit2 className="h-4 w-4" />
+                  Edit
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  type="button"
+                  onClick={() => { void onDelete(message) }}
+                  className="flex-1 rounded-btn border border-error/30 px-4 py-2 text-sm font-medium text-error hover:bg-error/10 transition flex items-center justify-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

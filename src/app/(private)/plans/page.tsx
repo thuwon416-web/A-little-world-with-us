@@ -11,6 +11,17 @@ type Plan = {
   dueDate: string
   status: 'In progress' | 'Completed'
   items: { id: string; label: string; done: boolean }[]
+  updated_at: string
+}
+
+type PlanRecord = {
+  id: string
+  title: string
+  type: string
+  due_date: string | null
+  status: string
+  updated_at: string
+  created_at: string
 }
 
 const bucketList = [
@@ -22,6 +33,7 @@ const bucketList = [
 export default function PlansPage() {
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
+  const [conflictPlan, setConflictPlan] = useState<Plan | null>(null)
 
   useEffect(() => {
     const fetchPlans = async () => {
@@ -53,12 +65,13 @@ export default function PlansPage() {
           .select('*')
           .in('plan_id', planIds)
 
-        const plansWithItems = plansData.map((plan) => ({
+        const plansWithItems = plansData.map((plan: PlanRecord) => ({
           id: plan.id,
           title: plan.title,
           type: plan.type,
           dueDate: plan.due_date ? new Date(plan.due_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '',
           status: (plan.status === 'completed' ? 'Completed' : 'In progress') as 'In progress' | 'Completed',
+          updated_at: plan.updated_at || plan.created_at,
           items: (itemsData || [])
             .filter((item) => item.plan_id === plan.id)
             .map((item) => ({
@@ -98,7 +111,20 @@ export default function PlansPage() {
   const toggleItem = async (planId: string, itemId: string) => {
     const plan = plans.find((p) => p.id === planId)
     const item = plan?.items.find((i) => i.id === itemId)
-    if (!item) return
+    if (!item || !plan) return
+
+    // Check for conflict by fetching latest plan version
+    const { data: latestPlan } = await supabase
+      .from('plans')
+      .select('updated_at')
+      .eq('id', planId)
+      .single()
+
+    if (latestPlan && new Date(latestPlan.updated_at) > new Date(plan.updated_at)) {
+      // Conflict detected
+      setConflictPlan(plan)
+      return
+    }
 
     const { error } = await supabase
       .from('plan_items')
@@ -112,6 +138,34 @@ export default function PlansPage() {
 
   return (
     <div className="space-y-6">
+      {conflictPlan && (
+        <div className="rounded-modal border border-error/50 bg-card p-5">
+          <p className="text-sm font-semibold text-error">Edit conflict detected</p>
+          <p className="mt-2 text-sm text-text-2">
+            This plan was modified by your partner. Your changes may overwrite theirs.
+          </p>
+          <div className="mt-4 flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                // Force update by refetching
+                window.location.reload()
+              }}
+              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-white"
+            >
+              Reload latest
+            </button>
+            <button
+              type="button"
+              onClick={() => setConflictPlan(null)}
+              className="rounded-btn border border-border px-4 py-2 text-sm font-medium text-text-1"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-text-2">Shared plans</p>

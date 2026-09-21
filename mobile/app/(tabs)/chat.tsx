@@ -33,6 +33,7 @@ import {
   getChatMediaUrl,
   uploadChatMedia,
 } from '@/services/chatMedia'
+import { deriveChatKey, decryptMessage, encryptMessage } from '@/lib/chatEncryption'
 
 function formatMessageTime(value: string) {
   const date = new Date(value)
@@ -98,6 +99,22 @@ export default function ChatScreen() {
             const mediaUrl = rawRecord._get('media_url')
             const mediaDuration = rawRecord._get('media_duration')
             const replyTo = rawRecord._get('reply_to')
+            const encrypted = rawRecord._get('encrypted')
+            const encryptionVersion = rawRecord._get('encryption_version')
+            
+            let displayContent = typeof content === 'string' ? content : ''
+            
+            // Decrypt if encrypted
+            if (encrypted && encryptionVersion && coupleId && typeof content === 'string') {
+              try {
+                const key = await deriveChatKey(coupleId)
+                displayContent = await decryptMessage(content, key, coupleId)
+              } catch (error) {
+                console.error('Failed to decrypt message:', error)
+                displayContent = '[Encrypted message]'
+              }
+            }
+            
             const normalizedType: ChatMessageType =
               messageType === 'voice' ||
               messageType === 'photo' ||
@@ -127,12 +144,12 @@ export default function ChatScreen() {
             return {
               id: rawRecord.id,
               sender: (rawRecord._get('sender_id') === user?.id ? 'me' : 'them') as 'me' | 'them',
-              content: typeof content === 'string' ? content : '',
+              content: displayContent,
               senderId:
                 typeof rawRecord._get('sender_id') === 'string'
                   ? (rawRecord._get('sender_id') as string)
                   : '',
-              text: typeof content === 'string' ? content : '',
+              text: displayContent,
               time: formatMessageTime(
                 typeof createdAt === 'number'
                   ? new Date(createdAt).toISOString()
@@ -155,7 +172,7 @@ export default function ChatScreen() {
       })
 
     return () => subscription.unsubscribe()
-  }, [user?.id])
+  }, [user?.id, coupleId])
 
   // Fetch the accepted couple link and resolve the partner from its members.
   useEffect(() => {
@@ -186,6 +203,21 @@ export default function ChatScreen() {
     const trimmed = draft.trim()
     if (!trimmed || !user?.id || !coupleId) return
 
+    let encryptedContent = trimmed
+    let isEncrypted = false
+    let encryptionVersion: number | null = null
+
+    // Encrypt text messages
+    try {
+      const key = await deriveChatKey(coupleId)
+      encryptedContent = await encryptMessage(trimmed, key)
+      isEncrypted = true
+      encryptionVersion = 1
+    } catch (error) {
+      console.error('Failed to encrypt message:', error)
+      // Fall back to plaintext if encryption fails
+    }
+
     await database.write(async () => {
       await database.get('messages').create((record) => {
         const rawRecord = record as unknown as {
@@ -194,12 +226,16 @@ export default function ChatScreen() {
           couple_id: string
           created_at: number
           synced: boolean
+          encrypted: boolean
+          encryption_version: number | null
         }
-        rawRecord.content = trimmed
+        rawRecord.content = encryptedContent
         rawRecord.sender_id = user.id
         rawRecord.couple_id = coupleId
         rawRecord.created_at = Date.now()
         rawRecord.synced = !isOffline
+        rawRecord.encrypted = isEncrypted
+        rawRecord.encryption_version = encryptionVersion
       })
     })
 

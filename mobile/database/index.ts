@@ -3,7 +3,6 @@ import {
   addColumns,
   createTable,
   schemaMigrations,
-  unsafeExecuteSql,
 } from '@nozbe/watermelondb/Schema/migrations'
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite'
 
@@ -63,31 +62,11 @@ const migrations = schemaMigrations({
     {
       toVersion: 6,
       steps: [
-        unsafeExecuteSql('DROP TABLE IF EXISTS messages;'),
-        unsafeExecuteSql('DROP TABLE IF EXISTS offline_queue;'),
-        createTable({
-          name: 'messages',
+        addColumns({
+          table: 'messages',
           columns: [
-            { name: 'content', type: 'string' },
-            { name: 'sender_id', type: 'string' },
-            { name: 'couple_id', type: 'string', isOptional: true },
-            { name: 'message_type', type: 'string', isOptional: true },
-            { name: 'media_url', type: 'string', isOptional: true },
-            { name: 'media_duration', type: 'number', isOptional: true },
-            { name: 'reply_to', type: 'string', isOptional: true },
-            { name: 'location_payload', type: 'string', isOptional: true },
-            { name: 'created_at', type: 'number' },
-            { name: 'synced', type: 'boolean' },
-          ],
-        }),
-        createTable({
-          name: 'offline_queue',
-          columns: [
-            { name: 'method', type: 'string' },
-            { name: 'url', type: 'string' },
-            { name: 'body', type: 'string' },
-            { name: 'retry_count', type: 'number' },
-            { name: 'created_at', type: 'number' },
+            { name: 'encrypted', type: 'boolean', isOptional: true },
+            { name: 'encryption_version', type: 'number', isOptional: true },
           ],
         }),
       ],

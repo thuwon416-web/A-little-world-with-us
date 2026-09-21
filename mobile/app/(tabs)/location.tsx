@@ -9,6 +9,7 @@ import {
 } from '@maplibre/maplibre-react-native'
 import Constants from 'expo-constants'
 import * as Location from 'expo-location'
+import * as Linking from 'expo-linking'
 import { Redirect } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
@@ -149,6 +150,7 @@ export default function LocationScreen() {
   const [checkinNote, setCheckinNote] = useState('')
   const [checkinExpected, setCheckinExpected] = useState('')
   const [checkinSending, setCheckinSending] = useState(false)
+  const [locationPermissionDenied, setLocationPermissionDenied] = useState(false)
 
   const sendSOS = async () => {
     if (sosSending || !user || !coupleId) return
@@ -157,7 +159,9 @@ export default function LocationScreen() {
     try {
       const permission = await Location.requestForegroundPermissionsAsync()
       if (permission.status !== Location.PermissionStatus.GRANTED) {
-        throw new Error('Location permission is required to send an SOS.')
+        setLocationPermissionDenied(true)
+        setSosSending(false)
+        return
       }
       const position = await Location.getCurrentPositionAsync({
         accuracy: Location.Accuracy.High,
@@ -756,6 +760,20 @@ export default function LocationScreen() {
               </Text>
             ) : null}
             {sosError ? <Text style={[styles.sosError, { color: colors.error }]}>{sosError}</Text> : null}
+            {locationPermissionDenied ? (
+              <View style={[styles.permissionDeniedCard, { backgroundColor: colors.surface, borderColor: colors.accent1 }]}>
+                <Text style={[styles.permissionDeniedTitle, { color: colors.textPrimary }]}>Location Permission Required</Text>
+                <Text style={[styles.permissionDeniedText, { color: colors.textSecondary }]}>
+                  Enable location access in your device settings to use emergency SOS features.
+                </Text>
+                <TouchableOpacity
+                  onPress={() => Linking.openSettings()}
+                  style={[styles.permissionDeniedButton, { backgroundColor: colors.accent1 }]}
+                >
+                  <Text style={styles.permissionDeniedButtonText}>Open Settings</Text>
+                </TouchableOpacity>
+              </View>
+            ) : null}
           </View>
           {sosAlerts.map((alert) => (
             <View key={alert.id} style={styles.listItem}>
@@ -988,6 +1006,31 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     sosButtonText: { color: colors.background, fontSize: sizes.text.bodyLg, fontWeight: '800' },
     sosSuccess: { color: colors.success, fontSize: sizes.text.xs },
     sosError: { color: colors.error, fontSize: sizes.text.xs },
+    permissionDeniedCard: {
+      marginTop: 12,
+      padding: 16,
+      borderRadius: sizes.radius.card,
+      borderWidth: 1,
+    },
+    permissionDeniedTitle: {
+      fontSize: sizes.text.body,
+      fontWeight: '600',
+      marginBottom: 8,
+    },
+    permissionDeniedText: {
+      fontSize: sizes.text.sm,
+      marginBottom: 12,
+    },
+    permissionDeniedButton: {
+      paddingVertical: 12,
+      borderRadius: sizes.radius.btn,
+      alignItems: 'center',
+    },
+    permissionDeniedButtonText: {
+      color: '#FFFFFF',
+      fontSize: sizes.text.body,
+      fontWeight: '600',
+    },
     list: { paddingBottom: 20 },
     listItem: {
       backgroundColor: colors.surface,

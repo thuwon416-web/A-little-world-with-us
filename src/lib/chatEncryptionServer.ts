@@ -1,15 +1,100 @@
-const PREFIX = 'a-little-world-with-us-chat-'
+/**
+ * Server-side chat decryption (dual-key support)
+ * - New messages use CHAT_ENCRYPTION_KEY (env var)
+ * - Old messages use legacy hardcoded prefix (fallback)
+ */
 
-export async function decryptChatMessageServer(encrypted: string, coupleId: string): Promise<string> {
+const LEGACY_KEY_PREFIX = 'a-little-world-with-us-chat-'
+const PBKDF2_ITERATIONS = 100000
+const IV_LENGTH = 12
+
+// New env-based derivation
+async function deriveNewKey(coupleId: string): Promise<CryptoKey> {
+  const secret = process.env.CHAT_ENCRYPTION_KEY
+  if (!secret) {
+    throw new Error('CHAT_ENCRYPTION_KEY not set')
+  }
+  
   const encoder = new TextEncoder()
-  const material = await crypto.subtle.importKey('raw', encoder.encode(PREFIX + coupleId), 'PBKDF2', false, ['deriveKey'])
-  const key = await crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: encoder.encode(coupleId), iterations: 100000, hash: 'SHA-256' },
-    material,
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(secret),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  )
+  
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: encoder.encode(coupleId),
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
     { name: 'AES-GCM', length: 256 },
     false,
     ['decrypt']
   )
-  const bytes = Uint8Array.from(Buffer.from(encrypted, 'base64'))
-  return new TextDecoder().decode(await crypto.subtle.decrypt({ name: 'AES-GCM', iv: bytes.slice(0, 12) }, key, bytes.slice(12)))
+}
+
+// Legacy derivation (for old messages only)
+async function deriveLegacyKey(coupleId: string): Promise<CryptoKey> {
+  const encoder = new TextEncoder()
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(LEGACY_KEY_PREFIX + coupleId),
+    'PBKDF2',
+    false,
+    ['deriveKey']
+  )
+  
+  return crypto.subtle.deriveKey(
+    {
+      name: 'PBKDF2',
+      salt: encoder.encode(coupleId),
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt']
+  )
+}
+
+/**
+ * Decrypt — tries NEW key first, falls back to LEGACY on failure.
+ */
+export async function decryptChatMessageServer(encrypted: string, coupleId: string): Promise<string> {
+  const combined = Uint8Array.from(Buffer.from(encrypted, 'base64'))
+  const decoder = new TextDecoder()
+  
+  // Try new format first (version byte = 1)
+  if (combined[0] === 1) {
+    const iv = combined.slice(1, 1 + IV_LENGTH)
+    const ciphertext = combined.slice(1 + IV_LENGTH)
+    try {
+      const newKey = await deriveNewKey(coupleId)
+      const plaintext = await crypto.subtle.decrypt(
+        { name: 'AES-GCM', iv },
+        newKey,
+        ciphertext
+      )
+      return decoder.decode(plaintext)
+    } catch {
+      // fall through to legacy attempt
+    }
+  }
+  
+  // Legacy format: [IV][ciphertext]
+  const legacyIv = combined.slice(0, IV_LENGTH)
+  const legacyCiphertext = combined.slice(IV_LENGTH)
+  const legacyKey = await deriveLegacyKey(coupleId)
+  const plaintext = await crypto.subtle.decrypt(
+    { name: 'AES-GCM', iv: legacyIv },
+    legacyKey,
+    legacyCiphertext
+  )
+  return decoder.decode(plaintext)
 }

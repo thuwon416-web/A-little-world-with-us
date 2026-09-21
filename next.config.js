@@ -1,27 +1,7 @@
-const withPWA = require('next-pwa')({
-  dest: 'public',
+const withSerwist = require('@serwist/next').default({
+  swSrc: 'src/sw.ts',
+  swDest: 'public/sw.js',
   disable: process.env.NODE_ENV === 'development',
-  register: true,
-  scope: '/',
-  sw: 'sw.js',
-  reloadOnOnline: true,
-  // Next 15 does not always publish this internal manifest. Excluding it prevents
-  // a stale Workbox precache from failing installation with a 404 after deploys.
-  buildExcludes: [/app-build-manifest\.json$/],
-  maximumFileSizeToCacheInBytes: 52428800, // 50 MB limit (P2 constraint)
-  runtimeCaching: [
-    {
-      urlPattern: /^https?.*/,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'offlineCache',
-        expiration: {
-          maxEntries: 200,
-          maxAgeSeconds: 24 * 60 * 60, // 24 hours
-        },
-      },
-    },
-  ],
 })
 
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -131,8 +111,8 @@ const sentryOptions = {
 // Apply Sentry wrapper only if DSN is available
 const withSentry =
   process.env.NEXT_PUBLIC_SENTRY_DSN || process.env.SENTRY_DSN
-    ? withSentryConfig(withPWA(nextConfig), sentryOptions)
-    : withPWA(nextConfig)
+    ? withSentryConfig(withSerwist(nextConfig), sentryOptions)
+    : withSerwist(nextConfig)
 
 // Apply bundle analyzer
 module.exports = withBundleAnalyzer(withSentry)

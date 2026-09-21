@@ -17,6 +17,8 @@ export class MessageModel extends Model {
         { name: 'location_payload', type: 'string', isOptional: true },
         { name: 'created_at', type: 'number' },
         { name: 'synced', type: 'boolean' },
+        { name: 'encrypted', type: 'boolean', isOptional: true },
+        { name: 'encryption_version', type: 'number', isOptional: true },
       ],
     })
   }

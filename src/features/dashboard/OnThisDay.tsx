@@ -127,7 +127,7 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
               })()}
                 {memory.source === 'photo' ? (
                   <div className="mt-2 flex items-center gap-3">
-                    {memory.imageUrl ? <img src={memory.imageUrl} alt="" className="h-14 w-14 rounded-xl object-cover" /> : null}
+                    {memory.imageUrl ? <img src={memory.imageUrl} alt={`Memory photo: ${memory.title ?? 'Shared memory'}`} className="h-14 w-14 rounded-xl object-cover" /> : null}
                     <p className="text-sm text-text-1">{memory.title}</p>
                   </div>
                 ) : memory.quote ? (

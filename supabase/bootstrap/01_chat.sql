@@ -57,10 +57,19 @@ alter table public.messages
 alter table public.messages
   add column if not exists edited_at timestamptz;
 
+-- 5. Soft delete
+alter table public.messages
+  add column if not exists deleted_at timestamptz;
+
 -- Index for unread count queries
 create index if not exists messages_unseen_idx
   on public.messages(couple_id, seen_at)
   where seen_at is null;
+
+-- Index for soft delete filtering
+create index if not exists messages_deleted_idx
+  on public.messages(deleted_at)
+  where deleted_at is null;
 
 -- Index for reaction queries
 create index if not exists messages_reactions_gin_idx
