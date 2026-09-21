@@ -7,6 +7,8 @@ import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, Touc
 
 import { Modal } from '@/components/ui/Modal'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { supabase } from '@/lib/supabase'
 import { deleteMemory, getMemories, MemoryRecord } from '@/services/memories'
 import MemorySlideshow from '@/components/memories/MemorySlideshow'
@@ -29,6 +31,7 @@ const JOURNAL_MOODS: { id: JournalMood; label: string; Icon: typeof Smile }[] = 
 export default function MemoriesScreen() {
   const { colors } = useTheme()
   const router = useRouter()
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [memories, setMemories] = useState<JournalMemory[]>([])
   const [filter, setFilter] = useState<(typeof categories)[number]>('all')
   const [error, setError] = useState('')
@@ -692,67 +695,68 @@ export default function MemoriesScreen() {
     </ScrollView>
   )
 }
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { fontSize: 30, fontWeight: '700' },
-  secondary: { borderRadius: 12, padding: 12, alignItems: 'center' },
-  secondaryText: { fontWeight: '700' },
-  filters: { gap: 8 },
-  filter: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 16,
-  },
-  filterText: { textTransform: 'capitalize' },
-  card: {
-    borderRadius: 18,
-    borderWidth: 1,
-    padding: 16,
-    gap: 7,
-  },
-  row: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
-  memoryTitle: { fontSize: 18, fontWeight: '700', flex: 1 },
-  meta: { textTransform: 'capitalize', fontSize: 12 },
-  caption: { lineHeight: 21 },
-  muted: {},
-  error: {},
-  delete: { fontWeight: '700' },
-  journalActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  primaryButton: { borderRadius: 12, padding: 12, alignItems: 'center' },
-  primaryButtonText: { fontWeight: '700' },
-  input: { minHeight: 44, borderRadius: 12, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
-  textArea: { minHeight: 120, textAlignVertical: 'top' },
-  label: { fontWeight: '700' },
-  moodRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  moodChip: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: 999, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8 },
-  moodLabel: { fontSize: 12 },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 20, marginTop: 14 },
-  reflectionCard: { borderRadius: 12, borderWidth: 1, padding: 12, gap: 8 },
-  reflectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  reflectionLabel: { fontSize: 12, fontWeight: '700' },
-  reflectButton: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, borderRadius: 999, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
-  reflectButtonText: { fontSize: 12, fontWeight: '700' },
-  voiceRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 12, borderWidth: 1, padding: 10 },
-  voiceText: { flex: 1, fontSize: 13 },
-  mediatorCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 12 },
-  mediatorHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  mediatorHeaderText: { flex: 1, gap: 4 },
-  mediatorTitle: { fontSize: 17, fontWeight: '700' },
-  mediatorDescription: { fontSize: 14, lineHeight: 20 },
-  mediatorInput: { minHeight: 96, borderRadius: 14, borderWidth: 1, padding: 12, textAlignVertical: 'top' },
-  mediatorActions: { gap: 10 },
-  privacyNote: { fontSize: 12 },
-  askButton: { alignSelf: 'flex-end', borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 },
-  askButtonText: { fontWeight: '700' },
-  result: { borderRadius: 14, borderWidth: 1, padding: 14 },
-  resultText: { fontSize: 14, lineHeight: 22 },
-  curationCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 12 },
-  curationMemoryList: { gap: 8, maxHeight: 192 },
-  curationMemory: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: 12, padding: 10 },
-  checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  curationMemoryTitle: { flex: 1, fontSize: 14 },
-  curationMemoryDate: { fontSize: 11 },
-  curationInput: { minHeight: 44, borderRadius: 14, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
-  curationContextInput: { minHeight: 80, textAlignVertical: 'top' },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
+    eyebrow: { fontSize: sizes.text.xs, letterSpacing: 2, textTransform: 'uppercase' },
+    title: { fontSize: sizes.text.hLg, fontWeight: '700' },
+    secondary: { borderRadius: sizes.radius.input, padding: 12, alignItems: 'center' },
+    secondaryText: { fontWeight: '700' },
+    filters: { gap: 8 },
+    filter: {
+      paddingHorizontal: 14,
+      paddingVertical: 8,
+      borderRadius: sizes.radius.btn,
+    },
+    filterText: { textTransform: 'capitalize' },
+    card: {
+      borderRadius: sizes.radius.card,
+      borderWidth: 1,
+      padding: 16,
+      gap: 7,
+    },
+    row: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+    memoryTitle: { fontSize: sizes.text.bodyLg, fontWeight: '700', flex: 1 },
+    meta: { textTransform: 'capitalize', fontSize: sizes.text.xs },
+    caption: { lineHeight: 21 },
+    muted: {},
+    error: {},
+    delete: { fontWeight: '700' },
+    journalActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+    primaryButton: { borderRadius: sizes.radius.input, padding: 12, alignItems: 'center' },
+    primaryButtonText: { fontWeight: '700' },
+    input: { minHeight: 44, borderRadius: sizes.radius.input, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
+    textArea: { minHeight: 120, textAlignVertical: 'top' },
+    label: { fontWeight: '700' },
+    moodRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    moodChip: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: sizes.radius.pill, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8 },
+    moodLabel: { fontSize: sizes.text.xs },
+    modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 20, marginTop: 14 },
+    reflectionCard: { borderRadius: sizes.radius.input, borderWidth: 1, padding: 12, gap: 8 },
+    reflectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    reflectionLabel: { fontSize: sizes.text.xs, fontWeight: '700' },
+    reflectButton: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, borderRadius: sizes.radius.pill, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
+    reflectButtonText: { fontSize: sizes.text.xs, fontWeight: '700' },
+    voiceRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: sizes.radius.input, borderWidth: 1, padding: 10 },
+    voiceText: { flex: 1, fontSize: sizes.text.sm },
+    mediatorCard: { borderRadius: sizes.radius.card, borderWidth: 1, padding: 16, gap: 12 },
+    mediatorHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    mediatorHeaderText: { flex: 1, gap: 4 },
+    mediatorTitle: { fontSize: sizes.text.bodyLg, fontWeight: '700' },
+    mediatorDescription: { fontSize: sizes.text.sm, lineHeight: 20 },
+    mediatorInput: { minHeight: 96, borderRadius: sizes.radius.btn, borderWidth: 1, padding: 12, textAlignVertical: 'top' },
+    mediatorActions: { gap: 10 },
+    privacyNote: { fontSize: sizes.text.xs },
+    askButton: { alignSelf: 'flex-end', borderRadius: sizes.radius.pill, paddingHorizontal: 16, paddingVertical: 10 },
+    askButtonText: { fontWeight: '700' },
+    result: { borderRadius: sizes.radius.btn, borderWidth: 1, padding: 14 },
+    resultText: { fontSize: sizes.text.sm, lineHeight: 22 },
+    curationCard: { borderRadius: sizes.radius.card, borderWidth: 1, padding: 16, gap: 12 },
+    curationMemoryList: { gap: 8, maxHeight: 192 },
+    curationMemory: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: sizes.radius.input, padding: 10 },
+    checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+    curationMemoryTitle: { flex: 1, fontSize: sizes.text.sm },
+    curationMemoryDate: { fontSize: sizes.text.xs },
+    curationInput: { minHeight: 44, borderRadius: sizes.radius.btn, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
+    curationContextInput: { minHeight: 80, textAlignVertical: 'top' },
+  })

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Bell } from 'lucide-react-native'
 import {
   Alert,
@@ -13,10 +13,12 @@ import {
 import { useNotifications } from '@/hooks/useNotifications'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 
 export default function RemindersScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const { permissionStatus, reminders, addReminder, triggerTest } = useNotifications()
   const [draftTitle, setDraftTitle] = useState('')
   const [draftMessage, setDraftMessage] = useState('')
@@ -91,100 +93,101 @@ export default function RemindersScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: 72,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 10,
-  },
-  pill: {
-    color: colors.accent2,
-    fontSize: 12,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 14,
-  },
-  primaryButton: {
-    backgroundColor: colors.accent1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  primaryText: {
-    color: colors.background,
-    fontWeight: '700',
-  },
-  form: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    marginBottom: 16,
-  },
-  label: {
-    color: colors.textSecondary,
-    fontSize: 12,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 6,
-  },
-  input: {
-    color: colors.textPrimary,
-    fontSize: 15,
-    paddingVertical: 8,
-    marginBottom: 12,
-  },
-  secondaryButton: {
-    backgroundColor: colors.accent1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  secondaryText: {
-    color: colors.background,
-    fontWeight: '700',
-  },
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    gap: 12,
-  },
-  empty: {
-    color: colors.textSecondary,
-    lineHeight: 22,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  cardTitle: {
-    color: colors.textPrimary,
-    fontWeight: '700',
-    fontSize: 16,
-    marginBottom: 6,
-  },
-  cardMessage: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginBottom: 8,
-  },
-  cardTime: {
-    color: colors.accent2,
-    fontSize: 12,
-  },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 72,
+      paddingHorizontal: 20,
+      paddingBottom: 20,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hLg,
+      fontWeight: '700',
+      marginBottom: 10,
+    },
+    pill: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      marginBottom: 14,
+    },
+    primaryButton: {
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingVertical: 12,
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    primaryText: {
+      color: colors.background,
+      fontWeight: '700',
+    },
+    form: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.btn,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      marginBottom: 16,
+    },
+    label: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.xs,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      marginBottom: 6,
+    },
+    input: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.body,
+      paddingVertical: 8,
+      marginBottom: 12,
+    },
+    secondaryButton: {
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingVertical: 12,
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    secondaryText: {
+      color: colors.background,
+      fontWeight: '700',
+    },
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      gap: 12,
+    },
+    empty: {
+      color: colors.textSecondary,
+      lineHeight: 22,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.btn,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    cardTitle: {
+      color: colors.textPrimary,
+      fontWeight: '700',
+      fontSize: sizes.text.body,
+      marginBottom: 6,
+    },
+    cardMessage: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.sm,
+      marginBottom: 8,
+    },
+    cardTime: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+    },
+  })

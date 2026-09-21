@@ -4,6 +4,8 @@ import React from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 
 import { ThemeProvider, useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { I18nProvider } from '@/i18n/config'
 import { AuthProvider } from '@/lib/auth'
 import '@/services/location'
@@ -37,6 +39,7 @@ class ErrorBoundary extends React.Component<
 
 function ErrorFallback({ message }: { message: string }) {
   const { colors } = useTheme()
+  const styles = createStyles(colors, sizes)
   return (
     <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
       <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>Something went wrong</Text>
@@ -71,7 +74,7 @@ export default function RootLayout() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -79,12 +82,12 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   errorTitle: {
-    fontSize: 24,
+    fontSize: sizes.text.hMd,
     fontWeight: '700',
     marginBottom: 12,
   },
   errorMessage: {
-    fontSize: 16,
+    fontSize: sizes.text.body,
     textAlign: 'center',
   },
 })

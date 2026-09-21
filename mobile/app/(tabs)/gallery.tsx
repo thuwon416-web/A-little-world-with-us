@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import ImageUpload from '@/components/ImageUpload'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 
@@ -16,7 +18,7 @@ type GalleryItem = {
 
 export default function GalleryScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -134,77 +136,78 @@ export default function GalleryScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: colors.background,
-    paddingTop: 72,
-    paddingHorizontal: 20,
-    paddingBottom: 32,
-  },
-  eyebrow: {
-    color: colors.accent2,
-    fontSize: 12,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 30,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: 18,
-  },
-  loading: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    marginTop: 10,
-  },
-  emptyState: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  emptyText: {
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  grid: {
-    gap: 14,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  image: {
-    width: '100%',
-    height: 220,
-  },
-  meta: {
-    color: colors.accent2,
-    fontSize: 12,
-    letterSpacing: 1.4,
-    textTransform: 'uppercase',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-  },
-  metaRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingRight: 12,
-  },
-  delete: { color: colors.error, fontSize: 12, fontWeight: '700' },
-  error: { color: colors.error, fontSize: 13, marginBottom: 10 },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      backgroundColor: colors.background,
+      paddingTop: 72,
+      paddingHorizontal: 20,
+      paddingBottom: 32,
+    },
+    eyebrow: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+      marginBottom: 8,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hLg,
+      fontWeight: '700',
+      marginBottom: 8,
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.body,
+      lineHeight: 22,
+      marginBottom: 18,
+    },
+    loading: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.sm,
+      marginTop: 10,
+    },
+    emptyState: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 20,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    emptyText: {
+      color: colors.textSecondary,
+      textAlign: 'center',
+    },
+    grid: {
+      gap: 14,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    image: {
+      width: '100%',
+      height: 220,
+    },
+    meta: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+      letterSpacing: 1.4,
+      textTransform: 'uppercase',
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingRight: 12,
+    },
+    delete: { color: colors.error, fontSize: sizes.text.xs, fontWeight: '700' },
+    error: { color: colors.error, fontSize: sizes.text.sm, marginBottom: 10 },
+  })

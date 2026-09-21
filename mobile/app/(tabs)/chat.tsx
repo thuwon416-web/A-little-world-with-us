@@ -1,6 +1,6 @@
 import { Q } from '@nozbe/watermelondb'
 import * as Location from 'expo-location'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { FileText, Gift, Image as ImageIcon, MapPin, Mic, Paperclip, Send, Sticker, X } from 'lucide-react-native'
 
@@ -8,6 +8,8 @@ import { Button } from '@/components/Button'
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
 import { Input } from '@/components/Input'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { FileUpload } from '@/components/chat/FileUpload'
 import { GIFPicker } from '@/components/chat/GIFPicker'
 import { PhotoShare } from '@/components/chat/PhotoShare'
@@ -52,7 +54,7 @@ function formatMessageTime(value: string) {
 export default function ChatScreen() {
   const { user } = useAuth()
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const { state: callState, placeCall } = useCall()
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -585,112 +587,113 @@ export default function ChatScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: 72,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  syncBanner: {
-    flexDirection: 'row',
-    gap: 8,
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    marginBottom: 12,
-  },
-  online: {
-    backgroundColor: colors.surface,
-  },
-  offline: {
-    backgroundColor: colors.surface,
-  },
-  syncText: {
-    color: colors.textPrimary,
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  list: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 16,
-  },
-  listContent: {
-    gap: 12,
-  },
-  callRow: {
-    flexDirection: 'row',
-    gap: 10,
-    marginBottom: 12,
-  },
-  callButton: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.accent1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  callButtonVideo: {
-    flex: 1,
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.accent1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  callButtonDisabled: {
-    opacity: 0.5,
-  },
-  callButtonText: {
-    color: colors.textPrimary,
-    fontWeight: '700',
-  },
-  callStatus: {
-    color: colors.accent2,
-    fontSize: 12,
-    marginBottom: 10,
-  },
-  composer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 16,
-  },
-  attachmentButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  input: {
-    flex: 1,
-  },
-  error: { color: colors.error, marginBottom: 8, fontSize: 13 },
-  attachmentOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#0008' },
-  attachmentSheet: { borderTopWidth: 1, borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
-  attachmentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
-  attachmentTitle: { fontSize: 20, fontWeight: '700' },
-  attachmentGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  attachmentItem: { width: '30%', minHeight: 72, borderRadius: 14, alignItems: 'center', justifyContent: 'center', gap: 6 },
-  attachmentLabel: { fontSize: 12, fontWeight: '600' },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 72,
+      paddingHorizontal: 20,
+      paddingBottom: 20,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hLg,
+      fontWeight: '700',
+      marginBottom: 12,
+    },
+    syncBanner: {
+      flexDirection: 'row',
+      gap: 8,
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      marginBottom: 12,
+    },
+    online: {
+      backgroundColor: colors.surface,
+    },
+    offline: {
+      backgroundColor: colors.surface,
+    },
+    syncText: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.xs,
+      fontWeight: '600',
+    },
+    list: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+    },
+    listContent: {
+      gap: 12,
+    },
+    callRow: {
+      flexDirection: 'row',
+      gap: 10,
+      marginBottom: 12,
+    },
+    callButton: {
+      flex: 1,
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    callButtonVideo: {
+      flex: 1,
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    callButtonDisabled: {
+      opacity: 0.5,
+    },
+    callButtonText: {
+      color: colors.textPrimary,
+      fontWeight: '700',
+    },
+    callStatus: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+      marginBottom: 10,
+    },
+    composer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      marginTop: 16,
+    },
+    attachmentButton: {
+      width: 44,
+      height: 44,
+      borderRadius: sizes.radius.btn,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    sendButton: {
+      width: 44,
+      height: 44,
+      borderRadius: sizes.radius.btn,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    input: {
+      flex: 1,
+    },
+    error: { color: colors.error, marginBottom: 8, fontSize: sizes.text.sm },
+    attachmentOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#0008' },
+    attachmentSheet: { borderTopWidth: 1, borderTopLeftRadius: sizes.radius.panel, borderTopRightRadius: sizes.radius.panel, padding: 20 },
+    attachmentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    attachmentTitle: { fontSize: sizes.text.hSm, fontWeight: '700' },
+    attachmentGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+    attachmentItem: { width: '30%', minHeight: 72, borderRadius: sizes.radius.btn, alignItems: 'center', justifyContent: 'center', gap: 6 },
+    attachmentLabel: { fontSize: sizes.text.xs, fontWeight: '600' },
+  })

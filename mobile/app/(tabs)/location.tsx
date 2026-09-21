@@ -21,6 +21,8 @@ import { sendLocalNotification } from '@/services/notifications'
 import { resolveSos } from '@/services/safety-sos'
 import { createCheckin, type SafetyCheckin } from '@/services/safety-checkins'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 
 type LocationHistoryRow = {
   latitude: number
@@ -110,7 +112,7 @@ type Tab = (typeof tabs)[number]
 
 export default function LocationScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const { isAdmin, loading: adminLoading } = useAdmin()
   const { user } = useAuth()
   const {
@@ -843,7 +845,7 @@ export default function LocationScreen() {
 
 function Empty({ label }: { label: string }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   return (
     <View style={styles.card}>
       <Text style={styles.meta}>{label}</Text>
@@ -851,147 +853,148 @@ function Empty({ label }: { label: string }) {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: 64,
-    paddingHorizontal: 16,
-    paddingBottom: 18,
-  },
-  eyebrow: {
-    color: colors.accent3,
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-  },
-  title: { color: colors.textPrimary, fontSize: 31, fontWeight: '700', marginTop: 5, marginBottom: 12 },
-  tabs: { gap: 8, paddingBottom: 12 },
-  tab: {
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  tabActive: { backgroundColor: colors.accent1, borderColor: colors.accent1 },
-  tabText: { color: colors.textSecondary, fontSize: 12, fontWeight: '600' },
-  tabTextActive: { color: colors.background },
-  map: {
-    height: 340,
-    borderRadius: 22,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  marker: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors.accent1,
-    borderWidth: 3,
-    borderColor: colors.textPrimary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  markerText: { color: colors.background, fontWeight: '800', fontSize: 12 },
-  card: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    borderRadius: 18,
-    padding: 16,
-    marginTop: 14,
-  },
-  savedPlaceLabel: {
-    backgroundColor: colors.success,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  savedPlaceLabelText: {
-    color: colors.background,
-    fontSize: 10,
-    fontWeight: '600',
-  },
-  eventsSection: {
-    marginTop: 20,
-  },
-  cardTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700', marginBottom: 6 },
-  meta: { color: colors.textSecondary, fontSize: 13, lineHeight: 19 },
-  distance: { color: colors.accent3, marginTop: 10, fontWeight: '700' },
-  button: {
-    marginTop: 14,
-    backgroundColor: colors.accent1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  checkinGrid: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  checkinButton: {
-    flex: 1,
-    alignItems: 'center',
-    borderRadius: 12,
-    paddingHorizontal: 8,
-    paddingVertical: 12,
-  },
-  buttonText: { color: colors.background, fontWeight: '800' },
-  danger: { color: colors.error, fontWeight: '700', marginTop: 10 },
-  input: {
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    color: colors.textPrimary,
-    marginTop: 10,
-  },
-  noteInput: {
-    minHeight: 90,
-    textAlignVertical: 'top',
-  },
-  modalBackdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.55)',
-  },
-  modalCard: {
-    backgroundColor: colors.surface,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    padding: 20,
-  },
-  modalActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 12 },
-  loading: { color: colors.textSecondary, textAlign: 'center', marginTop: 8, fontSize: 12 },
-  sosCard: {
-    backgroundColor: colors.surface,
-    borderColor: colors.error,
-    borderWidth: 1,
-    borderRadius: 20,
-    padding: 16,
-    gap: 10,
-  },
-  sosButton: {
-    backgroundColor: colors.error,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  sosButtonText: { color: colors.background, fontSize: 18, fontWeight: '800' },
-  sosSuccess: { color: colors.success, fontSize: 12 },
-  sosError: { color: colors.error, fontSize: 12 },
-  list: { paddingBottom: 20 },
-  listItem: {
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 14,
-    marginTop: 10,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 64,
+      paddingHorizontal: 16,
+      paddingBottom: 18,
+    },
+    eyebrow: {
+      color: colors.accent3,
+      fontSize: sizes.text.xs,
+      fontWeight: '700',
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+    },
+    title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700', marginTop: 5, marginBottom: 12 },
+    tabs: { gap: 8, paddingBottom: 12 },
+    tab: {
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      borderRadius: sizes.radius.pill,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    tabActive: { backgroundColor: colors.accent1, borderColor: colors.accent1 },
+    tabText: { color: colors.textSecondary, fontSize: sizes.text.xs, fontWeight: '600' },
+    tabTextActive: { color: colors.background },
+    map: {
+      height: 340,
+      borderRadius: sizes.radius.card,
+      overflow: 'hidden',
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    marker: {
+      width: 36,
+      height: 36,
+      borderRadius: sizes.radius.btn,
+      backgroundColor: colors.accent1,
+      borderWidth: 3,
+      borderColor: colors.textPrimary,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    markerText: { color: colors.background, fontWeight: '800', fontSize: sizes.text.xs },
+    card: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      marginTop: 14,
+    },
+    savedPlaceLabel: {
+      backgroundColor: colors.success,
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 6,
+    },
+    savedPlaceLabelText: {
+      color: colors.background,
+      fontSize: sizes.text.xs,
+      fontWeight: '600',
+    },
+    eventsSection: {
+      marginTop: 20,
+    },
+    cardTitle: { color: colors.textPrimary, fontSize: sizes.text.body, fontWeight: '700', marginBottom: 6 },
+    meta: { color: colors.textSecondary, fontSize: sizes.text.sm, lineHeight: 19 },
+    distance: { color: colors.accent3, marginTop: 10, fontWeight: '700' },
+    button: {
+      marginTop: 14,
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    checkinGrid: {
+      flexDirection: 'row',
+      gap: 8,
+      marginBottom: 12,
+    },
+    checkinButton: {
+      flex: 1,
+      alignItems: 'center',
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 8,
+      paddingVertical: 12,
+    },
+    buttonText: { color: colors.background, fontWeight: '800' },
+    danger: { color: colors.error, fontWeight: '700', marginTop: 10 },
+    input: {
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      color: colors.textPrimary,
+      marginTop: 10,
+    },
+    noteInput: {
+      minHeight: 90,
+      textAlignVertical: 'top',
+    },
+    modalBackdrop: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: 'rgba(0,0,0,0.55)',
+    },
+    modalCard: {
+      backgroundColor: colors.surface,
+      borderTopLeftRadius: sizes.radius.panel,
+      borderTopRightRadius: sizes.radius.panel,
+      padding: 20,
+    },
+    modalActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 12 },
+    loading: { color: colors.textSecondary, textAlign: 'center', marginTop: 8, fontSize: sizes.text.xs },
+    sosCard: {
+      backgroundColor: colors.surface,
+      borderColor: colors.error,
+      borderWidth: 1,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      gap: 10,
+    },
+    sosButton: {
+      backgroundColor: colors.error,
+      borderRadius: sizes.radius.btn,
+      paddingVertical: 16,
+      alignItems: 'center',
+    },
+    sosButtonText: { color: colors.background, fontSize: sizes.text.bodyLg, fontWeight: '800' },
+    sosSuccess: { color: colors.success, fontSize: sizes.text.xs },
+    sosError: { color: colors.error, fontSize: sizes.text.xs },
+    list: { paddingBottom: 20 },
+    listItem: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.btn,
+      padding: 14,
+      marginTop: 10,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+  })

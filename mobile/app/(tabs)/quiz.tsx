@@ -3,10 +3,13 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native'
 
 import { QuizEngine } from '@/components/learning/QuizEngine'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import type { KoreanLevel, QuizType } from '@/types/korean'
 
 export default function QuizScreen() {
   const { colors } = useTheme()
+  const styles = createStyles(colors, sizes)
   const params = useLocalSearchParams<{ level?: string; quizType?: string }>()
   const parsedLevel = Number(params.level ?? 1)
   const level = ([1, 2, 3, 4, 5, 6, 7] as number[]).includes(parsedLevel)
@@ -45,12 +48,12 @@ export default function QuizScreen() {
   )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   screen: { flex: 1 },
   content: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 20 },
   header: { gap: 6 },
-  eyebrow: { fontSize: 12, fontWeight: '700', letterSpacing: 1 },
-  title: { fontSize: 30, fontWeight: '700' },
-  subtitle: { fontSize: 14, lineHeight: 21 },
-  card: { borderWidth: 1, borderRadius: 22, padding: 18 },
+  eyebrow: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1 },
+  title: { fontSize: sizes.text.hLg, fontWeight: '700' },
+  subtitle: { fontSize: sizes.text.sm, lineHeight: 21 },
+  card: { borderWidth: 1, borderRadius: sizes.radius.card, padding: 18 },
 })

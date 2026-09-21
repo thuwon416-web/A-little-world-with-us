@@ -193,6 +193,8 @@ export const sizes = {
 export type ThemeName = keyof typeof themes
 export type ThemeTokens = typeof themes[ThemeName]
 
+export type Sizes = typeof sizes
+
 // Preserved old types for backward compatibility
 export type DesignTokenColors = typeof designTokens.colors
 export type DesignTokenTypography = typeof designTokens.typography

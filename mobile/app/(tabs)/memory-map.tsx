@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { X } from 'lucide-react-native'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { supabase } from '@/lib/supabase'
 import { getMemories, type MemoryRecord } from '@/services/memories'
 
@@ -11,6 +13,7 @@ const mapStyle = process.env.EXPO_PUBLIC_CARTO_STYLE_URL ?? 'https://basemaps.ca
 
 export default function MemoryMapScreen() {
   const { colors } = useTheme()
+  const styles = createStyles(colors, sizes)
   const router = useRouter()
   const [memories, setMemories] = useState<MemoryRecord[]>([])
   const [selected, setSelected] = useState<MemoryRecord | null>(null)
@@ -35,12 +38,12 @@ export default function MemoryMapScreen() {
   return <View style={{ flex: 1, backgroundColor: colors.background }}><MapView style={styles.map} mapStyle={mapStyle} logoEnabled={false}><Camera centerCoordinate={center} zoomLevel={4} /><>{memories.map((memory) => <PointAnnotation key={memory.id} id={memory.id} coordinate={[memory.longitude as number, memory.latitude as number]} onSelected={() => setSelected(memory)}><View style={[styles.marker, { backgroundColor: colors.accent1, borderColor: colors.textPrimary }]} /></PointAnnotation>)}</></MapView><TouchableOpacity style={[styles.back, { backgroundColor: colors.cardBg }]} onPress={() => router.back()}><X color={colors.textPrimary} size={22} /></TouchableOpacity><Modal visible={selected !== null} transparent animationType="slide" onRequestClose={() => setSelected(null)}><View style={[styles.sheet, { backgroundColor: colors.cardBg }]}><Text style={[styles.title, { color: colors.textPrimary }]}>{selected?.title ?? 'A memory together'}</Text><Text style={{ color: colors.textSecondary }}>{selected?.location_label ?? 'Located memory'} · {selected?.date}</Text>{selected && urls[selected.id] ? <Image source={{ uri: urls[selected.id] }} style={styles.thumbnail} resizeMode="cover" /> : null}<TouchableOpacity onPress={() => setSelected(null)}><Text style={{ color: colors.accent1 }}>Close</Text></TouchableOpacity></View></Modal></View>
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   map: { flex: 1 },
   marker: { width: 22, height: 22, borderRadius: 11, borderWidth: 3 },
-  back: { position: 'absolute', top: 52, left: 18, borderRadius: 22, padding: 10 },
-  sheet: { marginTop: 'auto', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 24, gap: 10 },
-  thumbnail: { width: '100%', height: 180, borderRadius: 14 },
-  title: { fontSize: 20, fontWeight: '700' },
+  back: { position: 'absolute', top: 52, left: 18, borderRadius: sizes.radius.card, padding: 10 },
+  sheet: { marginTop: 'auto', borderTopLeftRadius: sizes.radius.card, borderTopRightRadius: sizes.radius.card, padding: 24, gap: 10 },
+  thumbnail: { width: '100%', height: 180, borderRadius: sizes.radius.input },
+  title: { fontSize: sizes.text.hSm, fontWeight: '700' },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 },
 })

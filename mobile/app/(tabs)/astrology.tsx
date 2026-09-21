@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
-import { Alert, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
 import { supabase } from '@/lib/supabase'
 import { moonPhase } from '@/services/secondary'
 import { calculateSynastry, createAstrologyProfile } from '@/services/astrology'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 
 const signs = [
   'Aries',
@@ -23,6 +25,7 @@ const signs = [
 ]
 export default function AstrologyScreen() {
   const { colors } = useTheme()
+  const styles = createStyles(colors, sizes)
   const [sign, setSign] = useState('Aries')
   const [advice, setAdvice] = useState('')
   const [score, setScore] = useState<number | null>(null)
@@ -80,17 +83,17 @@ export default function AstrologyScreen() {
       </View>
       <View style={s.card}>
         <Text style={s.buttonText}>Your sign</Text>
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 7 }}>
+        <View style={styles.signGrid}>
           {signs.map((item) => (
             <TouchableOpacity
               key={item}
               style={[
-                { backgroundColor: colors.cardBorder, padding: 8, borderRadius: 9 },
-                sign === item && { backgroundColor: colors.accent1 },
+                styles.signButton,
+                sign === item && styles.signButtonActive,
               ]}
               onPress={() => setSign(item)}
             >
-              <Text style={{ color: colors.background, fontSize: 12 }}>{item}</Text>
+              <Text style={[styles.signText, sign === item ? styles.signTextActive : undefined]}>{item}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -107,3 +110,11 @@ export default function AstrologyScreen() {
     </SecondaryPage>
   )
 }
+
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
+  signGrid: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 7 },
+  signButton: { backgroundColor: colors.cardBorder, padding: 8, borderRadius: sizes.radius.input },
+  signButtonActive: { backgroundColor: colors.accent1 },
+  signText: { color: colors.background, fontSize: sizes.text.xs },
+  signTextActive: { color: colors.background, fontWeight: '700' as const },
+})

@@ -8,12 +8,14 @@ import Timeline from '@/components/our-story/Timeline'
 import { haptics } from '@/lib/haptics'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 
 type Tab = 'timeline' | 'all' | 'categories'
 
 export default function OurStoryScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('timeline')
   const [loading, setLoading] = useState(true)
@@ -99,10 +101,10 @@ export default function OurStoryScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 18 },
   header: { alignItems: 'center', flexDirection: 'row', gap: 12 },
-  title: { color: colors.textPrimary, fontSize: 28, fontWeight: '700' },
+  title: { color: colors.textPrimary, fontSize: sizes.text.hMd, fontWeight: '700' },
   subtitle: { color: colors.textSecondary, marginTop: 3 },
   content: { flex: 1, gap: 16 },
   tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
@@ -112,11 +114,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 9,
-    borderRadius: 14,
+    borderRadius: sizes.radius.input,
   },
   tabActive: { backgroundColor: colors.surface },
-  tabText: { color: colors.textPrimary, fontSize: 12 },
+  tabText: { color: colors.textPrimary, fontSize: sizes.text.xs },
   muted: { color: colors.textSecondary, padding: 24, textAlign: 'center' },
   error: { color: colors.error, padding: 24, textAlign: 'center' },
-  filterNote: { color: colors.accent2, fontSize: 12 },
+  filterNote: { color: colors.accent2, fontSize: sizes.text.xs },
 })

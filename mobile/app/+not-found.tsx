@@ -1,10 +1,12 @@
 import { Link } from 'expo-router'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 
 export default function NotFoundScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   return (
     <View style={styles.container}>
       <Text style={styles.eyebrow}>A LITTLE WORLD WITH US</Text>
@@ -19,7 +21,7 @@ export default function NotFoundScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
@@ -29,24 +31,24 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 30,
+    fontSize: sizes.text.hLg,
     fontWeight: '700',
     marginBottom: 8,
   },
   eyebrow: {
     color: colors.accent2,
-    fontSize: 12,
+    fontSize: sizes.text.xs,
     letterSpacing: 2,
     marginBottom: 12,
   },
   text: {
     color: colors.textSecondary,
-    fontSize: 16,
+    fontSize: sizes.text.body,
     marginBottom: 20,
   },
   button: {
     backgroundColor: colors.accent1,
-    borderRadius: 12,
+    borderRadius: sizes.radius.input,
     paddingHorizontal: 20,
     paddingVertical: 12,
   },

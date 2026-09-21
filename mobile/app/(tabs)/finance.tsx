@@ -12,6 +12,7 @@ import {
 
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import { sizes, type Sizes } from '@/design-tokens'
 import {
   checkInStreak,
   getAdvancedData,
@@ -25,10 +26,13 @@ import CategoryFilter from '@/features/finance/CategoryFilter'
 import ExpenseList from '@/features/finance/ExpenseList'
 import AddExpenseModal from '@/features/finance/AddExpenseModal'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 const mmk = (value: number) => `${Number(value).toLocaleString()} MMK`
 
 export default function FinanceScreen() {
+  const { colors } = useTheme()
   const { user } = useAuth()
   const [data, setData] = useState<any>()
   const [partnerId, setPartnerId] = useState<string | null>(null)
@@ -167,6 +171,9 @@ export default function FinanceScreen() {
       )
     }
   }
+
+  const styles = useMemo(() => createStyles(colors, sizes), [colors, sizes])
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.eyebrow}>SHARED FINANCE</Text>
@@ -178,7 +185,7 @@ export default function FinanceScreen() {
           value={budget || String(data?.budget?.amount ?? '')}
           onChangeText={setBudget}
           placeholder="Budget (MMK)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           keyboardType="numeric"
           style={styles.input}
         />
@@ -242,14 +249,14 @@ export default function FinanceScreen() {
           value={title}
           onChangeText={setTitle}
           placeholder="Goal name"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <TextInput
           value={target}
           onChangeText={setTarget}
           placeholder="Target (MMK)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           keyboardType="numeric"
           style={styles.input}
         />
@@ -257,7 +264,7 @@ export default function FinanceScreen() {
           value={current}
           onChangeText={setCurrent}
           placeholder="Current (MMK)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           keyboardType="numeric"
           style={styles.input}
         />
@@ -308,14 +315,14 @@ export default function FinanceScreen() {
           value={billTitle}
           onChangeText={setBillTitle}
           placeholder="Bill name"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <TextInput
           value={billAmount}
           onChangeText={setBillAmount}
           placeholder="Amount (MMK)"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           keyboardType="numeric"
           style={styles.input}
         />
@@ -323,7 +330,7 @@ export default function FinanceScreen() {
           value={billDate}
           onChangeText={setBillDate}
           placeholder="Due date YYYY-MM-DD"
-          placeholderTextColor="#8d8d99"
+          placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <TouchableOpacity style={styles.primary} onPress={() => void createBill()}>
@@ -344,7 +351,7 @@ export default function FinanceScreen() {
       <View style={styles.card}>
         <View style={styles.rowCentered}>
           <Text style={styles.section}>Love streak</Text>
-          <Flame size={18} color="#ff6b81" />
+          <Flame size={18} color={colors.accent1} />
         </View>
         <Text style={styles.muted}>{data?.streak?.current_streak ?? 0} days</Text>
         <Text style={styles.muted}>Check in daily to keep your shared streak alive.</Text>
@@ -373,38 +380,40 @@ export default function FinanceScreen() {
     </ScrollView>
   )
 }
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: '#0f0f12', padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { color: '#d9bfd7', fontSize: 12, letterSpacing: 2 },
-  title: { color: '#f3f0f5', fontSize: 30, fontWeight: '700' },
-  section: { color: '#fff', fontSize: 18, fontWeight: '800' },
-  card: {
-    backgroundColor: '#171b22',
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#2a2d35',
-    gap: 10,
-  },
-  input: {
-    backgroundColor: '#0f0f12',
-    borderRadius: 12,
-    color: '#f3f0f5',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#2a2d35',
-  },
-  primary: { backgroundColor: '#d8b9c8', padding: 13, borderRadius: 12, alignItems: 'center' },
-  primarySmall: { backgroundColor: '#ff6b81', padding: 10, borderRadius: 10 },
-  primaryText: { color: '#0f0f12', fontWeight: '800' },
-  secondary: { backgroundColor: '#ff6b81', padding: 13, borderRadius: 12, alignItems: 'center' },
-  muted: { color: '#c4c4ce', lineHeight: 20 },
-  error: { color: '#ff9b9b' },
-  link: { color: '#ff9bba', fontWeight: '700' },
-  row: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
-  rowCentered: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  goal: { gap: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: '#2a2d35' },
-  goalTitle: { color: '#fff', fontSize: 16, fontWeight: '700', flex: 1 },
-  track: { height: 9, backgroundColor: '#2a2d35', borderRadius: 8, overflow: 'hidden' },
-  fill: { height: '100%', backgroundColor: '#ff6b81' },
-})
+
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 14 },
+    eyebrow: { color: colors.textPrimary, fontSize: sizes.text.xs, letterSpacing: 2 },
+    title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
+    section: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
+    card: {
+      backgroundColor: colors.cardBg,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      gap: 10,
+    },
+    input: {
+      backgroundColor: colors.background,
+      borderRadius: sizes.radius.input,
+      color: colors.textPrimary,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    primary: { backgroundColor: colors.accent2, padding: 13, borderRadius: sizes.radius.input, alignItems: 'center' },
+    primarySmall: { backgroundColor: colors.accent1, padding: 10, borderRadius: sizes.radius.input },
+    primaryText: { color: colors.textPrimary, fontWeight: '800' },
+    secondary: { backgroundColor: colors.accent1, padding: 13, borderRadius: sizes.radius.input, alignItems: 'center' },
+    muted: { color: colors.textSecondary, lineHeight: 20 },
+    error: { color: colors.error },
+    link: { color: colors.accent2, fontWeight: '700' },
+    row: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
+    rowCentered: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    goal: { gap: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.cardBorder },
+    goalTitle: { color: colors.textPrimary, fontSize: sizes.text.body, fontWeight: '700', flex: 1 },
+    track: { height: 9, backgroundColor: colors.cardBorder, borderRadius: sizes.radius.input, overflow: 'hidden' },
+    fill: { height: '100%', backgroundColor: colors.accent1 },
+  })

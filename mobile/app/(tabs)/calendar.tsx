@@ -1,5 +1,5 @@
 import { Check, Gift, Heart, Plane, Star, Target, Home, Trash2 } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   Modal,
@@ -13,6 +13,8 @@ import {
 
 import { useAuth } from '@/lib/auth'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import {
   getCalendarData,
   getSharedCalendarPreference,
@@ -42,7 +44,7 @@ const daysUntil = (date: string) =>
 export default function CalendarScreen() {
   const { user } = useAuth()
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [wishlist, setWishlist] = useState<ListItem[]>([])
   const [coupleId, setCoupleId] = useState('')
@@ -380,79 +382,80 @@ export default function CalendarScreen() {
     </ScrollView>
   )
 }
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { letterSpacing: 2, fontSize: 12 },
-  title: { fontSize: 30, fontWeight: '700' },
-  error: {},
-  toolbar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.surface,
-    borderRadius: 16,
-    padding: 10,
-  },
-  nav: { color: colors.accent1, fontSize: 32, paddingHorizontal: 12 },
-  month: { color: colors.textPrimary, fontSize: 17, fontWeight: '800' },
-  today: { backgroundColor: colors.accent2, borderRadius: 10, padding: 8 },
-  todayText: { color: colors.background, fontWeight: '700' },
-  row: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
-  muted: { color: colors.textSecondary, fontSize: 13 },
-  link: { color: colors.accent1, fontWeight: '700' },
-  week: { flexDirection: 'row' },
-  weekDay: { width: `${100 / 7}%`, textAlign: 'center', color: colors.textSecondary },
-  grid: { flexDirection: 'row', flexWrap: 'wrap' },
-  day: {
-    width: `${100 / 7}%`,
-    aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 12,
-  },
-  todayDay: { borderWidth: 2, borderColor: colors.accent1 },
-  dayText: { color: colors.textPrimary },
-  dot: { backgroundColor: colors.accent1, borderRadius: 8, minWidth: 15, alignItems: 'center' },
-  dotText: { color: colors.background, fontSize: 9 },
-  events: { gap: 8 },
-  event: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: colors.surface,
-    borderRadius: 14,
-    padding: 12,
-  },
-  eventText: { flex: 1 },
-  eventTitle: { color: colors.textPrimary, fontWeight: '700' },
-  wishlistCard: { borderRadius: 18, borderWidth: 1, padding: 16, gap: 12 },
-  wishlistHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  wishlistTitle: { fontSize: 20, fontWeight: '700' },
-  wishlistForm: { flexDirection: 'row', gap: 8 },
-  wishlistInput: { flex: 1, borderRadius: 12, borderWidth: 1, padding: 12 },
-  wishlistAdd: { borderRadius: 12, paddingHorizontal: 18, justifyContent: 'center' },
-  wishlistItem: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, padding: 12 },
-  wishlistCheck: { width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  wishlistText: { flex: 1, fontSize: 15 },
-  wishlistDone: { textDecorationLine: 'line-through' },
-  add: { backgroundColor: colors.accent1, padding: 14, borderRadius: 13, alignItems: 'center' },
-  addText: { color: colors.background, fontWeight: '800' },
-  overlay: { flex: 1, backgroundColor: '#0009', justifyContent: 'center', padding: 20 },
-  modal: { backgroundColor: colors.surface, borderRadius: 20, padding: 20, gap: 12 },
-  modalTitle: { color: colors.textPrimary, fontSize: 22, fontWeight: '800' },
-  typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  type: { padding: 9, backgroundColor: colors.cardBorder, borderRadius: 10 },
-  typeActive: { backgroundColor: colors.accent1 },
-  typeText: { color: colors.textPrimary, fontSize: 12 },
-  input: { backgroundColor: colors.background, borderRadius: 11, color: colors.textPrimary, padding: 12 },
-  notes: { minHeight: 75, textAlignVertical: 'top' },
-  text: { color: colors.textPrimary },
-  delete: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    backgroundColor: colors.error,
-    borderRadius: 11,
-    padding: 12,
-  },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
+    eyebrow: { letterSpacing: 2, fontSize: sizes.text.xs },
+    title: { fontSize: sizes.text.hLg, fontWeight: '700' },
+    error: {},
+    toolbar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.btn,
+      padding: 10,
+    },
+    nav: { color: colors.accent1, fontSize: sizes.text.hLg, paddingHorizontal: 12 },
+    month: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
+    today: { backgroundColor: colors.accent2, borderRadius: sizes.radius.input, padding: 8 },
+    todayText: { color: colors.background, fontWeight: '700' },
+    row: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
+    muted: { color: colors.textSecondary, fontSize: sizes.text.sm },
+    link: { color: colors.accent1, fontWeight: '700' },
+    week: { flexDirection: 'row' },
+    weekDay: { width: `${100 / 7}%`, textAlign: 'center', color: colors.textSecondary },
+    grid: { flexDirection: 'row', flexWrap: 'wrap' },
+    day: {
+      width: `${100 / 7}%`,
+      aspectRatio: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: sizes.radius.input,
+    },
+    todayDay: { borderWidth: 2, borderColor: colors.accent1 },
+    dayText: { color: colors.textPrimary },
+    dot: { backgroundColor: colors.accent1, borderRadius: sizes.radius.input, minWidth: 15, alignItems: 'center' },
+    dotText: { color: colors.background, fontSize: sizes.text.xs },
+    events: { gap: 8 },
+    event: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.btn,
+      padding: 12,
+    },
+    eventText: { flex: 1 },
+    eventTitle: { color: colors.textPrimary, fontWeight: '700' },
+    wishlistCard: { borderRadius: sizes.radius.card, borderWidth: 1, padding: 16, gap: 12 },
+    wishlistHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    wishlistTitle: { fontSize: sizes.text.hSm, fontWeight: '700' },
+    wishlistForm: { flexDirection: 'row', gap: 8 },
+    wishlistInput: { flex: 1, borderRadius: sizes.radius.input, borderWidth: 1, padding: 12 },
+    wishlistAdd: { borderRadius: sizes.radius.input, paddingHorizontal: 18, justifyContent: 'center' },
+    wishlistItem: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: sizes.radius.btn, padding: 12 },
+    wishlistCheck: { width: 28, height: 28, borderRadius: sizes.radius.btn, alignItems: 'center', justifyContent: 'center' },
+    wishlistText: { flex: 1, fontSize: sizes.text.body },
+    wishlistDone: { textDecorationLine: 'line-through' },
+    add: { backgroundColor: colors.accent1, padding: 14, borderRadius: sizes.radius.btn, alignItems: 'center' },
+    addText: { color: colors.background, fontWeight: '800' },
+    overlay: { flex: 1, backgroundColor: '#0009', justifyContent: 'center', padding: 20 },
+    modal: { backgroundColor: colors.surface, borderRadius: sizes.radius.card, padding: 20, gap: 12 },
+    modalTitle: { color: colors.textPrimary, fontSize: sizes.text.hMd, fontWeight: '800' },
+    typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
+    type: { padding: 9, backgroundColor: colors.cardBorder, borderRadius: sizes.radius.input },
+    typeActive: { backgroundColor: colors.accent1 },
+    typeText: { color: colors.textPrimary, fontSize: sizes.text.xs },
+    input: { backgroundColor: colors.background, borderRadius: sizes.radius.input, color: colors.textPrimary, padding: 12 },
+    notes: { minHeight: 75, textAlignVertical: 'top' },
+    text: { color: colors.textPrimary },
+    delete: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 8,
+      backgroundColor: colors.error,
+      borderRadius: sizes.radius.input,
+      padding: 12,
+    },
+  })

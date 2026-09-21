@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { useCall } from '@/hooks/useCall'
 
 function formatCallDuration(seconds: number) {
@@ -36,7 +38,7 @@ export default function CallScreen() {
     }
   }, [callType, permission, requestPermission])
 
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   return (
     <View style={styles.container}>
       <Text style={styles.status}>
@@ -80,7 +82,7 @@ export default function CallScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -90,25 +92,25 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   status: {
     color: colors.textPrimary,
-    fontSize: 26,
+    fontSize: sizes.text.hMd,
     fontWeight: '700',
     marginBottom: 8,
   },
   time: {
     color: colors.accent2,
-    fontSize: 18,
+    fontSize: sizes.text.body,
     marginBottom: 18,
   },
   camera: {
     flex: 1,
-    borderRadius: 28,
+    borderRadius: sizes.radius.card,
     overflow: 'hidden',
     minHeight: 240,
   },
   placeholder: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: 28,
+    borderRadius: sizes.radius.card,
     justifyContent: 'center',
     alignItems: 'center',
     minHeight: 240,
@@ -117,7 +119,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   placeholderTitle: {
     color: colors.textPrimary,
-    fontSize: 22,
+    fontSize: sizes.text.hSm,
     fontWeight: '700',
   },
   placeholderSubtitle: {
@@ -133,7 +135,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   controlButton: {
     flex: 1,
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: sizes.radius.input,
     paddingVertical: 14,
     alignItems: 'center',
     borderWidth: 1,

@@ -1,9 +1,11 @@
 import * as Clipboard from 'expo-clipboard'
 import { Sparkles } from 'lucide-react-native'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { useAI } from '@/hooks/useAI'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { supabase } from '@/lib/supabase'
@@ -31,7 +33,7 @@ const instructions: Record<'coach' | 'letter' | 'surprise', string> = {
 
 export default function AIAssistantScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [tab, setTab] = useState<Tool>('gift')
   const [input, setInput] = useState('')
   const [customResult, setCustomResult] = useState('')
@@ -239,106 +241,107 @@ export default function AIAssistantScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: 72,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 16,
-  },
-  tabs: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 12,
-  },
-  tab: {
-    minWidth: 110,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-  },
-  tabText: {
-    fontWeight: '600',
-  },
-  input: {
-    minHeight: 92,
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    textAlignVertical: 'top',
-    marginBottom: 12,
-  },
-  refreshButton: {
-    backgroundColor: colors.accent1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  refreshText: {
-    color: colors.background,
-    fontWeight: '700',
-  },
-  error: {
-    color: colors.error,
-    marginBottom: 12,
-  },
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    gap: 12,
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  badge: {
-    color: colors.accent2,
-    fontSize: 11,
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  content: {
-    color: colors.textPrimary,
-    fontSize: 16,
-    lineHeight: 24,
-  },
-  actions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 10,
-    marginTop: 16,
-  },
-  actionButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.accent1,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  actionText: {
-    color: colors.textPrimary,
-    fontWeight: '600',
-  },
-  empty: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    lineHeight: 22,
-  },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 72,
+      paddingHorizontal: 20,
+      paddingBottom: 20,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hLg,
+      fontWeight: '700',
+      marginBottom: 16,
+    },
+    tabs: {
+      flexDirection: 'row',
+      gap: 8,
+      marginBottom: 12,
+    },
+    tab: {
+      minWidth: 110,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
+      borderRadius: sizes.radius.input,
+      alignItems: 'center',
+      borderWidth: 1,
+    },
+    tabText: {
+      fontWeight: '600',
+    },
+    input: {
+      minHeight: 92,
+      borderRadius: sizes.radius.btn,
+      borderWidth: 1,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      textAlignVertical: 'top',
+      marginBottom: 12,
+    },
+    refreshButton: {
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingVertical: 12,
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    refreshText: {
+      color: colors.background,
+      fontWeight: '700',
+    },
+    error: {
+      color: colors.error,
+      marginBottom: 12,
+    },
+    list: {
+      flex: 1,
+    },
+    listContent: {
+      gap: 12,
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    badge: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+      marginBottom: 8,
+    },
+    content: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.body,
+      lineHeight: 24,
+    },
+    actions: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: 10,
+      marginTop: 16,
+    },
+    actionButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    actionText: {
+      color: colors.textPrimary,
+      fontWeight: '600',
+    },
+    empty: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.sm,
+      lineHeight: 22,
+    },
+  })

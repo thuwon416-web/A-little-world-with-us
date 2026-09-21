@@ -28,6 +28,8 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 
 const sections = [
   {
@@ -89,7 +91,7 @@ export default function MoreScreen() {
   const { signOut } = useAuth()
   const router = useRouter()
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const { t } = useTranslation()
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -132,13 +134,13 @@ export default function MoreScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72 },
-  eyebrow: { color: colors.accent2, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { color: colors.textPrimary, fontSize: 30, fontWeight: '700', marginTop: 8, marginBottom: 22 },
+  eyebrow: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700', marginTop: 8, marginBottom: 22 },
   section: { marginTop: 20 },
   sectionHeader: {
-    fontSize: 10,
+    fontSize: sizes.text.xs,
     fontWeight: '700',
     letterSpacing: 1.2,
     color: colors.accent3,
@@ -151,17 +153,17 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     width: '47%',
     minHeight: 105,
     padding: 18,
-    borderRadius: 18,
+    borderRadius: sizes.radius.card,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.cardBorder,
     gap: 12,
   },
-  label: { color: colors.textPrimary, fontSize: 14, fontWeight: '600' },
+  label: { color: colors.textPrimary, fontSize: sizes.text.sm, fontWeight: '600' },
   logout: {
     marginTop: 24,
     padding: 16,
-    borderRadius: 14,
+    borderRadius: sizes.radius.input,
     backgroundColor: colors.surface,
     flexDirection: 'row',
     alignItems: 'center',

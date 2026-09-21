@@ -12,6 +12,8 @@ import {
 
 import { useAuth } from '@/lib/auth'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import {
   getCalendarData,
   saveListItem,
@@ -22,7 +24,7 @@ import {
 
 export default function ListsScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const { user } = useAuth()
   const [tab, setTab] = useState<'bucket' | 'wishlist'>('bucket')
   const [items, setItems] = useState<ListItem[]>([])
@@ -113,20 +115,20 @@ export default function ListsScreen() {
     </ScrollView>
   )
 }
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { color: colors.accent2, letterSpacing: 2, fontSize: 12 },
-  title: { color: colors.textPrimary, fontSize: 29, fontWeight: '700' },
+  eyebrow: { color: colors.accent2, letterSpacing: 2, fontSize: sizes.text.xs },
+  title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
   tabs: { flexDirection: 'row', gap: 8 },
-  tab: { flex: 1, padding: 12, borderRadius: 12, backgroundColor: colors.cardBorder, alignItems: 'center' },
+  tab: { flex: 1, padding: 12, borderRadius: sizes.radius.input, backgroundColor: colors.cardBorder, alignItems: 'center' },
   active: { backgroundColor: colors.accent1 },
   tabText: { color: colors.background, fontWeight: '700' },
   error: { color: colors.error },
   form: { flexDirection: 'row', gap: 8 },
-  input: { flex: 1, backgroundColor: colors.surface, color: colors.textPrimary, borderRadius: 12, padding: 12 },
+  input: { flex: 1, backgroundColor: colors.surface, color: colors.textPrimary, borderRadius: sizes.radius.input, padding: 12 },
   add: {
     backgroundColor: colors.accent1,
-    borderRadius: 12,
+    borderRadius: sizes.radius.input,
     paddingHorizontal: 18,
     justifyContent: 'center',
   },
@@ -136,7 +138,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     alignItems: 'center',
     gap: 10,
     backgroundColor: colors.surface,
-    borderRadius: 14,
+    borderRadius: sizes.radius.card,
     padding: 14,
   },
   check: {
@@ -147,6 +149,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     alignItems: 'center',
     justifyContent: 'center',
   },
-  itemText: { flex: 1, color: colors.textPrimary, fontSize: 15 },
+  itemText: { flex: 1, color: colors.textPrimary, fontSize: sizes.text.body },
   done: { color: colors.textSecondary, textDecorationLine: 'line-through' },
 })

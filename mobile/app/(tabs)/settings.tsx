@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import * as LocalAuthentication from 'expo-local-authentication'
 import { useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   ScrollView,
@@ -15,6 +15,8 @@ import {
 } from 'react-native'
 
 import { useTheme, type ThemePreference } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { useLocation } from '@/hooks/useLocation'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
@@ -70,7 +72,7 @@ const privacyLabels = [
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -88,7 +90,7 @@ function Toggle({
   onChange: (value: boolean) => void
 }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   return (
     <View style={styles.row}>
       <Text style={styles.label}>{label}</Text>
@@ -110,7 +112,7 @@ function Button({
   danger?: boolean
 }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   return (
     <TouchableOpacity style={[styles.button, danger && styles.dangerButton]} onPress={onPress}>
       <Text style={styles.buttonText}>{title}</Text>
@@ -122,7 +124,7 @@ export default function SettingsScreen() {
   const { user, signOut } = useAuth()
   const router = useRouter()
   const { preference, setPreference, colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const { locale, setLocale, t } = useTranslation()
   const {
     isSharing,
@@ -548,68 +550,69 @@ export default function SettingsScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flexGrow: 1,
-    backgroundColor: colors.background,
-    paddingTop: 72,
-    paddingBottom: 40,
-    paddingHorizontal: 20,
-    gap: 14,
-  },
-  center: {
-    flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 14,
-    padding: 24,
-  },
-  eyebrow: { color: colors.accent2, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { color: colors.textPrimary, fontSize: 30, fontWeight: '700' },
-  section: {
-    backgroundColor: colors.surface,
-    borderRadius: 20,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    gap: 10,
-  },
-  sectionTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700', marginBottom: 4 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 12,
-    paddingVertical: 8,
-  },
-  label: { color: colors.textPrimary, flex: 1 },
-  muted: { color: colors.textSecondary, fontSize: 13 },
-  error: { color: colors.error },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    color: colors.textPrimary,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  button: {
-    backgroundColor: colors.accent1,
-    padding: 13,
-    borderRadius: 12,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  dangerButton: { backgroundColor: colors.error },
-  buttonText: { color: colors.background, fontWeight: '800' },
-  options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  option: {
-    backgroundColor: colors.surface,
-    minWidth: 90,
-    paddingHorizontal: 13,
-    paddingVertical: 10,
-    borderRadius: 12,
-  },
-  optionActive: { backgroundColor: colors.accent1 },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      backgroundColor: colors.background,
+      paddingTop: 72,
+      paddingBottom: 40,
+      paddingHorizontal: 20,
+      gap: 14,
+    },
+    center: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 14,
+      padding: 24,
+    },
+    eyebrow: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 2, textTransform: 'uppercase' },
+    title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
+    section: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 18,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      gap: 10,
+    },
+    sectionTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '700', marginBottom: 4 },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      gap: 12,
+      paddingVertical: 8,
+    },
+    label: { color: colors.textPrimary, flex: 1 },
+    muted: { color: colors.textSecondary, fontSize: sizes.text.sm },
+    error: { color: colors.error },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.input,
+      color: colors.textPrimary,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    button: {
+      backgroundColor: colors.accent1,
+      padding: 13,
+      borderRadius: sizes.radius.input,
+      alignItems: 'center',
+      marginTop: 4,
+    },
+    dangerButton: { backgroundColor: colors.error },
+    buttonText: { color: colors.background, fontWeight: '800' },
+    options: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    option: {
+      backgroundColor: colors.surface,
+      minWidth: 90,
+      paddingHorizontal: 13,
+      paddingVertical: 10,
+      borderRadius: sizes.radius.input,
+    },
+    optionActive: { backgroundColor: colors.accent1 },
+  })

@@ -22,6 +22,7 @@ import { KOREAN_VOCAB } from '@/data/korean-vocab'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 import { useTheme, type ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { getProgress } from '@/services/korean'
 import { isTTSSupported, speakKorean, stopSpeaking } from '@/lib/tts'
 import type { KoreanLevel, KoreanProgress, KoreanVocab } from '@/types/korean'
@@ -32,6 +33,7 @@ export default function LearningScreen() {
   const { colors } = useTheme()
   const { user } = useAuth()
   const { t } = useTranslation()
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [selectedLevel, setSelectedLevel] = useState<KoreanLevel>(1)
   const [openLessonId, setOpenLessonId] = useState<string | null>(null)
   const [progress, setProgress] = useState<KoreanProgress[]>([])
@@ -288,6 +290,7 @@ function VocabCard({
   speaking: boolean
   onSpeak: () => void
 }) {
+  const styles = createStyles(colors, sizes)
   return (
     <View
       style={[
@@ -335,75 +338,76 @@ function VocabCard({
   )
 }
 
-const styles = StyleSheet.create({
-  screen: { flex: 1 },
-  content: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 18 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  headerIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: 18,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-  },
-  headerCopy: { flex: 1 },
-  title: { fontSize: 30, fontWeight: '700' },
-  subtitle: { marginTop: 4, fontSize: 14, lineHeight: 20 },
-  progressCard: {
-    borderWidth: 1,
-    borderRadius: 18,
-    padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  progressCopy: { gap: 4 },
-  progressLabel: { fontSize: 12 },
-  progressValue: { fontSize: 16, fontWeight: '700' },
-  levelTabs: { gap: 8, paddingRight: 12 },
-  levelTab: { borderWidth: 1, borderRadius: 999, paddingHorizontal: 17, paddingVertical: 10 },
-  levelTabText: { fontSize: 13, fontWeight: '700' },
-  sectionHeading: { gap: 4 },
-  sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  sectionTitle: { fontSize: 24, fontWeight: '700' },
-  sectionSubtitle: { fontSize: 14 },
-  quizButton: { alignSelf: 'flex-start', borderRadius: 12, paddingHorizontal: 16, paddingVertical: 11, marginTop: 8 },
-  quizButtonText: { fontSize: 13, fontWeight: '700' },
-  lessonCard: { borderWidth: 1, borderRadius: 22, overflow: 'hidden' },
-  lessonButton: { padding: 18, gap: 12 },
-  lessonHeading: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
-  lessonCopy: { flex: 1, gap: 3 },
-  lessonOrder: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
-  lessonTitle: { fontSize: 20, fontWeight: '700' },
-  lessonTitleMy: { fontSize: 14 },
-  description: { fontSize: 14, lineHeight: 21 },
-  lessonMeta: { flexDirection: 'row', justifyContent: 'space-between' },
-  metaText: { fontSize: 12 },
-  vocabList: { borderTopWidth: 1, padding: 12, gap: 10 },
-  vocabCard: { borderWidth: 1, borderRadius: 18, padding: 14, gap: 7 },
-  vocabTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
-  vocabCopy: { gap: 2 },
-  korean: { fontSize: 30, fontWeight: '700' },
-  romanization: { fontSize: 13 },
-  english: { fontSize: 15, fontWeight: '600' },
-  myanmar: { fontSize: 15, lineHeight: 22 },
-  example: { borderRadius: 12, padding: 10, marginTop: 4, gap: 4 },
-  exampleText: { fontSize: 13, lineHeight: 19 },
-  exampleTranslation: { fontSize: 13, lineHeight: 19 },
-  ttsButton: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 7,
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    marginTop: 3,
-  },
-  ttsText: { fontSize: 12, fontWeight: '600' },
-  emptyCard: { borderWidth: 1, borderStyle: 'dashed', borderRadius: 22, padding: 28, gap: 8 },
-  emptyTitle: { fontSize: 17, fontWeight: '700', textAlign: 'center' },
-  emptyText: { fontSize: 14, lineHeight: 21, textAlign: 'center' },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    screen: { flex: 1 },
+    content: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 18 },
+    header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
+    headerIcon: {
+      width: 52,
+      height: 52,
+      borderRadius: sizes.radius.card,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+    },
+    headerCopy: { flex: 1 },
+    title: { fontSize: sizes.text.hLg, fontWeight: '700' },
+    subtitle: { marginTop: 4, fontSize: sizes.text.sm, lineHeight: 20 },
+    progressCard: {
+      borderWidth: 1,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    progressCopy: { gap: 4 },
+    progressLabel: { fontSize: sizes.text.xs },
+    progressValue: { fontSize: sizes.text.body, fontWeight: '700' },
+    levelTabs: { gap: 8, paddingRight: 12 },
+    levelTab: { borderWidth: 1, borderRadius: sizes.radius.pill, paddingHorizontal: 17, paddingVertical: 10 },
+    levelTabText: { fontSize: sizes.text.sm, fontWeight: '700' },
+    sectionHeading: { gap: 4 },
+    sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    sectionTitle: { fontSize: sizes.text.hMd, fontWeight: '700' },
+    sectionSubtitle: { fontSize: sizes.text.sm },
+    quizButton: { alignSelf: 'flex-start', borderRadius: sizes.radius.input, paddingHorizontal: 16, paddingVertical: 11, marginTop: 8 },
+    quizButtonText: { fontSize: sizes.text.sm, fontWeight: '700' },
+    lessonCard: { borderWidth: 1, borderRadius: sizes.radius.card, overflow: 'hidden' },
+    lessonButton: { padding: 18, gap: 12 },
+    lessonHeading: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
+    lessonCopy: { flex: 1, gap: 3 },
+    lessonOrder: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+    lessonTitle: { fontSize: sizes.text.hSm, fontWeight: '700' },
+    lessonTitleMy: { fontSize: sizes.text.sm },
+    description: { fontSize: sizes.text.sm, lineHeight: 21 },
+    lessonMeta: { flexDirection: 'row', justifyContent: 'space-between' },
+    metaText: { fontSize: sizes.text.xs },
+    vocabList: { borderTopWidth: 1, padding: 12, gap: 10 },
+    vocabCard: { borderWidth: 1, borderRadius: sizes.radius.card, padding: 14, gap: 7 },
+    vocabTop: { flexDirection: 'row', justifyContent: 'space-between', gap: 10 },
+    vocabCopy: { gap: 2 },
+    korean: { fontSize: sizes.text.hLg, fontWeight: '700' },
+    romanization: { fontSize: sizes.text.sm },
+    english: { fontSize: sizes.text.body, fontWeight: '600' },
+    myanmar: { fontSize: sizes.text.body, lineHeight: 22 },
+    example: { borderRadius: sizes.radius.input, padding: 10, marginTop: 4, gap: 4 },
+    exampleText: { fontSize: sizes.text.sm, lineHeight: 19 },
+    exampleTranslation: { fontSize: sizes.text.sm, lineHeight: 19 },
+    ttsButton: {
+      alignSelf: 'flex-start',
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 7,
+      borderWidth: 1,
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+      marginTop: 3,
+    },
+    ttsText: { fontSize: sizes.text.xs, fontWeight: '600' },
+    emptyCard: { borderWidth: 1, borderStyle: 'dashed', borderRadius: sizes.radius.card, padding: 28, gap: 8 },
+    emptyTitle: { fontSize: sizes.text.bodyLg, fontWeight: '700', textAlign: 'center' },
+    emptyText: { fontSize: sizes.text.sm, lineHeight: 21, textAlign: 'center' },
+  })

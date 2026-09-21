@@ -16,6 +16,8 @@ import {
 import { Sparkles } from 'lucide-react-native'
 
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { supabase } from '@/lib/supabase'
 import {
   saveTodayCareLog,
@@ -107,7 +109,7 @@ function Chips({
   tone?: 'pink' | 'purple' | 'green'
 }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   return (
     <View style={styles.chips}>
       {options.map((option) => (
@@ -135,7 +137,7 @@ function Chips({
 
 function Card({ title, children }: { title: string; children: ReactNode }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   return (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
@@ -146,7 +148,7 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
 
 function Insights({ logs, summary, savedCycleLength }: { logs: CareLog[]; summary: NativeCycleSummary; savedCycleLength: number }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const moodCounts = useMemo(
     () =>
       Object.entries(
@@ -235,7 +237,7 @@ function Insights({ logs, summary, savedCycleLength }: { logs: CareLog[]; summar
 
 function Stat({ label, value }: { label: string; value: string }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   return (
     <View style={styles.stat}>
       <Text style={styles.statValue}>{value}</Text>
@@ -254,7 +256,7 @@ function Calendar({
   onLog: (date: string) => void
 }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const [month, setMonth] = useState(new Date())
   const year = month.getFullYear()
   const monthIndex = month.getMonth()
@@ -345,7 +347,7 @@ function Calendar({
 
 function Reminders() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const [enabled, setEnabled] = useState({
     period: true,
     fertile: true,
@@ -429,7 +431,7 @@ function Reminder({
   onChange: () => void
 }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   return (
     <View style={styles.reminder}>
       <Text style={styles.text}>{label}</Text>
@@ -446,7 +448,7 @@ function Reminder({
 
 function HealthProfile() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const [profile, setProfile] = useState({
     age: '',
     weight: '',
@@ -515,7 +517,7 @@ function HealthProfile() {
 
 export default function CareScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [activeTab, setActiveTab] = useState<
     'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
   >('Today')
@@ -976,22 +978,22 @@ export default function CareScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   intimacyContainer: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 4 },
-  intimacyCard: { borderRadius: 22, borderWidth: 1, padding: 18, gap: 12 },
+  intimacyCard: { borderRadius: sizes.radius.card, borderWidth: 1, padding: 18, gap: 12 },
   intimacyHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   intimacyHeaderText: { flex: 1, gap: 4 },
-  intimacyTitle: { fontSize: 18, fontWeight: '800' },
-  intimacyDescription: { fontSize: 14, lineHeight: 20 },
-  intimacyInput: { minHeight: 96, borderRadius: 14, borderWidth: 1, padding: 12, textAlignVertical: 'top' },
+  intimacyTitle: { fontSize: sizes.text.bodyLg, fontWeight: '800' },
+  intimacyDescription: { fontSize: sizes.text.sm, lineHeight: 20 },
+  intimacyInput: { minHeight: 96, borderRadius: sizes.radius.btn, borderWidth: 1, padding: 12, textAlignVertical: 'top' },
   intimacyActions: { gap: 10 },
-  intimacyPrivacy: { fontSize: 12 },
-  intimacyButton: { alignSelf: 'flex-end', borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 },
+  intimacyPrivacy: { fontSize: sizes.text.xs },
+  intimacyButton: { alignSelf: 'flex-end', borderRadius: sizes.radius.pill, paddingHorizontal: 16, paddingVertical: 10 },
   intimacyButtonText: { fontWeight: '800' },
-  intimacyError: { fontSize: 13 },
-  intimacyResult: { borderRadius: 14, borderWidth: 1, padding: 14 },
-  intimacyResultText: { fontSize: 14, lineHeight: 22 },
+  intimacyError: { fontSize: sizes.text.sm },
+  intimacyResult: { borderRadius: sizes.radius.btn, borderWidth: 1, padding: 14 },
+  intimacyResultText: { fontSize: sizes.text.sm, lineHeight: 22 },
   content: { padding: 20, paddingTop: 24, paddingBottom: 50 },
   center: {
     flex: 1,
@@ -1001,8 +1003,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     padding: 24,
     gap: 12,
   },
-  eyebrow: { color: colors.textSecondary, fontWeight: '700', letterSpacing: 1.3, fontSize: 10 },
-  title: { color: colors.textPrimary, fontWeight: '800', fontSize: 30, marginTop: 6 },
+  eyebrow: { color: colors.textSecondary, fontWeight: '700', letterSpacing: 1.3, fontSize: sizes.text.xs },
+  title: { color: colors.textPrimary, fontWeight: '800', fontSize: sizes.text.hLg, marginTop: 6 },
   tabRow: {
     gap: 8,
     paddingHorizontal: 20,
@@ -1010,48 +1012,48 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     paddingBottom: 12,
     backgroundColor: colors.background,
   },
-  tab: { borderRadius: 16, backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 9 },
+  tab: { borderRadius: sizes.radius.btn, backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 9 },
   tabActive: { backgroundColor: colors.accent1 },
-  tabText: { color: colors.background, fontWeight: '700', fontSize: 12 },
+  tabText: { color: colors.background, fontWeight: '700', fontSize: sizes.text.xs },
   hero: {
     marginTop: 18,
-    borderRadius: 28,
+    borderRadius: sizes.radius.panel,
     padding: 24,
     alignItems: 'center',
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.cardBorder,
   },
-  heroLabel: { color: colors.textSecondary, fontSize: 11, fontWeight: '800', letterSpacing: 1.5 },
+  heroLabel: { color: colors.textSecondary, fontSize: sizes.text.xs, fontWeight: '800', letterSpacing: 1.5 },
   days: { color: colors.accent3, fontWeight: '800', fontSize: 38, marginTop: 8 },
   heroNote: {
     color: colors.textPrimary,
-    fontSize: 15,
+    fontSize: sizes.text.body,
     fontWeight: '600',
     marginTop: 10,
     textAlign: 'center',
   },
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 22,
+    borderRadius: sizes.radius.card,
     padding: 18,
     marginTop: 16,
     borderWidth: 1,
     borderColor: colors.cardBorder,
   },
-  cardTitle: { color: colors.textPrimary, fontSize: 19, fontWeight: '800' },
-  muted: { color: colors.textSecondary, fontSize: 13, marginTop: 5 },
-  text: { color: colors.textPrimary, fontSize: 14 },
+  cardTitle: { color: colors.textPrimary, fontSize: sizes.text.hSm, fontWeight: '800' },
+  muted: { color: colors.textSecondary, fontSize: sizes.text.sm, marginTop: 5 },
+  text: { color: colors.textPrimary, fontSize: sizes.text.sm },
   accentText: { color: colors.accent1, fontWeight: '700' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  chip: { borderRadius: 20, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: colors.surface },
+  chip: { borderRadius: sizes.radius.card, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: colors.surface },
   purpleChip: { backgroundColor: colors.surface },
   greenChip: { backgroundColor: colors.accent2 },
   chipSelected: { backgroundColor: colors.accent1 },
-  chipText: { color: colors.textPrimary, fontWeight: '600', fontSize: 13 },
+  chipText: { color: colors.textPrimary, fontWeight: '600', fontSize: sizes.text.sm },
   chipTextSelected: { color: colors.background },
   input: {
-    borderRadius: 12,
+    borderRadius: sizes.radius.input,
     borderWidth: 1,
     borderColor: colors.cardBorder,
     backgroundColor: colors.surface,
@@ -1064,13 +1066,13 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   saveButton: {
     marginTop: 16,
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: sizes.radius.btn,
     backgroundColor: colors.accent1,
     paddingVertical: 15,
   },
   secondaryButton: {
     alignItems: 'center',
-    borderRadius: 16,
+    borderRadius: sizes.radius.btn,
     backgroundColor: colors.accent2,
     paddingVertical: 14,
     marginTop: 14,
@@ -1087,10 +1089,10 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     borderBottomColor: colors.cardBorder,
   },
   statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 },
-  stat: { width: '48%', backgroundColor: colors.surface, borderRadius: 12, padding: 12 },
-  statValue: { color: colors.accent1, fontSize: 17, fontWeight: '800' },
+  stat: { width: '48%', backgroundColor: colors.surface, borderRadius: sizes.radius.input, padding: 12 },
+  statValue: { color: colors.accent1, fontSize: sizes.text.bodyLg, fontWeight: '800' },
   barRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
-  barLabel: { color: colors.textPrimary, width: 105, fontSize: 12 },
+  barLabel: { color: colors.textPrimary, width: 105, fontSize: sizes.text.xs },
   barTrack: {
     flex: 1,
     height: 10,
@@ -1115,7 +1117,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     marginTop: 12,
   },
   calendarMonth: { color: colors.textPrimary, fontWeight: '800' },
-  nav: { color: colors.accent1, fontSize: 32, paddingHorizontal: 12 },
+  nav: { color: colors.accent1, fontSize: sizes.text.dSm, paddingHorizontal: 12 },
   weekRow: { flexDirection: 'row', marginTop: 14 },
   weekDay: { color: colors.textSecondary, width: `${100 / 7}%`, textAlign: 'center', fontWeight: '700' },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
@@ -1124,16 +1126,16 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     aspectRatio: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 10,
+    borderRadius: sizes.radius.input,
     borderWidth: 1,
     borderColor: 'transparent',
   },
-  dayText: { color: colors.textPrimary, fontSize: 13 },
+  dayText: { color: colors.textPrimary, fontSize: sizes.text.sm },
   periodDay: { backgroundColor: colors.accent1 },
   predictedDay: { borderColor: colors.accent2, borderStyle: 'dotted' },
   fertileDay: { backgroundColor: colors.accent2 },
   ovulationDay: { backgroundColor: colors.success },
   todayDay: { borderColor: colors.textPrimary, borderWidth: 2 },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 16 },
-  legendText: { color: colors.textSecondary, fontSize: 11 },
+  legendText: { color: colors.textSecondary, fontSize: sizes.text.xs },
 })

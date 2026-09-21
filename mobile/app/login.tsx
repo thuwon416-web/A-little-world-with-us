@@ -4,10 +4,12 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 
 export default function LoginScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -78,7 +80,7 @@ export default function LoginScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 24,
@@ -88,20 +90,20 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   eyebrow: {
     color: colors.accent2,
-    fontSize: 12,
+    fontSize: sizes.text.xs,
     letterSpacing: 2,
     textTransform: 'uppercase',
     marginBottom: 8,
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 36,
+    fontSize: sizes.text.dSm,
     fontWeight: '700',
     marginBottom: 12,
   },
   subtitle: {
     color: colors.textSecondary,
-    fontSize: 16,
+    fontSize: sizes.text.body,
     lineHeight: 24,
     marginBottom: 32,
   },
@@ -114,14 +116,14 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     borderWidth: 1,
     borderColor: colors.cardBorder,
     color: colors.textPrimary,
-    borderRadius: 14,
+    borderRadius: sizes.radius.input,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 16,
+    fontSize: sizes.text.body,
   },
   primaryButton: {
     backgroundColor: colors.accent1,
-    borderRadius: 14,
+    borderRadius: sizes.radius.input,
     paddingVertical: 16,
     alignItems: 'center',
     marginBottom: 12,
@@ -132,6 +134,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   primaryButtonText: {
     color: colors.background,
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: sizes.text.body,
   },
 })

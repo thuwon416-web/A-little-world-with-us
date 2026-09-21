@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'expo-router'
 import {
   Gamepad2,
@@ -16,6 +16,8 @@ import {
 } from 'react-native'
 
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { calculateLoveScore } from '@/lib/love-score'
 import { supabase } from '@/lib/supabase'
 
@@ -42,6 +44,7 @@ function Section({
   children: ReactNode
 }) {
   const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
 
   return (
     <View style={styles.section}>
@@ -68,6 +71,7 @@ function GameCard({
   action?: string
 }) {
   const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
 
   return (
     <TouchableOpacity
@@ -85,6 +89,7 @@ function GameCard({
 export default function GamesScreen() {
   const router = useRouter()
   const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [board, setBoard] = useState<string[]>(Array(9).fill(''))
   const [xNext, setXNext] = useState(true)
   const [loveScore, setLoveScore] = useState(0)
@@ -206,24 +211,25 @@ export default function GamesScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  scroll: { flex: 1 },
-  container: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 28 },
-  hero: { borderWidth: 1, borderRadius: 24, padding: 20, gap: 8 },
-  title: { fontSize: 30, fontWeight: '700' },
-  subtitle: { fontSize: 15, lineHeight: 22 },
-  section: { gap: 12 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  sectionTitle: { fontSize: 12, fontWeight: '700', letterSpacing: 1.5 },
-  sectionContent: { gap: 12 },
-  card: { borderWidth: 1, borderRadius: 18, padding: 16, gap: 8 },
-  cardTitle: { fontSize: 17, fontWeight: '700' },
-  cardSubtitle: { fontSize: 14, lineHeight: 20 },
-  cardAction: { fontSize: 13, fontWeight: '700', marginTop: 4 },
-  score: { fontSize: 34, fontWeight: '800', marginTop: 4 },
-  board: { width: 210, flexDirection: 'row', flexWrap: 'wrap', marginTop: 4 },
-  cell: { width: 70, height: 70, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
-  cellText: { fontSize: 28 },
-  button: { borderRadius: 12, padding: 13, alignItems: 'center', marginTop: 8 },
-  buttonText: { fontWeight: '800' },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    scroll: { flex: 1 },
+    container: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 28 },
+    hero: { borderWidth: 1, borderRadius: sizes.radius.panel, padding: 20, gap: 8 },
+    title: { fontSize: sizes.text.hLg, fontWeight: '700' },
+    subtitle: { fontSize: sizes.text.body, lineHeight: 22 },
+    section: { gap: 12 },
+    sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    sectionTitle: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1.5 },
+    sectionContent: { gap: 12 },
+    card: { borderWidth: 1, borderRadius: sizes.radius.card, padding: 16, gap: 8 },
+    cardTitle: { fontSize: sizes.text.bodyLg, fontWeight: '700' },
+    cardSubtitle: { fontSize: sizes.text.sm, lineHeight: 20 },
+    cardAction: { fontSize: sizes.text.sm, fontWeight: '700', marginTop: 4 },
+    score: { fontSize: sizes.text.hLg, fontWeight: '800', marginTop: 4 },
+    board: { width: 210, flexDirection: 'row', flexWrap: 'wrap', marginTop: 4 },
+    cell: { width: 70, height: 70, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+    cellText: { fontSize: sizes.text.hLg },
+    button: { borderRadius: sizes.radius.input, padding: 13, alignItems: 'center', marginTop: 8 },
+    buttonText: { fontWeight: '800' },
+  })

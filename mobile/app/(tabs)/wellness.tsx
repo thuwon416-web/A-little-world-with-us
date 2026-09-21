@@ -60,12 +60,15 @@ import TenderCompassBoard from '@/components/wellness/TenderCompassBoard'
 import { enabledBoards, type WellnessBoard } from '@/data/wellness-boards'
 import { workouts, type Workout } from '@/data/workouts'
 import { useAuth } from '@/lib/auth'
+import { sizes, type Sizes } from '@/design-tokens'
 import {
   getResetAdvice,
   getWellnessLogs,
   logWellnessActivity,
   type WellnessLog,
 } from '@/services/wellnessTracking'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 type Category = 'health' | 'mental' | 'relationship' | 'quests'
 
@@ -164,6 +167,7 @@ function formatTime(seconds: number) {
 }
 
 export default function WellnessScreen() {
+  const { colors, theme } = useTheme()
   const { user } = useAuth()
   const [category, setCategory] = useState<Category>('health')
   const [selectedBoard, setSelectedBoard] = useState<WellnessBoard | null>(null)
@@ -260,6 +264,8 @@ export default function WellnessScreen() {
     }
   }
 
+  const styles = useMemo(() => createStyles(colors, sizes, theme), [colors, sizes, theme])
+
   const renderBoards = () => (
     <>
       {filteredBoards.length === 0 ? (
@@ -274,7 +280,7 @@ export default function WellnessScreen() {
             style={styles.boardButton}
             onPress={() => setSelectedBoard(board)}
           >
-            <BoardIcon size={28} color="#ff6b81" />
+            <BoardIcon size={28} color={colors.accent1} />
             <View style={styles.boardInfo}>
               <Text style={styles.boardName}>{board.name}</Text>
               <Text style={styles.muted}>{board.description}</Text>
@@ -327,7 +333,7 @@ export default function WellnessScreen() {
               style={[styles.categoryButton, category === item.id && styles.categoryActive]}
               onPress={() => setCategory(item.id)}
             >
-              <CategoryIcon size={20} color={category === item.id ? '#ff6b81' : '#d8b98c'} />
+              <CategoryIcon size={20} color={category === item.id ? colors.accent1 : colors.textSecondary} />
               <Text style={styles.categoryText}>{item.label}</Text>
             </TouchableOpacity>
           )
@@ -394,7 +400,7 @@ export default function WellnessScreen() {
                 onPress={() => void completeQuest(quest.id)}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  {completedQuestIds.has(quest.id) ? <Check size={14} color="#8ed0c4" /> : null}
+                  {completedQuestIds.has(quest.id) ? <Check size={14} color={colors.success} /> : null}
                   <Text style={styles.cardTitle}>{quest.title}</Text>
                 </View>
                 <Text style={styles.muted}>
@@ -415,7 +421,7 @@ export default function WellnessScreen() {
         <TouchableOpacity style={styles.adviceButton} onPress={() => void requestAdvice()}>
           <Text style={styles.adviceText}>Need guidance?</Text>
         </TouchableOpacity>
-        {loading ? <ActivityIndicator color="#ff9bba" /> : null}
+        {loading ? <ActivityIndicator color={colors.accent2} /> : null}
         {advice ? (
           <View style={styles.adviceCard}>
             <Text style={styles.cardTitle}>A gentle reset</Text>
@@ -427,78 +433,81 @@ export default function WellnessScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f0f13' },
-  header: { padding: 20, paddingTop: 64, backgroundColor: '#171b27' },
-  eyebrow: { color: '#d5c4d4', letterSpacing: 2, fontSize: 11 },
-  title: { color: '#f4edf5', fontSize: 28, fontWeight: '800', marginTop: 5 },
-  subtitle: { color: '#d5c4d4', marginTop: 5 },
-  categoryRow: { padding: 12, gap: 8, backgroundColor: '#171b27' },
-  categoryButton: {
-    minWidth: 83,
-    alignItems: 'center',
-    padding: 10,
-    borderRadius: 13,
-    backgroundColor: '#2d3140',
-  },
-  categoryActive: { backgroundColor: '#604582', borderWidth: 1, borderColor: '#ff9bba' },
-  categoryIcon: { fontSize: 20 },
-  categoryText: { color: '#fff', fontSize: 11, marginTop: 4 },
-  content: { padding: 16, gap: 10 },
-  boardContent: { paddingVertical: 16, gap: 12 },
-  sectionTitle: { color: '#fff', fontSize: 19, fontWeight: '800', marginTop: 8 },
-  boardButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#171b27',
-    padding: 14,
-    borderRadius: 15,
-  },
-  boardIcon: { fontSize: 26 },
-  boardInfo: { flex: 1 },
-  boardName: { color: '#fff', fontWeight: '700', fontSize: 15 },
-  muted: { color: '#c4bfd0', fontSize: 13, lineHeight: 19 },
-  workout: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    backgroundColor: '#171b27',
-    padding: 14,
-    borderRadius: 15,
-  },
-  workoutInfo: { flex: 1, gap: 3 },
-  cardTitle: { color: '#fff', fontSize: 15, fontWeight: '800' },
-  smallButton: {
-    backgroundColor: '#ff6b81',
-    paddingVertical: 9,
-    paddingHorizontal: 13,
-    borderRadius: 10,
-  },
-  smallButtonText: { color: '#fff', fontWeight: '800' },
-  timerCard: {
-    backgroundColor: '#604582',
-    padding: 18,
-    borderRadius: 16,
-    alignItems: 'center',
-    gap: 7,
-  },
-  timer: { color: '#fff', fontSize: 44, fontWeight: '800' },
-  primary: { backgroundColor: '#ff6b81', borderRadius: 11, padding: 12, marginTop: 5 },
-  primaryText: { color: '#fff', fontWeight: '800' },
-  history: { color: '#d5c4d4', padding: 11, backgroundColor: '#171b27', borderRadius: 11 },
-  quest: { backgroundColor: '#171b27', padding: 15, borderRadius: 15, gap: 4 },
-  completed: { borderColor: '#86d6ad', borderWidth: 1 },
-  adviceButton: {
-    backgroundColor: '#ff6b81',
-    borderRadius: 13,
-    padding: 13,
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  adviceText: { color: '#fff', fontWeight: '800' },
-  adviceCard: { backgroundColor: '#221d2d', borderRadius: 14, padding: 15, gap: 7 },
-  advice: { color: '#f4edf5', lineHeight: 21 },
-  link: { color: '#ff9bba', padding: 20, paddingTop: 60, fontWeight: '800' },
-  error: { color: '#ff9b9b' },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes, theme: string) => {
+  const buttonTextColor = theme === 'monochrome' ? colors.cardBg : '#fff'
+  return StyleSheet.create({
+    container: { flex: 1, backgroundColor: colors.background },
+    header: { padding: 20, paddingTop: 64, backgroundColor: colors.cardBg },
+    eyebrow: { color: colors.textPrimary, letterSpacing: 2, fontSize: sizes.text.xs },
+    title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '800', marginTop: 5 },
+    subtitle: { color: colors.textPrimary, marginTop: 5 },
+    categoryRow: { padding: 12, gap: 8, backgroundColor: colors.cardBg },
+    categoryButton: {
+      minWidth: 83,
+      alignItems: 'center',
+      padding: 10,
+      borderRadius: sizes.radius.btn,
+      backgroundColor: colors.surface,
+    },
+    categoryActive: { backgroundColor: colors.accent1, borderWidth: 1, borderColor: colors.accent2 },
+    categoryIcon: { fontSize: sizes.icon.btn },
+    categoryText: { color: colors.textPrimary, fontSize: sizes.text.xs, marginTop: 4 },
+    content: { padding: 16, gap: 10 },
+    boardContent: { paddingVertical: 16, gap: 12 },
+    sectionTitle: { color: colors.textPrimary, fontSize: sizes.text.hSm, fontWeight: '800', marginTop: 8 },
+    boardButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      backgroundColor: colors.cardBg,
+      padding: 14,
+      borderRadius: sizes.radius.btn,
+    },
+    boardIcon: { fontSize: sizes.icon.card },
+    boardInfo: { flex: 1 },
+    boardName: { color: colors.textPrimary, fontWeight: '700', fontSize: sizes.text.body },
+    muted: { color: colors.textSecondary, fontSize: sizes.text.sm, lineHeight: 19 },
+    workout: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      backgroundColor: colors.cardBg,
+      padding: 14,
+      borderRadius: sizes.radius.btn,
+    },
+    workoutInfo: { flex: 1, gap: 3 },
+    cardTitle: { color: colors.textPrimary, fontSize: sizes.text.body, fontWeight: '800' },
+    smallButton: {
+      backgroundColor: colors.accent1,
+      paddingVertical: 9,
+      paddingHorizontal: 13,
+      borderRadius: sizes.radius.input,
+    },
+    smallButtonText: { color: buttonTextColor, fontWeight: '800' },
+    timerCard: {
+      backgroundColor: colors.accent1,
+      padding: 18,
+      borderRadius: sizes.radius.btn,
+      alignItems: 'center',
+      gap: 7,
+    },
+    timer: { color: buttonTextColor, fontSize: 44, fontWeight: '800' },
+    primary: { backgroundColor: colors.accent1, borderRadius: sizes.radius.input, padding: 12, marginTop: 5 },
+    primaryText: { color: buttonTextColor, fontWeight: '800' },
+    history: { color: colors.textPrimary, padding: 11, backgroundColor: colors.cardBg, borderRadius: sizes.radius.input },
+    quest: { backgroundColor: colors.cardBg, padding: 15, borderRadius: sizes.radius.btn, gap: 4 },
+    completed: { borderColor: colors.success, borderWidth: 1 },
+    adviceButton: {
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.btn,
+      padding: 13,
+      alignItems: 'center',
+      marginTop: 12,
+    },
+    adviceText: { color: buttonTextColor, fontWeight: '800' },
+    adviceCard: { backgroundColor: colors.cardBg, borderRadius: sizes.radius.btn, padding: 15, gap: 7 },
+    advice: { color: colors.textPrimary, lineHeight: 21 },
+    link: { color: colors.accent2, padding: 20, paddingTop: 60, fontWeight: '800' },
+    error: { color: colors.error },
+  })
+}

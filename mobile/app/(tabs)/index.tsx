@@ -30,6 +30,8 @@ import {
 import OnThisDay from '@/components/dashboard/OnThisDay'
 import OurStats from '@/components/dashboard/OurStats'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { supabase } from '@/lib/supabase'
 import { getCareData, type CareLog, type CareSettings } from '@/services/care'
 import { calculateNativeCycleSummary } from '@/services/cycleCalculator'
@@ -106,7 +108,7 @@ function nextAnniversary() {
 
 function StatCard({ title, value }: { title: string; value: number }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   return (
     <View style={styles.statCard}>
       <Text style={styles.statTitle}>{title}</Text>
@@ -118,7 +120,7 @@ function StatCard({ title, value }: { title: string; value: number }) {
 export default function DashboardScreen() {
   const router = useRouter()
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [care, setCare] = useState<CareData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -425,7 +427,7 @@ export default function DashboardScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 72,
@@ -441,82 +443,82 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     gap: 16,
     padding: 24,
   },
-  eyebrow: { color: colors.accent2, fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { color: colors.textPrimary, fontSize: 30, fontWeight: '700' },
-  subtitle: { color: colors.textSecondary, fontSize: 15, lineHeight: 22 },
+  eyebrow: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 2, textTransform: 'uppercase' },
+  title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
+  subtitle: { color: colors.textSecondary, fontSize: sizes.text.body, lineHeight: 22 },
   heroCard: {
     backgroundColor: colors.surface,
-    borderRadius: 24,
+    borderRadius: sizes.radius.panel,
     padding: 24,
     borderWidth: 1,
     borderColor: `${colors.accent1}66`,
     alignItems: 'center',
   },
-  heroLabel: { color: colors.accent2, fontSize: 11, letterSpacing: 1.6 },
+  heroLabel: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 1.6 },
   heroValue: { color: colors.accent3, fontSize: 42, fontWeight: '800', marginTop: 6 },
-  heroText: { color: colors.textPrimary, fontSize: 15 },
+  heroText: { color: colors.textPrimary, fontSize: sizes.text.body },
   infoCard: {
     borderWidth: 1,
-    borderRadius: 16,
+    borderRadius: sizes.radius.btn,
     padding: 16,
     marginTop: 12,
     gap: 8,
   },
-  infoLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 1.5 },
-  infoText: { fontSize: 14, lineHeight: 21 },
-  sectionTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '800', marginTop: 8 },
+  infoLabel: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1.5 },
+  infoText: { fontSize: sizes.text.sm, lineHeight: 21 },
+  sectionTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800', marginTop: 8 },
   stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   statCard: {
     width: '48%',
     backgroundColor: colors.surface,
-    borderRadius: 16,
+    borderRadius: sizes.radius.btn,
     padding: 15,
     borderWidth: 1,
     borderColor: colors.cardBorder,
   },
-  statTitle: { color: colors.textSecondary, fontSize: 12, textTransform: 'uppercase' },
-  statValue: { color: colors.accent1, fontSize: 26, fontWeight: '800', marginTop: 8 },
+  statTitle: { color: colors.textSecondary, fontSize: sizes.text.xs, textTransform: 'uppercase' },
+  statValue: { color: colors.accent1, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 8 },
   actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   action: {
     width: '31%',
     minHeight: 74,
     backgroundColor: colors.surface,
-    borderRadius: 15,
+    borderRadius: sizes.radius.btn,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,
     padding: 8,
   },
-  actionText: { color: colors.textPrimary, fontSize: 11, textAlign: 'center', fontWeight: '700' },
+  actionText: { color: colors.textPrimary, fontSize: sizes.text.xs, textAlign: 'center', fontWeight: '700' },
   card: {
     backgroundColor: colors.surface,
-    borderRadius: 20,
+    borderRadius: sizes.radius.card,
     padding: 16,
     borderWidth: 1,
     borderColor: colors.cardBorder,
   },
   shareCard: {
     backgroundColor: colors.surface,
-    borderRadius: 20,
+    borderRadius: sizes.radius.card,
     padding: 16,
     borderWidth: 1,
     borderColor: `${colors.accent1}66`,
   },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { color: colors.textPrimary, fontSize: 17, fontWeight: '800' },
-  countdown: { color: colors.accent3, fontSize: 25, fontWeight: '800', marginTop: 12 },
-  memoryImage: { width: '100%', height: 170, borderRadius: 14, marginTop: 12 },
-  memoryTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700', marginTop: 12 },
-  careValue: { color: colors.success, fontSize: 24, fontWeight: '800', marginTop: 10 },
-  musicTitle: { color: colors.textPrimary, fontSize: 18, fontWeight: '700', marginTop: 12 },
-  anniversary: { color: colors.accent3, fontSize: 25, fontWeight: '800', marginTop: 10 },
-  muted: { color: colors.textSecondary, fontSize: 13, marginTop: 6 },
+  cardTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
+  countdown: { color: colors.accent3, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 12 },
+  memoryImage: { width: '100%', height: 170, borderRadius: sizes.radius.btn, marginTop: 12 },
+  memoryTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '700', marginTop: 12 },
+  careValue: { color: colors.success, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 10 },
+  musicTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '700', marginTop: 12 },
+  anniversary: { color: colors.accent3, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 10 },
+  muted: { color: colors.textSecondary, fontSize: sizes.text.sm, marginTop: 6 },
   error: { color: colors.error, textAlign: 'center' },
   primaryButton: {
     backgroundColor: colors.accent1,
     paddingHorizontal: 22,
     paddingVertical: 12,
-    borderRadius: 12,
+    borderRadius: sizes.radius.input,
   },
   primaryText: { color: colors.background, fontWeight: '800' },
   secondaryButton: {
@@ -524,7 +526,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     backgroundColor: colors.accent2,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    borderRadius: 11,
+    borderRadius: sizes.radius.input,
     marginTop: 14,
   },
   secondaryText: { color: colors.background, fontWeight: '800' },
@@ -534,7 +536,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     gap: 8,
     alignSelf: 'flex-start',
     backgroundColor: colors.accent1,
-    borderRadius: 12,
+    borderRadius: sizes.radius.input,
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginTop: 14,
@@ -545,7 +547,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 8,
-    borderRadius: 999,
+    borderRadius: sizes.radius.pill,
     paddingHorizontal: 14,
     paddingVertical: 9,
   },
@@ -556,13 +558,13 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     backgroundColor: '#00000088',
   },
   customizeModal: {
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: sizes.radius.panel,
+    borderTopRightRadius: sizes.radius.panel,
     padding: 20,
     gap: 12,
   },
   modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  modalTitle: { fontSize: 22, fontWeight: '800' },
+  modalTitle: { fontSize: sizes.text.hMd, fontWeight: '800' },
   widgetRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -570,6 +572,6 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     borderBottomWidth: 1,
     paddingVertical: 10,
   },
-  visibilityToggle: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 7 },
+  visibilityToggle: { borderRadius: sizes.radius.pill, paddingHorizontal: 10, paddingVertical: 7 },
   widgetLabel: { flex: 1, fontWeight: '700' },
 })

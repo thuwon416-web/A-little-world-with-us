@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Linking,
   ScrollView,
@@ -11,6 +11,8 @@ import {
 import { Play, Sparkles, Star } from 'lucide-react-native'
 
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { addSong, getPlaylist, PlaylistSong, removeSong, toggleAnniversary } from '@/services/music'
 
 type MusicTab = 'playlist' | 'mood'
@@ -68,6 +70,7 @@ function extractId(value: string) {
 
 export default function MusicScreen() {
   const { colors } = useTheme()
+  const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [tab, setTab] = useState<MusicTab>('playlist')
   const [songs, setSongs] = useState<PlaylistSong[]>([])
   const [input, setInput] = useState('')
@@ -227,41 +230,42 @@ export default function MusicScreen() {
     </ScrollView>
   )
 }
-const styles = StyleSheet.create({
-  container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
-  eyebrow: { fontSize: 12, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { fontSize: 30, fontWeight: '700' },
-  subtitle: { fontSize: 14, lineHeight: 21 },
-  tabs: { flexDirection: 'row', borderRadius: 14, borderWidth: 1, padding: 4, gap: 4 },
-  tab: { flex: 1, paddingVertical: 11, borderRadius: 10, alignItems: 'center' },
-  tabText: { fontWeight: '700' },
-  card: {
-    borderRadius: 18,
-    padding: 16,
-    borderWidth: 1,
-    gap: 10,
-  },
-  input: {
-    borderRadius: 12,
-    padding: 12,
-    borderWidth: 1,
-  },
-  primary: { padding: 13, borderRadius: 12, alignItems: 'center' },
-  primaryText: { fontWeight: '800' },
-  song: { fontSize: 18, fontWeight: '700' },
-  artist: {},
-  note: { fontStyle: 'italic' },
-  actions: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
-  actionRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  action: { fontWeight: '700' },
-  delete: { fontWeight: '700' },
-  error: {},
-  moodHeading: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  moodTitle: { fontSize: 16, fontWeight: '700' },
-  moodTracks: { gap: 8, marginTop: 4 },
-  track: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: 14, borderWidth: 1, padding: 10 },
-  playIcon: { width: 30, height: 30, borderRadius: 15, alignItems: 'center', justifyContent: 'center' },
-  trackDetails: { flex: 1, minWidth: 0 },
-  trackTitle: { fontSize: 14, fontWeight: '600' },
-  duration: { fontSize: 12 },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
+    eyebrow: { fontSize: sizes.text.xs, letterSpacing: 2, textTransform: 'uppercase' },
+    title: { fontSize: sizes.text.hLg, fontWeight: '700' },
+    subtitle: { fontSize: sizes.text.sm, lineHeight: 21 },
+    tabs: { flexDirection: 'row', borderRadius: sizes.radius.btn, borderWidth: 1, padding: 4, gap: 4 },
+    tab: { flex: 1, paddingVertical: 11, borderRadius: sizes.radius.input, alignItems: 'center' },
+    tabText: { fontWeight: '700' },
+    card: {
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      borderWidth: 1,
+      gap: 10,
+    },
+    input: {
+      borderRadius: sizes.radius.input,
+      padding: 12,
+      borderWidth: 1,
+    },
+    primary: { padding: 13, borderRadius: sizes.radius.input, alignItems: 'center' },
+    primaryText: { fontWeight: '800' },
+    song: { fontSize: sizes.text.bodyLg, fontWeight: '700' },
+    artist: {},
+    note: { fontStyle: 'italic' },
+    actions: { flexDirection: 'row', justifyContent: 'space-between', gap: 8 },
+    actionRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    action: { fontWeight: '700' },
+    delete: { fontWeight: '700' },
+    error: {},
+    moodHeading: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    moodTitle: { fontSize: sizes.text.body, fontWeight: '700' },
+    moodTracks: { gap: 8, marginTop: 4 },
+    track: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: sizes.radius.btn, borderWidth: 1, padding: 10 },
+    playIcon: { width: 30, height: 30, borderRadius: sizes.radius.btn, alignItems: 'center', justifyContent: 'center' },
+    trackDetails: { flex: 1, minWidth: 0 },
+    trackTitle: { fontSize: sizes.text.sm, fontWeight: '600' },
+    duration: { fontSize: sizes.text.xs },
+  })

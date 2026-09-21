@@ -13,12 +13,14 @@ import {
 import { Button } from '@/components/Button'
 import { PlanCard } from '@/components/PlanCard'
 import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { usePlans } from '@/hooks/usePlans'
 
 export default function PlansScreen() {
   const router = useRouter()
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = createStyles(colors, sizes)
   const { plans, loading, error, createPlan, togglePlanItem, updatePlan } = usePlans()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -120,7 +122,7 @@ export default function PlansScreen() {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
   container: {
     paddingHorizontal: 20,
     paddingTop: 72,
@@ -129,13 +131,13 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   title: {
     color: colors.textPrimary,
-    fontSize: 30,
+    fontSize: sizes.text.hLg,
     fontWeight: '700',
     marginBottom: 8,
   },
   subtitle: {
     color: colors.textSecondary,
-    fontSize: 15,
+    fontSize: sizes.text.body,
     marginBottom: 20,
   },
   toolbar: {
@@ -149,18 +151,18 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: colors.cardBorder,
-    borderRadius: 12,
+    borderRadius: sizes.radius.input,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   secondaryButtonText: {
     color: colors.textPrimary,
     fontWeight: '700',
-    fontSize: 14,
+    fontSize: sizes.text.sm,
   },
   composer: {
     backgroundColor: colors.surface,
-    borderRadius: 18,
+    borderRadius: sizes.radius.card,
     borderWidth: 1,
     borderColor: colors.cardBorder,
     padding: 18,
@@ -170,7 +172,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.cardBorder,
-    borderRadius: 12,
+    borderRadius: sizes.radius.input,
     color: colors.textPrimary,
     paddingHorizontal: 12,
     paddingVertical: 12,
@@ -200,7 +202,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   typeButtonText: {
     color: colors.textPrimary,
-    fontSize: 12,
+    fontSize: sizes.text.xs,
     textTransform: 'capitalize',
   },
   typeButtonTextActive: {
