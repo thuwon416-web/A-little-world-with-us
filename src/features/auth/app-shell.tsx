@@ -43,7 +43,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <Sidebar />
         </aside>
 
-        <main className="min-w-0 flex-1 px-4 pb-28 pt-6 md:px-6 lg:px-8 lg:pb-8">
+        <main id="main-content" className="min-w-0 flex-1 px-4 pb-28 pt-6 md:px-6 lg:px-8 lg:pb-8">
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}

@@ -189,7 +189,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main
+    <div
       className={`dashboard-shell animate-fade-in ${activeOccasion ? `dashboard-shell--${activeOccasion.kind}` : ''}`}
     >
       <section className="dashboard-hero">
@@ -302,6 +302,6 @@ export default function DashboardPage() {
 
       {coupleId ? <OurStats coupleId={coupleId} /> : null}
       <QuickActions />
-    </main>
+    </div>
   )
 }

@@ -60,7 +60,7 @@ export default function SettingsPage() {
   const [privateMode, setPrivateMode] = useState(true)
 
   return (
-    <main className="space-y-6 p-4 md:p-6 animate-fade-in">
+    <div className="space-y-6 p-4 md:p-6 animate-fade-in">
       <section className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-text-2">Settings</p>
         <h1 className="mt-3 text-3xl font-serif text-text-1">Your little world</h1>
@@ -191,6 +191,6 @@ export default function SettingsPage() {
       </section>
 
       <ErrorReport />
-    </main>
+    </div>
   )
 }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Delete } from 'lucide-react'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 interface PinLockProps {
   correctPin: string
@@ -26,6 +27,7 @@ export default function PinLock({
   const [attempts, setAttempts] = useState(0)
   const [isLocked, setIsLocked] = useState(false)
   const [lockedUntil, setLockedUntil] = useState<number | null>(null)
+  const prefersReduced = usePrefersReducedMotion()
 
   useEffect(() => {
     if (!lockedUntil) return
@@ -83,8 +85,8 @@ export default function PinLock({
           <motion.div
             key={i}
             initial={{ opacity: 0, y: '100vh', x: `${Math.random() * 100}%` }}
-            animate={{ opacity: [0, 0.3, 0], y: '-20vh' }}
-            transition={{
+            animate={prefersReduced ? {} : { opacity: [0, 0.3, 0], y: '-20vh' }}
+            transition={prefersReduced ? {} : {
               duration: 8 + Math.random() * 4,
               repeat: Infinity,
               delay: i * 1.5,
@@ -110,8 +112,8 @@ export default function PinLock({
           </p>
         )}
         <motion.div
-          animate={{ scale: [1, 1.15, 1] }}
-          transition={{ repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
+          animate={prefersReduced ? {} : { scale: [1, 1.15, 1] }}
+          transition={prefersReduced ? {} : { repeat: Infinity, duration: 2.5, ease: 'easeInOut' }}
         >
           <Heart className="w-20 h-20 text-accent-1 mx-auto mb-6 fill-current drop-shadow-lg" />
         </motion.div>

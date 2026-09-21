@@ -85,7 +85,7 @@ export default function HelpPage() {
   }, [query])
 
   return (
-    <main className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6 p-4 md:p-6">
       <section className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
@@ -209,6 +209,6 @@ export default function HelpPage() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

@@ -65,7 +65,7 @@ export default function Sidebar() {
   const navItems = [...baseNavItems, ...infoNavItems]
 
   return (
-    <aside className="flex h-full w-full flex-col rounded-panel border border-accent-1/20 bg-card px-3 py-6 shadow-lg backdrop-blur-xl">
+    <aside aria-label="Main sidebar" className="flex h-full w-full flex-col rounded-panel border border-accent-1/20 bg-card px-3 py-6 shadow-lg backdrop-blur-xl">
       <Link href="/dashboard" className="mb-7 flex items-center gap-3 px-2">
         <div className="flex h-10 w-10 items-center justify-center rounded-btn bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-lg">
           <Infinity size={22} aria-hidden="true" />
@@ -82,7 +82,7 @@ export default function Sidebar() {
         </div>
       </Link>
 
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-1">
         {navItems.map(({ href, key, icon: Icon }) => {
           const active = pathname === href
 

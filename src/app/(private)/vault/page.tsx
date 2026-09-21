@@ -14,6 +14,7 @@ import { loadWrappedKey } from '@/lib/vault-storage'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, insertRow, type VaultItem } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 type VaultCategory = 'all' | 'private' | 'celebration' | 'ritual' | 'travel'
 
@@ -46,6 +47,7 @@ function VaultPageContent() {
   const [hasWrappedKey, setHasWrappedKey] = useState<boolean | null>(null)
   const [passphrase, setPassphrase] = useState('')
   const [passwordVaultError, setPasswordVaultError] = useState('')
+  const prefersReduced = usePrefersReducedMotion()
   const [showVaultSetup, setShowVaultSetup] = useState(false)
   const isPinValid = /^\d{4,6}$/.test(pin)
 
@@ -182,8 +184,8 @@ function VaultPageContent() {
         >
           <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-1 text-text-1 shadow-lg">
             <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ repeat: Infinity, duration: 3 }}
+              animate={prefersReduced ? {} : { rotate: [0, 10, -10, 0] }}
+              transition={prefersReduced ? {} : { repeat: Infinity, duration: 3 }}
             >
               <Lock className="h-9 w-9" />
             </motion.div>

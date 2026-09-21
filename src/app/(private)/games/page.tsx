@@ -37,7 +37,7 @@ function QuizPlaceholderCard({
     >
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="font-semibold text-text-1">{title}</h3>
+          <p className="font-semibold text-text-1">{title}</p>
           <p className="mt-1 text-xs text-text-2">{subtitle}</p>
         </div>
         {badge ? (
@@ -59,7 +59,7 @@ function QuizPlaceholderCard({
 
 export default function GamesPage() {
   return (
-    <main className="mx-auto min-h-screen max-w-6xl space-y-10 px-4 py-8">
+    <div className="mx-auto min-h-screen max-w-6xl space-y-10 px-4 py-8">
       <motion.header initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-panel border border-accent-1/20 bg-card p-6">
         <div className="flex items-center gap-3 text-accent-1">
           <Gamepad2 className="h-7 w-7" />
@@ -97,6 +97,6 @@ export default function GamesPage() {
         <h2 className="flex items-center gap-2 text-2xl font-semibold text-text-1"><Trophy className="h-5 w-5 text-accent-1" /> Quests</h2>
         <GameCard><RelationshipQuests /></GameCard>
       </motion.section>
-    </main>
+    </div>
   )
 }

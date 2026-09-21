@@ -4,6 +4,7 @@ import { memo, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
 import { calculateDaysTogether, getRelationshipStartDate } from '@/lib/relationship-days'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 /**
  * Displays total days together since the anniversary date.
@@ -11,6 +12,7 @@ import { calculateDaysTogether, getRelationshipStartDate } from '@/lib/relations
  */
 export default memo(function DaysCounter() {
   const [days, setDays] = useState(0)
+  const prefersReduced = usePrefersReducedMotion()
 
   useEffect(() => {
     setDays(calculateDaysTogether())
@@ -25,8 +27,8 @@ export default memo(function DaysCounter() {
     >
       {/* Decorative heart */}
       <motion.div
-        animate={{ scale: [1, 1.3, 1], rotate: [0, 10, -10, 0] }}
-        transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+        animate={prefersReduced ? {} : { scale: [1, 1.3, 1], rotate: [0, 10, -10, 0] }}
+        transition={prefersReduced ? {} : { repeat: Infinity, duration: 3, ease: 'easeInOut' }}
         className="absolute top-4 right-4 text-accent-1/40"
       >
         <Heart className="w-10 h-10 fill-current" />
@@ -45,8 +47,8 @@ export default memo(function DaysCounter() {
           {days}
         </motion.span>
         <motion.div
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ repeat: Infinity, duration: 1.2 }}
+          animate={prefersReduced ? {} : { scale: [1, 1.2, 1] }}
+          transition={prefersReduced ? {} : { repeat: Infinity, duration: 1.2 }}
         >
           <Heart className="w-8 h-8 text-accent-1 fill-current" />
         </motion.div>

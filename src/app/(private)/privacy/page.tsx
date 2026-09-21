@@ -1,6 +1,6 @@
 export default function Privacy() {
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-8 animate-fade-in">
+    <div className="max-w-2xl mx-auto p-6 space-y-8 animate-fade-in">
       <section className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
         <p className="text-xs uppercase tracking-[0.22em] text-text-2">Legal</p>
         <h1 className="mt-3 text-3xl font-serif text-text-1">Privacy Policy</h1>
@@ -86,6 +86,6 @@ export default function Privacy() {
           </p>
         </section>
       </div>
-    </main>
+    </div>
   )
 }

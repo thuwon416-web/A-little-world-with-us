@@ -19,7 +19,7 @@ export default function PrivateError({
   }, [error])
 
   return (
-    <main className="flex min-h-[60vh] items-center justify-center px-4 py-10">
+    <div className="flex min-h-[60vh] items-center justify-center px-4 py-10">
       <div className="w-full max-w-lg rounded-panel border border-accent-1/20 bg-card p-8 text-center shadow-lg">
         <p className="text-xs uppercase tracking-[0.25em] text-accent-1">Private area</p>
         <h1 className="mt-3 text-3xl font-semibold text-text-1">
@@ -45,6 +45,6 @@ export default function PrivateError({
           </Link>
         </div>
       </div>
-    </main>
+    </div>
   )
 }

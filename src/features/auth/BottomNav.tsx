@@ -71,7 +71,7 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav className="flex items-center justify-around border-t border-accent-1/20 bg-card px-2 py-2.5 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur-xl">
+      <nav aria-label="Primary navigation" className="flex items-center justify-around border-t border-accent-1/20 bg-card px-2 py-2.5 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur-xl">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href
 

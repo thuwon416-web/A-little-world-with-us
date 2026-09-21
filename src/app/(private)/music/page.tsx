@@ -17,7 +17,7 @@ export default function MusicPage() {
   const [preview, setPreview] = useState<MusicTrack | null>(null)
 
   return (
-    <main className="mx-auto min-h-screen max-w-5xl py-6">
+    <div className="mx-auto min-h-screen max-w-5xl py-6">
       <div className="mb-4 flex items-center gap-2 text-xs text-text-2">
         <Link href="/dashboard" className="flex items-center gap-1 hover:text-text-1">
           <Home size={11} /> Home
@@ -85,6 +85,6 @@ export default function MusicPage() {
           {preview && <div className="rounded-panel border border-accent-1/20 bg-card p-4"><div className="mb-3 text-sm font-medium text-text-1">Preview: {preview.title}</div><YouTubePlayer videoId={preview.youtubeId} title={preview.title} /></div>}
         </section>
       )}
-    </main>
+    </div>
   )
 }

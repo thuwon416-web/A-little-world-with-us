@@ -15,5 +15,5 @@ export default function MemoryMapPage() {
       else setMemories((data ?? []) as Memory[])
     })
   }, [])
-  return <main className="mx-auto max-w-6xl space-y-5 px-4 py-8"><h1 className="text-3xl font-serif text-text-1">Memory Map</h1>{error ? <p className="text-sm text-red-400">{error}</p> : memories.length ? <Map memories={memories} /> : <section className="glass-card flex min-h-64 items-center justify-center rounded-panel p-6 text-center text-text-2">No located memories yet.</section>}</main>
+  return <div className="mx-auto max-w-6xl space-y-5 px-4 py-8"><h1 className="text-3xl font-serif text-text-1">Memory Map</h1>{error ? <p className="text-sm text-red-400">{error}</p> : memories.length ? <Map memories={memories} /> : <section className="glass-card flex min-h-64 items-center justify-center rounded-panel p-6 text-center text-text-2">No located memories yet.</section>}</div>
 }

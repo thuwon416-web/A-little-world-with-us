@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Heart, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react'
 import { acceptPairInvite } from '@/lib/couple-link'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 type PageState = 'loading' | 'input' | 'accepting' | 'success' | 'error'
 
@@ -14,6 +15,7 @@ export default function AcceptCoupleLinkPage() {
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const _prefersReduced = usePrefersReducedMotion()
 
   const handleAccept = useCallback(async (codeToAccept?: string) => {
     const finalCode = (codeToAccept || code).trim().toUpperCase()
@@ -162,6 +164,7 @@ function InputState({
 }
 
 function AcceptingState() {
+  const _prefersReduced = usePrefersReducedMotion()
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -169,8 +172,8 @@ function AcceptingState() {
       className="flex flex-col items-center justify-center py-16 space-y-4"
     >
       <motion.div
-        animate={{ scale: [1, 1.1, 1] }}
-        transition={{ duration: 2, repeat: Infinity }}
+        animate={_prefersReduced ? {} : { scale: [1, 1.1, 1] }}
+        transition={_prefersReduced ? {} : { duration: 2, repeat: Infinity }}
       >
         <Heart className="h-16 w-16 text-accent-1" />
       </motion.div>

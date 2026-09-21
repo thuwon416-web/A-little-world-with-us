@@ -49,7 +49,7 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-10">
+    <main id="main-content" className="flex min-h-screen items-center justify-center px-4 py-10">
       <section className="w-full max-w-md rounded-modal border border-accent-1/20 bg-card p-7 shadow-xl backdrop-blur-xl">
         <div className="mb-6 text-center">
           <Heart className="mx-auto mb-4 h-12 w-12 fill-current text-accent-1" />
@@ -66,6 +66,7 @@ export default function SignupPage() {
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <input
+            id="email"
             required
             type="email"
             value={email}
@@ -75,6 +76,7 @@ export default function SignupPage() {
             className="w-full rounded-input border border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 outline-none focus:border-accent-1"
           />
           <input
+            id="password"
             required
             minLength={6}
             type="password"
@@ -85,6 +87,7 @@ export default function SignupPage() {
             className="w-full rounded-input border border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 outline-none focus:border-accent-1"
           />
           <input
+            id="confirm-password"
             required
             type="password"
             value={confirmPassword}

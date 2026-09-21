@@ -4,6 +4,7 @@ import { useMemo } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Sparkle } from 'lucide-react'
 import { useTheme } from '@/features/auth/ThemeProvider'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 interface AmbientBackgroundProps {
   density?: 'low' | 'medium' | 'high'
@@ -12,6 +13,7 @@ interface AmbientBackgroundProps {
 export default function AmbientBackground({ density = 'medium' }: AmbientBackgroundProps) {
   const { mode } = useTheme()
   const isMonochrome = mode === 'monochrome'
+  const prefersReduced = usePrefersReducedMotion()
   const count = density === 'low' ? 4 : density === 'high' ? 8 : 6
 
   const particles = useMemo(() => {
@@ -58,13 +60,13 @@ export default function AmbientBackground({ density = 'medium' }: AmbientBackgro
           className="absolute"
           style={{ left: `${p.left}%`, bottom: '-5%' }}
           initial={{ y: 0, opacity: 0, scale: 0 }}
-          animate={{
+          animate={prefersReduced ? {} : {
             y: [0, -1100],
             opacity: [0, p.opacity, p.opacity, 0],
             scale: [0, 1, 1, 0.5],
             x: [0, p.driftX, -p.driftX, 0],
           }}
-          transition={{
+          transition={prefersReduced ? {} : {
             duration: p.duration,
             repeat: Infinity,
             delay: p.delay,
@@ -101,11 +103,11 @@ export default function AmbientBackground({ density = 'medium' }: AmbientBackgro
           key={`spark-${s.id}`}
           className="absolute"
           style={{ left: `${s.left}%`, top: `${s.top}%` }}
-          animate={{
+          animate={prefersReduced ? {} : {
             opacity: [0, 1, 0],
             scale: [0.5, 1.2, 0.5],
           }}
-          transition={{
+          transition={prefersReduced ? {} : {
             duration: s.duration,
             repeat: Infinity,
             delay: s.delay,

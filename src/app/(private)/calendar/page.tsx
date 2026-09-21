@@ -107,7 +107,7 @@ export default function CalendarPage() {
   const { days, firstDay } = getDaysInMonth(currentDate)
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header>
         <h1
           className="text-4xl text-text-1"
@@ -276,6 +276,6 @@ export default function CalendarPage() {
           </>
         )}
       </section>
-    </main>
+    </div>
   )
 }

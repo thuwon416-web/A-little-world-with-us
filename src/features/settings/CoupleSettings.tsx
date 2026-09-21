@@ -229,6 +229,7 @@ export default function CoupleSettings() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="partner@example.com"
+                autoComplete="email"
                 className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 required
               />
@@ -240,6 +241,7 @@ export default function CoupleSettings() {
                 value={coupleName}
                 onChange={(e) => setCoupleName(e.target.value)}
                 placeholder="Our Little World"
+                autoComplete="off"
                 className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
               />
             </div>

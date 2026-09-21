@@ -66,7 +66,7 @@ export default function LearningPage() {
     KOREAN_VOCAB.filter((vocab) => vocab.lessonId === lesson.id)
 
   return (
-    <main className="mx-auto max-w-6xl space-y-8 px-4 py-8 animate-fade-in" data-theme={mode}>
+    <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 animate-fade-in" data-theme={mode}>
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -302,6 +302,6 @@ export default function LearningPage() {
           </section>
         </div>
       )}
-    </main>
+    </div>
   )
 }

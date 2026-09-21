@@ -673,6 +673,9 @@ export default function RealtimeChat() {
 
   return (
     <div className="flex flex-col h-[600px] glass-card">
+      <div role="status" aria-live="polite" className="sr-only">
+        {messages.length > 0 && `Latest message from ${messages[messages.length - 1].sender_id === currentUserId ? 'you' : 'your partner'}`}
+      </div>
       <header className="flex items-center gap-3 border-b border-accent-1/20 bg-card px-4 py-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-pill bg-accent-1 text-lg text-white"><Heart className="h-5 w-5 fill-current" /></div>
         <div><p className="font-semibold text-text-1">Your love</p><p className="text-xs text-emerald-400">{isOnline ? 'Online' : 'Offline'}{pendingCount > 0 && ` (${pendingCount} pending)`}</p></div>

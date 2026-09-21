@@ -414,7 +414,7 @@ function MemoriesPageContent() {
   }
 
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-serif text-text-1">Our Memories</h1>
@@ -663,7 +663,7 @@ function MemoriesPageContent() {
           </section>
         </div>
       ) : null}
-    </main>
+    </div>
   )
 }
 
@@ -685,7 +685,7 @@ function MemoryDetail({ memory, onClose, onSaved }: { memory: DisplayMemory; onC
 
 function MemoriesSkeleton() {
   return (
-    <main className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <div className="h-8 w-48 animate-pulse rounded-full bg-card" />
       <div className="h-20 animate-pulse rounded-panel bg-card" />
       <div className="h-12 animate-pulse rounded-full bg-card" />
@@ -694,6 +694,6 @@ function MemoriesSkeleton() {
         <div className="h-60 animate-pulse rounded-panel bg-card" />
         <div className="h-60 animate-pulse rounded-panel bg-card" />
       </div>
-    </main>
+    </div>
   )
 }

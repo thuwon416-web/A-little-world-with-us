@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Sparkle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import AmbientBackground from '@/components/effects/ambient-background'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 interface LockScreenProps {
   onUnlock: () => void
@@ -21,6 +22,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
     { id: number; angle: number; distance: number; size: number }[]
   >([])
   const inputRef = useRef<HTMLInputElement>(null)
+  const prefersReduced = usePrefersReducedMotion()
 
   useEffect(() => {
     checkPinSet()
@@ -185,8 +187,8 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
           >
             <div className="absolute inset-0 rounded-full bg-gold/30 blur-3xl animate-glow-pulse scale-150" />
             <motion.div
-              animate={{ scale: [1, 1.12, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              animate={prefersReduced ? {} : { scale: [1, 1.12, 1] }}
+              transition={prefersReduced ? {} : { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
               className="relative"
             >
               <Heart className="w-24 h-24 text-gold fill-gold drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]" />

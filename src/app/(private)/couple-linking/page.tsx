@@ -7,6 +7,7 @@ import { LoadingState } from '@/components/shared/Loading'
 import { createPairInvite, getPairStatus, type CoupleLinkStatus } from '@/lib/couple-link'
 import { getCurrentUserId } from '@/lib/supabase'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
+import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
 type PageState = 'loading' | 'linked' | 'pending' | 'create' | 'error'
 
@@ -18,6 +19,7 @@ export default function CoupleLinkingPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [lastStatusUpdatedAt, setLastStatusUpdatedAt] = useState<string | null>(null)
+  const _prefersReduced = usePrefersReducedMotion()
 
   useEffect(() => {
     void getCurrentUserId().then(setCurrentUserId)
@@ -210,6 +212,7 @@ function PendingState({
   onCopyCode: () => void
   copied: boolean
 }) {
+  const _prefersReduced = usePrefersReducedMotion()
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -219,8 +222,8 @@ function PendingState({
       <div className="rounded-btn border border-accent-1/20 bg-card p-8 text-center">
         <div className="mb-6 flex justify-center">
           <motion.div
-            animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={_prefersReduced ? {} : { scale: [1, 1.1, 1] }}
+            transition={_prefersReduced ? {} : { duration: 2, repeat: Infinity }}
             className="rounded-full bg-accent-1/10 p-4"
           >
             <Heart className="h-8 w-8 text-accent-1" />
