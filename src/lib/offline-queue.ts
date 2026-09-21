@@ -1,4 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 interface QueuedMessage {
   id: string
@@ -66,7 +67,7 @@ export async function getQueueCount(): Promise<number> {
   return await database.count(STORE_NAME)
 }
 
-export async function processQueue(supabase: { from: (table: string) => { insert: (data: unknown) => Promise<{ error: unknown }> } }, coupleId: string) {
+export async function processQueue(supabase: SupabaseClient, coupleId: string): Promise<number> {
   const messages = await dequeueMessages()
   let processed = 0
 
