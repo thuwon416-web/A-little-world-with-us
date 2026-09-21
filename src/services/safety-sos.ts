@@ -33,13 +33,13 @@ async function context() {
 }
 export async function getActiveSos() {
   const { coupleId } = await context()
-  const { data, error } = await supabase.from('emergency_alerts').select('*').eq('couple_id', coupleId).is('resolved_at', null).order('created_at', { ascending: false })
+  const { data, error } = await supabase.from('emergency_alerts').select('id, couple_id, reporter_id, latitude, longitude, accuracy, message, created_at, resolved_at, resolved_by, resolution_note').eq('couple_id', coupleId).is('resolved_at', null).order('created_at', { ascending: false })
   if (error) throw error
   return ((data ?? []) as SosRow[]).map(mapSos)
 }
 export async function getSosHistory(limit = 50) {
   const { coupleId } = await context()
-  const { data, error } = await supabase.from('emergency_alerts').select('*').eq('couple_id', coupleId).order('created_at', { ascending: false }).limit(limit)
+  const { data, error } = await supabase.from('emergency_alerts').select('id, couple_id, reporter_id, latitude, longitude, accuracy, message, created_at, resolved_at, resolved_by, resolution_note').eq('couple_id', coupleId).order('created_at', { ascending: false }).limit(limit)
   if (error) throw error
   return ((data ?? []) as SosRow[]).map(mapSos)
 }

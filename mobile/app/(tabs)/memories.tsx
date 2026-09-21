@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Audio } from 'expo-av'
 import * as Speech from 'expo-speech'
 import { Check, Frown, Heart, Meh, Mic, Pause, Pencil, Play, Smile, Sparkles, Square, Trash2, TriangleAlert, Volume2, Wand2 } from 'lucide-react-native'
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import { Modal } from '@/components/ui/Modal'
 import { useTheme } from '@/context/ThemeContext'
@@ -547,77 +547,85 @@ export default function MemoriesScreen() {
       {visible.length === 0 ? (
         <Text style={[styles.muted, { color: colors.textSecondary }]}>No structured memories in this category yet.</Text>
       ) : (
-        visible.map((memory) => (
-          <View key={memory.id} style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
-            <View style={styles.row}>
-              <Text style={[styles.memoryTitle, { color: colors.textPrimary }]}>{memory.title}</Text>
-              {memory.category === 'journal' ? (
-                <View style={styles.journalActions}>
-                  {memory.metadata?.mood_tag ? (() => {
-                    const mood = JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
-                      JOURNAL_MOODS.find((item) => item.id === 'okay')
-                    if (!mood) return null
-                    const MoodIcon = mood.Icon
-                    return <MoodIcon color={colors.accent2} size={20} />
-                  })() : null}
-                  <TouchableOpacity onPress={() => openEditJournal(memory)} accessibilityLabel="Edit journal entry">
-                    <Pencil color={colors.accent2} size={20} />
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => remove(memory)} accessibilityLabel="Delete journal entry">
-                    <Trash2 color={colors.error} size={20} />
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <TouchableOpacity onPress={() => remove(memory)}>
-                  <Text style={[styles.delete, { color: colors.error }]}>Delete</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-            <Text style={[styles.meta, { color: colors.accent2 }]}>
-              {memory.category} {memory.date ? `• ${memory.date}` : ''}
-            </Text>
-            {memory.caption ? <Text style={[styles.caption, { color: colors.textSecondary }]}>{memory.caption}</Text> : null}
-            {memory.category === 'journal' && memory.description ? (
-              <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={2}>{memory.description}</Text>
-            ) : null}
-            {memory.category === 'journal' ? (
-              memory.metadata?.ai_reflection ? (
-                <View style={[styles.reflectionCard, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
-                  <View style={styles.reflectionHeader}>
-                    <Sparkles color={colors.accent1} size={16} />
-                    <Text style={[styles.reflectionLabel, { color: colors.accent1 }]}>AI reflection</Text>
-                    <TouchableOpacity onPress={() => void speakReflection(memory)} accessibilityLabel="Read AI reflection aloud">
-                      {speakingJournalId === memory.id
-                        ? <Square color={colors.accent1} size={16} />
-                        : <Volume2 color={colors.accent1} size={16} />}
+        <FlatList
+          data={visible}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item: memory }) => (
+            <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+              <View style={styles.row}>
+                <Text style={[styles.memoryTitle, { color: colors.textPrimary }]}>{memory.title}</Text>
+                {memory.category === 'journal' ? (
+                  <View style={styles.journalActions}>
+                    {memory.metadata?.mood_tag ? (() => {
+                      const mood = JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
+                        JOURNAL_MOODS.find((item) => item.id === 'okay')
+                      if (!mood) return null
+                      const MoodIcon = mood.Icon
+                      return <MoodIcon color={colors.accent2} size={20} />
+                    })() : null}
+                    <TouchableOpacity onPress={() => openEditJournal(memory)} accessibilityLabel="Edit journal entry">
+                      <Pencil color={colors.accent2} size={20} />
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => remove(memory)} accessibilityLabel="Delete journal entry">
+                      <Trash2 color={colors.error} size={20} />
                     </TouchableOpacity>
                   </View>
-                  <Text style={[styles.caption, { color: colors.textPrimary }]}>{memory.metadata.ai_reflection}</Text>
-                </View>
-              ) : (
+                ) : (
+                  <TouchableOpacity onPress={() => remove(memory)}>
+                    <Text style={[styles.delete, { color: colors.error }]}>Delete</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <Text style={[styles.meta, { color: colors.accent2 }]}>
+                {memory.category} {memory.date ? `• ${memory.date}` : ''}
+              </Text>
+              {memory.caption ? <Text style={[styles.caption, { color: colors.textSecondary }]}>{memory.caption}</Text> : null}
+              {memory.category === 'journal' && memory.description ? (
+                <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={2}>{memory.description}</Text>
+              ) : null}
+              {memory.category === 'journal' ? (
+                memory.metadata?.ai_reflection ? (
+                  <View style={[styles.reflectionCard, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+                    <View style={styles.reflectionHeader}>
+                      <Sparkles color={colors.accent1} size={16} />
+                      <Text style={[styles.reflectionLabel, { color: colors.accent1 }]}>AI reflection</Text>
+                      <TouchableOpacity onPress={() => void speakReflection(memory)} accessibilityLabel="Read AI reflection aloud">
+                        {speakingJournalId === memory.id
+                          ? <Square color={colors.accent1} size={16} />
+                          : <Volume2 color={colors.accent1} size={16} />}
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={[styles.caption, { color: colors.textPrimary }]}>{memory.metadata.ai_reflection}</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={[styles.reflectButton, { borderColor: colors.cardBorder }]}
+                    onPress={() => void requestReflection(memory)}
+                    disabled={reflectingId !== null}
+                  >
+                    {reflectingId === memory.id ? <ActivityIndicator color={colors.accent1} size="small" /> : <Sparkles color={colors.accent1} size={16} />}
+                    <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>
+                      {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
+                    </Text>
+                  </TouchableOpacity>
+                )
+              ) : null}
+              {memory.category === 'journal' && memory.metadata?.voice_url ? (
                 <TouchableOpacity
-                  style={[styles.reflectButton, { borderColor: colors.cardBorder }]}
-                  onPress={() => void requestReflection(memory)}
-                  disabled={reflectingId !== null}
+                  style={[styles.voiceRow, { borderColor: colors.cardBorder }]}
+                  onPress={() => void playJournalVoice(memory.metadata?.voice_url)}
                 >
-                  {reflectingId === memory.id ? <ActivityIndicator color={colors.accent1} size="small" /> : <Sparkles color={colors.accent1} size={16} />}
-                  <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>
-                    {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
-                  </Text>
+                  <Play color={colors.accent1} size={16} />
+                  <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>Play voice note</Text>
                 </TouchableOpacity>
-              )
-            ) : null}
-            {memory.category === 'journal' && memory.metadata?.voice_url ? (
-              <TouchableOpacity
-                style={[styles.voiceRow, { borderColor: colors.cardBorder }]}
-                onPress={() => void playJournalVoice(memory.metadata?.voice_url)}
-              >
-                <Play color={colors.accent1} size={16} />
-                <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>Play voice note</Text>
-              </TouchableOpacity>
-            ) : null}
-          </View>
-        ))
+              ) : null}
+            </View>
+          )}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews
+        />
       )}
       <Modal
         visible={journalModalOpen}

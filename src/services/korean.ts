@@ -147,7 +147,7 @@ const mapProgress = (row: ProgressRow): KoreanProgress => ({
 })
 
 export async function getLessons(level?: KoreanLesson['level']): Promise<KoreanLesson[]> {
-  let query = supabase.from('korean_lessons').select('*').order('lesson_order')
+  let query = supabase.from('korean_lessons').select('id, level, title, title_my, description, lesson_order, created_at, updated_at').order('lesson_order')
   if (level !== undefined) query = query.eq('level', level)
   const { data, error } = await query
   if (error) throw error
@@ -157,7 +157,7 @@ export async function getLessons(level?: KoreanLesson['level']): Promise<KoreanL
 export async function getVocabByLesson(lessonId: string): Promise<KoreanVocab[]> {
   const { data, error } = await supabase
     .from('korean_vocab')
-    .select('*')
+    .select('id, lesson_id, level, korean, romanization, english, myanmar, audio_url, example_sentence, example_translation, tags, created_at')
     .eq('lesson_id', lessonId)
     .order('created_at')
   if (error) throw error
@@ -184,7 +184,7 @@ export async function createQuizSession(input: {
       focus_categories: input.focusCategories,
       total_questions: input.totalQuestions,
     })
-    .select('*')
+    .select('id, couple_id, created_by, target_user, level, quiz_type, focus_categories, status, score, total_questions, started_at, completed_at, created_at')
     .single()
   if (error) throw error
   return mapSession(data as QuizSessionRow)
@@ -196,10 +196,10 @@ export async function getQuizSession(sessionId: string): Promise<{
 }> {
   const [{ data: session, error: sessionError }, { data: questions, error: questionsError }] =
     await Promise.all([
-      supabase.from('korean_quiz_sessions').select('*').eq('id', sessionId).single(),
+      supabase.from('korean_quiz_sessions').select('id, couple_id, created_by, target_user, level, quiz_type, focus_categories, status, score, total_questions, started_at, completed_at, created_at').eq('id', sessionId).single(),
       supabase
         .from('korean_quiz_questions')
-        .select('*')
+        .select('id, session_id, vocab_id, question_type, question_text, options, correct_answer, user_answer, is_correct, answered_at, created_at')
         .eq('session_id', sessionId)
         .order('created_at'),
     ])
@@ -217,7 +217,7 @@ export async function submitAnswer(
 ): Promise<KoreanQuizQuestion> {
   const { data: question, error: readError } = await supabase
     .from('korean_quiz_questions')
-    .select('*')
+    .select('id, session_id, vocab_id, question_type, question_text, options, correct_answer, user_answer, is_correct, answered_at, created_at')
     .eq('id', questionId)
     .single()
   if (readError) throw readError
@@ -231,7 +231,7 @@ export async function submitAnswer(
       answered_at: new Date().toISOString(),
     })
     .eq('id', questionId)
-    .select('*')
+    .select('id, session_id, vocab_id, question_type, question_text, options, correct_answer, user_answer, is_correct, answered_at, created_at')
     .single()
   if (error) throw error
   return mapQuestion(data as QuizQuestionRow)
@@ -240,7 +240,7 @@ export async function submitAnswer(
 export async function getProgress(userId: string): Promise<KoreanProgress[]> {
   const { data, error } = await supabase
     .from('korean_progress')
-    .select('*')
+    .select('id, user_id, vocab_id, mastery_level, times_correct, times_wrong, last_reviewed_at, next_review_at, created_at, updated_at')
     .eq('user_id', userId)
     .order('next_review_at')
   if (error) throw error
@@ -266,7 +266,7 @@ export async function upsertProgress(
       },
       { onConflict: 'user_id,vocab_id' }
     )
-    .select('*')
+    .select('id, user_id, vocab_id, mastery_level, times_correct, times_wrong, last_reviewed_at, next_review_at, created_at, updated_at')
     .single()
   if (error) throw error
   return mapProgress(data as ProgressRow)

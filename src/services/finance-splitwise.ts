@@ -156,7 +156,7 @@ export async function getExpenses(): Promise<Expense[]> {
   const { coupleId } = await getContext()
   const { data, error } = await supabase
     .from('finance_expenses')
-    .select('*')
+    .select('id, couple_id, user_id, title, amount, spent_at, category, paid_by, split_type, split_with, split_percentage, is_settled, notes, created_at, updated_at')
     .eq('couple_id', coupleId)
     .order('spent_at', { ascending: false })
     .order('created_at', { ascending: false })
@@ -181,7 +181,7 @@ export async function createExpense(input: CreateExpenseInput): Promise<Expense>
       split_percentage: input.splitPercentage ?? null,
       notes: input.notes ?? null,
     })
-    .select('*')
+    .select('id, couple_id, user_id, title, amount, spent_at, category, paid_by, split_type, split_with, split_percentage, is_settled, notes, created_at, updated_at')
     .single()
   if (error) throw new Error(error.message)
   return mapExpense(data as ExpenseRow)
@@ -228,7 +228,7 @@ export async function getSettlements(): Promise<Settlement[]> {
   const { coupleId } = await getContext()
   const { data, error } = await supabase
     .from('settlements')
-    .select('*')
+    .select('id, couple_id, from_user, to_user, amount, notes, settled_at, created_at')
     .eq('couple_id', coupleId)
     .order('settled_at', { ascending: false })
   if (error) throw new Error(error.message)
@@ -250,7 +250,7 @@ export async function createSettlement(input: CreateSettlementInput): Promise<Se
       notes: input.notes ?? null,
       settled_at: input.settledAt,
     })
-    .select('*')
+    .select('id, couple_id, from_user, to_user, amount, notes, settled_at, created_at')
     .single()
   if (error) throw new Error(error.message)
   return mapSettlement(data as SettlementRow)

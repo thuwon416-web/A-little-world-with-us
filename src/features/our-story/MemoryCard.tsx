@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import {
   Cake,
   Gift,
@@ -54,7 +55,7 @@ function formatCategory(value: string) {
   return value.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 }
 
-export default function MemoryCard({ memory }: { memory: RelationshipMemory }) {
+const MemoryCardComponent = function MemoryCard({ memory }: { memory: RelationshipMemory }) {
   return (
     <article className="glass-card rounded-btn p-6">
       <div className="flex items-start justify-between gap-3">
@@ -85,3 +86,5 @@ export default function MemoryCard({ memory }: { memory: RelationshipMemory }) {
     </article>
   )
 }
+
+export default React.memo(MemoryCardComponent)

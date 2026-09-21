@@ -14,7 +14,7 @@ export type WellnessEntry = {
 export async function getEntries(coupleId: string, boardId: string): Promise<WellnessEntry[]> {
   const { data, error } = await supabase
     .from('wellness_entries')
-    .select('*')
+    .select('id, couple_id, author_id, board_id, content, metadata, created_at, updated_at')
     .eq('couple_id', coupleId)
     .eq('board_id', boardId)
     .order('created_at', { ascending: false })
@@ -34,7 +34,7 @@ export async function addEntry(
   const { data, error } = await supabase
     .from('wellness_entries')
     .insert({ couple_id: coupleId, author_id: authorId, board_id: boardId, content, metadata })
-    .select('*')
+    .select('id, couple_id, author_id, board_id, content, metadata, created_at, updated_at')
     .single()
   if (error) throw error
   return data as WellnessEntry

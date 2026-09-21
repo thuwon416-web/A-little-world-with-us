@@ -3,7 +3,7 @@ import type { VaultItem } from '@/shared-types'
 
 export const vaultService = {
   async getByCouple(coupleId: string): Promise<VaultItem[]> {
-    const { data, error } = await supabase.from('vault_items').select('*').eq('couple_id', coupleId).order('created_at', { ascending: false })
+    const { data, error } = await supabase.from('vault_items').select('id, couple_id, user_id, title, content, photo_url, created_at, updated_at').eq('couple_id', coupleId).order('created_at', { ascending: false })
     if (error) throw error
     return (data ?? []) as VaultItem[]
   },

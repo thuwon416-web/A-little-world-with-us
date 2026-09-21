@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Flame } from 'lucide-react-native'
 import {
   Alert,
+  FlatList,
   ScrollView,
   StyleSheet,
   Text,
@@ -277,37 +278,47 @@ export default function FinanceScreen() {
             title="No savings goals yet"
             description="Add one above to start planning together."
           />
-        ) : (data?.goals ?? []).map((goal: FinancialGoal) => (
-          <View key={goal.id} style={styles.goal}>
-            <View style={styles.row}>
-              <Text style={styles.goalTitle}>{goal.title}</Text>
-              <Text style={styles.muted}>
-                {mmk(goal.current_amount)} / {mmk(goal.target_amount)}
-              </Text>
-            </View>
-            <View style={styles.track}>
-              <View
-                style={[
-                  styles.fill,
-                  { width: `${Math.min(100, (goal.current_amount / goal.target_amount) * 100)}%` },
-                ]}
-              />
-            </View>
-            <TouchableOpacity
-              onPress={() =>
-                Alert.prompt('Add progress', 'Amount in MMK', async (value) => {
-                  const amount = Number(value)
-                  if (amount > 0) {
-                    await addFinancialProgress(goal.id, goal.current_amount, amount)
-                    await load()
+        ) : (
+          <FlatList
+            data={data?.goals ?? []}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item: goal }) => (
+              <View style={styles.goal}>
+                <View style={styles.row}>
+                  <Text style={styles.goalTitle}>{goal.title}</Text>
+                  <Text style={styles.muted}>
+                    {mmk(goal.current_amount)} / {mmk(goal.target_amount)}
+                  </Text>
+                </View>
+                <View style={styles.track}>
+                  <View
+                    style={[
+                      styles.fill,
+                      { width: `${Math.min(100, (goal.current_amount / goal.target_amount) * 100)}%` },
+                    ]}
+                  />
+                </View>
+                <TouchableOpacity
+                  onPress={() =>
+                    Alert.prompt('Add progress', 'Amount in MMK', async (value) => {
+                      const amount = Number(value)
+                      if (amount > 0) {
+                        await addFinancialProgress(goal.id, goal.current_amount, amount)
+                        await load()
+                      }
+                    })
                   }
-                })
-              }
-            >
-              <Text style={styles.link}>Add progress</Text>
-            </TouchableOpacity>
-          </View>
-        ))}
+                >
+                  <Text style={styles.link}>Add progress</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews
+          />
+        )}
       </View>
       <View style={styles.card}>
         <Text style={styles.section}>Bill reminders</Text>
@@ -342,11 +353,21 @@ export default function FinanceScreen() {
             title="No bills yet"
             description="Add a bill reminder above to stay on track."
           />
-        ) : (data?.bills ?? []).map((bill: any) => (
-          <Text key={bill.id} style={styles.muted}>
-            {bill.title} · {mmk(bill.amount)} · due {bill.due_date}
-          </Text>
-        ))}
+        ) : (
+          <FlatList
+            data={data?.bills ?? []}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item: bill }) => (
+              <Text style={styles.muted}>
+                {bill.title} · {mmk(bill.amount)} · due {bill.due_date}
+              </Text>
+            )}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            windowSize={5}
+            removeClippedSubviews
+          />
+        )}
       </View>
       <View style={styles.card}>
         <View style={styles.rowCentered}>

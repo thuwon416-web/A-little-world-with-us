@@ -29,6 +29,7 @@ import {
 import {
   ActivityIndicator,
   Alert,
+  FlatList,
   ScrollView,
   StyleSheet,
   Text,
@@ -271,23 +272,30 @@ export default function WellnessScreen() {
       {filteredBoards.length === 0 ? (
         <Text style={styles.muted}>More activities are coming to this category.</Text>
       ) : null}
-      {filteredBoards.map((board) => {
-        const BoardIcon = boardIconMap[board.icon] ?? Sparkles
+      <FlatList
+        data={filteredBoards}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item: board }) => {
+          const BoardIcon = boardIconMap[board.icon] ?? Sparkles
 
-        return (
-          <TouchableOpacity
-            key={board.id}
-            style={styles.boardButton}
-            onPress={() => setSelectedBoard(board)}
-          >
-            <BoardIcon size={28} color={colors.accent1} />
-            <View style={styles.boardInfo}>
-              <Text style={styles.boardName}>{board.name}</Text>
-              <Text style={styles.muted}>{board.description}</Text>
-            </View>
-          </TouchableOpacity>
-        )
-      })}
+          return (
+            <TouchableOpacity
+              style={styles.boardButton}
+              onPress={() => setSelectedBoard(board)}
+            >
+              <BoardIcon size={28} color={colors.accent1} />
+              <View style={styles.boardInfo}>
+                <Text style={styles.boardName}>{board.name}</Text>
+                <Text style={styles.muted}>{board.description}</Text>
+              </View>
+            </TouchableOpacity>
+          )
+        }}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews
+      />
     </>
   )
 

@@ -10,6 +10,8 @@ import { Toaster } from '@/components/ui/sonner'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import AIChatWidget from '@/components/AIChatWidget'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { QueryProvider } from '@/components/QueryProvider'
+import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display' })
@@ -86,17 +88,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen font-sans antialiased">
-        <LanguageProvider>
-          <ThemeProvider>
-            <AmbientBackground density="medium" />
-            <InteractiveCursor />
-            {children}
-            <Toaster />
-            <PWAInstallPrompt />
-            <AIChatWidget />
-            <SpeedInsights />
-          </ThemeProvider>
-        </LanguageProvider>
+        <QueryProvider>
+          <LanguageProvider>
+            <ThemeProvider>
+              <AmbientBackground density="medium" />
+              <InteractiveCursor />
+              {children}
+              <Toaster />
+              <PWAInstallPrompt />
+              <AIChatWidget />
+              <SpeedInsights />
+              <WebVitalsReporter />
+            </ThemeProvider>
+          </LanguageProvider>
+        </QueryProvider>
       </body>
     </html>
   )

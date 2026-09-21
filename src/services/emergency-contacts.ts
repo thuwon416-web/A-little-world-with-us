@@ -49,7 +49,7 @@ async function getContext() {
 
 export async function getContacts(): Promise<EmergencyContact[]> {
   const { coupleId } = await getContext()
-  const { data, error } = await supabase.from('emergency_contacts').select('*').eq('couple_id', coupleId).order('priority').order('created_at')
+  const { data, error } = await supabase.from('emergency_contacts').select('id, couple_id, created_by, name, relationship, phone, email, priority, notify_on_sos, notify_on_checkin_missed, notify_on_low_battery, is_active, created_at, updated_at').eq('couple_id', coupleId).order('priority').order('created_at')
   if (error) throw error
   return ((data ?? []) as ContactRow[]).map(mapContact)
 }
@@ -61,7 +61,7 @@ export async function createContact(input: EmergencyContactInput): Promise<Emerg
     phone: input.phone, email: input.email, priority: input.priority, notify_on_sos: input.notifyOnSos,
     notify_on_checkin_missed: input.notifyOnCheckinMissed, notify_on_low_battery: input.notifyOnLowBattery,
     is_active: input.isActive,
-  }).select('*').single()
+  }).select('id, couple_id, created_by, name, relationship, phone, email, priority, notify_on_sos, notify_on_checkin_missed, notify_on_low_battery, is_active, created_at, updated_at').single()
   if (error) throw error
   return mapContact(data as ContactRow)
 }

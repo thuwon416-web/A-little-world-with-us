@@ -3,7 +3,7 @@ import type { Memory } from '@/shared-types'
 
 export const memoriesService = {
   async getByCouple(coupleId: string): Promise<Memory[]> {
-    const { data, error } = await supabase.from('memories').select('*').eq('couple_id', coupleId).order('date', { ascending: false })
+    const { data, error } = await supabase.from('memories').select('id, couple_id, user_id, title, description, caption, image_url, storage_path, date, category, latitude, longitude, location_label, created_at, updated_at').eq('couple_id', coupleId).order('date', { ascending: false })
     if (error) throw error
     return (data ?? []) as Memory[]
   },

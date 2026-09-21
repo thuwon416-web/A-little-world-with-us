@@ -3,7 +3,7 @@ import type { ChatMessage } from '@/shared-types'
 
 export const chatService = {
   async getByCouple(coupleId: string): Promise<ChatMessage[]> {
-    const { data, error } = await supabase.from('messages').select('*').eq('couple_id', coupleId).order('created_at', { ascending: true })
+    const { data, error } = await supabase.from('messages').select('id, couple_id, sender_id, content, message_type, media_url, media_duration, reply_to, transcript, location_payload, encrypted, created_at, updated_at').eq('couple_id', coupleId).order('created_at', { ascending: true })
     if (error) throw error
     return (data ?? []) as ChatMessage[]
   },

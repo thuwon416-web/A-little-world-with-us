@@ -6,33 +6,6 @@ export interface RelationshipMemoryQueryOptions {
   offset?: number
 }
 
-async function fetchAllBatched<T>(
-  table: string,
-  coupleId: string,
-  columns = '*',
-  orderColumn = 'date_time'
-): Promise<T[]> {
-  const batch = 1000
-  const all: T[] = []
-  let from = 0
-
-  while (true) {
-    const { data, error } = await supabase
-      .from(table)
-      .select(columns)
-      .eq('couple_id', coupleId)
-      .order(orderColumn, { ascending: false })
-      .range(from, from + batch - 1)
-    if (error) throw error
-    if (!data || data.length === 0) break
-    all.push(...(data as T[]))
-    if (data.length < batch) break
-    from += batch
-  }
-
-  return all
-}
-
 const CATEGORY_ALIASES: Record<string, string> = {
   promise: 'promises',
   commitment: 'promises',
@@ -53,7 +26,7 @@ export const relationshipMemoriesService = {
     const offset = options.offset ?? 0
     const { data, error } = await supabase
       .from('relationship_memories')
-      .select('*')
+      .select('id, couple_id, category, sub_category, date_time, quote_burmese, context, persons, emotional_tone, importance, batch_id, created_at')
       .eq('couple_id', coupleId)
       .order('date_time', { ascending: false })
       .range(offset, offset + limit - 1)
@@ -64,7 +37,7 @@ export const relationshipMemoriesService = {
   async getHighlights(coupleId: string, limit = 50): Promise<RelationshipMemory[]> {
     const { data, error } = await supabase
       .from('relationship_memories')
-      .select('*')
+      .select('id, couple_id, category, sub_category, date_time, quote_burmese, context, persons, emotional_tone, importance, batch_id, created_at')
       .eq('couple_id', coupleId)
       .in('importance', ['critical', 'high'])
       .order('date_time', { ascending: false })
@@ -81,7 +54,7 @@ export const relationshipMemoriesService = {
   ): Promise<RelationshipMemory[]> {
     const { data, error } = await supabase
       .from('relationship_memories')
-      .select('*')
+      .select('id, couple_id, category, sub_category, date_time, quote_burmese, context, persons, emotional_tone, importance, batch_id, created_at')
       .eq('couple_id', coupleId)
       .eq('category', category)
       .order('date_time', { ascending: false })
@@ -99,7 +72,7 @@ export const relationshipMemoriesService = {
     const safeKeyword = keyword.replace(/[%(),]/g, ' ').trim()
     const { data, error } = await supabase
       .from('relationship_memories')
-      .select('*')
+      .select('id, couple_id, category, sub_category, date_time, quote_burmese, context, persons, emotional_tone, importance, batch_id, created_at')
       .eq('couple_id', coupleId)
       .or(`quote_burmese.ilike.%${safeKeyword}%,context.ilike.%${safeKeyword}%`)
       .order('date_time', { ascending: false })
@@ -109,23 +82,26 @@ export const relationshipMemoriesService = {
   },
 
   async getOnThisDay(coupleId: string, date: Date): Promise<RelationshipMemory[]> {
-    const memories = await fetchAllBatched<RelationshipMemory>('relationship_memories', coupleId)
-    return memories.filter((memory) => {
-      const memoryDate = new Date(memory.date_time)
-      return memoryDate.getMonth() === date.getMonth() && memoryDate.getDate() === date.getDate()
-    })
+    const { data, error } = await supabase
+      .rpc('on_this_day_memories', {
+        p_couple_id: coupleId,
+        p_month: date.getMonth() + 1,
+        p_day: date.getDate(),
+      })
+    if (error) throw error
+    return (data ?? []) as RelationshipMemory[]
   },
 
   async getStats(coupleId: string): Promise<Record<string, number>> {
-    const rows = await fetchAllBatched<{ category: string }>(
-      'relationship_memories',
-      coupleId,
-      'category'
-    )
-    return rows.reduce<Record<string, number>>((stats, row) => {
+    const { data, error } = await supabase
+      .rpc('memory_category_stats', {
+        p_couple_id: coupleId,
+      })
+    if (error) throw error
+    return (data ?? []).reduce((stats: Record<string, number>, row: { category: string; count: number }) => {
       const category = normalizeCategory(row.category)
-      stats[category] = (stats[category] ?? 0) + 1
+      stats[category] = (stats[category] ?? 0) + (row.count ?? 0)
       return stats
-    }, {})
+    }, {} as Record<string, number>)
   },
 }

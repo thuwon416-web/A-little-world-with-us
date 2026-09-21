@@ -68,7 +68,7 @@ export async function getCredentials(): Promise<VaultCredential[]> {
   const { coupleId } = await getVaultContext()
   const { data, error } = await supabase
     .from('vault_credentials')
-    .select('*')
+    .select('id, couple_id, user_id, is_shared, encrypted_payload, encryption_iv, encryption_version, category, label, website_url, key_version, created_at, updated_at')
     .eq('couple_id', coupleId)
     .order('created_at', { ascending: false })
   if (error) throw error
@@ -91,7 +91,7 @@ export async function createCredential(input: VaultCredentialInput): Promise<Vau
       website_url: input.websiteUrl,
       key_version: input.keyVersion,
     })
-    .select('*')
+    .select('id, couple_id, user_id, is_shared, encrypted_payload, encryption_iv, encryption_version, category, label, website_url, key_version, created_at, updated_at')
     .single()
   if (error) throw error
   return mapCredential(data as VaultCredentialRow)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { CheckCircle2, ListTodo, Sparkles } from 'lucide-react'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
@@ -13,6 +13,38 @@ type BucketItem = {
   progress: number
   target: string
 }
+
+type BucketItemProps = {
+  item: BucketItem
+  onToggle: (id: string) => void
+}
+
+const BucketItemComponent = function BucketItem({ item, onToggle }: BucketItemProps) {
+  return (
+    <motion.button
+      whileHover={{ y: -2 }}
+      onClick={() => onToggle(item.id)}
+      className={`w-full rounded-btn border p-3 text-left ${item.done ? 'border-accent-1/20 bg-accent-2/20' : 'border-accent-1/20 bg-card/25'}`}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="font-medium text-text-1">{item.label}</div>
+        <span className="flex items-center gap-2 text-[9px] uppercase tracking-[0.18em]">
+          <CheckCircle2 className={`h-4 w-4 ${item.done ? 'fill-current' : ''}`} />
+          {item.done ? 'done' : 'next'}
+        </span>
+      </div>
+      <div className="mt-2 h-2 rounded-full bg-card/40 overflow-hidden">
+        <motion.div
+          animate={{ width: `${item.progress}%` }}
+          className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)]"
+        />
+      </div>
+      <div className="mt-2 text-[11px] opacity-60">{item.target}</div>
+    </motion.button>
+  )
+}
+
+const MemoizedBucketItem = React.memo(BucketItemComponent)
 
 export default function BucketList() {
   const [items, setItems] = useState<BucketItem[]>([])
@@ -144,27 +176,11 @@ export default function BucketList() {
             <div className="text-center text-text-2">No items yet. Add your first shared dream!</div>
           ) : (
             items.map((item) => (
-              <motion.button
+              <MemoizedBucketItem
                 key={item.id}
-                whileHover={{ y: -2 }}
-                onClick={() => toggleItem(item.id)}
-                className={`w-full rounded-btn border p-3 text-left ${item.done ? 'border-accent-1/20 bg-accent-2/20' : 'border-accent-1/20 bg-card/25'}`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="font-medium text-text-1">{item.label}</div>
-                  <span className="flex items-center gap-2 text-[9px] uppercase tracking-[0.18em]">
-                    <CheckCircle2 className={`h-4 w-4 ${item.done ? 'fill-current' : ''}`} />
-                    {item.done ? 'done' : 'next'}
-                  </span>
-                </div>
-                <div className="mt-2 h-2 rounded-full bg-card/40 overflow-hidden">
-                  <motion.div
-                    animate={{ width: `${item.progress}%` }}
-                    className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)]"
-                  />
-                </div>
-                <div className="mt-2 text-[11px] opacity-60">{item.target}</div>
-              </motion.button>
+                item={item}
+                onToggle={toggleItem}
+              />
             ))
           )}
         </div>

@@ -25,7 +25,7 @@ export async function logWellnessActivity(
 export async function getWellnessHistory(userId: string) {
   const { data, error } = await supabase
     .from('wellness_logs')
-    .select('*')
+    .select('id, user_id, activity_type, activity_id, completed_at')
     .eq('user_id', userId)
     .order('completed_at', { ascending: false })
   if (error) throw error
