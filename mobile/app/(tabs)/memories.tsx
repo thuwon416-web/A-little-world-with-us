@@ -578,10 +578,10 @@ export default function MemoriesScreen() {
                       const MoodIcon = mood.Icon
                       return <MoodIcon color={colors.accent2} size={20} />
                     })() : null}
-                    <TouchableOpacity onPress={() => openEditJournal(memory)} accessibilityLabel="Edit journal entry">
+                    <TouchableOpacity onPress={() => openEditJournal(memory)} accessibilityLabel="Edit journal entry" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                       <Pencil color={colors.accent2} size={20} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => remove(memory)} accessibilityLabel="Delete journal entry">
+                    <TouchableOpacity onPress={() => remove(memory)} accessibilityLabel="Delete journal entry" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                       <Trash2 color={colors.error} size={20} />
                     </TouchableOpacity>
                   </View>
@@ -604,7 +604,7 @@ export default function MemoriesScreen() {
                     <View style={styles.reflectionHeader}>
                       <Sparkles color={colors.accent1} size={16} />
                       <Text style={[styles.reflectionLabel, { color: colors.accent1 }]}>AI reflection</Text>
-                      <TouchableOpacity onPress={() => void speakReflection(memory)} accessibilityLabel="Read AI reflection aloud">
+                      <TouchableOpacity onPress={() => void speakReflection(memory)} accessibilityLabel="Read AI reflection aloud" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                         {speakingJournalId === memory.id
                           ? <Square color={colors.accent1} size={16} />
                           : <Volume2 color={colors.accent1} size={16} />}
@@ -667,19 +667,19 @@ export default function MemoriesScreen() {
         {journalRecording ? (
           <View style={[styles.voiceRow, { borderColor: colors.cardBorder }]}>
             <Text style={{ color: colors.textPrimary }}>{journalRecordingTime}s</Text>
-            <TouchableOpacity onPress={() => void stopJournalRecording()}>
+            <TouchableOpacity onPress={() => void stopJournalRecording()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Square color={colors.error} size={20} />
             </TouchableOpacity>
           </View>
         ) : (journalVoiceUri || journalVoiceRemoteUrl) ? (
           <View style={[styles.voiceRow, { borderColor: colors.cardBorder }]}>
-            <TouchableOpacity onPress={() => void playJournalVoice()}>
+            <TouchableOpacity onPress={() => void playJournalVoice()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               {journalPlaying ? <Pause color={colors.accent1} size={20} /> : <Play color={colors.accent1} size={20} />}
             </TouchableOpacity>
             <Text style={[styles.voiceText, { color: colors.textPrimary }]}>
               {journalPlaying ? 'Playing...' : journalUploadingVoice ? 'Uploading...' : 'Voice attached'}
             </Text>
-            <TouchableOpacity onPress={() => void discardJournalVoice()}>
+            <TouchableOpacity onPress={() => void discardJournalVoice()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <Trash2 color={colors.error} size={20} />
             </TouchableOpacity>
           </View>

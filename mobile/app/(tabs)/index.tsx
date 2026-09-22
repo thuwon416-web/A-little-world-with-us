@@ -252,7 +252,7 @@ export default function DashboardScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Memory of the day</Text>
-            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Refresh memory of the day" onPress={() => void load()}>
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Refresh memory of the day" onPress={() => void load()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
               <RefreshCw color={colors.accent2} size={18} />
             </TouchableOpacity>
           </View>
@@ -268,7 +268,7 @@ export default function DashboardScreen() {
           <Text style={styles.cardTitle}>Mini Care check</Text>
           <Text style={styles.careValue}>{summary?.day ? `Cycle day ${summary.day}` : 'No cycle day yet'}</Text>
           <Text style={styles.muted}>{nextPeriodText ?? 'Log a period to begin forecasting.'}</Text>
-          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Care" style={styles.secondaryButton} onPress={() => router.push('/care')}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Care" style={styles.secondaryButton} onPress={() => router.push('/care')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Text style={styles.secondaryText}>Open Care</Text>
           </TouchableOpacity>
         </View>
@@ -278,7 +278,7 @@ export default function DashboardScreen() {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>Our playlist</Text>
-          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Music" onPress={() => router.push('/music')}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Music" onPress={() => router.push('/music')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
             <Text style={styles.link}>Open Music</Text>
           </TouchableOpacity>
         </View>
@@ -287,7 +287,7 @@ export default function DashboardScreen() {
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={playing ? 'Pause playlist' : 'Play playlist'} style={styles.playButton} onPress={() => {
           setPlaying((value) => !value)
           if (dashboard?.playlistSong?.external_id) void Linking.openURL(`https://www.youtube.com/watch?v=${dashboard.playlistSong.external_id}`)
-        }}>
+        }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
           {playing ? <Pause color={colors.background} size={18} /> : <Play color={colors.background} size={18} />}
           <Text style={styles.primaryText}>{playing ? 'Pause' : 'Play'}</Text>
         </TouchableOpacity>
@@ -323,7 +323,7 @@ export default function DashboardScreen() {
       <Text style={styles.eyebrow}>Love dashboard</Text>
       <Text style={styles.title}>Good evening, KoKo × Pu Tuu</Text>
       <Text style={styles.subtitle}>Today is a good day to notice the little things.</Text>
-      <TouchableOpacity style={[styles.customizeButton, { backgroundColor: colors.cardBg }]} onPress={() => setCustomizing(true)}>
+      <TouchableOpacity style={[styles.customizeButton, { backgroundColor: colors.cardBg }]} onPress={() => setCustomizing(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
         <Settings2 color={colors.accent1} size={18} />
         <Text style={[styles.customizeText, { color: colors.textPrimary }]}>Customize home</Text>
       </TouchableOpacity>
@@ -398,7 +398,7 @@ export default function DashboardScreen() {
           <View style={[styles.customizeModal, { backgroundColor: colors.cardBg }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Customize home</Text>
-              <TouchableOpacity onPress={() => setCustomizing(false)} accessibilityLabel="Close customization">
+              <TouchableOpacity onPress={() => setCustomizing(false)} accessibilityLabel="Close customization" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                 <X color={colors.textPrimary} size={22} />
               </TouchableOpacity>
             </View>
@@ -413,10 +413,10 @@ export default function DashboardScreen() {
                   </Text>
                 </TouchableOpacity>
                 <Text style={[styles.widgetLabel, { color: colors.textPrimary }]}>{widgetLabels[id]}</Text>
-                <TouchableOpacity onPress={() => moveWidget(id, -1)} disabled={index === 0} accessibilityLabel={`Move ${widgetLabels[id]} up`}>
+                <TouchableOpacity onPress={() => moveWidget(id, -1)} disabled={index === 0} accessibilityLabel={`Move ${widgetLabels[id]} up`} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                   <ChevronUp color={index === 0 ? colors.textSecondary : colors.textPrimary} size={20} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => moveWidget(id, 1)} disabled={index === dashboardLayout.order.length - 1} accessibilityLabel={`Move ${widgetLabels[id]} down`}>
+                <TouchableOpacity onPress={() => moveWidget(id, 1)} disabled={index === dashboardLayout.order.length - 1} accessibilityLabel={`Move ${widgetLabels[id]} down`} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                   <ChevronDown color={index === dashboardLayout.order.length - 1 ? colors.textSecondary : colors.textPrimary} size={20} />
                 </TouchableOpacity>
               </View>

@@ -533,7 +533,7 @@ export default function ChatScreen() {
             <View style={[styles.attachmentSheet, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
               <View style={styles.attachmentHeader}>
                 <Text style={[styles.attachmentTitle, { color: colors.textPrimary }]}>Attachments</Text>
-                <TouchableOpacity onPress={() => setAttachmentsOpen(false)} accessibilityLabel="Close attachments">
+                <TouchableOpacity onPress={() => setAttachmentsOpen(false)} accessibilityLabel="Close attachments" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
                   <X color={colors.textSecondary} size={22} />
                 </TouchableOpacity>
               </View>
@@ -578,6 +578,7 @@ export default function ChatScreen() {
           accessibilityLabel="Open attachments"
           accessibilityRole="button"
           accessibilityHint="Choose a photo, voice note, file, GIF, sticker, or location"
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           <Paperclip color={colors.textSecondary} size={20} />
         </TouchableOpacity>
