@@ -27,6 +27,7 @@ describe('A11Y smoke tests', () => {
 
   test('Image with alt has no violations', async () => {
     const { container } = render(
+      // eslint-disable-next-line @next/next/no-img-element
       <img src="/test.png" alt="Test image" />
     )
     const results = await axe(container)

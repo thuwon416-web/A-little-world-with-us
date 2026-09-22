@@ -21,13 +21,11 @@ export default function TimeCapsule() {
   const [capsules, setCapsules] = useState<Capsule[]>([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
-  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     const { data: userData } = await supabase.auth.getUser()
     if (!userData.user) return
     const { data: link } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
-    setCoupleId(link?.couple_id ?? null)
     const { data, error: loadError } = await supabase.from('time_capsules').select('*, time_capsule_attachments(*)').order('unlock_at', { ascending: true })
     if (loadError) setError(loadError.message)
     else setCapsules(await Promise.all(((data ?? []) as Capsule[]).map(async (capsule) => ({ ...capsule, time_capsule_attachments: await Promise.all((capsule.time_capsule_attachments ?? []).map(async (attachment) => {

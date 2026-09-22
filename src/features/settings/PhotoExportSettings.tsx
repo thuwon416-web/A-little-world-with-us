@@ -13,14 +13,12 @@ type Photo = { id: string; url: string; filename: string; created_at: string }
 
 export default function PhotoExportSettings() {
   const [photos, setPhotos] = useState<Photo[]>([])
-  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   useEffect(() => {
     void (async () => {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) return
       const { data: link } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
-      setCoupleId(link?.couple_id ?? null)
       const { data } = await supabase.from('memories').select('id,image_url,storage_path,title,caption,created_at,mime_type').order('created_at', { ascending: false })
       const resolved = await Promise.all((data ?? []).map(async (memory) => {
         const path = memory.storage_path ?? memory.image_url ?? ''

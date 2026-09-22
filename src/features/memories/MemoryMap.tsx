@@ -3,12 +3,8 @@
 
 import { useEffect, useState } from 'react'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
-import { supabase, type Memory } from '@/lib/supabase'
+import type { Memory } from '@/lib/supabase'
 import { getCachedDecryptedUrl } from '@/lib/mediaEncryption'
-
-function isExternalUrl(v?: string | null) {
-  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
-}
 
 export default function MemoryMap({ memories, coupleId }: { memories: Memory[]; coupleId: string }) {
   const first = memories[0]

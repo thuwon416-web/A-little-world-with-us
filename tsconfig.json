@@ -37,6 +37,9 @@
   ],
   "exclude": [
     "node_modules",
-    "mobile"
+    "mobile",
+    "src/tests/**/*",
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
   ]
 }
