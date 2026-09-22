@@ -7,6 +7,7 @@ import * as SecureStore from 'expo-secure-store'
 import * as TaskManager from 'expo-task-manager'
 
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import { sendLocalNotification } from '@/services/notifications'
 
 export type LocationPoint = {
   latitude: number
@@ -243,7 +244,9 @@ export async function startLocationTracking(onUpdate?: (point: LocationPoint) =>
       deferredUpdatesInterval: STATIONARY_INTERVAL_MS,
       deferredUpdatesDistance: MOVING_DISTANCE_METERS,
       activityType: Location.ActivityType.Other,
-      pausesUpdatesAutomatically: true,
+      // Keep updates running even when device is stationary
+      // Required for always-on partner location sharing
+      pausesUpdatesAutomatically: false,
       showsBackgroundLocationIndicator: true,
       foregroundService: {
         notificationTitle: 'Location sharing is active',
@@ -327,9 +330,75 @@ export async function shareLocation(
   return true
 }
 
+// ═══════════════════════════════════════════════════════════
+// Geofence Check (client-side)
+// ═══════════════════════════════════════════════════════════
+async function checkGeofence(userId: string, location: LocationPoint) {
+  try {
+    const coupleId = await getActiveCoupleId(userId)
+    if (!coupleId) return
+
+    const { data: places } = await supabase
+      .from('saved_places')
+      .select('id,name,latitude,longitude,radius_meters')
+      .eq('user_id', userId)
+    
+    if (!places || places.length === 0) return
+
+    for (const place of places) {
+      const distance = distanceMeters(
+        location,
+        { latitude: place.latitude, longitude: place.longitude, accuracy: null, timestamp: new Date().toISOString() }
+      )
+      const inside = distance <= place.radius_meters
+      const eventType = inside ? 'entered' : 'exited'
+
+      const { data: recent } = await supabase
+        .from('geofence_events')
+        .select('event_type')
+        .eq('saved_place_id', place.id)
+        .eq('user_id', userId)
+        .order('occurred_at', { ascending: false })
+        .limit(1)
+
+      const lastType = recent?.[0]?.event_type as 'entered' | 'exited' | undefined
+      if (eventType === lastType) continue
+
+      const { data: event } = await supabase
+        .from('geofence_events')
+        .insert({
+          couple_id: coupleId,
+          saved_place_id: place.id,
+          user_id: userId,
+          event_type: eventType,
+          latitude: location.latitude,
+          longitude: location.longitude,
+          notified: false,
+        })
+        .select('id,saved_place_id,user_id,event_type,occurred_at')
+        .single()
+
+      if (event) {
+        const title = eventType === 'entered' ? `Arrived at ${place.name}` : `Left ${place.name}`
+        const body = eventType === 'entered' ? 'You arrived at a saved place.' : 'You left a saved place.'
+        void sendLocalNotification(title, body)
+      }
+    }
+  } catch (err) {
+    console.warn('[Geofence] check failed:', err)
+  }
+}
+
 TaskManager.defineTask(TASK_NAME, async ({ data, error }) => {
   if (error || !data) return
   const { locations } = data as { locations: Location.LocationObject[] }
   const current = locations.at(-1)
-  if (current) await shareLocation(toLocationPoint(current))
+  if (current) {
+    const point = toLocationPoint(current)
+    await shareLocation(point)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user) void checkGeofence(user.id, point)
+  }
 })

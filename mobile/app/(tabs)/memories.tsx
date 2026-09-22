@@ -462,6 +462,7 @@ export default function MemoriesScreen() {
             return (
               <TouchableOpacity
                 key={memory.id}
+                hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }}
                 onPress={() =>
                   setCurationSelected((current) =>
                     isSelected

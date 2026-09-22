@@ -12,7 +12,7 @@ interface PlanItemProps {
 export function PlanItem({ title, completed, onToggle }: PlanItemProps) {
   const { colors } = useTheme()
   return (
-    <TouchableOpacity onPress={onToggle} style={styles.row} activeOpacity={0.8}>
+    <TouchableOpacity hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }} onPress={onToggle} style={styles.row} activeOpacity={0.8}>
       <View style={[styles.check, { borderColor: colors.accent2 }, completed && { backgroundColor: colors.accent1, borderColor: colors.accent1 }]}>
         {completed ? <Check size={14} color={colors.background} /> : null}
       </View>

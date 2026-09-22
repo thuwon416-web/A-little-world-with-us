@@ -26,6 +26,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import OnThisDay from '@/components/dashboard/OnThisDay'
 import OurStats from '@/components/dashboard/OurStats'
@@ -120,6 +121,7 @@ function StatCard({ title, value }: { title: string; value: number }) {
 export default function DashboardScreen() {
   const router = useRouter()
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
   const [care, setCare] = useState<CareData | null>(null)
@@ -317,7 +319,7 @@ export default function DashboardScreen() {
     )
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.eyebrow}>Love dashboard</Text>
       <Text style={styles.title}>Good evening, KoKo × Pu Tuu</Text>
       <Text style={styles.subtitle}>Today is a good day to notice the little things.</Text>

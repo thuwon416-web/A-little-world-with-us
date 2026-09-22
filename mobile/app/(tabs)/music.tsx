@@ -209,6 +209,7 @@ export default function MusicScreen() {
                 {mood.tracks.map((track) => (
                   <TouchableOpacity
                     key={track.youtubeId}
+                    hitSlop={{ top: 7, bottom: 7, left: 7, right: 7 }}
                     style={[styles.track, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
                     onPress={() => void Linking.openURL(`https://www.youtube.com/watch?v=${track.youtubeId}`)}
                   >

@@ -3,6 +3,7 @@ import * as Location from 'expo-location'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { FileText, Gift, Image as ImageIcon, MapPin, Mic, Paperclip, Send, Sticker, X } from 'lucide-react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '@/components/Button'
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
@@ -55,6 +56,7 @@ function formatMessageTime(value: string) {
 export default function ChatScreen() {
   const { user } = useAuth()
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const { state: callState, placeCall } = useCall()
   const [draft, setDraft] = useState('')
@@ -416,7 +418,7 @@ export default function ChatScreen() {
         : 'Synced'
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.title}>Chat</Text>
       {error && <Text style={styles.error}>{error}</Text>}
 

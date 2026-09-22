@@ -14,6 +14,7 @@ import {
   View,
 } from 'react-native'
 import { Sparkles } from 'lucide-react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
@@ -517,6 +518,7 @@ function HealthProfile() {
 
 export default function CareScreen() {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [activeTab, setActiveTab] = useState<
     'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
@@ -712,7 +714,7 @@ export default function CareScreen() {
       </View>
     )
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={[styles.intimacyContainer, { backgroundColor: colors.background }]}>
         <View style={[styles.intimacyCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
           <View style={styles.intimacyHeader}>

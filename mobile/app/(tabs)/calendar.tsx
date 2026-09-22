@@ -243,6 +243,7 @@ export default function CalendarScreen() {
         {wishlist.map((item) => (
           <View key={item.id} style={[styles.wishlistItem, { backgroundColor: colors.surface }]}>
             <TouchableOpacity
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               style={[styles.wishlistCheck, { backgroundColor: colors.cardBorder }]}
               onPress={() => void toggleListItem('wishlist', item.id, !item.completed).then(load)}
             >

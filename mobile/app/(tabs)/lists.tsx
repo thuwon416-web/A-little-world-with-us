@@ -88,6 +88,7 @@ export default function ListsScreen() {
       {items.map((item) => (
         <View key={item.id} style={styles.item}>
           <TouchableOpacity
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             style={styles.check}
             onPress={() => void toggleListItem(tab, item.id, !item.completed).then(load)}
           >

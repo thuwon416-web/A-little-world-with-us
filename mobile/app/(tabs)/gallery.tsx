@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import ImageUpload from '@/components/ImageUpload'
 import { useTheme } from '@/context/ThemeContext'
@@ -18,6 +19,7 @@ type GalleryItem = {
 
 export default function GalleryScreen() {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
@@ -96,7 +98,7 @@ export default function GalleryScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.eyebrow}>Gallery</Text>
       <Text style={styles.title}>Shared moments</Text>
       <Text style={styles.subtitle}>Save little snapshots of your story.</Text>

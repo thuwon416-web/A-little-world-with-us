@@ -13,7 +13,7 @@ interface BucketListItemProps {
 export function BucketListItem({ item, completed, completedAt, onToggle }: BucketListItemProps) {
   const { colors } = useTheme()
   return (
-    <TouchableOpacity style={[styles.row, { borderBottomColor: colors.cardBorder }]} onPress={onToggle} activeOpacity={0.85}>
+    <TouchableOpacity hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }} style={[styles.row, { borderBottomColor: colors.cardBorder }]} onPress={onToggle} activeOpacity={0.85}>
       <View style={[styles.check, { borderColor: colors.accent2 }, completed && { backgroundColor: colors.success, borderColor: colors.success }]}>
         {completed ? <Check size={14} color={colors.background} /> : null}
       </View>

@@ -24,6 +24,7 @@ import {
   Languages,
 } from 'lucide-react-native'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
@@ -91,10 +92,11 @@ export default function MoreScreen() {
   const { signOut } = useAuth()
   const router = useRouter()
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = createStyles(colors, sizes)
   const { t } = useTranslation()
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.eyebrow}>{t('nav.more')}</Text>
       <Text style={styles.title}>{t('nav.everythingElse')}</Text>
       {sections.map(({ title: sectionTitle, items: sectionItems }) => (

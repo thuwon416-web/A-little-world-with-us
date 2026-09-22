@@ -3,6 +3,7 @@ import { useQuickActionRouting } from 'expo-quick-actions/router'
 import { Redirect, Tabs } from 'expo-router'
 import { Heart, Home, MessageCircle, MoreHorizontal, Sparkles } from 'lucide-react-native'
 import { useEffect } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useAdmin } from '@/hooks/useAdmin'
 import { useTheme } from '@/context/ThemeContext'
@@ -14,6 +15,7 @@ export default function TabsLayout() {
   const { loading: adminLoading } = useAdmin()
   const { t } = useTranslation()
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   useQuickActionRouting()
   useEffect(() => {
     void QuickActions.setItems([
@@ -42,8 +44,8 @@ export default function TabsLayout() {
           backgroundColor: colors.surface,
           borderTopColor: colors.cardBorder,
           borderTopWidth: 1,
-          height: 72,
-          paddingBottom: 10,
+          height: 72 + insets.bottom,
+          paddingBottom: Math.max(insets.bottom, 10),
           paddingTop: 8,
         },
       }}

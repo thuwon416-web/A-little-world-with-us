@@ -20,7 +20,7 @@ export function CareChecklist({ values = {}, onToggle }: CareChecklistProps) {
   return (
     <View style={styles.container}>
       {careItems.map((item) => (
-        <TouchableOpacity key={item.key} style={styles.row} onPress={() => onToggle?.(item.key)}>
+        <TouchableOpacity key={item.key} hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }} style={styles.row} onPress={() => onToggle?.(item.key)}>
           <View style={[styles.check, { borderColor: colors.accent2 }, values[item.key] && { backgroundColor: colors.success, borderColor: colors.success }]}>
             {values[item.key] ? <Check size={14} color={colors.background} /> : null}
           </View>

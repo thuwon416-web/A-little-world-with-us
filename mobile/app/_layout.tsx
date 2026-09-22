@@ -1,14 +1,15 @@
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
+import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { ThemeProvider, useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { I18nProvider } from '@/i18n/config'
 import { AuthProvider } from '@/lib/auth'
-import '@/services/location'
+import { getSharingStatus, startLocationTracking } from '@/services/location'
 
 // Error Boundary Component
 class ErrorBoundary extends React.Component<
@@ -56,21 +57,37 @@ function ThemedStatusBar() {
 }
 
 export default function RootLayout() {
+  useEffect(() => {
+    const autoStartLocation = async () => {
+      try {
+        const status = await getSharingStatus()
+        if (status.enabled && status.permission === 'granted') {
+          await startLocationTracking()
+        }
+      } catch (err) {
+        console.warn('[Location] auto-start failed:', err)
+      }
+    }
+    void autoStartLocation()
+  }, [])
+
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <I18nProvider>
-          <ThemeProvider>
-          <ThemedStatusBar />
-            <Stack>
-              <Stack.Screen name="login" options={{ title: 'Login' }} />
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
-            </Stack>
-          </ThemeProvider>
-        </I18nProvider>
-      </AuthProvider>
-    </ErrorBoundary>
+    <SafeAreaProvider>
+      <ErrorBoundary>
+        <AuthProvider>
+          <I18nProvider>
+            <ThemeProvider>
+            <ThemedStatusBar />
+              <Stack>
+                <Stack.Screen name="login" options={{ title: 'Login' }} />
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
+              </Stack>
+            </ThemeProvider>
+          </I18nProvider>
+        </AuthProvider>
+      </ErrorBoundary>
+    </SafeAreaProvider>
   )
 }
 
