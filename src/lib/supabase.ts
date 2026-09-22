@@ -133,6 +133,7 @@ export type Memory = {
   longitude?: number | null
   location_label?: string | null
   reveal_at?: string | null
+  mime_type?: string | null
 }
 
 // ✅ Message type ကို Actual Database Schema နဲ့ ကိုက်ညီအောင် ပြင်ထားပါတယ်။

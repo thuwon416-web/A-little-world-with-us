@@ -10,9 +10,11 @@ export type UploadImageResult = Awaited<ReturnType<typeof uploadGalleryImage>>
 export default function ImageUpload({
   onUpload,
   folder = 'gallery',
+  coupleId,
 }: {
   onUpload?: (image: UploadImageResult) => void
   folder?: string
+  coupleId: string
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -50,7 +52,7 @@ export default function ImageUpload({
     try {
       setIsUploading(true)
       setError('')
-      const uploaded = await uploadGalleryImage(selectedFile, folder)
+      const uploaded = await uploadGalleryImage(selectedFile, coupleId, folder)
       onUpload?.(uploaded)
       setSelectedFile(null)
       setPreview(null)

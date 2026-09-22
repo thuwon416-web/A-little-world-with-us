@@ -4,6 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { Clock3, Lock, Mail, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { validateUpload } from '@/lib/upload-validation'
+import { encryptAndUpload, getCachedDecryptedUrl, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
+
+function isExternalUrl(v?: string | null) {
+  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
+}
 
 type CapsuleAttachment = { id: string; storage_path: string; media_type: 'image' | 'file'; url?: string }
 type Capsule = { id: string; title: string; content: string; unlock_at: string; status: 'scheduled' | 'revealed' | 'cancelled'; user_id: string; recipient_id: string; created_at: string; time_capsule_attachments?: CapsuleAttachment[] }
@@ -16,13 +21,25 @@ export default function TimeCapsule() {
   const [capsules, setCapsules] = useState<Capsule[]>([])
   const [error, setError] = useState('')
   const [saving, setSaving] = useState(false)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) return
+    const { data: link } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
+    setCoupleId(link?.couple_id ?? null)
     const { data, error: loadError } = await supabase.from('time_capsules').select('*, time_capsule_attachments(*)').order('unlock_at', { ascending: true })
     if (loadError) setError(loadError.message)
     else setCapsules(await Promise.all(((data ?? []) as Capsule[]).map(async (capsule) => ({ ...capsule, time_capsule_attachments: await Promise.all((capsule.time_capsule_attachments ?? []).map(async (attachment) => {
-      const { data: signed } = await supabase.storage.from('surprises').createSignedUrl(attachment.storage_path, 60 * 60)
-      return { ...attachment, url: signed?.signedUrl }
+      let url: string | undefined
+      if (isExternalUrl(attachment.storage_path)) {
+        const { data: signed } = await supabase.storage.from('surprises').createSignedUrl(attachment.storage_path, 60 * 60)
+        url = signed?.signedUrl
+      } else if (link?.couple_id) {
+        const mimeType = guessMimeTypeFromPath(attachment.storage_path)
+        url = await getCachedDecryptedUrl(link.couple_id, 'surprises', attachment.storage_path, mimeType)
+      }
+      return { ...attachment, url }
     })) }))))
   }, [])
   useEffect(() => { void load() }, [load])
@@ -45,10 +62,14 @@ export default function TimeCapsule() {
     else {
       if (attachment) {
         const path = `${user.id}/${crypto.randomUUID()}-${attachment.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-        const { error: uploadError } = await supabase.storage.from('surprises').upload(path, attachment, { upsert: false, contentType: attachment.type || 'application/octet-stream' })
-        if (uploadError) { await supabase.from('time_capsules').delete().eq('id', capsule.id); setError(uploadError.message); setSaving(false); return }
-        const { error: attachmentError } = await supabase.from('time_capsule_attachments').insert({ capsule_id: capsule.id, storage_path: path, media_type: attachment.type.startsWith('image/') ? 'image' : 'file' })
-        if (attachmentError) { await supabase.storage.from('surprises').remove([path]); await supabase.from('time_capsules').delete().eq('id', capsule.id); setError(attachmentError.message); setSaving(false); return }
+        const { path: storedPath, mimeType } = await encryptAndUpload(
+          attachment,
+          link.couple_id,
+          'surprises',
+          path
+        )
+        const { error: attachmentError } = await supabase.from('time_capsule_attachments').insert({ capsule_id: capsule.id, storage_path: storedPath, media_type: attachment.type.startsWith('image/') ? 'image' : 'file', mime_type: mimeType })
+        if (attachmentError) { await supabase.storage.from('surprises').remove([storedPath]); await supabase.from('time_capsules').delete().eq('id', capsule.id); setError(attachmentError instanceof Error ? attachmentError.message : 'Attachment upload failed'); setSaving(false); return }
       }
       setTitle(''); setContent(''); setUnlockAt(''); setAttachment(null); await load()
     }

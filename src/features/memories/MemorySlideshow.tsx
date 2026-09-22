@@ -5,6 +5,12 @@ import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Pause, Play, X } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { getCachedDecryptedUrl } from '@/lib/mediaEncryption'
+
+function isExternalUrl(v?: string | null) {
+  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
+}
+
 type SlideshowMemory = {
   id: string
   title?: string | null
@@ -13,16 +19,18 @@ type SlideshowMemory = {
   image_url: string | null
   storage_path?: string | null
   displayUrl?: string
+  mime_type?: string | null
 }
 
 type Props = {
   memories: SlideshowMemory[]
   onClose: () => void
+  coupleId: string
 }
 
 const speeds = [3, 5, 10] as const
 
-export default function MemorySlideshow({ memories, onClose }: Props) {
+export default function MemorySlideshow({ memories, onClose, coupleId }: Props) {
   const [index, setIndex] = useState(0)
   const [playing, setPlaying] = useState(true)
   const [speed, setSpeed] = useState<(typeof speeds)[number]>(5)
@@ -43,11 +51,16 @@ export default function MemorySlideshow({ memories, onClose }: Props) {
           if (memory.image_url?.startsWith('/')) return [memory.id, memory.image_url] as const
           const path = memory.storage_path ?? memory.image_url
           if (!path) return null
-          const { data, error: signedError } = await supabase.storage
-            .from('memories')
-            .createSignedUrl(path, 60 * 60)
-          if (signedError || !data?.signedUrl) return null
-          return [memory.id, data.signedUrl] as const
+          if (isExternalUrl(path)) {
+            const { data, error: signedError } = await supabase.storage
+              .from('memories')
+              .createSignedUrl(path, 60 * 60)
+            if (signedError || !data?.signedUrl) return null
+            return [memory.id, data.signedUrl] as const
+          }
+          const mimeType = memory.mime_type || 'image/jpeg'
+          const url = await getCachedDecryptedUrl(coupleId, 'memories', path, mimeType)
+          return [memory.id, url] as const
         })
       )
       if (!mounted) return
@@ -59,7 +72,7 @@ export default function MemorySlideshow({ memories, onClose }: Props) {
     return () => {
       mounted = false
     }
-  }, [photos])
+  }, [photos, coupleId])
 
   useEffect(() => {
     if (!playing || photos.length < 2) return

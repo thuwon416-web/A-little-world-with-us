@@ -3,7 +3,7 @@ import type { Memory } from '@/shared-types'
 
 export type MemoryRecord = Pick<
   Memory,
-  'id' | 'title' | 'caption' | 'date' | 'category' | 'image_url' | 'storage_path' | 'latitude' | 'longitude' | 'location_label' | 'created_at'
+  'id' | 'title' | 'caption' | 'date' | 'category' | 'image_url' | 'storage_path' | 'latitude' | 'longitude' | 'location_label' | 'created_at' | 'mime_type'
 >
 
 async function getCoupleId() {
@@ -25,7 +25,7 @@ export async function getMemories(): Promise<MemoryRecord[]> {
   const id = await getCoupleId()
   const { data, error } = await supabase
     .from('memories')
-    .select('id,title,caption,date,category,image_url,storage_path,latitude,longitude,location_label,created_at')
+    .select('id,title,caption,date,category,image_url,storage_path,latitude,longitude,location_label,created_at,mime_type')
     .eq('couple_id', id)
     .order('date', { ascending: false })
   if (error) throw new Error(error.message)

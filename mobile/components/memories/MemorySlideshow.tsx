@@ -2,12 +2,17 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Dimensions, FlatList, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { Pause, Play, X } from 'lucide-react-native'
 import { useTheme } from '@/context/ThemeContext'
+import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 import type { MemoryRecord } from '@/services/memories'
 
+function isExternalUrl(v?: string | null) {
+  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
+}
+
 const { width, height } = Dimensions.get('window')
 
-export default function MemorySlideshow({ memories, onClose }: { memories: MemoryRecord[]; onClose: () => void }) {
+export default function MemorySlideshow({ memories, onClose, coupleId }: { memories: MemoryRecord[]; onClose: () => void; coupleId: string }) {
   const { colors } = useTheme()
   const [index, setIndex] = useState(0)
   const [playing, setPlaying] = useState(true)
@@ -18,16 +23,17 @@ export default function MemorySlideshow({ memories, onClose }: { memories: Memor
   useEffect(() => {
     let mounted = true
     void Promise.all(photos.map(async (memory) => {
-      const path = memory.image_url
+      const path = memory.storage_path ?? memory.image_url
       if (!path) return null
       if (path.startsWith('http') || path.startsWith('/')) return [memory.id, path] as const
-      const { data } = await supabase.storage.from('memories').createSignedUrl(path, 60 * 60)
-      return data?.signedUrl ? [memory.id, data.signedUrl] as const : null
+      const mimeType = memory.mime_type || 'image/jpeg'
+      const uri = await downloadDecryptAndCache(coupleId, 'memories', path, mimeType)
+      return [memory.id, uri] as const
     })).then((entries) => {
       if (mounted) setUrls(Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => entry !== null)))
     })
     return () => { mounted = false }
-  }, [photos])
+  }, [photos, coupleId])
 
   useEffect(() => {
     if (!playing || photos.length < 2) return

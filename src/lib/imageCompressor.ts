@@ -4,6 +4,7 @@
  */
 
 import { validateUpload } from './upload-validation'
+import { encryptAndUpload } from './mediaEncryption'
 
 export interface CompressedImage {
   blob: Blob
@@ -79,7 +80,7 @@ export async function uploadChatPhoto(
   blob: Blob,
   coupleId: string,
   messageId: string
-): Promise<string> {
+): Promise<{ path: string; mimeType: string }> {
   const { supabase } = await import('./supabase')
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -88,14 +89,12 @@ export async function uploadChatPhoto(
   // private, so the database stores this path and the UI creates a signed URL.
   const fileName = `${user.id}/${coupleId}-${messageId}-${Date.now()}.webp`
 
-  const { error } = await supabase.storage
-    .from('chat_photos')
-    .upload(fileName, blob, {
-      contentType: 'image/webp',
-      upsert: false,
-    })
+  const { path, mimeType } = await encryptAndUpload(
+    blob,
+    coupleId,
+    'chat_photos',
+    fileName
+  )
 
-  if (error) throw error
-
-  return fileName
+  return { path, mimeType }
 }

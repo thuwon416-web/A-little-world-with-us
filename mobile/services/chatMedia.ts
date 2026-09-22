@@ -1,5 +1,6 @@
 import type { ChatAttachment } from '@/components/chat/chat-types'
 import { supabase } from '@/lib/supabase'
+import { encryptMedia } from '@/lib/mediaEncryption'
 
 export type ChatMediaBucket = 'chat_photos' | 'voice_messages' | 'chat_files'
 
@@ -39,6 +40,7 @@ function extensionFor(name: string, mimeType: string) {
 
 export async function uploadChatMedia(
   userId: string,
+  coupleId: string,
   messageId: string,
   attachment: ChatAttachment
 ) {
@@ -51,12 +53,16 @@ export async function uploadChatMedia(
     throw new Error('File too large. Files must be 5 MB or smaller.')
   }
   const path = `${userId}/${messageId}.${extensionFor(attachment.name, attachment.mimeType)}`
-  const { error } = await supabase.storage.from(bucket).upload(path, body, {
-    contentType: attachment.mimeType,
+  
+  // Encrypt before upload
+  const encrypted = await encryptMedia(new Uint8Array(body), coupleId)
+  
+  const { error } = await supabase.storage.from(bucket).upload(path, encrypted, {
+    contentType: 'application/octet-stream',
     upsert: false,
   })
   if (error) throw new Error(error.message)
-  return path
+  return { path, mimeType: attachment.mimeType }
 }
 
 export async function getChatMediaUrl(bucket: ChatMediaBucket, path: string | null) {

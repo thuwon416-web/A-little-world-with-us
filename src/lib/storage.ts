@@ -1,5 +1,6 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 import { validateUpload } from '@/lib/upload-validation'
+import { encryptAndUpload } from '@/lib/mediaEncryption'
 
 export type GalleryImage = { id: string; name: string; path: string; url: string; created_at: string }
 
@@ -15,16 +16,21 @@ async function currentUserId() {
   return user.id
 }
 
-export async function uploadGalleryImage(file: File, _folder?: string) {
+export async function uploadGalleryImage(file: File, coupleId: string, _folder?: string) {
   if (!isSupabaseConfigured) throw new Error('Supabase is not configured.')
   const validation = validateUpload(file, { imagesOnly: true })
   if (!validation.valid) throw new Error(validation.error)
   const userId = await currentUserId()
   const extension = file.name.includes('.') ? file.name.split('.').pop() ?? 'jpg' : 'jpg'
   const path = `${userId}/${crypto.randomUUID()}.${extension}`
-  const { data, error } = await supabase.storage.from('gallery').upload(path, file, { cacheControl: '3600', upsert: false, contentType: file.type || 'image/jpeg' })
-  if (error) throw error
-  return { id: data?.id ?? crypto.randomUUID(), name: data?.path ?? path, path: data?.path ?? path, url: await signedUrl('gallery', data?.path ?? path), created_at: new Date().toISOString() }
+  const { path: storedPath, mimeType } = await encryptAndUpload(
+    file,
+    coupleId,
+    'gallery',
+    path,
+    { cacheControl: '3600', upsert: false }
+  )
+  return { id: crypto.randomUUID(), name: storedPath, path: storedPath, url: await signedUrl('gallery', storedPath), created_at: new Date().toISOString(), mimeType }
 }
 
 export async function listGalleryImages(bucket = 'gallery'): Promise<GalleryImage[]> {

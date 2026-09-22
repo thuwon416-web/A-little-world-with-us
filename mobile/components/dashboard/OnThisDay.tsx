@@ -19,6 +19,11 @@ import { supabase } from '@/lib/supabase'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import { getMemories } from '@/services/memories'
 import type { RelationshipMemory } from '@/shared-types'
+import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
+
+function isExternalUrl(v?: string | null) {
+  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
+}
 
 const icons: Record<string, LucideIcon> = {
   first_events: Sparkles,
@@ -79,8 +84,9 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
         const path = memory.storage_path ?? memory.image_url
         if (!path) return [memory.id, ''] as const
         if (path.startsWith('/') || path.startsWith('http')) return [memory.id, path] as const
-        const { data } = await supabase.storage.from('memories').createSignedUrl(path, 3600)
-        return [memory.id, data?.signedUrl ?? ''] as const
+        const mimeType = memory.mime_type || 'image/jpeg'
+        const uri = await downloadDecryptAndCache(coupleId, 'memories', path, mimeType)
+        return [memory.id, uri] as const
       }))
       const photoItems: UnifiedMemory[] = photos.map((memory) => ({
         source: 'photo',

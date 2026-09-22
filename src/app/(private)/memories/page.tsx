@@ -13,6 +13,7 @@ const MemoryLocationPicker = dynamic(() => import('@/features/memories/MemoryLoc
 import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { validateUpload } from '@/lib/upload-validation'
+import { encryptAndUpload, getCachedDecryptedUrl } from '@/lib/mediaEncryption'
 
 const MemoryCurationAI = dynamic(
   () => import('@/features/memories/MemoryCurationAI'),
@@ -27,7 +28,7 @@ const PAGE_SIZE = 6
 type MemoryCategory = 'all' | 'favorite' | 'travel' | 'ritual' | 'journal'
 type MemorySort = 'newest' | 'oldest'
 
-type DisplayMemory = Memory & { displayUrl: string }
+type DisplayMemory = Memory & { displayUrl: string; mime_type?: string | null }
 type JournalMemory = DisplayMemory & {
   metadata?: { mood_tag?: string; ai_reflection?: string } | null
 }
@@ -148,7 +149,7 @@ function MemoriesPageContent() {
     setCoupleLinkId(link?.couple_id ?? null)
     const { data, error: memoriesError } = await supabase
       .from('memories')
-      .select('*')
+      .select('*,mime_type')
       .order('date', { ascending: false })
 
     if (memoriesError) {
@@ -159,18 +160,35 @@ function MemoriesPageContent() {
 
     const displayMemories = await Promise.all(
       (data as Memory[]).map(async (memory) => {
-        if (memory.image_url?.startsWith('/')) {
-          return { ...memory, displayUrl: memory.image_url ?? '' }
+        const path = memory.storage_path ?? memory.image_url ?? ''
+        if (!path || path.startsWith('/')) {
+          return { ...memory, displayUrl: memory.image_url ?? '', mime_type: memory.mime_type }
         }
 
-        const { data: signedData, error: signedError } = await supabase.storage
-          .from('memories')
-          .createSignedUrl(memory.storage_path ?? memory.image_url ?? '', 60 * 60)
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+          return { ...memory, displayUrl: path, mime_type: memory.mime_type }
+        }
+
+        if (!link?.couple_id) {
+          const { data: signedData, error: signedError } = await supabase.storage
+            .from('memories')
+            .createSignedUrl(path, 60 * 60)
+          return {
+            ...memory,
+            category: memory.category ?? 'favorite',
+            displayUrl: signedError ? '' : signedData.signedUrl,
+            mime_type: memory.mime_type,
+          }
+        }
+
+        const mimeType = memory.mime_type || 'image/jpeg'
+        const displayUrl = await getCachedDecryptedUrl(link.couple_id, 'memories', path, mimeType)
 
         return {
           ...memory,
           category: memory.category ?? 'favorite',
-          displayUrl: signedError ? '' : signedData.signedUrl,
+          displayUrl,
+          mime_type: memory.mime_type,
         }
       })
     )
@@ -238,13 +256,18 @@ function MemoriesPageContent() {
         try {
           const compressedImage = await compressImage(file)
           const path = `${userData.user.id}/${crypto.randomUUID()}.webp`
-          const { error: uploadError } = await supabase.storage.from('memories').upload(path, compressedImage, { contentType: 'image/webp', upsert: false })
-          if (uploadError) throw uploadError
+          const { path: storedPath, mimeType } = await encryptAndUpload(
+            compressedImage,
+            coupleLinkId,
+            'memories',
+            path
+          )
           const { error: insertError } = await supabase.from('memories').insert({
             user_id: userData.user.id,
             couple_id: coupleLinkId,
-            image_url: path,
-            storage_path: path,
+            image_url: storedPath,
+            storage_path: storedPath,
+            mime_type: mimeType,
             title: caption.trim() || 'A memory together',
             caption: caption.trim() || 'A memory together',
             date: memoryDate,
@@ -255,7 +278,7 @@ function MemoriesPageContent() {
             location_label: locationLabel.trim() || null,
           })
           if (insertError) {
-            await supabase.storage.from('memories').remove([path])
+            await supabase.storage.from('memories').remove([storedPath])
             throw insertError
           }
           uploadedCount += 1
@@ -628,7 +651,7 @@ function MemoriesPageContent() {
         </div>
       )}
       {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-accent-1" /><p className="mt-4 text-lg text-text-1">No memories yet. Start creating your little world together!</p></section>}
-      {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} /> : null}
+      {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} coupleId={coupleLinkId ?? ''} /> : null}
       {selectedMemory && <MemoryDetail memory={selectedMemory} onClose={() => setSelectedMemory(null)} onSaved={(updated) => {
         setMemories((current) => current.map((memory) => memory.id === updated.id ? { ...memory, ...updated } : memory))
         setSelectedMemory((current) => current?.id === updated.id ? { ...current, ...updated } : current)

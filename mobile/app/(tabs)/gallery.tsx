@@ -7,7 +7,12 @@ import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { useAuth } from '@/lib/auth'
+import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
+
+function isExternalUrl(v?: string | null) {
+  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
+}
 
 type GalleryItem = {
   id: string
@@ -24,6 +29,7 @@ export default function GalleryScreen() {
   const [items, setItems] = useState<GalleryItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
   const { user, loading: authLoading } = useAuth()
 
   const loadGallery = async () => {
@@ -43,14 +49,21 @@ export default function GalleryScreen() {
             .filter((item) => item.name && !item.metadata?.isFolder)
             .map(async (item) => {
               const path = `${user.id}/${item.name}`
-              const { data: signed, error: signedError } = await supabase.storage
-                .from('gallery')
-                .createSignedUrl(path, 3600)
-              if (signedError || !signed?.signedUrl) return null
+              let url: string | null = null
+              if (isExternalUrl(path)) {
+                const { data: signed, error: signedError } = await supabase.storage
+                  .from('gallery')
+                  .createSignedUrl(path, 3600)
+                if (!signedError && signed?.signedUrl) url = signed.signedUrl
+              } else if (coupleId) {
+                const mimeType = guessMimeTypeFromPath(path)
+                url = await downloadDecryptAndCache(coupleId, 'gallery', path, mimeType)
+              }
+              if (!url) return null
               return {
                 id: item.id ?? path,
                 path,
-                url: signed.signedUrl,
+                url,
                 name: item.name,
                 created_at: item.created_at ?? new Date().toISOString(),
               }
@@ -67,9 +80,24 @@ export default function GalleryScreen() {
     }
   }
 
+  const loadCoupleId = async () => {
+    if (!user?.id) return
+    const { data } = await supabase
+      .from('couple_links')
+      .select('couple_id')
+      .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+      .eq('status', 'accepted')
+      .maybeSingle()
+    setCoupleId(data?.couple_id ?? null)
+  }
+
   useEffect(() => {
     if (!authLoading) void loadGallery()
-  }, [authLoading, user?.id])
+  }, [authLoading, user?.id, coupleId])
+
+  useEffect(() => {
+    void loadCoupleId()
+  }, [user?.id])
 
   const handleUpload = (image: GalleryItem) => {
     setItems((current) => [image, ...current])
@@ -103,7 +131,7 @@ export default function GalleryScreen() {
       <Text style={styles.title}>Shared moments</Text>
       <Text style={styles.subtitle}>Save little snapshots of your story.</Text>
 
-      <ImageUpload onUpload={handleUpload} />
+      <ImageUpload onUpload={handleUpload} coupleId={coupleId ?? ''} />
 
       {error && <Text style={styles.error}>{error}</Text>}
       {loading || authLoading ? (

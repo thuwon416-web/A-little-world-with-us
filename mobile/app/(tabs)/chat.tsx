@@ -34,7 +34,13 @@ import {
   getChatMediaUrl,
   uploadChatMedia,
 } from '@/services/chatMedia'
+import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 import { deriveChatKey, decryptMessage, encryptMessage } from '@/lib/chatEncryption'
+
+function isExternalUrl(value: string | null | undefined): boolean {
+  if (!value) return false
+  return value.startsWith('http://') || value.startsWith('https://')
+}
 
 function formatMessageTime(value: string) {
   const date = new Date(value)
@@ -139,7 +145,11 @@ export default function ChatScreen() {
                     : null
             const resolvedMediaUrl =
               bucket && typeof mediaUrl === 'string'
-                ? await getChatMediaUrl(bucket, mediaUrl)
+                ? isExternalUrl(mediaUrl)
+                  ? await getChatMediaUrl(bucket, mediaUrl)
+                  : coupleId
+                    ? await downloadDecryptAndCache(coupleId, bucket, mediaUrl, guessMimeTypeFromPath(mediaUrl))
+                    : await getChatMediaUrl(bucket, mediaUrl)
                 : typeof mediaUrl === 'string'
                   ? mediaUrl
                   : null
@@ -318,10 +328,10 @@ export default function ChatScreen() {
     if (insertError || !message)
       throw new Error(insertError?.message || 'Unable to create media message.')
     try {
-      const path = await uploadChatMedia(user.id, message.id, attachment)
+      const { path, mimeType } = await uploadChatMedia(user.id, coupleId, message.id, attachment)
       const { error: updateError } = await supabase
         .from('messages')
-        .update({ media_url: path })
+        .update({ media_url: path, media_mime_type: mimeType })
         .eq('id', message.id)
       if (updateError) throw new Error(updateError.message)
       await refresh()

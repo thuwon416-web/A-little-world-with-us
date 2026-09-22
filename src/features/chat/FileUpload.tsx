@@ -5,15 +5,17 @@ import { useState, useRef } from 'react'
 import Image from 'next/image'
 import { X, Upload, File as FileIcon, Image as ImageIcon, Film, Music, FileText, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { encryptAndUpload } from '@/lib/mediaEncryption'
 
 interface FileUploadProps {
-  onFileUpload: (fileData: { url: string; type: string; name: string; size: number; path?: string }) => void
+  onFileUpload: (fileData: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string }) => void
   onClose: () => void
+  coupleId: string
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
 
-export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
+export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
@@ -106,20 +108,19 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
       const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
       const filePath = `${user.id}/${fileName}`
 
-      // Upload to Supabase storage
-      const { error: uploadError } = await supabase.storage
-        .from('chat_files')
-        .upload(filePath, selectedFile, {
-          cacheControl: '3600',
-          upsert: false,
-        })
-
-      if (uploadError) throw uploadError
+      // Upload to Supabase storage (encrypted)
+      const { path: storedPath, mimeType } = await encryptAndUpload(
+        selectedFile,
+        coupleId,
+        'chat_files',
+        filePath,
+        { cacheControl: '3600', upsert: false }
+      )
 
       // Get signed URL (1 hour expiry)
       const { data: signedUrlData } = await supabase.storage
         .from('chat_files')
-        .createSignedUrl(filePath, 3600)
+        .createSignedUrl(storedPath, 3600)
       
       if (!signedUrlData?.signedUrl) {
         throw new Error('Failed to generate signed URL for chat file')
@@ -131,7 +132,8 @@ export default function FileUpload({ onFileUpload, onClose }: FileUploadProps) {
         type: selectedFile.type,
         name: selectedFile.name,
         size: selectedFile.size,
-        path: filePath,
+        path: storedPath,
+        mimeType,
       })
 
       // Reset state

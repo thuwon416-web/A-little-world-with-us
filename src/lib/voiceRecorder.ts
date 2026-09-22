@@ -3,6 +3,8 @@
  * Uses MediaRecorder API
  */
 
+import { encryptAndUpload } from './mediaEncryption'
+
 export interface VoiceRecording {
   blob: Blob
   url: string
@@ -62,7 +64,7 @@ export async function uploadVoiceRecording(
   blob: Blob,
   coupleId: string,
   messageId: string
-): Promise<string> {
+): Promise<{ path: string; mimeType: string }> {
   const { supabase } = await import('./supabase')
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) throw new Error('Not authenticated')
@@ -72,14 +74,12 @@ export async function uploadVoiceRecording(
   // rendering it instead of persisting an expiring/public URL.
   const fileName = `${user.id}/${coupleId}-${messageId}-${Date.now()}.webm`
 
-  const { error } = await supabase.storage
-    .from('voice_messages')
-    .upload(fileName, blob, {
-      contentType: 'audio/webm',
-      upsert: false,
-    })
+  const { path, mimeType } = await encryptAndUpload(
+    blob,
+    coupleId,
+    'voice_messages',
+    fileName
+  )
 
-  if (error) throw error
-
-  return fileName
+  return { path, mimeType }
 }

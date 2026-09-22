@@ -13,6 +13,7 @@ import { supabase } from '@/lib/supabase'
 import { deleteMemory, getMemories, MemoryRecord } from '@/services/memories'
 import MemorySlideshow from '@/components/memories/MemorySlideshow'
 import SlideshowLaunchButton from '@/components/memories/SlideshowLaunchButton'
+import { downloadDecryptAndCache, encryptMedia, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 
 const categories = ['all', 'favorite', 'travel', 'ritual', 'journal'] as const
 type JournalMood = 'happy' | 'okay' | 'sad' | 'loved' | 'anxious'
@@ -46,6 +47,7 @@ export default function MemoriesScreen() {
   const [curationError, setCurationError] = useState('')
   const [curationLoading, setCurationLoading] = useState(false)
   const [isSlideshowOpen, setIsSlideshowOpen] = useState(false)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
   const [journalModalOpen, setJournalModalOpen] = useState(false)
   const [editingJournalId, setEditingJournalId] = useState<string | null>(null)
   const [journalTitle, setJournalTitle] = useState('')
@@ -83,6 +85,20 @@ export default function MemoriesScreen() {
   }
 
   useEffect(() => {
+    const loadCoupleId = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: coupleLink } = await supabase
+        .from('couple_links')
+        .select('couple_id')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
+      setCoupleId(coupleLink?.couple_id ?? null)
+    }
+    void loadCoupleId()
     void loadMemories()
       .then(setMemories)
       .catch((caught) =>
@@ -238,15 +254,12 @@ export default function MemoriesScreen() {
         setJournalUploadingVoice(true)
         const filePath = `journal/${coupleLink.couple_id}/${Date.now()}.m4a`
         const arraybuffer = await fetch(journalVoiceUri).then((response) => response.arrayBuffer())
+        const encryptedData = await encryptMedia(new Uint8Array(arraybuffer), coupleLink.couple_id)
         const { error: uploadError } = await supabase.storage
           .from('memories')
-          .upload(filePath, arraybuffer, { contentType: 'audio/m4a', upsert: false })
+          .upload(filePath, encryptedData, { contentType: 'application/octet-stream', upsert: false })
         if (uploadError) throw new Error(`Voice upload failed: ${uploadError.message}`)
-        const { data: urlData } = await supabase.storage.from('memories').createSignedUrl(filePath, 3600)
-        if (!urlData?.signedUrl) {
-          throw new Error('Failed to generate signed URL for voice memo')
-        }
-        voiceUrl = urlData.signedUrl
+        const voiceUrl = await downloadDecryptAndCache(coupleLink.couple_id, 'memories', filePath, 'audio/m4a')
         setJournalVoiceRemoteUrl(voiceUrl)
       }
       const existingMeta = editingJournalId
@@ -259,6 +272,7 @@ export default function MemoriesScreen() {
         description: journalBody.trim() || null,
         category: 'journal' as const,
         date: new Date().toISOString().slice(0, 10),
+        mime_type: 'audio/m4a',
         metadata: { ...existingMeta, mood_tag: journalMood, ...(voiceUrl ? { voice_url: voiceUrl } : {}) },
       }
       const query = editingJournalId
@@ -700,7 +714,7 @@ export default function MemoriesScreen() {
           </TouchableOpacity>
         </View>
       </Modal>
-      {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} /> : null}
+      {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} coupleId={coupleId ?? ''} /> : null}
     </ScrollView>
   )
 }

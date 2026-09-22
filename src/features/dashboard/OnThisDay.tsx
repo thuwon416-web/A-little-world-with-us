@@ -7,6 +7,11 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import { supabase, type Memory } from '@/lib/supabase'
 import type { RelationshipMemory } from '@/shared-types'
+import { getCachedDecryptedUrl } from '@/lib/mediaEncryption'
+
+function isExternalUrl(v?: string | null) {
+  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
+}
 
 const icons: Record<string, LucideIcon> = {
   first_events: Sparkles,
@@ -74,8 +79,13 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
             let imageUrl: string | undefined
             if (path?.startsWith('/')) imageUrl = path
             else if (path) {
-              const { data } = await supabase.storage.from('memories').createSignedUrl(path, 3600)
-              imageUrl = data?.signedUrl
+              if (isExternalUrl(path)) {
+                const { data } = await supabase.storage.from('memories').createSignedUrl(path, 3600)
+                imageUrl = data?.signedUrl
+              } else {
+                const mimeType = memory.mime_type || 'image/jpeg'
+                imageUrl = await getCachedDecryptedUrl(coupleId, 'memories', path, mimeType)
+              }
             }
             return {
               source: 'photo',

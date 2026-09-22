@@ -5,10 +5,12 @@ import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/context/ThemeContext'
+import { encryptMedia } from '@/lib/mediaEncryption'
 
 export default function ImageUpload({
   onUpload,
   folder = 'gallery',
+  coupleId,
 }: {
   onUpload?: (image: {
     id: string
@@ -18,6 +20,7 @@ export default function ImageUpload({
     created_at: string
   }) => void
   folder?: string
+  coupleId: string
 }) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
@@ -62,10 +65,11 @@ export default function ImageUpload({
       if (!user?.id) throw new Error('Please wait for sign-in to finish.')
       const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
 
+      const encryptedData = await encryptMedia(new Uint8Array(await blob.arrayBuffer()), coupleId)
       const { data, error: uploadError } = await supabase.storage
         .from('gallery')
-        .upload(path, blob, {
-          contentType: 'image/jpeg',
+        .upload(path, encryptedData, {
+          contentType: 'application/octet-stream',
           upsert: false,
         })
 

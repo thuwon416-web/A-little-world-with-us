@@ -8,6 +8,11 @@ import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { supabase } from '@/lib/supabase'
 import { getMemories, type MemoryRecord } from '@/services/memories'
+import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
+
+function isExternalUrl(v?: string | null) {
+  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
+}
 
 const mapStyle = process.env.EXPO_PUBLIC_CARTO_STYLE_URL ?? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
 
@@ -16,22 +21,44 @@ export default function MemoryMapScreen() {
   const styles = createStyles(colors, sizes)
   const router = useRouter()
   const [memories, setMemories] = useState<MemoryRecord[]>([])
+  const [coupleId, setCoupleId] = useState<string | null>(null)
   const [selected, setSelected] = useState<MemoryRecord | null>(null)
   const [urls, setUrls] = useState<Record<string, string>>({})
   const [error, setError] = useState('')
   useEffect(() => {
-    void getMemories().then((rows) => setMemories(rows.filter((row) => row.latitude !== null && row.longitude !== null))).catch((caught) => setError(caught instanceof Error ? caught.message : 'Unable to load memory locations.'))
+    const loadData = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) return
+      const { data: coupleLink } = await supabase
+        .from('couple_links')
+        .select('couple_id')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
+      setCoupleId(coupleLink?.couple_id ?? null)
+      const rows = await getMemories()
+      setMemories(rows.filter((row) => row.latitude !== null && row.longitude !== null))
+    }
+    void loadData().catch((caught) => setError(caught instanceof Error ? caught.message : 'Unable to load memory locations.'))
   }, [])
   useEffect(() => {
     let mounted = true
     void Promise.all(memories.map(async (memory) => {
       const path = memory.storage_path ?? memory.image_url
       if (!path || path.startsWith('/') || path.startsWith('http')) return path ? [memory.id, path] as const : null
-      const { data } = await supabase.storage.from('memories').createSignedUrl(path, 3600)
-      return data?.signedUrl ? [memory.id, data.signedUrl] as const : null
+      if (isExternalUrl(path)) {
+        const { data } = await supabase.storage.from('memories').createSignedUrl(path, 3600)
+        return data?.signedUrl ? [memory.id, data.signedUrl] as const : null
+      }
+      if (!coupleId) return null
+      const mimeType = memory.mime_type || 'image/jpeg'
+      const uri = await downloadDecryptAndCache(coupleId, 'memories', path, mimeType)
+      return [memory.id, uri] as const
     })).then((entries) => { if (mounted) setUrls(Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => entry !== null))) })
     return () => { mounted = false }
-  }, [memories])
+  }, [memories, coupleId])
   const center = useMemo<[number, number]>(() => memories[0] ? [memories[0].longitude as number, memories[0].latitude as number] : [96.1951, 16.8661], [memories])
   if (error) return <View style={[styles.empty, { backgroundColor: colors.background }]}><Text style={{ color: colors.error }}>{error}</Text></View>
   if (!memories.length) return <View style={[styles.empty, { backgroundColor: colors.background }]}><Text style={{ color: colors.textSecondary }}>No located memories yet.</Text><TouchableOpacity onPress={() => router.back()}><Text style={{ color: colors.accent1 }}>Back</Text></TouchableOpacity></View>

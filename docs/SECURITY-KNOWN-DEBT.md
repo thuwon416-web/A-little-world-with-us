@@ -35,3 +35,10 @@
 **Alternative considered:**
 - B/C: Manual upgrade — Deferred to Week 6
 - D: Wait for upstream — Already doing
+
+## Deferred — @vercel/analytics
+
+**Issue:** Peer dependency conflict (vite@5.4.21 vs vite@8.3.0 required by @sveltejs/kit)
+**Workaround:** SpeedInsights already provides Web Vitals analytics
+**Impact:** No visitor analytics (page views), but performance metrics covered
+**Plan:** Revisit in Week 6 with alternative (Plausible / Umami) if needed

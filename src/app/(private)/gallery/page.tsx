@@ -6,11 +6,13 @@ import ImageUpload from '@/components/shared/ImageUpload'
 import { LoadingState } from '@/components/shared/Loading'
 import { GallerySkeleton } from '@/components/shared/Skeleton'
 import { deleteGalleryImage, listGalleryImages, type GalleryImage } from '@/lib/storage'
+import { supabase } from '@/lib/supabase'
 
 export default function GalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [coupleId, setCoupleId] = useState<string | null>(null)
 
   const loadGallery = async () => {
     try {
@@ -25,8 +27,21 @@ export default function GalleryPage() {
     }
   }
 
+  const loadCoupleId = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('couple_links')
+      .select('couple_id')
+      .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+      .eq('status', 'accepted')
+      .maybeSingle()
+    setCoupleId(data?.couple_id ?? null)
+  }
+
   useEffect(() => {
     void loadGallery()
+    void loadCoupleId()
   }, [])
 
   const handleUpload = async (image: GalleryImage) => {
@@ -54,7 +69,7 @@ export default function GalleryPage() {
         <h1 className="mt-3 text-3xl font-serif text-text-1">Shared memories</h1>
       </div>
 
-      <ImageUpload onUpload={handleUpload} />
+      <ImageUpload onUpload={handleUpload} coupleId={coupleId ?? ''} />
 
       {error && <div className="rounded-btn border border-error/20 bg-error/10 p-4 text-sm text-error">{error}</div>}
 

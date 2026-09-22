@@ -31,6 +31,7 @@ export interface Memory {
   latitude: number | null
   longitude: number | null
   location_label: string | null
+  mime_type: string | null
   created_at: string
   updated_at: string
 }

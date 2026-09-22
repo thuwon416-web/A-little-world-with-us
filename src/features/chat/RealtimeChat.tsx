@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
 import { resolveChatMediaUrl } from '@/lib/chatMedia'
+import { getCachedDecryptedUrl } from '@/lib/mediaEncryption'
 import { detectContextKeywords } from '@/features/ai-guardian/context/detector'
 import { enqueueMessage, processQueue, getQueueCount } from '@/lib/offline-queue'
 import ChatInputBar from './ChatInputBar'
@@ -26,6 +27,7 @@ interface Message {
   content: string | null
   message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location' | 'sos'
   media_url: string | null
+  media_mime_type?: string | null
   media_duration: number | null
   encrypted: boolean
   reply_to: string | null
@@ -40,6 +42,11 @@ interface Message {
 
 type StickerSelection = { emoji: string }
 type GifSelection = { url: string }
+
+function isExternalUrl(value: string | null | undefined): boolean {
+  if (!value) return false
+  return value.startsWith('http://') || value.startsWith('https://')
+}
 
 export default function RealtimeChat() {
   const [messages, setMessages] = useState<Message[]>([])
@@ -140,11 +147,17 @@ export default function RealtimeChat() {
       (loadedMessages || []).map(async (msg: Message) => {
         let mediaUrl = msg.media_url
         try {
-          mediaUrl = msg.message_type === 'voice'
-            ? await resolveChatMediaUrl(msg.media_url, 'voice')
-            : msg.message_type === 'photo'
-              ? await resolveChatMediaUrl(msg.media_url, 'photo')
-              : msg.media_url
+          if (isExternalUrl(msg.media_url)) {
+            mediaUrl = msg.message_type === 'voice'
+              ? await resolveChatMediaUrl(msg.media_url, 'voice')
+              : msg.message_type === 'photo'
+                ? await resolveChatMediaUrl(msg.media_url, 'photo')
+                : msg.media_url
+          } else if (msg.media_url) {
+            const mimeType = msg.media_mime_type || (msg.message_type === 'voice' ? 'audio/m4a' : 'image/jpeg')
+            const bucket = msg.message_type === 'voice' ? 'voice_messages' : 'chat_photos'
+            mediaUrl = await getCachedDecryptedUrl(couple.id, bucket, msg.media_url, mimeType)
+          }
         } catch {
           mediaUrl = null
         }
@@ -202,11 +215,17 @@ export default function RealtimeChat() {
           const rawMessage = payload.new as Message
           let mediaUrl = rawMessage.media_url
           try {
-            mediaUrl = rawMessage.message_type === 'voice'
-              ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
-              : rawMessage.message_type === 'photo'
-                ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
-                : rawMessage.media_url
+            if (isExternalUrl(rawMessage.media_url)) {
+              mediaUrl = rawMessage.message_type === 'voice'
+                ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
+                : rawMessage.message_type === 'photo'
+                  ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
+                  : rawMessage.media_url
+            } else if (rawMessage.media_url) {
+              const mimeType = rawMessage.media_mime_type || (rawMessage.message_type === 'voice' ? 'audio/m4a' : 'image/jpeg')
+              const bucket = rawMessage.message_type === 'voice' ? 'voice_messages' : 'chat_photos'
+              mediaUrl = await getCachedDecryptedUrl(couple.id, bucket, rawMessage.media_url, mimeType)
+            }
           } catch {
             mediaUrl = null
           }
@@ -240,11 +259,17 @@ export default function RealtimeChat() {
           const rawMessage = payload.new as Message
           let mediaUrl = rawMessage.media_url
           try {
-            mediaUrl = rawMessage.message_type === 'voice'
-              ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
-              : rawMessage.message_type === 'photo'
-                ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
-                : rawMessage.media_url
+            if (isExternalUrl(rawMessage.media_url)) {
+              mediaUrl = rawMessage.message_type === 'voice'
+                ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
+                : rawMessage.message_type === 'photo'
+                  ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
+                  : rawMessage.media_url
+            } else if (rawMessage.media_url) {
+              const mimeType = rawMessage.media_mime_type || (rawMessage.message_type === 'voice' ? 'audio/m4a' : 'image/jpeg')
+              const bucket = rawMessage.message_type === 'voice' ? 'voice_messages' : 'chat_photos'
+              mediaUrl = await getCachedDecryptedUrl(couple.id, bucket, rawMessage.media_url, mimeType)
+            }
           } catch {
             mediaUrl = null
           }
@@ -550,6 +575,7 @@ export default function RealtimeChat() {
     name: string
     size: number
     path?: string
+    mimeType?: string
   }) => {
     try {
       if (!coupleId || !currentUserId) return
@@ -566,6 +592,7 @@ export default function RealtimeChat() {
         content: fileInfo.name,
         media_url: fileInfo.url,
         message_type: messageType,
+        media_mime_type: fileInfo.mimeType,
         encrypted: false,
       })
 
@@ -855,6 +882,7 @@ export default function RealtimeChat() {
         <FileUpload
           onFileUpload={handleFileUpload}
           onClose={() => setShowFileUpload(false)}
+          coupleId={coupleId ?? ''}
         />
       )}
       {showReplyThread && selectedMessage && (
