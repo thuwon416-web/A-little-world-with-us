@@ -1,3 +1,4 @@
+import { ListChecks } from 'lucide-react-native'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -6,7 +7,6 @@ import { ProgressBar } from '@/components/ProgressBar'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useTheme } from '@/context/ThemeContext'
 import type { PlanRecord } from '@/services/plans'
-import { ListChecks } from 'lucide-react-native'
 
 interface PlanCardProps {
   plan: PlanRecord
@@ -34,7 +34,11 @@ export function PlanCard({ plan, onPress, onToggleItem }: PlanCardProps) {
   const progress = items.length === 0 ? 0 : (doneCount / items.length) * 100
 
   return (
-    <TouchableOpacity style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]} onPress={onPress} activeOpacity={0.9}>
+    <TouchableOpacity
+      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+      onPress={onPress}
+      activeOpacity={0.9}
+    >
       <View style={styles.headerRow}>
         <View>
           <Text style={[styles.type, { color: colors.accent2 }]}>{plan.type}</Text>
@@ -43,10 +47,16 @@ export function PlanCard({ plan, onPress, onToggleItem }: PlanCardProps) {
         <Text style={[styles.status, { color: colors.success }]}>{plan.status}</Text>
       </View>
 
-      {plan.description ? <Text style={[styles.description, { color: colors.textSecondary }]}>{plan.description}</Text> : null}
+      {plan.description ? (
+        <Text style={[styles.description, { color: colors.textSecondary }]}>
+          {plan.description}
+        </Text>
+      ) : null}
 
       <View style={styles.metaRow}>
-        <Text style={[styles.meta, { color: colors.textSecondary }]}>{getDaysUntil(plan.due_date)}</Text>
+        <Text style={[styles.meta, { color: colors.textSecondary }]}>
+          {getDaysUntil(plan.due_date)}
+        </Text>
         <Text style={[styles.meta, { color: colors.textSecondary }]}>
           {doneCount}/{items.length || 0} done
         </Text>

@@ -5,21 +5,30 @@ import { useEffect, useState } from 'react'
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
-import { addVaultItem, deleteVaultItem, getContext, getVaultItems } from '@/services/secondary'
-import VaultTabs, { type VaultTab } from '@/components/vault/VaultTabs'
 import PasswordList from '@/components/vault/PasswordList'
 import VaultSetupModal from '@/components/vault/VaultSetupModal'
-import { VaultKeyProvider, useVaultKey } from '@/contexts/VaultKeyContext'
+import VaultTabs, { type VaultTab } from '@/components/vault/VaultTabs'
 import { useTheme } from '@/context/ThemeContext'
+import { VaultKeyProvider, useVaultKey } from '@/contexts/VaultKeyContext'
 import { loadWrappedKey } from '@/lib/vault-storage'
+import { addVaultItem, deleteVaultItem, getContext, getVaultItems } from '@/services/secondary'
 
 export default function VaultScreen() {
-  return <VaultKeyProvider><VaultScreenContent /></VaultKeyProvider>
+  return (
+    <VaultKeyProvider>
+      <VaultScreenContent />
+    </VaultKeyProvider>
+  )
 }
 
 function VaultScreenContent() {
   const { colors } = useTheme()
-  const { masterKey, isUnlocked: passwordUnlocked, unlockWithPassphrase, unlockWithBiometric } = useVaultKey()
+  const {
+    masterKey,
+    isUnlocked: passwordUnlocked,
+    unlockWithPassphrase,
+    unlockWithBiometric,
+  } = useVaultKey()
   const [items, setItems] = useState<any[]>([])
   const [coupleId, setCoupleId] = useState('')
   const [userId, setUserId] = useState('')
@@ -120,77 +129,120 @@ function VaultScreenContent() {
           <VaultTabs tab={tab} onChange={setTab} />
           {tab === 'letters' ? (
             <>
-          <TextInput
-            style={s.input}
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Title"
-            placeholderTextColor={colors.textSecondary}
-          />
-          <TextInput
-            style={s.input}
-            value={content}
-            onChangeText={setContent}
-            placeholder="Secret or note"
-            placeholderTextColor={colors.textSecondary}
-            multiline
-          />
-          <TextInput
-            style={s.input}
-            value={photoUrl}
-            onChangeText={setPhotoUrl}
-            placeholder="Photo URL (optional)"
-            placeholderTextColor={colors.textSecondary}
-            autoCapitalize="none"
-          />
-          <TouchableOpacity style={s.button} onPress={() => void add()}>
-            <Text style={s.buttonText}>Add to vault</Text>
-          </TouchableOpacity>
-          {items.map((item) => (
-            <View key={item.id} style={s.card}>
-              <Text style={s.buttonText}>{item.title}</Text>
-              <Text style={s.muted}>{item.content}</Text>
-              {item.photo_url ? <Text style={s.muted}>Photo attached</Text> : null}
-              <TouchableOpacity
-                onPress={() =>
-                  Alert.alert('Delete item?', '', [
-                    { text: 'Cancel' },
-                    {
-                      text: 'Delete',
-                      style: 'destructive',
-                      onPress: () => void deleteVaultItem(item.id).then(load),
-                    },
-                  ])
-                }
-              >
-                <Text style={s.danger}>Delete</Text>
+              <TextInput
+                style={s.input}
+                value={title}
+                onChangeText={setTitle}
+                placeholder="Title"
+                placeholderTextColor={colors.textSecondary}
+              />
+              <TextInput
+                style={s.input}
+                value={content}
+                onChangeText={setContent}
+                placeholder="Secret or note"
+                placeholderTextColor={colors.textSecondary}
+                multiline
+              />
+              <TextInput
+                style={s.input}
+                value={photoUrl}
+                onChangeText={setPhotoUrl}
+                placeholder="Photo URL (optional)"
+                placeholderTextColor={colors.textSecondary}
+                autoCapitalize="none"
+              />
+              <TouchableOpacity style={s.button} onPress={() => void add()}>
+                <Text style={s.buttonText}>Add to vault</Text>
               </TouchableOpacity>
-            </View>
-          ))}
+              {items.map((item) => (
+                <View key={item.id} style={s.card}>
+                  <Text style={s.buttonText}>{item.title}</Text>
+                  <Text style={s.muted}>{item.content}</Text>
+                  {item.photo_url ? <Text style={s.muted}>Photo attached</Text> : null}
+                  <TouchableOpacity
+                    onPress={() =>
+                      Alert.alert('Delete item?', '', [
+                        { text: 'Cancel' },
+                        {
+                          text: 'Delete',
+                          style: 'destructive',
+                          onPress: () => void deleteVaultItem(item.id).then(load),
+                        },
+                      ])
+                    }
+                  >
+                    <Text style={s.danger}>Delete</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
             </>
           ) : (
             <>
               {!hasWrappedKey ? (
                 <View style={s.card}>
                   <Text style={s.buttonText}>Set up your password vault</Text>
-                  <Text style={s.muted}>Create a separate passphrase for encrypted credentials.</Text>
-                  <TouchableOpacity style={s.button} onPress={() => setShowSetup(true)}><Text style={s.buttonText}>Set up Vault Passphrase</Text></TouchableOpacity>
+                  <Text style={s.muted}>
+                    Create a separate passphrase for encrypted credentials.
+                  </Text>
+                  <TouchableOpacity style={s.button} onPress={() => setShowSetup(true)}>
+                    <Text style={s.buttonText}>Set up Vault Passphrase</Text>
+                  </TouchableOpacity>
                 </View>
               ) : !passwordUnlocked ? (
                 <View style={s.card}>
                   <Text style={s.buttonText}>Unlock passwords</Text>
-                  <TextInput style={s.input} value={passphrase} onChangeText={setPassphrase} placeholder="Vault passphrase" placeholderTextColor={colors.textSecondary} secureTextEntry />
+                  <TextInput
+                    style={s.input}
+                    value={passphrase}
+                    onChangeText={setPassphrase}
+                    placeholder="Vault passphrase"
+                    placeholderTextColor={colors.textSecondary}
+                    secureTextEntry
+                  />
                   {passwordError ? <Text style={s.danger}>{passwordError}</Text> : null}
-                  <TouchableOpacity style={s.button} onPress={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))}><Text style={s.buttonText}>Unlock passwords</Text></TouchableOpacity>
-                  <TouchableOpacity onPress={() => void unlockWithBiometric().catch((cause) => setPasswordError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))}><Text style={s.muted}>Use biometric unlock</Text></TouchableOpacity>
+                  <TouchableOpacity
+                    style={s.button}
+                    onPress={() =>
+                      void unlockWithPassphrase(passphrase).catch((cause) =>
+                        setPasswordError(
+                          cause instanceof Error ? cause.message : 'Unable to unlock passwords.'
+                        )
+                      )
+                    }
+                  >
+                    <Text style={s.buttonText}>Unlock passwords</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() =>
+                      void unlockWithBiometric().catch((cause) =>
+                        setPasswordError(
+                          cause instanceof Error
+                            ? cause.message
+                            : 'Biometric unlock is unavailable.'
+                        )
+                      )
+                    }
+                  >
+                    <Text style={s.muted}>Use biometric unlock</Text>
+                  </TouchableOpacity>
                 </View>
               ) : masterKey ? (
                 <View>
-                  <Text style={s.muted}>Unlocked · password vault auto-locks after five minutes.</Text>
+                  <Text style={s.muted}>
+                    Unlocked · password vault auto-locks after five minutes.
+                  </Text>
                   <PasswordList masterKey={masterKey} />
                 </View>
               ) : null}
-              <VaultSetupModal visible={showSetup} onClose={() => setShowSetup(false)} onReady={() => { setShowSetup(false); void loadWrappedKey().then((stored) => setHasWrappedKey(Boolean(stored))) }} />
+              <VaultSetupModal
+                visible={showSetup}
+                onClose={() => setShowSetup(false)}
+                onReady={() => {
+                  setShowSetup(false)
+                  void loadWrappedKey().then((stored) => setHasWrappedKey(Boolean(stored)))
+                }}
+              />
             </>
           )}
         </>

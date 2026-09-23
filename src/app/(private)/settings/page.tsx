@@ -58,6 +58,7 @@ export default function SettingsPage() {
   const [notificationsEnabled, setNotificationsEnabled] = useState(true)
   const [quietMode, setQuietMode] = useState(false)
   const [privateMode, setPrivateMode] = useState(true)
+  const [activeSettingsModal, setActiveSettingsModal] = useState<'reminder' | 'pin' | null>(null)
 
   return (
     <div className="space-y-6 p-4 md:p-6 animate-fade-in">
@@ -142,8 +143,16 @@ export default function SettingsPage() {
           <CoupleSettings />
           <HealthProfileWidget />
           <FavoritesWidget />
-          <RemindersWidget />
-          <PINLockWidget />
+          <RemindersWidget
+            modalBlocked={activeSettingsModal !== null && activeSettingsModal !== 'reminder'}
+            onModalOpen={() => setActiveSettingsModal('reminder')}
+            onModalClose={() => setActiveSettingsModal(null)}
+          />
+          <PINLockWidget
+            modalBlocked={activeSettingsModal !== null && activeSettingsModal !== 'pin'}
+            onModalOpen={() => setActiveSettingsModal('pin')}
+            onModalClose={() => setActiveSettingsModal(null)}
+          />
           <SecuritySettings />
           <LanguageSwitcher />
           <TwoFactorAuthWidget />
@@ -182,7 +191,7 @@ export default function SettingsPage() {
                 alert('Account deletion requires authentication. Please contact support for assistance.')
               }
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-error py-3 font-medium text-white transition hover:bg-error/80"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-700 py-3 font-medium text-white transition hover:bg-red-800"
           >
             <Trash2 className="h-4 w-4" />
             <span>Delete My Account</span>

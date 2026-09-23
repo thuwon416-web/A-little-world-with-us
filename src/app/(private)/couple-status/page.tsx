@@ -165,7 +165,7 @@ function StatusCards({
   isInviter: boolean
 }) {
   const statusColors = {
-    pending: { bg: 'var(--card-bg)', border: 'var(--accent-1)', text: 'var(--accent-2)', icon: Clock },
+    pending: { bg: 'var(--card-bg)', border: 'rgb(var(--accent-1))', text: 'rgb(var(--accent-2))', icon: Clock },
     accepted: { bg: 'var(--card-bg)', border: 'var(--success)', text: 'var(--success)', icon: CheckCircle2 },
     declined: { bg: 'var(--card-bg)', border: 'var(--error)', text: 'var(--error)', icon: XCircle },
     revoked: { bg: 'var(--card-bg)', border: 'var(--error)', text: 'var(--error)', icon: XCircle },

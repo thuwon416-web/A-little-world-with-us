@@ -5,9 +5,9 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import MemoryCard from './MemoryCard'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useTheme } from '@/context/ThemeContext'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { RelationshipMemory } from '@/shared-types'
-import { useTheme } from '@/context/ThemeContext'
 
 const PAGE_SIZE = 50
 
@@ -76,7 +76,12 @@ function Timeline({ coupleId }: { coupleId: string }) {
         keyExtractor={([key]) => key}
         ListHeaderComponent={
           <View style={styles.yearRow}>
-            <Chip colors={colors} label="All years" active={year === null} onPress={() => setYear(null)} />
+            <Chip
+              colors={colors}
+              label="All years"
+              active={year === null}
+              onPress={() => setYear(null)}
+            />
             {years.map((item) => (
               <Chip
                 key={item}
@@ -121,7 +126,17 @@ function Timeline({ coupleId }: { coupleId: string }) {
 
 export default memo(Timeline)
 
-function Chip({ colors, label, active, onPress }: { colors: ReturnType<typeof useTheme>['colors']; label: string; active: boolean; onPress: () => void }) {
+function Chip({
+  colors,
+  label,
+  active,
+  onPress,
+}: {
+  colors: ReturnType<typeof useTheme>['colors']
+  label: string
+  active: boolean
+  onPress: () => void
+}) {
   const styles = createStyles(colors)
   return (
     <TouchableOpacity onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
@@ -139,7 +154,15 @@ function Loading({ colors }: { colors: ReturnType<typeof useTheme>['colors'] }) 
     </View>
   )
 }
-function Message({ colors, text, onRetry }: { colors: ReturnType<typeof useTheme>['colors']; text: string; onRetry?: () => void }) {
+function Message({
+  colors,
+  text,
+  onRetry,
+}: {
+  colors: ReturnType<typeof useTheme>['colors']
+  text: string
+  onRetry?: () => void
+}) {
   const styles = createStyles(colors)
   return (
     <View style={styles.message}>
@@ -153,22 +176,28 @@ function Message({ colors, text, onRetry }: { colors: ReturnType<typeof useTheme
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  wrapper: { flex: 1 },
-  list: { gap: 14, paddingBottom: 24 },
-  yearRow: { flexDirection: 'row', gap: 8, paddingBottom: 6 },
-  chip: { backgroundColor: colors.surface, borderRadius: 16, paddingHorizontal: 12, paddingVertical: 8 },
-  chipActive: { backgroundColor: colors.accent2 },
-  chipText: { color: colors.textPrimary, fontSize: 12 },
-  group: { borderLeftColor: colors.accent2, borderLeftWidth: 1, paddingLeft: 12 },
-  timelineLine: { flexDirection: 'row', gap: 8 },
-  dot: { color: colors.accent1, fontSize: 16, marginLeft: -19 },
-  flex: { flex: 1, gap: 10 },
-  groupHeader: { flexDirection: 'row', justifyContent: 'space-between' },
-  groupTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
-  count: { color: colors.textSecondary },
-  muted: { color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
-  message: { alignItems: 'center', gap: 12, padding: 28 },
-  retry: { color: colors.accent1, fontWeight: '700' },
-  skeleton: { backgroundColor: colors.surface, borderRadius: 18, height: 150 },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    wrapper: { flex: 1 },
+    list: { gap: 14, paddingBottom: 24 },
+    yearRow: { flexDirection: 'row', gap: 8, paddingBottom: 6 },
+    chip: {
+      backgroundColor: colors.surface,
+      borderRadius: 16,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    chipActive: { backgroundColor: colors.accent2 },
+    chipText: { color: colors.textPrimary, fontSize: 12 },
+    group: { borderLeftColor: colors.accent2, borderLeftWidth: 1, paddingLeft: 12 },
+    timelineLine: { flexDirection: 'row', gap: 8 },
+    dot: { color: colors.accent1, fontSize: 16, marginLeft: -19 },
+    flex: { flex: 1, gap: 10 },
+    groupHeader: { flexDirection: 'row', justifyContent: 'space-between' },
+    groupTitle: { color: colors.textPrimary, fontSize: 16, fontWeight: '700' },
+    count: { color: colors.textSecondary },
+    muted: { color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
+    message: { alignItems: 'center', gap: 12, padding: 28 },
+    retry: { color: colors.accent1, fontWeight: '700' },
+    skeleton: { backgroundColor: colors.surface, borderRadius: 18, height: 150 },
+  })

@@ -12,9 +12,6 @@ const config: Config = {
     'font-dancing',
     'font-display',
     'font-body',
-    { pattern: /^(bg|text|border|from|via|to|ring|shadow)-/ },
-    { pattern: /^(grid|flex|col|row|gap|p|m|w|h|max|min)-/ },
-    { pattern: /^animate-/ },
   ],
   theme: {
     extend: {

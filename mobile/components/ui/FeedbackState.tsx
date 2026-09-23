@@ -1,6 +1,6 @@
+import { CircleAlert, Sparkles } from 'lucide-react-native'
 import type { ComponentType } from 'react'
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { CircleAlert, Sparkles } from 'lucide-react-native'
 
 import { useTheme } from '@/context/ThemeContext'
 

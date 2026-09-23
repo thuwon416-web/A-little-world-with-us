@@ -22,6 +22,7 @@ const OurStats = dynamic(() => import('@/features/dashboard/OurStats'), { loadin
 const MemoryOfTheDay = dynamic(() => import('@/features/memories/MemoryOfTheDay'), { loading: () => <DashboardPanelSkeleton /> })
 const MiniCareCheck = dynamic(() => import('@/features/cycle/MiniCareCheck'), { loading: () => <DashboardPanelSkeleton /> })
 const MusicPlayer = dynamic(() => import('@/features/dashboard/MusicPlayer'), { loading: () => <DashboardPanelSkeleton /> })
+const CoupleScoreboard = dynamic(() => import('@/features/games/CoupleScoreboard'), { loading: () => <DashboardPanelSkeleton /> })
 
 const defaultVisibility: Record<DashboardWidgetId, boolean> = {
   'days-counter': true,
@@ -301,6 +302,9 @@ export default function DashboardPage() {
       </section>
 
       {coupleId ? <OurStats coupleId={coupleId} /> : null}
+      <section className="dashboard-panel rounded-panel border border-accent-1/15 bg-card p-5" aria-label="Couple scoreboard">
+        <CoupleScoreboard />
+      </section>
       <QuickActions />
     </div>
   )

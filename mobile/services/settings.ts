@@ -5,11 +5,7 @@ import * as SecureStore from 'expo-secure-store'
 import { supabase } from '@/lib/supabase'
 
 export type DashboardWidgetId =
-  | 'days-counter'
-  | 'countdown'
-  | 'memory-of-the-day'
-  | 'mini-care-check'
-  | 'music-player'
+  'days-counter' | 'countdown' | 'memory-of-the-day' | 'mini-care-check' | 'music-player'
 
 export type DashboardLayout = {
   order: DashboardWidgetId[]
@@ -35,17 +31,18 @@ function isDashboardLayout(value: unknown): value is DashboardLayout {
 function defaultDashboardLayout(): DashboardLayout {
   return {
     order: [...DEFAULT_DASHBOARD_WIDGETS],
-    visibility: Object.fromEntries(
-      DEFAULT_DASHBOARD_WIDGETS.map((id) => [id, true])
-    ) as Record<DashboardWidgetId, boolean>,
+    visibility: Object.fromEntries(DEFAULT_DASHBOARD_WIDGETS.map((id) => [id, true])) as Record<
+      DashboardWidgetId,
+      boolean
+    >,
   }
 }
 
 function normalizeDashboardLayout(value: unknown): DashboardLayout {
   const fallback = defaultDashboardLayout()
   if (!isDashboardLayout(value)) return fallback
-  const order = value.order.filter(
-    (id): id is DashboardWidgetId => DEFAULT_DASHBOARD_WIDGETS.includes(id)
+  const order = value.order.filter((id): id is DashboardWidgetId =>
+    DEFAULT_DASHBOARD_WIDGETS.includes(id)
   )
   for (const id of DEFAULT_DASHBOARD_WIDGETS) {
     if (!order.includes(id)) order.push(id)

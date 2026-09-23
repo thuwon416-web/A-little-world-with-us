@@ -134,7 +134,7 @@ function InputState({
           <button
             type="submit"
             disabled={isSubmitting || code.length !== 6}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)] px-8 py-3 font-semibold text-white transition hover:shadow-lg hover:shadow-accent-1/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent-1 to-accent-2 px-8 py-3 font-semibold text-white transition hover:shadow-lg hover:shadow-accent-1/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (
               <>

@@ -1,4 +1,5 @@
 import { StyleSheet, TextInput, TextInputProps } from 'react-native'
+
 import { useTheme } from '@/context/ThemeContext'
 
 export function Input(props: TextInputProps) {
@@ -15,15 +16,16 @@ export function Input(props: TextInputProps) {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  input: {
-    backgroundColor: colors.surface,
-    borderColor: colors.cardBorder,
-    borderWidth: 1,
-    borderRadius: 12,
-    color: colors.textPrimary,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 15,
-  },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    input: {
+      backgroundColor: colors.surface,
+      borderColor: colors.cardBorder,
+      borderWidth: 1,
+      borderRadius: 12,
+      color: colors.textPrimary,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
+      fontSize: 15,
+    },
+  })

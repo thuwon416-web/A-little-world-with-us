@@ -95,8 +95,7 @@ function dateOnly(value: Date) {
 
 function daysUntil(value: string) {
   return Math.ceil(
-    (dateOnly(new Date(`${value}T12:00:00`)).getTime() - dateOnly(new Date()).getTime()) /
-      86400000
+    (dateOnly(new Date(`${value}T12:00:00`)).getTime() - dateOnly(new Date()).getTime()) / 86400000
   )
 }
 
@@ -131,9 +130,10 @@ export default function DashboardScreen() {
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout>({
     order: [...DEFAULT_DASHBOARD_WIDGETS],
-    visibility: Object.fromEntries(
-      DEFAULT_DASHBOARD_WIDGETS.map((id) => [id, true])
-    ) as Record<DashboardWidgetId, boolean>,
+    visibility: Object.fromEntries(DEFAULT_DASHBOARD_WIDGETS.map((id) => [id, true])) as Record<
+      DashboardWidgetId,
+      boolean
+    >,
   })
   const [customizing, setCustomizing] = useState(false)
   const [layoutError, setLayoutError] = useState('')
@@ -169,7 +169,11 @@ export default function DashboardScreen() {
   useEffect(() => {
     void loadDashboardLayout()
       .then(setDashboardLayout)
-      .catch((caught) => setLayoutError(caught instanceof Error ? caught.message : 'Unable to load dashboard layout.'))
+      .catch((caught) =>
+        setLayoutError(
+          caught instanceof Error ? caught.message : 'Unable to load dashboard layout.'
+        )
+      )
   }, [])
 
   const summary = useMemo(
@@ -252,13 +256,24 @@ export default function DashboardScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.cardTitle}>Memory of the day</Text>
-            <TouchableOpacity accessibilityRole="button" accessibilityLabel="Refresh memory of the day" onPress={() => void load()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="Refresh memory of the day"
+              onPress={() => void load()}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <RefreshCw color={colors.accent2} size={18} />
             </TouchableOpacity>
           </View>
-          {dashboard?.memory?.image_url ? <Image source={{ uri: dashboard.memory.image_url }} style={styles.memoryImage} /> : null}
-          <Text style={styles.memoryTitle}>{dashboard?.memory?.title ?? 'A new memory is waiting'}</Text>
-          <Text style={styles.muted}>{dashboard?.memory?.caption ?? 'Add a memory to make this space yours.'}</Text>
+          {dashboard?.memory?.image_url ? (
+            <Image source={{ uri: dashboard.memory.image_url }} style={styles.memoryImage} />
+          ) : null}
+          <Text style={styles.memoryTitle}>
+            {dashboard?.memory?.title ?? 'A new memory is waiting'}
+          </Text>
+          <Text style={styles.muted}>
+            {dashboard?.memory?.caption ?? 'Add a memory to make this space yours.'}
+          </Text>
         </View>
       )
     }
@@ -266,9 +281,17 @@ export default function DashboardScreen() {
       return (
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Mini Care check</Text>
-          <Text style={styles.careValue}>{summary?.day ? `Cycle day ${summary.day}` : 'No cycle day yet'}</Text>
+          <Text style={styles.careValue}>
+            {summary?.day ? `Cycle day ${summary.day}` : 'No cycle day yet'}
+          </Text>
           <Text style={styles.muted}>{nextPeriodText ?? 'Log a period to begin forecasting.'}</Text>
-          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Care" style={styles.secondaryButton} onPress={() => router.push('/care')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Open Care"
+            style={styles.secondaryButton}
+            onPress={() => router.push('/care')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Text style={styles.secondaryText}>Open Care</Text>
           </TouchableOpacity>
         </View>
@@ -278,17 +301,39 @@ export default function DashboardScreen() {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>Our playlist</Text>
-          <TouchableOpacity accessibilityRole="button" accessibilityLabel="Open Music" onPress={() => router.push('/music')} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Open Music"
+            onPress={() => router.push('/music')}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
             <Text style={styles.link}>Open Music</Text>
           </TouchableOpacity>
         </View>
-        <Text style={styles.musicTitle}>{dashboard?.playlistSong?.title ?? 'Add your first shared song'}</Text>
-        <Text style={styles.muted}>{dashboard?.playlistSong?.artist ?? 'A soundtrack for your little world.'}</Text>
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel={playing ? 'Pause playlist' : 'Play playlist'} style={styles.playButton} onPress={() => {
-          setPlaying((value) => !value)
-          if (dashboard?.playlistSong?.external_id) void Linking.openURL(`https://www.youtube.com/watch?v=${dashboard.playlistSong.external_id}`)
-        }} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          {playing ? <Pause color={colors.background} size={18} /> : <Play color={colors.background} size={18} />}
+        <Text style={styles.musicTitle}>
+          {dashboard?.playlistSong?.title ?? 'Add your first shared song'}
+        </Text>
+        <Text style={styles.muted}>
+          {dashboard?.playlistSong?.artist ?? 'A soundtrack for your little world.'}
+        </Text>
+        <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel={playing ? 'Pause playlist' : 'Play playlist'}
+          style={styles.playButton}
+          onPress={() => {
+            setPlaying((value) => !value)
+            if (dashboard?.playlistSong?.external_id)
+              void Linking.openURL(
+                `https://www.youtube.com/watch?v=${dashboard.playlistSong.external_id}`
+              )
+          }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
+          {playing ? (
+            <Pause color={colors.background} size={18} />
+          ) : (
+            <Play color={colors.background} size={18} />
+          )}
           <Text style={styles.primaryText}>{playing ? 'Pause' : 'Play'}</Text>
         </TouchableOpacity>
       </View>
@@ -323,7 +368,11 @@ export default function DashboardScreen() {
       <Text style={styles.eyebrow}>Love dashboard</Text>
       <Text style={styles.title}>Good evening, KoKo × Pu Tuu</Text>
       <Text style={styles.subtitle}>Today is a good day to notice the little things.</Text>
-      <TouchableOpacity style={[styles.customizeButton, { backgroundColor: colors.cardBg }]} onPress={() => setCustomizing(true)} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+      <TouchableOpacity
+        style={[styles.customizeButton, { backgroundColor: colors.cardBg }]}
+        onPress={() => setCustomizing(true)}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
         <Settings2 color={colors.accent1} size={18} />
         <Text style={[styles.customizeText, { color: colors.textPrimary }]}>Customize home</Text>
       </TouchableOpacity>
@@ -347,7 +396,9 @@ export default function DashboardScreen() {
       </View>
       {dashboardLayout.order
         .filter((id) => dashboardLayout.visibility[id])
-        .map((id) => <View key={id}>{renderWidget(id)}</View>)}
+        .map((id) => (
+          <View key={id}>{renderWidget(id)}</View>
+        ))}
       {coupleId ? <OnThisDay coupleId={coupleId} /> : null}
       <Text style={styles.sectionTitle}>Relationship stats</Text>
       <View style={styles.stats}>
@@ -393,35 +444,89 @@ export default function DashboardScreen() {
           <Text style={styles.secondaryText}>Share our love</Text>
         </TouchableOpacity>
       </View>
-      <Modal visible={customizing} transparent animationType="slide" onRequestClose={() => setCustomizing(false)}>
+      <Modal
+        visible={customizing}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCustomizing(false)}
+      >
         <View style={styles.modalBackdrop}>
           <View style={[styles.customizeModal, { backgroundColor: colors.cardBg }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Customize home</Text>
-              <TouchableOpacity onPress={() => setCustomizing(false)} accessibilityLabel="Close customization" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+              <TouchableOpacity
+                onPress={() => setCustomizing(false)}
+                accessibilityLabel="Close customization"
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
                 <X color={colors.textPrimary} size={22} />
               </TouchableOpacity>
             </View>
             {dashboardLayout.order.map((id, index) => (
               <View key={id} style={[styles.widgetRow, { borderColor: colors.cardBorder }]}>
                 <TouchableOpacity
-                  style={[styles.visibilityToggle, { backgroundColor: dashboardLayout.visibility[id] ? colors.accent1 : colors.surface }]}
-                  onPress={() => updateLayout({ ...dashboardLayout, visibility: { ...dashboardLayout.visibility, [id]: !dashboardLayout.visibility[id] } })}
+                  style={[
+                    styles.visibilityToggle,
+                    {
+                      backgroundColor: dashboardLayout.visibility[id]
+                        ? colors.accent1
+                        : colors.surface,
+                    },
+                  ]}
+                  onPress={() =>
+                    updateLayout({
+                      ...dashboardLayout,
+                      visibility: {
+                        ...dashboardLayout.visibility,
+                        [id]: !dashboardLayout.visibility[id],
+                      },
+                    })
+                  }
                 >
-                  <Text style={{ color: dashboardLayout.visibility[id] ? colors.background : colors.textSecondary }}>
+                  <Text
+                    style={{
+                      color: dashboardLayout.visibility[id]
+                        ? colors.background
+                        : colors.textSecondary,
+                    }}
+                  >
                     {dashboardLayout.visibility[id] ? 'Shown' : 'Hidden'}
                   </Text>
                 </TouchableOpacity>
-                <Text style={[styles.widgetLabel, { color: colors.textPrimary }]}>{widgetLabels[id]}</Text>
-                <TouchableOpacity onPress={() => moveWidget(id, -1)} disabled={index === 0} accessibilityLabel={`Move ${widgetLabels[id]} up`} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                  <ChevronUp color={index === 0 ? colors.textSecondary : colors.textPrimary} size={20} />
+                <Text style={[styles.widgetLabel, { color: colors.textPrimary }]}>
+                  {widgetLabels[id]}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => moveWidget(id, -1)}
+                  disabled={index === 0}
+                  accessibilityLabel={`Move ${widgetLabels[id]} up`}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <ChevronUp
+                    color={index === 0 ? colors.textSecondary : colors.textPrimary}
+                    size={20}
+                  />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => moveWidget(id, 1)} disabled={index === dashboardLayout.order.length - 1} accessibilityLabel={`Move ${widgetLabels[id]} down`} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                  <ChevronDown color={index === dashboardLayout.order.length - 1 ? colors.textSecondary : colors.textPrimary} size={20} />
+                <TouchableOpacity
+                  onPress={() => moveWidget(id, 1)}
+                  disabled={index === dashboardLayout.order.length - 1}
+                  accessibilityLabel={`Move ${widgetLabels[id]} down`}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  <ChevronDown
+                    color={
+                      index === dashboardLayout.order.length - 1
+                        ? colors.textSecondary
+                        : colors.textPrimary
+                    }
+                    size={20}
+                  />
                 </TouchableOpacity>
               </View>
             ))}
-            {layoutError ? <Text style={[styles.error, { color: colors.error }]}>{layoutError}</Text> : null}
+            {layoutError ? (
+              <Text style={[styles.error, { color: colors.error }]}>{layoutError}</Text>
+            ) : null}
           </View>
         </View>
       </Modal>
@@ -429,151 +534,196 @@ export default function DashboardScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 72,
-    paddingBottom: 48,
-    backgroundColor: colors.background,
-    gap: 16,
-  },
-  center: {
-    flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 16,
-    padding: 24,
-  },
-  eyebrow: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 2, textTransform: 'uppercase' },
-  title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
-  subtitle: { color: colors.textSecondary, fontSize: sizes.text.body, lineHeight: 22 },
-  heroCard: {
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.panel,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: `${colors.accent1}66`,
-    alignItems: 'center',
-  },
-  heroLabel: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 1.6 },
-  heroValue: { color: colors.accent3, fontSize: 42, fontWeight: '800', marginTop: 6 },
-  heroText: { color: colors.textPrimary, fontSize: sizes.text.body },
-  infoCard: {
-    borderWidth: 1,
-    borderRadius: sizes.radius.btn,
-    padding: 16,
-    marginTop: 12,
-    gap: 8,
-  },
-  infoLabel: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1.5 },
-  infoText: { fontSize: sizes.text.sm, lineHeight: 21 },
-  sectionTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800', marginTop: 8 },
-  stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  statCard: {
-    width: '48%',
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.btn,
-    padding: 15,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  statTitle: { color: colors.textSecondary, fontSize: sizes.text.xs, textTransform: 'uppercase' },
-  statValue: { color: colors.accent1, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 8 },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
-  action: {
-    width: '31%',
-    minHeight: 74,
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.btn,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    padding: 8,
-  },
-  actionText: { color: colors.textPrimary, fontSize: sizes.text.xs, textAlign: 'center', fontWeight: '700' },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.card,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  shareCard: {
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.card,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: `${colors.accent1}66`,
-  },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  cardTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
-  countdown: { color: colors.accent3, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 12 },
-  memoryImage: { width: '100%', height: 170, borderRadius: sizes.radius.btn, marginTop: 12 },
-  memoryTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '700', marginTop: 12 },
-  careValue: { color: colors.success, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 10 },
-  musicTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '700', marginTop: 12 },
-  anniversary: { color: colors.accent3, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 10 },
-  muted: { color: colors.textSecondary, fontSize: sizes.text.sm, marginTop: 6 },
-  error: { color: colors.error, textAlign: 'center' },
-  primaryButton: {
-    backgroundColor: colors.accent1,
-    paddingHorizontal: 22,
-    paddingVertical: 12,
-    borderRadius: sizes.radius.input,
-  },
-  primaryText: { color: colors.background, fontWeight: '800' },
-  secondaryButton: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.accent2,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: sizes.radius.input,
-    marginTop: 14,
-  },
-  secondaryText: { color: colors.background, fontWeight: '800' },
-  playButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    alignSelf: 'flex-start',
-    backgroundColor: colors.accent1,
-    borderRadius: sizes.radius.input,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginTop: 14,
-  },
-  link: { color: colors.accent1, fontWeight: '700' },
-  customizeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    gap: 8,
-    borderRadius: sizes.radius.pill,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-  },
-  customizeText: { fontWeight: '700' },
-  modalBackdrop: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: '#00000088',
-  },
-  customizeModal: {
-    borderTopLeftRadius: sizes.radius.panel,
-    borderTopRightRadius: sizes.radius.panel,
-    padding: 20,
-    gap: 12,
-  },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  modalTitle: { fontSize: sizes.text.hMd, fontWeight: '800' },
-  widgetRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    borderBottomWidth: 1,
-    paddingVertical: 10,
-  },
-  visibilityToggle: { borderRadius: sizes.radius.pill, paddingHorizontal: 10, paddingVertical: 7 },
-  widgetLabel: { flex: 1, fontWeight: '700' },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 20,
+      paddingTop: 72,
+      paddingBottom: 48,
+      backgroundColor: colors.background,
+      gap: 16,
+    },
+    center: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 16,
+      padding: 24,
+    },
+    eyebrow: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+    },
+    title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
+    subtitle: { color: colors.textSecondary, fontSize: sizes.text.body, lineHeight: 22 },
+    heroCard: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.panel,
+      padding: 24,
+      borderWidth: 1,
+      borderColor: `${colors.accent1}66`,
+      alignItems: 'center',
+    },
+    heroLabel: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 1.6 },
+    heroValue: { color: colors.accent3, fontSize: 42, fontWeight: '800', marginTop: 6 },
+    heroText: { color: colors.textPrimary, fontSize: sizes.text.body },
+    infoCard: {
+      borderWidth: 1,
+      borderRadius: sizes.radius.btn,
+      padding: 16,
+      marginTop: 12,
+      gap: 8,
+    },
+    infoLabel: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1.5 },
+    infoText: { fontSize: sizes.text.sm, lineHeight: 21 },
+    sectionTitle: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.bodyLg,
+      fontWeight: '800',
+      marginTop: 8,
+    },
+    stats: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+    statCard: {
+      width: '48%',
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.btn,
+      padding: 15,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    statTitle: { color: colors.textSecondary, fontSize: sizes.text.xs, textTransform: 'uppercase' },
+    statValue: { color: colors.accent1, fontSize: sizes.text.hMd, fontWeight: '800', marginTop: 8 },
+    actions: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+    action: {
+      width: '31%',
+      minHeight: 74,
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.btn,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 8,
+      padding: 8,
+    },
+    actionText: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.xs,
+      textAlign: 'center',
+      fontWeight: '700',
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    shareCard: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      borderWidth: 1,
+      borderColor: `${colors.accent1}66`,
+    },
+    cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    cardTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
+    countdown: {
+      color: colors.accent3,
+      fontSize: sizes.text.hMd,
+      fontWeight: '800',
+      marginTop: 12,
+    },
+    memoryImage: { width: '100%', height: 170, borderRadius: sizes.radius.btn, marginTop: 12 },
+    memoryTitle: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.bodyLg,
+      fontWeight: '700',
+      marginTop: 12,
+    },
+    careValue: {
+      color: colors.success,
+      fontSize: sizes.text.hMd,
+      fontWeight: '800',
+      marginTop: 10,
+    },
+    musicTitle: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.bodyLg,
+      fontWeight: '700',
+      marginTop: 12,
+    },
+    anniversary: {
+      color: colors.accent3,
+      fontSize: sizes.text.hMd,
+      fontWeight: '800',
+      marginTop: 10,
+    },
+    muted: { color: colors.textSecondary, fontSize: sizes.text.sm, marginTop: 6 },
+    error: { color: colors.error, textAlign: 'center' },
+    primaryButton: {
+      backgroundColor: colors.accent1,
+      paddingHorizontal: 22,
+      paddingVertical: 12,
+      borderRadius: sizes.radius.input,
+    },
+    primaryText: { color: colors.background, fontWeight: '800' },
+    secondaryButton: {
+      alignSelf: 'flex-start',
+      backgroundColor: colors.accent2,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+      borderRadius: sizes.radius.input,
+      marginTop: 14,
+    },
+    secondaryText: { color: colors.background, fontWeight: '800' },
+    playButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      alignSelf: 'flex-start',
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 15,
+      paddingVertical: 10,
+      marginTop: 14,
+    },
+    link: { color: colors.accent1, fontWeight: '700' },
+    customizeButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: 8,
+      borderRadius: sizes.radius.pill,
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+    },
+    customizeText: { fontWeight: '700' },
+    modalBackdrop: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      backgroundColor: '#00000088',
+    },
+    customizeModal: {
+      borderTopLeftRadius: sizes.radius.panel,
+      borderTopRightRadius: sizes.radius.panel,
+      padding: 20,
+      gap: 12,
+    },
+    modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+    modalTitle: { fontSize: sizes.text.hMd, fontWeight: '800' },
+    widgetRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 12,
+      borderBottomWidth: 1,
+      paddingVertical: 10,
+    },
+    visibilityToggle: {
+      borderRadius: sizes.radius.pill,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+    },
+    widgetLabel: { flex: 1, fontWeight: '700' },
+  })

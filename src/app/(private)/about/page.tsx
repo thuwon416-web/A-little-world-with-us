@@ -103,54 +103,20 @@ export default function About() {
           <h2 className="font-bold text-xl mb-4 text-text-1">
             Frequently Asked Questions
           </h2>
-          <div className="space-y-4 text-sm">
-            <div>
-              <h3 className="font-semibold text-text-1">
-                How do I link with my partner?
-              </h3>
-              <p className="mt-1 text-text-2">
-                Use the couple-linking flow from the app and share the invite with your partner.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-text-1">How is my data secured?</h3>
-              <p className="mt-1 text-text-2">
-                The app uses authenticated access and couple-scoped data access to protect shared
-                content.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-text-1">
-                Does AI read my messages?
-              </h3>
-              <p className="mt-1 text-text-2">
-                AI features process only the data you choose to submit for an AI request.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-text-1">Can I export my data?</h3>
-              <p className="mt-1 text-text-2">
-                Yes. Use the Export option in Settings to download available account data.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-text-1">
-                How do I delete my account?
-              </h3>
-              <p className="mt-1 text-text-2">
-                Open Settings and review the account-management options, or contact support for
-                help.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-text-1">
-                Is my location shared with anyone?
-              </h3>
-              <p className="mt-1 text-text-2">
-                Location sharing is an opt-in couple feature and is intended for your accepted
-                partner.
-              </p>
-            </div>
+          <div className="space-y-3 text-sm">
+            {[
+              ['How do I link with my partner?', 'Use the couple-linking flow from the app and share the invite with your partner.'],
+              ['How is my data secured?', 'The app uses authenticated access and couple-scoped data access to protect shared content.'],
+              ['Does AI read my messages?', 'AI features process only the data you choose to submit for an AI request.'],
+              ['Can I export my data?', 'Yes. Use the Export option in Settings to download available account data.'],
+              ['How do I delete my account?', 'Open Settings and review the account-management options, or contact support for help.'],
+              ['Is my location shared with anyone?', 'Location sharing is an opt-in couple feature and is intended for your accepted partner.'],
+            ].map(([question, answer]) => (
+              <details key={question} className="rounded-xl border border-border/30 p-3">
+                <summary className="cursor-pointer font-semibold text-text-1 marker:text-accent-1">{question}</summary>
+                <p className="mt-2 text-text-2">{answer}</p>
+              </details>
+            ))}
           </div>
         </section>
 

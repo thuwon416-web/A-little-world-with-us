@@ -1,4 +1,3 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   Armchair,
   Check,
@@ -26,6 +25,7 @@ import {
   VolumeX,
   type LucideIcon,
 } from 'lucide-react-native'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
@@ -37,6 +37,7 @@ import {
   View,
 } from 'react-native'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import AffirmationDeck from '@/components/wellness/AffirmationDeck'
 import ApologyCorner from '@/components/wellness/ApologyCorner'
 import ArmchairMomentBoard from '@/components/wellness/ArmchairMomentBoard'
@@ -44,6 +45,7 @@ import CarefulQuietBoard from '@/components/wellness/CarefulQuietBoard'
 import CoupleMoodMeter from '@/components/wellness/CoupleMoodMeter'
 import CouplePromiseBoard from '@/components/wellness/CouplePromiseBoard'
 import CozyReentryBoard from '@/components/wellness/CozyReentryBoard'
+import CycleTrackerBoard from '@/components/wellness/CycleTrackerBoard'
 import DayEchoBoard from '@/components/wellness/DayEchoBoard'
 import EasyBreathBoard from '@/components/wellness/EasyBreathBoard'
 import EverydayRitualsBoard from '@/components/wellness/EverydayRitualsBoard'
@@ -53,23 +55,21 @@ import GratitudeWall from '@/components/wellness/GratitudeWall'
 import LoveCheckInBoard from '@/components/wellness/LoveCheckInBoard'
 import LoveNotesBoard from '@/components/wellness/LoveNotesBoard'
 import MellowBloomBoard from '@/components/wellness/MellowBloomBoard'
-import CycleTrackerBoard from '@/components/wellness/CycleTrackerBoard'
 import PeriodSymptomsBoard from '@/components/wellness/PeriodSymptomsBoard'
-import { EmptyState } from '@/components/ui/EmptyState'
 import SteadyLandingBoard from '@/components/wellness/SteadyLandingBoard'
 import TenderCompassBoard from '@/components/wellness/TenderCompassBoard'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 import { enabledBoards, type WellnessBoard } from '@/data/wellness-boards'
 import { workouts, type Workout } from '@/data/workouts'
-import { useAuth } from '@/lib/auth'
 import { sizes, type Sizes } from '@/design-tokens'
+import { useAuth } from '@/lib/auth'
 import {
   getResetAdvice,
   getWellnessLogs,
   logWellnessActivity,
   type WellnessLog,
 } from '@/services/wellnessTracking'
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
 
 type Category = 'health' | 'mental' | 'relationship' | 'quests'
 
@@ -279,10 +279,7 @@ export default function WellnessScreen() {
           const BoardIcon = boardIconMap[board.icon] ?? Sparkles
 
           return (
-            <TouchableOpacity
-              style={styles.boardButton}
-              onPress={() => setSelectedBoard(board)}
-            >
+            <TouchableOpacity style={styles.boardButton} onPress={() => setSelectedBoard(board)}>
               <BoardIcon size={28} color={colors.accent1} />
               <View style={styles.boardInfo}>
                 <Text style={styles.boardName}>{board.name}</Text>
@@ -341,7 +338,10 @@ export default function WellnessScreen() {
               style={[styles.categoryButton, category === item.id && styles.categoryActive]}
               onPress={() => setCategory(item.id)}
             >
-              <CategoryIcon size={20} color={category === item.id ? colors.accent1 : colors.textSecondary} />
+              <CategoryIcon
+                size={20}
+                color={category === item.id ? colors.accent1 : colors.textSecondary}
+              />
               <Text style={styles.categoryText}>{item.label}</Text>
             </TouchableOpacity>
           )
@@ -408,7 +408,9 @@ export default function WellnessScreen() {
                 onPress={() => void completeQuest(quest.id)}
               >
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  {completedQuestIds.has(quest.id) ? <Check size={14} color={colors.success} /> : null}
+                  {completedQuestIds.has(quest.id) ? (
+                    <Check size={14} color={colors.success} />
+                  ) : null}
                   <Text style={styles.cardTitle}>{quest.title}</Text>
                 </View>
                 <Text style={styles.muted}>
@@ -457,12 +459,21 @@ const createStyles = (colors: ThemeColors, sizes: Sizes, theme: string) => {
       borderRadius: sizes.radius.btn,
       backgroundColor: colors.surface,
     },
-    categoryActive: { backgroundColor: colors.accent1, borderWidth: 1, borderColor: colors.accent2 },
+    categoryActive: {
+      backgroundColor: colors.accent1,
+      borderWidth: 1,
+      borderColor: colors.accent2,
+    },
     categoryIcon: { fontSize: sizes.icon.btn },
     categoryText: { color: colors.textPrimary, fontSize: sizes.text.xs, marginTop: 4 },
     content: { padding: 16, gap: 10 },
     boardContent: { paddingVertical: 16, gap: 12 },
-    sectionTitle: { color: colors.textPrimary, fontSize: sizes.text.hSm, fontWeight: '800', marginTop: 8 },
+    sectionTitle: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hSm,
+      fontWeight: '800',
+      marginTop: 8,
+    },
     boardButton: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -500,9 +511,19 @@ const createStyles = (colors: ThemeColors, sizes: Sizes, theme: string) => {
       gap: 7,
     },
     timer: { color: buttonTextColor, fontSize: 44, fontWeight: '800' },
-    primary: { backgroundColor: colors.accent1, borderRadius: sizes.radius.input, padding: 12, marginTop: 5 },
+    primary: {
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      padding: 12,
+      marginTop: 5,
+    },
     primaryText: { color: buttonTextColor, fontWeight: '800' },
-    history: { color: colors.textPrimary, padding: 11, backgroundColor: colors.cardBg, borderRadius: sizes.radius.input },
+    history: {
+      color: colors.textPrimary,
+      padding: 11,
+      backgroundColor: colors.cardBg,
+      borderRadius: sizes.radius.input,
+    },
     quest: { backgroundColor: colors.cardBg, padding: 15, borderRadius: sizes.radius.btn, gap: 4 },
     completed: { borderColor: colors.success, borderWidth: 1 },
     adviceButton: {
@@ -513,7 +534,12 @@ const createStyles = (colors: ThemeColors, sizes: Sizes, theme: string) => {
       marginTop: 12,
     },
     adviceText: { color: buttonTextColor, fontWeight: '800' },
-    adviceCard: { backgroundColor: colors.cardBg, borderRadius: sizes.radius.btn, padding: 15, gap: 7 },
+    adviceCard: {
+      backgroundColor: colors.cardBg,
+      borderRadius: sizes.radius.btn,
+      padding: 15,
+      gap: 7,
+    },
     advice: { color: colors.textPrimary, lineHeight: 21 },
     link: { color: colors.accent2, padding: 20, paddingTop: 60, fontWeight: '800' },
     error: { color: colors.error },

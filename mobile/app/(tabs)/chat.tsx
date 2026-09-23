@@ -1,16 +1,22 @@
 import { Q } from '@nozbe/watermelondb'
 import * as Location from 'expo-location'
+import {
+  FileText,
+  Gift,
+  Image as ImageIcon,
+  MapPin,
+  Mic,
+  Paperclip,
+  Send,
+  Sticker,
+  X,
+} from 'lucide-react-native'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Alert, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import { FileText, Gift, Image as ImageIcon, MapPin, Mic, Paperclip, Send, Sticker, X } from 'lucide-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { Button } from '@/components/Button'
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
 import { Input } from '@/components/Input'
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
-import { sizes, type Sizes } from '@/design-tokens'
 import { FileUpload } from '@/components/chat/FileUpload'
 import { GIFPicker } from '@/components/chat/GIFPicker'
 import { PhotoShare } from '@/components/chat/PhotoShare'
@@ -23,10 +29,15 @@ import type {
   ChatMessageType,
   NativeChatMessage,
 } from '@/components/chat/chat-types'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { useTheme } from '@/context/ThemeContext'
 import { database } from '@/database'
+import { sizes, type Sizes } from '@/design-tokens'
 import { useCall } from '@/hooks/useCall'
 import { useSync } from '@/hooks/useSync'
 import { useAuth } from '@/lib/auth'
+import { deriveChatKey, decryptMessage, encryptMessage } from '@/lib/chatEncryption'
+import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 import {
   deleteChatMedia,
@@ -34,8 +45,6 @@ import {
   getChatMediaUrl,
   uploadChatMedia,
 } from '@/services/chatMedia'
-import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
-import { deriveChatKey, decryptMessage, encryptMessage } from '@/lib/chatEncryption'
 
 function isExternalUrl(value: string | null | undefined): boolean {
   if (!value) return false
@@ -109,9 +118,9 @@ export default function ChatScreen() {
             const replyTo = rawRecord._get('reply_to')
             const encrypted = rawRecord._get('encrypted')
             const encryptionVersion = rawRecord._get('encryption_version')
-            
+
             let displayContent = typeof content === 'string' ? content : ''
-            
+
             // Decrypt if encrypted
             if (encrypted && encryptionVersion && coupleId && typeof content === 'string') {
               try {
@@ -122,7 +131,7 @@ export default function ChatScreen() {
                 displayContent = '[Encrypted message]'
               }
             }
-            
+
             const normalizedType: ChatMessageType =
               messageType === 'voice' ||
               messageType === 'photo' ||
@@ -148,7 +157,12 @@ export default function ChatScreen() {
                 ? isExternalUrl(mediaUrl)
                   ? await getChatMediaUrl(bucket, mediaUrl)
                   : coupleId
-                    ? await downloadDecryptAndCache(coupleId, bucket, mediaUrl, guessMimeTypeFromPath(mediaUrl))
+                    ? await downloadDecryptAndCache(
+                        coupleId,
+                        bucket,
+                        mediaUrl,
+                        guessMimeTypeFromPath(mediaUrl)
+                      )
                     : await getChatMediaUrl(bucket, mediaUrl)
                 : typeof mediaUrl === 'string'
                   ? mediaUrl
@@ -530,10 +544,21 @@ export default function ChatScreen() {
             activeOpacity={1}
             onPress={() => setAttachmentsOpen(false)}
           >
-            <View style={[styles.attachmentSheet, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+            <View
+              style={[
+                styles.attachmentSheet,
+                { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+              ]}
+            >
               <View style={styles.attachmentHeader}>
-                <Text style={[styles.attachmentTitle, { color: colors.textPrimary }]}>Attachments</Text>
-                <TouchableOpacity onPress={() => setAttachmentsOpen(false)} accessibilityLabel="Close attachments" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                <Text style={[styles.attachmentTitle, { color: colors.textPrimary }]}>
+                  Attachments
+                </Text>
+                <TouchableOpacity
+                  onPress={() => setAttachmentsOpen(false)}
+                  accessibilityLabel="Close attachments"
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
                   <X color={colors.textSecondary} size={22} />
                 </TouchableOpacity>
               </View>
@@ -554,7 +579,9 @@ export default function ChatScreen() {
                     }}
                   >
                     <Icon color={colors.accent1} size={20} />
-                    <Text style={[styles.attachmentLabel, { color: colors.textPrimary }]}>{label as string}</Text>
+                    <Text style={[styles.attachmentLabel, { color: colors.textPrimary }]}>
+                      {label as string}
+                    </Text>
                   </TouchableOpacity>
                 ))}
                 <TouchableOpacity
@@ -566,7 +593,9 @@ export default function ChatScreen() {
                   disabled={!coupleId}
                 >
                   <MapPin color={colors.accent1} size={20} />
-                  <Text style={[styles.attachmentLabel, { color: colors.textPrimary }]}>Location</Text>
+                  <Text style={[styles.attachmentLabel, { color: colors.textPrimary }]}>
+                    Location
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -595,7 +624,11 @@ export default function ChatScreen() {
           onPress={() => (draft.trim() ? void handleSend() : setMediaModal('voice'))}
           accessibilityLabel={draft.trim() ? 'Send message' : 'Record voice note'}
         >
-          {draft.trim() ? <Send color={colors.background} size={18} /> : <Mic color={colors.background} size={18} />}
+          {draft.trim() ? (
+            <Send color={colors.background} size={18} />
+          ) : (
+            <Mic color={colors.background} size={18} />
+          )}
         </TouchableOpacity>
       </View>
       <PhotoShare
@@ -739,10 +772,27 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     },
     error: { color: colors.error, marginBottom: 8, fontSize: sizes.text.sm },
     attachmentOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: '#0008' },
-    attachmentSheet: { borderTopWidth: 1, borderTopLeftRadius: sizes.radius.panel, borderTopRightRadius: sizes.radius.panel, padding: 20 },
-    attachmentHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+    attachmentSheet: {
+      borderTopWidth: 1,
+      borderTopLeftRadius: sizes.radius.panel,
+      borderTopRightRadius: sizes.radius.panel,
+      padding: 20,
+    },
+    attachmentHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
     attachmentTitle: { fontSize: sizes.text.hSm, fontWeight: '700' },
     attachmentGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-    attachmentItem: { width: '30%', minHeight: 72, borderRadius: sizes.radius.btn, alignItems: 'center', justifyContent: 'center', gap: 6 },
+    attachmentItem: {
+      width: '30%',
+      minHeight: 72,
+      borderRadius: sizes.radius.btn,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 6,
+    },
     attachmentLabel: { fontSize: sizes.text.xs, fontWeight: '600' },
   })

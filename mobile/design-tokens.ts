@@ -125,7 +125,7 @@ export const themes = {
     statBorder: '#d0e4f2',
     softTint: '#d4e6f2',
   },
-  'monochrome': {
+  monochrome: {
     bg: '#0f0f12',
     card: '#1a1a1e',
     border: '#2a2a30',
@@ -191,7 +191,7 @@ export const sizes = {
 } as const
 
 export type ThemeName = keyof typeof themes
-export type ThemeTokens = typeof themes[ThemeName]
+export type ThemeTokens = (typeof themes)[ThemeName]
 
 export type Sizes = typeof sizes
 

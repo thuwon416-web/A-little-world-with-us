@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Sparkles } from 'lucide-react-native'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -13,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import { Sparkles } from 'lucide-react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useTheme } from '@/context/ThemeContext'
@@ -147,7 +147,15 @@ function Card({ title, children }: { title: string; children: ReactNode }) {
   )
 }
 
-function Insights({ logs, summary, savedCycleLength }: { logs: CareLog[]; summary: NativeCycleSummary; savedCycleLength: number }) {
+function Insights({
+  logs,
+  summary,
+  savedCycleLength,
+}: {
+  logs: CareLog[]
+  summary: NativeCycleSummary
+  savedCycleLength: number
+}) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   const moodCounts = useMemo(
@@ -716,7 +724,12 @@ export default function CareScreen() {
   return (
     <View style={[styles.screen, { paddingTop: insets.top }]}>
       <View style={[styles.intimacyContainer, { backgroundColor: colors.background }]}>
-        <View style={[styles.intimacyCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+        <View
+          style={[
+            styles.intimacyCard,
+            { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+          ]}
+        >
           <View style={styles.intimacyHeader}>
             <Sparkles color={colors.accent1} size={20} />
             <View style={styles.intimacyHeaderText}>
@@ -737,7 +750,11 @@ export default function CareScreen() {
             placeholderTextColor={colors.textSecondary}
             style={[
               styles.intimacyInput,
-              { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder },
+              {
+                color: colors.textPrimary,
+                backgroundColor: colors.surface,
+                borderColor: colors.cardBorder,
+              },
             ]}
           />
           <View style={styles.intimacyActions}>
@@ -758,7 +775,12 @@ export default function CareScreen() {
             <Text style={[styles.intimacyError, { color: colors.error }]}>{intimacyError}</Text>
           ) : null}
           {intimacyResult ? (
-            <View style={[styles.intimacyResult, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+            <View
+              style={[
+                styles.intimacyResult,
+                { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+              ]}
+            >
               <Text style={[styles.intimacyResultText, { color: colors.textPrimary }]}>
                 {intimacyResult}
               </Text>
@@ -980,164 +1002,206 @@ export default function CareScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  intimacyContainer: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 4 },
-  intimacyCard: { borderRadius: sizes.radius.card, borderWidth: 1, padding: 18, gap: 12 },
-  intimacyHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  intimacyHeaderText: { flex: 1, gap: 4 },
-  intimacyTitle: { fontSize: sizes.text.bodyLg, fontWeight: '800' },
-  intimacyDescription: { fontSize: sizes.text.sm, lineHeight: 20 },
-  intimacyInput: { minHeight: 96, borderRadius: sizes.radius.btn, borderWidth: 1, padding: 12, textAlignVertical: 'top' },
-  intimacyActions: { gap: 10 },
-  intimacyPrivacy: { fontSize: sizes.text.xs },
-  intimacyButton: { alignSelf: 'flex-end', borderRadius: sizes.radius.pill, paddingHorizontal: 16, paddingVertical: 10 },
-  intimacyButtonText: { fontWeight: '800' },
-  intimacyError: { fontSize: sizes.text.sm },
-  intimacyResult: { borderRadius: sizes.radius.btn, borderWidth: 1, padding: 14 },
-  intimacyResultText: { fontSize: sizes.text.sm, lineHeight: 22 },
-  content: { padding: 20, paddingTop: 24, paddingBottom: 50 },
-  center: {
-    flex: 1,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    gap: 12,
-  },
-  eyebrow: { color: colors.textSecondary, fontWeight: '700', letterSpacing: 1.3, fontSize: sizes.text.xs },
-  title: { color: colors.textPrimary, fontWeight: '800', fontSize: sizes.text.hLg, marginTop: 6 },
-  tabRow: {
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingTop: 62,
-    paddingBottom: 12,
-    backgroundColor: colors.background,
-  },
-  tab: { borderRadius: sizes.radius.btn, backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 9 },
-  tabActive: { backgroundColor: colors.accent1 },
-  tabText: { color: colors.background, fontWeight: '700', fontSize: sizes.text.xs },
-  hero: {
-    marginTop: 18,
-    borderRadius: sizes.radius.panel,
-    padding: 24,
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  heroLabel: { color: colors.textSecondary, fontSize: sizes.text.xs, fontWeight: '800', letterSpacing: 1.5 },
-  days: { color: colors.accent3, fontWeight: '800', fontSize: 38, marginTop: 8 },
-  heroNote: {
-    color: colors.textPrimary,
-    fontSize: sizes.text.body,
-    fontWeight: '600',
-    marginTop: 10,
-    textAlign: 'center',
-  },
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.card,
-    padding: 18,
-    marginTop: 16,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  cardTitle: { color: colors.textPrimary, fontSize: sizes.text.hSm, fontWeight: '800' },
-  muted: { color: colors.textSecondary, fontSize: sizes.text.sm, marginTop: 5 },
-  text: { color: colors.textPrimary, fontSize: sizes.text.sm },
-  accentText: { color: colors.accent1, fontWeight: '700' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
-  chip: { borderRadius: sizes.radius.card, paddingHorizontal: 13, paddingVertical: 9, backgroundColor: colors.surface },
-  purpleChip: { backgroundColor: colors.surface },
-  greenChip: { backgroundColor: colors.accent2 },
-  chipSelected: { backgroundColor: colors.accent1 },
-  chipText: { color: colors.textPrimary, fontWeight: '600', fontSize: sizes.text.sm },
-  chipTextSelected: { color: colors.background },
-  input: {
-    borderRadius: sizes.radius.input,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    backgroundColor: colors.surface,
-    color: colors.textPrimary,
-    paddingHorizontal: 12,
-    paddingVertical: 11,
-    marginTop: 10,
-  },
-  notes: { minHeight: 82, textAlignVertical: 'top' },
-  saveButton: {
-    marginTop: 16,
-    alignItems: 'center',
-    borderRadius: sizes.radius.btn,
-    backgroundColor: colors.accent1,
-    paddingVertical: 15,
-  },
-  secondaryButton: {
-    alignItems: 'center',
-    borderRadius: sizes.radius.btn,
-    backgroundColor: colors.accent2,
-    paddingVertical: 14,
-    marginTop: 14,
-  },
-  saveText: { color: colors.background, fontWeight: '800' },
-  disabled: { opacity: 0.6 },
-  reminder: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 12,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.cardBorder,
-  },
-  statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 },
-  stat: { width: '48%', backgroundColor: colors.surface, borderRadius: sizes.radius.input, padding: 12 },
-  statValue: { color: colors.accent1, fontSize: sizes.text.bodyLg, fontWeight: '800' },
-  barRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
-  barLabel: { color: colors.textPrimary, width: 105, fontSize: sizes.text.xs },
-  barTrack: {
-    flex: 1,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.surface,
-    overflow: 'hidden',
-  },
-  bar: { height: '100%', backgroundColor: colors.accent1, borderRadius: 5 },
-  barValue: { color: colors.textSecondary, width: 20, textAlign: 'right' },
-  frequencyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 8,
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.cardBorder,
-  },
-  calendarHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  calendarMonth: { color: colors.textPrimary, fontWeight: '800' },
-  nav: { color: colors.accent1, fontSize: sizes.text.dSm, paddingHorizontal: 12 },
-  weekRow: { flexDirection: 'row', marginTop: 14 },
-  weekDay: { color: colors.textSecondary, width: `${100 / 7}%`, textAlign: 'center', fontWeight: '700' },
-  calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
-  dayCell: {
-    width: `${100 / 7}%`,
-    aspectRatio: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: sizes.radius.input,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  dayText: { color: colors.textPrimary, fontSize: sizes.text.sm },
-  periodDay: { backgroundColor: colors.accent1 },
-  predictedDay: { borderColor: colors.accent2, borderStyle: 'dotted' },
-  fertileDay: { backgroundColor: colors.accent2 },
-  ovulationDay: { backgroundColor: colors.success },
-  todayDay: { borderColor: colors.textPrimary, borderWidth: 2 },
-  legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 16 },
-  legendText: { color: colors.textSecondary, fontSize: sizes.text.xs },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    screen: { flex: 1, backgroundColor: colors.background },
+    intimacyContainer: { paddingHorizontal: 20, paddingTop: 18, paddingBottom: 4 },
+    intimacyCard: { borderRadius: sizes.radius.card, borderWidth: 1, padding: 18, gap: 12 },
+    intimacyHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
+    intimacyHeaderText: { flex: 1, gap: 4 },
+    intimacyTitle: { fontSize: sizes.text.bodyLg, fontWeight: '800' },
+    intimacyDescription: { fontSize: sizes.text.sm, lineHeight: 20 },
+    intimacyInput: {
+      minHeight: 96,
+      borderRadius: sizes.radius.btn,
+      borderWidth: 1,
+      padding: 12,
+      textAlignVertical: 'top',
+    },
+    intimacyActions: { gap: 10 },
+    intimacyPrivacy: { fontSize: sizes.text.xs },
+    intimacyButton: {
+      alignSelf: 'flex-end',
+      borderRadius: sizes.radius.pill,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+    },
+    intimacyButtonText: { fontWeight: '800' },
+    intimacyError: { fontSize: sizes.text.sm },
+    intimacyResult: { borderRadius: sizes.radius.btn, borderWidth: 1, padding: 14 },
+    intimacyResultText: { fontSize: sizes.text.sm, lineHeight: 22 },
+    content: { padding: 20, paddingTop: 24, paddingBottom: 50 },
+    center: {
+      flex: 1,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 24,
+      gap: 12,
+    },
+    eyebrow: {
+      color: colors.textSecondary,
+      fontWeight: '700',
+      letterSpacing: 1.3,
+      fontSize: sizes.text.xs,
+    },
+    title: { color: colors.textPrimary, fontWeight: '800', fontSize: sizes.text.hLg, marginTop: 6 },
+    tabRow: {
+      gap: 8,
+      paddingHorizontal: 20,
+      paddingTop: 62,
+      paddingBottom: 12,
+      backgroundColor: colors.background,
+    },
+    tab: {
+      borderRadius: sizes.radius.btn,
+      backgroundColor: colors.surface,
+      paddingHorizontal: 14,
+      paddingVertical: 9,
+    },
+    tabActive: { backgroundColor: colors.accent1 },
+    tabText: { color: colors.background, fontWeight: '700', fontSize: sizes.text.xs },
+    hero: {
+      marginTop: 18,
+      borderRadius: sizes.radius.panel,
+      padding: 24,
+      alignItems: 'center',
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    heroLabel: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.xs,
+      fontWeight: '800',
+      letterSpacing: 1.5,
+    },
+    days: { color: colors.accent3, fontWeight: '800', fontSize: 38, marginTop: 8 },
+    heroNote: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.body,
+      fontWeight: '600',
+      marginTop: 10,
+      textAlign: 'center',
+    },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 18,
+      marginTop: 16,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    cardTitle: { color: colors.textPrimary, fontSize: sizes.text.hSm, fontWeight: '800' },
+    muted: { color: colors.textSecondary, fontSize: sizes.text.sm, marginTop: 5 },
+    text: { color: colors.textPrimary, fontSize: sizes.text.sm },
+    accentText: { color: colors.accent1, fontWeight: '700' },
+    chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 14 },
+    chip: {
+      borderRadius: sizes.radius.card,
+      paddingHorizontal: 13,
+      paddingVertical: 9,
+      backgroundColor: colors.surface,
+    },
+    purpleChip: { backgroundColor: colors.surface },
+    greenChip: { backgroundColor: colors.accent2 },
+    chipSelected: { backgroundColor: colors.accent1 },
+    chipText: { color: colors.textPrimary, fontWeight: '600', fontSize: sizes.text.sm },
+    chipTextSelected: { color: colors.background },
+    input: {
+      borderRadius: sizes.radius.input,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      backgroundColor: colors.surface,
+      color: colors.textPrimary,
+      paddingHorizontal: 12,
+      paddingVertical: 11,
+      marginTop: 10,
+    },
+    notes: { minHeight: 82, textAlignVertical: 'top' },
+    saveButton: {
+      marginTop: 16,
+      alignItems: 'center',
+      borderRadius: sizes.radius.btn,
+      backgroundColor: colors.accent1,
+      paddingVertical: 15,
+    },
+    secondaryButton: {
+      alignItems: 'center',
+      borderRadius: sizes.radius.btn,
+      backgroundColor: colors.accent2,
+      paddingVertical: 14,
+      marginTop: 14,
+    },
+    saveText: { color: colors.background, fontWeight: '800' },
+    disabled: { opacity: 0.6 },
+    reminder: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+      paddingVertical: 12,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.cardBorder,
+    },
+    statGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 14 },
+    stat: {
+      width: '48%',
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.input,
+      padding: 12,
+    },
+    statValue: { color: colors.accent1, fontSize: sizes.text.bodyLg, fontWeight: '800' },
+    barRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 14 },
+    barLabel: { color: colors.textPrimary, width: 105, fontSize: sizes.text.xs },
+    barTrack: {
+      flex: 1,
+      height: 10,
+      borderRadius: 5,
+      backgroundColor: colors.surface,
+      overflow: 'hidden',
+    },
+    bar: { height: '100%', backgroundColor: colors.accent1, borderRadius: 5 },
+    barValue: { color: colors.textSecondary, width: 20, textAlign: 'right' },
+    frequencyRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 8,
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.cardBorder,
+    },
+    calendarHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: 12,
+    },
+    calendarMonth: { color: colors.textPrimary, fontWeight: '800' },
+    nav: { color: colors.accent1, fontSize: sizes.text.dSm, paddingHorizontal: 12 },
+    weekRow: { flexDirection: 'row', marginTop: 14 },
+    weekDay: {
+      color: colors.textSecondary,
+      width: `${100 / 7}%`,
+      textAlign: 'center',
+      fontWeight: '700',
+    },
+    calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },
+    dayCell: {
+      width: `${100 / 7}%`,
+      aspectRatio: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: sizes.radius.input,
+      borderWidth: 1,
+      borderColor: 'transparent',
+    },
+    dayText: { color: colors.textPrimary, fontSize: sizes.text.sm },
+    periodDay: { backgroundColor: colors.accent1 },
+    predictedDay: { borderColor: colors.accent2, borderStyle: 'dotted' },
+    fertileDay: { backgroundColor: colors.accent2 },
+    ovulationDay: { backgroundColor: colors.success },
+    todayDay: { borderColor: colors.textPrimary, borderWidth: 2 },
+    legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 16 },
+    legendText: { color: colors.textSecondary, fontSize: sizes.text.xs },
+  })

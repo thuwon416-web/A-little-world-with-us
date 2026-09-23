@@ -15,7 +15,7 @@ export async function saveWrappedKey(data: WrappedKeyStorage): Promise<void> {
 
 export async function loadWrappedKey(): Promise<WrappedKeyStorage | null> {
   const value = await SecureStore.getItemAsync(STORAGE_KEY)
-  return value ? JSON.parse(value) as WrappedKeyStorage : null
+  return value ? (JSON.parse(value) as WrappedKeyStorage) : null
 }
 
 export async function clearWrappedKey(): Promise<void> {

@@ -15,7 +15,15 @@ interface DisplayReminder {
   repeat_interval: 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly' | null
 }
 
-export default function RemindersWidget() {
+export default function RemindersWidget({
+  modalBlocked,
+  onModalOpen,
+  onModalClose,
+}: {
+  modalBlocked: boolean
+  onModalOpen: () => void
+  onModalClose: () => void
+}) {
   const [reminders, setReminders] = useState<DisplayReminder[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -23,6 +31,11 @@ export default function RemindersWidget() {
   const [newDate, setNewDate] = useState('')
   const [newType, setNewType] = useState<'custom' | 'anniversary' | 'birthday' | 'cycle' | 'medication'>('custom')
   const [newRepeat, setNewRepeat] = useState<'once' | 'daily' | 'weekly' | 'monthly' | 'yearly'>('once')
+
+  const closeModal = () => {
+    setShowAddModal(false)
+    onModalClose()
+  }
 
   useEffect(() => {
     loadReminders()
@@ -52,7 +65,7 @@ export default function RemindersWidget() {
     setNewDate('')
     setNewType('custom')
     setNewRepeat('once')
-    setShowAddModal(false)
+    closeModal()
     loadReminders()
   }
 
@@ -111,8 +124,12 @@ export default function RemindersWidget() {
       </div>
 
       <button
-        onClick={() => setShowAddModal(true)}
-        className="w-full rounded-xl border border-dashed border-accent-1/30 bg-soft-tint px-3 py-3 text-sm text-text-2 flex items-center justify-center gap-2"
+        onClick={() => {
+          setShowAddModal(true)
+          onModalOpen()
+        }}
+        disabled={modalBlocked}
+        className="w-full rounded-xl border border-dashed border-accent-1/30 bg-soft-tint px-3 py-3 text-sm text-text-2 flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />
         Add Reminder
@@ -126,7 +143,7 @@ export default function RemindersWidget() {
               <h3 className="text-lg font-semibold text-text-1">
                 Add Reminder
               </h3>
-              <button onClick={() => setShowAddModal(false)} className="text-text-2">
+              <button onClick={closeModal} className="text-text-2" aria-label="Close add reminder">
                 <X className="h-5 w-5" />
               </button>
             </div>

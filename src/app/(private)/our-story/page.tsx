@@ -3,16 +3,18 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
-import { Heart, Layers, Sparkles } from 'lucide-react'
+import { Heart, Layers, MessageCircle, Sparkles } from 'lucide-react'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { getCoupleStatus } from '@/lib/couples'
+import TelegramImport from '@/features/our-story/TelegramImport'
 
-type Tab = 'timeline' | 'all' | 'categories'
+type Tab = 'timeline' | 'all' | 'categories' | 'telegram'
 
 const TabSkeleton = () => <div className="h-96 animate-pulse rounded-panel bg-card" />
 const Timeline = dynamic(() => import('@/features/our-story/Timeline'), { loading: TabSkeleton })
 const AllMemories = dynamic(() => import('@/features/our-story/AllMemories'), { loading: TabSkeleton })
 const Categories = dynamic(() => import('@/features/our-story/Categories'), { loading: TabSkeleton })
+const ImportedTelegramMessages = dynamic(() => import('@/features/our-story/ImportedTelegramMessages'), { loading: TabSkeleton })
 
 export default function OurStoryPage() {
   const [coupleId, setCoupleId] = useState<string | null>(null)
@@ -51,13 +53,15 @@ export default function OurStoryPage() {
         <div className="rounded-panel border border-dashed border-accent-1/25 p-10 text-center text-text-2">Link with your partner to see your shared story.</div>
       ) : (
         <>
-          <nav className="flex flex-wrap gap-2" aria-label="Our Story sections">
+          <TelegramImport coupleId={coupleId} />
+          <nav className="flex flex-wrap gap-2" aria-label="Our Story sections" role="tablist">
             {([
               ['timeline', 'Timeline', Sparkles],
               ['all', 'All Memories', Heart],
               ['categories', 'Categories', Layers],
+              ['telegram', 'Telegram', MessageCircle],
             ] as const).map(([value, label, Icon]) => (
-              <button key={value} type="button" onClick={() => setTab(value)} className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm transition ${tab === value ? 'bg-accent-1/15 text-accent-1' : 'text-text-2 hover:bg-soft-tint'}`}>
+              <button key={value} type="button" role="tab" aria-selected={tab === value} onClick={() => setTab(value)} className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm transition ${tab === value ? 'bg-accent-1/15 text-accent-1' : 'text-text-2 hover:bg-soft-tint'}`}>
                 <Icon size={16} /> {label}
               </button>
             ))}
@@ -65,6 +69,7 @@ export default function OurStoryPage() {
           {tab === 'timeline' ? <Timeline coupleId={coupleId} /> : null}
           {tab === 'all' ? <AllMemories coupleId={coupleId} initialCategory={categoryFilter} /> : null}
           {tab === 'categories' ? <Categories coupleId={coupleId} onOpenCategory={(category) => { setCategoryFilter(category); setTab('all') }} /> : null}
+          {tab === 'telegram' ? <ImportedTelegramMessages coupleId={coupleId} /> : null}
         </>
       )}
     </motion.main>

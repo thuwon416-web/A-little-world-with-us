@@ -16,10 +16,15 @@ export function Modal({ visible, onClose, title, children }: ModalProps) {
     <RNModal transparent visible={visible} animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.overlay} onPress={onClose}>
         <Pressable
-          style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+          style={[
+            styles.container,
+            { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+          ]}
           onPress={() => undefined}
         >
-          {title ? <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text> : null}
+          {title ? (
+            <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
+          ) : null}
           {children}
         </Pressable>
       </Pressable>

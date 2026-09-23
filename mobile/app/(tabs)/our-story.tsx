@@ -1,21 +1,24 @@
-import { BookHeart, Heart, Layers, Sparkles } from 'lucide-react-native'
+import { BookHeart, Heart, Layers, MessageCircle, Sparkles } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import AllMemories from '@/components/our-story/AllMemories'
 import Categories from '@/components/our-story/Categories'
+import TelegramArchive from '@/components/our-story/TelegramArchive'
 import Timeline from '@/components/our-story/Timeline'
-import { haptics } from '@/lib/haptics'
-import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
+import { haptics } from '@/lib/haptics'
+import { supabase } from '@/lib/supabase'
 
-type Tab = 'timeline' | 'all' | 'categories'
+type Tab = 'timeline' | 'all' | 'categories' | 'telegram'
 
 export default function OurStoryScreen() {
   const { colors } = useTheme()
-  const styles = createStyles(colors, sizes)
+  const insets = useSafeAreaInsets()
+  const styles = createStyles(colors, sizes, insets.top)
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('timeline')
   const [loading, setLoading] = useState(true)
@@ -64,6 +67,7 @@ export default function OurStoryScreen() {
                 ['timeline', 'Timeline', Sparkles],
                 ['all', 'All Memories', Heart],
                 ['categories', 'Categories', Layers],
+                ['telegram', 'Telegram', MessageCircle],
               ] as const
             ).map(([value, label, Icon]) => (
               <TouchableOpacity
@@ -92,6 +96,7 @@ export default function OurStoryScreen() {
               }}
             />
           ) : null}
+          {tab === 'telegram' ? <TelegramArchive coupleId={coupleId} /> : null}
           {category ? (
             <Text style={styles.filterNote}>Category shortcut: {category.replace(/_/g, ' ')}</Text>
           ) : null}
@@ -101,24 +106,31 @@ export default function OurStoryScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 18 },
-  header: { alignItems: 'center', flexDirection: 'row', gap: 12 },
-  title: { color: colors.textPrimary, fontSize: sizes.text.hMd, fontWeight: '700' },
-  subtitle: { color: colors.textSecondary, marginTop: 3 },
-  content: { flex: 1, gap: 16 },
-  tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  tab: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    borderRadius: sizes.radius.input,
-  },
-  tabActive: { backgroundColor: colors.surface },
-  tabText: { color: colors.textPrimary, fontSize: sizes.text.xs },
-  muted: { color: colors.textSecondary, padding: 24, textAlign: 'center' },
-  error: { color: colors.error, padding: 24, textAlign: 'center' },
-  filterNote: { color: colors.accent2, fontSize: sizes.text.xs },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes, paddingTop: number) =>
+  StyleSheet.create({
+    container: {
+      flexGrow: 1,
+      backgroundColor: colors.background,
+      padding: 20,
+      paddingTop,
+      gap: 18,
+    },
+    header: { alignItems: 'center', flexDirection: 'row', gap: 12 },
+    title: { color: colors.textPrimary, fontSize: sizes.text.hMd, fontWeight: '700' },
+    subtitle: { color: colors.textSecondary, marginTop: 3 },
+    content: { flex: 1, gap: 16 },
+    tabs: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    tab: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: 6,
+      paddingHorizontal: 12,
+      paddingVertical: 9,
+      borderRadius: sizes.radius.input,
+    },
+    tabActive: { backgroundColor: colors.surface },
+    tabText: { color: colors.textPrimary, fontSize: sizes.text.xs },
+    muted: { color: colors.textSecondary, padding: 24, textAlign: 'center' },
+    error: { color: colors.error, padding: 24, textAlign: 'center' },
+    filterNote: { color: colors.accent2, fontSize: sizes.text.xs },
+  })

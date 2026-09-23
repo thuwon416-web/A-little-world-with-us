@@ -2,6 +2,7 @@ import * as LocalAuthentication from 'expo-local-authentication'
 import { Fingerprint, Lock, ShieldCheck } from 'lucide-react-native'
 import React, { useState, useEffect } from 'react'
 import { Text, View, TouchableOpacity, StyleSheet, Alert } from 'react-native'
+
 import { useTheme } from '@/context/ThemeContext'
 
 interface BiometricAuthProps {
@@ -122,59 +123,60 @@ export default function BiometricAuth({ onSuccess, onCancel }: BiometricAuthProp
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-    backgroundColor: colors.background,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.surface,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-  message: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 20,
-  },
-  button: {
-    backgroundColor: colors.accent1,
-    paddingHorizontal: 32,
-    paddingVertical: 16,
-    borderRadius: 12,
-    width: '100%',
-    alignItems: 'center',
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: colors.background,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  cancelButton: {
-    marginTop: 16,
-    padding: 12,
-  },
-  cancelButtonText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 24,
+      backgroundColor: colors.background,
+    },
+    iconContainer: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      backgroundColor: colors.surface,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginBottom: 24,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: '700',
+      color: colors.textPrimary,
+      marginBottom: 12,
+      textAlign: 'center',
+    },
+    message: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginBottom: 32,
+      lineHeight: 20,
+    },
+    button: {
+      backgroundColor: colors.accent1,
+      paddingHorizontal: 32,
+      paddingVertical: 16,
+      borderRadius: 12,
+      width: '100%',
+      alignItems: 'center',
+    },
+    buttonDisabled: {
+      opacity: 0.6,
+    },
+    buttonText: {
+      color: colors.background,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    cancelButton: {
+      marginTop: 16,
+      padding: 12,
+    },
+    cancelButtonText: {
+      color: colors.textSecondary,
+      fontSize: 14,
+    },
+  })

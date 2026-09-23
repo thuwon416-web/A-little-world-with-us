@@ -97,23 +97,26 @@ export async function updateSafetyNotificationPreference(
 }
 
 export async function getSafetyNotificationPreferences(): Promise<SafetyNotificationPreferences> {
-    const defaults: SafetyNotificationPreferences = { geofence: true, battery_low: true, missed_checkin: true }
-    const {
-      data: { user },
-    } = await supabase.auth.getUser()
-    if (!user) return defaults
-    const { data, error } = await supabase
-      .from('push_devices')
-      .select('preferences')
-      .eq('user_id', user.id)
-    if (error) throw new Error(error.message)
-    for (const device of data ?? []) {
-      for (const key of Object.keys(defaults) as SafetyNotificationPreference[]) {
-        if (device.preferences?.[key] !== undefined) defaults[key] = device.preferences[key] !== false
-      }
+  const defaults: SafetyNotificationPreferences = {
+    geofence: true,
+    battery_low: true,
+    missed_checkin: true,
+  }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return defaults
+  const { data, error } = await supabase
+    .from('push_devices')
+    .select('preferences')
+    .eq('user_id', user.id)
+  if (error) throw new Error(error.message)
+  for (const device of data ?? []) {
+    for (const key of Object.keys(defaults) as SafetyNotificationPreference[]) {
+      if (device.preferences?.[key] !== undefined) defaults[key] = device.preferences[key] !== false
     }
-    return defaults
-
+  }
+  return defaults
 }
 
 export async function scheduleReminder(

@@ -82,70 +82,71 @@ export default function CallScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-    paddingTop: 72,
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  status: {
-    color: colors.textPrimary,
-    fontSize: sizes.text.hMd,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  time: {
-    color: colors.accent2,
-    fontSize: sizes.text.body,
-    marginBottom: 18,
-  },
-  camera: {
-    flex: 1,
-    borderRadius: sizes.radius.card,
-    overflow: 'hidden',
-    minHeight: 240,
-  },
-  placeholder: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.card,
-    justifyContent: 'center',
-    alignItems: 'center',
-    minHeight: 240,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  placeholderTitle: {
-    color: colors.textPrimary,
-    fontSize: sizes.text.hSm,
-    fontWeight: '700',
-  },
-  placeholderSubtitle: {
-    color: colors.textSecondary,
-    marginTop: 8,
-  },
-  controls: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 10,
-    marginTop: 18,
-  },
-  controlButton: {
-    flex: 1,
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.input,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  endButton: {
-    backgroundColor: colors.error,
-  },
-  controlText: {
-    color: colors.textPrimary,
-    fontWeight: '700',
-  },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: 72,
+      paddingHorizontal: 20,
+      paddingBottom: 20,
+    },
+    status: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hMd,
+      fontWeight: '700',
+      marginBottom: 8,
+    },
+    time: {
+      color: colors.accent2,
+      fontSize: sizes.text.body,
+      marginBottom: 18,
+    },
+    camera: {
+      flex: 1,
+      borderRadius: sizes.radius.card,
+      overflow: 'hidden',
+      minHeight: 240,
+    },
+    placeholder: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      justifyContent: 'center',
+      alignItems: 'center',
+      minHeight: 240,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    placeholderTitle: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hSm,
+      fontWeight: '700',
+    },
+    placeholderSubtitle: {
+      color: colors.textSecondary,
+      marginTop: 8,
+    },
+    controls: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      gap: 10,
+      marginTop: 18,
+    },
+    controlButton: {
+      flex: 1,
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.input,
+      paddingVertical: 14,
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    endButton: {
+      backgroundColor: colors.error,
+    },
+    controlText: {
+      color: colors.textPrimary,
+      fontWeight: '700',
+    },
+  })

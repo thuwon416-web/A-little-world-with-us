@@ -1,13 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
 import { router } from 'expo-router'
-import {
-  BookOpen,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Languages,
-  Volume2,
-} from 'lucide-react-native'
+import { BookOpen, Check, ChevronDown, ChevronUp, Languages, Volume2 } from 'lucide-react-native'
+import { useEffect, useMemo, useState } from 'react'
 import {
   ActivityIndicator,
   ScrollView,
@@ -16,21 +9,23 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useTheme, type ThemeColors } from '@/context/ThemeContext'
 import { KOREAN_LESSONS } from '@/data/korean-lessons'
 import { KOREAN_VOCAB } from '@/data/korean-vocab'
+import { sizes, type Sizes } from '@/design-tokens'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
-import { useTheme, type ThemeColors } from '@/context/ThemeContext'
-import { sizes, type Sizes } from '@/design-tokens'
-import { getProgress } from '@/services/korean'
 import { isTTSSupported, speakKorean, stopSpeaking } from '@/lib/tts'
+import { getProgress } from '@/services/korean'
 import type { KoreanLevel, KoreanProgress, KoreanVocab } from '@/types/korean'
 
 const levels: KoreanLevel[] = [1, 2, 3, 4, 5, 6, 7]
 
 export default function LearningScreen() {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const { user } = useAuth()
   const { t } = useTranslation()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
@@ -82,7 +77,7 @@ export default function LearningScreen() {
   return (
     <ScrollView
       style={[styles.screen, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top }]}
     >
       <View style={styles.header}>
         <View
@@ -173,7 +168,9 @@ export default function LearningScreen() {
         {levelVocab.length > 0 && (
           <TouchableOpacity
             accessibilityRole="button"
-            onPress={() => router.push(`/(tabs)/quiz?level=${selectedLevel}&quizType=multiple_choice`)}
+            onPress={() =>
+              router.push(`/(tabs)/quiz?level=${selectedLevel}&quizType=multiple_choice`)
+            }
             style={[styles.quizButton, { backgroundColor: colors.accent1 }]}
           >
             <Text style={[styles.quizButtonText, { color: colors.background }]}>Start Quiz</Text>
@@ -301,9 +298,7 @@ function VocabCard({
       <View style={styles.vocabTop}>
         <View style={styles.vocabCopy}>
           <Text style={[styles.korean, { color: colors.textPrimary }]}>{vocab.korean}</Text>
-          <Text style={[styles.romanization, { color: colors.accent1 }]}>
-            {vocab.romanization}
-          </Text>
+          <Text style={[styles.romanization, { color: colors.accent1 }]}>{vocab.romanization}</Text>
         </View>
         {mastered && <Check size={20} color={colors.success} />}
       </View>
@@ -341,7 +336,7 @@ function VocabCard({
 const createStyles = (colors: ThemeColors, sizes: Sizes) =>
   StyleSheet.create({
     screen: { flex: 1 },
-    content: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 18 },
+    content: { padding: 20, paddingBottom: 40, gap: 18 },
     header: { flexDirection: 'row', alignItems: 'center', gap: 14 },
     headerIcon: {
       width: 52,
@@ -366,19 +361,35 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     progressLabel: { fontSize: sizes.text.xs },
     progressValue: { fontSize: sizes.text.body, fontWeight: '700' },
     levelTabs: { gap: 8, paddingRight: 12 },
-    levelTab: { borderWidth: 1, borderRadius: sizes.radius.pill, paddingHorizontal: 17, paddingVertical: 10 },
+    levelTab: {
+      borderWidth: 1,
+      borderRadius: sizes.radius.pill,
+      paddingHorizontal: 17,
+      paddingVertical: 10,
+    },
     levelTabText: { fontSize: sizes.text.sm, fontWeight: '700' },
     sectionHeading: { gap: 4 },
     sectionTitleRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     sectionTitle: { fontSize: sizes.text.hMd, fontWeight: '700' },
     sectionSubtitle: { fontSize: sizes.text.sm },
-    quizButton: { alignSelf: 'flex-start', borderRadius: sizes.radius.input, paddingHorizontal: 16, paddingVertical: 11, marginTop: 8 },
+    quizButton: {
+      alignSelf: 'flex-start',
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 16,
+      paddingVertical: 11,
+      marginTop: 8,
+    },
     quizButtonText: { fontSize: sizes.text.sm, fontWeight: '700' },
     lessonCard: { borderWidth: 1, borderRadius: sizes.radius.card, overflow: 'hidden' },
     lessonButton: { padding: 18, gap: 12 },
     lessonHeading: { flexDirection: 'row', justifyContent: 'space-between', gap: 12 },
     lessonCopy: { flex: 1, gap: 3 },
-    lessonOrder: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase' },
+    lessonOrder: {
+      fontSize: sizes.text.xs,
+      fontWeight: '700',
+      letterSpacing: 1,
+      textTransform: 'uppercase',
+    },
     lessonTitle: { fontSize: sizes.text.hSm, fontWeight: '700' },
     lessonTitleMy: { fontSize: sizes.text.sm },
     description: { fontSize: sizes.text.sm, lineHeight: 21 },
@@ -407,7 +418,13 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       marginTop: 3,
     },
     ttsText: { fontSize: sizes.text.xs, fontWeight: '600' },
-    emptyCard: { borderWidth: 1, borderStyle: 'dashed', borderRadius: sizes.radius.card, padding: 28, gap: 8 },
+    emptyCard: {
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderRadius: sizes.radius.card,
+      padding: 28,
+      gap: 8,
+    },
     emptyTitle: { fontSize: sizes.text.bodyLg, fontWeight: '700', textAlign: 'center' },
     emptyText: { fontSize: sizes.text.sm, lineHeight: 21, textAlign: 'center' },
   })

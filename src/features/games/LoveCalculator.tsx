@@ -69,7 +69,7 @@ export default function LoveCalculator() {
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${compatibility}%` }}
-            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)]"
+            className="h-full rounded-full bg-gradient-to-r from-accent-1 to-accent-2"
           />
         </div>
         <p className="mt-2 text-xs opacity-70">{vibe}</p>

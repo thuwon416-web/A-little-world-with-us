@@ -1,6 +1,6 @@
-import { Stack } from 'expo-router'
+import { Redirect, Stack, useSegments } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
-import React, { useEffect } from 'react'
+import React, { useEffect, useState, type ReactNode } from 'react'
 import { View, Text, StyleSheet } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
@@ -8,7 +8,8 @@ import { ThemeProvider, useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { I18nProvider } from '@/i18n/config'
-import { AuthProvider } from '@/lib/auth'
+import { AuthProvider, useAuth } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 import { getSharingStatus, startLocationTracking } from '@/services/location'
 
 // Error Boundary Component
@@ -56,6 +57,40 @@ function ThemedStatusBar() {
   return <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background} />
 }
 
+function MfaGate({ children }: { children: ReactNode }) {
+  const { user, loading: authLoading } = useAuth()
+  const segments = useSegments()
+  const routeKey = segments.join('/')
+  const [checkedKey, setCheckedKey] = useState('')
+  const [requiredKey, setRequiredKey] = useState('')
+  const currentKey = user ? `${user.id}:${routeKey}` : ''
+
+  useEffect(() => {
+    let active = true
+    if (authLoading || !currentKey) {
+      setCheckedKey(currentKey)
+      return () => {
+        active = false
+      }
+    }
+    void supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data, error }) => {
+      if (!active) return
+      setRequiredKey(
+        error || (data?.nextLevel === 'aal2' && data.currentLevel !== 'aal2') ? currentKey : ''
+      )
+      setCheckedKey(currentKey)
+    })
+    return () => {
+      active = false
+    }
+  }, [authLoading, currentKey])
+
+  if (authLoading || checkedKey !== currentKey) return null
+  if (requiredKey === currentKey && !segments.includes('mfa'))
+    return <Redirect href="/(tabs)/mfa" />
+  return <>{children}</>
+}
+
 export default function RootLayout() {
   useEffect(() => {
     const autoStartLocation = async () => {
@@ -77,12 +112,14 @@ export default function RootLayout() {
         <AuthProvider>
           <I18nProvider>
             <ThemeProvider>
-            <ThemedStatusBar />
-              <Stack>
-                <Stack.Screen name="login" options={{ title: 'Login' }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
-              </Stack>
+              <ThemedStatusBar />
+              <MfaGate>
+                <Stack>
+                  <Stack.Screen name="login" options={{ title: 'Login' }} />
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                  <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
+                </Stack>
+              </MfaGate>
             </ThemeProvider>
           </I18nProvider>
         </AuthProvider>
@@ -91,20 +128,21 @@ export default function RootLayout() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 24,
-  },
-  errorTitle: {
-    fontSize: sizes.text.hMd,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  errorMessage: {
-    fontSize: sizes.text.body,
-    textAlign: 'center',
-  },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    errorContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 24,
+    },
+    errorTitle: {
+      fontSize: sizes.text.hMd,
+      fontWeight: '700',
+      marginBottom: 12,
+    },
+    errorMessage: {
+      fontSize: sizes.text.body,
+      textAlign: 'center',
+    },
+  })

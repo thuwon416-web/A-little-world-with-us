@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
 import { Flame } from 'lucide-react-native'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Alert,
   FlatList,
@@ -10,10 +10,17 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { EmptyState } from '@/components/ui/EmptyState'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
+import AddExpenseModal from '@/features/finance/AddExpenseModal'
+import CategoryFilter from '@/features/finance/CategoryFilter'
+import ExpenseList from '@/features/finance/ExpenseList'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
-import { sizes, type Sizes } from '@/design-tokens'
 import {
   checkInStreak,
   getAdvancedData,
@@ -21,19 +28,14 @@ import {
   saveBudget,
   addBill,
 } from '@/services/advanced'
-import { addFinancialProgress, addFinancialGoal, type FinancialGoal } from '@/services/finance'
+import { addFinancialProgress, addFinancialGoal } from '@/services/finance'
 import { deleteExpense, getExpenses, type Expense } from '@/services/finance-splitwise'
-import CategoryFilter from '@/features/finance/CategoryFilter'
-import ExpenseList from '@/features/finance/ExpenseList'
-import AddExpenseModal from '@/features/finance/AddExpenseModal'
-import { EmptyState } from '@/components/ui/EmptyState'
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
 
 const mmk = (value: number) => `${Number(value).toLocaleString()} MMK`
 
 export default function FinanceScreen() {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const { user } = useAuth()
   const [data, setData] = useState<any>()
   const [partnerId, setPartnerId] = useState<string | null>(null)
@@ -176,7 +178,7 @@ export default function FinanceScreen() {
   const styles = useMemo(() => createStyles(colors, sizes), [colors, sizes])
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.eyebrow}>SHARED FINANCE</Text>
       <Text style={styles.title}>Money & connection</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
@@ -242,7 +244,9 @@ export default function FinanceScreen() {
         currentUserId={user?.id ?? ''}
         partnerId={partnerId}
         onClose={() => setShowAddExpense(false)}
-        onSaved={() => { void loadSplitExpenses() }}
+        onSaved={() => {
+          void loadSplitExpenses()
+        }}
       />
       <View style={styles.card}>
         <Text style={styles.section}>Savings goals</Text>
@@ -294,7 +298,9 @@ export default function FinanceScreen() {
                   <View
                     style={[
                       styles.fill,
-                      { width: `${Math.min(100, (goal.current_amount / goal.target_amount) * 100)}%` },
+                      {
+                        width: `${Math.min(100, (goal.current_amount / goal.target_amount) * 100)}%`,
+                      },
                     ]}
                   />
                 </View>
@@ -392,11 +398,13 @@ export default function FinanceScreen() {
             title="No ideas yet"
             description="Suggest a date to get ideas for your next outing."
           />
-        ) : ideas.map((idea, index) => (
-          <Text key={index} style={styles.muted}>
-            • {typeof idea === 'string' ? idea : (idea.title ?? idea.description)}
-          </Text>
-        ))}
+        ) : (
+          ideas.map((idea, index) => (
+            <Text key={index} style={styles.muted}>
+              • {typeof idea === 'string' ? idea : (idea.title ?? idea.description)}
+            </Text>
+          ))
+        )}
       </View>
     </ScrollView>
   )
@@ -404,7 +412,7 @@ export default function FinanceScreen() {
 
 const createStyles = (colors: ThemeColors, sizes: Sizes) =>
   StyleSheet.create({
-    container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 14 },
+    container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, gap: 14 },
     eyebrow: { color: colors.textPrimary, fontSize: sizes.text.xs, letterSpacing: 2 },
     title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
     section: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
@@ -424,10 +432,24 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderWidth: 1,
       borderColor: colors.cardBorder,
     },
-    primary: { backgroundColor: colors.accent2, padding: 13, borderRadius: sizes.radius.input, alignItems: 'center' },
-    primarySmall: { backgroundColor: colors.accent1, padding: 10, borderRadius: sizes.radius.input },
+    primary: {
+      backgroundColor: colors.accent2,
+      padding: 13,
+      borderRadius: sizes.radius.input,
+      alignItems: 'center',
+    },
+    primarySmall: {
+      backgroundColor: colors.accent1,
+      padding: 10,
+      borderRadius: sizes.radius.input,
+    },
     primaryText: { color: colors.textPrimary, fontWeight: '800' },
-    secondary: { backgroundColor: colors.accent1, padding: 13, borderRadius: sizes.radius.input, alignItems: 'center' },
+    secondary: {
+      backgroundColor: colors.accent1,
+      padding: 13,
+      borderRadius: sizes.radius.input,
+      alignItems: 'center',
+    },
     muted: { color: colors.textSecondary, lineHeight: 20 },
     error: { color: colors.error },
     link: { color: colors.accent2, fontWeight: '700' },
@@ -435,6 +457,11 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     rowCentered: { flexDirection: 'row', alignItems: 'center', gap: 8 },
     goal: { gap: 8, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.cardBorder },
     goalTitle: { color: colors.textPrimary, fontSize: sizes.text.body, fontWeight: '700', flex: 1 },
-    track: { height: 9, backgroundColor: colors.cardBorder, borderRadius: sizes.radius.input, overflow: 'hidden' },
+    track: {
+      height: 9,
+      backgroundColor: colors.cardBorder,
+      borderRadius: sizes.radius.input,
+      overflow: 'hidden',
+    },
     fill: { height: '100%', backgroundColor: colors.accent1 },
   })

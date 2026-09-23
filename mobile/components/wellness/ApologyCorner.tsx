@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
 
 import { WellnessBoardShell } from './WellnessBoardShell'
+
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 const templates = [
   'I am sorry for the way I hurt you and for not being gentler with your feelings.',
@@ -49,48 +50,49 @@ export default function ApologyCorner() {
   )
 }
 
-const createStyles = (colors: ThemeColors) => StyleSheet.create({
-  list: {
-    gap: 10,
-    marginBottom: 12,
-  },
-  templateItem: {
-    backgroundColor: colors.cardBg,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    padding: 12,
-  },
-  templateText: {
-    color: colors.textPrimary,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    color: colors.textPrimary,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 14,
-  },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: 'top',
-    marginTop: 8,
-  },
-  button: {
-    marginTop: 12,
-    backgroundColor: colors.accent1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: colors.background,
-    fontWeight: '700',
-    fontSize: 14,
-  },
-})
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    list: {
+      gap: 10,
+      marginBottom: 12,
+    },
+    templateItem: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      padding: 12,
+    },
+    templateText: {
+      color: colors.textPrimary,
+      fontSize: 13,
+      lineHeight: 18,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      color: colors.textPrimary,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      fontSize: 14,
+    },
+    textArea: {
+      minHeight: 100,
+      textAlignVertical: 'top',
+      marginTop: 8,
+    },
+    button: {
+      marginTop: 12,
+      backgroundColor: colors.accent1,
+      borderRadius: 12,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    buttonText: {
+      color: colors.background,
+      fontWeight: '700',
+      fontSize: 14,
+    },
+  })

@@ -1,9 +1,5 @@
 import { Database } from '@nozbe/watermelondb'
-import {
-  addColumns,
-  createTable,
-  schemaMigrations,
-} from '@nozbe/watermelondb/Schema/migrations'
+import { addColumns, createTable, schemaMigrations } from '@nozbe/watermelondb/Schema/migrations'
 import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite'
 
 import schema, { MessageModel, OfflineQueueModel, UserModel } from './schema'

@@ -57,7 +57,16 @@ export function formatMemoryDate(value: string) {
 function MemoryCard({ memory }: { memory: RelationshipMemory }) {
   const { colors } = useTheme()
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.accent1, shadowColor: colors.accent1 }]}>
+    <View
+      style={[
+        styles.card,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.accent1,
+          shadowColor: colors.accent1,
+        },
+      ]}
+    >
       <View style={styles.header}>
         <View style={styles.identity}>
           {(() => {
@@ -68,15 +77,23 @@ function MemoryCard({ memory }: { memory: RelationshipMemory }) {
             <Text style={[styles.category, { color: colors.textPrimary }]} numberOfLines={1}>
               {memory.category.replace(/_/g, ' ')}
             </Text>
-            <Text style={[styles.date, { color: colors.accent2 }]}>{formatMemoryDate(memory.date_time)}</Text>
+            <Text style={[styles.date, { color: colors.accent2 }]}>
+              {formatMemoryDate(memory.date_time)}
+            </Text>
           </View>
         </View>
         {memory.importance === 'critical' || memory.importance === 'high' ? (
-          <Text style={[styles.badge, { backgroundColor: colors.surface, color: colors.accent2 }]}>{memory.importance}</Text>
+          <Text style={[styles.badge, { backgroundColor: colors.surface, color: colors.accent2 }]}>
+            {memory.importance}
+          </Text>
         ) : null}
       </View>
-      {memory.quote_burmese ? <Text style={[styles.quote, { color: colors.textPrimary }]}>{memory.quote_burmese}</Text> : null}
-      {memory.context ? <Text style={[styles.context, { color: colors.textSecondary }]}>{memory.context}</Text> : null}
+      {memory.quote_burmese ? (
+        <Text style={[styles.quote, { color: colors.textPrimary }]}>{memory.quote_burmese}</Text>
+      ) : null}
+      {memory.context ? (
+        <Text style={[styles.context, { color: colors.textSecondary }]}>{memory.context}</Text>
+      ) : null}
     </View>
   )
 }

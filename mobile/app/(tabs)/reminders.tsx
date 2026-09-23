@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
 import { Bell } from 'lucide-react-native'
+import { useState, useMemo } from 'react'
 import {
   Alert,
   ScrollView,
@@ -10,11 +10,11 @@ import {
   View,
 } from 'react-native'
 
-import { useNotifications } from '@/hooks/useNotifications'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
+import { useNotifications } from '@/hooks/useNotifications'
 
 export default function RemindersScreen() {
   const { colors } = useTheme()

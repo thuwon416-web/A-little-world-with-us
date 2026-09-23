@@ -10,11 +10,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useAuth } from '@/lib/auth'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
+import { useAuth } from '@/lib/auth'
 import {
   getCalendarData,
   getSharedCalendarPreference,
@@ -44,6 +45,7 @@ const daysUntil = (date: string) =>
 export default function CalendarScreen() {
   const { user } = useAuth()
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [wishlist, setWishlist] = useState<ListItem[]>([])
@@ -141,7 +143,12 @@ export default function CalendarScreen() {
     }
   }
   return (
-    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}>
+    <ScrollView
+      contentContainerStyle={[
+        styles.container,
+        { backgroundColor: colors.background, paddingTop: insets.top },
+      ]}
+    >
       <Text style={[styles.eyebrow, { color: colors.accent2 }]}>SHARED CALENDAR</Text>
       <Text style={[styles.title, { color: colors.textPrimary }]}>Calendar</Text>
       {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
@@ -223,7 +230,12 @@ export default function CalendarScreen() {
           )
         })}
       </View>
-      <View style={[styles.wishlistCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <View
+        style={[
+          styles.wishlistCard,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
         <View style={styles.wishlistHeader}>
           <Gift color={colors.accent2} size={20} />
           <Text style={[styles.wishlistTitle, { color: colors.textPrimary }]}>Shared Wishlist</Text>
@@ -234,9 +246,19 @@ export default function CalendarScreen() {
             onChangeText={setWishlistDraft}
             placeholder="A gift idea"
             placeholderTextColor={colors.textSecondary}
-            style={[styles.wishlistInput, { backgroundColor: colors.surface, borderColor: colors.cardBorder, color: colors.textPrimary }]}
+            style={[
+              styles.wishlistInput,
+              {
+                backgroundColor: colors.surface,
+                borderColor: colors.cardBorder,
+                color: colors.textPrimary,
+              },
+            ]}
           />
-          <TouchableOpacity style={[styles.wishlistAdd, { backgroundColor: colors.accent1 }]} onPress={() => void addWishlistItem()}>
+          <TouchableOpacity
+            style={[styles.wishlistAdd, { backgroundColor: colors.accent1 }]}
+            onPress={() => void addWishlistItem()}
+          >
             <Text style={[styles.addText, { color: colors.background }]}>Add</Text>
           </TouchableOpacity>
         </View>
@@ -249,7 +271,13 @@ export default function CalendarScreen() {
             >
               <Check color={item.completed ? colors.background : colors.textSecondary} size={17} />
             </TouchableOpacity>
-            <Text style={[styles.wishlistText, { color: item.completed ? colors.textSecondary : colors.textPrimary }, item.completed && styles.wishlistDone]}>
+            <Text
+              style={[
+                styles.wishlistText,
+                { color: item.completed ? colors.textSecondary : colors.textPrimary },
+                item.completed && styles.wishlistDone,
+              ]}
+            >
               {item.item || item.title}
             </Text>
             <TouchableOpacity
@@ -385,7 +413,7 @@ export default function CalendarScreen() {
 }
 const createStyles = (colors: ThemeColors, sizes: Sizes) =>
   StyleSheet.create({
-    container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
+    container: { flexGrow: 1, padding: 20, gap: 14 },
     eyebrow: { letterSpacing: 2, fontSize: sizes.text.xs },
     title: { fontSize: sizes.text.hLg, fontWeight: '700' },
     error: {},
@@ -416,7 +444,12 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     },
     todayDay: { borderWidth: 2, borderColor: colors.accent1 },
     dayText: { color: colors.textPrimary },
-    dot: { backgroundColor: colors.accent1, borderRadius: sizes.radius.input, minWidth: 15, alignItems: 'center' },
+    dot: {
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      minWidth: 15,
+      alignItems: 'center',
+    },
     dotText: { color: colors.background, fontSize: sizes.text.xs },
     events: { gap: 8 },
     event: {
@@ -434,21 +467,52 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     wishlistTitle: { fontSize: sizes.text.hSm, fontWeight: '700' },
     wishlistForm: { flexDirection: 'row', gap: 8 },
     wishlistInput: { flex: 1, borderRadius: sizes.radius.input, borderWidth: 1, padding: 12 },
-    wishlistAdd: { borderRadius: sizes.radius.input, paddingHorizontal: 18, justifyContent: 'center' },
-    wishlistItem: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: sizes.radius.btn, padding: 12 },
-    wishlistCheck: { width: 28, height: 28, borderRadius: sizes.radius.btn, alignItems: 'center', justifyContent: 'center' },
+    wishlistAdd: {
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 18,
+      justifyContent: 'center',
+    },
+    wishlistItem: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      borderRadius: sizes.radius.btn,
+      padding: 12,
+    },
+    wishlistCheck: {
+      width: 28,
+      height: 28,
+      borderRadius: sizes.radius.btn,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     wishlistText: { flex: 1, fontSize: sizes.text.body },
     wishlistDone: { textDecorationLine: 'line-through' },
-    add: { backgroundColor: colors.accent1, padding: 14, borderRadius: sizes.radius.btn, alignItems: 'center' },
+    add: {
+      backgroundColor: colors.accent1,
+      padding: 14,
+      borderRadius: sizes.radius.btn,
+      alignItems: 'center',
+    },
     addText: { color: colors.background, fontWeight: '800' },
     overlay: { flex: 1, backgroundColor: '#0009', justifyContent: 'center', padding: 20 },
-    modal: { backgroundColor: colors.surface, borderRadius: sizes.radius.card, padding: 20, gap: 12 },
+    modal: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 20,
+      gap: 12,
+    },
     modalTitle: { color: colors.textPrimary, fontSize: sizes.text.hMd, fontWeight: '800' },
     typeRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
     type: { padding: 9, backgroundColor: colors.cardBorder, borderRadius: sizes.radius.input },
     typeActive: { backgroundColor: colors.accent1 },
     typeText: { color: colors.textPrimary, fontSize: sizes.text.xs },
-    input: { backgroundColor: colors.background, borderRadius: sizes.radius.input, color: colors.textPrimary, padding: 12 },
+    input: {
+      backgroundColor: colors.background,
+      borderRadius: sizes.radius.input,
+      color: colors.textPrimary,
+      padding: 12,
+    },
     notes: { minHeight: 75, textAlignVertical: 'top' },
     text: { color: colors.textPrimary },
     delete: {

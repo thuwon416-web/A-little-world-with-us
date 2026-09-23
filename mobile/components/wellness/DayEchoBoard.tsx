@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { WellnessBoardShell } from './WellnessBoardShell'
+
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
-
-import { WellnessBoardShell } from './WellnessBoardShell'
 
 type EchoItem = {
   id: string
@@ -167,7 +167,12 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       marginBottom: 8,
     },
-    progressLabel: { color: colors.textSecondary, fontSize: 10, letterSpacing: 1.1, textTransform: 'uppercase' },
+    progressLabel: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      letterSpacing: 1.1,
+      textTransform: 'uppercase',
+    },
     progressValue: { color: colors.accent2, fontSize: 11, fontWeight: '700' },
     barTrack: {
       height: 8,
@@ -199,7 +204,12 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: 4,
       alignSelf: 'flex-start',
     },
-    pillText: { color: colors.textPrimary, fontSize: 9, letterSpacing: 1.2, textTransform: 'uppercase' },
+    pillText: {
+      color: colors.textPrimary,
+      fontSize: 9,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+    },
     itemText: { color: colors.textPrimary, fontSize: 13, lineHeight: 18 },
     itemTextDone: { opacity: 0.7, textDecorationLine: 'line-through' },
     itemState: {
@@ -228,7 +238,12 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
     },
     optionSelected: { backgroundColor: colors.cardBg, borderColor: colors.accent1 },
-    optionText: { color: colors.textSecondary, fontSize: 9, letterSpacing: 1.2, textTransform: 'uppercase' },
+    optionText: {
+      color: colors.textSecondary,
+      fontSize: 9,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+    },
     optionTextSelected: { color: colors.accent2 },
     input: {
       backgroundColor: colors.surface,
@@ -261,7 +276,12 @@ const createStyles = (colors: ThemeColors) =>
       justifyContent: 'space-between',
       marginBottom: 8,
     },
-    promptLabel: { color: colors.accent2, fontSize: 10, letterSpacing: 1.2, textTransform: 'uppercase' },
+    promptLabel: {
+      color: colors.accent2,
+      fontSize: 10,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+    },
     shuffleButton: {
       backgroundColor: colors.cardBg,
       borderRadius: 999,
@@ -270,6 +290,11 @@ const createStyles = (colors: ThemeColors) =>
       borderWidth: 1,
       borderColor: colors.cardBorder,
     },
-    shuffleText: { color: colors.textPrimary, fontSize: 9, letterSpacing: 1.1, textTransform: 'uppercase' },
+    shuffleText: {
+      color: colors.textPrimary,
+      fontSize: 9,
+      letterSpacing: 1.1,
+      textTransform: 'uppercase',
+    },
     promptText: { color: colors.textPrimary, fontSize: 13, lineHeight: 18 },
   })

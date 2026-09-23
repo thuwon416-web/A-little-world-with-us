@@ -1,12 +1,12 @@
-import React, { useMemo, useState } from 'react'
 import { Heart } from 'lucide-react-native'
+import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
+import { WellnessBoardShell } from './WellnessBoardShell'
 
 import { EmptyState } from '@/components/ui/EmptyState'
-import { WellnessBoardShell } from './WellnessBoardShell'
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 type NoteMood = 'sweet' | 'deep' | 'playful' | 'thankful'
 

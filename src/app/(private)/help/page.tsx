@@ -117,13 +117,13 @@ export default function HelpPage() {
           <div className="space-y-3">
             {filteredFaq.length > 0 ? (
               filteredFaq.map(({ question, answer }) => (
-                <div
+                <details
                   key={question}
                   className="rounded-[22px] border border-border/20 bg-card p-4"
                 >
-                  <p className="font-medium text-text-1">{question}</p>
+                  <summary className="cursor-pointer font-medium text-text-1 marker:text-accent-1">{question}</summary>
                   <p className="mt-2 text-sm text-text-2">{answer}</p>
-                </div>
+                </details>
               ))
             ) : (
               <div className="rounded-[22px] border border-dashed border-accent-1/20 bg-card p-4 text-sm text-text-2">

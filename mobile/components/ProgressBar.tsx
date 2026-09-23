@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
+
 import { useTheme } from '@/context/ThemeContext'
 
 interface ProgressBarProps {

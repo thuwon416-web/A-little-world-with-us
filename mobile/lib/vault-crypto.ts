@@ -4,9 +4,30 @@ const PBKDF2_ITERATIONS = 100_000
 const IV_LENGTH = 12
 const SALT_LENGTH = 16
 const BACKUP_WORDS = [
-  'amber', 'apple', 'bamboo', 'candle', 'cedar', 'cloud', 'coral', 'dawn',
-  'ember', 'forest', 'garden', 'harbor', 'honey', 'lantern', 'meadow', 'moon',
-  'olive', 'pearl', 'petal', 'river', 'saffron', 'silver', 'summer', 'willow',
+  'amber',
+  'apple',
+  'bamboo',
+  'candle',
+  'cedar',
+  'cloud',
+  'coral',
+  'dawn',
+  'ember',
+  'forest',
+  'garden',
+  'harbor',
+  'honey',
+  'lantern',
+  'meadow',
+  'moon',
+  'olive',
+  'pearl',
+  'petal',
+  'river',
+  'saffron',
+  'silver',
+  'summer',
+  'willow',
 ]
 
 type SubtleCrypto = {
@@ -93,11 +114,13 @@ export async function unwrapMasterKey(
   iv: string,
   wrappingKey: CryptoKey
 ): Promise<Uint8Array> {
-  return new Uint8Array(await getSubtle().decrypt(
-    { name: 'AES-GCM', iv: base64ToBytes(iv) },
-    wrappingKey,
-    base64ToBytes(ciphertext)
-  ))
+  return new Uint8Array(
+    await getSubtle().decrypt(
+      { name: 'AES-GCM', iv: base64ToBytes(iv) },
+      wrappingKey,
+      base64ToBytes(ciphertext)
+    )
+  )
 }
 
 export async function encryptCredential(

@@ -1,17 +1,16 @@
 # Deployment
 
-## 1. Supabase reset
+## 1. Supabase schema
 
-1. Confirm the existing project contains the two intended Auth accounts.
-2. In Supabase Dashboard > Storage, empty every current bucket. This permanently removes old files.
-3. Run [supabase/bootstrap/20260111_reset_and_bootstrap.sql](supabase/bootstrap/20260111_reset_and_bootstrap.sql) in SQL Editor.
-4. Confirm the final result says `Reset complete`, then sign out and sign back in on both accounts.
+For an existing production database, do not run `00_core.sql`: it drops and recreates the public schema. Apply only the reviewed additive SQL needed by that release. To resolve the missing media column, review and run [15_media_mime_types.sql](supabase/bootstrap/15_media_mime_types.sql); it adds `memories.mime_type`, `messages.media_mime_type`, and `time_capsule_attachments.mime_type`.
 
-The bootstrap creates the accepted pair directly, imports Flo periods, scopes shared content to the pair, and limits `/location` data to `thuwon416@gmail.com`.
+For a new, empty database only, use the ordered scripts in [supabase/bootstrap/README.md](supabase/bootstrap/README.md). The bootstrap `00_core.sql` includes the shared occasion and voice transcript schema; the old standalone reset/upgrade filenames are not present in this repository.
 
 ## 2. Vercel environment variables
 
 Required: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+
+Set the matching web, server, and mobile chat-encryption configuration from the existing deployment value. Do not generate a different value for an app that must decrypt existing messages. `NEXT_PUBLIC_CHAT_ENCRYPTION_KEY` and `EXPO_PUBLIC_CHAT_ENCRYPTION_KEY` are shipped with their client apps; they are not secret keys. Keep server-only provider keys and tokens out of client variables.
 
 Production services as used: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, a selected server-side AI key such as `GROQ_API_KEY`, and optional `NEXT_PUBLIC_GIPHY_API_KEY`.
 
@@ -37,6 +36,6 @@ Set `SURPRISE_REVEAL_SECRET` for `reveal-surprises` in Supabase Edge Function se
 
 Then build the Android preview APK from `mobile`. MapLibre/CARTO is the mobile map stack and needs no Google, Mapbox, or tile API key. Each person must deliberately enable **Settings > Privacy > Share my location in background**; this cannot be enabled remotely. Android background tracking is unavailable in Expo Go and may stop after a user force-stops the app, as required by Android/device-vendor restrictions.
 
-## 5. Release 2 upgrade and verification
+## 5. Voice transcript check
 
-Run [supabase/bootstrap/20260909_f1_f6_schema_upgrade.sql](supabase/bootstrap/20260909_f1_f6_schema_upgrade.sql), then [supabase/bootstrap/20260909_release2_upgrade.sql](supabase/bootstrap/20260909_release2_upgrade.sql). The second script adds the shared occasion calendar and the `messages.transcript` field used by explicit Groq transcription. Deploy after setting `GROQ_API_KEY`, then verify a voice-note transcription with both accounts. Audio is submitted to Groq only after a person taps **Transcribe**.
+The maintained bootstrap schema already defines `messages.transcript` and shared occasions. After confirming the deployed database has those fields, deploy the web and mobile apps, then verify voice-note transcription with both accounts. Audio is submitted to Groq only after a person taps **Transcribe**.

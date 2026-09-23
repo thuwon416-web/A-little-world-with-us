@@ -1,6 +1,7 @@
-import React from 'react'
 import { Check } from 'lucide-react-native'
+import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
 import { useTheme } from '@/context/ThemeContext'
 
 const careItems = [
@@ -20,11 +21,30 @@ export function CareChecklist({ values = {}, onToggle }: CareChecklistProps) {
   return (
     <View style={styles.container}>
       {careItems.map((item) => (
-        <TouchableOpacity key={item.key} hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }} style={styles.row} onPress={() => onToggle?.(item.key)}>
-          <View style={[styles.check, { borderColor: colors.accent2 }, values[item.key] && { backgroundColor: colors.success, borderColor: colors.success }]}>
+        <TouchableOpacity
+          key={item.key}
+          hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }}
+          style={styles.row}
+          onPress={() => onToggle?.(item.key)}
+        >
+          <View
+            style={[
+              styles.check,
+              { borderColor: colors.accent2 },
+              values[item.key] && { backgroundColor: colors.success, borderColor: colors.success },
+            ]}
+          >
             {values[item.key] ? <Check size={14} color={colors.background} /> : null}
           </View>
-          <Text style={[styles.label, { color: values[item.key] ? colors.success : colors.textPrimary }, values[item.key] && styles.labelDone]}>{item.label}</Text>
+          <Text
+            style={[
+              styles.label,
+              { color: values[item.key] ? colors.success : colors.textPrimary },
+              values[item.key] && styles.labelDone,
+            ]}
+          >
+            {item.label}
+          </Text>
         </TouchableOpacity>
       ))}
     </View>

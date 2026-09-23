@@ -5,9 +5,9 @@ import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'r
 import MemoryCard from './MemoryCard'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useTheme } from '@/context/ThemeContext'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { MemoryImportance, RelationshipMemory } from '@/shared-types'
-import { useTheme } from '@/context/ThemeContext'
 
 const PAGE_SIZE = 50
 
@@ -142,23 +142,29 @@ function AllMemories({
 
 export default memo(AllMemories)
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  wrapper: { flex: 1, gap: 12 },
-  input: {
-    backgroundColor: colors.surface,
-    borderColor: colors.cardBorder,
-    borderRadius: 14,
-    borderWidth: 1,
-    color: colors.textPrimary,
-    padding: 13,
-  },
-  filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: colors.surface, borderRadius: 15, paddingHorizontal: 12, paddingVertical: 8 },
-  active: { backgroundColor: colors.accent2 },
-  chipText: { color: colors.textPrimary, textTransform: 'capitalize' },
-  list: { gap: 12, paddingBottom: 24 },
-  muted: { color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
-  message: { alignItems: 'center', gap: 12, padding: 28 },
-  error: { color: colors.error, textAlign: 'center' },
-  retry: { color: colors.accent1, fontWeight: '700' },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    wrapper: { flex: 1, gap: 12 },
+    input: {
+      backgroundColor: colors.surface,
+      borderColor: colors.cardBorder,
+      borderRadius: 14,
+      borderWidth: 1,
+      color: colors.textPrimary,
+      padding: 13,
+    },
+    filters: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+    chip: {
+      backgroundColor: colors.surface,
+      borderRadius: 15,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+    active: { backgroundColor: colors.accent2 },
+    chipText: { color: colors.textPrimary, textTransform: 'capitalize' },
+    list: { gap: 12, paddingBottom: 24 },
+    muted: { color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
+    message: { alignItems: 'center', gap: 12, padding: 28 },
+    error: { color: colors.error, textAlign: 'center' },
+    retry: { color: colors.accent1, fontWeight: '700' },
+  })

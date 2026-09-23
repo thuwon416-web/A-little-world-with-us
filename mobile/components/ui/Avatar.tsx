@@ -19,7 +19,9 @@ export function Avatar({ label = 'A', size = 42, style, ...props }: AvatarProps)
         style,
       ]}
     >
-      <Text style={[styles.text, { color: colors.background, fontSize: Math.max(12, size * 0.35) }]}>
+      <Text
+        style={[styles.text, { color: colors.background, fontSize: Math.max(12, size * 0.35) }]}
+      >
         {label}
       </Text>
     </View>

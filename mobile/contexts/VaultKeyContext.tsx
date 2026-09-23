@@ -1,5 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import * as LocalAuthentication from 'expo-local-authentication'
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
+
 import {
   deriveKeyFromPassphrase,
   generateMasterKey,
@@ -31,34 +32,49 @@ export function VaultKeyProvider({ children }: { children: React.ReactNode }) {
     if (timer.current) clearTimeout(timer.current)
     timer.current = setTimeout(lock, 5 * 60 * 1000)
   }, [lock])
-  const unlockWithPassphrase = useCallback(async (passphrase: string) => {
-    if (passphrase.length < 8) throw new Error('Vault passphrase must be at least 8 characters.')
-    const stored = await loadWrappedKey()
-    if (stored) {
-      const key = await deriveKeyFromPassphrase(passphrase, stored.salt)
-      setMasterKey(await unwrapMasterKey(stored.ciphertext, stored.iv, key))
-    } else {
-      const salt = await generateSalt()
-      const key = await deriveKeyFromPassphrase(passphrase, salt)
-      const generated = await generateMasterKey()
-      const wrapped = await wrapMasterKey(generated, key)
-      await saveWrappedKey({ ...wrapped, salt, version: 1 })
-      setMasterKey(generated)
-    }
-    armAutoLock()
-  }, [armAutoLock])
+  const unlockWithPassphrase = useCallback(
+    async (passphrase: string) => {
+      if (passphrase.length < 8) throw new Error('Vault passphrase must be at least 8 characters.')
+      const stored = await loadWrappedKey()
+      if (stored) {
+        const key = await deriveKeyFromPassphrase(passphrase, stored.salt)
+        setMasterKey(await unwrapMasterKey(stored.ciphertext, stored.iv, key))
+      } else {
+        const salt = await generateSalt()
+        const key = await deriveKeyFromPassphrase(passphrase, salt)
+        const generated = await generateMasterKey()
+        const wrapped = await wrapMasterKey(generated, key)
+        await saveWrappedKey({ ...wrapped, salt, version: 1 })
+        setMasterKey(generated)
+      }
+      armAutoLock()
+    },
+    [armAutoLock]
+  )
   const unlockWithBiometric = useCallback(async () => {
     const availability = await LocalAuthentication.hasHardwareAsync()
     if (!availability) throw new Error('Biometric hardware is unavailable.')
-    const result = await LocalAuthentication.authenticateAsync({ promptMessage: 'Unlock your private vault' })
+    const result = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Unlock your private vault',
+    })
     if (!result.success) throw new Error('Biometric authentication was cancelled.')
     const stored = await loadWrappedKey()
     if (!stored) throw new Error('Set a Vault passphrase before using biometrics.')
-    throw new Error('Biometric key release requires platform secure key wrapping and is planned for Phase 14.5.')
+    throw new Error(
+      'Biometric key release requires platform secure key wrapping and is planned for Phase 14.5.'
+    )
   }, [])
   useEffect(() => () => lock(), [lock])
   return (
-    <VaultKeyContext.Provider value={{ masterKey, isUnlocked: masterKey !== null, unlockWithPassphrase, unlockWithBiometric, lock }}>
+    <VaultKeyContext.Provider
+      value={{
+        masterKey,
+        isUnlocked: masterKey !== null,
+        unlockWithPassphrase,
+        unlockWithBiometric,
+        lock,
+      }}
+    >
       {children}
     </VaultKeyContext.Provider>
   )

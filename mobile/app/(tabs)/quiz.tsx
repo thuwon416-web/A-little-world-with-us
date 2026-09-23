@@ -13,7 +13,7 @@ export default function QuizScreen() {
   const params = useLocalSearchParams<{ level?: string; quizType?: string }>()
   const parsedLevel = Number(params.level ?? 1)
   const level = ([1, 2, 3, 4, 5, 6, 7] as number[]).includes(parsedLevel)
-    ? parsedLevel as KoreanLevel
+    ? (parsedLevel as KoreanLevel)
     : 1
   const requestedType = params.quizType
   const quizType: QuizType =
@@ -36,7 +36,9 @@ export default function QuizScreen() {
           Practice together and build your Korean confidence.
         </Text>
       </View>
-      <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <View
+        style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
+      >
         <QuizEngine
           level={level}
           quizType={quizType}
@@ -48,12 +50,13 @@ export default function QuizScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  screen: { flex: 1 },
-  content: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 20 },
-  header: { gap: 6 },
-  eyebrow: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1 },
-  title: { fontSize: sizes.text.hLg, fontWeight: '700' },
-  subtitle: { fontSize: sizes.text.sm, lineHeight: 21 },
-  card: { borderWidth: 1, borderRadius: sizes.radius.card, padding: 18 },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    screen: { flex: 1 },
+    content: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 20 },
+    header: { gap: 6 },
+    eyebrow: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1 },
+    title: { fontSize: sizes.text.hLg, fontWeight: '700' },
+    subtitle: { fontSize: sizes.text.sm, lineHeight: 21 },
+    card: { borderWidth: 1, borderRadius: sizes.radius.card, padding: 18 },
+  })

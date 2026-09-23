@@ -109,13 +109,13 @@ export default function LoveCalculatorMigrated() {
         </div>
         <div className="relative mb-5">
           <svg width="140" height="140" viewBox="0 0 140 140" aria-label={`Compatibility ${average}%`}>
-            <circle cx="70" cy="70" r="54" fill="none" stroke="var(--accent-1)" strokeOpacity="0.2" strokeWidth="12" />
+            <circle cx="70" cy="70" r="54" fill="none" stroke="rgb(var(--accent-1))" strokeOpacity="0.2" strokeWidth="12" />
             <circle
               cx="70"
               cy="70"
               r="54"
               fill="none"
-              stroke="var(--accent-1)"
+              stroke="rgb(var(--accent-1))"
               strokeWidth="12"
               strokeDasharray={circumference}
               strokeDashoffset={offset}

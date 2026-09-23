@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import Link from 'next/link'
 import { calculateDaysTogether } from '@/lib/relationship-days'
 import { supabase } from '@/lib/supabase'
 
@@ -38,6 +39,8 @@ function countValue(count: number | null, error: unknown) {
 
 export default function RelationshipStats() {
   const [counts, setCounts] = useState<DashboardCounts>(initialCounts)
+  const [status, setStatus] = useState<'loading' | 'ready' | 'unlinked' | 'error'>('loading')
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     let active = true
@@ -46,7 +49,10 @@ export default function RelationshipStats() {
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) {
+        if (active) setStatus('unlinked')
+        return
+      }
 
       const { data: link } = await supabase
         .from('couple_links')
@@ -55,7 +61,10 @@ export default function RelationshipStats() {
         .eq('status', 'accepted')
         .limit(1)
         .maybeSingle()
-      if (!link?.couple_id) return
+      if (!link?.couple_id) {
+        if (active) setStatus('unlinked')
+        return
+      }
 
       const [
         memoriesResult,
@@ -166,10 +175,13 @@ export default function RelationshipStats() {
               : Math.round((financeCurrent / financeTarget) * 100),
           watchHistory: countValue(watchHistoryResult.count, watchHistoryResult.error),
         })
+        setStatus('ready')
       }
     }
 
-    void loadCounts()
+    void loadCounts().catch(() => {
+      if (active) setStatus('error')
+    })
     return () => {
       active = false
     }
@@ -195,14 +207,52 @@ export default function RelationshipStats() {
     ]
   }, [counts])
 
-  return (
-    <section className="dashboard-grid dashboard-grid--stats">
-      {stats.map((stat) => (
-        <div key={stat.label} className="dashboard-stat-card">
-          <p className="dashboard-stat-card__label">{stat.label}</p>
-          <p className="dashboard-stat-card__value">{stat.value}</p>
+  const visibleStats = showAll ? stats : stats.slice(0, 6)
+
+  if (status === 'loading') {
+    return (
+      <section aria-label="Relationship statistics" aria-busy="true">
+        <div className="dashboard-grid dashboard-grid--stats">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div key={index} className="h-24 animate-pulse rounded-panel bg-card" />
+          ))}
         </div>
-      ))}
+      </section>
+    )
+  }
+
+  if (status === 'unlinked') {
+    return (
+      <section aria-label="Relationship statistics" className="rounded-panel border border-accent-1/15 bg-card p-5">
+        <p className="font-medium text-text-1">Link your partner to see shared statistics.</p>
+        <Link href="/couple-linking" className="mt-2 inline-flex text-sm font-semibold text-accent-1 hover:underline">
+          Set up your couple link
+        </Link>
+      </section>
+    )
+  }
+
+  return (
+    <section aria-label="Relationship statistics">
+      {status === 'error' ? (
+        <p className="mb-3 text-sm text-text-2" role="status">Some shared statistics could not be loaded.</p>
+      ) : null}
+      <div className="dashboard-grid dashboard-grid--stats">
+        {visibleStats.map((stat) => (
+          <div key={stat.label} className="dashboard-stat-card">
+            <p className="dashboard-stat-card__label">{stat.label}</p>
+            <p className="dashboard-stat-card__value">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+      <button
+        type="button"
+        className="mt-3 text-sm font-medium text-accent-1 underline-offset-4 hover:underline"
+        aria-expanded={showAll}
+        onClick={() => setShowAll((current) => !current)}
+      >
+        {showAll ? 'Show fewer' : 'View all statistics'}
+      </button>
     </section>
   )
 }

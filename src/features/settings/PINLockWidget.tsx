@@ -3,12 +3,25 @@
 import { useState, useEffect } from 'react'
 import { Lock, X } from 'lucide-react'
 
-export default function PINLockWidget() {
+export default function PINLockWidget({
+  modalBlocked,
+  onModalOpen,
+  onModalClose,
+}: {
+  modalBlocked: boolean
+  onModalOpen: () => void
+  onModalClose: () => void
+}) {
   const [hasPin, setHasPin] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [error, setError] = useState('')
+
+  const closeModal = () => {
+    setShowModal(false)
+    onModalClose()
+  }
 
   useEffect(() => {
     const loadStatus = async () => {
@@ -51,7 +64,7 @@ export default function PINLockWidget() {
         return
       }
       setHasPin(true)
-      setShowModal(false)
+      closeModal()
       setPin('')
       setConfirmPin('')
       setError('')
@@ -106,8 +119,12 @@ export default function PINLockWidget() {
             Set a PIN to protect your app and private vault.
           </p>
           <button
-            onClick={() => setShowModal(true)}
-            className="w-full rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white"
+            onClick={() => {
+              setShowModal(true)
+              onModalOpen()
+            }}
+            disabled={modalBlocked}
+            className="w-full rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             Set PIN
           </button>
@@ -122,7 +139,7 @@ export default function PINLockWidget() {
               <h3 className="text-lg font-semibold text-text-1">
                 Set PIN
               </h3>
-              <button onClick={() => setShowModal(false)} className="text-text-2">
+              <button onClick={closeModal} className="text-text-2" aria-label="Close PIN setup">
                 <X className="h-5 w-5" />
               </button>
             </div>

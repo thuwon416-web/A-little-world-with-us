@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+
 import { useTheme } from '@/context/ThemeContext'
 
 interface CycleTrackerProps {
@@ -10,9 +11,13 @@ interface CycleTrackerProps {
 export function CycleTracker({ prediction, cycleLength }: CycleTrackerProps) {
   const { colors } = useTheme()
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+    <View
+      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+    >
       <Text style={[styles.title, { color: colors.accent2 }]}>Cycle track</Text>
-      <Text style={[styles.value, { color: colors.textPrimary }]}>{cycleLength ? `${cycleLength} day cycle` : 'Tracking soon'}</Text>
+      <Text style={[styles.value, { color: colors.textPrimary }]}>
+        {cycleLength ? `${cycleLength} day cycle` : 'Tracking soon'}
+      </Text>
       <Text style={[styles.subtext, { color: colors.textSecondary }]}>
         {prediction
           ? `Next predicted start: ${new Date(prediction).toLocaleDateString()}`

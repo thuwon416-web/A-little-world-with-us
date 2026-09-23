@@ -2,9 +2,11 @@ import * as DocumentPicker from 'expo-document-picker'
 import { FileUp, X } from 'lucide-react-native'
 import { useState } from 'react'
 import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import type { ChatAttachment } from './chat-types'
 
 import { useTheme } from '@/context/ThemeContext'
-import type { ChatAttachment } from './chat-types'
 
 type Props = {
   visible: boolean
@@ -14,6 +16,8 @@ type Props = {
 
 export function FileUpload({ visible, onClose, onFileSelect }: Props) {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
+  const styles = createStyles(colors)
   const [file, setFile] = useState<ChatAttachment | null>(null)
   const [sending, setSending] = useState(false)
   const choose = async () => {
@@ -46,7 +50,9 @@ export function FileUpload({ visible, onClose, onFileSelect }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={[styles.card, { backgroundColor: colors.surface }]}>
+        <View
+          style={[styles.card, { backgroundColor: colors.surface, paddingBottom: insets.bottom }]}
+        >
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.textPrimary }]}>Send file</Text>
             <TouchableOpacity onPress={onClose}>
@@ -58,46 +64,52 @@ export function FileUpload({ visible, onClose, onFileSelect }: Props) {
             onPress={() => void choose()}
           >
             <FileUp color={colors.accent1} size={38} />
-            <Text style={[styles.secondary, { color: colors.textSecondary }]}>{file?.name || 'Choose a file'}</Text>
+            <Text style={[styles.secondary, { color: colors.textSecondary }]}>
+              {file?.name || 'Choose a file'}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.send, { backgroundColor: colors.accent1 }, !file && styles.disabled]}
             disabled={!file || sending}
             onPress={() => void send()}
           >
-            <Text style={[styles.sendText, { color: colors.background }]}>{sending ? 'Sending...' : 'Send file'}</Text>
+            <Text style={[styles.sendText, { color: colors.background }]}>
+              {sending ? 'Sending...' : 'Send file'}
+            </Text>
           </TouchableOpacity>
+          <View style={{ height: insets.bottom }} />
         </View>
       </View>
     </Modal>
   )
 }
 
-const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
-  card: { borderRadius: 24, padding: 20 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: { fontSize: 20, fontWeight: '700' },
-  dropzone: {
-    height: 160,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  secondary: { marginTop: 12, textAlign: 'center' },
-  send: {
-    marginTop: 16,
-    borderRadius: 14,
-    padding: 14,
-    alignItems: 'center',
-  },
-  sendText: { fontWeight: '700' },
-  disabled: { opacity: 0.45 },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
+    card: { borderRadius: 24, padding: 20 },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    title: { fontSize: 20, fontWeight: '700' },
+    dropzone: {
+      height: 160,
+      borderWidth: 2,
+      borderStyle: 'dashed',
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    secondary: { marginTop: 12, textAlign: 'center' },
+    send: {
+      marginTop: 16,
+      borderRadius: 14,
+      padding: 14,
+      alignItems: 'center',
+    },
+    sendText: { fontWeight: '700' },
+    disabled: { opacity: 0.45 },
+  })

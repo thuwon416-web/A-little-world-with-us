@@ -86,7 +86,7 @@ export default function CoupleScoreboard() {
             <motion.span
               key={badge}
               whileHover={{ y: -2, scale: 1.03 }}
-              className="rounded-full bg-gradient-to-r from-[var(--accent-1)]/25 to-[var(--accent-2)]/25 px-3 py-2 text-[11px] font-medium"
+              className="rounded-full bg-gradient-to-r from-accent-1/25 to-accent-2/25 px-3 py-2 text-[11px] font-medium"
             >
               {badge}
             </motion.span>

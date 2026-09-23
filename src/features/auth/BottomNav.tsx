@@ -31,18 +31,45 @@ const navItems = [
   { href: '/chat', label: 'Chat', icon: MessageCircleHeart },
 ]
 
-const morePages = [
-  { name: 'Location', href: '/location', icon: MapPin },
-  { name: 'Calls', href: '/calls', icon: Phone },
-  { name: 'AI', href: '/ai', icon: Cpu },
-  { name: 'Plans', href: '/calendar', icon: Calendar },
-  { name: 'Wellness & Play', href: '/wellness', icon: Sparkles },
-  { name: 'Vault', href: '/vault', icon: Lock },
-  { name: 'Settings', href: '/settings', icon: Settings },
-  { name: 'Finance', href: '/finance', icon: DollarSign },
-  { name: 'Watch Together', href: '/watch-together', icon: MonitorPlay },
-  { name: 'About', href: '/about', icon: Info },
-  { name: 'Help', href: '/help', icon: HelpCircle },
+const moreGroups = [
+  {
+    name: 'Our Journey',
+    pages: [
+      { name: 'Our Story', href: '/our-story', icon: Heart },
+      { name: 'Memory Map', href: '/memories/map', icon: MapPin },
+      { name: 'Gallery', href: '/gallery', icon: Heart },
+    ],
+  },
+  {
+    name: 'Daily',
+    pages: [
+      { name: 'Calls', href: '/calls', icon: Phone },
+      { name: 'Plans', href: '/calendar', icon: Calendar },
+      { name: 'Wellness', href: '/wellness', icon: Sparkles },
+    ],
+  },
+  {
+    name: 'Play and Explore',
+    pages: [
+      { name: 'AI Companion', href: '/ai', icon: Cpu },
+      { name: 'Watch Together', href: '/watch-together', icon: MonitorPlay },
+      { name: 'Learning', href: '/learning', icon: Sparkles },
+      { name: 'Games', href: '/games', icon: Heart },
+      { name: 'Music', href: '/music', icon: Heart },
+      { name: 'Astrology', href: '/astrology', icon: Sparkles },
+    ],
+  },
+  {
+    name: 'Settings and Help',
+    pages: [
+      { name: 'Vault', href: '/vault', icon: Lock },
+      { name: 'Finance', href: '/finance', icon: DollarSign },
+      { name: 'Settings', href: '/settings', icon: Settings },
+      { name: 'About', href: '/about', icon: Info },
+      { name: 'Help', href: '/help', icon: HelpCircle },
+      { name: 'Location', href: '/location', icon: MapPin },
+    ],
+  },
 ]
 
 export default function BottomNav() {
@@ -115,7 +142,7 @@ export default function BottomNav() {
       {/* More Menu Modal */}
       {moreMenuOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-t-3xl bg-card p-6 pb-8">
+          <div className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-card p-6 pb-8">
             <div className="mb-6 flex items-center justify-between">
               <h2 className="text-lg font-semibold text-text-1">More</h2>
               <button
@@ -127,22 +154,28 @@ export default function BottomNav() {
               </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
-              {morePages
-                .filter((page) => page.href !== '/location' || isAdmin)
-                .map((page) => (
-                  <Link
-                    key={page.name}
-                    href={page.href}
-                    onClick={() => setMoreMenuOpen(false)}
-                    className="flex flex-col items-center gap-2 rounded-btn border border-accent-1/20 bg-card p-4 transition hover:bg-card/60"
-                  >
-                    <page.icon size={24} className="text-accent-1" />
-                    <span className="text-xs font-medium text-text-1">
-                      {page.name}
-                    </span>
-                  </Link>
-                ))}
+            <div className="space-y-3">
+              {moreGroups.map((group) => {
+                const pages = group.pages.filter((page) => page.href !== '/location' || isAdmin)
+                return (
+                  <details key={group.name} open={pages.some((page) => pathname === page.href)} className="rounded-xl border border-accent-1/15">
+                    <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-text-1">{group.name}</summary>
+                    <div className="grid grid-cols-2 gap-2 px-3 pb-3">
+                      {pages.map((page) => (
+                        <Link
+                          key={page.name}
+                          href={page.href}
+                          onClick={() => setMoreMenuOpen(false)}
+                          className="flex min-h-16 items-center gap-2 rounded-btn border border-accent-1/20 bg-card p-3 transition hover:bg-card/60"
+                        >
+                          <page.icon size={20} className="shrink-0 text-accent-1" />
+                          <span className="text-xs font-medium text-text-1">{page.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </details>
+                )
+              })}
             </div>
 
             <button

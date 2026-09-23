@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
-import { supabase } from '@/lib/supabase'
-import { moonPhase } from '@/services/secondary'
-import { calculateSynastry, createAstrologyProfile } from '@/services/astrology'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
+import { supabase } from '@/lib/supabase'
+import { calculateSynastry, createAstrologyProfile } from '@/services/astrology'
+import { moonPhase } from '@/services/secondary'
 
 const signs = [
   'Aries',
@@ -31,7 +31,9 @@ export default function AstrologyScreen() {
   const [score, setScore] = useState<number | null>(null)
   useEffect(() => {
     const loadCompatibility = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
       if (!user) return
       const { data: link } = await supabase
         .from('couple_links')
@@ -49,7 +51,9 @@ export default function AstrologyScreen() {
         .filter((birthDate): birthDate is string => Boolean(birthDate))
         .map((birthDate) => new Date(`${birthDate}T12:00:00`))
       if (dates.length !== 2 || dates.some((date) => Number.isNaN(date.getTime()))) return
-      setScore(calculateSynastry(createAstrologyProfile(dates[0]), createAstrologyProfile(dates[1])))
+      setScore(
+        calculateSynastry(createAstrologyProfile(dates[0]), createAstrologyProfile(dates[1]))
+      )
     }
     void loadCompatibility()
   }, [])
@@ -78,7 +82,9 @@ export default function AstrologyScreen() {
       </Text>
       <View style={s.card}>
         <Text style={s.buttonText}>Compatibility</Text>
-        <Text style={{ color: colors.accent1, fontSize: 38, fontWeight: '800' }}>{score ?? '—'}%</Text>
+        <Text style={{ color: colors.accent1, fontSize: 38, fontWeight: '800' }}>
+          {score ?? '—'}%
+        </Text>
         <Text style={s.muted}>Based on both partners&apos; saved birth dates.</Text>
       </View>
       <View style={s.card}>
@@ -87,13 +93,12 @@ export default function AstrologyScreen() {
           {signs.map((item) => (
             <TouchableOpacity
               key={item}
-              style={[
-                styles.signButton,
-                sign === item && styles.signButtonActive,
-              ]}
+              style={[styles.signButton, sign === item && styles.signButtonActive]}
               onPress={() => setSign(item)}
             >
-              <Text style={[styles.signText, sign === item ? styles.signTextActive : undefined]}>{item}</Text>
+              <Text style={[styles.signText, sign === item ? styles.signTextActive : undefined]}>
+                {item}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -111,10 +116,15 @@ export default function AstrologyScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  signGrid: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 7 },
-  signButton: { backgroundColor: colors.cardBorder, padding: 8, borderRadius: sizes.radius.input },
-  signButtonActive: { backgroundColor: colors.accent1 },
-  signText: { color: colors.background, fontSize: sizes.text.xs },
-  signTextActive: { color: colors.background, fontWeight: '700' as const },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    signGrid: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 7 },
+    signButton: {
+      backgroundColor: colors.cardBorder,
+      padding: 8,
+      borderRadius: sizes.radius.input,
+    },
+    signButtonActive: { backgroundColor: colors.accent1 },
+    signText: { color: colors.background, fontSize: sizes.text.xs },
+    signTextActive: { color: colors.background, fontWeight: '700' as const },
+  })

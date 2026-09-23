@@ -134,12 +134,12 @@ export default function PinLock({
             key={i}
             animate={
               i < pin.length
-                ? { scale: [1, 1.3, 1], backgroundColor: 'accent-1' }
+                ? { scale: [1, 1.3, 1], backgroundColor: 'rgb(var(--accent-1))' }
                 : { scale: 1 }
             }
             className={`w-5 h-5 rounded-full border-2 transition-colors duration-300 ${
               i < pin.length
-                ? 'bg-accent-1 border-accent-1 shadow-[0_0_10px_rgba(255,182,193,0.6)]'
+                ? 'bg-accent-1 border-accent-1 shadow-[0_0_10px_rgb(var(--accent-1)_/_0.6)]'
                 : 'border-accent-1/20 bg-transparent'
             }`}
           />
@@ -160,7 +160,7 @@ export default function PinLock({
               animate={{ scale: [0, 1.5, 1.2] }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
             >
-              <Heart className="w-32 h-32 text-accent-1 fill-current drop-shadow-[0_0_30px_rgba(255,182,193,0.8)]" />
+              <Heart className="w-32 h-32 text-accent-1 fill-current drop-shadow-[0_0_30px_rgb(var(--accent-1))]" />
             </motion.div>
             <motion.p
               initial={{ opacity: 0, y: 20 }}

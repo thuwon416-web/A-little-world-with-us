@@ -17,7 +17,11 @@ export function Input({ label, error, style, ...props }: InputProps) {
         {...props}
         style={[
           styles.input,
-          { backgroundColor: colors.surface, color: colors.textPrimary, borderColor: colors.cardBorder },
+          {
+            backgroundColor: colors.surface,
+            color: colors.textPrimary,
+            borderColor: colors.cardBorder,
+          },
           style,
           error ? { borderColor: colors.error } : null,
         ]}

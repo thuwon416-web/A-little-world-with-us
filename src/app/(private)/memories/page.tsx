@@ -145,11 +145,22 @@ function MemoriesPageContent() {
       return
     }
 
-    const { data: link } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
+    const { data: link, error: linkError } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
+    if (linkError) {
+      setError(linkError.message)
+      setIsLoading(false)
+      return
+    }
     setCoupleLinkId(link?.couple_id ?? null)
+    if (!link?.couple_id) {
+      setMemories([])
+      setIsLoading(false)
+      return
+    }
     const { data, error: memoriesError } = await supabase
       .from('memories')
       .select('*,mime_type')
+      .eq('couple_id', link.couple_id)
       .order('date', { ascending: false })
 
     if (memoriesError) {

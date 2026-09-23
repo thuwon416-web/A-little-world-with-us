@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
 
 import { WellnessBoardShell } from './WellnessBoardShell'
+
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 type Tone = 'warm' | 'deep' | 'playful' | 'grounded'
 
@@ -67,60 +68,61 @@ export default function AffirmationDeck() {
   )
 }
 
-const createStyles = (colors: ThemeColors) => StyleSheet.create({
-  stack: {
-    gap: 10,
-  },
-  cardItem: {
-    backgroundColor: colors.cardBg,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    borderRadius: 14,
-    padding: 12,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
-    gap: 10,
-  },
-  cardItemSelected: {
-    borderColor: colors.accent1,
-    backgroundColor: colors.cardBg,
-  },
-  itemText: {
-    color: colors.textPrimary,
-    fontSize: 14,
-    lineHeight: 20,
-    flex: 1,
-  },
-  pill: {
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    alignSelf: 'flex-start',
-  },
-  pillText: {
-    color: colors.textPrimary,
-    fontSize: 9,
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-  },
-  featureCard: {
-    marginTop: 14,
-    backgroundColor: colors.cardBg,
-    borderRadius: 14,
-    padding: 12,
-  },
-  featureLabel: {
-    color: colors.accent2,
-    fontSize: 11,
-    letterSpacing: 1.3,
-    textTransform: 'uppercase',
-    marginBottom: 6,
-  },
-  featureText: {
-    color: colors.textPrimary,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-})
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    stack: {
+      gap: 10,
+    },
+    cardItem: {
+      backgroundColor: colors.cardBg,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      borderRadius: 14,
+      padding: 12,
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 10,
+    },
+    cardItemSelected: {
+      borderColor: colors.accent1,
+      backgroundColor: colors.cardBg,
+    },
+    itemText: {
+      color: colors.textPrimary,
+      fontSize: 14,
+      lineHeight: 20,
+      flex: 1,
+    },
+    pill: {
+      borderWidth: 1,
+      borderRadius: 999,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      alignSelf: 'flex-start',
+    },
+    pillText: {
+      color: colors.textPrimary,
+      fontSize: 9,
+      letterSpacing: 1.2,
+      textTransform: 'uppercase',
+    },
+    featureCard: {
+      marginTop: 14,
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      padding: 12,
+    },
+    featureLabel: {
+      color: colors.accent2,
+      fontSize: 11,
+      letterSpacing: 1.3,
+      textTransform: 'uppercase',
+      marginBottom: 6,
+    },
+    featureText: {
+      color: colors.textPrimary,
+      fontSize: 14,
+      lineHeight: 20,
+    },
+  })

@@ -1,5 +1,6 @@
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+
 import { useTheme } from '@/context/ThemeContext'
 
 interface WellnessCardProps {
@@ -11,10 +12,14 @@ interface WellnessCardProps {
 export function WellnessCard({ title, value, detail }: WellnessCardProps) {
   const { colors } = useTheme()
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+    <View
+      style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+    >
       <Text style={[styles.title, { color: colors.accent2 }]}>{title}</Text>
       <Text style={[styles.value, { color: colors.textPrimary }]}>{value}</Text>
-      {detail ? <Text style={[styles.detail, { color: colors.textSecondary }]}>{detail}</Text> : null}
+      {detail ? (
+        <Text style={[styles.detail, { color: colors.textSecondary }]}>{detail}</Text>
+      ) : null}
     </View>
   )
 }

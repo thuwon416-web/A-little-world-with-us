@@ -1,3 +1,5 @@
+import * as LucideIcons from 'lucide-react-native'
+import type { LucideIcon } from 'lucide-react-native'
 import { forwardRef, useCallback, useEffect, useImperativeHandle } from 'react'
 import { Pressable, View } from 'react-native'
 import Animated, {
@@ -7,8 +9,6 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
-import * as LucideIcons from 'lucide-react-native'
-import type { LucideIcon } from 'lucide-react-native'
 
 import { useTheme } from '@/context/ThemeContext'
 
@@ -98,10 +98,7 @@ export const AnimatedIcon = forwardRef<AnimatedIconHandle, AnimatedIconProps>(fu
 
   if (trigger === 'press') {
     return (
-      <Pressable
-        onPressIn={startAnimation}
-        onPressOut={stopAnimation}
-      >
+      <Pressable onPressIn={startAnimation} onPressOut={stopAnimation}>
         {content}
       </Pressable>
     )

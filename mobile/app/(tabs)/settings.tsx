@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
 import {
   Alert,
+  Modal,
   ScrollView,
   Share,
   StyleSheet,
@@ -13,9 +14,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { WebView } from 'react-native-webview'
 
-import { useTheme, type ThemePreference } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
+import { useTheme, type ThemeColors, type ThemePreference } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { useLocation } from '@/hooks/useLocation'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -46,7 +47,7 @@ type NotificationSettings = {
   milestones: boolean
   wellness: boolean
 }
-const safetyNotificationItems: Array<{ key: SafetyNotificationPreference; translationKey: string }> = [
+const safetyNotificationItems: { key: SafetyNotificationPreference; translationKey: string }[] = [
   { key: 'geofence', translationKey: 'settings.safetyNotifications.geofence' },
   { key: 'battery_low', translationKey: 'settings.safetyNotifications.batteryLow' },
   { key: 'missed_checkin', translationKey: 'settings.safetyNotifications.missedCheckin' },
@@ -106,15 +107,21 @@ function Button({
   title,
   onPress,
   danger = false,
+  disabled = false,
 }: {
   title: string
   onPress: () => void
   danger?: boolean
+  disabled?: boolean
 }) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   return (
-    <TouchableOpacity style={[styles.button, danger && styles.dangerButton]} onPress={onPress}>
+    <TouchableOpacity
+      disabled={disabled}
+      style={[styles.button, danger && styles.dangerButton, disabled && { opacity: 0.55 }]}
+      onPress={onPress}
+    >
       <Text style={styles.buttonText}>{title}</Text>
     </TouchableOpacity>
   )
@@ -135,7 +142,9 @@ export default function SettingsScreen() {
   } = useLocation()
   const [data, setData] = useState<SettingsData | null>(null)
   const [notifications, setNotifications] = useState(defaults)
-  const [safetyNotifications, setSafetyNotifications] = useState<Record<SafetyNotificationPreference, boolean>>({
+  const [safetyNotifications, setSafetyNotifications] = useState<
+    Record<SafetyNotificationPreference, boolean>
+  >({
     geofence: true,
     battery_low: true,
     missed_checkin: true,
@@ -154,6 +163,13 @@ export default function SettingsScreen() {
   const [pin, setPin] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [mfaFactorId, setMfaFactorId] = useState('')
+  const [mfaQrCode, setMfaQrCode] = useState('')
+  const [mfaSecret, setMfaSecret] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaVisible, setMfaVisible] = useState(false)
+  const [mfaBusy, setMfaBusy] = useState(false)
+  const [mfaEnabled, setMfaEnabled] = useState(false)
   const load = async () => {
     try {
       setLoading(true)
@@ -180,6 +196,16 @@ export default function SettingsScreen() {
     void load()
   }, [])
   useEffect(() => {
+    let active = true
+    void supabase.auth.mfa.listFactors().then(({ data, error: factorError }) => {
+      if (active && !factorError)
+        setMfaEnabled((data?.totp ?? []).some((factor) => factor.status === 'verified'))
+    })
+    return () => {
+      active = false
+    }
+  }, [])
+  useEffect(() => {
     if (!loading) void AsyncStorage.setItem(notificationKey, JSON.stringify(notifications))
   }, [loading, notifications])
   const toggleSafetyNotification = async (key: SafetyNotificationPreference, value: boolean) => {
@@ -188,7 +214,10 @@ export default function SettingsScreen() {
       await updateSafetyNotificationPreference(key, value)
     } catch (caught) {
       setSafetyNotifications((current) => ({ ...current, [key]: !value }))
-      Alert.alert('Notifications', caught instanceof Error ? caught.message : 'Unable to save preference.')
+      Alert.alert(
+        'Notifications',
+        caught instanceof Error ? caught.message : 'Unable to save preference.'
+      )
     }
   }
   const saveHealth = async () => {
@@ -249,6 +278,111 @@ export default function SettingsScreen() {
     } catch (caught) {
       Alert.alert('Security', caught instanceof Error ? caught.message : 'Unable to update PIN.')
     }
+  }
+  const startMfaSetup = async () => {
+    setMfaBusy(true)
+    try {
+      const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors()
+      if (factorsError) throw factorsError
+      const verified = factors?.totp.find((factor) => factor.status === 'verified')
+      if (verified) {
+        setMfaEnabled(true)
+        Alert.alert('အသုံးပြုနေပြီးပါပြီ', 'အကောင့်မှာ အတည်ပြုမှုအဆင့် ၂ ဖွင့်ထားပြီးပါပြီ။')
+        return
+      }
+      const pending = factors?.all.find(
+        (factor) => factor.factor_type === 'totp' && factor.status === 'unverified'
+      )
+      if (pending) {
+        const { error: removeError } = await supabase.auth.mfa.unenroll({ factorId: pending.id })
+        if (removeError) throw removeError
+      }
+      const { data, error: enrollError } = await supabase.auth.mfa.enroll({
+        factorType: 'totp',
+        friendlyName: 'A Little World With Us',
+      })
+      if (enrollError) throw enrollError
+      setMfaFactorId(data.id)
+      setMfaQrCode(data.totp.qr_code)
+      setMfaSecret(data.totp.secret)
+      setMfaCode('')
+      setMfaVisible(true)
+    } catch (caught) {
+      Alert.alert(
+        'စနစ်ထည့်သွင်းမှု မအောင်မြင်ပါ',
+        caught instanceof Error ? caught.message : 'ပြန်ကြိုးစားပါ။'
+      )
+    } finally {
+      setMfaBusy(false)
+    }
+  }
+  const verifyMfaSetup = async () => {
+    if (!mfaFactorId || !/^\d{6}$/.test(mfaCode)) return
+    setMfaBusy(true)
+    try {
+      const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
+        factorId: mfaFactorId,
+      })
+      if (challengeError) throw challengeError
+      const { error: verifyError } = await supabase.auth.mfa.verify({
+        factorId: mfaFactorId,
+        challengeId: challenge.id,
+        code: mfaCode,
+      })
+      if (verifyError) throw verifyError
+      setMfaEnabled(true)
+      setMfaVisible(false)
+      setMfaFactorId('')
+      setMfaQrCode('')
+      setMfaSecret('')
+      setMfaCode('')
+      Alert.alert('ပြီးပါပြီ', 'အတည်ပြုမှုအဆင့် ၂ ကို ဖွင့်ပြီးပါပြီ။')
+    } catch (caught) {
+      Alert.alert(
+        'ကုဒ်အတည်မပြုနိုင်ပါ',
+        caught instanceof Error ? caught.message : 'ကုဒ်ကို ပြန်စစ်ပါ။'
+      )
+    } finally {
+      setMfaBusy(false)
+    }
+  }
+  const cancelMfaSetup = async () => {
+    if (mfaFactorId) await supabase.auth.mfa.unenroll({ factorId: mfaFactorId })
+    setMfaVisible(false)
+    setMfaFactorId('')
+    setMfaQrCode('')
+    setMfaSecret('')
+    setMfaCode('')
+  }
+  const disableMfa = () => {
+    Alert.alert('အဆင့် ၂ ကို ပိတ်မလား', 'အကောင့်ဝင်ရာတွင် အတည်ပြုအက်ပ်ကုဒ်ကို ထပ်မတောင်းတော့ပါ။', [
+      { text: 'မပိတ်တော့ပါ', style: 'cancel' },
+      {
+        text: 'ပိတ်ရန်',
+        style: 'destructive',
+        onPress: () => {
+          void (async () => {
+            setMfaBusy(true)
+            try {
+              const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors()
+              if (factorsError) throw factorsError
+              const verified = factors?.totp.find((factor) => factor.status === 'verified')
+              if (!verified) throw new Error('အတည်ပြုထားသော စနစ် မတွေ့ပါ။')
+              const { error: removeError } = await supabase.auth.mfa.unenroll({
+                factorId: verified.id,
+              })
+              if (removeError) throw removeError
+              setMfaEnabled(false)
+              Alert.alert('ပြီးပါပြီ', 'အတည်ပြုမှုအဆင့် ၂ ကို ပိတ်ပြီးပါပြီ။')
+            } catch (caught) {
+              Alert.alert('ပိတ်မရပါ', caught instanceof Error ? caught.message : 'ပြန်စမ်းကြည့်ပါ။')
+            } finally {
+              setMfaBusy(false)
+            }
+          })()
+        },
+      },
+    ])
   }
   const biometric = async (enabled: boolean) => {
     if (!user) return
@@ -317,7 +451,13 @@ export default function SettingsScreen() {
       <Section title="Appearance">
         <View style={styles.options}>
           {(
-            ['lavender-mist', 'peach-cream', 'mint-whisper', 'ocean-calm', 'monochrome'] as ThemePreference[]
+            [
+              'lavender-mist',
+              'peach-cream',
+              'mint-whisper',
+              'ocean-calm',
+              'monochrome',
+            ] as ThemePreference[]
           ).map((option) => (
             <TouchableOpacity
               key={option}
@@ -477,25 +617,9 @@ export default function SettingsScreen() {
           onChange={(value) => void biometric(value)}
         />
         <Button
-          title="Set up 2FA"
-          onPress={async () => {
-            try {
-              const { data: factor, error: enrollError } = await supabase.auth.mfa.enroll({
-                factorType: 'totp',
-                friendlyName: 'A Little World with Us',
-              })
-              if (enrollError) throw enrollError
-              Alert.alert(
-                '2FA setup',
-                `Scan this secret in your authenticator app:\n${factor?.totp.secret ?? 'Secret unavailable'}`
-              )
-            } catch (caught) {
-              Alert.alert(
-                '2FA setup failed',
-                caught instanceof Error ? caught.message : 'Unable to start 2FA setup.'
-              )
-            }
-          }}
+          title={mfaEnabled ? 'Turn off two-factor verification' : 'Set up two-factor verification'}
+          onPress={() => (mfaEnabled ? disableMfa() : void startMfaSetup())}
+          disabled={mfaBusy}
         />
         <Button title="Log out" danger onPress={() => void signOut()} />
       </Section>
@@ -546,6 +670,50 @@ export default function SettingsScreen() {
         ) : null}
         {locationError ? <Text style={styles.error}>{locationError}</Text> : null}
       </Section>
+      <Modal
+        visible={mfaVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setMfaVisible(false)}
+      >
+        <View style={styles.mfaOverlay}>
+          <View style={styles.mfaPanel}>
+            <Text style={styles.sectionTitle}>အတည်ပြုအက်ပ် ချိတ်ဆက်ရန်</Text>
+            <Text style={styles.muted}>
+              အတည်ပြုအက်ပ်ကို ဖွင့်ပြီး QR ပုံကို ဖတ်ပါ။ ပြင်ပဝဘ်ဆိုဒ်သို့ မပို့ပါ။
+            </Text>
+            {mfaQrCode ? (
+              <WebView
+                originWhitelist={['*']}
+                javaScriptEnabled={false}
+                source={{
+                  html: `<html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;display:grid;place-items:center;height:100vh;background:white"><img width="220" height="220" src="${mfaQrCode.replace(/"/g, '&quot;')}" /></body></html>`,
+                }}
+                style={styles.qrPreview}
+              />
+            ) : null}
+            <Text style={styles.muted}>QR ဖတ်ပြီးနောက် အတည်ပြုအက်ပ်မှ ဂဏန်း ၆ လုံးကို ထည့်ပါ။</Text>
+            <Text selectable style={styles.mfaSecret}>
+              {mfaSecret}
+            </Text>
+            <TextInput
+              value={mfaCode}
+              onChangeText={(value) => setMfaCode(value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="ဂဏန်း ၆ လုံး"
+              placeholderTextColor={colors.textSecondary}
+              keyboardType="number-pad"
+              maxLength={6}
+              style={styles.input}
+            />
+            <Button
+              title={mfaBusy ? 'စစ်ဆေးနေသည်…' : 'ကုဒ်အတည်ပြုရန်'}
+              onPress={() => void verifyMfaSetup()}
+              disabled={mfaBusy || mfaCode.length !== 6}
+            />
+            <Button title="မလုပ်တော့ပါ" onPress={() => void cancelMfaSetup()} />
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   )
 }
@@ -568,7 +736,12 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       gap: 14,
       padding: 24,
     },
-    eyebrow: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 2, textTransform: 'uppercase' },
+    eyebrow: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+    },
     title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
     section: {
       backgroundColor: colors.surface,
@@ -578,7 +751,12 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderColor: colors.cardBorder,
       gap: 10,
     },
-    sectionTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '700', marginBottom: 4 },
+    sectionTitle: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.bodyLg,
+      fontWeight: '700',
+      marginBottom: 4,
+    },
     row: {
       flexDirection: 'row',
       justifyContent: 'space-between',
@@ -615,4 +793,26 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderRadius: sizes.radius.input,
     },
     optionActive: { backgroundColor: colors.accent1 },
+    mfaOverlay: {
+      flex: 1,
+      justifyContent: 'center',
+      padding: 20,
+      backgroundColor: 'rgba(0,0,0,0.65)',
+    },
+    mfaPanel: {
+      gap: 12,
+      padding: 20,
+      borderRadius: sizes.radius.card,
+      backgroundColor: colors.surface,
+    },
+    qrPreview: { height: 230, borderRadius: 12, backgroundColor: '#fff' },
+    mfaSecret: {
+      padding: 10,
+      borderRadius: 8,
+      color: colors.textPrimary,
+      backgroundColor: colors.background,
+      textAlign: 'center',
+      fontFamily: 'monospace',
+      fontSize: sizes.text.xs,
+    },
   })

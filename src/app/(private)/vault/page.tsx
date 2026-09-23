@@ -261,7 +261,7 @@ function VaultPageContent() {
 
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="px-4 py-2 rounded-full text-sm font-medium text-text-1 shadow-md hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)]"
+            className="px-4 py-2 rounded-full text-sm font-medium text-text-1 shadow-md hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0 bg-gradient-to-r from-accent-2 to-accent-1"
           >
             <Lock className="h-4 w-4" />
             {showForm ? 'Cancel' : 'Seal a new letter'}
@@ -277,7 +277,7 @@ function VaultPageContent() {
       <div className="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
         <div className="rounded-panel p-6 border border-accent-1/20 bg-card backdrop-blur">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-btn bg-gradient-to-br from-[var(--accent-2)] to-[var(--accent-1)] text-white">
+            <div className="flex h-12 w-12 items-center justify-center rounded-btn bg-gradient-to-br from-accent-2 to-accent-1 text-white">
               <Lock className="h-5 w-5" />
             </div>
             <div>

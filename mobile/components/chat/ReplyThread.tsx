@@ -1,8 +1,10 @@
 import { Reply as ReplyIcon, Send, X } from 'lucide-react-native'
 import { useState } from 'react'
 import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import type { NativeChatMessage } from './chat-types'
+
 import { useTheme } from '@/context/ThemeContext'
 
 type Props = {
@@ -25,6 +27,7 @@ function preview(message: NativeChatMessage) {
 
 export function ReplyThread({ visible, message, currentUserId, onClose, onReply }: Props) {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = createStyles(colors)
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
@@ -43,7 +46,9 @@ export function ReplyThread({ visible, message, currentUserId, onClose, onReply 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View
+          style={[styles.card, { backgroundColor: colors.surface, paddingBottom: insets.bottom }]}
+        >
           <View style={styles.header}>
             <View style={styles.heading}>
               <ReplyIcon color={colors.accent1} size={20} />
@@ -75,50 +80,52 @@ export function ReplyThread({ visible, message, currentUserId, onClose, onReply 
             <Send color={colors.background} size={17} />
             <Text style={styles.sendText}>{sending ? 'Sending...' : 'Send reply'}</Text>
           </TouchableOpacity>
+          <View style={{ height: insets.bottom }} />
         </View>
       </View>
     </Modal>
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: colors.surface, borderRadius: 24, padding: 20 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  heading: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  title: { color: colors.textPrimary, fontSize: 19, fontWeight: '700' },
-  context: {
-    borderLeftWidth: 3,
-    borderLeftColor: colors.accent1,
-    backgroundColor: colors.cardBg,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 14,
-  },
-  author: { color: colors.accent1, fontSize: 12, fontWeight: '700', marginBottom: 5 },
-  preview: { color: colors.textPrimary },
-  input: {
-    minHeight: 100,
-    backgroundColor: colors.cardBg,
-    borderRadius: 14,
-    color: colors.textPrimary,
-    padding: 14,
-    textAlignVertical: 'top',
-  },
-  send: {
-    marginTop: 14,
-    backgroundColor: colors.accent1,
-    borderRadius: 14,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  sendText: { color: colors.background, fontWeight: '700' },
-  disabled: { opacity: 0.45 },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
+    card: { backgroundColor: colors.surface, borderRadius: 24, padding: 20 },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    heading: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+    title: { color: colors.textPrimary, fontSize: 19, fontWeight: '700' },
+    context: {
+      borderLeftWidth: 3,
+      borderLeftColor: colors.accent1,
+      backgroundColor: colors.cardBg,
+      borderRadius: 8,
+      padding: 12,
+      marginBottom: 14,
+    },
+    author: { color: colors.accent1, fontSize: 12, fontWeight: '700', marginBottom: 5 },
+    preview: { color: colors.textPrimary },
+    input: {
+      minHeight: 100,
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      color: colors.textPrimary,
+      padding: 14,
+      textAlignVertical: 'top',
+    },
+    send: {
+      marginTop: 14,
+      backgroundColor: colors.accent1,
+      borderRadius: 14,
+      padding: 14,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    sendText: { color: colors.background, fontWeight: '700' },
+    disabled: { opacity: 0.45 },
+  })

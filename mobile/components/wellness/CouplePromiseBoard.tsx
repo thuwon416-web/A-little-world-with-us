@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { WellnessBoardShell } from './WellnessBoardShell'
+
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
-
-import { WellnessBoardShell } from './WellnessBoardShell'
 
 type PromiseItem = {
   id: string

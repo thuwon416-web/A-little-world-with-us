@@ -11,6 +11,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 import { useTheme } from '@/context/ThemeContext'
 
 type Props = { visible: boolean; onClose: () => void; onSelect: (url: string) => Promise<void> }
@@ -22,6 +24,7 @@ const fallbackGifs = [
 
 export function GIFPicker({ visible, onClose, onSelect }: Props) {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const [query, setQuery] = useState('')
   const [gifs, setGifs] = useState(fallbackGifs)
   const [sending, setSending] = useState(false)
@@ -58,7 +61,9 @@ export function GIFPicker({ visible, onClose, onSelect }: Props) {
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={[styles.card, { backgroundColor: colors.surface }]}>
+        <View
+          style={[styles.card, { backgroundColor: colors.surface, paddingBottom: insets.bottom }]}
+        >
           <View style={styles.header}>
             <Text style={[styles.title, { color: colors.textPrimary }]}>Choose a GIF</Text>
             <TouchableOpacity onPress={onClose}>

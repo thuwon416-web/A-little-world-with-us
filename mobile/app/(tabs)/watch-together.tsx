@@ -13,6 +13,9 @@ import {
 } from 'react-native'
 import YouTube from 'react-native-youtube-iframe'
 
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import {
   addWatchHistory,
   addWatchlistItem,
@@ -24,9 +27,6 @@ import {
   subscribeToWatchSync,
   type WatchlistItem,
 } from '@/services/watchTogether'
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
-import { sizes, type Sizes } from '@/design-tokens'
 
 export default function WatchTogetherScreen() {
   const router = useRouter()
@@ -184,15 +184,46 @@ export default function WatchTogetherScreen() {
 
 const createStyles = (colors: ThemeColors, sizes: Sizes) =>
   StyleSheet.create({
-    container: { flexGrow: 1, backgroundColor: colors.background, padding: 20, paddingTop: 72, gap: 14 },
-    eyebrow: { color: colors.accent2, letterSpacing: 2, textTransform: 'uppercase', fontSize: sizes.text.xs },
+    container: {
+      flexGrow: 1,
+      backgroundColor: colors.background,
+      padding: 20,
+      paddingTop: 72,
+      gap: 14,
+    },
+    eyebrow: {
+      color: colors.accent2,
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+      fontSize: sizes.text.xs,
+    },
     title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700' },
-    player: { backgroundColor: colors.surface, borderRadius: sizes.radius.card, overflow: 'hidden', paddingBottom: 14 },
+    player: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      overflow: 'hidden',
+      paddingBottom: 14,
+    },
     now: { color: colors.textPrimary, fontWeight: '700', padding: 14 },
-    card: { backgroundColor: colors.surface, borderRadius: sizes.radius.card, padding: 16, gap: 10 },
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      padding: 16,
+      gap: 10,
+    },
     section: { color: colors.textPrimary, fontSize: sizes.text.hSm, fontWeight: '700' },
-    input: { backgroundColor: colors.surface, color: colors.textPrimary, borderRadius: sizes.radius.input, padding: 12 },
-    button: { backgroundColor: colors.accent1, borderRadius: sizes.radius.input, padding: 12, alignItems: 'center' },
+    input: {
+      backgroundColor: colors.surface,
+      color: colors.textPrimary,
+      borderRadius: sizes.radius.input,
+      padding: 12,
+    },
+    button: {
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      padding: 12,
+      alignItems: 'center',
+    },
     buttonText: { color: colors.background, fontWeight: '700' },
     item: {
       backgroundColor: colors.surface,

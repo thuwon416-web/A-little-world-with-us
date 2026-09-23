@@ -1,19 +1,28 @@
 import * as Clipboard from 'expo-clipboard'
 import { Sparkles } from 'lucide-react-native'
 import { useState, useMemo } from 'react'
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import {
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { EmptyState } from '@/components/ui/EmptyState'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { useAI } from '@/hooks/useAI'
-import { EmptyState } from '@/components/ui/EmptyState'
 import { supabase } from '@/lib/supabase'
 import { saveAISuggestion } from '@/services/favorites'
 
 type Tool = 'gift' | 'date' | 'message' | 'coach' | 'letter' | 'surprise'
 
-const tools: Array<{ id: Tool; label: string }> = [
+const tools: { id: Tool; label: string }[] = [
   { id: 'gift', label: 'Gift Ideas' },
   { id: 'date', label: 'Date Ideas' },
   { id: 'message', label: 'Message Helper' },
@@ -33,6 +42,7 @@ const instructions: Record<'coach' | 'letter' | 'surprise', string> = {
 
 export default function AIAssistantScreen() {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [tab, setTab] = useState<Tool>('gift')
   const [input, setInput] = useState('')
@@ -69,25 +79,22 @@ export default function AIAssistantScreen() {
         throw new Error('Please sign in again.')
       }
 
-      const response = await fetch(
-        `${webUrl}/api/ai/${tab === 'surprise' ? 'surprise' : 'chat'}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${session.access_token}`,
-          },
-          body:
-            tab === 'surprise'
-              ? JSON.stringify({
-                  occasion: 'A private surprise',
-                  interests: input.trim(),
-                })
-              : JSON.stringify({
-                  message: `${instructions[tab]}\n\nUser request: ${input.trim()}`,
-                }),
-        }
-      )
+      const response = await fetch(`${webUrl}/api/ai/${tab === 'surprise' ? 'surprise' : 'chat'}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body:
+          tab === 'surprise'
+            ? JSON.stringify({
+                occasion: 'A private surprise',
+                interests: input.trim(),
+              })
+            : JSON.stringify({
+                message: `${instructions[tab]}\n\nUser request: ${input.trim()}`,
+              }),
+      })
       const body = (await response.json()) as {
         response?: string
         ideas?: string
@@ -127,7 +134,9 @@ export default function AIAssistantScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}
+    >
       <Text style={[styles.title, { color: colors.textPrimary }]}>AI Love Assistant</Text>
 
       <ScrollView
@@ -191,11 +200,18 @@ export default function AIAssistantScreen() {
         </Text>
       </TouchableOpacity>
 
-      {displayedError ? <Text style={[styles.error, { color: colors.error }]}>{displayedError}</Text> : null}
+      {displayedError ? (
+        <Text style={[styles.error, { color: colors.error }]}>{displayedError}</Text>
+      ) : null}
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {isCustomTool && customResult ? (
-          <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+            ]}
+          >
             <Text style={[styles.badge, { color: colors.accent2 }]}>AI-generated</Text>
             <Text style={[styles.content, { color: colors.textPrimary }]}>{customResult}</Text>
             <View style={styles.actions}>
@@ -209,7 +225,13 @@ export default function AIAssistantScreen() {
           </View>
         ) : !isCustomTool && filteredItems.length > 0 ? (
           filteredItems.map((item) => (
-            <View key={item.id} style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+            <View
+              key={item.id}
+              style={[
+                styles.card,
+                { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+              ]}
+            >
               <Text style={[styles.badge, { color: colors.accent2 }]}>AI-generated</Text>
               <Text style={[styles.content, { color: colors.textPrimary }]}>{item.content}</Text>
 
@@ -246,7 +268,6 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingTop: 72,
       paddingHorizontal: 20,
       paddingBottom: 20,
     },

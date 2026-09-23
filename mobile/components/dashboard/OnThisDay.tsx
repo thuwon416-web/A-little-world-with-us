@@ -15,15 +15,10 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useTheme } from '@/context/ThemeContext'
-import { supabase } from '@/lib/supabase'
-import { relationshipMemoriesService } from '@/services/relationship-memories'
+import { downloadDecryptAndCache } from '@/lib/mediaEncryption'
 import { getMemories } from '@/services/memories'
+import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { RelationshipMemory } from '@/shared-types'
-import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
-
-function isExternalUrl(v?: string | null) {
-  return !!v && (v.startsWith('http://') || v.startsWith('https://'))
-}
 
 const icons: Record<string, LucideIcon> = {
   first_events: Sparkles,
@@ -74,20 +69,23 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
               category: memory.category,
             }))
           : []
-      const photos = photoResult.status === 'fulfilled'
-        ? photoResult.value.filter((memory) => {
-            const date = new Date(memory.date)
-            return date.getMonth() === today.getMonth() && date.getDate() === today.getDate()
-          })
-        : []
-      const resolvedPhotos = await Promise.all(photos.map(async (memory) => {
-        const path = memory.storage_path ?? memory.image_url
-        if (!path) return [memory.id, ''] as const
-        if (path.startsWith('/') || path.startsWith('http')) return [memory.id, path] as const
-        const mimeType = memory.mime_type || 'image/jpeg'
-        const uri = await downloadDecryptAndCache(coupleId, 'memories', path, mimeType)
-        return [memory.id, uri] as const
-      }))
+      const photos =
+        photoResult.status === 'fulfilled'
+          ? photoResult.value.filter((memory) => {
+              const date = new Date(memory.date)
+              return date.getMonth() === today.getMonth() && date.getDate() === today.getDate()
+            })
+          : []
+      const resolvedPhotos = await Promise.all(
+        photos.map(async (memory) => {
+          const path = memory.storage_path ?? memory.image_url
+          if (!path) return [memory.id, ''] as const
+          if (path.startsWith('/') || path.startsWith('http')) return [memory.id, path] as const
+          const mimeType = memory.mime_type || 'image/jpeg'
+          const uri = await downloadDecryptAndCache(coupleId, 'memories', path, mimeType)
+          return [memory.id, uri] as const
+        })
+      )
       const photoItems: UnifiedMemory[] = photos.map((memory) => ({
         source: 'photo',
         id: memory.id,
@@ -99,12 +97,16 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
       }))
       if (mounted) {
         setImageUrls(Object.fromEntries(resolvedPhotos.filter(([, url]) => url)))
-        setMemories([...chatItems, ...photoItems].sort((a, b) => b.yearsAgo - a.yearsAgo).slice(0, 3))
+        setMemories(
+          [...chatItems, ...photoItems].sort((a, b) => b.yearsAgo - a.yearsAgo).slice(0, 3)
+        )
         setLoading(false)
       }
     }
     void load()
-    return () => { mounted = false }
+    return () => {
+      mounted = false
+    }
   }, [coupleId])
   return (
     <View style={styles.card}>
@@ -121,20 +123,29 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
         memories.map((memory) => (
           <View key={memory.id} style={styles.item}>
             <Text style={[styles.meta, { color: colors.textSecondary }]}>
-              {memory.yearsAgo}{' '}
-              years ago today
+              {memory.yearsAgo} years ago today
             </Text>
             {(() => {
-              const Icon = memory.source === 'photo' ? Camera : icons[memory.category ?? ''] ?? MessageCircle
+              const Icon =
+                memory.source === 'photo' ? Camera : (icons[memory.category ?? ''] ?? MessageCircle)
               return <Icon color={colors.accent1} size={20} />
             })()}
             {memory.source === 'photo' ? (
               <View style={styles.photoRow}>
-                {memory.imageUrl ? <Image source={{ uri: imageUrls[memory.id] ?? memory.imageUrl }} style={styles.thumbnail} /> : null}
+                {memory.imageUrl ? (
+                  <Image
+                    source={{ uri: imageUrls[memory.id] ?? memory.imageUrl }}
+                    style={styles.thumbnail}
+                  />
+                ) : null}
                 <Text style={[styles.quote, { color: colors.textPrimary }]}>{memory.title}</Text>
               </View>
-            ) : memory.quote ? <Text style={[styles.quote, { color: colors.textPrimary }]}>{memory.quote}</Text> : null}
-            {memory.context ? <Text style={[styles.muted, { color: colors.textSecondary }]}>{memory.context}</Text> : null}
+            ) : memory.quote ? (
+              <Text style={[styles.quote, { color: colors.textPrimary }]}>{memory.quote}</Text>
+            ) : null}
+            {memory.context ? (
+              <Text style={[styles.muted, { color: colors.textSecondary }]}>{memory.context}</Text>
+            ) : null}
           </View>
         ))
       )}
@@ -142,33 +153,34 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.accent1,
-    borderRadius: 16,
-    borderWidth: 1,
-    gap: 10,
-    padding: 24,
-    shadowColor: colors.accent1,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 14,
-    elevation: 5,
-  },
-  kicker: {
-    color: colors.accent2,
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-  },
-  item: { borderLeftColor: colors.accent2, borderLeftWidth: 2, gap: 4, paddingLeft: 10 },
-  meta: { color: colors.textSecondary, fontSize: 12 },
-  icon: { fontSize: 20 },
-  quote: { color: colors.textPrimary, fontSize: 15, lineHeight: 22 },
-  muted: { color: colors.textSecondary, fontSize: 13, lineHeight: 20 },
-  skeleton: { backgroundColor: colors.cardBorder, borderRadius: 12, height: 72 },
-  photoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  thumbnail: { width: 56, height: 56, borderRadius: 12 },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderColor: colors.accent1,
+      borderRadius: 16,
+      borderWidth: 1,
+      gap: 10,
+      padding: 24,
+      shadowColor: colors.accent1,
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.12,
+      shadowRadius: 14,
+      elevation: 5,
+    },
+    kicker: {
+      color: colors.accent2,
+      fontSize: 12,
+      fontWeight: '700',
+      letterSpacing: 1.5,
+      textTransform: 'uppercase',
+    },
+    item: { borderLeftColor: colors.accent2, borderLeftWidth: 2, gap: 4, paddingLeft: 10 },
+    meta: { color: colors.textSecondary, fontSize: 12 },
+    icon: { fontSize: 20 },
+    quote: { color: colors.textPrimary, fontSize: 15, lineHeight: 22 },
+    muted: { color: colors.textSecondary, fontSize: 13, lineHeight: 20 },
+    skeleton: { backgroundColor: colors.cardBorder, borderRadius: 12, height: 72 },
+    photoRow: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+    thumbnail: { width: 56, height: 56, borderRadius: 12 },
+  })

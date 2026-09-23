@@ -3,71 +3,84 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LogOut,
-  Calendar,
-  Camera,
-  DollarSign,
-  HeartPulse,
-  HelpCircle,
-  Home,
-  Info,
-  Image,
-  Leaf,
-  LockKeyhole,
-  MapPin,
-  MessageCircleHeart,
-  Gamepad2,
-  Music,
-  PhoneCall,
-  Settings,
-  Sparkles,
-  Star,
-  MonitorPlay,
-  BookHeart,
-  Infinity,
-  Languages,
+  LogOut, Calendar, Camera, DollarSign, HeartPulse, HelpCircle, Home, Info,
+  Image, Leaf, LockKeyhole, MapPin, MessageCircleHeart, Gamepad2, Music,
+  PhoneCall, Settings, Sparkles, Star, MonitorPlay, BookHeart, Infinity,
+  Languages, ClipboardList, Bell, Users, Shield, FileText,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { supabase } from '@/lib/supabase'
 
-const baseNavItems = [
-  { href: '/dashboard', key: 'home', icon: Home },
-  { href: '/memories', key: 'memories', icon: Camera },
-  { href: '/memories/map', key: 'memoryMap', icon: MapPin },
-  { href: '/our-story', key: 'ourStory', icon: BookHeart },
-  { href: '/chat', key: 'whispers', icon: MessageCircleHeart },
-  { href: '/calls', key: 'calls', icon: PhoneCall },
-  { href: '/care', key: 'care', icon: HeartPulse },
-  { href: '/wellness', key: 'wellness', icon: Leaf },
-  { href: '/calendar', key: 'plans', icon: Calendar },
-  { href: '/astrology', key: 'astrology', icon: Star },
-  { href: '/ai', key: 'ai', icon: Sparkles },
-  { href: '/vault', key: 'vault', icon: LockKeyhole },
-  { href: '/finance', key: 'finance', icon: DollarSign },
-  { href: '/watch-together', key: 'watchTogether', icon: MonitorPlay },
-  { href: '/learning', key: 'learning', icon: Languages },
-  { href: '/games', key: 'games', icon: Gamepad2 },
-  { href: '/music', key: 'music', icon: Music },
-  { href: '/gallery', key: 'gallery', icon: Image },
-  { href: '/location', key: 'location', icon: MapPin },
-  { href: '/settings', key: 'settings', icon: Settings },
-]
-
-const infoNavItems = [
-  { href: '/about', key: 'about', icon: Info },
-  { href: '/help', key: 'help', icon: HelpCircle },
+const navGroups = [
+  {
+    label: 'Home',
+    items: [
+      { href: '/dashboard', key: 'home', icon: Home },
+    ],
+  },
+  {
+    label: 'Connection',
+    items: [
+      { href: '/chat', key: 'whispers', icon: MessageCircleHeart },
+      { href: '/calls', key: 'calls', icon: PhoneCall },
+      { href: '/location', key: 'location', icon: MapPin },
+      { href: '/couple-linking', key: 'coupleLinking', icon: Users },
+    ],
+  },
+  {
+    label: 'Memories',
+    items: [
+      { href: '/memories', key: 'memories', icon: Camera },
+      { href: '/memories/map', key: 'memoryMap', icon: MapPin },
+      { href: '/our-story', key: 'ourStory', icon: BookHeart },
+      { href: '/gallery', key: 'gallery', icon: Image },
+      { href: '/time-capsules', key: 'timeCapsules', icon: Infinity },
+    ],
+  },
+  {
+    label: 'Plans',
+    items: [
+      { href: '/calendar', key: 'plans', icon: Calendar },
+      { href: '/plans', key: 'plans', icon: ClipboardList },
+      { href: '/reminders', key: 'reminders', icon: Bell },
+      { href: '/finance', key: 'finance', icon: DollarSign },
+    ],
+  },
+  {
+    label: 'Care & Play',
+    items: [
+      { href: '/care', key: 'care', icon: HeartPulse },
+      { href: '/wellness', key: 'wellness', icon: Leaf },
+      { href: '/watch-together', key: 'watchTogether', icon: MonitorPlay },
+      { href: '/learning', key: 'learning', icon: Languages },
+      { href: '/games', key: 'games', icon: Gamepad2 },
+      { href: '/music', key: 'music', icon: Music },
+      { href: '/astrology', key: 'astrology', icon: Star },
+      { href: '/ai', key: 'ai', icon: Sparkles },
+    ],
+  },
+  {
+    label: 'Account',
+    items: [
+      { href: '/vault', key: 'vault', icon: LockKeyhole },
+      { href: '/settings', key: 'settings', icon: Settings },
+      { href: '/about', key: 'about', icon: Info },
+      { href: '/help', key: 'help', icon: HelpCircle },
+      { href: '/privacy', key: 'privacy', icon: Shield },
+      { href: '/terms', key: 'terms', icon: FileText },
+    ],
+  },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
   const { t } = useLanguage()
-  const navItems = [...baseNavItems, ...infoNavItems]
 
   return (
     <aside aria-label="Main sidebar" className="flex h-full w-full flex-col rounded-panel border border-accent-1/20 bg-card px-3 py-6 shadow-lg backdrop-blur-xl">
       <Link href="/dashboard" className="mb-7 flex items-center gap-3 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-btn bg-gradient-to-br from-[var(--accent-1)] to-[var(--accent-2)] text-lg">
+        <div className="flex h-10 w-10 items-center justify-center rounded-btn bg-gradient-to-br from-accent-1 to-accent-2 text-lg">
           <Infinity size={22} aria-hidden="true" />
         </div>
 
@@ -82,25 +95,36 @@ export default function Sidebar() {
         </div>
       </Link>
 
-      <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-1">
-        {navItems.map(({ href, key, icon: Icon }) => {
-          const active = pathname === href
+      <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-2 overflow-y-auto">
+        {navGroups.map(({ label, items }) => (
+          <details key={label} open={items.some(({ href }) => pathname === href)} className="group/nav rounded-xl">
+            <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-text-2 hover:bg-soft-tint [&::-webkit-details-marker]:hidden">
+              {label}
+              <span aria-hidden="true" className="transition-transform group-open/nav:rotate-180">⌄</span>
+            </summary>
+            <div className="flex flex-col gap-1 pt-1">
+              {items.map(({ href, key, icon: Icon }) => {
+                const active = pathname === href
 
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm transition ${
-                active
-                  ? 'bg-accent-1/15 font-medium text-accent-1'
-                  : 'text-text-2 hover:bg-soft-tint hover:text-text-1'
-              }`}
-            >
-              <Icon size={17} />
-              {t(`nav.${key}`)}
-            </Link>
-          )
-        })}
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    aria-current={active ? 'page' : undefined}
+                    className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm transition ${
+                      active
+                        ? 'bg-accent-1/15 font-medium text-accent-1'
+                        : 'text-text-2 hover:bg-soft-tint hover:text-text-1'
+                    }`}
+                  >
+                    <Icon size={17} />
+                    {t(`nav.${key}`)}
+                  </Link>
+                )
+              })}
+            </div>
+          </details>
+        ))}
       </nav>
 
       <button

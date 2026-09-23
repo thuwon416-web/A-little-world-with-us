@@ -1,8 +1,10 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
+
 import { themes as themeTokens, semantic as semanticTokens } from '@/design-tokens'
 
-type CanonicalThemeName = 'lavender-mist' | 'peach-cream' | 'mint-whisper' | 'ocean-calm' | 'monochrome'
+type CanonicalThemeName =
+  'lavender-mist' | 'peach-cream' | 'mint-whisper' | 'ocean-calm' | 'monochrome'
 type LegacyThemeName = 'midnight' | 'sunset' | 'romantic' | 'ocean'
 export type ThemeName = CanonicalThemeName | LegacyThemeName
 export type ThemePreference = ThemeName

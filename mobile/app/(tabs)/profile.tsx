@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import BiometricAuth from '@/components/BiometricAuth'
-import { useAuth } from '@/lib/auth'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
+import { useAuth } from '@/lib/auth'
 
 export default function ProfileScreen() {
   const { colors } = useTheme()
-  const styles = useMemo(() => createStyles(colors, sizes), [colors])
+  const insets = useSafeAreaInsets()
+  const styles = useMemo(() => createStyles(colors, sizes, insets.top), [colors, insets.top])
   const { user, signOut } = useAuth()
   const [showBiometricAuth, setShowBiometricAuth] = useState(false)
 
@@ -59,12 +61,12 @@ export default function ProfileScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+const createStyles = (colors: ThemeColors, sizes: Sizes, paddingTop: number) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingTop: 72,
+      paddingTop,
       paddingHorizontal: 20,
     },
     eyebrow: {

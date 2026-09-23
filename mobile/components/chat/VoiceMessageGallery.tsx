@@ -72,19 +72,20 @@ export function VoiceMessageGallery({ messages }: Props) {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  wrapper: { marginBottom: 10 },
-  heading: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
-  title: { color: colors.accent2, fontSize: 12, fontWeight: '700' },
-  list: { gap: 8 },
-  item: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: colors.cardBg,
-    borderRadius: 14,
-    paddingHorizontal: 11,
-    paddingVertical: 8,
-  },
-  label: { color: colors.textPrimary, fontSize: 11 },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    wrapper: { marginBottom: 10 },
+    heading: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6 },
+    title: { color: colors.accent2, fontSize: 12, fontWeight: '700' },
+    list: { gap: 8 },
+    item: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      paddingHorizontal: 11,
+      paddingVertical: 8,
+    },
+    label: { color: colors.textPrimary, fontSize: 11 },
+  })

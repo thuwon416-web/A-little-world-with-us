@@ -4,8 +4,6 @@ import { Inter, Playfair_Display } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
-import InteractiveCursor from '@/components/effects/InteractiveCursor'
-import AmbientBackground from '@/components/effects/ambient-background'
 import { Toaster } from '@/components/ui/sonner'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import AIChatWidget from '@/components/AIChatWidget'
@@ -17,10 +15,10 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display' })
 
 const descriptions = [
-  'A private little world for KoKo and Pu Tuu â€” memories, love, and every day in between',
-  'Our little world â€” where every moment together matters',
-  'Two souls, one little world â€” love, care, and everything in between',
-  'A quiet space for us â€” memories, moods, and everyday love',
+  'A private little world for KoKo and Pu Tuu — memories, love, and every day in between',
+  'Our little world — where every moment together matters',
+  'Two souls, one little world — love, care, and everything in between',
+  'A quiet space for us — memories, moods, and everyday love',
   'Just us, our world, and all the little things that make it ours',
 ]
 
@@ -44,7 +42,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: 'var(--accent-1)',
+  themeColor: 'rgb(var(--accent-1))',
   width: 'device-width',
   initialScale: 1,
 }
@@ -97,8 +95,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               >
                 Skip to main content
               </a>
-              <AmbientBackground density="medium" />
-              <InteractiveCursor />
               {children}
               <Toaster />
               <PWAInstallPrompt />

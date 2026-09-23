@@ -24,13 +24,21 @@ export interface EmptyStateProps {
 export function EmptyState({ icon: Icon, title, description, action, style }: EmptyStateProps) {
   const { colors } = useTheme()
   return (
-    <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }, style]}>
+    <View
+      style={[
+        styles.card,
+        { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        style,
+      ]}
+    >
       <View style={styles.iconWrap}>
         <Icon color={colors.accent1} size={30} />
       </View>
 
       <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
-      {description ? <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text> : null}
+      {description ? (
+        <Text style={[styles.description, { color: colors.textSecondary }]}>{description}</Text>
+      ) : null}
 
       {action ? (
         <TouchableOpacity

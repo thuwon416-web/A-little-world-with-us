@@ -38,7 +38,7 @@ export default function ThemeToggle() {
               }}
               className={`flex w-full items-center justify-between gap-2 rounded-full border px-3 py-2 text-left text-[11px] transition-all ${
                 isActive
-                  ? 'border-accent-1 bg-accent-1/12 text-text-1 shadow-[0_0_18px_rgba(255,182,193,0.2)]'
+                  ? 'border-accent-1 bg-accent-1/12 text-text-1 shadow-[0_0_18px_rgb(var(--accent-1)_/_0.2)]'
                   : 'border-accent-1/20 bg-card text-text-1/80 hover:bg-card'
               }`}
               aria-label={`Set ${label} theme`}

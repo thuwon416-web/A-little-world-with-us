@@ -1,6 +1,7 @@
-import React from 'react'
 import { Check } from 'lucide-react-native'
+import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
 import { useTheme } from '@/context/ThemeContext'
 
 interface BucketListItemProps {
@@ -13,14 +14,35 @@ interface BucketListItemProps {
 export function BucketListItem({ item, completed, completedAt, onToggle }: BucketListItemProps) {
   const { colors } = useTheme()
   return (
-    <TouchableOpacity hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }} style={[styles.row, { borderBottomColor: colors.cardBorder }]} onPress={onToggle} activeOpacity={0.85}>
-      <View style={[styles.check, { borderColor: colors.accent2 }, completed && { backgroundColor: colors.success, borderColor: colors.success }]}>
+    <TouchableOpacity
+      hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }}
+      style={[styles.row, { borderBottomColor: colors.cardBorder }]}
+      onPress={onToggle}
+      activeOpacity={0.85}
+    >
+      <View
+        style={[
+          styles.check,
+          { borderColor: colors.accent2 },
+          completed && { backgroundColor: colors.success, borderColor: colors.success },
+        ]}
+      >
         {completed ? <Check size={14} color={colors.background} /> : null}
       </View>
       <View style={styles.meta}>
-        <Text style={[styles.title, { color: completed ? colors.textSecondary : colors.textPrimary }, completed && styles.doneTitle]}>{item}</Text>
+        <Text
+          style={[
+            styles.title,
+            { color: completed ? colors.textSecondary : colors.textPrimary },
+            completed && styles.doneTitle,
+          ]}
+        >
+          {item}
+        </Text>
         {completedAt ? (
-          <Text style={[styles.date, { color: colors.textSecondary }]}>Done {new Date(completedAt).toLocaleDateString()}</Text>
+          <Text style={[styles.date, { color: colors.textSecondary }]}>
+            Done {new Date(completedAt).toLocaleDateString()}
+          </Text>
         ) : null}
       </View>
     </TouchableOpacity>

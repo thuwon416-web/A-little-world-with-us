@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import type { ChatMessageType, NativeChatMessage } from './chat/chat-types'
+
 import { useTheme } from '@/context/ThemeContext'
 
 export type ChatMessage = NativeChatMessage & {
@@ -117,7 +118,11 @@ export function ChatBubble({
         ) : message.type === 'voice' || message.type === 'audio' ? (
           <TouchableOpacity style={styles.mediaRow} onPress={() => void toggleAudio()}>
             <View style={styles.mediaIcon}>
-              {playing ? <Square color={colors.background} size={15} /> : <Play color={colors.background} size={15} />}
+              {playing ? (
+                <Square color={colors.background} size={15} />
+              ) : (
+                <Play color={colors.background} size={15} />
+              )}
             </View>
             <Text style={styles.text}>
               {playing
@@ -175,55 +180,56 @@ export function ChatBubble({
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  row: { flexDirection: 'column', marginBottom: 8 },
-  rowMe: { alignItems: 'flex-end' },
-  rowThem: { alignItems: 'flex-start' },
-  bubble: { maxWidth: '84%', paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
-  bubbleMe: { backgroundColor: colors.accent1, borderBottomRightRadius: 4 },
-  bubbleThem: { backgroundColor: colors.surface, borderBottomLeftRadius: 4 },
-  text: { color: colors.textPrimary, fontSize: 15, lineHeight: 21, flexShrink: 1 },
-  heading: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  locationTitle: { color: colors.textPrimary, fontSize: 15, fontWeight: '700', marginBottom: 4 },
-  sosText: { color: colors.error, fontSize: 15, fontWeight: '700' },
-  replyContext: { color: colors.accent2, fontSize: 11, marginBottom: 6, fontStyle: 'italic' },
-  replyLabel: { color: colors.accent2, fontSize: 11, fontStyle: 'italic' },
-  replyPreview: { color: colors.textPrimary, fontSize: 12, marginTop: 2 },
-  highlightedRow: {
-    backgroundColor: `${colors.accent1}22`,
-    borderRadius: 20,
-    padding: 4,
-    marginHorizontal: -4,
-  },
-  photo: { width: 220, height: 180, borderRadius: 12 },
-  gif: { width: 220, height: 150, borderRadius: 12 },
-  mediaRow: { flexDirection: 'row', alignItems: 'center', gap: 9, maxWidth: 220 },
-  mediaIcon: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: colors.accent2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  actions: { flexDirection: 'row', gap: 12, justifyContent: 'flex-end', marginTop: 8 },
-  timestampRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 4,
-    marginTop: 4,
-    opacity: 0.7,
-  },
-  time: {
-    color: colors.background,
-    fontSize: 10,
-  },
-  statusPlaceholder: {
-    width: 0,
-    height: 0,
-  },
-  reactionPlaceholder: {
-    display: 'none',
-  },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    row: { flexDirection: 'column', marginBottom: 8 },
+    rowMe: { alignItems: 'flex-end' },
+    rowThem: { alignItems: 'flex-start' },
+    bubble: { maxWidth: '84%', paddingHorizontal: 14, paddingVertical: 12, borderRadius: 16 },
+    bubbleMe: { backgroundColor: colors.accent1, borderBottomRightRadius: 4 },
+    bubbleThem: { backgroundColor: colors.surface, borderBottomLeftRadius: 4 },
+    text: { color: colors.textPrimary, fontSize: 15, lineHeight: 21, flexShrink: 1 },
+    heading: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+    locationTitle: { color: colors.textPrimary, fontSize: 15, fontWeight: '700', marginBottom: 4 },
+    sosText: { color: colors.error, fontSize: 15, fontWeight: '700' },
+    replyContext: { color: colors.accent2, fontSize: 11, marginBottom: 6, fontStyle: 'italic' },
+    replyLabel: { color: colors.accent2, fontSize: 11, fontStyle: 'italic' },
+    replyPreview: { color: colors.textPrimary, fontSize: 12, marginTop: 2 },
+    highlightedRow: {
+      backgroundColor: `${colors.accent1}22`,
+      borderRadius: 20,
+      padding: 4,
+      marginHorizontal: -4,
+    },
+    photo: { width: 220, height: 180, borderRadius: 12 },
+    gif: { width: 220, height: 150, borderRadius: 12 },
+    mediaRow: { flexDirection: 'row', alignItems: 'center', gap: 9, maxWidth: 220 },
+    mediaIcon: {
+      width: 30,
+      height: 30,
+      borderRadius: 15,
+      backgroundColor: colors.accent2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    actions: { flexDirection: 'row', gap: 12, justifyContent: 'flex-end', marginTop: 8 },
+    timestampRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: 4,
+      marginTop: 4,
+      opacity: 0.7,
+    },
+    time: {
+      color: colors.background,
+      fontSize: 10,
+    },
+    statusPlaceholder: {
+      width: 0,
+      height: 0,
+    },
+    reactionPlaceholder: {
+      display: 'none',
+    },
+  })

@@ -68,6 +68,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Supabase marks sessions that have an enrolled TOTP factor as requiring AAL2.
+  // Keep private routes behind the second-factor challenge after password sign-in.
+  if (!pathname.startsWith('/mfa')) {
+    const { data: assurance } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+    if (assurance?.nextLevel === 'aal2' && assurance.currentLevel !== 'aal2') {
+      const url = request.nextUrl.clone()
+      url.pathname = '/mfa'
+      url.search = ''
+      const redirect = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie))
+      return redirect
+    }
+  }
+
   return supabaseResponse
 }
 

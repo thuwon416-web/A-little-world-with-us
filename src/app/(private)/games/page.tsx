@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Gamepad2, Sparkles, Trophy } from 'lucide-react'
 
@@ -11,55 +12,22 @@ const DailyQuestionGame = dynamic(() => import('@/features/games/DailyQuestionGa
 const TicTacToe = dynamic(() => import('@/features/games/TicTacToe'), { loading: gameLoading })
 const ScavengerHunt = dynamic(() => import('@/features/games/ScavengerHunt'), { loading: gameLoading })
 const LoveWeather = dynamic(() => import('@/features/games/LoveWeather'), { loading: gameLoading })
-const CoupleScoreboard = dynamic(() => import('@/features/games/CoupleScoreboard'), { loading: gameLoading })
 const FuturePredictions = dynamic(() => import('@/features/games/FuturePredictions'), { loading: gameLoading })
-const GiftRecommender = dynamic(() => import('@/features/games/GiftRecommender'), { loading: gameLoading })
 const RelationshipQuests = dynamic(() => import('@/features/games/RelationshipQuests'), { loading: gameLoading })
 
 function GameCard({ children }: { children: React.ReactNode }) {
   return <div className="glass-card rounded-panel p-5">{children}</div>
 }
 
-function QuizPlaceholderCard({
-  title,
-  subtitle,
-  badge,
-}: {
-  title: string
-  subtitle: string
-  badge?: string
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="glass-card rounded-btn p-5"
-    >
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="font-semibold text-text-1">{title}</p>
-          <p className="mt-1 text-xs text-text-2">{subtitle}</p>
-        </div>
-        {badge ? (
-          <span className="rounded-full bg-accent-1/10 px-2 py-1 text-[10px] text-accent-1">
-            {badge}
-          </span>
-        ) : null}
-      </div>
-      <button
-        type="button"
-        onClick={() => window.alert(`${title} is coming soon!`)}
-        className="mt-4 w-full rounded-full bg-accent-1/15 py-2 text-xs font-semibold text-accent-1 transition hover:bg-accent-1/25"
-      >
-        Coming soon
-      </button>
-    </motion.div>
-  )
-}
-
 export default function GamesPage() {
+  const [activeTab, setActiveTab] = useState<'quizzes' | 'playful' | 'trackers'>('quizzes')
+  const tabs = [
+    { id: 'quizzes' as const, label: 'Quizzes', Icon: Sparkles },
+    { id: 'playful' as const, label: 'Interactive play', Icon: Gamepad2 },
+    { id: 'trackers' as const, label: 'Trackers & insights', Icon: Trophy },
+  ]
   return (
-    <div className="mx-auto min-h-screen max-w-6xl space-y-10 px-4 py-8">
+    <div className="mx-auto min-h-screen max-w-6xl space-y-6 px-4 py-8">
       <motion.header initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="rounded-panel border border-accent-1/20 bg-card p-6">
         <div className="flex items-center gap-3 text-accent-1">
           <Gamepad2 className="h-7 w-7" />
@@ -68,35 +36,36 @@ export default function GamesPage() {
         <p className="mt-2 text-sm text-text-2">Little games for two hearts.</p>
       </motion.header>
 
-      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }} className="space-y-4">
+      <div role="tablist" aria-label="Game categories" className="flex flex-wrap gap-2">
+        {tabs.map(({ id, label, Icon }) => (
+          <button key={id} type="button" role="tab" aria-selected={activeTab === id} aria-controls={`games-panel-${id}`} onClick={() => setActiveTab(id)} className={`inline-flex min-h-11 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition ${activeTab === id ? 'bg-accent-1 text-white' : 'bg-card text-text-2 hover:bg-soft-tint'}`}>
+            <Icon className="h-4 w-4" aria-hidden="true" />{label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'quizzes' ? <motion.section id="games-panel-quizzes" role="tabpanel" aria-label="Quizzes" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
         <h2 className="flex items-center gap-2 text-2xl font-semibold text-text-1"><Sparkles className="h-5 w-5 text-accent-1" /> Quizzes</h2>
         <div className="grid gap-6 lg:grid-cols-2">
           <GameCard><LoveQuiz /></GameCard>
           <GameCard><DailyQuestionGame /></GameCard>
-          <QuizPlaceholderCard title="Couple Quiz" subtitle="Shared questions for two" />
-          <QuizPlaceholderCard title="Would You Rather" subtitle="20 questions" badge="20 questions" />
-          <QuizPlaceholderCard title="Never Have I Ever" subtitle="30 questions" badge="30 questions" />
-          <QuizPlaceholderCard title="36 Questions" subtitle="36 questions" badge="36 questions" />
         </div>
-      </motion.section>
+      </motion.section> : null}
 
-      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-4">
+      {activeTab === 'playful' ? <motion.section id="games-panel-playful" role="tabpanel" aria-label="Playful games" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
         <h2 className="flex items-center gap-2 text-2xl font-semibold text-text-1"><Gamepad2 className="h-5 w-5 text-accent-1" /> Playful</h2>
         <div className="grid gap-6 lg:grid-cols-2">
           <GameCard><LoveCalculatorMigrated /></GameCard>
           <GameCard><TicTacToe /></GameCard>
           <GameCard><ScavengerHunt /></GameCard>
           <GameCard><LoveWeather /></GameCard>
-          <GameCard><CoupleScoreboard /></GameCard>
-          <GameCard><FuturePredictions /></GameCard>
-          <GameCard><GiftRecommender /></GameCard>
         </div>
-      </motion.section>
+      </motion.section> : null}
 
-      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="space-y-4">
-        <h2 className="flex items-center gap-2 text-2xl font-semibold text-text-1"><Trophy className="h-5 w-5 text-accent-1" /> Quests</h2>
-        <GameCard><RelationshipQuests /></GameCard>
-      </motion.section>
+      {activeTab === 'trackers' ? <motion.section id="games-panel-trackers" role="tabpanel" aria-label="Trackers and insights" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+        <h2 className="flex items-center gap-2 text-2xl font-semibold text-text-1"><Trophy className="h-5 w-5 text-accent-1" /> Trackers &amp; insights</h2>
+        <div className="grid gap-6 lg:grid-cols-2"><GameCard><FuturePredictions /></GameCard><GameCard><RelationshipQuests /></GameCard></div>
+      </motion.section> : null}
     </div>
   )
 }

@@ -1,4 +1,4 @@
-export function Spinner({ size = 20, color = 'var(--accent-1)', className = '' }: { size?: number; color?: string; className?: string }) {
+export function Spinner({ size = 20, color = 'rgb(var(--accent-1))', className = '' }: { size?: number; color?: string; className?: string }) {
   return (
     <div
       className={`inline-block animate-spin rounded-full border-2 border-transparent border-t-current ${className}`.trim()}

@@ -4,7 +4,7 @@ Master schema files for A Little World With Us.
 
 ## Run Order
 
-Run in this order on a **fresh/dev** database:
+Run in this order only when preparing a **fresh or disposable** database. `00_core.sql` drops and recreates the public schema; never use this sequence to update a database whose data must be kept.
 
 | # | File | Purpose |
 |---|------|---------|
@@ -19,6 +19,12 @@ Run in this order on a **fresh/dev** database:
 | 08 | `08_learning.sql` | Korean lessons, vocab, quizzes |
 | 09 | `09_memories.sql` | Relationship memories + metadata |
 | 10 | `10_misc.sql` | Playlist, calendar, wishlist, watch, telegram |
+| 11 | `11_sos_constraint.sql` | Allow SOS chat message type |
+| 12 | `12_admin_roles.sql` | Role-based admin checks |
+| 14 | `14_rpc_functions.sql` | On This Day and memory statistics functions |
+| 15a | `15_media_mime_types.sql` | Media MIME type columns |
+| 15b | `15_performance_indexes.sql` | Query performance indexes |
+| 16 | `16_telegram_import.sql` | Existing-database Telegram import table and couple-only RLS |
 
 ## Warning
 
@@ -26,18 +32,21 @@ Run in this order on a **fresh/dev** database:
 
 ## Original Files
 
-The 45 original migrations were consolidated into the 11 files above.
-Originals are preserved in **git history** only — use:
+The base schema and follow-on scripts above are the maintained bootstrap set. Older source migrations are preserved in **git history** — use:
   git log --all -- supabase/bootstrap/
   git show <commit>:supabase/bootstrap/<file>.sql
 
 ## How to Run
 
 1. Supabase → SQL Editor
-2. Paste `00_core.sql` → Run
+2. Confirm this is a fresh or disposable database, then paste `00_core.sql` → Run
 3. Run the verification SELECTs included in each file
-4. Repeat 01 → 10 in order
-5. Verify schema after all 11 (see docs/manual-queue.md)
+4. Repeat 01 → 10, then 11, 12, 14, 15a, 15b, and 16 in order
+5. Verify the required tables, RLS policies, and media columns before deploying app code
+
+## Updating an existing database
+
+Do not rerun `00_core.sql` on an existing database. To resolve the missing `memories.mime_type` column, review and run `15_media_mime_types.sql` on its own. To enable Telegram archive import, run `16_telegram_import.sql` on its own. Both scripts are repeatable and preserve existing rows. The app reads `memories.mime_type`, `messages.media_mime_type`, and `time_capsule_attachments.mime_type`; the database column is named `mime_type`, not `memories_mime_type`.
 
 ---
 

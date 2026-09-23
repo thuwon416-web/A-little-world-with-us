@@ -221,7 +221,8 @@ export async function syncMessages(lastSyncAt?: string) {
               fields.reply_to = remoteMessage.reply_to ?? fields.reply_to
               fields.synced = true
               fields.encrypted = remoteMessage.encrypted ?? fields.encrypted
-              fields.encryption_version = remoteMessage.encryption_version ?? fields.encryption_version
+              fields.encryption_version =
+                remoteMessage.encryption_version ?? fields.encryption_version
             })
           }
         }

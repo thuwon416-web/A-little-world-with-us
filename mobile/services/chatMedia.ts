@@ -1,6 +1,6 @@
 import type { ChatAttachment } from '@/components/chat/chat-types'
-import { supabase } from '@/lib/supabase'
 import { encryptMedia } from '@/lib/mediaEncryption'
+import { supabase } from '@/lib/supabase'
 
 export type ChatMediaBucket = 'chat_photos' | 'voice_messages' | 'chat_files'
 
@@ -53,10 +53,10 @@ export async function uploadChatMedia(
     throw new Error('File too large. Files must be 5 MB or smaller.')
   }
   const path = `${userId}/${messageId}.${extensionFor(attachment.name, attachment.mimeType)}`
-  
+
   // Encrypt before upload
   const encrypted = await encryptMedia(new Uint8Array(body), coupleId)
-  
+
   const { error } = await supabase.storage.from(bucket).upload(path, encrypted, {
     contentType: 'application/octet-stream',
     upsert: false,
@@ -68,7 +68,7 @@ export async function uploadChatMedia(
 export async function getChatMediaUrl(bucket: ChatMediaBucket, path: string | null) {
   if (!path) return null
   if (/^https?:\/\//i.test(path)) return path
-  
+
   const cacheKey = `${bucket}:${path}`
   const now = Date.now()
   const FIVE_MINUTES_MS = 5 * 60 * 1000
@@ -92,11 +92,11 @@ export async function getChatMediaUrl(bucket: ChatMediaBucket, path: string | nu
 
   const { data, error } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60)
   if (error || !data?.signedUrl) return null
-  
+
   // Cache with 55-minute expiry (5-minute buffer)
   signedUrlCache.set(cacheKey, {
     url: data.signedUrl,
-    expiresAt: now + (55 * 60 * 1000),
+    expiresAt: now + 55 * 60 * 1000,
   })
 
   return data.signedUrl

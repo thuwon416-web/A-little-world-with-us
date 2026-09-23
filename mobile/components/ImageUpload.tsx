@@ -2,10 +2,10 @@ import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 
-import { useAuth } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/context/ThemeContext'
+import { useAuth } from '@/lib/auth'
 import { encryptMedia } from '@/lib/mediaEncryption'
+import { supabase } from '@/lib/supabase'
 
 export default function ImageUpload({
   onUpload,
@@ -129,59 +129,60 @@ export default function ImageUpload({
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    padding: 18,
-    marginBottom: 18,
-  },
-  label: {
-    color: colors.accent2,
-    fontSize: 12,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    marginBottom: 12,
-  },
-  selectButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 18,
-    paddingVertical: 18,
-    backgroundColor: colors.cardBg,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  selectButtonText: {
-    color: colors.textPrimary,
-    fontWeight: '700',
-  },
-  preview: {
-    width: '100%',
-    height: 220,
-    borderRadius: 18,
-    marginBottom: 14,
-  },
-  uploadButton: {
-    backgroundColor: colors.accent2,
-    borderRadius: 999,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  uploadButtonDisabled: {
-    opacity: 0.5,
-  },
-  uploadButtonText: {
-    color: colors.background,
-    fontWeight: '700',
-    fontSize: 14,
-  },
-  error: {
-    color: colors.error,
-    fontSize: 12,
-    marginTop: 8,
-  },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    card: {
+      backgroundColor: colors.surface,
+      borderRadius: 24,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      padding: 18,
+      marginBottom: 18,
+    },
+    label: {
+      color: colors.accent2,
+      fontSize: 12,
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+      marginBottom: 12,
+    },
+    selectButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 18,
+      paddingVertical: 18,
+      backgroundColor: colors.cardBg,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    selectButtonText: {
+      color: colors.textPrimary,
+      fontWeight: '700',
+    },
+    preview: {
+      width: '100%',
+      height: 220,
+      borderRadius: 18,
+      marginBottom: 14,
+    },
+    uploadButton: {
+      backgroundColor: colors.accent2,
+      borderRadius: 999,
+      paddingVertical: 12,
+      alignItems: 'center',
+      marginTop: 12,
+    },
+    uploadButtonDisabled: {
+      opacity: 0.5,
+    },
+    uploadButtonText: {
+      color: colors.background,
+      fontWeight: '700',
+      fontSize: 14,
+    },
+    error: {
+      color: colors.error,
+      fontSize: 12,
+      marginTop: 8,
+    },
+  })

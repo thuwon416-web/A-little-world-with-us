@@ -103,7 +103,7 @@ export default function CoupleDreamBoard() {
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-card">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-1)] to-[var(--accent-2)]"
+            className="h-full rounded-full bg-gradient-to-r from-accent-1 via-accent-1 to-accent-2"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
             transition={{ duration: 0.45 }}
@@ -150,7 +150,7 @@ export default function CoupleDreamBoard() {
         </button>
       </div>
 
-      <div className="rounded-btn border border-accent-1/30 bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-1)] p-3">
+      <div className="rounded-btn border border-accent-1/30 bg-gradient-to-r from-accent-1 to-accent-1 p-3">
         <div className="mb-2 flex items-center gap-2 text-accent-2">
           <MapPin className="h-4 w-4" />
           <span className="text-xs uppercase tracking-[0.2em]">Next date idea</span>

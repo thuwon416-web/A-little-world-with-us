@@ -2,8 +2,10 @@ import * as ImagePicker from 'expo-image-picker'
 import { Image as ImageIcon, Send, X } from 'lucide-react-native'
 import { useState } from 'react'
 import { Alert, Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import type { ChatAttachment } from './chat-types'
+
 import { useTheme } from '@/context/ThemeContext'
 
 type Props = {
@@ -14,6 +16,7 @@ type Props = {
 
 export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = createStyles(colors)
   const [photo, setPhoto] = useState<ChatAttachment | null>(null)
   const [sending, setSending] = useState(false)
@@ -55,7 +58,7 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.card}>
+        <View style={[styles.card, { paddingBottom: insets.bottom }]}>
           <View style={styles.header}>
             <Text style={styles.title}>Share photo</Text>
             <TouchableOpacity onPress={onClose} accessibilityLabel="Close photo picker">
@@ -87,50 +90,52 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
             <Send color={colors.background} size={18} />
             <Text style={styles.sendText}>{sending ? 'Sending...' : 'Send photo'}</Text>
           </TouchableOpacity>
+          <View style={{ height: insets.bottom }} />
         </View>
       </View>
     </Modal>
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: colors.surface, borderRadius: 24, padding: 20 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: { color: colors.textPrimary, fontSize: 20, fontWeight: '700' },
-  secondary: { color: colors.textSecondary, marginTop: 12 },
-  dropzone: {
-    height: 220,
-    borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: `${colors.accent1}66`,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  preview: { width: '100%', height: 260, borderRadius: 16 },
-  clear: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-    backgroundColor: '#0009',
-    borderRadius: 20,
-    padding: 8,
-  },
-  send: {
-    marginTop: 16,
-    backgroundColor: colors.accent1,
-    borderRadius: 14,
-    padding: 14,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  sendText: { color: colors.background, fontWeight: '700' },
-  disabled: { opacity: 0.45 },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
+    card: { backgroundColor: colors.surface, borderRadius: 24, padding: 20 },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 16,
+    },
+    title: { color: colors.textPrimary, fontSize: 20, fontWeight: '700' },
+    secondary: { color: colors.textSecondary, marginTop: 12 },
+    dropzone: {
+      height: 220,
+      borderWidth: 2,
+      borderStyle: 'dashed',
+      borderColor: `${colors.accent1}66`,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    preview: { width: '100%', height: 260, borderRadius: 16 },
+    clear: {
+      position: 'absolute',
+      right: 10,
+      top: 10,
+      backgroundColor: '#0009',
+      borderRadius: 20,
+      padding: 8,
+    },
+    send: {
+      marginTop: 16,
+      backgroundColor: colors.accent1,
+      borderRadius: 14,
+      padding: 14,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: 8,
+    },
+    sendText: { color: colors.background, fontWeight: '700' },
+    disabled: { opacity: 0.45 },
+  })

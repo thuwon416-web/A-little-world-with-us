@@ -1,19 +1,46 @@
-import { useRouter } from 'expo-router'
-import { useEffect, useMemo, useState } from 'react'
 import { Audio } from 'expo-av'
+import { useRouter } from 'expo-router'
 import * as Speech from 'expo-speech'
-import { Check, Frown, Heart, Meh, Mic, Pause, Pencil, Play, Smile, Sparkles, Square, Trash2, TriangleAlert, Volume2, Wand2 } from 'lucide-react-native'
-import { ActivityIndicator, Alert, FlatList, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import {
+  Check,
+  Frown,
+  Heart,
+  Meh,
+  Mic,
+  Pause,
+  Pencil,
+  Play,
+  Smile,
+  Sparkles,
+  Square,
+  Trash2,
+  TriangleAlert,
+  Volume2,
+  Wand2,
+} from 'lucide-react-native'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import MemorySlideshow from '@/components/memories/MemorySlideshow'
+import SlideshowLaunchButton from '@/components/memories/SlideshowLaunchButton'
 import { Modal } from '@/components/ui/Modal'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
+import { downloadDecryptAndCache, encryptMedia } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 import { deleteMemory, getMemories, MemoryRecord } from '@/services/memories'
-import MemorySlideshow from '@/components/memories/MemorySlideshow'
-import SlideshowLaunchButton from '@/components/memories/SlideshowLaunchButton'
-import { downloadDecryptAndCache, encryptMedia, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 
 const categories = ['all', 'favorite', 'travel', 'ritual', 'journal'] as const
 type JournalMood = 'happy' | 'okay' | 'sad' | 'loved' | 'anxious'
@@ -31,8 +58,9 @@ const JOURNAL_MOODS: { id: JournalMood; label: string; Icon: typeof Smile }[] = 
 
 export default function MemoriesScreen() {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const router = useRouter()
-  const styles = useMemo(() => createStyles(colors, sizes), [colors])
+  const styles = useMemo(() => createStyles(colors, sizes, insets.top), [colors, insets.top])
   const [memories, setMemories] = useState<JournalMemory[]>([])
   const [filter, setFilter] = useState<(typeof categories)[number]>('all')
   const [error, setError] = useState('')
@@ -70,7 +98,10 @@ export default function MemoriesScreen() {
     const { data, error: detailsError } = await supabase
       .from('memories')
       .select('id,description,metadata')
-      .in('id', records.map((memory) => memory.id))
+      .in(
+        'id',
+        records.map((memory) => memory.id)
+      )
     if (detailsError) throw new Error(detailsError.message)
     const details = new Map(
       (data ?? []).map((item) => [
@@ -105,11 +136,14 @@ export default function MemoriesScreen() {
         setError(caught instanceof Error ? caught.message : 'Unable to load memories.')
       )
   }, [])
-  useEffect(() => () => {
-    if (journalRecording) void journalRecording.stopAndUnloadAsync()
-    if (journalSound) void journalSound.unloadAsync()
-    void Speech.stop()
-  }, [journalRecording, journalSound])
+  useEffect(
+    () => () => {
+      if (journalRecording) void journalRecording.stopAndUnloadAsync()
+      if (journalSound) void journalSound.unloadAsync()
+      void Speech.stop()
+    },
+    [journalRecording, journalSound]
+  )
   const visible = useMemo(
     () => (filter === 'all' ? memories : memories.filter((memory) => memory.category === filter)),
     [filter, memories]
@@ -249,7 +283,7 @@ export default function MemoriesScreen() {
       if (coupleError || !coupleLink?.couple_id) {
         throw new Error(coupleError?.message || 'No accepted couple is linked to this account.')
       }
-      let voiceUrl = journalVoiceRemoteUrl
+      const voiceUrl = journalVoiceRemoteUrl
       if (journalVoiceUri && !journalVoiceRemoteUrl) {
         setJournalUploadingVoice(true)
         const filePath = `journal/${coupleLink.couple_id}/${Date.now()}.m4a`
@@ -257,13 +291,21 @@ export default function MemoriesScreen() {
         const encryptedData = await encryptMedia(new Uint8Array(arraybuffer), coupleLink.couple_id)
         const { error: uploadError } = await supabase.storage
           .from('memories')
-          .upload(filePath, encryptedData, { contentType: 'application/octet-stream', upsert: false })
+          .upload(filePath, encryptedData, {
+            contentType: 'application/octet-stream',
+            upsert: false,
+          })
         if (uploadError) throw new Error(`Voice upload failed: ${uploadError.message}`)
-        const voiceUrl = await downloadDecryptAndCache(coupleLink.couple_id, 'memories', filePath, 'audio/m4a')
+        const voiceUrl = await downloadDecryptAndCache(
+          coupleLink.couple_id,
+          'memories',
+          filePath,
+          'audio/m4a'
+        )
         setJournalVoiceRemoteUrl(voiceUrl)
       }
       const existingMeta = editingJournalId
-        ? memories.find((memory) => memory.id === editingJournalId)?.metadata ?? {}
+        ? (memories.find((memory) => memory.id === editingJournalId)?.metadata ?? {})
         : {}
       const payload = {
         couple_id: coupleLink.couple_id,
@@ -273,7 +315,11 @@ export default function MemoriesScreen() {
         category: 'journal' as const,
         date: new Date().toISOString().slice(0, 10),
         mime_type: 'audio/m4a',
-        metadata: { ...existingMeta, mood_tag: journalMood, ...(voiceUrl ? { voice_url: voiceUrl } : {}) },
+        metadata: {
+          ...existingMeta,
+          mood_tag: journalMood,
+          ...(voiceUrl ? { voice_url: voiceUrl } : {}),
+        },
       }
       const query = editingJournalId
         ? supabase.from('memories').update(payload).eq('id', editingJournalId).select().single()
@@ -283,12 +329,17 @@ export default function MemoriesScreen() {
       const saved = data as JournalMemory
       setMemories((current) =>
         editingJournalId
-          ? current.map((memory) => (memory.id === editingJournalId ? { ...memory, ...saved } : memory))
+          ? current.map((memory) =>
+              memory.id === editingJournalId ? { ...memory, ...saved } : memory
+            )
           : [saved, ...current]
       )
       closeJournalModal()
     } catch (caught) {
-      Alert.alert('Unable to save journal', caught instanceof Error ? caught.message : 'Unable to save journal.')
+      Alert.alert(
+        'Unable to save journal',
+        caught instanceof Error ? caught.message : 'Unable to save journal.'
+      )
     } finally {
       setJournalUploadingVoice(false)
       setJournalSaving(false)
@@ -298,7 +349,9 @@ export default function MemoriesScreen() {
     if (reflectingId) return
     setReflectingId(memory.id)
     try {
-      const { data: { session } } = await supabase.auth.getSession()
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
       const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
       if (!webUrl || !session?.access_token) throw new Error('Please sign in again.')
       const response = await fetch(`${webUrl}/api/ai/journal-reflect`, {
@@ -311,13 +364,18 @@ export default function MemoriesScreen() {
       })
       const body = (await response.json()) as { reflection?: string; error?: string }
       if (!response.ok || !body.reflection) throw new Error(body.error || 'Reflection failed.')
-      setMemories((current) => current.map((item) =>
-        item.id === memory.id
-          ? { ...item, metadata: { ...(item.metadata ?? {}), ai_reflection: body.reflection } }
-          : item
-      ))
+      setMemories((current) =>
+        current.map((item) =>
+          item.id === memory.id
+            ? { ...item, metadata: { ...(item.metadata ?? {}), ai_reflection: body.reflection } }
+            : item
+        )
+      )
     } catch (caught) {
-      Alert.alert('AI reflection', caught instanceof Error ? caught.message : 'Unable to reflect right now.')
+      Alert.alert(
+        'AI reflection',
+        caught instanceof Error ? caught.message : 'Unable to reflect right now.'
+      )
     } finally {
       setReflectingId(null)
     }
@@ -377,7 +435,9 @@ export default function MemoriesScreen() {
       }
       setCurationStory(body.story)
     } catch (caught) {
-      setCurationError(caught instanceof Error ? caught.message : 'Unable to create a story right now.')
+      setCurationError(
+        caught instanceof Error ? caught.message : 'Unable to create a story right now.'
+      )
     } finally {
       setCurationLoading(false)
     }
@@ -420,11 +480,18 @@ export default function MemoriesScreen() {
       <Text style={[styles.eyebrow, { color: colors.accent2 }]}>Memories</Text>
       <Text style={[styles.title, { color: colors.textPrimary }]}>Our story</Text>
       <SlideshowLaunchButton memories={memories} onPress={() => setIsSlideshowOpen(true)} />
-      <View style={[styles.mediatorCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <View
+        style={[
+          styles.mediatorCard,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
         <View style={styles.mediatorHeader}>
           <Sparkles color={colors.accent1} size={20} />
           <View style={styles.mediatorHeaderText}>
-            <Text style={[styles.mediatorTitle, { color: colors.textPrimary }]}>Talk through a memory</Text>
+            <Text style={[styles.mediatorTitle, { color: colors.textPrimary }]}>
+              Talk through a memory
+            </Text>
             <Text style={[styles.mediatorDescription, { color: colors.textSecondary }]}>
               Choose a memory and ask for a gentle, two-sided reflection.
             </Text>
@@ -437,7 +504,14 @@ export default function MemoriesScreen() {
           multiline
           placeholder="What happened, and what would you like help understanding?"
           placeholderTextColor={colors.textSecondary}
-          style={[styles.mediatorInput, { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+          style={[
+            styles.mediatorInput,
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.surface,
+              borderColor: colors.cardBorder,
+            },
+          ]}
         />
         <View style={styles.mediatorActions}>
           <Text style={[styles.privacyNote, { color: colors.textSecondary }]}>
@@ -453,50 +527,78 @@ export default function MemoriesScreen() {
             </Text>
           </TouchableOpacity>
         </View>
-        {mediatorError ? <Text style={[styles.error, { color: colors.error }]}>{mediatorError}</Text> : null}
+        {mediatorError ? (
+          <Text style={[styles.error, { color: colors.error }]}>{mediatorError}</Text>
+        ) : null}
         {mediatorResult ? (
-          <View style={[styles.result, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+          <View
+            style={[
+              styles.result,
+              { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+            ]}
+          >
             <Text style={[styles.resultText, { color: colors.textPrimary }]}>{mediatorResult}</Text>
           </View>
         ) : null}
       </View>
-      <View style={[styles.curationCard, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <View
+        style={[
+          styles.curationCard,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
         <View style={styles.mediatorHeader}>
           <Wand2 color={colors.accent2} size={20} />
           <View style={styles.mediatorHeaderText}>
-            <Text style={[styles.mediatorTitle, { color: colors.textPrimary }]}>Memory curation</Text>
+            <Text style={[styles.mediatorTitle, { color: colors.textPrimary }]}>
+              Memory curation
+            </Text>
             <Text style={[styles.mediatorDescription, { color: colors.textSecondary }]}>
               Only the memories you select below are sent to the AI.
             </Text>
           </View>
         </View>
         <View style={styles.curationMemoryList}>
-          {memories.length ? memories.map((memory) => {
-            const isSelected = curationSelected.includes(memory.id)
-            return (
-              <TouchableOpacity
-                key={memory.id}
-                hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }}
-                onPress={() =>
-                  setCurationSelected((current) =>
-                    isSelected
-                      ? current.filter((id) => id !== memory.id)
-                      : [...current, memory.id]
-                  )
-                }
-                style={[styles.curationMemory, { backgroundColor: colors.surface }]}
-              >
-                <View style={[styles.checkbox, { borderColor: isSelected ? colors.accent1 : colors.cardBorder, backgroundColor: isSelected ? colors.accent1 : 'transparent' }]}>
-                  {isSelected ? <Check color={colors.background} size={14} /> : null}
-                </View>
-                <Text style={[styles.curationMemoryTitle, { color: colors.textPrimary }]}>
-                  {memory.title || memory.caption || 'A memory together'}
-                </Text>
-                <Text style={[styles.curationMemoryDate, { color: colors.textSecondary }]}>{memory.date}</Text>
-              </TouchableOpacity>
-            )
-          }) : (
-            <Text style={[styles.muted, { color: colors.textSecondary }]}>No memories available to curate.</Text>
+          {memories.length ? (
+            memories.map((memory) => {
+              const isSelected = curationSelected.includes(memory.id)
+              return (
+                <TouchableOpacity
+                  key={memory.id}
+                  hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }}
+                  onPress={() =>
+                    setCurationSelected((current) =>
+                      isSelected
+                        ? current.filter((id) => id !== memory.id)
+                        : [...current, memory.id]
+                    )
+                  }
+                  style={[styles.curationMemory, { backgroundColor: colors.surface }]}
+                >
+                  <View
+                    style={[
+                      styles.checkbox,
+                      {
+                        borderColor: isSelected ? colors.accent1 : colors.cardBorder,
+                        backgroundColor: isSelected ? colors.accent1 : 'transparent',
+                      },
+                    ]}
+                  >
+                    {isSelected ? <Check color={colors.background} size={14} /> : null}
+                  </View>
+                  <Text style={[styles.curationMemoryTitle, { color: colors.textPrimary }]}>
+                    {memory.title || memory.caption || 'A memory together'}
+                  </Text>
+                  <Text style={[styles.curationMemoryDate, { color: colors.textSecondary }]}>
+                    {memory.date}
+                  </Text>
+                </TouchableOpacity>
+              )
+            })
+          ) : (
+            <Text style={[styles.muted, { color: colors.textSecondary }]}>
+              No memories available to curate.
+            </Text>
           )}
         </View>
         <TextInput
@@ -504,7 +606,14 @@ export default function MemoriesScreen() {
           onChangeText={setCurationTheme}
           placeholder="Theme"
           placeholderTextColor={colors.textSecondary}
-          style={[styles.curationInput, { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+          style={[
+            styles.curationInput,
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.surface,
+              borderColor: colors.cardBorder,
+            },
+          ]}
         />
         <TextInput
           value={curationContext}
@@ -513,7 +622,15 @@ export default function MemoriesScreen() {
           multiline
           placeholder="Optional context (only what you choose to share)"
           placeholderTextColor={colors.textSecondary}
-          style={[styles.curationInput, styles.curationContextInput, { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+          style={[
+            styles.curationInput,
+            styles.curationContextInput,
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.surface,
+              borderColor: colors.cardBorder,
+            },
+          ]}
         />
         <TouchableOpacity
           style={[styles.askButton, { backgroundColor: colors.accent1 }]}
@@ -524,14 +641,24 @@ export default function MemoriesScreen() {
             {curationLoading ? 'Creating...' : 'Create story'}
           </Text>
         </TouchableOpacity>
-        {curationError ? <Text style={[styles.error, { color: colors.error }]}>{curationError}</Text> : null}
+        {curationError ? (
+          <Text style={[styles.error, { color: colors.error }]}>{curationError}</Text>
+        ) : null}
         {curationStory ? (
-          <View style={[styles.result, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+          <View
+            style={[
+              styles.result,
+              { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+            ]}
+          >
             <Text style={[styles.resultText, { color: colors.textPrimary }]}>{curationStory}</Text>
           </View>
         ) : null}
       </View>
-      <TouchableOpacity style={[styles.secondary, { backgroundColor: colors.success }]} onPress={() => router.push('/(tabs)/gallery')}>
+      <TouchableOpacity
+        style={[styles.secondary, { backgroundColor: colors.success }]}
+        onPress={() => router.push('/(tabs)/gallery')}
+      >
         <Text style={[styles.secondaryText, { color: colors.background }]}>Open photo gallery</Text>
       </TouchableOpacity>
       <ScrollView
@@ -549,39 +676,71 @@ export default function MemoriesScreen() {
               filter === category && { backgroundColor: colors.accent1 },
             ]}
           >
-            <Text style={[styles.filterText, { color: filter === category ? colors.background : colors.textPrimary }]}>{category}</Text>
+            <Text
+              style={[
+                styles.filterText,
+                { color: filter === category ? colors.background : colors.textPrimary },
+              ]}
+            >
+              {category}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
       {filter === 'journal' ? (
-        <TouchableOpacity style={[styles.primaryButton, { backgroundColor: colors.accent1 }]} onPress={openNewJournal}>
-          <Text style={[styles.primaryButtonText, { color: colors.background }]}>New journal entry</Text>
+        <TouchableOpacity
+          style={[styles.primaryButton, { backgroundColor: colors.accent1 }]}
+          onPress={openNewJournal}
+        >
+          <Text style={[styles.primaryButtonText, { color: colors.background }]}>
+            New journal entry
+          </Text>
         </TouchableOpacity>
       ) : null}
       {error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
       {visible.length === 0 ? (
-        <Text style={[styles.muted, { color: colors.textSecondary }]}>No structured memories in this category yet.</Text>
+        <Text style={[styles.muted, { color: colors.textSecondary }]}>
+          No structured memories in this category yet.
+        </Text>
       ) : (
         <FlatList
           data={visible}
           keyExtractor={(item) => item.id}
           renderItem={({ item: memory }) => (
-            <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+              ]}
+            >
               <View style={styles.row}>
-                <Text style={[styles.memoryTitle, { color: colors.textPrimary }]}>{memory.title}</Text>
+                <Text style={[styles.memoryTitle, { color: colors.textPrimary }]}>
+                  {memory.title}
+                </Text>
                 {memory.category === 'journal' ? (
                   <View style={styles.journalActions}>
-                    {memory.metadata?.mood_tag ? (() => {
-                      const mood = JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
-                        JOURNAL_MOODS.find((item) => item.id === 'okay')
-                      if (!mood) return null
-                      const MoodIcon = mood.Icon
-                      return <MoodIcon color={colors.accent2} size={20} />
-                    })() : null}
-                    <TouchableOpacity onPress={() => openEditJournal(memory)} accessibilityLabel="Edit journal entry" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    {memory.metadata?.mood_tag
+                      ? (() => {
+                          const mood =
+                            JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
+                            JOURNAL_MOODS.find((item) => item.id === 'okay')
+                          if (!mood) return null
+                          const MoodIcon = mood.Icon
+                          return <MoodIcon color={colors.accent2} size={20} />
+                        })()
+                      : null}
+                    <TouchableOpacity
+                      onPress={() => openEditJournal(memory)}
+                      accessibilityLabel="Edit journal entry"
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
                       <Pencil color={colors.accent2} size={20} />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => remove(memory)} accessibilityLabel="Delete journal entry" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <TouchableOpacity
+                      onPress={() => remove(memory)}
+                      accessibilityLabel="Delete journal entry"
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
                       <Trash2 color={colors.error} size={20} />
                     </TouchableOpacity>
                   </View>
@@ -594,23 +753,44 @@ export default function MemoriesScreen() {
               <Text style={[styles.meta, { color: colors.accent2 }]}>
                 {memory.category} {memory.date ? `• ${memory.date}` : ''}
               </Text>
-              {memory.caption ? <Text style={[styles.caption, { color: colors.textSecondary }]}>{memory.caption}</Text> : null}
+              {memory.caption ? (
+                <Text style={[styles.caption, { color: colors.textSecondary }]}>
+                  {memory.caption}
+                </Text>
+              ) : null}
               {memory.category === 'journal' && memory.description ? (
-                <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={2}>{memory.description}</Text>
+                <Text style={[styles.caption, { color: colors.textSecondary }]} numberOfLines={2}>
+                  {memory.description}
+                </Text>
               ) : null}
               {memory.category === 'journal' ? (
                 memory.metadata?.ai_reflection ? (
-                  <View style={[styles.reflectionCard, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+                  <View
+                    style={[
+                      styles.reflectionCard,
+                      { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+                    ]}
+                  >
                     <View style={styles.reflectionHeader}>
                       <Sparkles color={colors.accent1} size={16} />
-                      <Text style={[styles.reflectionLabel, { color: colors.accent1 }]}>AI reflection</Text>
-                      <TouchableOpacity onPress={() => void speakReflection(memory)} accessibilityLabel="Read AI reflection aloud" hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-                        {speakingJournalId === memory.id
-                          ? <Square color={colors.accent1} size={16} />
-                          : <Volume2 color={colors.accent1} size={16} />}
+                      <Text style={[styles.reflectionLabel, { color: colors.accent1 }]}>
+                        AI reflection
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => void speakReflection(memory)}
+                        accessibilityLabel="Read AI reflection aloud"
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        {speakingJournalId === memory.id ? (
+                          <Square color={colors.accent1} size={16} />
+                        ) : (
+                          <Volume2 color={colors.accent1} size={16} />
+                        )}
                       </TouchableOpacity>
                     </View>
-                    <Text style={[styles.caption, { color: colors.textPrimary }]}>{memory.metadata.ai_reflection}</Text>
+                    <Text style={[styles.caption, { color: colors.textPrimary }]}>
+                      {memory.metadata.ai_reflection}
+                    </Text>
                   </View>
                 ) : (
                   <TouchableOpacity
@@ -618,7 +798,11 @@ export default function MemoriesScreen() {
                     onPress={() => void requestReflection(memory)}
                     disabled={reflectingId !== null}
                   >
-                    {reflectingId === memory.id ? <ActivityIndicator color={colors.accent1} size="small" /> : <Sparkles color={colors.accent1} size={16} />}
+                    {reflectingId === memory.id ? (
+                      <ActivityIndicator color={colors.accent1} size="small" />
+                    ) : (
+                      <Sparkles color={colors.accent1} size={16} />
+                    )}
                     <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>
                       {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
                     </Text>
@@ -631,7 +815,9 @@ export default function MemoriesScreen() {
                   onPress={() => void playJournalVoice(memory.metadata?.voice_url)}
                 >
                   <Play color={colors.accent1} size={16} />
-                  <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>Play voice note</Text>
+                  <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>
+                    Play voice note
+                  </Text>
                 </TouchableOpacity>
               ) : null}
             </View>
@@ -652,7 +838,14 @@ export default function MemoriesScreen() {
           onChangeText={setJournalTitle}
           placeholder="Title"
           placeholderTextColor={colors.textSecondary}
-          style={[styles.input, { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+          style={[
+            styles.input,
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.surface,
+              borderColor: colors.cardBorder,
+            },
+          ]}
         />
         <TextInput
           value={journalBody}
@@ -661,30 +854,58 @@ export default function MemoriesScreen() {
           placeholderTextColor={colors.textSecondary}
           multiline
           numberOfLines={5}
-          style={[styles.input, styles.textArea, { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+          style={[
+            styles.input,
+            styles.textArea,
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.surface,
+              borderColor: colors.cardBorder,
+            },
+          ]}
         />
         <Text style={[styles.label, { color: colors.textPrimary }]}>Voice note (optional)</Text>
         {journalRecording ? (
           <View style={[styles.voiceRow, { borderColor: colors.cardBorder }]}>
             <Text style={{ color: colors.textPrimary }}>{journalRecordingTime}s</Text>
-            <TouchableOpacity onPress={() => void stopJournalRecording()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity
+              onPress={() => void stopJournalRecording()}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Square color={colors.error} size={20} />
             </TouchableOpacity>
           </View>
-        ) : (journalVoiceUri || journalVoiceRemoteUrl) ? (
+        ) : journalVoiceUri || journalVoiceRemoteUrl ? (
           <View style={[styles.voiceRow, { borderColor: colors.cardBorder }]}>
-            <TouchableOpacity onPress={() => void playJournalVoice()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-              {journalPlaying ? <Pause color={colors.accent1} size={20} /> : <Play color={colors.accent1} size={20} />}
+            <TouchableOpacity
+              onPress={() => void playJournalVoice()}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              {journalPlaying ? (
+                <Pause color={colors.accent1} size={20} />
+              ) : (
+                <Play color={colors.accent1} size={20} />
+              )}
             </TouchableOpacity>
             <Text style={[styles.voiceText, { color: colors.textPrimary }]}>
-              {journalPlaying ? 'Playing...' : journalUploadingVoice ? 'Uploading...' : 'Voice attached'}
+              {journalPlaying
+                ? 'Playing...'
+                : journalUploadingVoice
+                  ? 'Uploading...'
+                  : 'Voice attached'}
             </Text>
-            <TouchableOpacity onPress={() => void discardJournalVoice()} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+            <TouchableOpacity
+              onPress={() => void discardJournalVoice()}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
               <Trash2 color={colors.error} size={20} />
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity style={[styles.voiceRow, { borderColor: colors.cardBorder }]} onPress={() => void startJournalRecording()}>
+          <TouchableOpacity
+            style={[styles.voiceRow, { borderColor: colors.cardBorder }]}
+            onPress={() => void startJournalRecording()}
+          >
             <Mic color={colors.accent1} size={20} />
             <Text style={[styles.voiceText, { color: colors.accent1 }]}>Record voice note</Text>
           </TouchableOpacity>
@@ -697,10 +918,22 @@ export default function MemoriesScreen() {
               <TouchableOpacity
                 key={id}
                 onPress={() => setJournalMood(id)}
-                style={[styles.moodChip, { borderColor: colors.cardBorder }, selected && { backgroundColor: colors.accent1, borderColor: colors.accent1 }]}
+                style={[
+                  styles.moodChip,
+                  { borderColor: colors.cardBorder },
+                  selected && { backgroundColor: colors.accent1, borderColor: colors.accent1 },
+                ]}
               >
                 <Icon color={selected ? colors.background : colors.textSecondary} size={20} />
-                <Text style={[styles.moodLabel, { color: colors.textSecondary }, selected && { color: colors.background }]}>{label}</Text>
+                <Text
+                  style={[
+                    styles.moodLabel,
+                    { color: colors.textSecondary },
+                    selected && { color: colors.background },
+                  ]}
+                >
+                  {label}
+                </Text>
               </TouchableOpacity>
             )
           })}
@@ -709,18 +942,27 @@ export default function MemoriesScreen() {
           <TouchableOpacity onPress={closeJournalModal}>
             <Text style={{ color: colors.textSecondary }}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => void saveJournal()} disabled={journalSaving || !journalTitle.trim()}>
+          <TouchableOpacity
+            onPress={() => void saveJournal()}
+            disabled={journalSaving || !journalTitle.trim()}
+          >
             <Text style={{ color: colors.accent1 }}>{journalSaving ? 'Saving...' : 'Save'}</Text>
           </TouchableOpacity>
         </View>
       </Modal>
-      {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} coupleId={coupleId ?? ''} /> : null}
+      {isSlideshowOpen ? (
+        <MemorySlideshow
+          memories={memories}
+          onClose={() => setIsSlideshowOpen(false)}
+          coupleId={coupleId ?? ''}
+        />
+      ) : null}
     </ScrollView>
   )
 }
-const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+const createStyles = (colors: ThemeColors, sizes: Sizes, paddingTop: number) =>
   StyleSheet.create({
-    container: { flexGrow: 1, padding: 20, paddingTop: 72, gap: 14 },
+    container: { flexGrow: 1, padding: 20, paddingTop, gap: 14 },
     eyebrow: { fontSize: sizes.text.xs, letterSpacing: 2, textTransform: 'uppercase' },
     title: { fontSize: sizes.text.hLg, fontWeight: '700' },
     secondary: { borderRadius: sizes.radius.input, padding: 12, alignItems: 'center' },
@@ -748,38 +990,98 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     journalActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
     primaryButton: { borderRadius: sizes.radius.input, padding: 12, alignItems: 'center' },
     primaryButtonText: { fontWeight: '700' },
-    input: { minHeight: 44, borderRadius: sizes.radius.input, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
+    input: {
+      minHeight: 44,
+      borderRadius: sizes.radius.input,
+      borderWidth: 1,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
     textArea: { minHeight: 120, textAlignVertical: 'top' },
     label: { fontWeight: '700' },
     moodRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-    moodChip: { flexDirection: 'row', alignItems: 'center', gap: 5, borderRadius: sizes.radius.pill, borderWidth: 1, paddingHorizontal: 10, paddingVertical: 8 },
+    moodChip: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      borderRadius: sizes.radius.pill,
+      borderWidth: 1,
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+    },
     moodLabel: { fontSize: sizes.text.xs },
     modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 20, marginTop: 14 },
     reflectionCard: { borderRadius: sizes.radius.input, borderWidth: 1, padding: 12, gap: 8 },
     reflectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6 },
     reflectionLabel: { fontSize: sizes.text.xs, fontWeight: '700' },
-    reflectButton: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, borderRadius: sizes.radius.pill, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 8 },
+    reflectButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      alignSelf: 'flex-start',
+      gap: 6,
+      borderRadius: sizes.radius.pill,
+      borderWidth: 1,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
     reflectButtonText: { fontSize: sizes.text.xs, fontWeight: '700' },
-    voiceRow: { flexDirection: 'row', alignItems: 'center', gap: 10, borderRadius: sizes.radius.input, borderWidth: 1, padding: 10 },
+    voiceRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 10,
+      borderRadius: sizes.radius.input,
+      borderWidth: 1,
+      padding: 10,
+    },
     voiceText: { flex: 1, fontSize: sizes.text.sm },
     mediatorCard: { borderRadius: sizes.radius.card, borderWidth: 1, padding: 16, gap: 12 },
     mediatorHeader: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
     mediatorHeaderText: { flex: 1, gap: 4 },
     mediatorTitle: { fontSize: sizes.text.bodyLg, fontWeight: '700' },
     mediatorDescription: { fontSize: sizes.text.sm, lineHeight: 20 },
-    mediatorInput: { minHeight: 96, borderRadius: sizes.radius.btn, borderWidth: 1, padding: 12, textAlignVertical: 'top' },
+    mediatorInput: {
+      minHeight: 96,
+      borderRadius: sizes.radius.btn,
+      borderWidth: 1,
+      padding: 12,
+      textAlignVertical: 'top',
+    },
     mediatorActions: { gap: 10 },
     privacyNote: { fontSize: sizes.text.xs },
-    askButton: { alignSelf: 'flex-end', borderRadius: sizes.radius.pill, paddingHorizontal: 16, paddingVertical: 10 },
+    askButton: {
+      alignSelf: 'flex-end',
+      borderRadius: sizes.radius.pill,
+      paddingHorizontal: 16,
+      paddingVertical: 10,
+    },
     askButtonText: { fontWeight: '700' },
     result: { borderRadius: sizes.radius.btn, borderWidth: 1, padding: 14 },
     resultText: { fontSize: sizes.text.sm, lineHeight: 22 },
     curationCard: { borderRadius: sizes.radius.card, borderWidth: 1, padding: 16, gap: 12 },
     curationMemoryList: { gap: 8, maxHeight: 192 },
-    curationMemory: { flexDirection: 'row', alignItems: 'center', gap: 8, borderRadius: sizes.radius.input, padding: 10 },
-    checkbox: { width: 22, height: 22, borderRadius: 6, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
+    curationMemory: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 8,
+      borderRadius: sizes.radius.input,
+      padding: 10,
+    },
+    checkbox: {
+      width: 22,
+      height: 22,
+      borderRadius: 6,
+      borderWidth: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     curationMemoryTitle: { flex: 1, fontSize: sizes.text.sm },
     curationMemoryDate: { fontSize: sizes.text.xs },
-    curationInput: { minHeight: 44, borderRadius: sizes.radius.btn, borderWidth: 1, paddingHorizontal: 12, paddingVertical: 10 },
+    curationInput: {
+      minHeight: 44,
+      borderRadius: sizes.radius.btn,
+      borderWidth: 1,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+    },
     curationContextInput: { minHeight: 80, textAlignVertical: 'top' },
   })

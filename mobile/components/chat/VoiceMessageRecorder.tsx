@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import type { ChatAttachment } from './chat-types'
+
 import { useTheme } from '@/context/ThemeContext'
 
 type Props = {
@@ -83,7 +84,11 @@ export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
             onPress={() => void (recording ? stop() : start())}
             disabled={saving}
           >
-            {recording ? <Square color={colors.background} size={30} /> : <Mic color={colors.background} size={30} />}
+            {recording ? (
+              <Square color={colors.background} size={30} />
+            ) : (
+              <Mic color={colors.background} size={30} />
+            )}
           </TouchableOpacity>
           <Text style={styles.secondary}>{recording ? 'Tap to stop' : 'Tap to record'}</Text>
         </View>
@@ -92,18 +97,19 @@ export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
-  card: { backgroundColor: colors.surface, borderRadius: 24, padding: 24, alignItems: 'center' },
-  header: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: { color: colors.textPrimary, fontSize: 20, fontWeight: '700' },
-  timer: { color: colors.accent1, fontSize: 42, fontWeight: '700', marginVertical: 36 },
-  record: { backgroundColor: colors.accent1, borderRadius: 42, padding: 24 },
-  stop: { backgroundColor: colors.error },
-  secondary: { color: colors.textSecondary, marginTop: 12 },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
+    card: { backgroundColor: colors.surface, borderRadius: 24, padding: 24, alignItems: 'center' },
+    header: {
+      width: '100%',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    title: { color: colors.textPrimary, fontSize: 20, fontWeight: '700' },
+    timer: { color: colors.accent1, fontSize: 42, fontWeight: '700', marginVertical: 36 },
+    record: { backgroundColor: colors.accent1, borderRadius: 42, padding: 24 },
+    stop: { backgroundColor: colors.error },
+    secondary: { color: colors.textSecondary, marginTop: 12 },
+  })

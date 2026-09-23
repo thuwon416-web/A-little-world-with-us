@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { Button } from '@/components/Button'
 import { PlanCard } from '@/components/PlanCard'
@@ -20,7 +21,8 @@ import { usePlans } from '@/hooks/usePlans'
 export default function PlansScreen() {
   const router = useRouter()
   const { colors } = useTheme()
-  const styles = createStyles(colors, sizes)
+  const insets = useSafeAreaInsets()
+  const styles = createStyles(colors, sizes, insets.top)
   const { plans, loading, error, createPlan, togglePlanItem, updatePlan } = usePlans()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
@@ -122,103 +124,104 @@ export default function PlansScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  container: {
-    paddingHorizontal: 20,
-    paddingTop: 72,
-    paddingBottom: 40,
-    backgroundColor: colors.background,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: sizes.text.hLg,
-    fontWeight: '700',
-    marginBottom: 8,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: sizes.text.body,
-    marginBottom: 20,
-  },
-  toolbar: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 20,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  secondaryButton: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    borderRadius: sizes.radius.input,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  secondaryButtonText: {
-    color: colors.textPrimary,
-    fontWeight: '700',
-    fontSize: sizes.text.sm,
-  },
-  composer: {
-    backgroundColor: colors.surface,
-    borderRadius: sizes.radius.card,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    padding: 18,
-    marginBottom: 20,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    borderRadius: sizes.radius.input,
-    color: colors.textPrimary,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    marginBottom: 12,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  typeRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 12,
-  },
-  typeButton: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    backgroundColor: colors.surface,
-  },
-  typeButtonActive: {
-    backgroundColor: colors.accent1,
-    borderColor: colors.accent1,
-  },
-  typeButtonText: {
-    color: colors.textPrimary,
-    fontSize: sizes.text.xs,
-    textTransform: 'capitalize',
-  },
-  typeButtonTextActive: {
-    color: colors.background,
-    fontWeight: '700',
-  },
-  error: {
-    color: colors.error,
-    marginBottom: 12,
-  },
-  loading: {
-    color: colors.accent2,
-    marginBottom: 12,
-  },
-  empty: {
-    color: colors.textSecondary,
-    marginTop: 12,
-  },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes, paddingTop: number) =>
+  StyleSheet.create({
+    container: {
+      paddingHorizontal: 20,
+      paddingTop,
+      paddingBottom: 40,
+      backgroundColor: colors.background,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hLg,
+      fontWeight: '700',
+      marginBottom: 8,
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.body,
+      marginBottom: 20,
+    },
+    toolbar: {
+      flexDirection: 'row',
+      gap: 12,
+      marginBottom: 20,
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    secondaryButton: {
+      backgroundColor: 'transparent',
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+    },
+    secondaryButtonText: {
+      color: colors.textPrimary,
+      fontWeight: '700',
+      fontSize: sizes.text.sm,
+    },
+    composer: {
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.card,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      padding: 18,
+      marginBottom: 20,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      borderRadius: sizes.radius.input,
+      color: colors.textPrimary,
+      paddingHorizontal: 12,
+      paddingVertical: 12,
+      marginBottom: 12,
+    },
+    textArea: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+    typeRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+      marginBottom: 12,
+    },
+    typeButton: {
+      paddingHorizontal: 10,
+      paddingVertical: 8,
+      borderRadius: 999,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      backgroundColor: colors.surface,
+    },
+    typeButtonActive: {
+      backgroundColor: colors.accent1,
+      borderColor: colors.accent1,
+    },
+    typeButtonText: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.xs,
+      textTransform: 'capitalize',
+    },
+    typeButtonTextActive: {
+      color: colors.background,
+      fontWeight: '700',
+    },
+    error: {
+      color: colors.error,
+      marginBottom: 12,
+    },
+    loading: {
+      color: colors.accent2,
+      marginBottom: 12,
+    },
+    empty: {
+      color: colors.textSecondary,
+      marginTop: 12,
+    },
+  })

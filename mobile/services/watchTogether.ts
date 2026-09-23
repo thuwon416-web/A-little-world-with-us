@@ -123,7 +123,7 @@ export function subscribeToWatchSync(
     .on('broadcast', { event: 'video' }, ({ payload }) => onEvent('video', payload))
     .subscribe((status) => {
       if (status === 'SUBSCRIBED') {
-        console.log('Watch-sync channel subscribed:', coupleId)
+        // The realtime listener is ready.
       }
     })
   return () => {

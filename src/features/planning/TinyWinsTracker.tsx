@@ -72,7 +72,7 @@ export default function TinyWinsTracker() {
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-card">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] via-[var(--accent-1)] to-[var(--accent-2)]"
+            className="h-full rounded-full bg-gradient-to-r from-accent-1 via-accent-1 to-accent-2"
             initial={{ width: 0 }}
             animate={{ width: `${ratio}%` }}
             transition={{ duration: 0.45 }}
@@ -119,7 +119,7 @@ export default function TinyWinsTracker() {
         </button>
       </div>
 
-      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm text-text-1/80">
+      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-accent-2 to-accent-1 p-3 text-sm text-text-1/80">
         <div className="mb-1 flex items-center gap-2 font-medium text-accent-2">
           <Sparkles className="h-4 w-4" />
           Kind reminder

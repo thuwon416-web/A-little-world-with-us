@@ -17,16 +17,9 @@ ALTER TABLE IF EXISTS messages
 ALTER TABLE IF EXISTS time_capsule_attachments
   ADD COLUMN IF NOT EXISTS mime_type TEXT;
 
--- Best-guess defaults for existing rows
-UPDATE memories 
-  SET mime_type = 'image/jpeg' 
-  WHERE mime_type IS NULL;
-
--- Only update chat messages that have media
-UPDATE messages 
-  SET media_mime_type = 'image/jpeg' 
-  WHERE media_mime_type IS NULL 
-    AND media_url IS NOT NULL;
+-- Leave existing rows NULL: encrypted legacy object paths do not reliably
+-- reveal their original format. The app applies its backwards-compatible
+-- fallback, while new uploads store their exact MIME type.
 
 -- Documentation
 COMMENT ON COLUMN memories.mime_type IS 

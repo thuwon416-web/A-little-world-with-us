@@ -15,9 +15,9 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import MemoryCard from './MemoryCard'
 
 import { EmptyState } from '@/components/ui/EmptyState'
+import { useTheme } from '@/context/ThemeContext'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { RelationshipMemory } from '@/shared-types'
-import { useTheme } from '@/context/ThemeContext'
 
 const icons: Record<string, LucideIcon> = {
   promises: Handshake,
@@ -115,23 +115,29 @@ function Categories({
 
 export default memo(Categories)
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
-  grid: { gap: 12, paddingBottom: 24 },
-  row: { gap: 12 },
-  card: {
-    backgroundColor: colors.surface,
-    borderColor: colors.cardBorder,
-    borderRadius: 18,
-    borderWidth: 1,
-    flex: 1,
-    padding: 14,
-  },
-  category: { alignItems: 'center', gap: 8, minHeight: 105, justifyContent: 'center' },
-  icon: { fontSize: 28 },
-  name: { color: colors.textPrimary, fontSize: 13, textAlign: 'center', textTransform: 'capitalize' },
-  count: { color: colors.accent2, fontWeight: '700' },
-  expanded: { gap: 8, width: 320 },
-  link: { color: colors.accent1, fontSize: 12 },
-  muted: { color: colors.textSecondary, padding: 28, textAlign: 'center' },
-  error: { color: colors.error, padding: 20, textAlign: 'center' },
-})
+const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+  StyleSheet.create({
+    grid: { gap: 12, paddingBottom: 24 },
+    row: { gap: 12 },
+    card: {
+      backgroundColor: colors.surface,
+      borderColor: colors.cardBorder,
+      borderRadius: 18,
+      borderWidth: 1,
+      flex: 1,
+      padding: 14,
+    },
+    category: { alignItems: 'center', gap: 8, minHeight: 105, justifyContent: 'center' },
+    icon: { fontSize: 28 },
+    name: {
+      color: colors.textPrimary,
+      fontSize: 13,
+      textAlign: 'center',
+      textTransform: 'capitalize',
+    },
+    count: { color: colors.accent2, fontWeight: '700' },
+    expanded: { gap: 8, width: 320 },
+    link: { color: colors.accent1, fontSize: 12 },
+    muted: { color: colors.textSecondary, padding: 28, textAlign: 'center' },
+    error: { color: colors.error, padding: 20, textAlign: 'center' },
+  })

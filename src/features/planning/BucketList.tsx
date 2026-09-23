@@ -36,7 +36,7 @@ const BucketItemComponent = function BucketItem({ item, onToggle }: BucketItemPr
       <div className="mt-2 h-2 rounded-full bg-card/40 overflow-hidden">
         <motion.div
           animate={{ width: `${item.progress}%` }}
-          className="h-full rounded-full bg-gradient-to-r from-[var(--accent-1)] to-[var(--accent-2)]"
+          className="h-full rounded-full bg-gradient-to-r from-accent-1 to-accent-2"
         />
       </div>
       <div className="mt-2 text-[11px] opacity-60">{item.target}</div>
@@ -200,7 +200,7 @@ export default function BucketList() {
           <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} /> Add to list
         </button>
       </div>
-      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-[var(--accent-2)] to-[var(--accent-1)] p-3 text-sm">
+      <div className="rounded-btn border border-accent-1/20 bg-gradient-to-r from-accent-2 to-accent-1 p-3 text-sm">
         <div className="mb-1 flex items-center gap-2 font-medium">
           <Sparkles className="h-4 w-4" />
           Shared promise

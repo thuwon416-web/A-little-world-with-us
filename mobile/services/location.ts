@@ -342,14 +342,16 @@ async function checkGeofence(userId: string, location: LocationPoint) {
       .from('saved_places')
       .select('id,name,latitude,longitude,radius_meters')
       .eq('user_id', userId)
-    
+
     if (!places || places.length === 0) return
 
     for (const place of places) {
-      const distance = distanceMeters(
-        location,
-        { latitude: place.latitude, longitude: place.longitude, accuracy: null, timestamp: new Date().toISOString() }
-      )
+      const distance = distanceMeters(location, {
+        latitude: place.latitude,
+        longitude: place.longitude,
+        accuracy: null,
+        timestamp: new Date().toISOString(),
+      })
       const inside = distance <= place.radius_meters
       const eventType = inside ? 'entered' : 'exited'
 
@@ -380,7 +382,8 @@ async function checkGeofence(userId: string, location: LocationPoint) {
 
       if (event) {
         const title = eventType === 'entered' ? `Arrived at ${place.name}` : `Left ${place.name}`
-        const body = eventType === 'entered' ? 'You arrived at a saved place.' : 'You left a saved place.'
+        const body =
+          eventType === 'entered' ? 'You arrived at a saved place.' : 'You left a saved place.'
         void sendLocalNotification(title, body)
       }
     }

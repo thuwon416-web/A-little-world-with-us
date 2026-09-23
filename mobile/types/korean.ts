@@ -82,12 +82,7 @@ export type KoreanVocab = {
   createdAt: string
 }
 
-export type QuizType =
-  | 'multiple_choice'
-  | 'fill_blank'
-  | 'matching'
-  | 'listening'
-  | 'typing'
+export type QuizType = 'multiple_choice' | 'fill_blank' | 'matching' | 'listening' | 'typing'
 
 export type KoreanQuizQuestion = {
   id: string

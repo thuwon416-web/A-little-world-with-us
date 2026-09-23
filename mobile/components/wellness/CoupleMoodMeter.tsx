@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
+import { WellnessBoardShell } from './WellnessBoardShell'
+
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
-
-import { WellnessBoardShell } from './WellnessBoardShell'
 
 type MoodId = 'blissful' | 'happy' | 'calm' | 'deep' | 'tired'
 
@@ -158,7 +158,12 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       marginBottom: 8,
     },
-    progressLabel: { color: colors.textSecondary, fontSize: 10, letterSpacing: 1.1, textTransform: 'uppercase' },
+    progressLabel: {
+      color: colors.textSecondary,
+      fontSize: 10,
+      letterSpacing: 1.1,
+      textTransform: 'uppercase',
+    },
     progressValue: { color: colors.accent2, fontSize: 11, fontWeight: '700' },
     barTrack: { height: 8, backgroundColor: colors.surface, borderRadius: 999, overflow: 'hidden' },
     barFill: { height: '100%', borderRadius: 999, backgroundColor: colors.accent1 },

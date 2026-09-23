@@ -1,5 +1,7 @@
 import { Smile, X } from 'lucide-react-native'
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
 import { useTheme } from '@/context/ThemeContext'
 
 type Props = { visible: boolean; onClose: () => void; onSelect: (emoji: string) => Promise<void> }
@@ -24,10 +26,13 @@ const stickers = [
 
 export function StickerPicker({ visible, onClose, onSelect }: Props) {
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={[styles.card, { backgroundColor: colors.surface }]}>
+        <View
+          style={[styles.card, { backgroundColor: colors.surface, paddingBottom: insets.bottom }]}
+        >
           <View style={styles.header}>
             <View style={styles.heading}>
               <Smile color={colors.accent1} size={20} />

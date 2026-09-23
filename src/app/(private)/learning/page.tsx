@@ -92,6 +92,19 @@ export default function LearningPage() {
           <p className="mt-1 text-lg font-semibold text-text-1">
             {masteredIds.size} / {KOREAN_VOCAB.length} words mastered
           </p>
+          <div
+            className="mt-2 h-2 overflow-hidden rounded-full bg-soft-tint"
+            role="progressbar"
+            aria-label="Korean vocabulary mastered"
+            aria-valuemin={0}
+            aria-valuemax={KOREAN_VOCAB.length}
+            aria-valuenow={masteredIds.size}
+          >
+            <div
+              className="h-full rounded-full bg-accent-1 transition-[width] duration-300"
+              style={{ width: `${KOREAN_VOCAB.length ? (masteredIds.size / KOREAN_VOCAB.length) * 100 : 0}%` }}
+            />
+          </div>
         </div>
       </header>
 

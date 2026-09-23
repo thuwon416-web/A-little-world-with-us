@@ -1,19 +1,8 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useRouter } from 'expo-router'
-import {
-  Gamepad2,
-  Sparkles,
-  Trophy,
-  type LucideIcon,
-} from 'lucide-react-native'
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { Gamepad2, Sparkles, Trophy, type LucideIcon } from 'lucide-react-native'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
@@ -81,7 +70,9 @@ function GameCard({
     >
       <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{title}</Text>
       <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
-      <Text style={[styles.cardAction, { color: colors.accent1 }]}>{action} {'\u2192'}</Text>
+      <Text style={[styles.cardAction, { color: colors.accent1 }]}>
+        {action} {'\u2192'}
+      </Text>
     </TouchableOpacity>
   )
 }
@@ -89,6 +80,7 @@ function GameCard({
 export default function GamesScreen() {
   const router = useRouter()
   const { colors } = useTheme()
+  const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [board, setBoard] = useState<string[]>(Array(9).fill(''))
   const [xNext, setXNext] = useState(true)
@@ -110,14 +102,14 @@ export default function GamesScreen() {
     if (winner(next)) Alert.alert('Game over', `${next[index]} wins!`)
   }
 
-  const comingSoon = (title: string) => Alert.alert(title, 'Coming soon!')
-
   return (
     <ScrollView
       style={[styles.scroll, { backgroundColor: colors.background }]}
-      contentContainerStyle={styles.container}
+      contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
     >
-      <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
+      <View
+        style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+      >
         <Gamepad2 size={28} color={colors.accent1} />
         <Text style={[styles.title, { color: colors.textPrimary }]}>Couple Games</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
@@ -127,39 +119,17 @@ export default function GamesScreen() {
 
       <Section title="Quizzes" icon={Sparkles}>
         <GameCard
-          title="Couple Quiz"
-          subtitle="Take turns answering and compare your memories."
-          onPress={() => Alert.alert('Quiz', 'Create a shared question deck from your memories.')}
-        />
-        <GameCard
-          title="Love Quiz"
-          subtitle="15 questions about the little things you know."
-          onPress={() => comingSoon('Love Quiz')}
-        />
-        <GameCard
-          title="Would You Rather"
-          subtitle="20 playful questions for two."
-          onPress={() => comingSoon('Would You Rather')}
-        />
-        <GameCard
-          title="Never Have I Ever"
-          subtitle="30 questions for shared stories."
-          onPress={() => comingSoon('Never Have I Ever')}
-        />
-        <GameCard
-          title="36 Questions"
-          subtitle="36 prompts for a deeper connection."
-          onPress={() => comingSoon('36 Questions')}
-        />
-        <GameCard
-          title="Daily Question"
-          subtitle="New question every day."
-          onPress={() => comingSoon('Daily Question')}
+          title="Korean Quiz"
+          subtitle="Practice Korean words and phrases together."
+          action="Start quiz"
+          onPress={() => router.push('/(tabs)/quiz?level=1')}
         />
       </Section>
 
       <Section title="Playful" icon={Gamepad2}>
-        <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+        <View
+          style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
+        >
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Love Calculator</Text>
           <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
             A playful score for your shared story.
@@ -167,7 +137,9 @@ export default function GamesScreen() {
           <Text style={[styles.score, { color: colors.accent2 }]}>{loveScore}%</Text>
         </View>
 
-        <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+        <View
+          style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
+        >
           <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Tic-Tac-Toe</Text>
           <View style={styles.board}>
             {board.map((value, index) => (
@@ -191,12 +163,6 @@ export default function GamesScreen() {
             <Text style={[styles.buttonText, { color: colors.background }]}>New game</Text>
           </TouchableOpacity>
         </View>
-
-        <GameCard title="Scavenger Hunt" subtitle="Find hidden clues." onPress={() => comingSoon('Scavenger Hunt')} />
-        <GameCard title="Love Weather" subtitle="Share your mood." onPress={() => comingSoon('Love Weather')} />
-        <GameCard title="Couple Scoreboard" subtitle="Track your wins." onPress={() => comingSoon('Couple Scoreboard')} />
-        <GameCard title="Future Predictions" subtitle="Playful predictions." onPress={() => comingSoon('Future Predictions')} />
-        <GameCard title="Gift Recommender" subtitle="Gift ideas for two." onPress={() => comingSoon('Gift Recommender')} />
       </Section>
 
       <Section title="Quests" icon={Trophy}>
@@ -214,7 +180,7 @@ export default function GamesScreen() {
 const createStyles = (colors: ThemeColors, sizes: Sizes) =>
   StyleSheet.create({
     scroll: { flex: 1 },
-    container: { padding: 20, paddingTop: 72, paddingBottom: 40, gap: 28 },
+    container: { padding: 20, paddingBottom: 40, gap: 28 },
     hero: { borderWidth: 1, borderRadius: sizes.radius.panel, padding: 20, gap: 8 },
     title: { fontSize: sizes.text.hLg, fontWeight: '700' },
     subtitle: { fontSize: sizes.text.body, lineHeight: 22 },

@@ -1,16 +1,14 @@
 import { gcm } from '@noble/ciphers/aes'
 import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
+
 import { deriveChatKey } from './chatEncryption'
 import { supabase } from './supabase'
 
 const MEDIA_VERSION = 2
 const IV_LENGTH = 12
 
-export async function encryptMedia(
-  data: Uint8Array,
-  coupleId: string
-): Promise<Uint8Array> {
+export async function encryptMedia(data: Uint8Array, coupleId: string): Promise<Uint8Array> {
   const key = await deriveChatKey(coupleId)
   const iv = await Crypto.getRandomBytesAsync(IV_LENGTH)
   const cipher = gcm(key, iv)
@@ -23,10 +21,7 @@ export async function encryptMedia(
   return result
 }
 
-export async function decryptMedia(
-  encrypted: Uint8Array,
-  coupleId: string
-): Promise<Uint8Array> {
+export async function decryptMedia(encrypted: Uint8Array, coupleId: string): Promise<Uint8Array> {
   const version = encrypted[0]
   if (version !== MEDIA_VERSION) {
     throw new Error(`Unsupported media version: ${version}`)

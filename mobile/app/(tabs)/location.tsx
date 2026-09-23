@@ -8,22 +8,32 @@ import {
   ShapeSource,
 } from '@maplibre/maplibre-react-native'
 import Constants from 'expo-constants'
-import * as Location from 'expo-location'
 import * as Linking from 'expo-linking'
+import * as Location from 'expo-location'
 import { Redirect } from 'expo-router'
 import { useEffect, useMemo, useState } from 'react'
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import {
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
+import { sizes, type Sizes } from '@/design-tokens'
 import { useAdmin } from '@/hooks/useAdmin'
 import { useLocation } from '@/hooks/useLocation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { sendLocalNotification } from '@/services/notifications'
-import { resolveSos } from '@/services/safety-sos'
 import { createCheckin, type SafetyCheckin } from '@/services/safety-checkins'
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
-import { sizes, type Sizes } from '@/design-tokens'
+import { resolveSos } from '@/services/safety-sos'
 
 type LocationHistoryRow = {
   latitude: number
@@ -98,7 +108,9 @@ function buildCirclePolygon(
   }
 }
 
-const mapStyle = process.env.EXPO_PUBLIC_CARTO_STYLE_URL ?? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+const mapStyle =
+  process.env.EXPO_PUBLIC_CARTO_STYLE_URL ??
+  'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
 const APP_VERSION = Constants.expoConfig?.version ?? 'Unknown'
 const DEFAULT_CENTER: [number, number] = [100.5018, 13.7563]
 const tabs = [
@@ -113,7 +125,8 @@ type Tab = (typeof tabs)[number]
 
 export default function LocationScreen() {
   const { colors } = useTheme()
-  const styles = useMemo(() => createStyles(colors, sizes), [colors])
+  const insets = useSafeAreaInsets()
+  const styles = useMemo(() => createStyles(colors, sizes, insets.top), [colors, insets.top])
   const { isAdmin, loading: adminLoading } = useAdmin()
   const { user } = useAuth()
   const {
@@ -136,7 +149,11 @@ export default function LocationScreen() {
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [sosSending, setSosSending] = useState(false)
   const [sosSentAt, setSosSentAt] = useState<string | null>(null)
-  const [sosLocation, setSosLocation] = useState<{ latitude: number; longitude: number; accuracy: number | null } | null>(null)
+  const [sosLocation, setSosLocation] = useState<{
+    latitude: number
+    longitude: number
+    accuracy: number | null
+  } | null>(null)
   const [sosError, setSosError] = useState('')
   const [placeModalOpen, setPlaceModalOpen] = useState(false)
   const [placeName, setPlaceName] = useState('')
@@ -188,11 +205,16 @@ export default function LocationScreen() {
         }),
       ])
       if (alertResult.error || messageResult.error) {
-        throw new Error(alertResult.error?.message ?? messageResult.error?.message ?? 'SOS could not be saved.')
+        throw new Error(
+          alertResult.error?.message ?? messageResult.error?.message ?? 'SOS could not be saved.'
+        )
       }
       setSosLocation(point)
       setSosSentAt(new Date().toISOString())
-      await sendLocalNotification('Emergency SOS sent', 'Your location has been shared with your partner.')
+      await sendLocalNotification(
+        'Emergency SOS sent',
+        'Your location has been shared with your partner.'
+      )
       setSosAlerts((current) => [
         {
           id: `local-${Date.now()}`,
@@ -212,14 +234,10 @@ export default function LocationScreen() {
   }
 
   const confirmSOS = () => {
-    Alert.alert(
-      'Send emergency SOS?',
-      'Your current location will be shared with your partner.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Send SOS', style: 'destructive', onPress: () => void sendSOS() },
-      ]
-    )
+    Alert.alert('Send emergency SOS?', 'Your current location will be shared with your partner.', [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Send SOS', style: 'destructive', onPress: () => void sendSOS() },
+    ])
   }
 
   const submitCheckin = async () => {
@@ -239,14 +257,19 @@ export default function LocationScreen() {
         accuracy: currentLocation?.accuracy ?? null,
         expectedUntil: expectedDate?.toISOString() ?? null,
       })
-      const { error } = await supabase.functions.invoke('checkin-notify', { body: { checkinId: checkin.id, type: checkinType } })
+      const { error } = await supabase.functions.invoke('checkin-notify', {
+        body: { checkinId: checkin.id, type: checkinType },
+      })
       if (error) throw error
       setCheckins((current) => [checkin, ...current])
       setCheckinType(null)
       setCheckinNote('')
       setCheckinExpected('')
     } catch (caught) {
-      Alert.alert('Unable to send check-in', caught instanceof Error ? caught.message : 'Please try again.')
+      Alert.alert(
+        'Unable to send check-in',
+        caught instanceof Error ? caught.message : 'Please try again.'
+      )
     } finally {
       setCheckinSending(false)
     }
@@ -257,13 +280,24 @@ export default function LocationScreen() {
     setResolving(true)
     try {
       await resolveSos(resolveModalAlert.id, resolutionNote)
-      setSosAlerts((current) => current.map((alert) => alert.id === resolveModalAlert.id
-        ? { ...alert, resolved_at: new Date().toISOString(), resolution_note: resolutionNote.trim() || null }
-        : alert))
+      setSosAlerts((current) =>
+        current.map((alert) =>
+          alert.id === resolveModalAlert.id
+            ? {
+                ...alert,
+                resolved_at: new Date().toISOString(),
+                resolution_note: resolutionNote.trim() || null,
+              }
+            : alert
+        )
+      )
       setResolveModalAlert(null)
       setResolutionNote('')
     } catch (caught) {
-      Alert.alert('Unable to resolve SOS', caught instanceof Error ? caught.message : 'Please try again.')
+      Alert.alert(
+        'Unable to resolve SOS',
+        caught instanceof Error ? caught.message : 'Please try again.'
+      )
     } finally {
       setResolving(false)
     }
@@ -280,24 +314,24 @@ export default function LocationScreen() {
     const point = currentLocation
     const result = editingPlaceId
       ? await supabase
-        .from('saved_places')
-        .update({ name: placeName.trim(), radius_meters: radius })
-        .eq('id', editingPlaceId)
-        .select('id,name,latitude,longitude,radius_meters')
-        .single()
-      : point
-        ? await supabase
           .from('saved_places')
-          .insert({
-            couple_id: coupleId,
-            created_by: user.id,
-            name: placeName.trim(),
-            latitude: point.latitude,
-            longitude: point.longitude,
-            radius_meters: radius,
-          })
+          .update({ name: placeName.trim(), radius_meters: radius })
+          .eq('id', editingPlaceId)
           .select('id,name,latitude,longitude,radius_meters')
           .single()
+      : point
+        ? await supabase
+            .from('saved_places')
+            .insert({
+              couple_id: coupleId,
+              created_by: user.id,
+              name: placeName.trim(),
+              latitude: point.latitude,
+              longitude: point.longitude,
+              radius_meters: radius,
+            })
+            .select('id,name,latitude,longitude,radius_meters')
+            .single()
         : null
     setPlaceSaving(false)
     if (!result) {
@@ -306,12 +340,17 @@ export default function LocationScreen() {
     }
     const { data, error: saveError } = result
     if (saveError) {
-      Alert.alert(editingPlaceId ? 'Unable to update place' : 'Unable to save place', saveError.message)
+      Alert.alert(
+        editingPlaceId ? 'Unable to update place' : 'Unable to save place',
+        saveError.message
+      )
       return
     }
-    setSavedPlaces((places) => editingPlaceId
-      ? places.map((place) => place.id === editingPlaceId ? data as SavedPlace : place)
-      : [...places, data as SavedPlace])
+    setSavedPlaces((places) =>
+      editingPlaceId
+        ? places.map((place) => (place.id === editingPlaceId ? (data as SavedPlace) : place))
+        : [...places, data as SavedPlace]
+    )
     setPlaceName('')
     setPlaceRadius('100')
     setEditingPlaceId(null)
@@ -346,13 +385,17 @@ export default function LocationScreen() {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          void supabase.from('saved_places').delete().eq('id', place.id).then(({ error: deleteError }) => {
-            if (deleteError) {
-              Alert.alert('Unable to delete place', deleteError.message)
-              return
-            }
-            setSavedPlaces((places) => places.filter((item) => item.id !== place.id))
-          })
+          void supabase
+            .from('saved_places')
+            .delete()
+            .eq('id', place.id)
+            .then(({ error: deleteError }) => {
+              if (deleteError) {
+                Alert.alert('Unable to delete place', deleteError.message)
+                return
+              }
+              setSavedPlaces((places) => places.filter((item) => item.id !== place.id))
+            })
         },
       },
     ])
@@ -513,12 +556,7 @@ export default function LocationScreen() {
 
       {activeTab === 'Live Map' ? (
         <>
-          <MapView
-            style={styles.map}
-            mapStyle={mapStyle}
-            logoEnabled={false}
-            attributionEnabled
-          >
+          <MapView style={styles.map} mapStyle={mapStyle} logoEnabled={false} attributionEnabled>
             <Camera
               centerCoordinate={center}
               zoomLevel={12}
@@ -676,16 +714,16 @@ export default function LocationScreen() {
               </TouchableOpacity>
             </View>
           ))}
-          {!savedPlaces.length ? (
-            <Empty label="No saved places yet." />
-          ) : null}
+          {!savedPlaces.length ? <Empty label="No saved places yet." /> : null}
           <View style={styles.eventsSection}>
             <Text style={styles.cardTitle}>Geofence events</Text>
             {geofenceEvents.length === 0 ? (
               <Empty label="No geofence events yet." />
             ) : (
               geofenceEvents.map((event) => {
-                const place = savedPlaces.find((savedPlace) => savedPlace.id === event.saved_place_id)
+                const place = savedPlaces.find(
+                  (savedPlace) => savedPlace.id === event.saved_place_id
+                )
                 const isYou = event.user_id === user?.id
                 const direction = event.event_type === 'entered' ? 'Arrived at' : 'Left'
                 const when = new Date(event.occurred_at).toLocaleString()
@@ -695,9 +733,7 @@ export default function LocationScreen() {
                       {isYou ? 'You' : 'Partner'} {direction} {place?.name ?? 'a saved place'}
                     </Text>
                     <Text style={styles.meta}>{when}</Text>
-                    {!event.notified ? (
-                      <Text style={styles.meta}>Notified: pending</Text>
-                    ) : null}
+                    {!event.notified ? <Text style={styles.meta}>Notified: pending</Text> : null}
                   </View>
                 )
               })
@@ -721,23 +757,38 @@ export default function LocationScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.list}>
           <View style={styles.checkinGrid}>
-            {([
-              ['safe', 'I am safe', colors.success],
-              ['need_help', 'I need help', colors.error],
-              ['home', 'I am home', colors.accent1],
-            ] as const).map(([type, label, color]) => (
-              <TouchableOpacity key={type} style={[styles.checkinButton, { backgroundColor: color }]} onPress={() => setCheckinType(type)}>
+            {(
+              [
+                ['safe', 'I am safe', colors.success],
+                ['need_help', 'I need help', colors.error],
+                ['home', 'I am home', colors.accent1],
+              ] as const
+            ).map(([type, label, color]) => (
+              <TouchableOpacity
+                key={type}
+                style={[styles.checkinButton, { backgroundColor: color }]}
+                onPress={() => setCheckinType(type)}
+              >
                 <Text style={styles.buttonText}>{label}</Text>
               </TouchableOpacity>
             ))}
           </View>
           {checkins.slice(0, 5).map((checkin) => (
             <View key={checkin.id} style={styles.listItem}>
-              <Text style={styles.cardTitle}>{checkin.checkinType.replace('_', ' ')} · {checkin.status}</Text>
-              <Text style={styles.meta}>{new Date(checkin.createdAt).toLocaleString()}{checkin.expectedUntil ? ` · expected by ${new Date(checkin.expectedUntil).toLocaleString()}` : ''}</Text>
+              <Text style={styles.cardTitle}>
+                {checkin.checkinType.replace('_', ' ')} · {checkin.status}
+              </Text>
+              <Text style={styles.meta}>
+                {new Date(checkin.createdAt).toLocaleString()}
+                {checkin.expectedUntil
+                  ? ` · expected by ${new Date(checkin.expectedUntil).toLocaleString()}`
+                  : ''}
+              </Text>
             </View>
           ))}
-          <View style={[styles.sosCard, { backgroundColor: colors.cardBg, borderColor: colors.error }]}>
+          <View
+            style={[styles.sosCard, { backgroundColor: colors.cardBg, borderColor: colors.error }]}
+          >
             <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Emergency SOS</Text>
             <Text style={[styles.meta, { color: colors.textSecondary }]}>
               Share your current location with your partner immediately.
@@ -749,20 +800,34 @@ export default function LocationScreen() {
               accessibilityRole="button"
               accessibilityLabel="Send emergency SOS"
             >
-              <Text style={styles.sosButtonText}>{sosSending ? 'Sending...' : 'EMERGENCY SOS'}</Text>
+              <Text style={styles.sosButtonText}>
+                {sosSending ? 'Sending...' : 'EMERGENCY SOS'}
+              </Text>
             </TouchableOpacity>
             {sosSentAt ? (
-              <Text style={[styles.sosSuccess, { color: colors.success }]}>SOS sent {new Date(sosSentAt).toLocaleString()}</Text>
+              <Text style={[styles.sosSuccess, { color: colors.success }]}>
+                SOS sent {new Date(sosSentAt).toLocaleString()}
+              </Text>
             ) : null}
             {sosLocation ? (
               <Text style={[styles.meta, { color: colors.textSecondary }]}>
-                Location shared: {sosLocation.latitude.toFixed(6)}, {sosLocation.longitude.toFixed(6)}
+                Location shared: {sosLocation.latitude.toFixed(6)},{' '}
+                {sosLocation.longitude.toFixed(6)}
               </Text>
             ) : null}
-            {sosError ? <Text style={[styles.sosError, { color: colors.error }]}>{sosError}</Text> : null}
+            {sosError ? (
+              <Text style={[styles.sosError, { color: colors.error }]}>{sosError}</Text>
+            ) : null}
             {locationPermissionDenied ? (
-              <View style={[styles.permissionDeniedCard, { backgroundColor: colors.surface, borderColor: colors.accent1 }]}>
-                <Text style={[styles.permissionDeniedTitle, { color: colors.textPrimary }]}>Location Permission Required</Text>
+              <View
+                style={[
+                  styles.permissionDeniedCard,
+                  { backgroundColor: colors.surface, borderColor: colors.accent1 },
+                ]}
+              >
+                <Text style={[styles.permissionDeniedTitle, { color: colors.textPrimary }]}>
+                  Location Permission Required
+                </Text>
                 <Text style={[styles.permissionDeniedText, { color: colors.textSecondary }]}>
                   Enable location access in your device settings to use emergency SOS features.
                 </Text>
@@ -789,7 +854,10 @@ export default function LocationScreen() {
                   {alert.resolution_note ? ` · ${alert.resolution_note}` : ''}
                 </Text>
               ) : (
-                <TouchableOpacity style={[styles.button, { marginTop: 10 }]} onPress={() => setResolveModalAlert(alert)}>
+                <TouchableOpacity
+                  style={[styles.button, { marginTop: 10 }]}
+                  onPress={() => setResolveModalAlert(alert)}
+                >
                   <Text style={styles.buttonText}>Resolve</Text>
                 </TouchableOpacity>
               )}
@@ -800,57 +868,131 @@ export default function LocationScreen() {
           ) : null}
         </ScrollView>
       )}
-        <Modal visible={Boolean(checkinType)} transparent animationType="slide" onRequestClose={() => setCheckinType(null)}>
-          <View style={styles.modalBackdrop}>
-            <View style={styles.modalCard}>
-              <Text style={styles.cardTitle}>{checkinType === 'safe' ? 'I am safe' : checkinType === 'home' ? 'I am home' : 'I need help'}</Text>
-              <TextInput style={[styles.input, styles.noteInput]} value={checkinNote} onChangeText={setCheckinNote} placeholder="Optional note" placeholderTextColor={colors.textSecondary} multiline maxLength={500} />
-              <TextInput style={styles.input} value={checkinExpected} onChangeText={setCheckinExpected} placeholder="Optional expected time" placeholderTextColor={colors.textSecondary} />
-              <View style={styles.modalActions}>
-                <TouchableOpacity onPress={() => setCheckinType(null)}><Text style={styles.meta}>Cancel</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => void submitCheckin()} disabled={checkinSending}>
-                  <Text style={styles.buttonText}>{checkinSending ? 'Sending...' : 'Send check-in'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-        <Modal visible={Boolean(resolveModalAlert)} transparent animationType="slide" onRequestClose={() => setResolveModalAlert(null)}>
-          <View style={styles.modalBackdrop}>
-            <View style={styles.modalCard}>
-              <Text style={styles.cardTitle}>Resolve SOS</Text>
-              <Text style={styles.meta}>Add an optional note for the person who sent the alert.</Text>
-              <TextInput
-                style={[styles.input, styles.noteInput]}
-                value={resolutionNote}
-                onChangeText={setResolutionNote}
-                placeholder="Resolution note"
-                placeholderTextColor={colors.textSecondary}
-                multiline
-                maxLength={500}
-              />
-              <View style={styles.modalActions}>
-                <TouchableOpacity onPress={() => setResolveModalAlert(null)}><Text style={styles.meta}>Cancel</Text></TouchableOpacity>
-                <TouchableOpacity style={styles.button} onPress={() => void submitResolution()} disabled={resolving}>
-                  <Text style={styles.buttonText}>{resolving ? 'Resolving...' : 'Resolve SOS'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </View>
-        </Modal>
-        <Modal visible={placeModalOpen} transparent animationType="slide" onRequestClose={closePlaceModal}>
+      <Modal
+        visible={Boolean(checkinType)}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCheckinType(null)}
+      >
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.cardTitle}>{editingPlaceId ? 'Edit saved place' : 'Add saved place'}</Text>
-            <TextInput style={styles.input} value={placeName} onChangeText={setPlaceName} placeholder="Name" placeholderTextColor={colors.textSecondary} />
-            <TextInput style={styles.input} value={placeRadius} onChangeText={setPlaceRadius} placeholder="Radius in meters" placeholderTextColor={colors.textSecondary} keyboardType="numeric" />
+            <Text style={styles.cardTitle}>
+              {checkinType === 'safe'
+                ? 'I am safe'
+                : checkinType === 'home'
+                  ? 'I am home'
+                  : 'I need help'}
+            </Text>
+            <TextInput
+              style={[styles.input, styles.noteInput]}
+              value={checkinNote}
+              onChangeText={setCheckinNote}
+              placeholder="Optional note"
+              placeholderTextColor={colors.textSecondary}
+              multiline
+              maxLength={500}
+            />
+            <TextInput
+              style={styles.input}
+              value={checkinExpected}
+              onChangeText={setCheckinExpected}
+              placeholder="Optional expected time"
+              placeholderTextColor={colors.textSecondary}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setCheckinType(null)}>
+                <Text style={styles.meta}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => void submitCheckin()}
+                disabled={checkinSending}
+              >
+                <Text style={styles.buttonText}>
+                  {checkinSending ? 'Sending...' : 'Send check-in'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={Boolean(resolveModalAlert)}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setResolveModalAlert(null)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.cardTitle}>Resolve SOS</Text>
+            <Text style={styles.meta}>Add an optional note for the person who sent the alert.</Text>
+            <TextInput
+              style={[styles.input, styles.noteInput]}
+              value={resolutionNote}
+              onChangeText={setResolutionNote}
+              placeholder="Resolution note"
+              placeholderTextColor={colors.textSecondary}
+              multiline
+              maxLength={500}
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => setResolveModalAlert(null)}>
+                <Text style={styles.meta}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => void submitResolution()}
+                disabled={resolving}
+              >
+                <Text style={styles.buttonText}>{resolving ? 'Resolving...' : 'Resolve SOS'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        visible={placeModalOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={closePlaceModal}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.cardTitle}>
+              {editingPlaceId ? 'Edit saved place' : 'Add saved place'}
+            </Text>
+            <TextInput
+              style={styles.input}
+              value={placeName}
+              onChangeText={setPlaceName}
+              placeholder="Name"
+              placeholderTextColor={colors.textSecondary}
+            />
+            <TextInput
+              style={styles.input}
+              value={placeRadius}
+              onChangeText={setPlaceRadius}
+              placeholder="Radius in meters"
+              placeholderTextColor={colors.textSecondary}
+              keyboardType="numeric"
+            />
             <Text style={styles.meta}>
-              {currentLocation ? `Using current location: ${currentLocation.latitude.toFixed(5)}, ${currentLocation.longitude.toFixed(5)}` : 'Current location unavailable'}
+              {currentLocation
+                ? `Using current location: ${currentLocation.latitude.toFixed(5)}, ${currentLocation.longitude.toFixed(5)}`
+                : 'Current location unavailable'}
             </Text>
             <View style={styles.modalActions}>
-              <TouchableOpacity onPress={closePlaceModal}><Text style={styles.meta}>Cancel</Text></TouchableOpacity>
-              <TouchableOpacity style={styles.button} onPress={() => void savePlace()} disabled={placeSaving}>
-                <Text style={styles.buttonText}>{placeSaving ? 'Saving...' : editingPlaceId ? 'Update place' : 'Save place'}</Text>
+              <TouchableOpacity onPress={closePlaceModal}>
+                <Text style={styles.meta}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => void savePlace()}
+                disabled={placeSaving}
+              >
+                <Text style={styles.buttonText}>
+                  {placeSaving ? 'Saving...' : editingPlaceId ? 'Update place' : 'Save place'}
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -863,7 +1005,7 @@ export default function LocationScreen() {
 
 function Empty({ label }: { label: string }) {
   const { colors } = useTheme()
-  const styles = createStyles(colors, sizes)
+  const styles = createStyles(colors, sizes, 0)
   return (
     <View style={styles.card}>
       <Text style={styles.meta}>{label}</Text>
@@ -871,12 +1013,12 @@ function Empty({ label }: { label: string }) {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+const createStyles = (colors: ThemeColors, sizes: Sizes, paddingTop: number) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingTop: 64,
+      paddingTop,
       paddingHorizontal: 16,
       paddingBottom: 18,
     },
@@ -887,7 +1029,13 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       letterSpacing: 2,
       textTransform: 'uppercase',
     },
-    title: { color: colors.textPrimary, fontSize: sizes.text.hLg, fontWeight: '700', marginTop: 5, marginBottom: 12 },
+    title: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.hLg,
+      fontWeight: '700',
+      marginTop: 5,
+      marginBottom: 12,
+    },
     tabs: { gap: 8, paddingBottom: 12 },
     tab: {
       borderWidth: 1,
@@ -939,7 +1087,12 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     eventsSection: {
       marginTop: 20,
     },
-    cardTitle: { color: colors.textPrimary, fontSize: sizes.text.body, fontWeight: '700', marginBottom: 6 },
+    cardTitle: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.body,
+      fontWeight: '700',
+      marginBottom: 6,
+    },
     meta: { color: colors.textSecondary, fontSize: sizes.text.sm, lineHeight: 19 },
     distance: { color: colors.accent3, marginTop: 10, fontWeight: '700' },
     button: {
@@ -987,8 +1140,19 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderTopRightRadius: sizes.radius.panel,
       padding: 20,
     },
-    modalActions: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginTop: 12 },
-    loading: { color: colors.textSecondary, textAlign: 'center', marginTop: 8, fontSize: sizes.text.xs },
+    modalActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+      marginTop: 12,
+    },
+    loading: {
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginTop: 8,
+      fontSize: sizes.text.xs,
+    },
     sosCard: {
       backgroundColor: colors.surface,
       borderColor: colors.error,

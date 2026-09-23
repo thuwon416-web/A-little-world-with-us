@@ -163,7 +163,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
   if (loading) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="text-rose-blush">Loading...</div>
+        <div className="text-text-2">Loading...</div>
       </div>
     )
   }
@@ -178,20 +178,20 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
         >
           <AmbientBackground density="high" />
 
-          {/* Glowing golden heart */}
+          {/* Brand heart in the selected theme color */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1, ease: 'easeOut' }}
             className="relative mb-10"
           >
-            <div className="absolute inset-0 rounded-full bg-gold/30 blur-3xl animate-glow-pulse scale-150" />
+            <div className="absolute inset-0 rounded-full bg-accent-2/30 blur-3xl animate-glow-pulse scale-150" />
             <motion.div
               animate={prefersReduced ? {} : { scale: [1, 1.12, 1] }}
               transition={prefersReduced ? {} : { duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
               className="relative"
             >
-              <Heart className="w-24 h-24 text-gold fill-gold drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]" />
+              <Heart className="w-24 h-24 fill-accent-1 text-accent-1 drop-shadow-[0_0_20px_rgb(var(--accent-2))]" />
             </motion.div>
           </motion.div>
 
@@ -200,7 +200,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.8 }}
-            className="font-script text-6xl md:text-7xl gold-text mb-3 animate-gold-glow"
+            className="font-script text-6xl md:text-7xl gold-text mb-3"
           >
             A Little World With Us
           </motion.h1>
@@ -208,7 +208,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="text-rose-blush/70 text-sm mb-4 font-sans tracking-wide"
+            className="text-text-2 text-sm mb-4 font-sans tracking-wide"
           >
             {isSettingPin ? 'Set your secret code' : 'Enter your secret code to unlock our world'}
           </motion.p>
@@ -217,7 +217,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-rose-blush/70 text-sm mb-8 font-sans tracking-wide"
+              className="text-text-2 text-sm mb-8 font-sans tracking-wide"
             >
               Confirm your PIN
             </motion.p>
@@ -264,7 +264,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
                   whileTap={{ scale: 0.88 }}
                   whileHover={{ scale: 1.08 }}
                   onClick={() => (btn === '⌫' ? handleBackspace() : handleInput(btn))}
-                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full glass-card flex items-center justify-center text-2xl font-light text-rose-blush hover:bg-gold/10 hover:glow-gold transition-all duration-300"
+                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-full glass-card flex items-center justify-center text-2xl font-light text-text-1 hover:bg-accent-1/10 hover:shadow-lg transition-all duration-300"
                 >
                   {btn}
                 </motion.button>
@@ -278,7 +278,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={handleSetPin}
-              className="mt-6 px-8 py-3 bg-gold text-black rounded-full font-medium hover:bg-gold/90 transition-colors"
+              className="mt-6 px-8 py-3 bg-accent-1 text-text-1 rounded-full font-medium hover:bg-accent-1/90 transition-colors"
             >
               Set PIN
             </motion.button>
@@ -289,7 +289,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               onClick={handleUnlock}
-              className="mt-6 px-8 py-3 bg-gold text-black rounded-full font-medium hover:bg-gold/90 transition-colors"
+              className="mt-6 px-8 py-3 bg-accent-1 text-text-1 rounded-full font-medium hover:bg-accent-1/90 transition-colors"
             >
               Unlock
             </motion.button>
@@ -298,7 +298,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: error ? 1 : 0 }}
-            className="text-rose-deep text-sm mt-6 font-sans"
+            className="text-error text-sm mt-6 font-sans"
           >
             {error}
           </motion.p>
@@ -319,7 +319,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             transition={{ duration: 1.2, ease: 'easeOut' }}
             className="absolute"
           >
-            <Heart className="w-24 h-24 text-gold fill-gold drop-shadow-[0_0_40px_rgba(255,215,0,0.8)]" />
+            <Heart className="w-24 h-24 text-accent-1 fill-accent-1 drop-shadow-[0_0_40px_rgb(var(--accent-2))]" />
           </motion.div>
 
           {particles.map((p) => (
@@ -337,10 +337,10 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
               className="absolute"
             >
               {p.id % 3 === 0 ? (
-                <Sparkle className="text-gold" style={{ width: p.size, height: p.size }} />
+                <Sparkle className="text-accent-2" style={{ width: p.size, height: p.size }} />
               ) : (
                 <Heart
-                  className="text-gold fill-gold/60"
+                  className="text-accent-1 fill-accent-1/60"
                   style={{ width: p.size, height: p.size }}
                 />
               )}
@@ -352,7 +352,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             initial={{ scale: 0, opacity: 0.8 }}
             animate={{ scale: 8, opacity: 0 }}
             transition={{ duration: 1.4, ease: 'easeOut' }}
-            className="absolute w-32 h-32 rounded-full border-2 border-gold"
+            className="absolute w-32 h-32 rounded-full border-2 border-accent-1"
           />
         </motion.div>
       )}

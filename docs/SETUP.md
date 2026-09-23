@@ -24,7 +24,9 @@ Server-only integrations such as AI providers, Upstash, and Sentry must remain s
 
 ## Database
 
-Run [`supabase/bootstrap/20260111_reset_and_bootstrap.sql`](../supabase/bootstrap/20260111_reset_and_bootstrap.sql) in the Supabase SQL Editor only after reviewing its reset behavior. Apply additive upgrade scripts in the order documented in the root README.
+The maintained schema scripts and run order are listed in [`supabase/bootstrap/README.md`](../supabase/bootstrap/README.md). `00_core.sql` is destructive and is only for a fresh or disposable database. Never use it to repair an existing database. For an existing database missing media type columns, review and apply [`15_media_mime_types.sql`](../supabase/bootstrap/15_media_mime_types.sql) on its own.
+
+For web chat encryption, configure matching `NEXT_PUBLIC_CHAT_ENCRYPTION_KEY` and server-side `CHAT_ENCRYPTION_KEY` values in the local ignored environment file. For mobile, set the same value as `EXPO_PUBLIC_CHAT_ENCRYPTION_KEY` in `mobile/.env`. Do not rotate these values if existing messages must remain readable. Client-prefixed values are bundled into the app and are not private secrets.
 
 ## Run locally
 

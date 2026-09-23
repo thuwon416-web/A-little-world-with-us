@@ -2,10 +2,10 @@ import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 
-import { supabase } from '@/lib/supabase'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
+import { supabase } from '@/lib/supabase'
 
 export default function LoginScreen() {
   const { colors } = useTheme()
@@ -80,60 +80,61 @@ export default function LoginScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes) => StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 80,
-    backgroundColor: colors.background,
-    justifyContent: 'center',
-  },
-  eyebrow: {
-    color: colors.accent2,
-    fontSize: sizes.text.xs,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    marginBottom: 8,
-  },
-  title: {
-    color: colors.textPrimary,
-    fontSize: sizes.text.dSm,
-    fontWeight: '700',
-    marginBottom: 12,
-  },
-  subtitle: {
-    color: colors.textSecondary,
-    fontSize: sizes.text.body,
-    lineHeight: 24,
-    marginBottom: 32,
-  },
-  form: {
-    gap: 12,
-    marginBottom: 20,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    color: colors.textPrimary,
-    borderRadius: sizes.radius.input,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    fontSize: sizes.text.body,
-  },
-  primaryButton: {
-    backgroundColor: colors.accent1,
-    borderRadius: sizes.radius.input,
-    paddingVertical: 16,
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  primaryButtonDisabled: {
-    opacity: 0.7,
-  },
-  primaryButtonText: {
-    color: colors.background,
-    fontWeight: '700',
-    fontSize: sizes.text.body,
-  },
-})
+const createStyles = (colors: ThemeColors, sizes: Sizes) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      paddingHorizontal: 24,
+      paddingTop: 80,
+      backgroundColor: colors.background,
+      justifyContent: 'center',
+    },
+    eyebrow: {
+      color: colors.accent2,
+      fontSize: sizes.text.xs,
+      letterSpacing: 2,
+      textTransform: 'uppercase',
+      marginBottom: 8,
+    },
+    title: {
+      color: colors.textPrimary,
+      fontSize: sizes.text.dSm,
+      fontWeight: '700',
+      marginBottom: 12,
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.body,
+      lineHeight: 24,
+      marginBottom: 32,
+    },
+    form: {
+      gap: 12,
+      marginBottom: 20,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      color: colors.textPrimary,
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: 16,
+      paddingVertical: 14,
+      fontSize: sizes.text.body,
+    },
+    primaryButton: {
+      backgroundColor: colors.accent1,
+      borderRadius: sizes.radius.input,
+      paddingVertical: 16,
+      alignItems: 'center',
+      marginBottom: 12,
+    },
+    primaryButtonDisabled: {
+      opacity: 0.7,
+    },
+    primaryButtonText: {
+      color: colors.background,
+      fontWeight: '700',
+      fontSize: sizes.text.body,
+    },
+  })

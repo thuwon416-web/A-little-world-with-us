@@ -5,8 +5,8 @@ import { Heart, Home, MessageCircle, MoreHorizontal, Sparkles } from 'lucide-rea
 import { useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useAdmin } from '@/hooks/useAdmin'
 import { useTheme } from '@/context/ThemeContext'
+import { useAdmin } from '@/hooks/useAdmin'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 
@@ -110,6 +110,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="quiz" options={{ href: null }} />
       <Tabs.Screen name="time-capsules" options={{ href: null }} />
       <Tabs.Screen name="calls" options={{ href: null }} />
+      <Tabs.Screen name="mfa" options={{ href: null }} />
       <Tabs.Screen name="couple-linking" options={{ href: null }} />
       <Tabs.Screen name="privacy" options={{ href: null }} />
       <Tabs.Screen name="help" options={{ href: null }} />

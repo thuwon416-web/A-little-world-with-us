@@ -45,17 +45,11 @@ export async function addEntry(
 }
 
 export async function updateEntry(entryId: string, content: string): Promise<void> {
-  const { error } = await supabase
-    .from('wellness_entries')
-    .update({ content })
-    .eq('id', entryId)
+  const { error } = await supabase.from('wellness_entries').update({ content }).eq('id', entryId)
   if (error) throw error
 }
 
 export async function deleteEntry(entryId: string): Promise<void> {
-  const { error } = await supabase
-    .from('wellness_entries')
-    .delete()
-    .eq('id', entryId)
+  const { error } = await supabase.from('wellness_entries').delete().eq('id', entryId)
   if (error) throw error
 }

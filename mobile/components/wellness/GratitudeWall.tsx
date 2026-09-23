@@ -1,9 +1,10 @@
 import React, { useMemo, useState } from 'react'
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
-import { useTheme } from '@/context/ThemeContext'
-import type { ThemeColors } from '@/context/ThemeContext'
 
 import { WellnessBoardShell } from './WellnessBoardShell'
+
+import { useTheme } from '@/context/ThemeContext'
+import type { ThemeColors } from '@/context/ThemeContext'
 
 const starterEntries = [
   'I am grateful for the way you make even ordinary mornings feel warm.',
@@ -53,54 +54,55 @@ export default function GratitudeWall() {
   )
 }
 
-const createStyles = (colors: ThemeColors) => StyleSheet.create({
-  list: {
-    gap: 10,
-    marginBottom: 14,
-  },
-  entry: {
-    backgroundColor: colors.cardBg,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    padding: 12,
-  },
-  entryText: {
-    color: colors.textPrimary,
-    fontSize: 13,
-    lineHeight: 18,
-  },
-  form: {
-    backgroundColor: colors.cardBg,
-    borderRadius: 14,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.cardBorder,
-    color: colors.textPrimary,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 10,
-    fontSize: 14,
-  },
-  textArea: {
-    minHeight: 80,
-    textAlignVertical: 'top',
-  },
-  button: {
-    backgroundColor: colors.accent1,
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: colors.background,
-    fontWeight: '700',
-    fontSize: 14,
-  },
-})
+const createStyles = (colors: ThemeColors) =>
+  StyleSheet.create({
+    list: {
+      gap: 10,
+      marginBottom: 14,
+    },
+    entry: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      padding: 12,
+    },
+    entryText: {
+      color: colors.textPrimary,
+      fontSize: 13,
+      lineHeight: 18,
+    },
+    form: {
+      backgroundColor: colors.cardBg,
+      borderRadius: 14,
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    input: {
+      backgroundColor: colors.surface,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+      color: colors.textPrimary,
+      paddingHorizontal: 12,
+      paddingVertical: 10,
+      marginBottom: 10,
+      fontSize: 14,
+    },
+    textArea: {
+      minHeight: 80,
+      textAlignVertical: 'top',
+    },
+    button: {
+      backgroundColor: colors.accent1,
+      borderRadius: 12,
+      paddingVertical: 12,
+      alignItems: 'center',
+    },
+    buttonText: {
+      color: colors.background,
+      fontWeight: '700',
+      fontSize: 14,
+    },
+  })
