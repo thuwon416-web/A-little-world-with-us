@@ -13,7 +13,7 @@ import { buildMemoriesContext } from '@/lib/ai/build-memories-context'
 
 const guardianSchema = z.object({
   message: z.string().trim().min(1).max(1000),
-  language: z.enum(['my', 'en']).optional().default('my'),
+  language: z.enum(['my', 'en']).optional().default('en'),
 })
 
 const privacyColumns = 'allow_ai_read_mood,allow_ai_read_cycle,allow_ai_read_chat,allow_ai_read_location,allow_ai_read_finance'

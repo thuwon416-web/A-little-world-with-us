@@ -11,7 +11,7 @@ import { decryptChatMessageServer } from '@/lib/chatEncryptionServer'
 
 const requestSchema = z.object({
   message: z.string().trim().min(1).max(2000),
-  language: z.enum(['my', 'en']).optional().default('my'),
+  language: z.enum(['my', 'en']).optional().default('en'),
 })
 
 const privacyColumns = 'allow_ai_read_chat,allow_ai_read_mood'

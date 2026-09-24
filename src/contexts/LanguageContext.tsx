@@ -16,7 +16,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined)
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('my')
+  const [language, setLanguageState] = useState<Language>('en')
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -26,6 +26,14 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       localStorage.getItem('a-little-world-with-us-lang')
     )
     const saved = storedLocale === 'mm' ? 'my' : storedLocale
+    const languageDefaultVersion = localStorage.getItem('a-little-world-with-us-language-default')
+    if (languageDefaultVersion !== 'english-v1') {
+      setLanguageState('en')
+      localStorage.setItem('a-little-world-with-us-locale', 'en')
+      localStorage.setItem('a-little-world-with-us-lang', 'en')
+      localStorage.setItem('a-little-world-with-us-language-default', 'english-v1')
+      return
+    }
     if (saved === 'my' || saved === 'en') {
       setLanguageState(saved)
       if (storedLocale === 'mm') {
