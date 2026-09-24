@@ -132,12 +132,6 @@ export default function CalendarPage() {
         <p className="mt-2 text-sm text-text-2">Our events, goals, and dreams</p>
       </header>
 
-      <ExplicitAdviceControl
-        title="Plan a kinder conversation"
-        description="Ask the mediator for a small repair step around an upcoming plan or event."
-        placeholder="What do we need to coordinate without turning it into an argument?"
-      />
-
       <section className="space-y-6">
         <nav className="flex gap-2 overflow-x-auto" aria-label="Calendar sections">
           {(['events', 'plans', 'reminders', 'lists'] as const).map((tab) => (
@@ -292,6 +286,11 @@ export default function CalendarPage() {
           </>
         )}
       </section>
+      <ExplicitAdviceControl
+        title="Plan a kinder conversation"
+        description="Ask the mediator for a small repair step around an upcoming plan or event."
+        placeholder="What do we need to coordinate without turning it into an argument?"
+      />
     </div>
   )
 }

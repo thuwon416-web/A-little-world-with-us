@@ -103,12 +103,6 @@ export default function WellnessPage() {
         </div>
       ) : null}
 
-      <ExplicitAdviceControl
-        title="Ask for a gentle reset"
-        description="Get one small, practical step for reconnecting. Nothing is sent automatically."
-        placeholder="What feels difficult for us today?"
-      />
-
       <nav className="flex gap-2 overflow-x-auto pb-2" aria-label="Wellness categories">
         {tabs.map((tab) => (
           <button
@@ -218,6 +212,11 @@ export default function WellnessPage() {
           ))}
         </section>
       )}
+      <ExplicitAdviceControl
+        title="Ask for a gentle reset"
+        description="Get one small, practical step for reconnecting. Nothing is sent automatically."
+        placeholder="What feels difficult for us today?"
+      />
     </div>
   )
 }

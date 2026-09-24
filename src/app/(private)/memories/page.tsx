@@ -459,12 +459,6 @@ function MemoriesPageContent() {
         <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
       </header>
 
-      <ExplicitAdviceControl
-        title="Talk through a memory"
-        description="Choose a memory and ask for a gentle, two-sided reflection."
-        placeholder="What happened, and what would you like help understanding?"
-      />
-
       {birthdayReveal && (
         <section className="glass-card rounded-modal border border-error/30 bg-gradient-to-r from-error/10 via-accent-1/10 to-warning/10 p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-text-2">
@@ -662,6 +656,11 @@ function MemoriesPageContent() {
         </div>
       )}
       {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-accent-1" /><p className="mt-4 text-lg text-text-1">No memories yet. Start creating your little world together!</p></section>}
+      <ExplicitAdviceControl
+        title="Talk through a memory"
+        description="Choose a memory and ask for a gentle, two-sided reflection."
+        placeholder="What happened, and what would you like help understanding?"
+      />
       {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} coupleId={coupleLinkId ?? ''} /> : null}
       {selectedMemory && <MemoryDetail memory={selectedMemory} onClose={() => setSelectedMemory(null)} onSaved={(updated) => {
         setMemories((current) => current.map((memory) => memory.id === updated.id ? { ...memory, ...updated } : memory))
