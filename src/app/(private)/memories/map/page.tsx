@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 
 const Map = dynamic(() => import('@/features/memories/MemoryMap'), { ssr: false, loading: () => <div className="h-[70vh] animate-pulse rounded-panel bg-soft-tint" /> })
 
-export default function MemoryMapPage() {
+export default function MemoryMapContent() {
   const router = useRouter()
   const [memories, setMemories] = useState<Memory[]>([])
   const [coupleId, setCoupleId] = useState<string | null>(null)

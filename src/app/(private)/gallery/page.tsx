@@ -12,7 +12,7 @@ import { deleteGalleryImage, listGalleryImages, type GalleryImage } from '@/lib/
 import { supabase } from '@/lib/supabase'
 import { getDecryptedObjectUrl, revokeDecryptedUrl } from '@/lib/mediaEncryption'
 
-export default function GalleryPage() {
+export default function GalleryContent() {
   const [images, setImages] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')

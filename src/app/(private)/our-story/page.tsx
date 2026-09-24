@@ -16,7 +16,7 @@ const AllMemories = dynamic(() => import('@/features/our-story/AllMemories'), { 
 const Categories = dynamic(() => import('@/features/our-story/Categories'), { loading: TabSkeleton })
 const ImportedTelegramMessages = dynamic(() => import('@/features/our-story/ImportedTelegramMessages'), { loading: TabSkeleton })
 
-export default function OurStoryPage() {
+export default function OurStoryContent() {
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('timeline')
   const [categoryFilter, setCategoryFilter] = useState('all')

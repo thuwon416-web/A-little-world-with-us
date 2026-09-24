@@ -34,14 +34,6 @@ const navItems = [
 
 const moreGroups = [
   {
-    name: 'Our Journey',
-    pages: [
-      { name: 'Our Story', href: '/our-story', icon: Heart },
-      { name: 'Memory Map', href: '/memories/map', icon: MapPin },
-      { name: 'Gallery', href: '/gallery', icon: Heart },
-    ],
-  },
-  {
     name: 'Daily',
     pages: [
       { name: 'Calls', href: '/calls', icon: Phone },

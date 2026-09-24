@@ -34,6 +34,10 @@ const nextConfig = {
       { source: '/plans', destination: '/planning', permanent: true },
       { source: '/couple-status', destination: '/couple-linking', permanent: true },
       { source: '/love-calculator', destination: '/games', permanent: true },
+      { source: '/memories/map', destination: '/memories?section=map', permanent: true },
+      { source: '/our-story', destination: '/memories?section=story', permanent: true },
+      { source: '/gallery', destination: '/memories?section=gallery', permanent: true },
+      { source: '/time-capsules', destination: '/memories?section=capsules', permanent: true },
     ]
   },
   async headers() {

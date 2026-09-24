@@ -4,8 +4,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LogOut, Calendar, Camera, DollarSign, HeartPulse, HelpCircle, Home, Info,
-  Image, Leaf, LockKeyhole, MapPin, MessageCircleHeart, Gamepad2, Music,
-  PhoneCall, Settings, Sparkles, Star, MonitorPlay, BookHeart, Infinity,
+  Leaf, LockKeyhole, MapPin, MessageCircleHeart, Gamepad2, Music,
+  PhoneCall, Settings, Sparkles, Star, MonitorPlay, Infinity,
   Languages, ClipboardList, Bell, Users, Shield, FileText,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
@@ -33,10 +33,6 @@ const navGroups = [
     label: 'Memories',
     items: [
       { href: '/memories', key: 'memories', icon: Camera },
-      { href: '/memories/map', key: 'memoryMap', icon: MapPin },
-      { href: '/our-story', key: 'ourStory', icon: BookHeart },
-      { href: '/gallery', key: 'gallery', icon: Image },
-      { href: '/time-capsules', key: 'timeCapsules', icon: Infinity },
     ],
   },
   {
