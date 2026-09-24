@@ -303,7 +303,7 @@ end $$;
 
 -- Generic couple RLS for all shared content tables.
 alter table public.profiles enable row level security;
-create policy profiles_read_own_or_location_admin on public.profiles for select using (id = auth.uid() or (public.is_location_admin() and public.is_linked_user(id)));
+create policy profiles_read_own_or_partner on public.profiles for select using (id = auth.uid() or public.is_linked_user(id));
 create policy profiles_update_own on public.profiles for update using (id = auth.uid()) with check (id = auth.uid() and role = (select role from public.profiles where id = auth.uid()));
 alter table public.couples enable row level security;
 create policy couples_member_access on public.couples for all using (public.is_couple_member(id)) with check (public.is_couple_member(id));
@@ -345,10 +345,24 @@ create policy feedback_insert_authenticated on public.feedback for insert with c
 alter table public.user_locations enable row level security;
 create policy locations_owner_write on public.user_locations for insert with check (auth.uid() = user_id and public.is_couple_member(couple_id) and exists (select 1 from public.location_sharing_settings s where s.user_id = auth.uid() and s.enabled));
 create policy locations_owner_update on public.user_locations for update using (auth.uid() = user_id) with check (auth.uid() = user_id and public.is_couple_member(couple_id) and exists (select 1 from public.location_sharing_settings s where s.user_id = auth.uid() and s.enabled));
-create policy locations_admin_pair_read on public.user_locations for select using (public.is_location_admin() and public.is_couple_member(couple_id));
+create policy locations_pair_member_read on public.user_locations for select using (
+  auth.uid() = user_id
+  or (
+    public.is_couple_member(couple_id)
+    and exists (select 1 from public.location_sharing_settings s where s.user_id = user_locations.user_id and s.enabled)
+  )
+  or (public.is_location_admin() and public.is_linked_user(user_id))
+);
 alter table public.location_history enable row level security;
 create policy location_history_owner_insert on public.location_history for insert with check (auth.uid() = user_id and public.is_couple_member(couple_id) and exists (select 1 from public.location_sharing_settings s where s.user_id = auth.uid() and s.enabled));
-create policy location_history_admin_pair_read on public.location_history for select using (public.is_location_admin() and public.is_couple_member(couple_id));
+create policy location_history_pair_member_read on public.location_history for select using (
+  auth.uid() = user_id
+  or (
+    public.is_couple_member(couple_id)
+    and exists (select 1 from public.location_sharing_settings s where s.user_id = location_history.user_id and s.enabled)
+  )
+  or (public.is_location_admin() and public.is_linked_user(user_id))
+);
 alter table public.location_sharing_settings enable row level security;
 create policy location_sharing_owner_access on public.location_sharing_settings for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 alter table public.location_address_cache enable row level security;
@@ -356,7 +370,7 @@ create policy location_address_admin_read on public.location_address_cache for s
 alter table public.push_devices enable row level security;
 create policy push_devices_owner_access on public.push_devices for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 alter table public.saved_places enable row level security;
-create policy saved_places_admin_access on public.saved_places for all using (public.is_location_admin() and public.is_couple_member(couple_id)) with check (public.is_location_admin() and public.is_couple_member(couple_id));
+create policy saved_places_pair_access on public.saved_places for all using (public.is_couple_member(couple_id)) with check (public.is_couple_member(couple_id));
 
 -- Private storage buckets with couple-aware paths (<owner-uuid>/...).
 insert into storage.buckets (id, name, public) values ('memories','memories',false),('gallery','gallery',false),('chat_files','chat_files',false),('chat_photos','chat_photos',false),('voice_messages','voice_messages',false),('surprises','surprises',false)
@@ -427,10 +441,12 @@ begin
   end if;
 end $$;
 
--- Realtime events used by chat and the admin's live map.
+-- Realtime events used by chat, live maps, shared reminders, and call signals.
 do $$ begin
   if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'messages') then alter publication supabase_realtime add table public.messages; end if;
   if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'user_locations') then alter publication supabase_realtime add table public.user_locations; end if;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'reminders') then alter publication supabase_realtime add table public.reminders; end if;
+  if not exists (select 1 from pg_publication_tables where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'call_signals') then alter publication supabase_realtime add table public.call_signals; end if;
 end $$;
 
 select 'Reset complete' as status, (select id from public.couples limit 1) as couple_id, (select count(*) from public.cycle_logs where source = 'flo_import') as imported_flo_periods;
@@ -722,7 +738,8 @@ drop policy if exists storage_security_hardening_delete on storage.objects;
 create policy storage_security_hardening_read on storage.objects
   for select using (
     bucket_id in ('memories','gallery','chat_files','chat_photos','voice_messages')
-    and public.has_accepted_couple()
+    and owner is not null
+    and public.is_linked_user(owner)
   );
 create policy storage_security_hardening_insert on storage.objects
   for insert with check (

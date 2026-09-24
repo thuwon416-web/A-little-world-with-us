@@ -11,47 +11,14 @@ type MoodId = 'blissful' | 'happy' | 'calm' | 'deep' | 'tired'
 type MoodOption = {
   id: MoodId
   label: string
-  backgroundColor: string
-  borderColor: string
-  textColor: string
 }
 
 const moodOptions: MoodOption[] = [
-  {
-    id: 'blissful',
-    label: 'Blissful',
-    backgroundColor: '#2d2234',
-    borderColor: '#d8b9c8',
-    textColor: '#f4cbd8',
-  },
-  {
-    id: 'happy',
-    label: 'Happy',
-    backgroundColor: '#1d1d2a',
-    borderColor: '#d8b9c8',
-    textColor: '#f4edf5',
-  },
-  {
-    id: 'calm',
-    label: 'Calm',
-    backgroundColor: '#191d28',
-    borderColor: '#b7c3f0',
-    textColor: '#d9e2ff',
-  },
-  {
-    id: 'deep',
-    label: 'Deep',
-    backgroundColor: '#211d22',
-    borderColor: '#f4c7a5',
-    textColor: '#f8ddc2',
-  },
-  {
-    id: 'tired',
-    label: 'Tired',
-    backgroundColor: '#1c2129',
-    borderColor: '#b0d8c5',
-    textColor: '#dfeee8',
-  },
+  { id: 'blissful', label: 'Blissful' },
+  { id: 'happy', label: 'Happy' },
+  { id: 'calm', label: 'Calm' },
+  { id: 'deep', label: 'Deep' },
+  { id: 'tired', label: 'Tired' },
 ]
 
 export default function CoupleMoodMeter() {
@@ -91,12 +58,12 @@ export default function CoupleMoodMeter() {
                 styles.option,
                 selected && styles.optionSelected,
                 {
-                  backgroundColor: mood.backgroundColor,
-                  borderColor: selected ? mood.borderColor : colors.cardBorder,
+                  backgroundColor: selected ? colors.accent3 : colors.cardBg,
+                  borderColor: selected ? colors.accent1 : colors.cardBorder,
                 },
               ]}
             >
-              <Text style={[styles.optionText, { color: mood.textColor }]}>{mood.label}</Text>
+              <Text style={[styles.optionText, { color: colors.textPrimary }]}>{mood.label}</Text>
             </Pressable>
           )
         })}

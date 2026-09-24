@@ -79,7 +79,13 @@ export default function LoveNotesBoard() {
           <View style={styles.latestBody}>
             <View style={styles.latestHeader}>
               <Text style={styles.latestTitle}>{latest.title}</Text>
-              <View style={[styles.pill, moodStyles[latest.mood]]}>
+              <View
+                style={[
+                  styles.pill,
+                  moodStyles[latest.mood],
+                  { backgroundColor: colors.accent3, borderColor: colors.accent1 },
+                ]}
+              >
                 <Text style={styles.pillText}>{latest.mood}</Text>
               </View>
             </View>

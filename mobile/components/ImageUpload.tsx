@@ -4,7 +4,7 @@ import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '@/context/ThemeContext'
 import { useAuth } from '@/lib/auth'
-import { encryptMedia } from '@/lib/mediaEncryption'
+import { downloadDecryptAndCache, encryptMedia } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 
 export default function ImageUpload({
@@ -15,6 +15,8 @@ export default function ImageUpload({
   onUpload?: (image: {
     id: string
     path: string
+    ownerId: string
+    mimeType: string
     url: string
     name: string
     created_at: string
@@ -78,16 +80,15 @@ export default function ImageUpload({
       }
 
       const storedPath = data?.path ?? path
-      const { data: signed, error: signedError } = await supabase.storage
-        .from('gallery')
-        .createSignedUrl(storedPath, 3600)
-      if (signedError || !signed?.signedUrl)
-        throw signedError ?? new Error('Unable to preview upload.')
+      const mimeType = 'image/jpeg'
+      const url = await downloadDecryptAndCache(coupleId, 'gallery', storedPath, mimeType)
 
       const result = {
         id: data?.id ?? path,
         path: data?.path ?? path,
-        url: signed.signedUrl,
+        ownerId: user.id,
+        mimeType,
+        url,
         name: storedPath.split('/').pop() ?? 'gallery-image',
         created_at: new Date().toISOString(),
       }

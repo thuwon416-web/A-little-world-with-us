@@ -107,7 +107,13 @@ export default function MellowBloomBoard() {
             style={[styles.item, item.done && styles.itemDone]}
           >
             <View style={styles.itemInner}>
-              <View style={[styles.pill, moodMeta[item.mood].style]}>
+              <View
+                style={[
+                  styles.pill,
+                  moodMeta[item.mood].style,
+                  { backgroundColor: colors.accent3, borderColor: colors.accent1 },
+                ]}
+              >
                 <Text style={styles.pillText}>{moodMeta[item.mood].label}</Text>
               </View>
               <Text style={[styles.itemText, item.done && styles.itemTextDone]}>{item.title}</Text>

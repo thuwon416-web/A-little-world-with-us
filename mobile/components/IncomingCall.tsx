@@ -1,5 +1,3 @@
-import { Audio } from 'expo-av'
-import { useEffect, useState } from 'react'
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '@/context/ThemeContext'
@@ -17,50 +15,23 @@ export function IncomingCall({
   onReject: () => void
 }) {
   const { colors } = useTheme()
-  const [sound, setSound] = useState<Audio.Sound | null>(null)
-
-  useEffect(() => {
-    if (!visible) {
-      void sound?.stopAsync()
-      return
-    }
-
-    const loadTone = async () => {
-      try {
-        const ringtone = new Audio.Sound()
-        await ringtone.loadAsync({ uri: 'https://example.com/ring.mp3' })
-        await ringtone.playAsync()
-        setSound(ringtone)
-      } catch {
-        // Silent fallback for environments without a bundled ring tone.
-      }
-    }
-
-    void loadTone()
-
-    return () => {
-      void sound?.stopAsync()
-      void sound?.unloadAsync()
-    }
-  }, [visible])
-
   const styles = createStyles(colors)
   return (
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <Text style={styles.title}>Incoming call</Text>
+          <Text style={styles.title}>ခေါ်ဆိုမှု ဝင်လာသည်</Text>
           <Text style={styles.subtitle}>
-            {signal?.type === 'video' ? 'Video call' : 'Audio call'}
+            {signal?.type === 'video' ? 'ဗီဒီယိုခေါ်ဆိုမှု' : 'အသံခေါ်ဆိုမှု'}
           </Text>
-          <Text style={styles.caller}>{signal?.caller_id ?? 'Partner'}</Text>
+          <Text style={styles.caller}>တွဲဖက်ထံမှ ခေါ်ဆိုမှု</Text>
 
           <View style={styles.actions}>
             <Pressable style={[styles.button, styles.acceptButton]} onPress={onAccept}>
-              <Text style={styles.buttonText}>Accept</Text>
+              <Text style={styles.buttonText}>လက်ခံရန်</Text>
             </Pressable>
             <Pressable style={[styles.button, styles.rejectButton]} onPress={onReject}>
-              <Text style={styles.buttonText}>Reject</Text>
+              <Text style={styles.buttonText}>ငြင်းပယ်ရန်</Text>
             </Pressable>
           </View>
         </View>

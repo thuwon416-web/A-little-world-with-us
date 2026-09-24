@@ -35,6 +35,8 @@ export default function CalendarPage() {
   const [showSharedCalendar, setShowSharedCalendar] = useState(false)
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'events' | 'plans' | 'reminders' | 'lists'>('events')
+  const [calendarError, setCalendarError] = useState<string | null>(null)
+  const [calendarLoading, setCalendarLoading] = useState(false)
 
   useEffect(() => {
     const loadUserId = async () => {
@@ -48,11 +50,13 @@ export default function CalendarPage() {
 
   const loadEvents = useCallback(async () => {
     if (!coupleId) return
+    setCalendarLoading(true)
+    setCalendarError(null)
 
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('events')
       .select('*')
       .eq('couple_id', coupleId)
@@ -60,6 +64,11 @@ export default function CalendarPage() {
       .lte('event_date', formatDate(endOfMonth))
       .order('event_date', { ascending: true })
 
+    setCalendarLoading(false)
+    if (error) {
+      setCalendarError('ပြက္ခဒိန်အစီအစဉ်များကို ဖတ်မရပါ။ ခဏနေမှ ထပ်ကြိုးစားပါ။')
+      return
+    }
     setEvents((data ?? []) as CalendarEvent[])
   }, [currentDate, coupleId])
 
@@ -82,7 +91,7 @@ export default function CalendarPage() {
       ? (requestedType as CalendarEventType)
       : 'other'
 
-    await supabase.from('events').insert({
+    const { error } = await supabase.from('events').insert({
       event_date: formatDate(selectedDate),
       event_time: null,
       description: null,
@@ -92,6 +101,11 @@ export default function CalendarPage() {
       user_id: userId,
       couple_id: coupleId,
     })
+
+    if (error) {
+      setCalendarError('အစီအစဉ်ကို မသိမ်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။')
+      return
+    }
 
     await loadEvents()
   }, [selectedDate, userId, coupleId, loadEvents])
@@ -177,6 +191,8 @@ export default function CalendarPage() {
 
               {showSharedCalendar && (
                 <div className="mt-4 space-y-4">
+                  {calendarError && <p role="alert" className="rounded-xl border border-error/30 bg-error/10 p-3 text-sm text-error">{calendarError}</p>}
+                  {calendarLoading && <p role="status" className="text-sm text-text-2">ပြက္ခဒိန်အစီအစဉ်များကို ဖတ်နေသည်…</p>}
                   {/* Navigation */}
                   <div className="flex justify-between items-center">
                     <button

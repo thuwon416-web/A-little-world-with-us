@@ -30,8 +30,8 @@
         "UIBackgroundModes": [
           "location"
         ],
-        "NSCameraUsageDescription": "Allow video calls and media capture.",
-        "NSMicrophoneUsageDescription": "Allow voice notes and audio calls."
+        "NSCameraUsageDescription": "ဗီဒီယိုခေါ်ဆိုမှုနှင့် ဓာတ်ပုံ၊ ဗီဒီယိုရိုက်ကူးရန် ကင်မရာအသုံးပြုခွင့် ပေးပါ။",
+        "NSMicrophoneUsageDescription": "အသံခေါ်ဆိုမှုနှင့် အသံစာတိုပို့ရန် မိုက်ခရိုဖုန်းအသုံးပြုခွင့် ပေးပါ။"
       }
     },
     "android": {
@@ -76,6 +76,13 @@
       ],
       "expo-task-manager",
       "expo-notifications",
+      [
+        "@config-plugins/react-native-webrtc",
+        {
+          "cameraPermission": "ဗီဒီယိုခေါ်ဆိုရန် ကင်မရာအသုံးပြုခွင့် ပေးပါ။",
+          "microphonePermission": "ခေါ်ဆိုရန် မိုက်ခရိုဖုန်းအသုံးပြုခွင့် ပေးပါ။"
+        }
+      ],
       "@maplibre/maplibre-react-native",
       "expo-quick-actions"
     ],

@@ -168,7 +168,7 @@ function formatTime(seconds: number) {
 }
 
 export default function WellnessScreen() {
-  const { colors, theme } = useTheme()
+  const { colors } = useTheme()
   const { user } = useAuth()
   const [category, setCategory] = useState<Category>('health')
   const [selectedBoard, setSelectedBoard] = useState<WellnessBoard | null>(null)
@@ -265,7 +265,7 @@ export default function WellnessScreen() {
     }
   }
 
-  const styles = useMemo(() => createStyles(colors, sizes, theme), [colors, sizes, theme])
+  const styles = useMemo(() => createStyles(colors, sizes), [colors, sizes])
 
   const renderBoards = () => (
     <>
@@ -443,8 +443,8 @@ export default function WellnessScreen() {
   )
 }
 
-const createStyles = (colors: ThemeColors, sizes: Sizes, theme: string) => {
-  const buttonTextColor = theme === 'monochrome' ? colors.cardBg : '#fff'
+const createStyles = (colors: ThemeColors, sizes: Sizes) => {
+  const buttonTextColor = colors.accentForeground
   return StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
     header: { padding: 20, paddingTop: 64, backgroundColor: colors.cardBg },

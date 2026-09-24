@@ -50,7 +50,13 @@ export default function AffirmationDeck() {
               style={[styles.cardItem, selected && styles.cardItemSelected]}
             >
               <Text style={styles.itemText}>{item.text}</Text>
-              <View style={[styles.pill, toneStyles[item.tone]]}>
+              <View
+                style={[
+                  styles.pill,
+                  toneStyles[item.tone],
+                  { backgroundColor: colors.accent3, borderColor: colors.accent1 },
+                ]}
+              >
                 <Text style={styles.pillText}>{item.tone}</Text>
               </View>
             </Pressable>

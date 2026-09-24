@@ -169,3 +169,52 @@ export async function sendLocalNotification(title: string, body: string) {
     trigger: null,
   })
 }
+
+/** Keep this device's OS notifications aligned with the couple's saved reminders. */
+export async function syncLocalReminderNotifications(reminders: Reminder[]) {
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('reminders', {
+      name: 'Reminders',
+      importance: Notifications.AndroidImportance.DEFAULT,
+      sound: 'default',
+    })
+  }
+
+  const now = Date.now()
+  const pending = new Map(
+    reminders
+      .filter((reminder) => reminder.active && new Date(reminder.scheduled_at).getTime() > now)
+      .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at))
+      .slice(0, 60)
+      .map((reminder) => [reminder.id, reminder] as const)
+  )
+
+  const existing = await Notifications.getAllScheduledNotificationsAsync()
+  for (const notification of existing) {
+    const data = notification.content.data as
+      { reminderId?: string; scheduledAt?: string } | undefined
+    if (!data?.reminderId) continue
+
+    const reminder = pending.get(data.reminderId)
+    const isCurrent =
+      reminder &&
+      data.scheduledAt === reminder.scheduled_at &&
+      notification.content.title === reminder.title &&
+      notification.content.body === reminder.message
+    if (isCurrent) pending.delete(reminder.id)
+    else await Notifications.cancelScheduledNotificationAsync(notification.identifier)
+  }
+
+  for (const reminder of pending.values()) {
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: reminder.title,
+        body: reminder.message,
+        sound: 'default',
+        data: { reminderId: reminder.id, scheduledAt: reminder.scheduled_at },
+        ...(Platform.OS === 'android' ? { channelId: 'reminders' } : {}),
+      },
+      trigger: new Date(reminder.scheduled_at),
+    })
+  }
+}

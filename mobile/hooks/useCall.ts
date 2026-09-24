@@ -1,12 +1,11 @@
-import { Audio } from 'expo-av'
-import { Camera, CameraType } from 'expo-camera'
 import { useRouter } from 'expo-router'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { useAuth } from '@/lib/auth'
 import {
   acceptCall,
   endCall,
+  getCallSignal,
   initiateCall,
   rejectCall,
   subscribeToCallSignals,
@@ -22,10 +21,10 @@ export function useCall() {
   const [state, setState] = useState<CallState>('idle')
   const [callType, setCallType] = useState<CallType>('audio')
   const [callId, setCallId] = useState<string | null>(null)
+  const callIdRef = useRef<string | null>(null)
+  const [incomingSignal, setIncomingSignal] = useState<CallSignal | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [callDuration, setCallDuration] = useState(0)
-  const [isMuted, setIsMuted] = useState(false)
-  const [cameraFacing, setCameraFacing] = useState<CameraType>('front')
 
   useEffect(() => {
     if (state !== 'in_call') {
@@ -41,38 +40,34 @@ export function useCall() {
 
   useEffect(() => {
     const { unsubscribe } = subscribeToCallSignals((signal: CallSignal) => {
-      if (signal.receiver_id !== user?.id) {
-        return
-      }
-
-      if (signal.status === 'calling') {
+      if (signal.receiver_id === user?.id && signal.status === 'calling') {
+        callIdRef.current = signal.id
         setState('ringing')
         setCallId(signal.id)
         setCallType(signal.type)
+        setIncomingSignal(signal)
+        return
+      }
+
+      if (signal.id !== callIdRef.current) return
+      if (signal.status === 'in_call') {
+        setState('in_call')
+        setIncomingSignal(null)
+      } else if (signal.status === 'ended') {
+        setState('ended')
+        setIncomingSignal(null)
+      } else if (signal.status === 'rejected') {
+        setState('rejected')
+        setIncomingSignal(null)
       }
     })
 
     return () => unsubscribe()
   }, [user?.id])
 
-  const requestPermissions = useCallback(async (type: CallType) => {
-    if (type === 'video') {
-      const { status } = await Camera.requestCameraPermissionsAsync()
-      if (status !== 'granted') {
-        throw new Error('Camera permission denied')
-      }
-    }
-
-    const { status } = await Audio.requestPermissionsAsync()
-    if (status !== 'granted') {
-      throw new Error('Microphone permission denied')
-    }
-  }, [])
-
   const placeCall = useCallback(
     async (receiverId: string, type: CallType) => {
       try {
-        await requestPermissions(type)
         const result = await initiateCall(receiverId, type)
         if (!result) {
           setError('Unable to start call')
@@ -82,13 +77,14 @@ export function useCall() {
         setState('calling')
         setCallType(type)
         setCallId(result.id)
+        callIdRef.current = result.id
         setCallDuration(0)
-        router.push('/call')
+        router.push({ pathname: '/call', params: { callId: result.id, type } })
       } catch (caughtError) {
         setError(caughtError instanceof Error ? caughtError.message : 'Unable to start call')
       }
     },
-    [requestPermissions, router]
+    [router]
   )
 
   const handleAccept = useCallback(async () => {
@@ -97,15 +93,16 @@ export function useCall() {
     }
 
     try {
-      await requestPermissions(callType)
       const accepted = await acceptCall(callId)
       if (accepted) {
         setState('in_call')
+        setIncomingSignal(null)
+        router.push({ pathname: '/call', params: { callId, type: callType } })
       }
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : 'Unable to accept call')
     }
-  }, [callId, callType, requestPermissions])
+  }, [callId, callType, router])
 
   const handleReject = useCallback(async () => {
     if (!callId) {
@@ -113,8 +110,9 @@ export function useCall() {
       return
     }
 
-    await rejectCall(callId)
-    setState('rejected')
+    const rejected = await rejectCall(callId)
+    setState(rejected ? 'rejected' : 'ringing')
+    if (rejected) setIncomingSignal(null)
   }, [callId])
 
   const handleEnd = useCallback(async () => {
@@ -123,14 +121,28 @@ export function useCall() {
     }
     setState('ended')
     setCallDuration(0)
+    setIncomingSignal(null)
+    callIdRef.current = null
   }, [callId])
 
-  const toggleMute = useCallback(() => {
-    setIsMuted((current) => !current)
-  }, [])
-
-  const toggleCamera = useCallback(() => {
-    setCameraFacing((current) => (current === 'front' ? 'back' : 'front'))
+  const attachCall = useCallback(async (id: string, type: CallType) => {
+    callIdRef.current = id
+    setCallId(id)
+    setCallType(type)
+    const signal = await getCallSignal(id)
+    if (signal) {
+      callIdRef.current = signal.id
+      setState(
+        signal.status === 'in_call'
+          ? 'in_call'
+          : signal.status === 'calling'
+            ? 'calling'
+            : signal.status === 'rejected'
+              ? 'rejected'
+              : 'ended'
+      )
+      setCallDuration(0)
+    }
   }, [])
 
   return useMemo(
@@ -138,31 +150,27 @@ export function useCall() {
       state,
       callType,
       callId,
+      incomingSignal,
+      attachCall,
       error,
       callDuration,
-      isMuted,
-      cameraFacing,
       placeCall,
       acceptCall: handleAccept,
       rejectCall: handleReject,
       endCall: handleEnd,
-      toggleMute,
-      toggleCamera,
     }),
     [
       callDuration,
       callId,
+      incomingSignal,
+      attachCall,
       callType,
       error,
       handleAccept,
       handleEnd,
       handleReject,
-      isMuted,
       placeCall,
       state,
-      toggleCamera,
-      toggleMute,
-      cameraFacing,
     ]
   )
 }

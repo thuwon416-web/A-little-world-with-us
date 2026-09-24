@@ -81,7 +81,13 @@ export default function TenderCompassBoard() {
             style={[styles.item, item.done && styles.itemDone]}
           >
             <View style={styles.itemInner}>
-              <View style={[styles.pill, kindMeta[item.kind].style]}>
+              <View
+                style={[
+                  styles.pill,
+                  kindMeta[item.kind].style,
+                  { backgroundColor: colors.accent3, borderColor: colors.accent1 },
+                ]}
+              >
                 <Text style={styles.pillText}>{kindMeta[item.kind].label}</Text>
               </View>
               <Text style={[styles.itemText, item.done && styles.itemTextDone]}>{item.title}</Text>

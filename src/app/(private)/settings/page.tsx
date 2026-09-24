@@ -1,10 +1,11 @@
 'use client'
 
-import { BellRing, Download, NotebookPen, ShieldCheck, Trash2, Wand2 } from 'lucide-react'
+import { BellRing, NotebookPen, ShieldCheck, Wand2 } from 'lucide-react'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 
 import ErrorReport from '@/components/shared/ErrorReport'
+import FeedbackWidget from '@/components/FeedbackWidget'
 import PWAInstall from '@/components/shared/PWAInstall'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import NotificationPermission from '@/components/NotificationPermission'
@@ -55,9 +56,6 @@ const settingCards = [
 ]
 
 export default function SettingsPage() {
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true)
-  const [quietMode, setQuietMode] = useState(false)
-  const [privateMode, setPrivateMode] = useState(true)
   const [activeSettingsModal, setActiveSettingsModal] = useState<'reminder' | 'pin' | null>(null)
 
   return (
@@ -77,37 +75,6 @@ export default function SettingsPage() {
               <h2 className="mt-1 text-xl font-semibold text-text-1">App settings</h2>
             </div>
             <PWAInstall />
-          </div>
-
-          <div className="space-y-3">
-            {[
-              { label: 'Push notifications', value: notificationsEnabled, onChange: setNotificationsEnabled },
-              { label: 'Quiet mode', value: quietMode, onChange: setQuietMode },
-              { label: 'Private home mode', value: privateMode, onChange: setPrivateMode },
-            ].map(({ label, value, onChange }) => (
-              <div
-                key={label}
-                className="flex items-center justify-between gap-4 rounded-[22px] border border-border bg-card p-4"
-              >
-                <div>
-                  <p className="font-medium text-text-1">{label}</p>
-                  <p className="text-sm text-text-2">
-                    {value ? 'Enabled' : 'Disabled'}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => onChange(!value)}
-                  className={`relative h-7 w-12 rounded-full transition ${value ? 'bg-accent-1' : 'bg-border/30'}`}
-                  aria-label={`Toggle ${label}`}
-                >
-                  <span
-                    className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${value ? 'left-6' : 'left-1'}`}
-                  />
-                </button>
-              </div>
-            ))}
           </div>
 
           <AIPrivacySettings />
@@ -172,34 +139,8 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="rounded-modal border border-error/20 bg-error/5 p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-error">Danger Zone</p>
-        <h2 className="mt-1 text-xl font-semibold text-error">Data Management</h2>
-
-        <div className="mt-4 space-y-3">
-          <button
-            onClick={() => alert('Use the Data & Export section above to download your available exports.')}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-error/30 py-3 font-medium text-error transition hover:bg-error/10"
-          >
-            <Download className="h-4 w-4" />
-            <span>Export All My Data</span>
-          </button>
-
-          <button
-            onClick={() => {
-              if (confirm('Are you sure? This will delete all your data permanently and cannot be undone.')) {
-                alert('Account deletion requires authentication. Please contact support for assistance.')
-              }
-            }}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-red-700 py-3 font-medium text-white transition hover:bg-red-800"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span>Delete My Account</span>
-          </button>
-        </div>
-      </section>
-
       <ErrorReport />
+      <FeedbackWidget />
     </div>
   )
 }

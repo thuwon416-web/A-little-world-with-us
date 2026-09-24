@@ -101,10 +101,10 @@ export default function GentleHoldBoard() {
                 <View
                   style={[
                     styles.pill,
-                    { backgroundColor: meta.backgroundColor, borderColor: meta.borderColor },
+                    { backgroundColor: colors.accent3, borderColor: colors.accent1 },
                   ]}
                 >
-                  <Text style={[styles.pillText, { color: meta.color }]}>{meta.label}</Text>
+                  <Text style={[styles.pillText, { color: colors.textPrimary }]}>{meta.label}</Text>
                 </View>
                 <Text style={[styles.itemText, item.done && styles.itemTextDone]}>
                   {item.title}

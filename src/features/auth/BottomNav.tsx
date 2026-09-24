@@ -23,6 +23,7 @@ import {
   MonitorPlay,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { removeBrowserPushSubscription } from '@/lib/notifications'
 
 const navItems = [
   { href: '/dashboard', label: 'Home', icon: Home },
@@ -91,6 +92,11 @@ export default function BottomNav() {
   }, [])
 
   const handleExit = async () => {
+    try {
+      await removeBrowserPushSubscription()
+    } catch (error) {
+      console.warn('Unable to clear this browser push subscription:', error)
+    }
     await supabase.auth.signOut()
     router.replace('/login')
     router.refresh()

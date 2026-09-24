@@ -35,7 +35,7 @@ function relativeTime(value: string) {
   return `${Math.floor(seconds / 3600)}h ago`
 }
 
-export default function AdminLocationsPage() {
+export default function AdminLocationsPage({ requireAdmin = true }: { requireAdmin?: boolean }) {
   const [tab, setTab] = useState<Tab>('live')
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [locations, setLocations] = useState<LocationRow[]>([])
@@ -58,8 +58,10 @@ export default function AdminLocationsPage() {
     const user = authData.user
     if (!user) { window.location.assign('/login'); return }
     setAuthUserId(user.id)
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
-    if (profile?.role !== 'admin') { window.location.assign('/dashboard'); return }
+    if (requireAdmin) {
+      const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
+      if (profile?.role !== 'admin') { window.location.assign('/dashboard'); return }
+    }
 
     const { data: link, error: linkError } = await supabase.from('couple_links').select('inviter_id, accepted_by, couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').maybeSingle()
     if (linkError || !link?.accepted_by || !link.couple_id) { setError('No accepted linked partner is available yet.'); setLoading(false); return }
@@ -85,7 +87,7 @@ export default function AdminLocationsPage() {
     setGeofenceEvents((geofenceEventsResult.data ?? []) as GeofenceEvent[])
     setSelectedUser((current) => current && userIds.includes(current) ? current : user.id)
     setLoading(false)
-  }, [])
+  }, [requireAdmin])
 
   const savePlace = async () => {
     const latitude = Number(placeForm.latitude)

@@ -16,6 +16,7 @@ import { Alert, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
+import { IncomingCall } from '@/components/IncomingCall'
 import { Input } from '@/components/Input'
 import { FileUpload } from '@/components/chat/FileUpload'
 import { GIFPicker } from '@/components/chat/GIFPicker'
@@ -73,7 +74,7 @@ export default function ChatScreen() {
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
-  const { state: callState, placeCall } = useCall()
+  const { state: callState, placeCall, incomingSignal, acceptCall, rejectCall } = useCall()
   const [draft, setDraft] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [partnerId, setPartnerId] = useState<string | null>(null)
@@ -434,21 +435,39 @@ export default function ChatScreen() {
   }
 
   const statusLabel = isOffline
-    ? 'Offline'
+    ? 'အင်တာနက် မချိတ်ဆက်ထားပါ'
     : status === 'syncing'
-      ? 'Syncing...'
+      ? 'ချိန်ကိုက်နေသည်…'
       : status === 'error'
-        ? 'Sync error'
-        : 'Synced'
+        ? 'ချိန်ကိုက်မှု မအောင်မြင်ပါ'
+        : 'ချိန်ကိုက်ပြီးပါပြီ'
+  const callStateLabel =
+    callState === 'calling'
+      ? 'ခေါ်ဆိုရန် တောင်းဆိုနေသည်'
+      : callState === 'ringing'
+        ? 'ခေါ်ဆိုမှု ဝင်လာသည်'
+        : callState === 'in_call'
+          ? 'ခေါ်ဆိုမှု လက်ခံပြီး'
+          : callState === 'ended'
+            ? 'ခေါ်ဆိုမှု ပြီးဆုံးပါပြီ'
+            : callState === 'rejected'
+              ? 'ခေါ်ဆိုမှုကို ငြင်းပယ်လိုက်သည်'
+              : ''
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Text style={styles.title}>Chat</Text>
+      <Text style={styles.title}>စကားပြောခန်း</Text>
+      <IncomingCall
+        visible={callState === 'ringing' && Boolean(incomingSignal)}
+        signal={incomingSignal}
+        onAccept={() => void acceptCall()}
+        onReject={() => void rejectCall()}
+      />
       {error && <Text style={styles.error}>{error}</Text>}
 
       <View style={[styles.syncBanner, isOffline ? styles.offline : styles.online]}>
         <Text style={styles.syncText}>{statusLabel}</Text>
-        {pendingCount > 0 && <Text style={styles.syncText}>• {pendingCount} pending</Text>}
+        {pendingCount > 0 && <Text style={styles.syncText}>• ပို့ရန်ကျန် {pendingCount} ခု</Text>}
       </View>
 
       <FlatList
@@ -513,24 +532,26 @@ export default function ChatScreen() {
           onPress={() => handleCall('audio')}
           disabled={!partnerId}
           accessibilityRole="button"
-          accessibilityLabel="Start audio call"
-          accessibilityHint="Calls your partner using audio"
+          accessibilityLabel="အသံခေါ်ဆိုမှု စတင်ရန်"
+          accessibilityHint="တွဲဖက်ကို အသံဖြင့် ခေါ်ဆိုရန်"
         >
-          <Text style={styles.callButtonText}>Audio call</Text>
+          <Text style={styles.callButtonText}>အသံခေါ်ဆိုရန်</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.callButtonVideo, !partnerId && styles.callButtonDisabled]}
           onPress={() => handleCall('video')}
           disabled={!partnerId}
           accessibilityRole="button"
-          accessibilityLabel="Start video call"
-          accessibilityHint="Calls your partner using video"
+          accessibilityLabel="ဗီဒီယိုခေါ်ဆိုမှု စတင်ရန်"
+          accessibilityHint="တွဲဖက်ကို ဗီဒီယိုဖြင့် ခေါ်ဆိုရန်"
         >
-          <Text style={styles.callButtonText}>Video call</Text>
+          <Text style={styles.callButtonText}>ဗီဒီယိုခေါ်ဆိုရန်</Text>
         </TouchableOpacity>
       </View>
 
-      {callState !== 'idle' && <Text style={styles.callStatus}>Call status: {callState}</Text>}
+      {callState !== 'idle' && (
+        <Text style={styles.callStatus}>ခေါ်ဆိုမှုအခြေအနေ — {callStateLabel}</Text>
+      )}
 
       <View style={styles.composer}>
         <Modal

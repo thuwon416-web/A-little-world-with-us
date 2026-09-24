@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import ImageUpload from '@/components/shared/ImageUpload'
@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Image as ImageIcon } from 'lucide-react'
 import { deleteGalleryImage, listGalleryImages, type GalleryImage } from '@/lib/storage'
 import { supabase } from '@/lib/supabase'
+import { getDecryptedObjectUrl, revokeDecryptedUrl } from '@/lib/mediaEncryption'
 
 export default function GalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([])
@@ -17,13 +18,21 @@ export default function GalleryPage() {
   const [error, setError] = useState('')
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [yearFilter, setYearFilter] = useState('all')
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const imagesRef = useRef<GalleryImage[]>([])
   const router = useRouter()
 
-  const loadGallery = async () => {
+  const loadGallery = async (activeCoupleId: string) => {
     try {
       setLoading(true)
-      const items = await listGalleryImages('gallery')
-      setImages(items)
+      const items = await listGalleryImages(activeCoupleId)
+      const decryptedItems = await Promise.all(items.map(async (item) => ({
+        ...item,
+        url: await getDecryptedObjectUrl(activeCoupleId, 'gallery', item.path, item.mimeType),
+      })))
+      imagesRef.current.forEach((image) => revokeDecryptedUrl('gallery', image.path))
+      imagesRef.current = decryptedItems
+      setImages(decryptedItems)
       setError('')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to load gallery.')
@@ -35,22 +44,32 @@ export default function GalleryPage() {
   const loadCoupleId = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
+    setCurrentUserId(user.id)
     const { data } = await supabase
       .from('couple_links')
       .select('couple_id')
       .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
       .eq('status', 'accepted')
       .maybeSingle()
-    setCoupleId(data?.couple_id ?? null)
+    const activeCoupleId = data?.couple_id ?? null
+    setCoupleId(activeCoupleId)
+    if (activeCoupleId) await loadGallery(activeCoupleId)
+    else {
+      setError('Зургийг хамтдаа үзэхийн тулд эхлээд хосын холбоосоо баталгаажуулна уу.')
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
-    void loadGallery()
     void loadCoupleId()
+    return () => imagesRef.current.forEach((image) => revokeDecryptedUrl('gallery', image.path))
+    // The initial lookup is intentional; later refreshes use the resolved couple id.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleUpload = async (image: GalleryImage) => {
-    setImages((current) => [image, ...current])
+    imagesRef.current = [image, ...imagesRef.current]
+    setImages(imagesRef.current)
   }
 
   const handleDelete = async (image: GalleryImage) => {
@@ -61,7 +80,9 @@ export default function GalleryPage() {
         return
       }
 
-      setImages((current) => current.filter((item) => item.path !== image.path))
+      revokeDecryptedUrl('gallery', image.path)
+      imagesRef.current = imagesRef.current.filter((item) => item.path !== image.path)
+      setImages(imagesRef.current)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unable to delete this image.')
     }
@@ -83,7 +104,7 @@ export default function GalleryPage() {
         <h1 className="mt-3 text-3xl font-serif text-text-1">Shared memories</h1>
       </div>
 
-      <ImageUpload onUpload={handleUpload} coupleId={coupleId ?? ''} />
+      {coupleId && <ImageUpload onUpload={handleUpload} coupleId={coupleId} />}
 
       {error && <div className="rounded-btn border border-error/20 bg-error/10 p-4 text-sm text-error">{error}</div>}
 
@@ -122,18 +143,18 @@ export default function GalleryPage() {
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {visibleImages.map((image) => (
             <div key={image.id} className="overflow-hidden rounded-btn border border-border bg-card shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
-              <Image src={image.url} alt={`Shared photo from ${new Date(image.created_at).toLocaleDateString()}`} width={256} height={256} className="h-64 w-full object-cover" />
+              <Image src={image.url} alt={`Shared photo from ${new Date(image.created_at).toLocaleDateString()}`} width={256} height={256} unoptimized className="h-64 w-full object-cover" />
               <div className="flex items-center justify-between gap-3 p-4">
                 <span className="text-xs uppercase tracking-[0.16em] text-text-2">
                   {new Date(image.created_at).toLocaleDateString()}
                 </span>
-                <button
+                {image.ownerId === currentUserId && <button
                   type="button"
                   onClick={() => void handleDelete(image)}
                   className="rounded-pill border border-error/30 bg-error/10 px-3 py-1 text-xs font-medium text-error"
                 >
                   Delete
-                </button>
+                </button>}
               </div>
             </div>
           ))}

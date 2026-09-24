@@ -19,63 +19,69 @@ import { useNotifications } from '@/hooks/useNotifications'
 export default function RemindersScreen() {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
-  const { permissionStatus, reminders, addReminder, triggerTest } = useNotifications()
+  const { permissionStatus, reminders, addReminder, triggerTest, error } = useNotifications()
   const [draftTitle, setDraftTitle] = useState('')
   const [draftMessage, setDraftMessage] = useState('')
 
   const handleAddReminder = async () => {
     if (!draftTitle.trim() || !draftMessage.trim()) {
-      Alert.alert('Missing details', 'Add a title and message before saving.')
+      Alert.alert('အချက်အလက် မပြည့်စုံပါ', 'မသိမ်းမီ ခေါင်းစဉ်နဲ့ စာတိုကို ဖြည့်ပါ။')
       return
     }
 
-    await addReminder(
+    const saved = await addReminder(
       draftTitle.trim(),
       draftMessage.trim(),
       new Date(Date.now() + 3600000).toISOString()
     )
+    if (!saved) return
     setDraftTitle('')
     setDraftMessage('')
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Reminders</Text>
-      <Text style={styles.pill}>Permission: {permissionStatus}</Text>
+      <Text style={styles.title}>သတိပေးချက်များ</Text>
+      <Text style={styles.pill}>အသိပေးခွင့်ပြုချက် — {permissionStatus}</Text>
+      {error ? (
+        <Text accessibilityRole="alert" style={styles.error}>
+          {error}
+        </Text>
+      ) : null}
 
       <TouchableOpacity style={styles.primaryButton} onPress={() => void triggerTest()}>
-        <Text style={styles.primaryText}>Test notification</Text>
+        <Text style={styles.primaryText}>အသိပေးချက် စမ်းသပ်ရန်</Text>
       </TouchableOpacity>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Title</Text>
+        <Text style={styles.label}>ခေါင်းစဉ်</Text>
         <TextInput
           value={draftTitle}
           onChangeText={setDraftTitle}
-          placeholder="Daily check-in"
+          placeholder="နေ့စဉ် အခြေအနေမေးရန်"
           placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
-        <Text style={styles.label}>Message</Text>
+        <Text style={styles.label}>စာတို</Text>
         <TextInput
           value={draftMessage}
           onChangeText={setDraftMessage}
-          placeholder="Take a moment to check in with each other."
+          placeholder="တစ်ယောက်အခြေအနေကို တစ်ယောက် မေးကြည့်ပါ။"
           placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
       </View>
 
       <TouchableOpacity style={styles.secondaryButton} onPress={() => void handleAddReminder()}>
-        <Text style={styles.secondaryText}>Add reminder</Text>
+        <Text style={styles.secondaryText}>သတိပေးချက် ထည့်ရန်</Text>
       </TouchableOpacity>
 
       <ScrollView style={styles.list} contentContainerStyle={styles.listContent}>
         {reminders.length === 0 ? (
           <EmptyState
             icon={Bell}
-            title="No reminders yet"
-            description="Create one to keep the love flowing."
+            title="သတိပေးချက် မရှိသေးပါ"
+            description="သတိပေးချက်အသစ်တစ်ခု ထည့်နိုင်ပါတယ်။"
           />
         ) : (
           reminders.map((reminder) => (
@@ -189,5 +195,9 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     cardTime: {
       color: colors.accent2,
       fontSize: sizes.text.xs,
+    },
+    error: {
+      color: colors.error,
+      marginBottom: 12,
     },
   })

@@ -30,10 +30,10 @@ export default function PairLocationMap({ locations, history, selectedUser, name
   return <MapContainer center={focus ?? [16.8661, 96.1951]} zoom={focus ? 13 : 4} scrollWheelZoom className="h-[430px] w-full rounded-btn" aria-label="Live pair location map">
     <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' url={tileUrl} />
     <FocusMap point={focus} />
-    {route.length > 1 && <Polyline positions={route} pathOptions={{ color: '#FFD700', weight: 4, opacity: 0.75 }} />}
+    {route.length > 1 && <Polyline positions={route} pathOptions={{ color: theme.accent2, weight: 4, opacity: 0.75 }} />}
     {locations.map((row, index) => <Marker key={row.user_id} position={[row.latitude, row.longitude]} icon={marker(index === 0 ? '♥' : '✦', index === 0 ? theme.accent1 : theme.accent2)}><Popup><strong>{names[row.user_id] ?? 'Linked account'}</strong><br />Updated {new Date(row.updated_at).toLocaleString()}<br />Accuracy ±{Math.round(row.accuracy ?? 0)}m</Popup></Marker>)}
     {locations.map((row, index) => <Circle key={`${row.user_id}-accuracy`} center={[row.latitude, row.longitude]} radius={Math.max(row.accuracy ?? 0, 10)} pathOptions={{ color: index === 0 ? theme.accent1 : theme.accent2, fillOpacity: 0.08 }} />)}
-    {places.map((place) => <Circle key={place.id} center={[place.latitude, place.longitude]} radius={place.radius_meters} pathOptions={{ color: '#34d399', fillOpacity: 0.12 }}><Popup><strong>{place.name}</strong><br />Safe zone · {place.radius_meters}m</Popup></Circle>)}
+    {places.map((place) => <Circle key={place.id} center={[place.latitude, place.longitude]} radius={place.radius_meters} pathOptions={{ color: theme.accent1, fillOpacity: 0.12 }}><Popup><strong>{place.name}</strong><br />Safe zone · {place.radius_meters}m</Popup></Circle>)}
     {alerts.filter((alert) => alert.latitude !== null && alert.longitude !== null).map((alert) => <Marker key={alert.id} position={[alert.latitude as number, alert.longitude as number]} icon={marker('!', '#ef4444')}><Popup><strong>SOS alert</strong><br />{new Date(alert.created_at).toLocaleString()}</Popup></Marker>)}
   </MapContainer>
 }

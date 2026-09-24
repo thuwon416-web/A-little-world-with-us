@@ -599,16 +599,16 @@ label {
   align-items: center;
   gap: 0.45rem;
   min-height: 2.5rem;
-  border: 1px solid rgba(255, 215, 0, 0.38);
+  border: 1px solid rgb(var(--accent-1) / 0.34);
   border-radius: 9999px;
   padding: 0.55rem 0.9rem;
-  background: rgba(255, 215, 0, 0.1);
+  background: rgb(var(--accent-1) / 0.1);
   color: var(--text-primary);
   font-size: 0.78rem;
   transition: background 180ms ease, transform 180ms ease;
 }
 
-.dashboard-share-card:hover:not(:disabled) { background: rgba(255, 215, 0, 0.18); transform: translateY(-1px); }
+.dashboard-share-card:hover:not(:disabled) { background: rgb(var(--accent-1) / 0.16); transform: translateY(-1px); }
 .dashboard-share-card:disabled { opacity: 0.6; cursor: wait; }
 
 .dashboard-layout-controls {
@@ -619,8 +619,8 @@ label {
 
 .dashboard-layout-chip {
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(17, 17, 19, 0.35);
+  border: 1px solid rgb(var(--border) / 0.82);
+  background: rgb(var(--card) / 0.94);
   color: var(--text-primary);
   padding: 0.45rem 0.85rem;
   font-size: 0.72rem;
@@ -633,8 +633,8 @@ label {
 }
 
 .dashboard-layout-chip.is-active {
-  border-color: rgba(255, 182, 193, 0.4);
-  background: rgba(255, 182, 193, 0.12);
+  border-color: rgb(var(--accent-1) / 0.58);
+  background: rgb(var(--accent-1) / 0.12);
 }
 
 .dashboard-layout-chip:hover {
@@ -720,10 +720,10 @@ label {
   justify-content: center;
   width: 3.5rem;
   height: 3.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgb(var(--accent-1) / 0.28);
   border-radius: 9999px;
   background: linear-gradient(135deg, rgb(var(--accent-1)), rgb(var(--accent-2)));
-  color: rgb(var(--text-1));
+  color: var(--accent-foreground);
   box-shadow: 0 16px 36px rgb(var(--accent-1) / 0.28);
   transition:
     transform 180ms ease,
@@ -745,9 +745,9 @@ label {
   min-width: 1.5rem;
   height: 1.5rem;
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(17, 17, 19, 0.22);
-  color: var(--text-secondary);
+  border: 1px solid rgb(var(--border) / 0.84);
+  background: rgb(var(--card) / 0.96);
+  color: rgb(var(--text-2));
   font-size: 0.62rem;
   letter-spacing: 0.08em;
 }
@@ -756,11 +756,11 @@ label {
   position: relative;
   overflow: hidden;
   border-radius: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgb(var(--border) / 0.72);
   background: linear-gradient(
     135deg,
-    rgba(255, 255, 255, 0.08),
-    rgba(255, 255, 255, 0.02)
+    rgb(var(--card) / 0.98),
+    rgb(var(--soft-tint) / 0.78)
   );
   box-shadow:
     0 20px 40px -24px rgba(17, 12, 30, 0.7),
@@ -806,8 +806,8 @@ label {
   gap: 0.4rem;
   padding: 0.45rem 0.8rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgb(var(--card) / 0.72);
+  border: 1px solid rgb(var(--border) / 0.72);
   color: var(--text-primary);
   font-size: 0.72rem;
   letter-spacing: 0.08em;
@@ -835,8 +835,8 @@ label {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgb(var(--card) / 0.78);
+  border: 1px solid rgb(var(--border) / 0.72);
   color: rgb(var(--accent-1));
   font-size: 1.5rem;
 }
@@ -864,8 +864,8 @@ label {
 .dashboard-mini-card {
   padding: 0.9rem 1rem;
   border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgb(var(--border) / 0.62);
+  background: rgb(var(--card) / 0.72);
   backdrop-filter: blur(8px);
 }
 
@@ -928,8 +928,8 @@ label {
 
 .dashboard-panel {
   border-radius: 1.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(17, 17, 19, 0.28);
+  border: 1px solid rgb(var(--border) / 0.74);
+  background: rgb(var(--card) / 0.94);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   box-shadow:
@@ -942,6 +942,7 @@ label {
 }
 
 .dashboard-card-interactive {
+  align-self: start;
   transform: translateY(0);
   transition:
     transform 180ms ease,
@@ -954,7 +955,7 @@ label {
 
 .dashboard-card-interactive:hover {
   transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: rgb(var(--accent-1) / 0.48);
   box-shadow:
     0 22px 36px -22px rgba(17, 12, 30, 0.78),
     0 0 0 1px rgba(255, 255, 255, 0.04),

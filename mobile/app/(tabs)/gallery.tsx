@@ -17,6 +17,7 @@ function isExternalUrl(v?: string | null) {
 type GalleryItem = {
   id: string
   path: string
+  ownerId: string
   url: string
   name: string
   created_at: string
@@ -30,46 +31,51 @@ export default function GalleryScreen() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [galleryOwnerIds, setGalleryOwnerIds] = useState<string[]>([])
   const { user, loading: authLoading } = useAuth()
 
   const loadGallery = async () => {
     try {
       setLoading(true)
-      if (!user?.id) return
-      const { data, error } = await supabase.storage
-        .from('gallery')
-        .list(user.id, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
-      if (error) {
-        throw error
-      }
-
-      const galleryItems = (
-        await Promise.all(
-          (data ?? [])
-            .filter((item) => item.name && !item.metadata?.isFolder)
-            .map(async (item) => {
-              const path = `${user.id}/${item.name}`
-              let url: string | null = null
-              if (isExternalUrl(path)) {
-                const { data: signed, error: signedError } = await supabase.storage
-                  .from('gallery')
-                  .createSignedUrl(path, 3600)
-                if (!signedError && signed?.signedUrl) url = signed.signedUrl
-              } else if (coupleId) {
-                const mimeType = guessMimeTypeFromPath(path)
-                url = await downloadDecryptAndCache(coupleId, 'gallery', path, mimeType)
-              }
-              if (!url) return null
-              return {
-                id: item.id ?? path,
-                path,
-                url,
-                name: item.name,
-                created_at: item.created_at ?? new Date().toISOString(),
-              }
-            })
-        )
-      ).filter((item): item is GalleryItem => item !== null)
+      if (!user?.id || !coupleId || galleryOwnerIds.length === 0) return
+      const ownerItems = await Promise.all(
+        galleryOwnerIds.map(async (ownerId) => {
+          const { data, error } = await supabase.storage
+            .from('gallery')
+            .list(ownerId, { limit: 100, sortBy: { column: 'created_at', order: 'desc' } })
+          if (error) throw error
+          return Promise.all(
+            (data ?? [])
+              .filter((item) => item.name && !item.metadata?.isFolder)
+              .map(async (item) => {
+                const path = `${ownerId}/${item.name}`
+                let url: string | null = null
+                if (isExternalUrl(path)) {
+                  const { data: signed, error: signedError } = await supabase.storage
+                    .from('gallery')
+                    .createSignedUrl(path, 3600)
+                  if (!signedError && signed?.signedUrl) url = signed.signedUrl
+                } else if (coupleId) {
+                  const mimeType = guessMimeTypeFromPath(path)
+                  url = await downloadDecryptAndCache(coupleId, 'gallery', path, mimeType)
+                }
+                if (!url) return null
+                return {
+                  id: item.id ?? path,
+                  path,
+                  ownerId,
+                  url,
+                  name: item.name,
+                  created_at: item.created_at ?? new Date().toISOString(),
+                }
+              })
+          )
+        })
+      )
+      const galleryItems = ownerItems
+        .flat()
+        .filter((item): item is GalleryItem => item !== null)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
 
       setItems(galleryItems)
     } catch (caught) {
@@ -84,16 +90,19 @@ export default function GalleryScreen() {
     if (!user?.id) return
     const { data } = await supabase
       .from('couple_links')
-      .select('couple_id')
+      .select('couple_id,inviter_id,accepted_by')
       .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
       .eq('status', 'accepted')
       .maybeSingle()
     setCoupleId(data?.couple_id ?? null)
+    setGalleryOwnerIds(
+      data?.inviter_id && data?.accepted_by ? [data.inviter_id, data.accepted_by] : []
+    )
   }
 
   useEffect(() => {
     if (!authLoading) void loadGallery()
-  }, [authLoading, user?.id, coupleId])
+  }, [authLoading, user?.id, coupleId, galleryOwnerIds])
 
   useEffect(() => {
     void loadCoupleId()
@@ -131,7 +140,7 @@ export default function GalleryScreen() {
       <Text style={styles.title}>Shared moments</Text>
       <Text style={styles.subtitle}>Save little snapshots of your story.</Text>
 
-      <ImageUpload onUpload={handleUpload} coupleId={coupleId ?? ''} />
+      {coupleId ? <ImageUpload onUpload={handleUpload} coupleId={coupleId} /> : null}
 
       {error && <Text style={styles.error}>{error}</Text>}
       {loading || authLoading ? (
@@ -154,9 +163,11 @@ export default function GalleryScreen() {
               />
               <View style={styles.metaRow}>
                 <Text style={styles.meta}>{new Date(item.created_at).toLocaleDateString()}</Text>
-                <TouchableOpacity onPress={() => handleDelete(item)}>
-                  <Text style={styles.delete}>Delete</Text>
-                </TouchableOpacity>
+                {item.ownerId === user?.id ? (
+                  <TouchableOpacity onPress={() => handleDelete(item)}>
+                    <Text style={styles.delete}>Delete</Text>
+                  </TouchableOpacity>
+                ) : null}
               </View>
             </View>
           ))}

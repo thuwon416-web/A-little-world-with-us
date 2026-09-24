@@ -18,6 +18,7 @@ export type ThemeColors = {
   accent1: string
   accent2: string
   accent3: string
+  accentForeground: string
   success: string
   warning: string
   error: string
@@ -71,6 +72,7 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent1: themeTokens['lavender-mist'].accent1,
     accent2: themeTokens['lavender-mist'].accent2,
     accent3: themeTokens['lavender-mist'].accent3,
+    accentForeground: themeTokens['lavender-mist'].accentForeground,
     success: semanticTokens.success,
     warning: semanticTokens.warning,
     error: semanticTokens.errorLight,
@@ -85,6 +87,7 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent1: themeTokens['peach-cream'].accent1,
     accent2: themeTokens['peach-cream'].accent2,
     accent3: themeTokens['peach-cream'].accent3,
+    accentForeground: themeTokens['peach-cream'].accentForeground,
     success: semanticTokens.success,
     warning: semanticTokens.warning,
     error: semanticTokens.errorLight,
@@ -99,6 +102,7 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent1: themeTokens['mint-whisper'].accent1,
     accent2: themeTokens['mint-whisper'].accent2,
     accent3: themeTokens['mint-whisper'].accent3,
+    accentForeground: themeTokens['mint-whisper'].accentForeground,
     success: semanticTokens.success,
     warning: semanticTokens.warning,
     error: semanticTokens.errorLight,
@@ -113,6 +117,7 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent1: themeTokens['ocean-calm'].accent1,
     accent2: themeTokens['ocean-calm'].accent2,
     accent3: themeTokens['ocean-calm'].accent3,
+    accentForeground: themeTokens['ocean-calm'].accentForeground,
     success: semanticTokens.success,
     warning: semanticTokens.warning,
     error: semanticTokens.errorLight,
@@ -127,6 +132,7 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent1: themeTokens['monochrome'].accent1,
     accent2: themeTokens['monochrome'].accent2,
     accent3: themeTokens['monochrome'].accent3,
+    accentForeground: themeTokens['monochrome'].accentForeground,
     success: semanticTokens.success,
     warning: semanticTokens.warning,
     error: semanticTokens.errorDark,

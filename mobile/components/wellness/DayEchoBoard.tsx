@@ -102,7 +102,13 @@ export default function DayEchoBoard() {
             style={[styles.item, item.done && styles.itemDone]}
           >
             <View style={styles.itemInner}>
-              <View style={[styles.pill, toneMeta[item.tone].style]}>
+              <View
+                style={[
+                  styles.pill,
+                  toneMeta[item.tone].style,
+                  { backgroundColor: colors.accent3, borderColor: colors.accent1 },
+                ]}
+              >
                 <Text style={styles.pillText}>{toneMeta[item.tone].label}</Text>
               </View>
               <Text style={[styles.itemText, item.done && styles.itemTextDone]}>{item.title}</Text>

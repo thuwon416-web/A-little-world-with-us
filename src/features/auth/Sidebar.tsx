@@ -11,6 +11,7 @@ import {
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { supabase } from '@/lib/supabase'
+import { removeBrowserPushSubscription } from '@/lib/notifications'
 
 const navGroups = [
   {
@@ -130,6 +131,11 @@ export default function Sidebar() {
       <button
         type="button"
         onClick={async () => {
+          try {
+            await removeBrowserPushSubscription()
+          } catch (error) {
+            console.warn('Unable to clear this browser push subscription:', error)
+          }
           await supabase.auth.signOut()
           window.location.href = '/login'
         }}
