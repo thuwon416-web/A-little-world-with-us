@@ -386,8 +386,8 @@
   --card: 26 26 30;
   --border: 42 42 48;
   --text-1: 240 240 244;
-  --text-2: 168 168 176;
-  --label: 160 160 168;
+  --text-2: 190 190 198;
+  --label: 184 184 192;
   --accent-1: 224 224 228;
   --accent-2: 136 136 144;
   --accent-3: 58 58 69;
@@ -892,6 +892,15 @@ label {
 
 .dashboard-grid--stats {
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+/* Accent surfaces are intentionally light gray in Monochrome. Components
+   using Tailwind's text-white utility need the dark foreground token here,
+   otherwise their labels blend into the button background. */
+:root[data-theme-mode='monochrome'] .bg-accent-1.text-white,
+:root[data-theme-mode='monochrome'] .from-accent-1.to-accent-2.text-white,
+:root[data-theme-mode='monochrome'] .bg-gradient-to-r.from-accent-1.to-accent-2.text-white {
+  color: var(--accent-foreground);
 }
 
 .memory-map-pin {
