@@ -55,7 +55,7 @@ export default function CarePage() {
     {tab === 'settings' && <CycleSettings settings={settings} logs={logs} onSave={async (next) => { await saveCycleSettings({ ...next, couple_id: context.coupleId }); await reload() }} />}
     {logOpen && <DailyLog log={logs.find((entry) => entry.log_date === dateKey(new Date()))} initial={initialSection} onClose={() => setLogOpen(false)} onSave={async (draft) => { await saveCareLog(context.coupleId, context.userId, draft); setLogOpen(false); await reload() }} />}
     {calendarOpen && <PeriodCalendarModal logs={logs} summary={summary} onClose={() => setCalendarOpen(false)} onSave={async (selected) => {
-      await savePeriodDates(context.coupleId, context.userId, selected, logs)
+      await savePeriodDates(context.coupleId, selected)
       setCalendarOpen(false); await reload()
     }} />}
     <ExplicitAdviceControl mode="intimacy" title="Ask before discussing intimacy" description="Share only what you choose for consent-led, non-graphic guidance." placeholder="What would help us talk about closeness or boundaries?" />

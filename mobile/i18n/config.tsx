@@ -6,6 +6,7 @@ import my from './messages/my.json'
 
 export type Locale = 'en' | 'my'
 const STORAGE_KEY = 'a-little-world-with-us-locale'
+const DEFAULT_LANGUAGE_VERSION_KEY = 'a-little-world-with-us-default-language-v2'
 type Messages = typeof en
 const messages: Record<Locale, Messages> = { en, my }
 
@@ -18,10 +19,15 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | null>(null)
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('my')
+  const [locale, setLocaleState] = useState<Locale>('en')
 
   useEffect(() => {
-    void AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
+    void Promise.all([AsyncStorage.getItem(STORAGE_KEY), AsyncStorage.getItem(DEFAULT_LANGUAGE_VERSION_KEY)]).then(([stored, version]) => {
+      if (!version) {
+        setLocaleState('en')
+        void AsyncStorage.multiSet([[STORAGE_KEY, 'en'], [DEFAULT_LANGUAGE_VERSION_KEY, '1']])
+        return
+      }
       if (stored === 'en' || stored === 'my') setLocaleState(stored)
     })
   }, [])

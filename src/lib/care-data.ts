@@ -87,47 +87,13 @@ export async function saveCareLog(coupleId: string, userId: string, draft: CareD
 // Each call first looked up the row, then inserted or updated it, which made a
 // long historical period selection feel stalled. This groups the work into at
 // most three database requests and runs those requests together.
-export async function savePeriodDates(coupleId: string, userId: string, selectedDates: string[], logs: CareLog[]) {
-  const selected = new Set(selectedDates)
-  const existingByDate = new Map(logs.map((log) => [log.log_date, log]))
-  const datesToEnable = selectedDates.filter((date) => {
-    const existing = existingByDate.get(date)
-    return existing && !existing.period_day
+export async function savePeriodDates(coupleId: string, selectedDates: string[]) {
+  const dates = [...new Set(selectedDates)].sort()
+  const { error } = await supabase.rpc('save_care_period_dates', {
+    target_couple_id: coupleId,
+    selected_dates: dates,
   })
-  const datesToDisable = logs
-    .filter((log) => log.period_day && !selected.has(log.log_date))
-    .map((log) => log.log_date)
-  const datesToCreate = selectedDates.filter((date) => !existingByDate.has(date))
-  const updatedAt = new Date().toISOString()
-
-  const requests: PromiseLike<{ error: unknown }>[] = []
-  if (datesToEnable.length) {
-    requests.push(
-      supabase.from('care_daily_logs').update({ period_day: true, updated_at: updatedAt, updated_by: userId }).eq('couple_id', coupleId).in('log_date', datesToEnable)
-    )
-  }
-  if (datesToDisable.length) {
-    requests.push(
-      supabase.from('care_daily_logs').update({ period_day: false, updated_at: updatedAt, updated_by: userId }).eq('couple_id', coupleId).in('log_date', datesToDisable)
-    )
-  }
-  if (datesToCreate.length) {
-    requests.push(
-      supabase.from('care_daily_logs').insert(datesToCreate.map((log_date) => ({
-        couple_id: coupleId,
-        user_id: userId,
-        log_date,
-        period_day: true,
-        created_by: userId,
-        updated_by: userId,
-        updated_at: updatedAt,
-      })))
-    )
-  }
-
-  const results = await Promise.all(requests)
-  const failed = results.find((result) => result.error)
-  if (failed?.error) throw failed.error
+  if (error) throw error
 }
 
 export function periodStarts(logs: CareLog[]) {

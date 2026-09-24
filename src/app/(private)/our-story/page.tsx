@@ -3,12 +3,9 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
-import { Heart, Layers, MessageCircle, Sparkles } from 'lucide-react'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { getCoupleStatus } from '@/lib/couples'
 import TelegramImport from '@/features/our-story/TelegramImport'
-
-type Tab = 'timeline' | 'all' | 'categories' | 'telegram'
 
 const TabSkeleton = () => <div className="h-96 animate-pulse rounded-panel bg-card" />
 const Timeline = dynamic(() => import('@/features/our-story/Timeline'), { loading: TabSkeleton })
@@ -18,8 +15,6 @@ const ImportedTelegramMessages = dynamic(() => import('@/features/our-story/Impo
 
 export default function OurStoryContent() {
   const [coupleId, setCoupleId] = useState<string | null>(null)
-  const [tab, setTab] = useState<Tab>('timeline')
-  const [categoryFilter, setCategoryFilter] = useState('all')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -54,22 +49,14 @@ export default function OurStoryContent() {
       ) : (
         <>
           <TelegramImport coupleId={coupleId} />
-          <nav className="flex flex-wrap gap-2" aria-label="Our Story sections" role="tablist">
-            {([
-              ['timeline', 'Timeline', Sparkles],
-              ['all', 'All Memories', Heart],
-              ['categories', 'Categories', Layers],
-              ['telegram', 'Telegram', MessageCircle],
-            ] as const).map(([value, label, Icon]) => (
-              <button key={value} type="button" role="tab" aria-selected={tab === value} onClick={() => setTab(value)} className={`flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm transition ${tab === value ? 'bg-accent-1/15 text-accent-1' : 'text-text-2 hover:bg-soft-tint'}`}>
-                <Icon size={16} /> {label}
-              </button>
-            ))}
-          </nav>
-          {tab === 'timeline' ? <Timeline coupleId={coupleId} /> : null}
-          {tab === 'all' ? <AllMemories coupleId={coupleId} initialCategory={categoryFilter} /> : null}
-          {tab === 'categories' ? <Categories coupleId={coupleId} onOpenCategory={(category) => { setCategoryFilter(category); setTab('all') }} /> : null}
-          {tab === 'telegram' ? <ImportedTelegramMessages coupleId={coupleId} /> : null}
+          <Timeline coupleId={coupleId} />
+          <AllMemories coupleId={coupleId} initialCategory="all" />
+          <Categories coupleId={coupleId} onOpenCategory={() => undefined} />
+          <details className="rounded-panel border border-accent-1/15 bg-card p-5">
+            <summary className="cursor-pointer font-semibold text-text-1">Telegram archive</summary>
+            <p className="mt-2 text-sm text-text-2">Imported Telegram messages stay available here without crowding the shared timeline.</p>
+            <div className="mt-4"><ImportedTelegramMessages coupleId={coupleId} /></div>
+          </details>
         </>
       )}
     </motion.main>

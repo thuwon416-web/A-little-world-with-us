@@ -23,6 +23,7 @@ import { supabase } from '@/lib/supabase'
 import {
   saveTodayCareLog,
   saveCareLogForDate,
+  saveSharedPeriodDates,
   getCareData,
   saveCareSettings,
   type CareLog,
@@ -279,11 +280,11 @@ function Calendar({
       <Text style={styles.title}>Calendar</Text>
       <Card title={monthName}>
         <View style={styles.calendarHeader}>
-          <TouchableOpacity onPress={() => setMonth(new Date(year, monthIndex - 1, 1))}>
+          <TouchableOpacity disabled={year === 2024 && monthIndex === 0} onPress={() => setMonth(new Date(year, monthIndex - 1, 1))}>
             <Text style={styles.nav}>‹</Text>
           </TouchableOpacity>
           <Text style={styles.calendarMonth}>{monthName}</Text>
-          <TouchableOpacity onPress={() => setMonth(new Date(year, monthIndex + 1, 1))}>
+          <TouchableOpacity disabled={new Date(year, monthIndex + 1, 1) > new Date(new Date().getFullYear(), new Date().getMonth() + 6, 1)} onPress={() => setMonth(new Date(year, monthIndex + 1, 1))}>
             <Text style={styles.nav}>›</Text>
           </TouchableOpacity>
         </View>
@@ -347,7 +348,7 @@ function Calendar({
             : 'Log at least one period to begin forecasting.'}
         </Text>
         <Text style={styles.muted}>
-          {summary.day ? `Today is cycle day ${summary.day}.` : 'Tap a date to log a period day.'}
+          {summary.day ? `Today is cycle day ${summary.day}. Tap a date to add or remove it.` : 'Tap a date to add or remove a period day.'}
         </Text>
       </Card>
     </ScrollView>
@@ -631,6 +632,20 @@ export default function CareScreen() {
       setSaving(false)
     }
   }
+  const toggleSharedPeriodDate = async (date: string) => {
+    if (!data) return
+    const selected = new Set(data.logs.filter((log) => log.periodDay).map((log) => log.logDate))
+    selected.has(date) ? selected.delete(date) : selected.add(date)
+    try {
+      setSaving(true)
+      await saveSharedPeriodDates(data.coupleId, [...selected])
+      await refresh()
+    } catch (caught) {
+      Alert.alert('Could not save period dates', caught instanceof Error ? caught.message : 'Please try again. Your calendar remains open.')
+    } finally {
+      setSaving(false)
+    }
+  }
   const saveSettings = async () => {
     if (!data) return
     try {
@@ -809,10 +824,7 @@ export default function CareScreen() {
         <Calendar
           logs={data.logs}
           summary={summary}
-          onLog={(date) => {
-            setActiveTab('Today')
-            void save(date)
-          }}
+          onLog={(date) => void toggleSharedPeriodDate(date)}
         />
       ) : activeTab === 'Reminders' ? (
         <Reminders />

@@ -52,11 +52,7 @@ const sections = [
   {
     title: 'Memories',
     items: [
-      { href: '/(tabs)/our-story', key: 'ourStory', Icon: BookHeart },
       { href: '/(tabs)/memories', key: 'ourMemories', Icon: HeartPulse },
-      { href: '/(tabs)/memory-map', key: 'memoryMap', Icon: MapPin },
-      { href: '/(tabs)/gallery', key: 'gallery', Icon: BookHeart },
-      { href: '/(tabs)/time-capsules', key: 'timeCapsules', Icon: Hourglass },
     ],
   },
   {

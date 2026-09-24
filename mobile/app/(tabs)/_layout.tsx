@@ -75,7 +75,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="gallery"
+        name="memories"
         options={{
           title: t('nav.memories'),
           tabBarAccessibilityLabel: `${t('nav.memories')} tab`,
@@ -99,7 +99,7 @@ export default function TabsLayout() {
       <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="music" options={{ href: null }} />
       <Tabs.Screen name="finance" options={{ href: null }} />
-      <Tabs.Screen name="memories" options={{ href: null }} />
+      <Tabs.Screen name="gallery" options={{ href: null }} />
       <Tabs.Screen name="memory-map" options={{ href: null }} />
       <Tabs.Screen name="calendar" options={{ href: null }} />
       <Tabs.Screen name="lists" options={{ href: null }} />

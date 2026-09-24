@@ -1,10 +1,9 @@
 'use client'
 /* eslint-disable @next/next/no-img-element -- Supabase signed image URLs are user-provided and can expire. */
 
-import { Suspense, type ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Frown, Heart, Meh, Pencil, Smile, Sparkles, Square, Trash2, TriangleAlert, Volume2, X } from 'lucide-react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
@@ -44,15 +43,6 @@ const PAGE_SIZE = 6
 
 type MemoryCategory = 'all' | 'favorite' | 'travel' | 'ritual' | 'journal'
 type MemorySort = 'newest' | 'oldest'
-type MemoriesSection = 'memories' | 'map' | 'story' | 'gallery' | 'capsules'
-
-const memorySections: Array<{ id: MemoriesSection; label: string }> = [
-  { id: 'memories', label: 'Our Memories' },
-  { id: 'map', label: 'Memory Map' },
-  { id: 'story', label: 'Our Story' },
-  { id: 'gallery', label: 'Gallery' },
-  { id: 'capsules', label: 'Time Capsules' },
-]
 
 type DisplayMemory = Memory & { displayUrl: string; mime_type?: string | null }
 type JournalMemory = DisplayMemory & {
@@ -66,33 +56,6 @@ const JOURNAL_MOODS: { id: JournalMood; label: string; Icon: typeof Smile }[] = 
   { id: 'loved', label: 'Loved', Icon: Heart },
   { id: 'anxious', label: 'Anxious', Icon: TriangleAlert },
 ]
-
-function MemoriesNavigation({
-  section,
-  onSelect,
-}: {
-  section: MemoriesSection
-  onSelect: (section: MemoriesSection) => void
-}) {
-  return (
-    <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Memory sections">
-      {memorySections.map((item) => (
-        <button
-          key={item.id}
-          type="button"
-          onClick={() => onSelect(item.id)}
-          className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${
-            section === item.id
-              ? 'border-accent-1 bg-accent-1 text-white'
-              : 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
-          }`}
-        >
-          {item.label}
-        </button>
-      ))}
-    </nav>
-  )
-}
 
 async function compressImage(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file)
@@ -121,22 +84,10 @@ async function compressImage(file: File): Promise<Blob> {
 }
 
 export default function MemoriesPage() {
-  return (
-    <Suspense fallback={<MemoriesSkeleton />}>
-      <MemoriesPageContent />
-    </Suspense>
-  )
+  return <MemoriesPageContent />
 }
 
 function MemoriesPageContent() {
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const requestedSection = searchParams.get('section')
-  const [section, setSection] = useState<MemoriesSection>(() =>
-    memorySections.some((item) => item.id === requestedSection)
-      ? (requestedSection as MemoriesSection)
-      : 'memories'
-  )
   const [memories, setMemories] = useState<JournalMemory[]>([])
   const [caption, setCaption] = useState('')
   const [memoryDate, setMemoryDate] = useState(() => new Date().toISOString().slice(0, 10))
@@ -164,19 +115,6 @@ function MemoriesPageContent() {
   const [journalSaving, setJournalSaving] = useState(false)
   const [reflectingId, setReflectingId] = useState<string | null>(null)
   const [speakingJournalId, setSpeakingJournalId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (memorySections.some((item) => item.id === requestedSection)) {
-      setSection(requestedSection as MemoriesSection)
-    }
-  }, [requestedSection])
-
-  const selectSection = (nextSection: MemoriesSection) => {
-    setSection(nextSection)
-    router.replace(nextSection === 'memories' ? '/memories' : `/memories?section=${nextSection}`, {
-      scroll: false,
-    })
-  }
 
   const sortedMemories = useMemo(() => {
     const filtered = memories.filter((memory) => {
@@ -521,21 +459,6 @@ function MemoriesPageContent() {
     window.speechSynthesis.speak(utterance)
   }
 
-  const sectionContent =
-    section === 'map' ? <MemoryMapContent /> :
-      section === 'story' ? <OurStoryContent /> :
-        section === 'gallery' ? <GalleryContent /> :
-          section === 'capsules' ? <TimeCapsulesContent /> : null
-
-  if (sectionContent) {
-    return (
-      <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-        <MemoriesNavigation section={section} onSelect={selectSection} />
-        {sectionContent}
-      </div>
-    )
-  }
-
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -547,8 +470,6 @@ function MemoriesPageContent() {
         </div>
         <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
       </header>
-
-      <MemoriesNavigation section={section} onSelect={selectSection} />
 
       {birthdayReveal && (
         <section className="glass-card rounded-modal border border-error/30 bg-gradient-to-r from-error/10 via-accent-1/10 to-warning/10 p-5">
@@ -747,11 +668,6 @@ function MemoriesPageContent() {
         </div>
       )}
       {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-accent-1" /><p className="mt-4 text-lg text-text-1">No memories yet. Start creating your little world together!</p></section>}
-      <ExplicitAdviceControl
-        title="Talk through a memory"
-        description="Choose a memory and ask for a gentle, two-sided reflection."
-        placeholder="What happened, and what would you like help understanding?"
-      />
       {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} coupleId={coupleLinkId ?? ''} /> : null}
       {selectedMemory && <MemoryDetail memory={selectedMemory} onClose={() => setSelectedMemory(null)} onSaved={(updated) => {
         setMemories((current) => current.map((memory) => memory.id === updated.id ? { ...memory, ...updated } : memory))
@@ -787,6 +703,27 @@ function MemoriesPageContent() {
           </section>
         </div>
       ) : null}
+      <section aria-labelledby="our-story-heading" className="border-t border-border/30 pt-8">
+        <h2 id="our-story-heading" className="mb-4 text-2xl font-serif text-text-1">Our Story</h2>
+        <OurStoryContent />
+      </section>
+      <section aria-labelledby="photo-memories-heading" className="border-t border-border/30 pt-8">
+        <h2 id="photo-memories-heading" className="mb-4 text-2xl font-serif text-text-1">Photo memories</h2>
+        <GalleryContent />
+      </section>
+      <section aria-labelledby="places-heading" className="border-t border-border/30 pt-8">
+        <h2 id="places-heading" className="mb-4 text-2xl font-serif text-text-1">Places we remember</h2>
+        <MemoryMapContent />
+      </section>
+      <section aria-labelledby="capsules-heading" className="border-t border-border/30 pt-8">
+        <h2 id="capsules-heading" className="mb-4 text-2xl font-serif text-text-1">Time capsules</h2>
+        <TimeCapsulesContent />
+      </section>
+      <ExplicitAdviceControl
+        title="Talk through a memory"
+        description="Choose a memory and ask for a gentle, two-sided reflection."
+        placeholder="What happened, and what would you like help understanding?"
+      />
     </div>
   )
 }
