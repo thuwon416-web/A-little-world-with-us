@@ -10,11 +10,11 @@ const keyboardRoutes = [
   { key: '1', href: '/dashboard' },
   { key: '2', href: '/memories' },
   { key: '3', href: '/chat' },
-  { key: '4', href: '/plans' },
+  { key: '4', href: '/calendar?section=plans' },
   { key: '5', href: '/location' },
   { key: '6', href: '/calls' },
   { key: '7', href: '/ai' },
-  { key: '8', href: '/reminders' },
+  { key: '8', href: '/calendar?section=reminders' },
   { key: '9', href: '/wellness' },
 ] as const
 

@@ -1,6 +1,8 @@
 'use client'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState, useEffect, useCallback } from 'react'
+import dynamic from 'next/dynamic'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { getCurrentUserId } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
@@ -11,7 +13,11 @@ import PlansPage from '@/app/(private)/plans/page'
 import RemindersPage from '@/app/(private)/reminders/page'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 
+const FuturePlansContent = dynamic(() => import('@/app/(private)/planning/page'), { ssr: false })
+const FinanceContent = dynamic(() => import('@/app/(private)/finance/page'), { ssr: false })
+
 type CalendarEventType = 'date' | 'trip' | 'goal' | 'life' | 'other'
+type PlanningSection = 'calendar' | 'plans' | 'reminders' | 'finance'
 type CalendarEvent = {
   id: string
   event_date: string
@@ -28,15 +34,35 @@ function formatDate(date: Date) {
 }
 
 export default function CalendarPage() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const requestedSection = searchParams.get('section')
   const [currentDate, setCurrentDate] = useState(new Date())
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [showSharedCalendar, setShowSharedCalendar] = useState(false)
   const [coupleId, setCoupleId] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'events' | 'plans' | 'reminders' | 'lists'>('events')
+  const [activeTab, setActiveTab] = useState<PlanningSection>(() =>
+    ['calendar', 'plans', 'reminders', 'finance'].includes(requestedSection ?? '')
+      ? (requestedSection as PlanningSection)
+      : 'calendar'
+  )
   const [calendarError, setCalendarError] = useState<string | null>(null)
   const [calendarLoading, setCalendarLoading] = useState(false)
+
+  useEffect(() => {
+    if (['calendar', 'plans', 'reminders', 'finance'].includes(requestedSection ?? '')) {
+      setActiveTab(requestedSection as PlanningSection)
+    }
+  }, [requestedSection])
+
+  const selectSection = (section: PlanningSection) => {
+    setActiveTab(section)
+    router.replace(section === 'calendar' ? '/calendar' : `/calendar?section=${section}`, {
+      scroll: false,
+    })
+  }
 
   useEffect(() => {
     const loadUserId = async () => {
@@ -127,38 +153,28 @@ export default function CalendarPage() {
           className="text-4xl text-text-1"
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          Calendar & Plans
+          Planning Hub
         </h1>
-        <p className="mt-2 text-sm text-text-2">Our events, goals, and dreams</p>
+        <p className="mt-2 text-sm text-text-2">Our calendar, shared plans, reminders, and finances in one place.</p>
       </header>
 
       <section className="space-y-6">
         <nav className="flex gap-2 overflow-x-auto" aria-label="Calendar sections">
-          {(['events', 'plans', 'reminders', 'lists'] as const).map((tab) => (
+          {(['calendar', 'plans', 'reminders', 'finance'] as const).map((tab) => (
             <button
               key={tab}
               type="button"
-              onClick={() => setActiveTab(tab)}
+              onClick={() => selectSection(tab)}
               className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-accent-1 bg-accent-1 text-white' : 'border-accent-1/20 bg-card text-text-2'}`}
             >
               {tab}
             </button>
           ))}
         </nav>
-        {activeTab === 'plans' && <PlansPage />}
+        {activeTab === 'plans' && <div className="space-y-8"><FuturePlansContent /><PlansPage /></div>}
         {activeTab === 'reminders' && <RemindersPage />}
-        {activeTab === 'lists' && (
-          <div className="grid gap-6 lg:grid-cols-2">
-            <div className="glass-card p-5">
-              <BucketList />
-            </div>
-            <div className="glass-card p-5">
-              <SharedWishlist />
-            </div>
-          </div>
-        )}
-        {activeTab !== 'events' && activeTab !== 'lists' ? null : null}
-        {activeTab === 'events' && (
+        {activeTab === 'finance' && <FinanceContent />}
+        {activeTab === 'calendar' && (
           <>
             <div className="glass-card p-5">
               <LoveCalendar />

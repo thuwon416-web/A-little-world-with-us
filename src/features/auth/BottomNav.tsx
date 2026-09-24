@@ -18,7 +18,6 @@ import {
   Calendar,
   Lock,
   Settings,
-  DollarSign,
   X,
   MonitorPlay,
 } from 'lucide-react'
@@ -56,7 +55,6 @@ const moreGroups = [
     name: 'Settings and Help',
     pages: [
       { name: 'Vault', href: '/vault', icon: Lock },
-      { name: 'Finance', href: '/finance', icon: DollarSign },
       { name: 'Settings', href: '/settings', icon: Settings },
       { name: 'About', href: '/about', icon: Info },
       { name: 'Help', href: '/help', icon: HelpCircle },

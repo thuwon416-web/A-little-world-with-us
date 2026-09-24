@@ -3,10 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
-  LogOut, Calendar, Camera, DollarSign, HeartPulse, HelpCircle, Home, Info,
+  LogOut, Calendar, Camera, HeartPulse, HelpCircle, Home, Info,
   Leaf, LockKeyhole, MapPin, MessageCircleHeart, Gamepad2, Music,
   PhoneCall, Settings, Sparkles, Star, MonitorPlay, Infinity,
-  Languages, ClipboardList, Bell, Users, Shield, FileText,
+  Languages, Users, Shield, FileText,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -39,9 +39,6 @@ const navGroups = [
     label: 'Plans',
     items: [
       { href: '/calendar', key: 'plans', icon: Calendar },
-      { href: '/plans', key: 'plans', icon: ClipboardList },
-      { href: '/reminders', key: 'reminders', icon: Bell },
-      { href: '/finance', key: 'finance', icon: DollarSign },
     ],
   },
   {
