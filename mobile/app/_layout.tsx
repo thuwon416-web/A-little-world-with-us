@@ -1,8 +1,16 @@
-import { Redirect, Stack, useSegments } from 'expo-router'
+import { Stack, useSegments, useRouter } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useState, type ReactNode } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+import { TextEncoder, TextDecoder } from 'text-encoding'
+
+if (typeof global.TextEncoder === 'undefined') {
+  global.TextEncoder = TextEncoder
+}
+if (typeof global.TextDecoder === 'undefined') {
+  global.TextDecoder = TextDecoder
+}
 
 import { ThemeProvider, useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
@@ -12,7 +20,6 @@ import { AuthProvider, useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { getSharingStatus, startLocationTracking } from '@/services/location'
 
-// Error Boundary Component
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean; error?: Error }
@@ -59,7 +66,10 @@ function ThemedStatusBar() {
 
 function MfaGate({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth()
+  const { colors } = useTheme()
+  const styles = createStyles(colors, sizes)
   const segments = useSegments()
+  const router = useRouter()
   const routeKey = segments.join('/')
   const [checkedKey, setCheckedKey] = useState('')
   const [requiredKey, setRequiredKey] = useState('')
@@ -75,9 +85,8 @@ function MfaGate({ children }: { children: ReactNode }) {
     }
     void supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data, error }) => {
       if (!active) return
-      setRequiredKey(
-        error || (data?.nextLevel === 'aal2' && data.currentLevel !== 'aal2') ? currentKey : ''
-      )
+      const needsMfa = error || (data?.nextLevel === 'aal2' && data.currentLevel !== 'aal2')
+      setRequiredKey(needsMfa ? currentKey : '')
       setCheckedKey(currentKey)
     })
     return () => {
@@ -85,10 +94,24 @@ function MfaGate({ children }: { children: ReactNode }) {
     }
   }, [authLoading, currentKey])
 
-  if (authLoading || checkedKey !== currentKey) return null
-  if (requiredKey === currentKey && !segments.includes('mfa'))
-    return <Redirect href="/(tabs)/mfa" />
-  return <>{children}</>
+  useEffect(() => {
+    if (checkedKey === currentKey && requiredKey === currentKey && !segments.includes('mfa')) {
+      router.replace('/(tabs)/mfa')
+    }
+  }, [checkedKey, currentKey, requiredKey, segments, router])
+
+  const isChecking = authLoading || checkedKey !== currentKey
+
+  return (
+    <View style={{ flex: 1 }}>
+      {children}
+      {isChecking && (
+        <View style={[styles.loadingContainer, StyleSheet.absoluteFill]}>
+          <ActivityIndicator size="large" color={colors.accent1} />
+        </View>
+      )}
+    </View>
+  )
 }
 
 export default function RootLayout() {
@@ -130,6 +153,12 @@ export default function RootLayout() {
 
 const createStyles = (colors: ThemeColors, sizes: Sizes) =>
   StyleSheet.create({
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+    },
     errorContainer: {
       flex: 1,
       justifyContent: 'center',

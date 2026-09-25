@@ -4,8 +4,8 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "eslint . --config .eslintrc.js",
     "lint:fix": "eslint . --config .eslintrc.js --fix",
@@ -49,6 +49,7 @@
     "expo-speech": "~12.0.2",
     "expo-status-bar": "~1.12.1",
     "expo-task-manager": "~11.8.2",
+    "fast-text-encoding": "^1.0.6",
     "lucide-react-native": "^0.453.0",
     "react": "18.2.0",
     "react-native": "0.74.5",
@@ -58,7 +59,8 @@
     "react-native-svg": "15.2.0",
     "react-native-webrtc": "^118.0.7",
     "react-native-webview": "13.8.6",
-    "react-native-youtube-iframe": "^2.4.1"
+    "react-native-youtube-iframe": "^2.4.1",
+    "text-encoding": "^0.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
