@@ -1,3 +1,4 @@
+import { AIClientError, requestAI } from '@/lib/aiClient'
 import { supabase } from '@/lib/supabase'
 
 export type SuggestionType = 'gift' | 'date' | 'message'
@@ -40,16 +41,31 @@ async function request(type: SuggestionType, context: string[]) {
       : type === 'date'
         ? 'Suggest three practical romantic date ideas.'
         : 'Draft three warm message ideas.'
-  const response = await fetch(`${webUrl}/api/ai/chat`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify({ message: `${instruction}\nContext: ${context.join(', ')}` }),
-  })
-  const body = (await response.json()) as { response?: string }
-  return response.ok && body.response ? body.response : null
+  try {
+    return await requestAI(
+      `${webUrl}/api/ai/chat`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ message: `${instruction}\nContext: ${context.join(', ')}` }),
+      },
+      {
+        parse: (data) => {
+          const body = data as { response?: unknown }
+          if (typeof body.response !== 'string' || !body.response.trim()) {
+            throw new Error('The AI service returned no suggestions.')
+          }
+          return body.response
+        },
+      }
+    )
+  } catch (error) {
+    if (error instanceof AIClientError) return null
+    throw error
+  }
 }
 
 async function getAIResponse(type: SuggestionType, context: string[]): Promise<AISuggestion[]> {

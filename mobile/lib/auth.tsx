@@ -1,10 +1,11 @@
+import type { User } from '@supabase/supabase-js'
 import { useRouter } from 'expo-router'
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
 import { supabase } from './supabase'
 
 type AuthContextType = {
-  user: any | null
+  user: User | null
   loading: boolean
   signOut: () => Promise<void>
 }
@@ -23,7 +24,7 @@ export async function getAuthToken() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<any | null>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
 

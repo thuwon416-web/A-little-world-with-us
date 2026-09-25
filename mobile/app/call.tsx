@@ -31,16 +31,16 @@ export default function CallScreen() {
     <View style={styles.container}>
       <Text style={styles.status}>
         {state === 'calling'
-          ? 'ခေါ်ဆိုရန် တောင်းဆိုနေသည်…'
+          ? 'Requesting call…'
           : state === 'ringing'
-            ? 'ခေါ်ဆိုမှု ဝင်လာသည်'
+            ? 'Incoming call'
             : state === 'in_call'
-              ? 'ခေါ်ဆိုမှု ချိတ်ဆက်နေသည်'
+              ? 'Call connected'
               : state === 'ended'
-                ? 'ခေါ်ဆိုမှု ပြီးဆုံးပါပြီ'
+                ? 'Call ended'
                 : state === 'rejected'
-                  ? 'ခေါ်ဆိုမှုကို ငြင်းပယ်လိုက်သည်'
-                  : 'ခေါ်ဆိုမှု'}
+                  ? 'Call rejected'
+                  : 'Call'}
       </Text>
       <View style={styles.stage}>
         {callType === 'video' && peer.remoteStream ? (
@@ -59,7 +59,7 @@ export default function CallScreen() {
         ) : (
           <View style={styles.placeholder}>
             <Text style={styles.placeholderTitle}>
-              {peer.remoteStream ? 'အသံချိတ်ဆက်ပြီးပါပြီ' : 'တွဲဖက်ကို ချိတ်ဆက်နေသည်…'}
+              {peer.remoteStream ? 'Audio connected' : 'Connecting to your partner…'}
             </Text>
             {state === 'in_call' && <Text style={styles.timer}>{clock}</Text>}
           </View>
@@ -81,17 +81,17 @@ export default function CallScreen() {
 
       <View style={styles.controls}>
         <TouchableOpacity style={styles.controlButton} onPress={toggleMicrophone}>
-          <Text style={styles.controlText}>{peer.isMuted ? 'အသံဖွင့်ရန်' : 'အသံပိတ်ရန်'}</Text>
+          <Text style={styles.controlText}>{peer.isMuted ? 'Unmute' : 'Mute'}</Text>
         </TouchableOpacity>
         {callType === 'video' && (
           <TouchableOpacity style={styles.controlButton} onPress={toggleCamera}>
             <Text style={styles.controlText}>
-              {peer.isCameraEnabled ? 'ကင်မရာပိတ်ရန်' : 'ကင်မရာဖွင့်ရန်'}
+              {peer.isCameraEnabled ? 'Turn camera off' : 'Turn camera on'}
             </Text>
           </TouchableOpacity>
         )}
         <TouchableOpacity style={[styles.controlButton, styles.endButton]} onPress={endCall}>
-          <Text style={styles.controlText}>ခေါ်ဆိုမှုကို အဆုံးသတ်ရန်</Text>
+          <Text style={styles.controlText}>End call</Text>
         </TouchableOpacity>
       </View>
     </View>

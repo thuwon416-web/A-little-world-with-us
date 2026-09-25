@@ -11,7 +11,6 @@ import {
   LockKeyhole,
   Moon,
   Gamepad2,
-  Hourglass,
   Phone,
   Users,
   Shield,
@@ -21,7 +20,6 @@ import {
   MonitorPlay,
   ListChecks,
   Bell,
-  BookHeart,
   Languages,
   Home,
 } from 'lucide-react-native'
@@ -51,9 +49,7 @@ const sections = [
   },
   {
     title: 'Memories',
-    items: [
-      { href: '/(tabs)/memories', key: 'ourMemories', Icon: HeartPulse },
-    ],
+    items: [{ href: '/(tabs)/memories', key: 'ourMemories', Icon: HeartPulse }],
   },
   {
     title: 'Connection',

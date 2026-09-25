@@ -1,5 +1,50 @@
 import { supabase } from '@/lib/supabase'
 
+export type FinanceBudget = {
+  amount: number | string | null
+}
+
+export type FinanceGoal = {
+  id: string
+  title: string
+  current_amount: number | string
+  target_amount: number | string
+}
+
+export type FinanceBill = {
+  id: string
+  title: string
+  amount: number | string
+  due_date: string
+}
+
+export type LoveStreak = {
+  current_streak: number | null
+  last_check_in?: string | null
+}
+
+export type FinanceExpense = {
+  id: string
+  amount: number | string
+}
+
+export type AdvancedFinanceData = {
+  coupleId: string
+  month: string
+  budget: FinanceBudget | null
+  goals: FinanceGoal[]
+  bills: FinanceBill[]
+  streak: LoveStreak | null
+  expenses: FinanceExpense[]
+}
+
+export type DateIdea =
+  | string
+  | {
+      title?: string
+      description?: string
+    }
+
 async function context() {
   const {
     data: { user },
@@ -15,7 +60,7 @@ async function context() {
   return { userId: user.id, coupleId: data.couple_id }
 }
 
-export async function getAdvancedData() {
+export async function getAdvancedData(): Promise<AdvancedFinanceData> {
   const { coupleId } = await context()
   const month = new Date().toISOString().slice(0, 7)
   const [budget, goals, bills, streak, expenses] = await Promise.all([
@@ -73,7 +118,7 @@ export async function addBill(
   if (error) throw new Error(error.message)
 }
 
-export async function checkInStreak(coupleId: string) {
+export async function checkInStreak(coupleId: string): Promise<LoveStreak> {
   const { data: current, error: readError } = await supabase
     .from('love_streaks')
     .select('*')
@@ -94,10 +139,22 @@ export async function checkInStreak(coupleId: string) {
   return data
 }
 
-export async function getDateIdeas(mood: string, weather: string, location: string) {
+export async function getDateIdeas(
+  mood: string,
+  weather: string,
+  location: string
+): Promise<DateIdea[]> {
   const { data, error } = await supabase.functions.invoke('ai-date-ideas', {
     body: { mood, weather, location, language: 'my' },
   })
   if (error) throw new Error(error.message)
-  return Array.isArray(data) ? data : (data?.ideas ?? [])
+  const ideas = Array.isArray(data) ? data : data?.ideas
+  if (!Array.isArray(ideas)) return []
+  return ideas.filter(
+    (idea): idea is DateIdea =>
+      typeof idea === 'string' ||
+      (typeof idea === 'object' &&
+        idea !== null &&
+        (typeof idea.title === 'string' || typeof idea.description === 'string'))
+  )
 }

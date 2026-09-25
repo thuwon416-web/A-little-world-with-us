@@ -2,7 +2,7 @@
   "expo": {
     "name": "A Little World With Us",
     "slug": "a-little-world-with-us",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -30,8 +30,8 @@
         "UIBackgroundModes": [
           "location"
         ],
-        "NSCameraUsageDescription": "ဗီဒီယိုခေါ်ဆိုမှုနှင့် ဓာတ်ပုံ၊ ဗီဒီယိုရိုက်ကူးရန် ကင်မရာအသုံးပြုခွင့် ပေးပါ။",
-        "NSMicrophoneUsageDescription": "အသံခေါ်ဆိုမှုနှင့် အသံစာတိုပို့ရန် မိုက်ခရိုဖုန်းအသုံးပြုခွင့် ပေးပါ။"
+        "NSCameraUsageDescription": "Allow camera access for video calls and taking photos or videos.",
+        "NSMicrophoneUsageDescription": "Allow microphone access for voice calls and sending voice messages."
       }
     },
     "android": {
@@ -40,7 +40,7 @@
         "backgroundColor": "#0f0f12"
       },
       "package": "com.alittleworldwithus.app",
-      "versionCode": 1,
+      "versionCode": 2,
       "permissions": [
         "INTERNET",
         "ACCESS_FINE_LOCATION",
@@ -79,8 +79,8 @@
       [
         "@config-plugins/react-native-webrtc",
         {
-          "cameraPermission": "ဗီဒီယိုခေါ်ဆိုရန် ကင်မရာအသုံးပြုခွင့် ပေးပါ။",
-          "microphonePermission": "ခေါ်ဆိုရန် မိုက်ခရိုဖုန်းအသုံးပြုခွင့် ပေးပါ။"
+          "cameraPermission": "Allow camera access for video calls.",
+          "microphonePermission": "Allow microphone access for calls."
         }
       ],
       "@maplibre/maplibre-react-native",

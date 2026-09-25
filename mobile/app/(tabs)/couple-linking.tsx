@@ -4,9 +4,12 @@ import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
 import { useTheme } from '@/context/ThemeContext'
 import { acceptLink, declineLink, getContext, unlinkCoupleLink } from '@/services/secondary'
+
+type CoupleLinkContext = Awaited<ReturnType<typeof getContext>>
+
 export default function CoupleLinkingScreen() {
   const { colors } = useTheme()
-  const [context, setContext] = useState<any>()
+  const [context, setContext] = useState<CoupleLinkContext | null>(null)
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const load = async () => {
@@ -31,6 +34,7 @@ export default function CoupleLinkingScreen() {
   const accept = async () => {
     if (!/^[a-zA-Z0-9]{6,}$/.test(code.trim()))
       return Alert.alert('Invalid code', 'Enter the invitation code.')
+    if (!context) return Alert.alert('Unable to link', 'Please wait for link status to load.')
     try {
       await acceptLink(context.user.id, code.trim())
       setCode('')
@@ -61,7 +65,8 @@ export default function CoupleLinkingScreen() {
                 {
                   text: 'Unlink',
                   style: 'destructive',
-                  onPress: () => void unlinkCoupleLink(context.link.id).then(load),
+                  onPress: () =>
+                    context.link ? void unlinkCoupleLink(context.link.id).then(load) : undefined,
                 },
               ])
             }
@@ -70,7 +75,11 @@ export default function CoupleLinkingScreen() {
           </TouchableOpacity>
         ) : null}
         {context?.link?.status === 'pending' && context.link.inviter_id !== context.user?.id ? (
-          <TouchableOpacity onPress={() => void declineLink(context.link.id).then(load)}>
+          <TouchableOpacity
+            onPress={() =>
+              context.link ? void declineLink(context.link.id).then(load) : undefined
+            }
+          >
             <Text style={s.danger}>Decline invitation</Text>
           </TouchableOpacity>
         ) : null}

@@ -31,7 +31,10 @@ export type CareSettings = {
   lastPeriodStart: string | null
 }
 
-export async function saveSharedPeriodDates(coupleId: string, selectedDates: string[]): Promise<string[]> {
+export async function saveSharedPeriodDates(
+  coupleId: string,
+  selectedDates: string[]
+): Promise<string[]> {
   const { data, error } = await supabase.rpc('save_care_period_dates', {
     target_couple_id: coupleId,
     selected_dates: [...new Set(selectedDates)].sort(),

@@ -1,5 +1,5 @@
 type RTCConfiguration = {
-  iceServers: Array<{ urls: string | string[]; username?: string; credential?: string }>
+  iceServers: { urls: string | string[]; username?: string; credential?: string }[]
 }
 
 const DEFAULT_STUN_URL = 'stun:stun.l.google.com:19302'

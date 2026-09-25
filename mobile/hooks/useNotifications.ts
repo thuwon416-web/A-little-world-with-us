@@ -53,7 +53,9 @@ export function useNotifications() {
             try {
               await syncLocalReminderNotifications(savedReminders)
             } catch {
-              setError('သတိပေးချက်များကို ဖုန်းတွင် စီစဉ်မရပါ။ အသိပေးခွင့်ပြုချက်ကို စစ်ဆေးပါ။')
+              setError(
+                'Unable to schedule reminders on this device. Check notification permissions.'
+              )
             }
           } else {
             await syncLocalReminderNotifications([])
@@ -67,7 +69,7 @@ export function useNotifications() {
     }
 
     void load().catch((caught: unknown) => {
-      setError(caught instanceof Error ? caught.message : 'သတိပေးချက်များကို ဖတ်မရပါ။')
+      setError(caught instanceof Error ? caught.message : 'Unable to load reminders.')
     })
   }, [])
 
@@ -88,7 +90,7 @@ export function useNotifications() {
         await syncLocalReminderNotifications(savedReminders)
         setError('')
       } catch {
-        setError('သတိပေးချက်များကို ဖုန်းတွင် စီစဉ်မရပါ။ အသိပေးခွင့်ပြုချက်ကို စစ်ဆေးပါ။')
+        setError('Unable to schedule reminders on this device. Check notification permissions.')
       }
     }
     const channel = supabase
@@ -103,14 +105,14 @@ export function useNotifications() {
         },
         () => {
           void refresh().catch((caught: unknown) => {
-            setError(caught instanceof Error ? caught.message : 'သတိပေးချက်များကို ပြန်ဖတ်မရပါ။')
+            setError(caught instanceof Error ? caught.message : 'Unable to refresh reminders.')
           })
         }
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
           void refresh().catch((caught: unknown) => {
-            setError(caught instanceof Error ? caught.message : 'သတိပေးချက်များကို ပြန်ဖတ်မရပါ။')
+            setError(caught instanceof Error ? caught.message : 'Unable to refresh reminders.')
           })
         }
       })
@@ -131,7 +133,7 @@ export function useNotifications() {
     })
 
     if (!saved) {
-      setError('သတိပေးချက်ကို သိမ်းမရပါ။ အကောင့်နဲ့ ကွန်ရက်ချိတ်ဆက်မှုကို စစ်ဆေးပါ။')
+      setError('Unable to save the reminder. Check your account and network connection.')
       return false
     }
     const updated = [...reminders, saved]
@@ -140,7 +142,7 @@ export function useNotifications() {
       await syncLocalReminderNotifications(updated)
     } catch {
       setError(
-        'သတိပေးချက်ကို သိမ်းပြီးပါပြီ၊ ဒါပေမဲ့ ဖုန်းအသိပေးမှုကို မစီစဉ်နိုင်ပါ။ ခွင့်ပြုချက်ကို စစ်ဆေးပါ။'
+        'The reminder was saved, but device notifications could not be scheduled. Check permissions.'
       )
     }
     return true

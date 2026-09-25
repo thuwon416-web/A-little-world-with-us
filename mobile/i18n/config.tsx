@@ -22,10 +22,16 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('en')
 
   useEffect(() => {
-    void Promise.all([AsyncStorage.getItem(STORAGE_KEY), AsyncStorage.getItem(DEFAULT_LANGUAGE_VERSION_KEY)]).then(([stored, version]) => {
+    void Promise.all([
+      AsyncStorage.getItem(STORAGE_KEY),
+      AsyncStorage.getItem(DEFAULT_LANGUAGE_VERSION_KEY),
+    ]).then(([stored, version]) => {
       if (!version) {
         setLocaleState('en')
-        void AsyncStorage.multiSet([[STORAGE_KEY, 'en'], [DEFAULT_LANGUAGE_VERSION_KEY, '1']])
+        void AsyncStorage.multiSet([
+          [STORAGE_KEY, 'en'],
+          [DEFAULT_LANGUAGE_VERSION_KEY, '1'],
+        ])
         return
       }
       if (stored === 'en' || stored === 'my') setLocaleState(stored)

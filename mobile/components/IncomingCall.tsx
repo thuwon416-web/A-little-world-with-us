@@ -20,18 +20,18 @@ export function IncomingCall({
     <Modal transparent visible={visible} animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.card}>
-          <Text style={styles.title}>ခေါ်ဆိုမှု ဝင်လာသည်</Text>
+          <Text style={styles.title}>Incoming call</Text>
           <Text style={styles.subtitle}>
-            {signal?.type === 'video' ? 'ဗီဒီယိုခေါ်ဆိုမှု' : 'အသံခေါ်ဆိုမှု'}
+            {signal?.type === 'video' ? 'Video call' : 'Audio call'}
           </Text>
-          <Text style={styles.caller}>တွဲဖက်ထံမှ ခေါ်ဆိုမှု</Text>
+          <Text style={styles.caller}>Call from your partner</Text>
 
           <View style={styles.actions}>
             <Pressable style={[styles.button, styles.acceptButton]} onPress={onAccept}>
-              <Text style={styles.buttonText}>လက်ခံရန်</Text>
+              <Text style={styles.buttonText}>Accept</Text>
             </Pressable>
             <Pressable style={[styles.button, styles.rejectButton]} onPress={onReject}>
-              <Text style={styles.buttonText}>ငြင်းပယ်ရန်</Text>
+              <Text style={styles.buttonText}>Decline</Text>
             </Pressable>
           </View>
         </View>

@@ -8,11 +8,12 @@ import {
   logMood,
   predictCycle,
   type CareType,
+  type MoodLog,
   type MoodValue,
 } from '@/services/wellness'
 
 export function useWellness() {
-  const [moodHistory, setMoodHistory] = useState<any[]>([])
+  const [moodHistory, setMoodHistory] = useState<MoodLog[]>([])
   const [careStats, setCareStats] = useState({ total: 0, percentage: 0, completed: 0 })
   const [prediction, setPrediction] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)

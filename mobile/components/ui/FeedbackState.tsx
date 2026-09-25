@@ -1,5 +1,5 @@
 import { CircleAlert, Sparkles } from 'lucide-react-native'
-import type { ComponentType } from 'react'
+import type { LucideIcon } from 'lucide-react-native'
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { useTheme } from '@/context/ThemeContext'
@@ -21,7 +21,7 @@ export function EmptyState({
   actionLabel,
   onAction,
 }: {
-  icon?: ComponentType<any>
+  icon?: LucideIcon
   title: string
   message: string
   actionLabel?: string

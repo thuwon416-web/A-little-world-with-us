@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "e408249d-9b07-4d2f-8df3-6115e4d47bab"
+      }
+    },
+    "android": {
+      "package": "com.thuwon.alittleworldwithus"
+    }
+  }
+}

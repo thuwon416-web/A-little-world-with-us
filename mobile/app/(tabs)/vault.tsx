@@ -12,6 +12,7 @@ import { useTheme } from '@/context/ThemeContext'
 import { VaultKeyProvider, useVaultKey } from '@/contexts/VaultKeyContext'
 import { loadWrappedKey } from '@/lib/vault-storage'
 import { addVaultItem, deleteVaultItem, getContext, getVaultItems } from '@/services/secondary'
+import type { VaultItem } from '@/shared-types'
 
 export default function VaultScreen() {
   return (
@@ -29,7 +30,7 @@ function VaultScreenContent() {
     unlockWithPassphrase,
     unlockWithBiometric,
   } = useVaultKey()
-  const [items, setItems] = useState<any[]>([])
+  const [items, setItems] = useState<VaultItem[]>([])
   const [coupleId, setCoupleId] = useState('')
   const [userId, setUserId] = useState('')
   const [title, setTitle] = useState('')

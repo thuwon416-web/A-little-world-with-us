@@ -287,7 +287,10 @@ export default function SettingsScreen() {
       const verified = factors?.totp.find((factor) => factor.status === 'verified')
       if (verified) {
         setMfaEnabled(true)
-        Alert.alert('အသုံးပြုနေပြီးပါပြီ', 'အကောင့်မှာ အတည်ပြုမှုအဆင့် ၂ ဖွင့်ထားပြီးပါပြီ။')
+        Alert.alert(
+          'Already enabled',
+          'Two-factor authentication is already enabled for this account.'
+        )
         return
       }
       const pending = factors?.all.find(
@@ -308,10 +311,7 @@ export default function SettingsScreen() {
       setMfaCode('')
       setMfaVisible(true)
     } catch (caught) {
-      Alert.alert(
-        'စနစ်ထည့်သွင်းမှု မအောင်မြင်ပါ',
-        caught instanceof Error ? caught.message : 'ပြန်ကြိုးစားပါ။'
-      )
+      Alert.alert('Setup failed', caught instanceof Error ? caught.message : 'Please try again.')
     } finally {
       setMfaBusy(false)
     }
@@ -336,11 +336,11 @@ export default function SettingsScreen() {
       setMfaQrCode('')
       setMfaSecret('')
       setMfaCode('')
-      Alert.alert('ပြီးပါပြီ', 'အတည်ပြုမှုအဆင့် ၂ ကို ဖွင့်ပြီးပါပြီ။')
+      Alert.alert('Complete', 'Two-factor authentication has been enabled.')
     } catch (caught) {
       Alert.alert(
-        'ကုဒ်အတည်မပြုနိုင်ပါ',
-        caught instanceof Error ? caught.message : 'ကုဒ်ကို ပြန်စစ်ပါ။'
+        'Code verification failed',
+        caught instanceof Error ? caught.message : 'Please check the code and try again.'
       )
     } finally {
       setMfaBusy(false)
@@ -355,34 +355,41 @@ export default function SettingsScreen() {
     setMfaCode('')
   }
   const disableMfa = () => {
-    Alert.alert('အဆင့် ၂ ကို ပိတ်မလား', 'အကောင့်ဝင်ရာတွင် အတည်ပြုအက်ပ်ကုဒ်ကို ထပ်မတောင်းတော့ပါ။', [
-      { text: 'မပိတ်တော့ပါ', style: 'cancel' },
-      {
-        text: 'ပိတ်ရန်',
-        style: 'destructive',
-        onPress: () => {
-          void (async () => {
-            setMfaBusy(true)
-            try {
-              const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors()
-              if (factorsError) throw factorsError
-              const verified = factors?.totp.find((factor) => factor.status === 'verified')
-              if (!verified) throw new Error('အတည်ပြုထားသော စနစ် မတွေ့ပါ။')
-              const { error: removeError } = await supabase.auth.mfa.unenroll({
-                factorId: verified.id,
-              })
-              if (removeError) throw removeError
-              setMfaEnabled(false)
-              Alert.alert('ပြီးပါပြီ', 'အတည်ပြုမှုအဆင့် ၂ ကို ပိတ်ပြီးပါပြီ။')
-            } catch (caught) {
-              Alert.alert('ပိတ်မရပါ', caught instanceof Error ? caught.message : 'ပြန်စမ်းကြည့်ပါ။')
-            } finally {
-              setMfaBusy(false)
-            }
-          })()
+    Alert.alert(
+      'Disable two-factor authentication?',
+      'The authenticator app code will no longer be required when signing in.',
+      [
+        { text: 'Keep enabled', style: 'cancel' },
+        {
+          text: 'Disable',
+          style: 'destructive',
+          onPress: () => {
+            void (async () => {
+              setMfaBusy(true)
+              try {
+                const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors()
+                if (factorsError) throw factorsError
+                const verified = factors?.totp.find((factor) => factor.status === 'verified')
+                if (!verified) throw new Error('No verified authenticator found.')
+                const { error: removeError } = await supabase.auth.mfa.unenroll({
+                  factorId: verified.id,
+                })
+                if (removeError) throw removeError
+                setMfaEnabled(false)
+                Alert.alert('Complete', 'Two-factor authentication has been disabled.')
+              } catch (caught) {
+                Alert.alert(
+                  'Unable to disable',
+                  caught instanceof Error ? caught.message : 'Please try again.'
+                )
+              } finally {
+                setMfaBusy(false)
+              }
+            })()
+          },
         },
-      },
-    ])
+      ]
+    )
   }
   const biometric = async (enabled: boolean) => {
     if (!user) return
@@ -645,7 +652,7 @@ export default function SettingsScreen() {
               setData((current) => (current ? { ...current, language: 'my' } : current))
             }}
           >
-            <Text style={styles.buttonText}>မြန်မာ</Text>
+            <Text style={styles.buttonText}>Myanmar</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.option, locale === 'en' && styles.optionActive]}
@@ -678,9 +685,10 @@ export default function SettingsScreen() {
       >
         <View style={styles.mfaOverlay}>
           <View style={styles.mfaPanel}>
-            <Text style={styles.sectionTitle}>အတည်ပြုအက်ပ် ချိတ်ဆက်ရန်</Text>
+            <Text style={styles.sectionTitle}>Set up authenticator app</Text>
             <Text style={styles.muted}>
-              အတည်ပြုအက်ပ်ကို ဖွင့်ပြီး QR ပုံကို ဖတ်ပါ။ ပြင်ပဝဘ်ဆိုဒ်သို့ မပို့ပါ။
+              Open your authenticator app and scan the QR code. It is not sent to an external
+              website.
             </Text>
             {mfaQrCode ? (
               <WebView
@@ -692,25 +700,27 @@ export default function SettingsScreen() {
                 style={styles.qrPreview}
               />
             ) : null}
-            <Text style={styles.muted}>QR ဖတ်ပြီးနောက် အတည်ပြုအက်ပ်မှ ဂဏန်း ၆ လုံးကို ထည့်ပါ။</Text>
+            <Text style={styles.muted}>
+              After scanning the QR code, enter the six-digit code from your authenticator app.
+            </Text>
             <Text selectable style={styles.mfaSecret}>
               {mfaSecret}
             </Text>
             <TextInput
               value={mfaCode}
               onChangeText={(value) => setMfaCode(value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="ဂဏန်း ၆ လုံး"
+              placeholder="Six-digit code"
               placeholderTextColor={colors.textSecondary}
               keyboardType="number-pad"
               maxLength={6}
               style={styles.input}
             />
             <Button
-              title={mfaBusy ? 'စစ်ဆေးနေသည်…' : 'ကုဒ်အတည်ပြုရန်'}
+              title={mfaBusy ? 'Verifying…' : 'Verify code'}
               onPress={() => void verifyMfaSetup()}
               disabled={mfaBusy || mfaCode.length !== 6}
             />
-            <Button title="မလုပ်တော့ပါ" onPress={() => void cancelMfaSetup()} />
+            <Button title="Cancel" onPress={() => void cancelMfaSetup()} />
           </View>
         </View>
       </Modal>

@@ -30,17 +30,10 @@ const BACKUP_WORDS = [
   'willow',
 ]
 
-type SubtleCrypto = {
-  importKey: (...args: any[]) => Promise<CryptoKey>
-  deriveKey: (...args: any[]) => Promise<CryptoKey>
-  encrypt: (...args: any[]) => Promise<ArrayBuffer>
-  decrypt: (...args: any[]) => Promise<ArrayBuffer>
-}
-
 function getSubtle(): SubtleCrypto {
   // Expo Crypto supplies secure randomness; PBKDF2/AES-GCM use the platform Web Crypto
   // implementation so their parameters and output remain compatible with the Web app.
-  const subtle = (globalThis.crypto as { subtle?: SubtleCrypto } | undefined)?.subtle
+  const subtle = globalThis.crypto?.subtle
   if (!subtle) {
     throw new Error('Mobile Web Crypto support is required for Vault encryption')
   }

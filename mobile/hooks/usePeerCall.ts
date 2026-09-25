@@ -50,7 +50,7 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
   }, [])
 
   const ensurePeer = useCallback(async () => {
-    if (!callId || !user?.id) throw new Error('ခေါ်ဆိုမှုအချက်အလက် မပြည့်စုံပါ။')
+    if (!callId || !user?.id) throw new Error('Call information is incomplete.')
     if (!peerRef.current) {
       const peer = new RTCPeerConnection(getCallIceConfiguration())
       peerRef.current = peer
@@ -61,12 +61,12 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
       peer.addEventListener('icecandidate', (event) => {
         if (!event.candidate) return
         void saveCallIceCandidate(callId, event.candidate.toJSON()).then((saved) => {
-          if (!saved) setConnectionError('ကွန်ရက်ချိတ်ဆက်မှုအချက်အလက် ပို့မရပါ။')
+          if (!saved) setConnectionError('Unable to send connection information.')
         })
       })
       peer.addEventListener('connectionstatechange', () => {
         if (peer.connectionState === 'failed') {
-          setConnectionError('ကွန်ရက်ချိတ်ဆက်မှု မအောင်မြင်ပါ။ အင်တာနက်ကို စစ်ဆေးပါ။')
+          setConnectionError('Connection failed. Check your internet connection.')
         }
       })
     }
@@ -95,7 +95,7 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
       try {
         await peer.addIceCandidate(new RTCIceCandidate(row.candidate))
       } catch {
-        setConnectionError('ကွန်ရက်ချိတ်ဆက်မှုအချက်အလက်ကို ဖတ်မရပါ။')
+        setConnectionError('Unable to read connection information.')
       }
     },
     [user?.id]
@@ -139,7 +139,7 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
             !description ||
             !(await saveCallOffer(callId, description as { type: 'offer'; sdp: string }))
           ) {
-            throw new Error('ခေါ်ဆိုမှုတောင်းဆိုချက်ကို မပို့နိုင်ပါ။')
+            throw new Error('Unable to send the call request.')
           }
           return
         }
@@ -155,7 +155,7 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
             !description ||
             !(await saveCallAnswer(callId, description as { type: 'answer'; sdp: string }))
           ) {
-            throw new Error('အဖြေကို မပို့နိုင်ပါ။')
+            throw new Error('Unable to send the call answer.')
           }
         }
       } catch (error) {
@@ -163,7 +163,7 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
           setConnectionError(
             error instanceof Error
               ? error.message
-              : 'ခေါ်ဆိုမှုကို စတင်မရပါ။ မိုက်ခရိုဖုန်းနဲ့ ကင်မရာခွင့်ပြုချက်ကို စစ်ဆေးပါ။'
+              : 'Unable to start the call. Check microphone and camera permissions.'
           )
           offerStarted.current = false
           answerStarted.current = false

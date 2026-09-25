@@ -435,28 +435,28 @@ export default function ChatScreen() {
   }
 
   const statusLabel = isOffline
-    ? 'အင်တာနက် မချိတ်ဆက်ထားပါ'
+    ? 'Offline'
     : status === 'syncing'
-      ? 'ချိန်ကိုက်နေသည်…'
+      ? 'Syncing…'
       : status === 'error'
-        ? 'ချိန်ကိုက်မှု မအောင်မြင်ပါ'
-        : 'ချိန်ကိုက်ပြီးပါပြီ'
+        ? 'Sync failed'
+        : 'Synced'
   const callStateLabel =
     callState === 'calling'
-      ? 'ခေါ်ဆိုရန် တောင်းဆိုနေသည်'
+      ? 'Requesting call'
       : callState === 'ringing'
-        ? 'ခေါ်ဆိုမှု ဝင်လာသည်'
+        ? 'Incoming call'
         : callState === 'in_call'
-          ? 'ခေါ်ဆိုမှု လက်ခံပြီး'
+          ? 'Call accepted'
           : callState === 'ended'
-            ? 'ခေါ်ဆိုမှု ပြီးဆုံးပါပြီ'
+            ? 'Call ended'
             : callState === 'rejected'
-              ? 'ခေါ်ဆိုမှုကို ငြင်းပယ်လိုက်သည်'
+              ? 'Call rejected'
               : ''
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Text style={styles.title}>စကားပြောခန်း</Text>
+      <Text style={styles.title}>Chat</Text>
       <IncomingCall
         visible={callState === 'ringing' && Boolean(incomingSignal)}
         signal={incomingSignal}
@@ -467,7 +467,7 @@ export default function ChatScreen() {
 
       <View style={[styles.syncBanner, isOffline ? styles.offline : styles.online]}>
         <Text style={styles.syncText}>{statusLabel}</Text>
-        {pendingCount > 0 && <Text style={styles.syncText}>• ပို့ရန်ကျန် {pendingCount} ခု</Text>}
+        {pendingCount > 0 && <Text style={styles.syncText}>• {pendingCount} pending</Text>}
       </View>
 
       <FlatList
@@ -532,25 +532,25 @@ export default function ChatScreen() {
           onPress={() => handleCall('audio')}
           disabled={!partnerId}
           accessibilityRole="button"
-          accessibilityLabel="အသံခေါ်ဆိုမှု စတင်ရန်"
-          accessibilityHint="တွဲဖက်ကို အသံဖြင့် ခေါ်ဆိုရန်"
+          accessibilityLabel="Start audio call"
+          accessibilityHint="Call your partner with audio"
         >
-          <Text style={styles.callButtonText}>အသံခေါ်ဆိုရန်</Text>
+          <Text style={styles.callButtonText}>Audio call</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.callButtonVideo, !partnerId && styles.callButtonDisabled]}
           onPress={() => handleCall('video')}
           disabled={!partnerId}
           accessibilityRole="button"
-          accessibilityLabel="ဗီဒီယိုခေါ်ဆိုမှု စတင်ရန်"
-          accessibilityHint="တွဲဖက်ကို ဗီဒီယိုဖြင့် ခေါ်ဆိုရန်"
+          accessibilityLabel="Start video call"
+          accessibilityHint="Call your partner with video"
         >
-          <Text style={styles.callButtonText}>ဗီဒီယိုခေါ်ဆိုရန်</Text>
+          <Text style={styles.callButtonText}>Video call</Text>
         </TouchableOpacity>
       </View>
 
       {callState !== 'idle' && (
-        <Text style={styles.callStatus}>ခေါ်ဆိုမှုအခြေအနေ — {callStateLabel}</Text>
+        <Text style={styles.callStatus}>Call status — {callStateLabel}</Text>
       )}
 
       <View style={styles.composer}>

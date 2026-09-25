@@ -42,7 +42,7 @@ export default function MfaScreen() {
       const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors()
       if (factorsError) throw factorsError
       const factor = factors?.totp.find((item) => item.status === 'verified')
-      if (!factor) throw new Error('အတည်ပြုထားသော စနစ်မတွေ့ပါ။ ဆက်တင်ကို ပြန်စစ်ပါ။')
+      if (!factor) throw new Error('No verified authenticator found. Check your settings.')
       const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
         factorId: factor.id,
       })
@@ -54,7 +54,10 @@ export default function MfaScreen() {
     }
     void startChallenge()
       .catch((caught) => {
-        if (active) setError(caught instanceof Error ? caught.message : 'အတည်ပြုကုဒ် တောင်း၍မရပါ။')
+        if (active)
+          setError(
+            caught instanceof Error ? caught.message : 'Unable to request a verification code.'
+          )
       })
       .finally(() => {
         if (active) setLoading(false)
@@ -70,7 +73,7 @@ export default function MfaScreen() {
     setError('')
     const { error: verifyError } = await supabase.auth.mfa.verify({ factorId, challengeId, code })
     if (verifyError) {
-      setError('ကုဒ်မှားနေသည် သို့မဟုတ် အချိန်ကုန်သွားသည်။ ပြန်စစ်ပြီး ထပ်ထည့်ပါ။')
+      setError('The code is incorrect or has expired. Check it and try again.')
       setCode('')
       setVerifying(false)
       return
@@ -93,10 +96,10 @@ export default function MfaScreen() {
       <View
         style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
       >
-        <Text style={[styles.kicker, { color: colors.accent1 }]}>အကောင့်လုံခြုံရေး</Text>
-        <Text style={[styles.title, { color: colors.textPrimary }]}>ဝင်ရောက်မှုကို အတည်ပြုပါ</Text>
+        <Text style={[styles.kicker, { color: colors.accent1 }]}>Account security</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Verify your sign-in</Text>
         <Text style={[styles.body, { color: colors.textSecondary }]}>
-          အတည်ပြုအက်ပ်မှ ပြသသော ဂဏန်း ၆ လုံးကို ထည့်ပါ။
+          Enter the six-digit code shown in your authenticator app.
         </Text>
         {loading ? (
           <ActivityIndicator color={colors.accent1} />
@@ -105,7 +108,7 @@ export default function MfaScreen() {
             <TextInput
               value={code}
               onChangeText={(value) => setCode(value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="ဂဏန်း ၆ လုံး"
+              placeholder="Six-digit code"
               placeholderTextColor={colors.textSecondary}
               keyboardType="number-pad"
               autoComplete="one-time-code"
@@ -133,7 +136,7 @@ export default function MfaScreen() {
                   setAttempt((current) => current + 1)
                 }}
               >
-                <Text style={[styles.link, { color: colors.accent1 }]}>ပြန်ကြိုးစားရန်</Text>
+                <Text style={[styles.link, { color: colors.accent1 }]}>Try again</Text>
               </TouchableOpacity>
             ) : null}
             <TouchableOpacity
@@ -149,13 +152,13 @@ export default function MfaScreen() {
               ]}
             >
               <Text style={[styles.buttonText, { color: colors.background }]}>
-                {verifying ? 'စစ်ဆေးနေသည်…' : 'အတည်ပြုပြီး ဆက်ရန်'}
+                {verifying ? 'Verifying…' : 'Verify and continue'}
               </Text>
             </TouchableOpacity>
           </>
         )}
         <TouchableOpacity accessibilityRole="button" onPress={() => void signOut()}>
-          <Text style={[styles.link, { color: colors.accent1 }]}>အကောင့်မှ ထွက်ရန်</Text>
+          <Text style={[styles.link, { color: colors.accent1 }]}>Sign out</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

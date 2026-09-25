@@ -1,14 +1,14 @@
-import NetInfo from '@react-native-community/netinfo'
+import NetInfo, { NetInfoStateType, type NetInfoState } from '@react-native-community/netinfo'
 import { useEffect, useState } from 'react'
 
 import { setNetworkStatus } from '@/lib/supabase'
 import { flushOfflineQueue } from '@/services/sync'
 
 export function useNetwork() {
-  const [state, setState] = useState<any>({
-    type: 'wifi',
+  const [state, setState] = useState<NetInfoState>({
+    type: NetInfoStateType.unknown,
     isConnected: true,
-    isInternetReachable: true,
+    isInternetReachable: null,
     details: null,
   })
 

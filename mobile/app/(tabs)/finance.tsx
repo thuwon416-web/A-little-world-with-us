@@ -22,7 +22,9 @@ import ExpenseList from '@/features/finance/ExpenseList'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import {
+  type AdvancedFinanceData,
   checkInStreak,
+  type DateIdea,
   getAdvancedData,
   getDateIdeas,
   saveBudget,
@@ -37,7 +39,7 @@ export default function FinanceScreen() {
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
   const { user } = useAuth()
-  const [data, setData] = useState<any>()
+  const [data, setData] = useState<AdvancedFinanceData | null>(null)
   const [partnerId, setPartnerId] = useState<string | null>(null)
   const [splitExpenses, setSplitExpenses] = useState<Expense[]>([])
   const [expenseFilter, setExpenseFilter] = useState('all')
@@ -50,7 +52,7 @@ export default function FinanceScreen() {
   const [billTitle, setBillTitle] = useState('')
   const [billAmount, setBillAmount] = useState('')
   const [billDate, setBillDate] = useState('')
-  const [ideas, setIdeas] = useState<any[]>([])
+  const [ideas, setIdeas] = useState<DateIdea[]>([])
   const [error, setError] = useState('')
   const loadSplitExpenses = async () => {
     if (!user?.id) return
@@ -91,7 +93,7 @@ export default function FinanceScreen() {
     void loadPartner()
   }, [user?.id])
   const spent = useMemo(
-    () => (data?.expenses ?? []).reduce((sum: number, item: any) => sum + Number(item.amount), 0),
+    () => (data?.expenses ?? []).reduce((sum, item) => sum + Number(item.amount), 0),
     [data]
   )
   const filteredExpenses = splitExpenses.filter(
@@ -156,7 +158,7 @@ export default function FinanceScreen() {
     if (!data) return
     try {
       const streak = await checkInStreak(data.coupleId)
-      setData((current: any) => ({ ...current, streak }))
+      setData((current) => (current ? { ...current, streak } : current))
     } catch (caught) {
       Alert.alert(
         'Unable to check in',
@@ -198,7 +200,7 @@ export default function FinanceScreen() {
             style={[
               styles.fill,
               {
-                width: `${Math.min(100, Number(data?.budget?.amount) ? (spent / Number(data.budget.amount)) * 100 : 0)}%`,
+                width: `${Math.min(100, Number(data?.budget?.amount) ? (spent / Number(data?.budget?.amount)) * 100 : 0)}%`,
               },
             ]}
           />
@@ -291,7 +293,7 @@ export default function FinanceScreen() {
                 <View style={styles.row}>
                   <Text style={styles.goalTitle}>{goal.title}</Text>
                   <Text style={styles.muted}>
-                    {mmk(goal.current_amount)} / {mmk(goal.target_amount)}
+                    {mmk(Number(goal.current_amount))} / {mmk(Number(goal.target_amount))}
                   </Text>
                 </View>
                 <View style={styles.track}>
@@ -299,7 +301,10 @@ export default function FinanceScreen() {
                     style={[
                       styles.fill,
                       {
-                        width: `${Math.min(100, (goal.current_amount / goal.target_amount) * 100)}%`,
+                        width: `${Math.min(
+                          100,
+                          (Number(goal.current_amount) / Number(goal.target_amount)) * 100
+                        )}%`,
                       },
                     ]}
                   />
@@ -309,7 +314,7 @@ export default function FinanceScreen() {
                     Alert.prompt('Add progress', 'Amount in MMK', async (value) => {
                       const amount = Number(value)
                       if (amount > 0) {
-                        await addFinancialProgress(goal.id, goal.current_amount, amount)
+                        await addFinancialProgress(goal.id, Number(goal.current_amount), amount)
                         await load()
                       }
                     })
@@ -365,7 +370,7 @@ export default function FinanceScreen() {
             keyExtractor={(item) => item.id}
             renderItem={({ item: bill }) => (
               <Text style={styles.muted}>
-                {bill.title} · {mmk(bill.amount)} · due {bill.due_date}
+                {bill.title} · {mmk(Number(bill.amount))} · due {bill.due_date}
               </Text>
             )}
             initialNumToRender={10}

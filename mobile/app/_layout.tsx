@@ -5,13 +5,6 @@ import { View, Text, StyleSheet, ActivityIndicator } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { TextEncoder, TextDecoder } from 'text-encoding'
 
-if (typeof global.TextEncoder === 'undefined') {
-  global.TextEncoder = TextEncoder
-}
-if (typeof global.TextDecoder === 'undefined') {
-  global.TextDecoder = TextDecoder
-}
-
 import { ThemeProvider, useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
@@ -19,6 +12,13 @@ import { I18nProvider } from '@/i18n/config'
 import { AuthProvider, useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { getSharingStatus, startLocationTracking } from '@/services/location'
+
+if (typeof global.TextEncoder === 'undefined') {
+  global.TextEncoder = TextEncoder
+}
+if (typeof global.TextDecoder === 'undefined') {
+  global.TextDecoder = TextDecoder
+}
 
 class ErrorBoundary extends React.Component<
   { children: React.ReactNode },
