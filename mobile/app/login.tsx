@@ -22,21 +22,20 @@ export default function LoginScreen() {
     }
 
     setIsLoggingIn(true)
-
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    setIsLoggingIn(false)
-
-    if (error) {
-      Alert.alert('Login Failed', error.message)
-      return
-    }
-
-    if (data.user) {
-      router.push('/(tabs)')
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+      if (error) {
+        Alert.alert('Login Failed', error.message)
+        return
+      }
+      if (data.user) router.replace('/(tabs)')
+    } catch {
+      Alert.alert('Login Failed', 'Unable to sign in. Check your connection and try again.')
+    } finally {
+      setIsLoggingIn(false)
     }
   }
 

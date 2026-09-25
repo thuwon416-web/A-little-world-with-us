@@ -9,24 +9,37 @@ export function useAdmin() {
   const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
+    let active = true
     const loadRole = async () => {
       if (!user) {
-        setIsAdmin(false)
-        setLoading(false)
+        if (active) {
+          setIsAdmin(false)
+          setLoading(false)
+        }
         return
       }
 
-      const { data } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      setIsAdmin(data?.role === 'admin')
-      setLoading(false)
+      setLoading(true)
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle()
+        if (error) throw error
+        if (active) setIsAdmin(data?.role === 'admin')
+      } catch {
+        // The app remains usable when the optional admin role check is unavailable.
+        if (active) setIsAdmin(false)
+      } finally {
+        if (active) setLoading(false)
+      }
     }
 
     void loadRole()
+    return () => {
+      active = false
+    }
   }, [user?.id])
 
   return { isAdmin, loading }

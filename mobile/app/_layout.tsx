@@ -85,7 +85,7 @@ function MfaGate({ children }: { children: ReactNode }) {
     }
     void supabase.auth.mfa.getAuthenticatorAssuranceLevel().then(({ data, error }) => {
       if (!active) return
-      const needsMfa = error || (data?.nextLevel === 'aal2' && data.currentLevel !== 'aal2')
+      const needsMfa = !error && data?.nextLevel === 'aal2' && data.currentLevel !== 'aal2'
       setRequiredKey(needsMfa ? currentKey : '')
       setCheckedKey(currentKey)
     })

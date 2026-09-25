@@ -6,13 +6,11 @@ import { useEffect } from 'react'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useTheme } from '@/context/ThemeContext'
-import { useAdmin } from '@/hooks/useAdmin'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 
 export default function TabsLayout() {
   const { user, loading } = useAuth()
-  const { loading: adminLoading } = useAdmin()
   const { t } = useTranslation()
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
@@ -26,7 +24,7 @@ export default function TabsLayout() {
     ])
   }, [])
 
-  if (loading || adminLoading) {
+  if (loading) {
     return null
   }
 
