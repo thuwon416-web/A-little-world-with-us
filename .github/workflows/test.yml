@@ -21,19 +21,19 @@ jobs:
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
       
       - name: Run lint
         run: npm run lint
       
       - name: Run TypeScript check
-        run: npx tsc --noEmit
+        run: npx --yes --package=typescript@5.9.3 tsc --noEmit
       
       - name: Run web tests with coverage (Vitest)
         run: npm run test:coverage
       
       - name: Run A11Y tests
-        run: npx vitest run src/tests/a11y.test.tsx
+        run: npx vitest@2.1.9 run src/tests/a11y.test.tsx
       
       - name: Upload coverage reports
         if: always()
@@ -58,7 +58,7 @@ jobs:
       
       - name: Install mobile dependencies
         working-directory: ./mobile
-        run: npm ci
+        run: npm ci --ignore-scripts
       
       - name: Run mobile TypeScript check
         working-directory: ./mobile

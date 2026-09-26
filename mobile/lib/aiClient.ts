@@ -1,4 +1,5 @@
 import NetInfo from '@react-native-community/netinfo'
+import * as Crypto from 'expo-crypto'
 
 export type AIClientErrorKind =
   'offline' | 'timeout' | 'rate_limit' | 'server' | 'invalid_response' | 'unknown'
@@ -140,6 +141,7 @@ function getHttpErrorMessage(status: number) {
 
 async function waitForRetry(attempt: number, baseDelayMs: number) {
   const exponentialDelay = Math.min(baseDelayMs * 2 ** (attempt - 1), maxBackoffMs)
-  const jitter = Math.floor(Math.random() * (jitterMaxMs + 1))
+  const randomValue = Crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
+  const jitter = Math.floor(randomValue * (jitterMaxMs + 1))
   await new Promise<void>((resolve) => setTimeout(resolve, exponentialDelay + jitter))
 }

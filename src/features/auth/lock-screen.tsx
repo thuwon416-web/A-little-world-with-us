@@ -11,6 +11,8 @@ interface LockScreenProps {
   onUnlock: () => void
 }
 
+const getRandomFraction = () => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
+
 export default function LockScreen({ onUnlock }: LockScreenProps) {
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
@@ -113,8 +115,8 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
         const newParticles = Array.from({ length: 24 }, (_, i) => ({
           id: i,
           angle: (i / 24) * Math.PI * 2,
-          distance: 120 + Math.random() * 100,
-          size: 6 + Math.random() * 14,
+          distance: 120 + getRandomFraction() * 100,
+          size: 6 + getRandomFraction() * 14,
         }))
         setParticles(newParticles)
         setUnlocking(true)
@@ -331,7 +333,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
                 y: Math.sin(p.angle) * p.distance,
                 opacity: 0,
                 scale: 0.3,
-                rotate: Math.random() * 360,
+                rotate: getRandomFraction() * 360,
               }}
               transition={{ duration: 1.2, ease: 'easeOut' }}
               className="absolute"

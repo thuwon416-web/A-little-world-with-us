@@ -1,4 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker'
+import * as Crypto from 'expo-crypto'
 import * as FileSystem from 'expo-file-system'
 import { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -82,7 +83,7 @@ export default function TelegramArchive({ coupleId }: { coupleId: string }) {
     setBusy(true)
     setError('')
     try {
-      const batchId = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+      const batchId = `${Date.now()}-${Crypto.randomUUID()}`
       for (let offset = 0; offset < preview.length; offset += BATCH_SIZE) {
         const batch = preview
           .slice(offset, offset + BATCH_SIZE)

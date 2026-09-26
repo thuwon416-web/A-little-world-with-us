@@ -34,9 +34,12 @@ function writeStoredErrors(errors: LoggedError[]) {
 
 export function logError(error: unknown, context?: ErrorContext) {
   const normalized = error instanceof Error ? error : new Error(String(error ?? 'Unknown error'))
+  const randomId = Array.from(crypto.getRandomValues(new Uint32Array(2)), (value) =>
+    value.toString(16).padStart(8, '0')
+  ).join('')
 
   const entry: LoggedError = {
-    id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+    id: `${Date.now()}-${randomId}`,
     message: normalized.message,
     name: normalized.name,
     stack: normalized.stack,

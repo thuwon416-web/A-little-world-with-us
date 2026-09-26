@@ -12,6 +12,8 @@ interface PinLockProps {
   autoLockMs?: number
 }
 
+const getRandomFraction = () => crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
+
 /**
  * Animated PIN lock screen with haptic feedback and heart unlock animation.
  */
@@ -84,10 +86,10 @@ export default function PinLock({
         {[...Array(6)].map((_, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: '100vh', x: `${Math.random() * 100}%` }}
+            initial={{ opacity: 0, y: '100vh', x: `${getRandomFraction() * 100}%` }}
             animate={prefersReduced ? {} : { opacity: [0, 0.3, 0], y: '-20vh' }}
             transition={prefersReduced ? {} : {
-              duration: 8 + Math.random() * 4,
+              duration: 8 + getRandomFraction() * 4,
               repeat: Infinity,
               delay: i * 1.5,
               ease: 'linear',
