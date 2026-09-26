@@ -55,6 +55,7 @@ export default function CoupleLinkingPage() {
     try {
       const status = await getPairStatus()
       if (status) {
+        setInviteCode(status.inviteCode ?? '')
         setLastStatusUpdatedAt((current) => current ?? new Date().toISOString())
         setState(status.status === 'accepted' ? 'linked' : 'pending')
       } else {
