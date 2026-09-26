@@ -1,8 +1,12 @@
-# Media Encryption — End-to-End
+# Media Encryption at Rest
 
 ## Overview
 
-All media (photos, voice messages, files) is encrypted at rest in Supabase Storage using AES-GCM with couple-specific keys. This ensures that even if storage is compromised, media content remains private to the couple.
+Media uploaded through the encrypted media helpers is encrypted at rest in Supabase Storage using AES-GCM. The format is intended to protect stored objects if storage is compromised, but the key is available to app clients.
+
+## Security Model
+
+**This is NOT end-to-end encryption. The encryption key is client-visible. Encryption protects against storage compromise only, not against a user with app access.** A person who can use or inspect an authorized app client can access the key and decrypt media available to that account. This design does not protect media from an authorized partner, a compromised device, or an attacker controlling an authenticated client.
 
 ## Format
 
@@ -99,12 +103,17 @@ useEffect(() => {
 
 ## Legacy Fallback
 
-For existing unencrypted media (before deployment), `decryptMediaSafe` attempts decryption and falls back to returning the original blob on failure:
+For existing unencrypted media (before deployment), `decryptMediaSafe` treats files whose first byte is not the version byte `2` as plaintext and returns them unchanged. If the first byte is `2`, the file is treated as encrypted and decryption must succeed; unsupported, corrupt, or wrong-key ciphertext throws an error and is never returned as plaintext.
 
 ```typescript
 const blob = await decryptMediaSafe(encryptedBlob, coupleId, mimeType)
-// Returns decrypted blob OR original blob if decryption fails
+// Returns decrypted media for version 2, or unchanged legacy plaintext otherwise.
+// Version 2 decryption failures throw.
 ```
+
+### Legacy Format Limitations
+
+Legacy media has no explicit format marker. The first-byte rule is therefore a compatibility heuristic: unencrypted legacy files beginning with byte `2` are classified as encrypted and decryption will fail. These files remain stored unchanged, but require a separate recovery/migration path to display. Do not treat a failed version-2 decryption as evidence that a file is plaintext.
 
 ## MIME Type Handling
 
@@ -165,7 +174,7 @@ Encrypted media is stored in these Supabase Storage buckets:
 
 ## Security Notes
 
-- Keys are derived from couple ID, not stored directly
+- Keys are available to client apps and are not an end-to-end secret
 - IV is unique per encryption (12 random bytes)
-- Decryption failures fall back to plaintext for legacy compatibility
+- Version-2 decryption failures are reported; only files without the version byte are treated as legacy plaintext
 - External URLs remain unencrypted (they're public anyway)

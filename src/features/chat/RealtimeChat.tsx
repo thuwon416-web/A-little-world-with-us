@@ -50,6 +50,7 @@ function isExternalUrl(value: string | null | undefined): boolean {
 
 export default function RealtimeChat() {
   const [messages, setMessages] = useState<Message[]>([])
+  const [loadError, setLoadError] = useState<string | null>(null)
   const [input, setInput] = useState('')
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
@@ -67,7 +68,6 @@ export default function RealtimeChat() {
   const [showAIPanel, setShowAIPanel] = useState(false)
   const [aiResponse, setAiResponse] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
-  const [loadError, setLoadError] = useState<string | null>(null)
   const [hasMore, setHasMore] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [isOnline, setIsOnline] = useState(true)
@@ -275,6 +275,7 @@ export default function RealtimeChat() {
   const loadMoreMessages = async () => {
     if (!coupleId || !oldestCreatedAt || loadingMore || !hasMore) return
     setLoadingMore(true)
+    setLoadError(null)
     try {
       const { data: olderMessages } = await supabase
         .from('messages')
@@ -313,6 +314,7 @@ export default function RealtimeChat() {
       }
     } catch (error) {
       console.error('Error loading more messages:', error)
+      setLoadError(error instanceof Error ? error.message : 'Unable to load more messages.')
     } finally {
       setLoadingMore(false)
     }

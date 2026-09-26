@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { filterByPrivacy, PrivacySettingsUnavailableError } from '@/lib/ai/privacy-guard'
 
 // Validation schema
 const dateIdeasSchema = z.object({
@@ -58,6 +59,23 @@ export async function POST(req: NextRequest) {
     // 3. Parse and validate request
     const body = await req.json()
     const validated = dateIdeasSchema.parse(body)
+    const permitted = await filterByPrivacy(userId, {
+      location: validated.location,
+      finance: validated.budget,
+    })
+    if (
+      validated.location !== undefined &&
+      validated.budget !== undefined &&
+      permitted.location === undefined &&
+      permitted.finance === undefined
+    ) {
+      return NextResponse.json(
+        { error: 'Enable AI Location or Finance access to use both details for date ideas.' },
+        { status: 403 }
+      )
+    }
+    const location = permitted.location
+    const budget = permitted.finance
 
     const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY
     
@@ -116,7 +134,7 @@ export async function POST(req: NextRequest) {
             },
             {
               role: 'user',
-              content: `Budget: ${validated.budget}, Location: ${validated.location}, Interests: ${validated.interests}`,
+              content: `Budget: ${budget}, Location: ${location}, Interests: ${validated.interests}`,
             },
           ],
           max_tokens: 800,
@@ -129,7 +147,7 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({
           contents: [{ 
             parts: [{ 
-              text: `Generate 5 creative date ideas. Return JSON array with: title, description, estimatedCost, duration. Be romantic and practical. Budget: ${validated.budget}, Location: ${validated.location}, Interests: ${validated.interests}` 
+              text: `Generate 5 creative date ideas. Return JSON array with: title, description, estimatedCost, duration. Be romantic and practical. Budget: ${budget}, Location: ${location}, Interests: ${validated.interests}`
             }] 
           }],
         }),
@@ -165,6 +183,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ dateIdeas })
 
   } catch (error) {
+    if (error instanceof PrivacySettingsUnavailableError) {
+      console.error('Date ideas privacy lookup failed:', error)
+      return NextResponse.json({ error: 'Could not load AI privacy settings.' }, { status: 503 })
+    }
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: 'Invalid input', details: error.issues },

@@ -744,17 +744,3 @@ function MemoryDetail({ memory, onClose, onSaved }: { memory: DisplayMemory; onC
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative h-[55vh] w-full overflow-hidden rounded-btn"><Image src={memory.displayUrl} alt={memory.caption || 'Memory'} fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover" /></div> : <div className="h-64 rounded-btn bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-lg font-serif text-text-1" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-error">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
 }
 
-function MemoriesSkeleton() {
-  return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-      <div className="h-8 w-48 animate-pulse rounded-full bg-card" />
-      <div className="h-20 animate-pulse rounded-panel bg-card" />
-      <div className="h-12 animate-pulse rounded-full bg-card" />
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="h-60 animate-pulse rounded-panel bg-card" />
-        <div className="h-60 animate-pulse rounded-panel bg-card" />
-        <div className="h-60 animate-pulse rounded-panel bg-card" />
-      </div>
-    </div>
-  )
-}

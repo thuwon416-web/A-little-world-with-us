@@ -64,6 +64,7 @@ export async function POST(req: NextRequest) {
     const systemPrompt = 'You are a gentle, caring partner. Reflect briefly on this personal journal entry with empathy. 2-4 sentences. No advice unless asked. No medical or clinical language.'
     const userPrompt = `Title: ${entry.title}\n\n${entry.description ?? ''}\n\nMood: ${(entry.metadata as { mood_tag?: string } | null)?.mood_tag ?? 'unspecified'}`
     const result = await generateAiResponse({
+      allowedProviders: ['groq', 'gemini', 'cerebras'],
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },

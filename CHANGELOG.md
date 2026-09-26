@@ -33,7 +33,7 @@
 
 | Phase | Task |
 |-------|------|
-| 20 | Manual E2E testing (see docs/manual-queue.md) |
+| 20 | Manual E2E testing (pending) |
 | 11 | Build & VPN release |
 
 ### Key Additions (Phase 17 + 21)

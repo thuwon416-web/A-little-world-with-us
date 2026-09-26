@@ -13,6 +13,11 @@ npx eas build --platform android --profile preview
 npx eas build --platform ios --profile preview
 ```
 
+The EAS project configuration is maintained in `mobile/eas.json`, since builds are
+invoked from this directory. The root `eas.json` is kept identical so commands run
+from either location use the same CLI requirement, version source, and build profiles.
+When changing EAS profiles, update both files together.
+
 Create a new native build whenever location permissions, background location configuration, notifications, or native dependencies change. MapLibre is a native dependency, so Expo Go cannot load the Location map or validate production background tracking.
 
 ## Location release setup

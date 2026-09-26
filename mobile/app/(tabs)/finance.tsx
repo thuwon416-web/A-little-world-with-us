@@ -32,6 +32,7 @@ import {
 } from '@/services/advanced'
 import { addFinancialProgress, addFinancialGoal } from '@/services/finance'
 import { deleteExpense, getExpenses, type Expense } from '@/services/finance-splitwise'
+import { getSettingsData } from '@/services/settings'
 
 const mmk = (value: number) => `${Number(value).toLocaleString()} MMK`
 
@@ -168,7 +169,9 @@ export default function FinanceScreen() {
   }
   const generateIdeas = async () => {
     try {
-      setIdeas(await getDateIdeas('happy', 'clear', 'nearby'))
+      const settings = await getSettingsData()
+      const location = settings.privacy.allow_ai_read_location ? 'nearby' : 'unspecified'
+      setIdeas(await getDateIdeas('happy', 'clear', location))
     } catch (caught) {
       Alert.alert(
         'Date ideas unavailable',

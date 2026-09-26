@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
       ? 'Respond in English.'
       : 'Respond in Myanmar language by default, while keeping key consent and safety terms clear.'
     const generated = safety.message ? null : await generateAiResponse({
+      allowedProviders: ['groq', 'gemini', 'cerebras'],
       maxTokens: 650,
       messages: [
         {

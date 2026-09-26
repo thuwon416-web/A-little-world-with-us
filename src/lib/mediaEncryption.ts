@@ -2,7 +2,7 @@ import { deriveChatKey } from './chatEncryption'
 import { supabase } from './supabase'
 
 // ═══════════════════════════════════════════════════════════
-// Media Encryption — End-to-End
+// Media Encryption at Rest
 //
 // Format: [version=2][iv_12_bytes][ciphertext]
 // Algorithm: AES-GCM
@@ -70,13 +70,9 @@ export async function decryptMediaSafe(
   coupleId: string,
   originalMimeType: string
 ): Promise<Blob> {
-  try {
-    return await decryptMedia(blob, coupleId, originalMimeType)
-  } catch (err) {
-    // Assume legacy unencrypted file
-    console.warn('[Media] Fallback to plaintext (legacy):', err)
-    return blob
-  }
+  const bytes = new Uint8Array(await blob.slice(0, 1).arrayBuffer())
+  if (bytes[0] !== MEDIA_VERSION) return blob
+  return decryptMedia(blob, coupleId, originalMimeType)
 }
 
 // ═══════════════════════════════════════════════════════════

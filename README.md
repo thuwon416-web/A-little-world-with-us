@@ -22,6 +22,10 @@ For an existing database, review and apply [18_storage_pair_scope.sql](supabase/
 
 Web location uses Leaflet with CARTO/OSM tiles; no map API key is required. Sentry is optional but recommended in production. Keep DSNs and auth tokens in ignored local files or Vercel Environment Variables, never in Git.
 
+## Security Model
+
+Chat and media encryption are client-side protections for data stored in Supabase; they are **not end-to-end encryption**. The Web `NEXT_PUBLIC_CHAT_ENCRYPTION_KEY` and Mobile `EXPO_PUBLIC_CHAT_ENCRYPTION_KEY` values are bundled into client apps, so a user or attacker with access to an authorized app/device can inspect the key and decrypt data that client can access. Encryption helps protect stored ciphertext if storage is compromised, but does not protect against an authorized couple member, a compromised device/client, or account takeover. Legacy chat messages using a fixed public derivation are not confidential against someone who knows the couple ID.
+
 Keep the matching chat encryption values in ignored local environment files and the deployment environment. `NEXT_PUBLIC_CHAT_ENCRYPTION_KEY` is included in browser code and is not a private server secret; do not treat it as protection from someone who can inspect the app bundle. See [DEPLOYMENT.md](DEPLOYMENT.md) for the production sequence and [mobile/BUILD_INSTRUCTIONS.md](mobile/BUILD_INSTRUCTIONS.md) for native builds.
 
-For a complete local setup and validation checklist, see [docs/SETUP.md](docs/SETUP.md). Contributors should also read [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md).
+For a complete local setup and validation checklist, see [docs/SETUP.md](docs/SETUP.md).

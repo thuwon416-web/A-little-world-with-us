@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { logAiUsage } from '@/lib/ai/usage-log'
 
 // Validation schema
 const loveLetterSchema = z.object({
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
     // 3. Parse and validate request
     const body = await req.json()
     const validated = loveLetterSchema.parse(body)
+    // The user supplied these details directly; privacy scopes govern stored context, not explicit prompts.
 
     const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY
     
@@ -115,6 +117,15 @@ export async function POST(req: NextRequest) {
     } else {
       loveLetter = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate love letter.'
     }
+
+    void logAiUsage({
+      userId,
+      endpoint: 'love-letter',
+      provider: process.env.GROQ_API_KEY ? 'groq' : 'gemini',
+      status: 'success',
+      promptLength: (validated.partnerName?.length ?? 0) + (validated.relationshipLength?.length ?? 0) + (validated.specialMemories?.length ?? 0) + (validated.tone?.length ?? 0),
+      responseLength: loveLetter.length,
+    })
 
     return NextResponse.json({ loveLetter })
 

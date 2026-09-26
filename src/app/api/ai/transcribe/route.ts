@@ -3,6 +3,11 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
+import {
+  assertAiScope,
+  PrivacyDeniedError,
+  PrivacySettingsUnavailableError,
+} from '@/lib/ai/privacy-guard'
 
 const messageIdSchema = z.string().uuid()
 const maxAudioBytes = 25 * 1024 * 1024
@@ -16,6 +21,7 @@ export async function POST(request: NextRequest) {
     )
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    await assertAiScope(user.id, 'chat')
     if (!process.env.GROQ_API_KEY) return NextResponse.json({ error: 'Voice transcription is not configured yet.' }, { status: 503 })
 
     const limit = await checkRateLimit(`ai-transcribe:${user.id}`, 5, 60_000)
@@ -47,6 +53,16 @@ export async function POST(request: NextRequest) {
     if (updateError) return NextResponse.json({ error: 'Unable to save the transcript.' }, { status: 500 })
     return NextResponse.json({ transcript })
   } catch (error) {
+    if (error instanceof PrivacyDeniedError) {
+      return NextResponse.json(
+        { error: 'Enable AI chat access in privacy settings to transcribe voice messages.' },
+        { status: 403 }
+      )
+    }
+    if (error instanceof PrivacySettingsUnavailableError) {
+      console.error('Voice transcription privacy lookup failed:', error)
+      return NextResponse.json({ error: 'Could not load AI privacy settings.' }, { status: 503 })
+    }
     if (error instanceof z.ZodError) return NextResponse.json({ error: 'Invalid transcription request.' }, { status: 400 })
     console.error('Voice transcription error:', error)
     return NextResponse.json({ error: 'Unable to transcribe this voice message.' }, { status: 500 })

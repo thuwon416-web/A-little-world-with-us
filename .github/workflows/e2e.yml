@@ -5,12 +5,14 @@ on:
     branches: [main]
   push:
     branches: [main]
+  workflow_dispatch:
 
-# E2E requires env vars; run manually in staging
 jobs:
   test:
-    if: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' }}
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
     
     steps:
       - name: Checkout code
@@ -25,10 +27,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
+      - name: Warn when E2E secrets are missing
+        if: ${{ env.NEXT_PUBLIC_SUPABASE_URL == '' || env.NEXT_PUBLIC_SUPABASE_ANON_KEY == '' }}
+        run: echo "::warning::Skipping Playwright tests because Supabase E2E secrets are not configured."
+
       - name: Install Playwright browsers
+        if: ${{ env.NEXT_PUBLIC_SUPABASE_URL != '' && env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}
         run: npx playwright install --with-deps
       
       - name: Run Playwright tests
+        if: ${{ env.NEXT_PUBLIC_SUPABASE_URL != '' && env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}
         run: npm run test:e2e
       
       - name: Upload Playwright report

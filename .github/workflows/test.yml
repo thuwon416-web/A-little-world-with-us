@@ -60,6 +60,14 @@ jobs:
         working-directory: ./mobile
         run: npm ci
       
+      - name: Run mobile TypeScript check
+        working-directory: ./mobile
+        run: npm run typecheck
+
+      - name: Run mobile lint
+        working-directory: ./mobile
+        run: npm run lint
+
       - name: Run mobile tests with coverage (Jest)
         working-directory: ./mobile
         run: npm run test:coverage

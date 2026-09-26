@@ -38,12 +38,8 @@ export async function decryptMediaSafe(
   encrypted: Uint8Array,
   coupleId: string
 ): Promise<Uint8Array> {
-  try {
-    return await decryptMedia(encrypted, coupleId)
-  } catch {
-    console.warn('[Media] Fallback to plaintext (legacy)')
-    return encrypted
-  }
+  if (encrypted[0] !== MEDIA_VERSION) return encrypted
+  return decryptMedia(encrypted, coupleId)
 }
 
 // ═══════════════════════════════════════════════════════════

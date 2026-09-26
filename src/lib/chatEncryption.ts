@@ -11,6 +11,7 @@
 const LEGACY_KEY_PREFIX = 'a-little-world-with-us-chat-'
 const PBKDF2_ITERATIONS = 100000
 const IV_LENGTH = 12
+const CHAT_FORMAT_MAGIC = new Uint8Array([0xC1, 0xAE, 0x01, 0x00])
 
 // New env-based derivation
 async function deriveNewKey(coupleId: string): Promise<CryptoKey> {
@@ -82,12 +83,11 @@ export async function encryptMessage(text: string, key: CryptoKey): Promise<stri
     key,
     encoder.encode(text)
   )
-  // Format: [1 byte version][12 byte IV][ciphertext]
-  const version = new Uint8Array([1])  // version 1 = new key
-  const combined = new Uint8Array(version.length + iv.length + ciphertext.byteLength)
-  combined.set(version, 0)
-  combined.set(iv, version.length)
-  combined.set(new Uint8Array(ciphertext), version.length + iv.length)
+  // Format: [4-byte magic/version][12-byte IV][ciphertext]
+  const combined = new Uint8Array(CHAT_FORMAT_MAGIC.length + iv.length + ciphertext.byteLength)
+  combined.set(CHAT_FORMAT_MAGIC, 0)
+  combined.set(iv, CHAT_FORMAT_MAGIC.length)
+  combined.set(new Uint8Array(ciphertext), CHAT_FORMAT_MAGIC.length + iv.length)
   return btoa(String.fromCharCode(...combined))
 }
 
@@ -102,30 +102,40 @@ export async function decryptMessage(
   const combined = Uint8Array.from(atob(encrypted), (c) => c.charCodeAt(0))
   const decoder = new TextDecoder()
   
-  // Try new format first (version byte = 1)
-  if (combined[0] === 1) {
-    const iv = combined.slice(1, 1 + IV_LENGTH)
-    const ciphertext = combined.slice(1 + IV_LENGTH)
-    try {
-      const plaintext = await window.crypto.subtle.decrypt(
-        { name: 'AES-GCM', iv },
-        newKey,
-        ciphertext
-      )
-      return decoder.decode(plaintext)
-    } catch {
-      // fall through to legacy attempt
-    }
+  const hasMagic = CHAT_FORMAT_MAGIC.every((byte, index) => combined[index] === byte)
+  if (hasMagic) {
+    const ivStart = CHAT_FORMAT_MAGIC.length
+    const iv = combined.slice(ivStart, ivStart + IV_LENGTH)
+    const ciphertext = combined.slice(ivStart + IV_LENGTH)
+    const plaintext = await window.crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv },
+      newKey,
+      ciphertext
+    )
+    return decoder.decode(plaintext)
   }
-  
-  // Legacy format: [IV][ciphertext]
+
+  // Unprefixed legacy format: [IV][ciphertext]
   const legacyIv = combined.slice(0, IV_LENGTH)
   const legacyCiphertext = combined.slice(IV_LENGTH)
   const legacyKey = await deriveLegacyKey(coupleId)
-  const plaintext = await window.crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: legacyIv },
-    legacyKey,
-    legacyCiphertext
-  )
-  return decoder.decode(plaintext)
+  try {
+    const plaintext = await window.crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: legacyIv },
+      legacyKey,
+      legacyCiphertext
+    )
+    return decoder.decode(plaintext)
+  } catch (legacyError) {
+    // Preserve messages written with the old one-byte versioned format.
+    if (combined[0] !== 1) throw legacyError
+    const oldIv = combined.slice(1, 1 + IV_LENGTH)
+    const oldCiphertext = combined.slice(1 + IV_LENGTH)
+    const plaintext = await window.crypto.subtle.decrypt(
+      { name: 'AES-GCM', iv: oldIv },
+      newKey,
+      oldCiphertext
+    )
+    return decoder.decode(plaintext)
+  }
 }

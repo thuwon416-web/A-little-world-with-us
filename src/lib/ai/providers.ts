@@ -20,6 +20,7 @@ interface GenerateOptions {
   messages: AiMessage[]
   maxTokens?: number
   provider?: AiProvider
+  allowedProviders?: string[]
 }
 
 export interface AiGeneration {
@@ -203,10 +204,22 @@ async function callWithFallback(
   throw new AIProviderError(failures)
 }
 
-export async function generateAiResponse({ messages, maxTokens = 600, provider }: GenerateOptions): Promise<AiGeneration> {
-  const providers = provider
+export async function generateAiResponse({
+  messages,
+  maxTokens = 600,
+  provider,
+  allowedProviders,
+}: GenerateOptions): Promise<AiGeneration> {
+  const candidates = provider
     ? [provider, ...fallbackOrder.filter((candidate) => candidate !== provider)]
     : resilienceOrder
+  const providers = allowedProviders
+    ? candidates.filter((candidate) => allowedProviders.includes(candidate))
+    : candidates
+
+  if (!providers.length) {
+    throw new AIProviderError([])
+  }
 
   return callWithFallback(providers, messages, maxTokens)
 }

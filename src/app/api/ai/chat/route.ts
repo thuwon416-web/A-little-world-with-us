@@ -57,6 +57,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unsupported AI provider' }, { status: 400 })
     }
 
+    // The user supplied this text directly; privacy scopes govern stored context, not explicit prompts.
     const result = await generateAiResponse({
       provider,
       messages: [

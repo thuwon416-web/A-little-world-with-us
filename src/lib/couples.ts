@@ -120,65 +120,16 @@ export async function getCoupleStatus(): Promise<CoupleStatusResult> {
  * Create a couple and send invite
  */
 export async function createCoupleAndInvite(partnerEmail: string, coupleName?: string) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
+  void coupleName
+  const { data: inviteCode, error } = await supabase.rpc('create_couple_invite', {
+    partner_email: partnerEmail,
+  })
+
+  if (error || !inviteCode) {
+    throw new Error(error?.message || 'Failed to send invite')
   }
 
-  // Find partner by email
-  const { data: partnerProfile, error: partnerError } = await supabase
-    .from('profiles')
-    .select('id')
-    .eq('email', partnerEmail)
-    .single()
-
-  if (partnerError || !partnerProfile) {
-    throw new Error('Partner not found. Please ask them to sign up first.')
-  }
-
-  if (partnerProfile.id === user.id) {
-    throw new Error('You cannot invite yourself')
-  }
-
-  // Check if already linked
-  const { data: existingLink } = await supabase
-    .from('couple_links')
-    .select('*')
-    .or(`and(inviter_id.eq.${user.id},accepted_by.eq.${partnerProfile.id}),and(inviter_id.eq.${partnerProfile.id},accepted_by.eq.${user.id})`)
-    .single()
-
-  if (existingLink) {
-    throw new Error('Already linked with this user')
-  }
-
-  // Create couple
-  const { data: couple, error: coupleError } = await supabase
-    .from('couples')
-    .insert({ name: coupleName || null })
-    .select()
-    .single()
-
-  if (coupleError || !couple) {
-    throw new Error('Failed to create couple')
-  }
-
-  // Create invite link
-  const inviteCode = generateInviteCode()
-  const { error: linkError } = await supabase
-    .from('couple_links')
-    .insert({
-      inviter_id: user.id,
-      accepted_by: partnerProfile.id,
-      invite_code: inviteCode,
-      couple_id: couple.id,
-      status: 'pending',
-    })
-
-  if (linkError) {
-    throw new Error('Failed to send invite')
-  }
-
-  return { couple, inviteCode }
+  return inviteCode
 }
 
 /**
@@ -190,41 +141,40 @@ export async function acceptCoupleInvite(linkId: string) {
     throw new Error('User not authenticated')
   }
 
-  const { data: link, error } = await supabase
+  const { data: invite, error: inviteError } = await supabase
     .from('couple_links')
-    .update({
-      status: 'accepted',
-      accepted_at: new Date().toISOString(),
-    })
+    .select('invite_code')
     .eq('id', linkId)
     .eq('accepted_by', user.id)
-    .select()
+    .eq('status', 'pending')
+    .gt('expires_at', new Date().toISOString())
     .single()
 
-  if (error || !link) {
-    throw new Error('Failed to accept invite')
+  if (inviteError || !invite) {
+    throw new Error(inviteError?.message || 'Failed to accept invite')
   }
 
-  return link
+  const { data: coupleId, error } = await supabase.rpc('accept_couple_invite', {
+    p_invite_code: invite.invite_code,
+  })
+
+  if (error || !coupleId) {
+    throw new Error(error?.message || 'Failed to accept invite')
+  }
+
+  return coupleId
 }
 
 /**
  * Decline a couple invite
  */
 export async function declineCoupleInvite(linkId: string) {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
-  }
-
-  const { error } = await supabase
-    .from('couple_links')
-    .update({ status: 'declined' })
-    .eq('id', linkId)
-    .eq('accepted_by', user.id)
+  const { error } = await supabase.rpc('decline_couple_invite', {
+    p_link_id: linkId,
+  })
 
   if (error) {
-    throw new Error('Failed to decline invite')
+    throw new Error(error.message || 'Failed to decline invite')
   }
 }
 
@@ -232,34 +182,11 @@ export async function declineCoupleInvite(linkId: string) {
  * Leave current couple
  */
 export async function leaveCouple() {
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    throw new Error('User not authenticated')
+  const { error } = await supabase.rpc('leave_couple')
+
+  if (error) {
+    throw new Error(error.message || 'Failed to leave couple')
   }
-
-  // Get current couple link
-  const { data: link } = await supabase
-    .from('couple_links')
-    .select('*')
-    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
-    .eq('status', 'accepted')
-    .single()
-
-  if (!link) {
-    throw new Error('No active couple found')
-  }
-
-  // Remove couple_id from user's profile
-  await supabase
-    .from('profiles')
-    .update({ couple_id: null })
-    .eq('id', user.id)
-
-  // Delete the couple link
-  await supabase
-    .from('couple_links')
-    .delete()
-    .eq('id', link.id)
 
   return { success: true }
 }
@@ -283,18 +210,6 @@ export async function updateCouple(coupleId: string, updates: { name?: string; a
 }
 
 /**
- * Generate a random invite code
- */
-function generateInviteCode(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let code = ''
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length))
-  }
-  return code
-}
-
-/**
  * Get couple by invite code
  */
 export async function getCoupleByInviteCode(code: string) {
@@ -303,6 +218,7 @@ export async function getCoupleByInviteCode(code: string) {
     .select('*, couples(*), profiles!couple_links_inviter_id_fkey(*)')
     .eq('invite_code', code)
     .eq('status', 'pending')
+    .gt('expires_at', new Date().toISOString())
     .single()
 
   if (error) {

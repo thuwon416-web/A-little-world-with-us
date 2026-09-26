@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { generateAiResponse } from '@/lib/ai/providers'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { logAiUsage } from '@/lib/ai/usage-log'
 
 const inputSchema = z.object({
   occasion: z.string().trim().min(1).max(80),
@@ -25,12 +26,21 @@ export async function POST(request: NextRequest) {
     if (!limit.allowed) return NextResponse.json({ error: 'Please wait before generating more ideas.' }, { status: 429 })
 
     const input = inputSchema.parse(await request.json())
+    // The user supplied these details directly; privacy scopes govern stored context, not explicit prompts.
     const generated = await generateAiResponse({
       maxTokens: 550,
       messages: [
         { role: 'system', content: 'Suggest thoughtful, realistic surprise ideas for a couple. Use only the details supplied by the user. Return five concise options with a title, why it fits, approximate cost in MMK, and one first step. Never claim to know private facts. Reply in the same language as the user; use Myanmar language by default.' },
         { role: 'user', content: `Occasion: ${input.occasion}\nInterests: ${input.interests}\nBudget: ${input.budget || 'not specified'}\nOptional notes: ${input.notes || 'none'}` },
       ],
+    })
+    void logAiUsage({
+      userId: user.id,
+      endpoint: 'surprise',
+      provider: generated.provider,
+      status: 'success',
+      promptLength: input.occasion.length + input.interests.length + (input.budget?.length ?? 0) + (input.notes?.length ?? 0),
+      responseLength: generated.content.length,
     })
     return NextResponse.json({ ideas: generated.content, provider: generated.provider })
   } catch (error) {

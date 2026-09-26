@@ -1,6 +1,12 @@
+import { resolve } from 'node:path'
 import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
   test: {
     environment: 'jsdom',
     include: ['src/**/*.test.{ts,tsx}'],
@@ -18,14 +24,13 @@ export default defineConfig({
         'src/**/types.ts',
       ],
       reporter: ['text', 'html', 'lcov'],
-      // TODO: Raise thresholds in Sprint 4 after test coverage work
-      // (See fix-phase plan: Sprint 2 covers testing)
+      // API routes remain excluded until route-level coverage is added.
+      // TODO: Remove src/app/api/** from exclusions after API test coverage is established.
       thresholds: {
         global: {
-          lines: 5,
-          branches: 3,
+          lines: 15,
+          branches: 10,
         },
-        // TODO Sprint 4: raise to 60/50 and lib/ to 80
       },
     },
   },

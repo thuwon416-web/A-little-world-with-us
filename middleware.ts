@@ -58,8 +58,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // Check onboarding completion from user metadata
-  const onboardingComplete = user?.user_metadata?.onboarding_complete === true
+  // Check onboarding completion from the persisted user progress record rather than
+  // untrusted auth user metadata.
+  const { data: onboardingRecord } = await supabase
+    .from('onboarding_progress')
+    .select('data')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  const onboardingComplete = onboardingRecord?.data?.is_completed === true
 
   // If authenticated but onboarding not complete, redirect to onboarding
   // Skip onboarding check for the onboarding page itself
