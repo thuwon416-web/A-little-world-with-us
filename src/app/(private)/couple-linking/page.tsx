@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Copy, CheckCircle, AlertCircle } from 'lucide-react'
 import { LoadingState } from '@/components/shared/Loading'
-import { createPairInvite, getPairStatus, type CoupleLinkStatus } from '@/lib/couple-link'
+import { acceptPairInvite, createPairInvite, getPairStatus, type CoupleLinkStatus } from '@/lib/couple-link'
 import { getCurrentUserId } from '@/lib/supabase'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -16,7 +16,7 @@ export default function CoupleLinkingPage() {
   const [inviteCode, setInviteCode] = useState('')
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState('')
-  const [isCreating, setIsCreating] = useState(false)
+  const [isCreating, setIsCreating] = useState(false)\n  const [acceptCode, setAcceptCode] = useState('')\n  const [isAccepting, setIsAccepting] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [lastStatusUpdatedAt, setLastStatusUpdatedAt] = useState<string | null>(null)
   const _prefersReduced = usePrefersReducedMotion()
@@ -188,6 +188,14 @@ function CreateInviteState({
             </>
           )}
         </button>
+      </div>
+
+      <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">
+        <h3 className="font-semibold text-accent-2 mb-3">Already have a code?</h3>
+        <div className="flex gap-2">
+          <input value={acceptCode} onChange={(event) => setAcceptCode(event.target.value.toUpperCase())} maxLength={8} placeholder="8-character code" className="min-w-0 flex-1 rounded-lg border border-accent-1/20 bg-card px-3 py-2 text-text-1" />
+          <button type="button" onClick={onAccept} disabled={isAccepting || acceptCode.length !== 8} className="rounded-lg bg-accent-1 px-4 py-2 font-semibold text-white disabled:opacity-50">{isAccepting ? 'Linking…' : 'Accept'}</button>
+        </div>
       </div>
 
       <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">
