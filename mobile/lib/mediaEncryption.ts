@@ -1,6 +1,6 @@
-import { gcm } from '@noble/ciphers/aes'
+import { gcm } from '@noble/ciphers/aes.js'
 import * as Crypto from 'expo-crypto'
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 
 import { deriveChatKey } from './chatEncryption'
 import { supabase } from './supabase'
@@ -72,9 +72,13 @@ export async function downloadDecryptAndCache(
   const fileName = path.split('/').pop() ?? 'file'
   const cachePath = `${cacheDir}${fileName}`
 
-  await FileSystem.writeAsStringAsync(cachePath, arrayBufferToBase64(decrypted.buffer), {
+  await FileSystem.writeAsStringAsync(
+    cachePath,
+    arrayBufferToBase64(new Uint8Array(decrypted).buffer),
+    {
     encoding: FileSystem.EncodingType.Base64,
-  })
+    }
+  )
 
   return `file://${cachePath}`
 }

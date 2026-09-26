@@ -54,21 +54,26 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
     if (!peerRef.current) {
       const peer = new RTCPeerConnection(getCallIceConfiguration())
       peerRef.current = peer
-      peer.addEventListener('track', (event) => {
+      const peerEvents = peer as RTCPeerConnection & {
+        ontrack: ((event: { streams: MediaStream[] }) => void) | null
+        onicecandidate: ((event: { candidate: RTCIceCandidate | null }) => void) | null
+        onconnectionstatechange: (() => void) | null
+      }
+      peerEvents.ontrack = (event: { streams: MediaStream[] }) => {
         const stream = event.streams[0]
         if (stream) setRemoteStream(stream)
-      })
-      peer.addEventListener('icecandidate', (event) => {
+      }
+      peerEvents.onicecandidate = (event: { candidate: RTCIceCandidate | null }) => {
         if (!event.candidate) return
         void saveCallIceCandidate(callId, event.candidate.toJSON()).then((saved) => {
           if (!saved) setConnectionError('Unable to send connection information.')
         })
-      })
-      peer.addEventListener('connectionstatechange', () => {
+      }
+      peerEvents.onconnectionstatechange = () => {
         if (peer.connectionState === 'failed') {
           setConnectionError('Connection failed. Check your internet connection.')
         }
-      })
+      }
     }
 
     if (!localStreamRef.current) {

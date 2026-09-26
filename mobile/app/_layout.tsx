@@ -13,11 +13,11 @@ import { AuthProvider, useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { getSharingStatus, startLocationTracking } from '@/services/location'
 
-if (typeof global.TextEncoder === 'undefined') {
-  global.TextEncoder = TextEncoder
+if (typeof globalThis.TextEncoder === 'undefined') {
+  Object.defineProperty(globalThis, 'TextEncoder', { value: TextEncoder, configurable: true, writable: true })
 }
-if (typeof global.TextDecoder === 'undefined') {
-  global.TextDecoder = TextDecoder
+if (typeof globalThis.TextDecoder === 'undefined') {
+  Object.defineProperty(globalThis, 'TextDecoder', { value: TextDecoder, configurable: true, writable: true })
 }
 
 class ErrorBoundary extends React.Component<
@@ -58,10 +58,10 @@ function ErrorFallback({ message }: { message: string }) {
 }
 
 function ThemedStatusBar() {
-  const { theme, colors } = useTheme()
+  const { theme } = useTheme()
   const isDark = theme === 'lavender-mist' || theme === 'monochrome'
 
-  return <StatusBar style={isDark ? 'light' : 'dark'} backgroundColor={colors.background} />
+  return <StatusBar style={isDark ? 'light' : 'dark'} />
 }
 
 function MfaGate({ children }: { children: ReactNode }) {

@@ -138,7 +138,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       color: colors.textSecondary,
       marginTop: 8,
     },
-    remoteVideo: { ...StyleSheet.absoluteFillObject },
+    remoteVideo: { ...StyleSheet.absoluteFill },
     localVideo: {
       position: 'absolute',
       right: 12,

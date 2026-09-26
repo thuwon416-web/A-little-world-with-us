@@ -7,8 +7,8 @@ const DEFAULT_STUN_URL = 'stun:stun.l.google.com:19302'
 function getTurnUrls() {
   return (process.env.EXPO_PUBLIC_TURN_URLS ?? '')
     .split(',')
-    .map((url) => url.trim())
-    .filter((url) => url.startsWith('turn:') || url.startsWith('turns:'))
+    .map((url: string) => url.trim())
+    .filter((url: string) => url.startsWith('turn:') || url.startsWith('turns:'))
 }
 
 /**

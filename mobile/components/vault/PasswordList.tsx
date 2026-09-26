@@ -1,5 +1,5 @@
 import * as DocumentPicker from 'expo-document-picker'
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import { Download, HeartPulse, Plus, RefreshCw, Upload } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { Alert, FlatList, Pressable, Share, StyleSheet, Text, View } from 'react-native'
