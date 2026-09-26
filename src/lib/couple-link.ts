@@ -4,10 +4,7 @@ export type CoupleLinkStatus = 'pending' | 'accepted' | 'declined' | 'revoked'
 
 export async function getPairStatus(): Promise<{ status: CoupleLinkStatus } | null> {
   const userId = await getCurrentUserId()
-
-  if (!userId) {
-    return null
-  }
+  if (!userId) return null
 
   const { data, error } = await supabase
     .from('couple_links')
@@ -24,52 +21,20 @@ export async function getPairStatus(): Promise<{ status: CoupleLinkStatus } | nu
   return data ? { status: data.status as CoupleLinkStatus } : null
 }
 
-export async function createPairInvite(code: string) {
-  const userId = await getCurrentUserId()
-
-  if (!userId) {
-    throw new Error('Not authenticated')
-  }
-
-  const { data, error } = await supabase
-    .from('couple_links')
-    .insert({
-      inviter_id: userId,
-      invite_code: code,
-      status: 'pending',
-    })
-    .select()
-    .single()
-
-  if (error) {
-    throw error
-  }
-
-  return data
+export async function createPairInvite() {
+  const { data, error } = await supabase.rpc('create_couple_code_invite')
+  if (error || !data) throw new Error(error?.message || 'Failed to create invite')
+  return data as string
 }
 
 export async function acceptPairInvite(code: string) {
-  const userId = await getCurrentUserId()
+  const normalized = code.trim().toUpperCase()
+  if (!/^[A-Z0-9]{8}$/.test(normalized)) throw new Error('Invalid invite code')
 
-  if (!userId) {
-    throw new Error('Not authenticated')
-  }
+  const { data, error } = await supabase.rpc('accept_couple_code_invite', {
+    p_invite_code: normalized,
+  })
 
-  const { data, error } = await supabase
-    .from('couple_links')
-    .update({
-      status: 'accepted',
-      accepted_by: userId,
-      accepted_at: new Date().toISOString(),
-    })
-    .eq('invite_code', code)
-    .eq('status', 'pending')
-    .select()
-    .single()
-
-  if (error) {
-    throw error
-  }
-
-  return data
+  if (error || !data) throw new Error(error?.message || 'Failed to accept invite')
+  return data as string
 }
