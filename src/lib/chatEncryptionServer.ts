@@ -7,6 +7,7 @@
 const LEGACY_KEY_PREFIX = 'a-little-world-with-us-chat-'
 const PBKDF2_ITERATIONS = 100000
 const IV_LENGTH = 12
+const CHAT_FORMAT_MAGIC = new Uint8Array([0xC1, 0xAE, 0x01, 0x00])
 
 // New env-based derivation
 async function deriveNewKey(coupleId: string): Promise<CryptoKey> {
