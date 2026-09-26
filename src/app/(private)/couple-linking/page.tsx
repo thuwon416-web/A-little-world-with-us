@@ -118,6 +118,22 @@ export default function CoupleLinkingPage() {
           <CreateInviteState
             onCreateInvite={handleCreateInvite}
             isCreating={isCreating}
+            acceptCode={acceptCode}
+            setAcceptCode={setAcceptCode}
+            isAccepting={isAccepting}
+            onAccept={async () => {
+              try {
+                setIsAccepting(true)
+                setError('')
+                await acceptPairInvite(acceptCode)
+                setAcceptCode('')
+                await checkLinkStatus()
+              } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to accept invite')
+              } finally {
+                setIsAccepting(false)
+              }
+            }}
           />
         )}
         {state === 'pending' && (
@@ -154,9 +170,17 @@ function LoadingStateCard() {
 function CreateInviteState({
   onCreateInvite,
   isCreating,
+  acceptCode,
+  setAcceptCode,
+  isAccepting,
+  onAccept,
 }: {
   onCreateInvite: () => void
   isCreating: boolean
+  acceptCode: string
+  setAcceptCode: (value: string) => void
+  isAccepting: boolean
+  onAccept: () => void
 }) {
   return (
     <motion.div
