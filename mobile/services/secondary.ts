@@ -110,29 +110,24 @@ export async function getCalls(coupleId: string) {
   return data ?? []
 }
 
-export async function acceptLink(userId: string, code: string) {
-  const { data: link, error } = await supabase
-    .from('couple_links')
-    .select('id,couple_id,inviter_id')
-    .eq('invite_code', code)
-    .eq('status', 'pending')
-    .maybeSingle()
-  if (error) throw new Error(error.message)
-  if (!link) throw new Error('No pending link was found for that code.')
-  if (link.inviter_id === userId) throw new Error('You cannot accept your own link.')
-  const { error: updateError } = await supabase
-    .from('couple_links')
-    .update({ accepted_by: userId, status: 'accepted', accepted_at: new Date().toISOString() })
-    .eq('id', link.id)
-  if (updateError) throw new Error(updateError.message)
+export async function acceptLink(code: string) {
+  const { data: coupleId, error } = await supabase.rpc('accept_couple_invite', {
+    p_invite_code: code,
+  })
+  if (error || !coupleId) {
+    throw new Error(error?.message || 'Failed to accept invite')
+  }
+  return coupleId
 }
-export async function unlinkCoupleLink(id: string) {
-  const { error } = await supabase.from('couple_links').update({ status: 'revoked' }).eq('id', id)
-  if (error) throw new Error(error.message)
+export async function unlinkCoupleLink() {
+  const { error } = await supabase.rpc('leave_couple')
+  if (error) throw new Error(error.message || 'Failed to leave couple')
 }
 export async function declineLink(id: string) {
-  const { error } = await supabase.from('couple_links').update({ status: 'declined' }).eq('id', id)
-  if (error) throw new Error(error.message)
+  const { error } = await supabase.rpc('decline_couple_invite', {
+    p_link_id: id,
+  })
+  if (error) throw new Error(error.message || 'Failed to decline invite')
 }
 
 export function moonPhase(date = new Date()) {

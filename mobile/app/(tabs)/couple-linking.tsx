@@ -36,7 +36,7 @@ export default function CoupleLinkingScreen() {
       return Alert.alert('Invalid code', 'Enter the invitation code.')
     if (!context) return Alert.alert('Unable to link', 'Please wait for link status to load.')
     try {
-      await acceptLink(context.user.id, code.trim())
+      await acceptLink(code.trim())
       setCode('')
       await load()
     } catch (caught) {
@@ -65,8 +65,7 @@ export default function CoupleLinkingScreen() {
                 {
                   text: 'Unlink',
                   style: 'destructive',
-                  onPress: () =>
-                    context.link ? void unlinkCoupleLink(context.link.id).then(load) : undefined,
+                  onPress: () => (context.link ? void unlinkCoupleLink().then(load) : undefined),
                 },
               ])
             }
