@@ -110,7 +110,7 @@ export async function getCalls(coupleId: string) {
   return data ?? []
 }
 
-export async function acceptLink(code: string) {
+export async function createLinkInvite() {\n  const { data, error } = await supabase.rpc('create_couple_code_invite')\n  if (error || !data) throw new Error(error?.message || 'Failed to create invite')\n  return data as string\n}\n\nexport async function acceptLink(code: string) {
   const { data: coupleId, error } = await supabase.rpc('accept_couple_invite', {
     p_invite_code: code,
   })
