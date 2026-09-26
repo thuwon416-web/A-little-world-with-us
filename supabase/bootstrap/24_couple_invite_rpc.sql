@@ -209,6 +209,15 @@ begin
     raise exception 'You are already in a couple.';
   end if;
 
+  if exists (
+    select 1 from public.couple_links
+    where status = 'pending'
+      and inviter_id = caller_id
+      and expires_at > now()
+  ) then
+    raise exception 'You already have an active invite.';
+  end if;
+
   insert into public.couples (name)
   values (null)
   returning id into couple_id;
