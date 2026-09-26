@@ -110,9 +110,18 @@ export async function getCalls(coupleId: string) {
   return data ?? []
 }
 
-export async function createLinkInvite() {\n  const { data, error } = await supabase.rpc('create_couple_code_invite')\n  if (error || !data) throw new Error(error?.message || 'Failed to create invite')\n  return data as string\n}\n\nexport async function acceptLink(code: string) {
-  const { data: coupleId, error } = await supabase.rpc('accept_couple_invite', {
-    p_invite_code: code,
+export async function createLinkInvite() {
+  const { data, error } = await supabase.rpc('create_couple_code_invite')
+  if (error || !data) throw new Error(error?.message || 'Failed to create invite')
+  return data as string
+}
+
+export async function acceptLink(code: string) {
+  const normalized = code.trim().toUpperCase()
+  if (!/^[A-Z0-9]{8}$/.test(normalized)) throw new Error('Invalid invite code')
+
+  const { data: coupleId, error } = await supabase.rpc('accept_couple_code_invite', {
+    p_invite_code: normalized,
   })
   if (error || !coupleId) {
     throw new Error(error?.message || 'Failed to accept invite')
