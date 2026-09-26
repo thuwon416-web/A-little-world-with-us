@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import YouTube from 'react-native-youtube-iframe'
+import YouTube, { PLAYER_STATES } from 'react-native-youtube-iframe'
 
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
@@ -109,9 +109,9 @@ export default function WatchTogetherScreen() {
             height={220}
             videoId={current.youtube_id}
             play={playing}
-            onChangeState={(state) => {
-              if (state === 'playing') setPlaying(true)
-              if (state === 'paused') setPlaying(false)
+            onChangeState={(state: PLAYER_STATES) => {
+              if (state === PLAYER_STATES.PLAYING) setPlaying(true)
+              if (state === PLAYER_STATES.PAUSED) setPlaying(false)
             }}
           />
           <Text style={styles.now}>{current.title}</Text>

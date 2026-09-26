@@ -48,6 +48,10 @@ function base64ToBytes(value: string): Uint8Array {
   return Uint8Array.from(atob(value), (character) => character.charCodeAt(0))
 }
 
+function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return Uint8Array.from(bytes).buffer
+}
+
 async function randomBytes(length: number): Promise<Uint8Array> {
   return Crypto.getRandomBytesAsync(length)
 }
@@ -77,7 +81,12 @@ export async function deriveKeyFromPassphrase(
     ['deriveKey']
   )
   return subtle.deriveKey(
-    { name: 'PBKDF2', salt: base64ToBytes(salt), iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    {
+      name: 'PBKDF2',
+      salt: toArrayBuffer(base64ToBytes(salt)),
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256',
+    },
     material,
     { name: 'AES-GCM', length: 256 },
     false,
@@ -90,7 +99,7 @@ export async function generateMasterKey(): Promise<Uint8Array> {
 }
 
 async function importRawKey(bytes: Uint8Array, usages: KeyUsage[]): Promise<CryptoKey> {
-  return getSubtle().importKey('raw', bytes, { name: 'AES-GCM' }, false, usages)
+  return getSubtle().importKey('raw', toArrayBuffer(bytes), { name: 'AES-GCM' }, false, usages)
 }
 
 export async function wrapMasterKey(
@@ -98,7 +107,11 @@ export async function wrapMasterKey(
   wrappingKey: CryptoKey
 ): Promise<{ ciphertext: string; iv: string }> {
   const iv = await randomBytes(IV_LENGTH)
-  const encrypted = await getSubtle().encrypt({ name: 'AES-GCM', iv }, wrappingKey, masterKey)
+  const encrypted = await getSubtle().encrypt(
+    { name: 'AES-GCM', iv: toArrayBuffer(iv) },
+    wrappingKey,
+    toArrayBuffer(masterKey)
+  )
   return { ciphertext: bytesToBase64(new Uint8Array(encrypted)), iv: bytesToBase64(iv) }
 }
 
@@ -109,9 +122,9 @@ export async function unwrapMasterKey(
 ): Promise<Uint8Array> {
   return new Uint8Array(
     await getSubtle().decrypt(
-      { name: 'AES-GCM', iv: base64ToBytes(iv) },
+      { name: 'AES-GCM', iv: toArrayBuffer(base64ToBytes(iv)) },
       wrappingKey,
-      base64ToBytes(ciphertext)
+      toArrayBuffer(base64ToBytes(ciphertext))
     )
   )
 }
@@ -123,9 +136,9 @@ export async function encryptCredential(
   const iv = await randomBytes(IV_LENGTH)
   const key = await importRawKey(masterKey, ['encrypt'])
   const encrypted = await getSubtle().encrypt(
-    { name: 'AES-GCM', iv },
+    { name: 'AES-GCM', iv: toArrayBuffer(iv) },
     key,
-    new TextEncoder().encode(JSON.stringify(data))
+    toArrayBuffer(new TextEncoder().encode(JSON.stringify(data)))
   )
   return { encryptedPayload: bytesToBase64(new Uint8Array(encrypted)), iv: bytesToBase64(iv) }
 }
@@ -137,9 +150,9 @@ export async function decryptCredential(
 ): Promise<object> {
   const key = await importRawKey(masterKey, ['decrypt'])
   const decrypted = await getSubtle().decrypt(
-    { name: 'AES-GCM', iv: base64ToBytes(iv) },
+    { name: 'AES-GCM', iv: toArrayBuffer(base64ToBytes(iv)) },
     key,
-    base64ToBytes(encryptedPayload)
+    toArrayBuffer(base64ToBytes(encryptedPayload))
   )
   return JSON.parse(new TextDecoder().decode(decrypted)) as object
 }

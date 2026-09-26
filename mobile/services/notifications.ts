@@ -10,6 +10,8 @@ export type SafetyNotificationPreferences = Record<SafetyNotificationPreference,
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
     shouldPlaySound: true,
     shouldSetBadge: false,
   }),
@@ -214,7 +216,10 @@ export async function syncLocalReminderNotifications(reminders: Reminder[]) {
         data: { reminderId: reminder.id, scheduledAt: reminder.scheduled_at },
         ...(Platform.OS === 'android' ? { channelId: 'reminders' } : {}),
       },
-      trigger: new Date(reminder.scheduled_at),
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: new Date(reminder.scheduled_at),
+      },
     })
   }
 }
