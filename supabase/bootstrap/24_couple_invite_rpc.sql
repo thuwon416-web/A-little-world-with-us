@@ -184,3 +184,102 @@ $$;
 
 revoke execute on function public.leave_couple() from public, anon;
 grant execute on function public.leave_couple() to authenticated;
+
+
+create or replace function public.create_couple_code_invite()
+returns text
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := auth.uid();
+  couple_id uuid;
+  invite_code text;
+begin
+  if caller_id is null then
+    raise exception 'User not authenticated' using errcode = '42501';
+  end if;
+
+  if exists (
+    select 1 from public.couple_links
+    where status = 'accepted'
+      and caller_id in (inviter_id, accepted_by)
+  ) then
+    raise exception 'You are already in a couple.';
+  end if;
+
+  if exists (
+    select 1 from public.couple_links
+    where status = 'pending'
+      and inviter_id = caller_id
+      and expires_at > now()
+  ) then
+    raise exception 'You already have an active invite.';
+  end if;
+
+  insert into public.couples (name)
+  values (null)
+  returning id into couple_id;
+
+  loop
+    invite_code := upper(substr(encode(gen_random_bytes(8), 'hex'), 1, 8));
+    exit when not exists (
+      select 1 from public.couple_links
+      where couple_links.invite_code = invite_code
+    );
+  end loop;
+
+  insert into public.couple_links (couple_id, inviter_id, accepted_by, invite_code, status)
+  values (couple_id, caller_id, null, invite_code, 'pending');
+
+  return invite_code;
+end;
+$$;
+
+revoke execute on function public.create_couple_code_invite() from public, anon;
+grant execute on function public.create_couple_code_invite() to authenticated;
+
+create or replace function public.accept_couple_code_invite(p_invite_code text)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  caller_id uuid := auth.uid();
+  couple_id uuid;
+begin
+  if caller_id is null then
+    raise exception 'User not authenticated' using errcode = '42501';
+  end if;
+
+  if exists (
+    select 1 from public.couple_links
+    where status = 'accepted'
+      and caller_id in (inviter_id, accepted_by)
+  ) then
+    raise exception 'You are already in a couple.';
+  end if;
+
+  update public.couple_links
+  set accepted_by = caller_id,
+      status = 'accepted',
+      accepted_at = now()
+  where invite_code = upper(btrim(p_invite_code))
+    and status = 'pending'
+    and expires_at > now()
+    and accepted_by is null
+    and inviter_id <> caller_id
+  returning public.couple_links.couple_id into couple_id;
+
+  if not found then
+    raise exception 'Invite is invalid, expired, or already used.';
+  end if;
+
+  return couple_id;
+end;
+$$;
+
+revoke execute on function public.accept_couple_code_invite(text) from public, anon;
+grant execute on function public.accept_couple_code_invite(text) to authenticated;

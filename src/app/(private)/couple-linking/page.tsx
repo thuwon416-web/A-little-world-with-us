@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Copy, CheckCircle, AlertCircle } from 'lucide-react'
 import { LoadingState } from '@/components/shared/Loading'
-import { createPairInvite, getPairStatus, type CoupleLinkStatus } from '@/lib/couple-link'
+import { acceptPairInvite, createPairInvite, getPairStatus, type CoupleLinkStatus } from '@/lib/couple-link'
 import { getCurrentUserId } from '@/lib/supabase'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -17,6 +17,8 @@ export default function CoupleLinkingPage() {
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState('')
   const [isCreating, setIsCreating] = useState(false)
+  const [acceptCode, setAcceptCode] = useState('')
+  const [isAccepting, setIsAccepting] = useState(false)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const [lastStatusUpdatedAt, setLastStatusUpdatedAt] = useState<string | null>(null)
   const _prefersReduced = usePrefersReducedMotion()
@@ -55,6 +57,7 @@ export default function CoupleLinkingPage() {
     try {
       const status = await getPairStatus()
       if (status) {
+        setInviteCode(status.inviteCode ?? '')
         setLastStatusUpdatedAt((current) => current ?? new Date().toISOString())
         setState(status.status === 'accepted' ? 'linked' : 'pending')
       } else {
@@ -71,10 +74,7 @@ export default function CoupleLinkingPage() {
       setIsCreating(true)
       setError('')
       
-      // Generate a 6-character alphanumeric code
-      const code = Math.random().toString(36).substring(2, 8).toUpperCase()
-      
-      await createPairInvite(code)
+      const code = await createPairInvite()
       setInviteCode(code)
       setLastStatusUpdatedAt(new Date().toISOString())
       setState('pending')
@@ -115,6 +115,22 @@ export default function CoupleLinkingPage() {
           <CreateInviteState
             onCreateInvite={handleCreateInvite}
             isCreating={isCreating}
+            acceptCode={acceptCode}
+            setAcceptCode={setAcceptCode}
+            isAccepting={isAccepting}
+            onAccept={async () => {
+              try {
+                setIsAccepting(true)
+                setError('')
+                await acceptPairInvite(acceptCode)
+                setAcceptCode('')
+                await checkLinkStatus()
+              } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to accept invite')
+              } finally {
+                setIsAccepting(false)
+              }
+            }}
           />
         )}
         {state === 'pending' && (
@@ -151,9 +167,17 @@ function LoadingStateCard() {
 function CreateInviteState({
   onCreateInvite,
   isCreating,
+  acceptCode,
+  setAcceptCode,
+  isAccepting,
+  onAccept,
 }: {
   onCreateInvite: () => void
   isCreating: boolean
+  acceptCode: string
+  setAcceptCode: (value: string) => void
+  isAccepting: boolean
+  onAccept: () => void
 }) {
   return (
     <motion.div
@@ -188,6 +212,14 @@ function CreateInviteState({
             </>
           )}
         </button>
+      </div>
+
+      <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">
+        <h3 className="font-semibold text-accent-2 mb-3">Already have a code?</h3>
+        <div className="flex gap-2">
+          <input value={acceptCode} onChange={(event) => setAcceptCode(event.target.value.toUpperCase())} maxLength={8} placeholder="8-character code" className="min-w-0 flex-1 rounded-lg border border-accent-1/20 bg-card px-3 py-2 text-text-1" />
+          <button type="button" onClick={onAccept} disabled={isAccepting || acceptCode.length !== 8} className="rounded-lg bg-accent-1 px-4 py-2 font-semibold text-white disabled:opacity-50">{isAccepting ? 'Linking…' : 'Accept'}</button>
+        </div>
       </div>
 
       <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">

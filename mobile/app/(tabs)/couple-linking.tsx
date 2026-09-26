@@ -3,7 +3,7 @@ import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
 import { useTheme } from '@/context/ThemeContext'
-import { acceptLink, declineLink, getContext, unlinkCoupleLink } from '@/services/secondary'
+import { acceptLink, createLinkInvite, declineLink, getContext, unlinkCoupleLink } from '@/services/secondary'
 
 type CoupleLinkContext = Awaited<ReturnType<typeof getContext>>
 
@@ -12,6 +12,8 @@ export default function CoupleLinkingScreen() {
   const [context, setContext] = useState<CoupleLinkContext | null>(null)
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
+  const [isCreating, setIsCreating] = useState(false)
   const load = async () => {
     try {
       setContext(await getContext())
@@ -31,8 +33,21 @@ export default function CoupleLinkingScreen() {
         ? 'Invitation sent'
         : 'Invitation received'
       : 'Not linked'
+  const createInvite = async () => {
+    try {
+      setIsCreating(true)
+      setError('')
+      const created = await createLinkInvite()
+      setInviteCode(created)
+      await load()
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to create invite.')
+    } finally {
+      setIsCreating(false)
+    }
+  }
   const accept = async () => {
-    if (!/^[a-zA-Z0-9]{6,}$/.test(code.trim()))
+    if (!/^[a-zA-Z0-9]{8}$/.test(code.trim()))
       return Alert.alert('Invalid code', 'Enter the invitation code.')
     if (!context) return Alert.alert('Unable to link', 'Please wait for link status to load.')
     try {
@@ -83,6 +98,12 @@ export default function CoupleLinkingScreen() {
           </TouchableOpacity>
         ) : null}
       </View>
+      {!context?.link ? (
+        <TouchableOpacity style={s.button} onPress={() => void createInvite()} disabled={isCreating}>
+          <Text style={s.buttonText}>{isCreating ? 'Creating…' : 'Create invite code'}</Text>
+        </TouchableOpacity>
+      ) : null}
+      {inviteCode ? <Text style={s.buttonText}>Code: {inviteCode}</Text> : null}
       <TextInput
         style={s.input}
         value={code}
