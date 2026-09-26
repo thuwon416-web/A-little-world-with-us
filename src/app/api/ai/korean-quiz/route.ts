@@ -62,9 +62,30 @@ function parseGeneratedJson(content: string) {
   return generatedResponseSchema.parse(JSON.parse(jsonText))
 }
 
+function secureRandomIndex(length: number) {
+  const range = 2 ** 32
+  const limit = Math.floor(range / length) * length
+  const values = new Uint32Array(1)
+  do {
+    crypto.getRandomValues(values)
+  } while (values[0] >= limit)
+  return values[0] % length
+}
+
+function shuffle<T>(items: T[]) {
+  const shuffled = [...items]
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = secureRandomIndex(index + 1)
+    const value = shuffled[index]
+    shuffled[index] = shuffled[swapIndex]
+    shuffled[swapIndex] = value
+  }
+  return shuffled
+}
+
 function fallbackQuestions(input: QuizRequest) {
   const vocab = KOREAN_VOCAB.filter((item) => item.level === input.level)
-  const selected = [...vocab].sort(() => Math.random() - 0.5).slice(0, input.questionCount)
+  const selected = shuffle(vocab).slice(0, input.questionCount)
   return selected.map((item, index) => {
     const questionType = input.questionTypes[index % input.questionTypes.length]
     const distractors = vocab

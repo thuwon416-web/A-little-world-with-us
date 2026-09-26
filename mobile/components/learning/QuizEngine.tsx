@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto'
 import { CheckCircle2, Trophy } from 'lucide-react-native'
 import { useMemo, useState } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
@@ -10,7 +11,11 @@ import { useAuth } from '@/lib/auth'
 import { getProgress, upsertProgress } from '@/services/korean'
 import type { KoreanLevel, KoreanProgress, KoreanVocab, QuizType } from '@/types/korean'
 
-const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5)
+const shuffle = <T,>(items: T[]) =>
+  items
+    .map((item) => ({ item, key: Crypto.randomUUID() }))
+    .sort((left, right) => left.key.localeCompare(right.key))
+    .map(({ item }) => item)
 const delayDays = (mastery: KoreanProgress['masteryLevel']) =>
   mastery <= 1 ? 1 : mastery <= 3 ? 3 : mastery === 4 ? 7 : 30
 

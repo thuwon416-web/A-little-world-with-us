@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto'
 import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
 import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
@@ -65,7 +66,7 @@ export default function ImageUpload({
       const response = await fetch(preview)
       const blob = await response.blob()
       if (!user?.id) throw new Error('Please wait for sign-in to finish.')
-      const path = `${user.id}/${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`
+      const path = `${user.id}/${Date.now()}-${Crypto.randomUUID()}.jpg`
 
       const encryptedData = await encryptMedia(new Uint8Array(await blob.arrayBuffer()), coupleId)
       const { data, error: uploadError } = await supabase.storage

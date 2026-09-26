@@ -1,5 +1,6 @@
+import * as Crypto from 'expo-crypto'
 import { Copy, RefreshCw, X } from 'lucide-react-native'
-import { useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { Modal } from '@/components/ui/Modal'
@@ -26,7 +27,11 @@ export default function PasswordGenerator({
   const [sets, setSets] = useState([true, true, true, true])
   const [exclude, setExclude] = useState(true)
   const [seed, setSeed] = useState(0)
-  const password = useMemo(() => {
+  const [password, setPassword] = useState('')
+  const [generationError, setGenerationError] = useState('')
+
+  useEffect(() => {
+    let active = true
     const alphabets =
       [
         sets[0] ? 'ABCDEFGHJKLMNPQRSTUVWXYZ' : '',
@@ -34,13 +39,34 @@ export default function PasswordGenerator({
         sets[2] ? (exclude ? '23456789' : '0123456789') : '',
         sets[3] ? '!@#$%^&*()-_=+' : '',
       ].join('') || 'abcdefghijkmnopqrstuvwxyz'
-    return Array.from(
-      { length },
-      (_, index) =>
-        alphabets[
-          (index * 31 + seed * 17 + Math.floor(Math.random() * alphabets.length)) % alphabets.length
-        ]
-    ).join('')
+
+    const generate = async () => {
+      const indices: number[] = []
+      const limit = 256 - (256 % alphabets.length)
+      while (indices.length < length) {
+        const bytes = await Crypto.getRandomBytesAsync(Math.max(16, (length - indices.length) * 2))
+        for (const byte of bytes) {
+          if (byte < limit) indices.push(byte % alphabets.length)
+          if (indices.length === length) break
+        }
+      }
+      if (active) {
+        setPassword(indices.map((index) => alphabets[index]).join(''))
+        setGenerationError('')
+      }
+    }
+
+    setPassword('')
+    setGenerationError('')
+    void generate().catch((caught: unknown) => {
+      if (active) {
+        setGenerationError(caught instanceof Error ? caught.message : 'Unable to generate a password securely.')
+      }
+    })
+
+    return () => {
+      active = false
+    }
   }, [exclude, length, seed, sets])
   const strength =
     length >= 20 && sets.filter(Boolean).length >= 3
@@ -51,6 +77,7 @@ export default function PasswordGenerator({
   return (
     <Modal visible={visible} onClose={onClose} title="Password generator">
       <Text style={[styles.password, { color: colors.text }]}>{password}</Text>
+      {generationError ? <Text style={{ color: colors.error }}>{generationError}</Text> : null}
       <Text style={{ color: strength === 'Strong' ? colors.success : colors.accent2 }}>
         Strength: {strength}
       </Text>
@@ -98,6 +125,7 @@ export default function PasswordGenerator({
         </Pressable>
         <Pressable
           onPress={() => void navigator.clipboard?.writeText(password)}
+          disabled={!password}
           style={[styles.action, { borderColor: colors.border }]}
         >
           <Copy size={15} color={colors.text} />
@@ -105,9 +133,11 @@ export default function PasswordGenerator({
         </Pressable>
         <Pressable
           onPress={() => {
+            if (!password) return
             onSelect(password)
             onClose()
           }}
+          disabled={!password}
           style={[styles.action, { backgroundColor: colors.buttonBg }]}
         >
           <Text style={{ color: colors.text }}>Use</Text>

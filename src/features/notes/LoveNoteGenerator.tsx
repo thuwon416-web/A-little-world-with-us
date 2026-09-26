@@ -9,11 +9,21 @@ const notes = [
   'Every moment with you is a gift.',
 ]
 
+function secureRandomIndex(length: number) {
+  const range = 2 ** 32
+  const limit = Math.floor(range / length) * length
+  const values = new Uint32Array(1)
+  do {
+    crypto.getRandomValues(values)
+  } while (values[0] >= limit)
+  return values[0] % length
+}
+
 export default function LoveNoteGenerator() {
   const [note, setNote] = useState('')
 
   const handleGenerate = () => {
-    const randomIndex = Math.floor(Math.random() * notes.length)
+    const randomIndex = secureRandomIndex(notes.length)
     const chosenNote = notes[randomIndex] ?? notes[0] ?? ''
     setNote(chosenNote)
   }

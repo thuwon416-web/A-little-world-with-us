@@ -24,7 +24,7 @@ export default function ScavengerHunt({ totalClues = 3 }: { totalClues?: number 
   useEffect(() => {
     const onFound = (e: Event) => {
       const d = (e as CustomEvent).detail
-      const id = String(d?.id || `clue-${Math.random().toString(36).slice(2, 8)}`)
+      const id = String(d?.id || `clue-${crypto.randomUUID()}`)
       setFound((prev) => {
         if (prev.includes(id)) return prev
         const next = [...prev, id]

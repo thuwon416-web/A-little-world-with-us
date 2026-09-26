@@ -8,7 +8,26 @@ import { supabase } from '@/lib/supabase'
 import type { KoreanLevel, KoreanProgress, KoreanVocab, QuizType } from '@/types/korean'
 import { QuizQuestion, type QuizPrompt } from './QuizQuestion'
 
-const shuffle = <T,>(items: T[]) => [...items].sort(() => Math.random() - 0.5)
+function secureRandomIndex(length: number) {
+  const range = 2 ** 32
+  const limit = Math.floor(range / length) * length
+  const values = new Uint32Array(1)
+  do {
+    crypto.getRandomValues(values)
+  } while (values[0] >= limit)
+  return values[0] % length
+}
+
+const shuffle = <T,>(items: T[]) => {
+  const shuffled = [...items]
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = secureRandomIndex(index + 1)
+    const value = shuffled[index]
+    shuffled[index] = shuffled[swapIndex]
+    shuffled[swapIndex] = value
+  }
+  return shuffled
+}
 
 function makePrompt(vocab: KoreanVocab, type: QuizType, pool: KoreanVocab[]): QuizPrompt {
   const answer = type === 'typing' ? vocab.korean : vocab.english

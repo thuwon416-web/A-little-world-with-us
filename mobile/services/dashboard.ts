@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto'
 import { supabase } from '@/lib/supabase'
 import type { MemoryRecord } from '@/services/memories'
 import type { PlaylistSong } from '@/services/music'
@@ -10,6 +11,16 @@ export type DashboardData = {
   longestStreak: number
   memory: MemoryRecord | null
   playlistSong: PlaylistSong | null
+}
+
+async function secureRandomIndex(length: number) {
+  const range = 2 ** 32
+  const limit = Math.floor(range / length) * length
+  while (true) {
+    const bytes = await Crypto.getRandomBytesAsync(4)
+    const value = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0)
+    if (value < limit) return value % length
+  }
 }
 
 async function getCoupleId() {
@@ -93,7 +104,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   if (playlistError) throw playlistError
   const memoryRows = (memories ?? []) as MemoryRecord[]
   const randomMemory = memoryRows.length
-    ? memoryRows[Math.floor(Math.random() * memoryRows.length)]
+    ? memoryRows[await secureRandomIndex(memoryRows.length)]
     : null
   return {
     coupleId,

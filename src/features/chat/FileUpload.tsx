@@ -105,7 +105,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
 
       // Generate unique filename
       const fileExt = selectedFile.name.split('.').pop()
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
+      const fileName = `${Date.now()}_${crypto.randomUUID()}.${fileExt}`
       const filePath = `${user.id}/${fileName}`
 
       // Upload to Supabase storage (encrypted)

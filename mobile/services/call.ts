@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 export type CallType = 'audio' | 'video'
@@ -199,7 +200,7 @@ export function subscribeToCallIceCandidates(
   onCandidate: (candidate: CallIceCandidateSignal) => void
 ) {
   const channel = supabase
-    .channel(`${CHANNEL_PREFIX}-ice-${callId}-${Math.random().toString(36).slice(2, 7)}`)
+    .channel(`${CHANNEL_PREFIX}-ice-${callId}-${Crypto.randomUUID()}`)
     .on(
       'postgres_changes',
       {
@@ -220,7 +221,7 @@ export function subscribeToCallSignals(onSignal: (signal: CallSignal) => void) {
     return { unsubscribe: () => undefined }
   }
 
-  const uniqueChannelName = `${CHANNEL_PREFIX}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+  const uniqueChannelName = `${CHANNEL_PREFIX}-${Date.now()}-${Crypto.randomUUID()}`
   const channel = supabase
     .channel(uniqueChannelName)
     .on('postgres_changes', { event: '*', schema: 'public', table: 'call_signals' }, (payload) => {
