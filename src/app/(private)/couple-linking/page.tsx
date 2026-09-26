@@ -74,10 +74,7 @@ export default function CoupleLinkingPage() {
       setIsCreating(true)
       setError('')
       
-      // Generate a 6-character alphanumeric code
-      const code = Math.random().toString(36).substring(2, 8).toUpperCase()
-      
-      await createPairInvite(code)
+      const code = await createPairInvite()
       setInviteCode(code)
       setLastStatusUpdatedAt(new Date().toISOString())
       setState('pending')
