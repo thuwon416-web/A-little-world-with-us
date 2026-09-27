@@ -52,6 +52,255 @@ function isVaultItem(value: unknown): value is VaultItem {
   )
 }
 
+function VaultLockScreen({
+  pin,
+  isPinValid,
+  unlockError,
+  prefersReduced,
+  onPinChange,
+  onUnlock,
+}: {
+  pin: string
+  isPinValid: boolean
+  unlockError: string
+  prefersReduced: boolean
+  onPinChange: (value: string) => void
+  onUnlock: () => void
+}) {
+  return (
+    <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        className="w-full rounded-[32px] border border-accent-1/20 bg-card p-7 text-center shadow-xl backdrop-blur-xl"
+      >
+        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-1 text-text-1 shadow-lg">
+          <motion.div
+            animate={prefersReduced ? {} : { rotate: [0, 10, -10, 0] }}
+            transition={prefersReduced ? {} : { repeat: Infinity, duration: 3 }}
+          >
+            <Lock className="h-9 w-9" />
+          </motion.div>
+        </div>
+
+        <p className="text-[10px] uppercase tracking-[0.22em] text-text-2">
+          Private keepsake
+        </p>
+        <h1
+          className="mt-2 text-4xl text-text-1"
+          style={{ fontFamily: 'var(--font-display)' }}
+        >
+          Love Vault
+        </h1>
+        <p className="mt-2 text-sm text-text-2">
+          Your private letters and memories, sealed until the right moment.
+        </p>
+        <input
+          value={pin}
+          onChange={(event) => onPinChange(event.target.value)}
+          inputMode="numeric"
+          maxLength={6}
+          type="password"
+          placeholder="Enter your 4-digit PIN"
+          className="mt-5 w-full rounded-btn border border-accent-1/20 bg-transparent px-4 py-3 text-center text-text-1"
+        />
+        <p className="mt-2 text-xs text-text-2">PIN must be 4-6 digits</p>
+        {unlockError ? <p className="mt-2 text-sm text-error">{unlockError}</p> : null}
+
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onUnlock}
+          disabled={!isPinValid}
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-3 text-sm font-medium text-text-1"
+        >
+          <Eye className="h-4 w-4" />
+          Unlock Vault
+        </motion.button>
+      </motion.div>
+    </div>
+  )
+}
+
+function VaultLetterStats({
+  letters,
+  stats,
+  showForm,
+  onToggleForm,
+}: {
+  letters: VaultItem[]
+  stats: { total: number; sealed: number; newest: string }
+  showForm: boolean
+  onToggleForm: () => void
+}) {
+  return (
+    <div className="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+      <div className="rounded-panel p-6 border border-accent-1/20 bg-card backdrop-blur">
+        <div className="flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-btn bg-gradient-to-br from-accent-2 to-accent-1 text-white">
+            <Lock className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.22em] text-text-2">
+              Private keepsake
+            </div>
+            <div
+              className="text-xl font-semibold text-text-1"
+              style={{ fontFamily: "'Playfair Display',serif'" }}
+            >
+              Some words are worth the wait.
+            </div>
+            <p className="text-sm text-text-2 mt-1">
+              Every letter opens only on its promised day — the future you writes to the future
+              us.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={onToggleForm}
+            className="inline-flex items-center gap-2 rounded-btn px-4 py-2.5 text-sm font-medium bg-soft-tint hover:bg-soft-tint backdrop-blur border border-accent-1/20"
+          >
+            {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+            {showForm ? 'Cancel' : 'Write a letter'}
+          </button>
+          <div className="inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-widest text-text-2 rounded-btn bg-soft-tint border border-accent-1/20">
+            <Sparkles className="h-3.5 w-3.5" />
+            {letters.length === 0 ? 'Fresh start' : 'Keepsakes saved'}
+          </div>
+        </div>
+      </div>
+
+      <div className="rounded-panel p-5 border border-accent-1/20 bg-card backdrop-blur">
+        <div className="text-[10px] uppercase tracking-[0.22em] text-text-2">
+          Archive
+        </div>
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">Letters</p>
+            <p className="mt-2 text-2xl text-text-1" style={{ fontFamily: "'Playfair Display',serif'" }}>
+              {stats.total}
+            </p>
+          </div>
+          <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">Sealed</p>
+            <p className="mt-2 text-2xl text-text-1" style={{ fontFamily: "'Playfair Display',serif'" }}>
+              {stats.sealed}
+            </p>
+          </div>
+          <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
+            <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">Latest</p>
+            <p className="mt-2 text-base text-text-1" style={{ fontFamily: "'Playfair Display',serif'" }}>
+              {stats.newest}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function NewVaultLetterForm({
+  fieldId,
+  title,
+  content,
+  category,
+  revealDate,
+  onTitleChange,
+  onContentChange,
+  onCategoryChange,
+  onRevealDateChange,
+  onCreate,
+}: {
+  fieldId: string
+  title: string
+  content: string
+  category: VaultCategory
+  revealDate: string
+  onTitleChange: (value: string) => void
+  onContentChange: (value: string) => void
+  onCategoryChange: (value: LetterCategory) => void
+  onRevealDateChange: (value: string) => void
+  onCreate: () => void
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, height: 0, y: -10 }}
+      animate={{ opacity: 1, height: 'auto', y: 0 }}
+      exit={{ opacity: 0, height: 0, y: -10 }}
+      transition={{ duration: 0.25, ease: 'easeInOut' }}
+      className="mb-6 overflow-hidden"
+    >
+      <div className="rounded-[32px] border border-accent-1/20 bg-card p-5 shadow-xl backdrop-blur-xl">
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <label htmlFor={`${fieldId}-title`} className="text-sm text-text-2">Title</label>
+              <input
+                id={`${fieldId}-title`}
+                type="text"
+                value={title}
+                onChange={(event) => onTitleChange(event.target.value)}
+                placeholder="A note for her heart"
+                className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label htmlFor={`${fieldId}-message`} className="text-sm text-text-2">Message</label>
+              <textarea
+                id={`${fieldId}-message`}
+                value={content}
+                onChange={(event) => onContentChange(event.target.value)}
+                placeholder="Write your heart out..."
+                rows={6}
+                className="mt-2 w-full resize-none rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
+              />
+            </div>
+            <div>
+              <label htmlFor={`${fieldId}-category`} className="text-sm text-text-2">Category</label>
+              <select
+                id={`${fieldId}-category`}
+                value={category === 'all' ? 'private' : category}
+                onChange={(event) => {
+                  if (isLetterCategory(event.target.value)) onCategoryChange(event.target.value)
+                }}
+                className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1 outline-none"
+              >
+                <option value="private">Private</option>
+                <option value="celebration">Celebration</option>
+                <option value="ritual">Ritual</option>
+                <option value="travel">Travel</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor={`${fieldId}-reveal-date`} className="text-sm text-text-2">Reveal date</label>
+              <input
+                id={`${fieldId}-reveal-date`}
+                type="date"
+                value={revealDate}
+                onChange={(event) => onRevealDateChange(event.target.value)}
+                className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1 outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="mt-5 flex justify-end">
+            <button
+              type="button"
+              onClick={onCreate}
+              disabled={!title.trim() || !content.trim()}
+              className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-2.5 text-sm font-medium text-text-1 disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" />
+              Seal &amp; Save
+            </button>
+          </div>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function VaultPage() {
   return (
     <VaultKeyProvider>
@@ -238,58 +487,14 @@ function VaultPageContent() {
 
   if (!isUnlocked) {
     return (
-      <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.97 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="w-full rounded-[32px] border border-accent-1/20 bg-card p-7 text-center shadow-xl backdrop-blur-xl"
-        >
-          <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-1 text-text-1 shadow-lg">
-            <motion.div
-              animate={prefersReduced ? {} : { rotate: [0, 10, -10, 0] }}
-              transition={prefersReduced ? {} : { repeat: Infinity, duration: 3 }}
-            >
-              <Lock className="h-9 w-9" />
-            </motion.div>
-          </div>
-
-          <p className="text-[10px] uppercase tracking-[0.22em] text-text-2">
-            Private keepsake
-          </p>
-          <h1
-            className="mt-2 text-4xl text-text-1"
-            style={{ fontFamily: 'var(--font-display)' }}
-          >
-            Love Vault
-          </h1>
-          <p className="mt-2 text-sm text-text-2">
-            Your private letters and memories, sealed until the right moment.
-          </p>
-          <input
-            value={pin}
-            onChange={(event) => setPin(event.target.value)}
-            inputMode="numeric"
-            maxLength={6}
-            type="password"
-            placeholder="Enter your 4-digit PIN"
-            className="mt-5 w-full rounded-btn border border-accent-1/20 bg-transparent px-4 py-3 text-center text-text-1"
-          />
-          <p className="mt-2 text-xs text-text-2">PIN must be 4-6 digits</p>
-          {unlockError ? <p className="mt-2 text-sm text-error">{unlockError}</p> : null}
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleUnlock}
-            disabled={!isPinValid}
-            className="mt-5 flex w-full items-center justify-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-3 text-sm font-medium text-text-1"
-          >
-            <Eye className="h-4 w-4" />
-            Unlock Vault
-          </motion.button>
-
-        </motion.div>
-      </div>
+      <VaultLockScreen
+        pin={pin}
+        isPinValid={isPinValid}
+        unlockError={unlockError}
+        prefersReduced={prefersReduced}
+        onPinChange={setPin}
+        onUnlock={handleUnlock}
+      />
     )
   }
 
@@ -335,163 +540,28 @@ function VaultPageContent() {
 
       {tab === 'letters' ? (
         <>
-      {/* Stats and intro */}
-      <div className="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="rounded-panel p-6 border border-accent-1/20 bg-card backdrop-blur">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-btn bg-gradient-to-br from-accent-2 to-accent-1 text-white">
-              <Lock className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-[10px] uppercase tracking-[0.22em] text-text-2">
-                Private keepsake
-              </div>
-              <div
-                className="text-xl font-semibold text-text-1"
-                style={{ fontFamily: "'Playfair Display',serif'" }}
-              >
-                Some words are worth the wait.
-              </div>
-              <p className="text-sm text-text-2 mt-1">
-                Every letter opens only on its promised day — the future you writes to the future
-                us.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button
-              type="button"
-              onClick={() => setShowForm((value) => !value)}
-              className="inline-flex items-center gap-2 rounded-btn px-4 py-2.5 text-sm font-medium bg-soft-tint hover:bg-soft-tint backdrop-blur border border-accent-1/20"
-            >
-              {showForm ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-              {showForm ? 'Cancel' : 'Write a letter'}
-            </button>
-            <div className="inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-widest text-text-2 rounded-btn bg-soft-tint border border-accent-1/20">
-              <Sparkles className="h-3.5 w-3.5" />
-              {letters.length === 0 ? 'Fresh start' : 'Keepsakes saved'}
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-panel p-5 border border-accent-1/20 bg-card backdrop-blur">
-          <div className="text-[10px] uppercase tracking-[0.22em] text-text-2">
-            Archive
-          </div>
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">
-                Letters
-              </p>
-              <p
-                className="mt-2 text-2xl text-text-1"
-                style={{ fontFamily: "'Playfair Display',serif'" }}
-              >
-                {stats.total}
-              </p>
-            </div>
-            <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">
-                Sealed
-              </p>
-              <p
-                className="mt-2 text-2xl text-text-1"
-                style={{ fontFamily: "'Playfair Display',serif'" }}
-              >
-                {stats.sealed}
-              </p>
-            </div>
-            <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
-              <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">
-                Latest
-              </p>
-              <p
-                className="mt-2 text-base text-text-1"
-                style={{ fontFamily: "'Playfair Display',serif'" }}
-              >
-                {stats.newest}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+      <VaultLetterStats
+        letters={letters}
+        stats={stats}
+        showForm={showForm}
+        onToggleForm={() => setShowForm((value) => !value)}
+      />
 
       <AnimatePresence>
-        {showForm && (
-          <motion.div
-            initial={{ opacity: 0, height: 0, y: -10 }}
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -10 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
-            className="mb-6 overflow-hidden"
-          >
-            <div className="rounded-[32px] border border-accent-1/20 bg-card p-5 shadow-xl backdrop-blur-xl">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="md:col-span-2">
-                  <label htmlFor={`${fieldId}-title`} className="text-sm text-text-2">Title</label>
-                  <input
-                    id={`${fieldId}-title`}
-                    type="text"
-                    value={newTitle}
-                    onChange={(e) => setNewTitle(e.target.value)}
-                    placeholder="A note for her heart"
-                    className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label htmlFor={`${fieldId}-message`} className="text-sm text-text-2">Message</label>
-                  <textarea
-                    id={`${fieldId}-message`}
-                    value={newContent}
-                    onChange={(e) => setNewContent(e.target.value)}
-                    placeholder="Write your heart out..."
-                    rows={6}
-                    className="mt-2 w-full resize-none rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
-                  />
-                </div>
-               <div>
-                 <label htmlFor={`${fieldId}-category`} className="text-sm text-text-2">Category</label>
-                 <select
-                   id={`${fieldId}-category`}
-                   value={vaultCategory === 'all' ? 'private' : vaultCategory}
-                   onChange={(event) => {
-                     if (isLetterCategory(event.target.value)) setVaultCategory(event.target.value)
-                   }}
-                   className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1 outline-none"
-                 >
-                   <option value="private">Private</option>
-                   <option value="celebration">Celebration</option>
-                   <option value="ritual">Ritual</option>
-                   <option value="travel">Travel</option>
-                 </select>
-               </div>
-               <div>
-                 <label htmlFor={`${fieldId}-reveal-date`} className="text-sm text-text-2">Reveal date</label>
-                 <input
-                   id={`${fieldId}-reveal-date`}
-                   type="date"
-                   value={revealDate}
-                   onChange={(e) => setRevealDate(e.target.value)}
-                   className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1 outline-none"
-                 />
-               </div>
-             </div>
-
-             <div className="mt-5 flex justify-end">
-               <button
-                 type="button"
-                 onClick={handleCreate}
-                 disabled={!newTitle.trim() || !newContent.trim()}
-                 className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-2.5 text-sm font-medium text-text-1 disabled:opacity-50"
-               >
-                 <Save className="h-4 w-4" />
-                 Seal & Save
-               </button>
-             </div>
-           </div>
-         </motion.div>
-      )}
+        {showForm ? (
+          <NewVaultLetterForm
+            fieldId={fieldId}
+            title={newTitle}
+            content={newContent}
+            category={vaultCategory}
+            revealDate={revealDate}
+            onTitleChange={setNewTitle}
+            onContentChange={setNewContent}
+            onCategoryChange={setVaultCategory}
+            onRevealDateChange={setRevealDate}
+            onCreate={handleCreate}
+          />
+        ) : null}
       </AnimatePresence>
 
       <div className="mb-6 flex flex-wrap gap-2">

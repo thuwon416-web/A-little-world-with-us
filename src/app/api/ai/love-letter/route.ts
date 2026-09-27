@@ -3,13 +3,19 @@ import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { logAiUsage } from '@/lib/ai/usage-log'
+import {
+  AI_ROUTE_RATE_LIMIT,
+  getAiResponseText,
+  MAX_TOKENS,
+  optionalString,
+} from '@/lib/ai/route-helpers'
 
 // Validation schema
 const loveLetterSchema = z.object({
-  partnerName: z.string().max(200).optional(),
-  relationshipLength: z.string().max(100).optional(),
-  specialMemories: z.string().max(1000).optional(),
-  tone: z.string().max(100).optional(),
+  partnerName: optionalString(200),
+  relationshipLength: optionalString(100),
+  specialMemories: optionalString(1000),
+  tone: optionalString(100),
 })
 
 export async function POST(req: NextRequest) {
@@ -42,7 +48,11 @@ export async function POST(req: NextRequest) {
     const userId = user.id
 
     // 2. Rate limiting
-    const rateLimitResult = await checkRateLimit(userId, 10, 60000)
+    const rateLimitResult = await checkRateLimit(
+      userId,
+      AI_ROUTE_RATE_LIMIT.limit,
+      AI_ROUTE_RATE_LIMIT.windowMs
+    )
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Try again later.' },
@@ -84,7 +94,7 @@ export async function POST(req: NextRequest) {
               content: `Write a love letter to ${validated.partnerName}. Relationship: ${validated.relationshipLength}. Memories: ${validated.specialMemories}. Tone: ${validated.tone}`,
             },
           ],
-          max_tokens: 1000,
+          max_tokens: MAX_TOKENS,
         }),
       })
     } else {
@@ -110,13 +120,8 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json()
     
-    let loveLetter = ''
-    
-    if (process.env.GROQ_API_KEY) {
-      loveLetter = data.choices?.[0]?.message?.content || 'Unable to generate love letter.'
-    } else {
-      loveLetter = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Unable to generate love letter.'
-    }
+    const provider = process.env.GROQ_API_KEY ? 'groq' : 'gemini'
+    const loveLetter = getAiResponseText(data, provider, 'Unable to generate love letter.')
 
     void logAiUsage({
       userId,

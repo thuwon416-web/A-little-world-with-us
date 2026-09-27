@@ -146,78 +146,82 @@ function MemoriesPageContent() {
   }, [])
 
   const loadMemories = async () => {
-    if (!isSupabaseConfigured) return
-
     setIsLoading(true)
     setError('')
-    const { data: userData, error: userError } = await supabase.auth.getUser()
-    if (userError || !userData.user) {
-      setError('Please sign in to load shared memories.')
-      setIsLoading(false)
-      return
-    }
+    try {
+      if (!isSupabaseConfigured) {
+        setError('Shared memories are unavailable because Supabase is not configured.')
+        return
+      }
 
-    const { data: link, error: linkError } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
-    if (linkError) {
-      setError(linkError.message)
-      setIsLoading(false)
-      return
-    }
-    setCoupleLinkId(link?.couple_id ?? null)
-    if (!link?.couple_id) {
-      setMemories([])
-      setIsLoading(false)
-      return
-    }
-    const { data, error: memoriesError } = await supabase
-      .from('memories')
-      .select('*,mime_type')
-      .eq('couple_id', link.couple_id)
-      .order('date', { ascending: false })
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError || !userData.user) {
+        setError('Please sign in to load shared memories.')
+        return
+      }
 
-    if (memoriesError) {
-      setError(memoriesError.message)
-      setIsLoading(false)
-      return
-    }
+      const { data: link, error: linkError } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
+      if (linkError) {
+        setError(linkError.message)
+        return
+      }
+      setCoupleLinkId(link?.couple_id ?? null)
+      if (!link?.couple_id) {
+        setMemories([])
+        return
+      }
+      const { data, error: memoriesError } = await supabase
+        .from('memories')
+        .select('*,mime_type')
+        .eq('couple_id', link.couple_id)
+        .order('date', { ascending: false })
 
-    const displayMemories = await Promise.all(
-      (data as Memory[]).map(async (memory) => {
-        const path = memory.storage_path ?? memory.image_url ?? ''
-        if (!path || path.startsWith('/')) {
-          return { ...memory, displayUrl: memory.image_url ?? '', mime_type: memory.mime_type }
-        }
+      if (memoriesError) {
+        setError(memoriesError.message)
+        return
+      }
 
-        if (path.startsWith('http://') || path.startsWith('https://')) {
-          return { ...memory, displayUrl: path, mime_type: memory.mime_type }
-        }
+      const displayMemories = await Promise.all(
+        (data as Memory[]).map(async (memory) => {
+          const path = memory.storage_path ?? memory.image_url ?? ''
+          if (!path || path.startsWith('/')) {
+            return { ...memory, displayUrl: memory.image_url ?? '', mime_type: memory.mime_type }
+          }
 
-        if (!link?.couple_id) {
-          const { data: signedData, error: signedError } = await supabase.storage
-            .from('memories')
-            .createSignedUrl(path, 60 * 60)
+          if (path.startsWith('http://') || path.startsWith('https://')) {
+            return { ...memory, displayUrl: path, mime_type: memory.mime_type }
+          }
+
+          if (!link?.couple_id) {
+            const { data: signedData, error: signedError } = await supabase.storage
+              .from('memories')
+              .createSignedUrl(path, 60 * 60)
+            return {
+              ...memory,
+              category: memory.category ?? 'favorite',
+              displayUrl: signedError ? '' : signedData.signedUrl,
+              mime_type: memory.mime_type,
+            }
+          }
+
+          const mimeType = memory.mime_type || 'image/jpeg'
+          const displayUrl = await getCachedDecryptedUrl(link.couple_id, 'memories', path, mimeType)
           return {
             ...memory,
             category: memory.category ?? 'favorite',
-            displayUrl: signedError ? '' : signedData.signedUrl,
+            displayUrl,
             mime_type: memory.mime_type,
           }
-        }
+        })
+      )
 
-        const mimeType = memory.mime_type || 'image/jpeg'
-        const displayUrl = await getCachedDecryptedUrl(link.couple_id, 'memories', path, mimeType)
-
-        return {
-          ...memory,
-          category: memory.category ?? 'favorite',
-          displayUrl,
-          mime_type: memory.mime_type,
-        }
-      })
-    )
-
-    setMemories(displayMemories)
-    setIsLoading(false)
+      setMemories(displayMemories)
+    } catch (error) {
+      console.error('Failed to load shared memories:', error)
+      setError(error instanceof Error ? error.message : 'Unable to load shared memories.')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   useEffect(() => {
@@ -483,53 +487,27 @@ function MemoriesPageContent() {
         </section>
       )}
 
-      <section className="glass-card p-5">
-        <h2 className="text-xl text-text-1">Add a memory</h2>
-        <form className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr_0.8fr_0.7fr_auto]" onSubmit={handleUpload}>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            onChange={handleFileChange}
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
-          />
-          <input
-            type="text"
-            value={caption}
-            onChange={(event) => setCaption(event.target.value)}
-            placeholder="Caption (optional)"
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 outline-none focus:border-accent-1"
-          />
-          <select
-            value={memoryCategory}
-            onChange={(event) => setMemoryCategory(event.target.value as MemoryCategory)}
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1"
-          >
-            <option value="favorite">Favorite</option>
-            <option value="travel">Travel</option>
-            <option value="ritual">Ritual</option>
-            <option value="journal">Journal</option>
-          </select>
-          <input type="date" value={memoryDate} onChange={(event) => setMemoryDate(event.target.value)} className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" aria-label="Memory date" />
-          <button type="button" onClick={() => setIsLocationOpen(true)} className="rounded-btn border border-accent-1/20 px-3 py-2 text-sm text-text-1">{location ? 'Location added' : 'Add location (optional)'}</button>
-          <button
-            type="submit"
-            disabled={isUploading || !isSupabaseConfigured}
-            className="rounded-btn bg-accent-1 px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {isUploading ? `Uploading ${uploadProgress}%` : 'Upload'}
-          </button>
-        </form>
-        {isUploading ? <div className="mt-3 h-2 overflow-hidden rounded-full bg-soft-tint" role="progressbar" aria-valuenow={uploadProgress} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-accent-1 transition-all" style={{ width: `${uploadProgress}%` }} /></div> : null}
-        {!isSupabaseConfigured && (
-          <p className="mt-3 text-xs text-text-2">
-            Configure Supabase to upload new memories.
-          </p>
-        )}
-        {error && <p className="mt-3 text-sm text-error">{error}</p>}
-        {uploadSummary && <p className="mt-3 text-sm text-success">{uploadSummary}</p>}
-      </section>
-      {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-panel bg-card p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-text-1">Memory location</h2><button type="button" onClick={() => setIsLocationOpen(false)} className="text-sm text-text-2">Close</button></div><MemoryLocationPicker value={location} onChange={setLocation} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => setError('Unable to read your current location.'))} className="rounded-xl border border-accent-1/20 px-3 py-2 text-sm text-text-1">Use current location</button><input value={locationLabel} onChange={(event) => setLocationLabel(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><button type="button" onClick={() => setIsLocationOpen(false)} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white">Save location</button></div></div> : null}
+      <MemoryUploadPanel
+        caption={caption}
+        memoryDate={memoryDate}
+        memoryCategory={memoryCategory}
+        location={location}
+        locationLabel={locationLabel}
+        isLocationOpen={isLocationOpen}
+        isUploading={isUploading}
+        uploadProgress={uploadProgress}
+        uploadSummary={uploadSummary}
+        error={error}
+        onCaptionChange={setCaption}
+        onMemoryDateChange={setMemoryDate}
+        onMemoryCategoryChange={setMemoryCategory}
+        onLocationChange={setLocation}
+        onLocationLabelChange={setLocationLabel}
+        onLocationOpenChange={setIsLocationOpen}
+        onErrorChange={setError}
+        onFileChange={handleFileChange}
+        onUpload={handleUpload}
+      />
 
       <section className="glass-card p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -572,89 +550,17 @@ function MemoriesPageContent() {
       <MemoryCurationAI memories={memories.map((memory) => ({ id: memory.id, title: memory.title ?? memory.caption ?? 'A memory together', date: memory.date }))} />
 
       {isLoading && <p className="text-sm text-text-2">Loading memories...</p>}
-      <section className="grid gap-4 md:grid-cols-2">
-        {visibleMemories.map((memory, index) => (
-          memory.category === 'journal' ? (
-            <article key={memory.id} className="glass-card relative space-y-3 p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-text-1">{memory.title}</h3>
-                  <p className="mt-1 text-xs text-text-2">{memory.date}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  {memory.metadata?.mood_tag ? (() => {
-                    const mood = JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
-                      JOURNAL_MOODS.find((item) => item.id === 'okay')
-                    if (!mood) return null
-                    const MoodIcon = mood.Icon
-                    return <MoodIcon className="h-5 w-5 text-accent-1" aria-label={mood.label} />
-                  })() : null}
-                  <button type="button" onClick={() => openEditJournal(memory)} className="text-accent-1" aria-label="Edit journal entry">
-                    <Pencil className="h-5 w-5" />
-                  </button>
-                  <button type="button" onClick={() => deleteJournal(memory)} className="text-error" aria-label="Delete journal entry">
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-              </div>
-              {memory.description ? <p className="line-clamp-2 text-sm text-text-2">{memory.description}</p> : null}
-              {memory.metadata?.ai_reflection ? (
-                <div className="rounded-xl border border-accent-1/20 bg-soft-tint p-3">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-accent-1">
-                    <Sparkles className="h-4 w-4" />
-                    AI reflection
-                    <button type="button" onClick={() => speakReflection(memory)} aria-label="Read AI reflection aloud">
-                      {speakingJournalId === memory.id
-                        ? <Square className="h-4 w-4" />
-                        : <Volume2 className="h-4 w-4" />}
-                    </button>
-                  </div>
-                  <p className="mt-2 text-sm text-text-1">{memory.metadata.ai_reflection}</p>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => void requestReflection(memory)}
-                  disabled={reflectingId !== null}
-                  className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-2 text-sm text-accent-1 disabled:opacity-50"
-                >
-                  {reflectingId === memory.id ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-1 border-t-transparent" /> : <Sparkles className="h-4 w-4" />}
-                  {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
-                </button>
-              )}
-            </article>
-          ) : (
-            <div key={memory.id} className="relative">
-              {memory.displayUrl ? (
-                <MemoryCard
-                  id={memory.id}
-                  imageUrl={memory.displayUrl}
-                  caption={memory.caption ?? 'Memory'}
-                  date={memory.date}
-                  index={index}
-                  onOpen={() => setSelectedMemory(memory)}
-                />
-              ) : (
-                <button type="button" onClick={() => setSelectedMemory(memory)} className="glass-card w-full bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20 p-6 text-left"><p className="font-serif text-xl text-text-1">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-text-2">{new Date(memory.date).toLocaleDateString()}</p></button>
-              )}
-              {memory.category && (
-                <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-text-1">
-                  {memory.category}
-                </span>
-              )}
-              {memory.user_id && (
-                <button
-                  type="button"
-                  onClick={() => handleDelete(memory)}
-                  className="absolute right-3 top-3 rounded-full bg-error/80 px-3 py-1 text-xs text-text-1 hover:bg-error"
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-          )
-        ))}
-      </section>
+      <MemoryGrid
+        memories={visibleMemories}
+        reflectingId={reflectingId}
+        speakingJournalId={speakingJournalId}
+        onEditJournal={openEditJournal}
+        onDeleteJournal={deleteJournal}
+        onSpeakReflection={speakReflection}
+        onRequestReflection={requestReflection}
+        onOpenMemory={setSelectedMemory}
+        onDeleteMemory={handleDelete}
+      />
 
       {visibleCount < sortedMemories.length && (
         <div className="flex justify-center">
@@ -674,34 +580,18 @@ function MemoriesPageContent() {
         setSelectedMemory((current) => current?.id === updated.id ? { ...current, ...updated } : current)
       }} />}
       {journalModalOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={editingJournalId ? 'Edit journal entry' : 'New journal entry'}>
-          <section className="glass-card w-full max-w-xl space-y-4 p-5">
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-1">{editingJournalId ? 'Edit journal entry' : 'New journal entry'}</h2>
-              <button type="button" onClick={closeJournalModal} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close journal modal"><X className="h-5 w-5" /></button>
-            </div>
-            <input value={journalTitle} onChange={(event) => setJournalTitle(event.target.value)} placeholder="Title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
-            <textarea value={journalBody} onChange={(event) => setJournalBody(event.target.value)} placeholder="Write your thoughts..." rows={5} className="w-full resize-y rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
-            <div>
-              <p className="mb-2 text-sm font-medium text-text-1">How are you feeling?</p>
-              <div className="flex flex-wrap gap-2">
-                {JOURNAL_MOODS.map(({ id, label, Icon }) => {
-                  const selected = journalMood === id
-                  return (
-                    <button key={id} type="button" onClick={() => setJournalMood(id)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${selected ? 'border-accent-1 bg-accent-1 text-white' : 'border-accent-1/20 text-text-2'}`}>
-                      <Icon className="h-5 w-5" />
-                      {label}
-                    </button>
-                  )
-                })}
-              </div>
-            </div>
-            <div className="flex justify-end gap-3">
-              <button type="button" onClick={closeJournalModal} className="rounded-xl px-4 py-2 text-sm text-text-2">Cancel</button>
-              <button type="button" onClick={() => void saveJournal()} disabled={journalSaving || !journalTitle.trim()} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{journalSaving ? 'Saving...' : 'Save'}</button>
-            </div>
-          </section>
-        </div>
+        <JournalEntryModal
+          isEditing={editingJournalId !== null}
+          title={journalTitle}
+          body={journalBody}
+          mood={journalMood}
+          saving={journalSaving}
+          onTitleChange={setJournalTitle}
+          onBodyChange={setJournalBody}
+          onMoodChange={setJournalMood}
+          onClose={closeJournalModal}
+          onSave={() => void saveJournal()}
+        />
       ) : null}
       <section aria-labelledby="our-story-heading" className="border-t border-border/30 pt-8">
         <h2 id="our-story-heading" className="mb-4 text-2xl font-serif text-text-1">Our Story</h2>
@@ -728,6 +618,263 @@ function MemoriesPageContent() {
   )
 }
 
+function JournalEntryModal({
+  isEditing,
+  title,
+  body,
+  mood,
+  saving,
+  onTitleChange,
+  onBodyChange,
+  onMoodChange,
+  onClose,
+  onSave,
+}: {
+  isEditing: boolean
+  title: string
+  body: string
+  mood: JournalMood
+  saving: boolean
+  onTitleChange: (value: string) => void
+  onBodyChange: (value: string) => void
+  onMoodChange: (value: JournalMood) => void
+  onClose: () => void
+  onSave: () => void
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={isEditing ? 'Edit journal entry' : 'New journal entry'}>
+      <section className="glass-card w-full max-w-xl space-y-4 p-5">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-text-1">{isEditing ? 'Edit journal entry' : 'New journal entry'}</h2>
+          <button type="button" onClick={onClose} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close journal modal"><X className="h-5 w-5" /></button>
+        </div>
+        <input value={title} onChange={(event) => onTitleChange(event.target.value)} placeholder="Title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
+        <textarea value={body} onChange={(event) => onBodyChange(event.target.value)} placeholder="Write your thoughts..." rows={5} className="w-full resize-y rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
+        <div>
+          <p className="mb-2 text-sm font-medium text-text-1">How are you feeling?</p>
+          <div className="flex flex-wrap gap-2">
+            {JOURNAL_MOODS.map(({ id, label, Icon }) => {
+              const selected = mood === id
+              return (
+                <button key={id} type="button" onClick={() => onMoodChange(id)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${selected ? 'border-accent-1 bg-accent-1 text-white' : 'border-accent-1/20 text-text-2'}`}>
+                  <Icon className="h-5 w-5" />
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+        <div className="flex justify-end gap-3">
+          <button type="button" onClick={onClose} className="rounded-xl px-4 py-2 text-sm text-text-2">Cancel</button>
+          <button type="button" onClick={onSave} disabled={saving || !title.trim()} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+        </div>
+      </section>
+    </div>
+  )
+}
+
+function MemoryUploadPanel({
+  caption,
+  memoryDate,
+  memoryCategory,
+  location,
+  locationLabel,
+  isLocationOpen,
+  isUploading,
+  uploadProgress,
+  uploadSummary,
+  error,
+  onCaptionChange,
+  onMemoryDateChange,
+  onMemoryCategoryChange,
+  onLocationChange,
+  onLocationLabelChange,
+  onLocationOpenChange,
+  onErrorChange,
+  onFileChange,
+  onUpload,
+}: {
+  caption: string
+  memoryDate: string
+  memoryCategory: MemoryCategory
+  location: { latitude: number; longitude: number } | null
+  locationLabel: string
+  isLocationOpen: boolean
+  isUploading: boolean
+  uploadProgress: number
+  uploadSummary: string
+  error: string
+  onCaptionChange: (value: string) => void
+  onMemoryDateChange: (value: string) => void
+  onMemoryCategoryChange: (value: MemoryCategory) => void
+  onLocationChange: (value: { latitude: number; longitude: number } | null) => void
+  onLocationLabelChange: (value: string) => void
+  onLocationOpenChange: (value: boolean) => void
+  onErrorChange: (value: string) => void
+  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
+  onUpload: (event: React.FormEvent<HTMLFormElement>) => void
+}) {
+  return (
+    <>
+      <section className="glass-card p-5">
+        <h2 className="text-xl text-text-1">Add a memory</h2>
+        <form className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr_0.8fr_0.7fr_auto]" onSubmit={onUpload}>
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={onFileChange}
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
+          />
+          <input
+            type="text"
+            value={caption}
+            onChange={(event) => onCaptionChange(event.target.value)}
+            placeholder="Caption (optional)"
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 outline-none focus:border-accent-1"
+          />
+          <select
+            value={memoryCategory}
+            onChange={(event) => onMemoryCategoryChange(event.target.value as MemoryCategory)}
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1"
+          >
+            <option value="favorite">Favorite</option>
+            <option value="travel">Travel</option>
+            <option value="ritual">Ritual</option>
+            <option value="journal">Journal</option>
+          </select>
+          <input type="date" value={memoryDate} onChange={(event) => onMemoryDateChange(event.target.value)} className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" aria-label="Memory date" />
+          <button type="button" onClick={() => onLocationOpenChange(true)} className="rounded-btn border border-accent-1/20 px-3 py-2 text-sm text-text-1">{location ? 'Location added' : 'Add location (optional)'}</button>
+          <button
+            type="submit"
+            disabled={isUploading || !isSupabaseConfigured}
+            className="rounded-btn bg-accent-1 px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {isUploading ? `Uploading ${uploadProgress}%` : 'Upload'}
+          </button>
+        </form>
+        {isUploading ? <div className="mt-3 h-2 overflow-hidden rounded-full bg-soft-tint" role="progressbar" aria-valuenow={uploadProgress} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-accent-1 transition-all" style={{ width: `${uploadProgress}%` }} /></div> : null}
+        {!isSupabaseConfigured && (
+          <p className="mt-3 text-xs text-text-2">
+            Configure Supabase to upload new memories.
+          </p>
+        )}
+        {error && <p className="mt-3 text-sm text-error">{error}</p>}
+        {uploadSummary && <p className="mt-3 text-sm text-success">{uploadSummary}</p>}
+      </section>
+      {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-panel bg-card p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-text-1">Memory location</h2><button type="button" onClick={() => onLocationOpenChange(false)} className="text-sm text-text-2">Close</button></div><MemoryLocationPicker value={location} onChange={onLocationChange} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => onLocationChange({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => onErrorChange('Unable to read your current location.'))} className="rounded-xl border border-accent-1/20 px-3 py-2 text-sm text-text-1">Use current location</button><input value={locationLabel} onChange={(event) => onLocationLabelChange(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><button type="button" onClick={() => onLocationOpenChange(false)} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white">Save location</button></div></div> : null}
+    </>
+  )
+}
+
+function MemoryGrid({
+  memories,
+  reflectingId,
+  speakingJournalId,
+  onEditJournal,
+  onDeleteJournal,
+  onSpeakReflection,
+  onRequestReflection,
+  onOpenMemory,
+  onDeleteMemory,
+}: {
+  memories: JournalMemory[]
+  reflectingId: string | null
+  speakingJournalId: string | null
+  onEditJournal: (memory: JournalMemory) => void
+  onDeleteJournal: (memory: JournalMemory) => void
+  onSpeakReflection: (memory: JournalMemory) => void
+  onRequestReflection: (memory: JournalMemory) => void
+  onOpenMemory: (memory: DisplayMemory) => void
+  onDeleteMemory: (memory: DisplayMemory) => void
+}) {
+  return (
+    <section className="grid gap-4 md:grid-cols-2">
+      {memories.map((memory, index) => (
+        memory.category === 'journal' ? (
+          <article key={memory.id} className="glass-card relative space-y-3 p-5">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h3 className="font-semibold text-text-1">{memory.title}</h3>
+                <p className="mt-1 text-xs text-text-2">{memory.date}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                {memory.metadata?.mood_tag ? (() => {
+                  const mood = JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
+                    JOURNAL_MOODS.find((item) => item.id === 'okay')
+                  if (!mood) return null
+                  const MoodIcon = mood.Icon
+                  return <MoodIcon className="h-5 w-5 text-accent-1" aria-label={mood.label} />
+                })() : null}
+                <button type="button" onClick={() => onEditJournal(memory)} className="text-accent-1" aria-label="Edit journal entry">
+                  <Pencil className="h-5 w-5" />
+                </button>
+                <button type="button" onClick={() => onDeleteJournal(memory)} className="text-error" aria-label="Delete journal entry">
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+            {memory.description ? <p className="line-clamp-2 text-sm text-text-2">{memory.description}</p> : null}
+            {memory.metadata?.ai_reflection ? (
+              <div className="rounded-xl border border-accent-1/20 bg-soft-tint p-3">
+                <div className="flex items-center gap-2 text-xs font-semibold text-accent-1">
+                  <Sparkles className="h-4 w-4" />
+                  AI reflection
+                  <button type="button" onClick={() => onSpeakReflection(memory)} aria-label="Read AI reflection aloud">
+                    {speakingJournalId === memory.id
+                      ? <Square className="h-4 w-4" />
+                      : <Volume2 className="h-4 w-4" />}
+                  </button>
+                </div>
+                <p className="mt-2 text-sm text-text-1">{memory.metadata.ai_reflection}</p>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void onRequestReflection(memory)}
+                disabled={reflectingId !== null}
+                className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-2 text-sm text-accent-1 disabled:opacity-50"
+              >
+                {reflectingId === memory.id ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-1 border-t-transparent" /> : <Sparkles className="h-4 w-4" />}
+                {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
+              </button>
+            )}
+          </article>
+        ) : (
+          <div key={memory.id} className="relative">
+            {memory.displayUrl ? (
+              <MemoryCard
+                id={memory.id}
+                imageUrl={memory.displayUrl}
+                caption={memory.caption ?? 'Memory'}
+                date={memory.date}
+                index={index}
+                onOpen={() => onOpenMemory(memory)}
+              />
+            ) : (
+              <button type="button" onClick={() => onOpenMemory(memory)} className="glass-card w-full bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20 p-6 text-left"><p className="font-serif text-xl text-text-1">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-text-2">{new Date(memory.date).toLocaleDateString()}</p></button>
+            )}
+            {memory.category && (
+              <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-text-1">
+                {memory.category}
+              </span>
+            )}
+            {memory.user_id && (
+              <button
+                type="button"
+                onClick={() => onDeleteMemory(memory)}
+                className="absolute right-3 top-3 rounded-full bg-error/80 px-3 py-1 text-xs text-text-1 hover:bg-error"
+              >
+                Delete
+              </button>
+            )}
+          </div>
+        )
+      ))}
+    </section>
+  )
+}
+
 function MemoryDetail({ memory, onClose, onSaved }: { memory: DisplayMemory; onClose: () => void; onSaved: (memory: Partial<DisplayMemory> & { id: string }) => void }) {
   const [title, setTitle] = useState(memory.title ?? memory.caption ?? '')
   const [date, setDate] = useState(memory.date)
@@ -743,4 +890,3 @@ function MemoryDetail({ memory, onClose, onSaved }: { memory: DisplayMemory; onC
   }
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative h-[55vh] w-full overflow-hidden rounded-btn"><Image src={memory.displayUrl} alt={memory.caption || 'Memory'} fill sizes="(max-width: 768px) 100vw, 672px" className="object-cover" /></div> : <div className="h-64 rounded-btn bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-lg font-serif text-text-1" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-error">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
 }
-

@@ -2,6 +2,11 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
+import {
+  AI_ROUTE_RATE_LIMIT,
+  getAiResponseText,
+  MAX_TOKENS,
+} from '@/lib/ai/route-helpers'
 
 // Validation schema
 const recommendPartnersSchema = z.object({
@@ -45,7 +50,11 @@ export async function POST(req: NextRequest) {
     const userId = user.id
 
     // 2. Rate limiting
-    const rateLimitResult = await checkRateLimit(userId, 10, 60000)
+    const rateLimitResult = await checkRateLimit(
+      userId,
+      AI_ROUTE_RATE_LIMIT.limit,
+      AI_ROUTE_RATE_LIMIT.windowMs
+    )
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Try again later.' },
@@ -106,7 +115,7 @@ export async function POST(req: NextRequest) {
               content: `Recommend couple activities for: ${JSON.stringify(validated.preferences)}`,
             },
           ],
-          max_tokens: 800,
+          max_tokens: MAX_TOKENS,
         }),
       })
     } else {
@@ -132,21 +141,17 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json()
     
-    let recommendations: z.infer<typeof generatedRecommendationsSchema> = []
-    
-    if (process.env.GROQ_API_KEY) {
-      try {
-        recommendations = generatedRecommendationsSchema.catch([]).parse(JSON.parse(data.choices?.[0]?.message?.content || '[]'))
-      } catch {
-        recommendations = []
-      }
-    } else {
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
-      try {
-        recommendations = generatedRecommendationsSchema.catch([]).parse(JSON.parse(text))
-      } catch {
-        recommendations = []
-      }
+    const provider = process.env.GROQ_API_KEY ? 'groq' : 'gemini'
+    let recommendations: z.infer<typeof generatedRecommendationsSchema>
+    try {
+      const text = getAiResponseText(data, provider, '')
+      recommendations = generatedRecommendationsSchema.parse(JSON.parse(text))
+    } catch (error) {
+      console.error('AI recommendations response parsing failed:', error)
+      return NextResponse.json(
+        { error: 'AI service returned an invalid response.' },
+        { status: 502 }
+      )
     }
 
     return NextResponse.json({ recommendations })

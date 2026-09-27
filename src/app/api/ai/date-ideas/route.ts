@@ -3,12 +3,18 @@ import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { filterByPrivacy, PrivacySettingsUnavailableError } from '@/lib/ai/privacy-guard'
+import {
+  AI_ROUTE_RATE_LIMIT,
+  getAiResponseText,
+  MAX_TOKENS,
+  optionalString,
+} from '@/lib/ai/route-helpers'
 
 // Validation schema
 const dateIdeasSchema = z.object({
-  budget: z.string().max(200).optional(),
-  location: z.string().max(200).optional(),
-  interests: z.string().max(500).optional(),
+  budget: optionalString(200),
+  location: optionalString(200),
+  interests: optionalString(500),
 })
 
 const generatedDateIdeasSchema = z.array(z.object({
@@ -48,7 +54,11 @@ export async function POST(req: NextRequest) {
     const userId = user.id
 
     // 2. Rate limiting
-    const rateLimitResult = await checkRateLimit(userId, 10, 60000)
+    const rateLimitResult = await checkRateLimit(
+      userId,
+      AI_ROUTE_RATE_LIMIT.limit,
+      AI_ROUTE_RATE_LIMIT.windowMs
+    )
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Try again later.' },
@@ -137,7 +147,7 @@ export async function POST(req: NextRequest) {
               content: `Budget: ${budget}, Location: ${location}, Interests: ${validated.interests}`,
             },
           ],
-          max_tokens: 800,
+          max_tokens: MAX_TOKENS,
         }),
       })
     } else {
@@ -163,21 +173,17 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json()
     
-    let dateIdeas: z.infer<typeof generatedDateIdeasSchema> = []
-    
-    if (process.env.GROQ_API_KEY) {
-      try {
-        dateIdeas = generatedDateIdeasSchema.catch([]).parse(JSON.parse(data.choices?.[0]?.message?.content || '[]'))
-      } catch {
-        dateIdeas = []
-      }
-    } else {
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
-      try {
-        dateIdeas = generatedDateIdeasSchema.catch([]).parse(JSON.parse(text))
-      } catch {
-        dateIdeas = []
-      }
+    const provider = process.env.GROQ_API_KEY ? 'groq' : 'gemini'
+    let dateIdeas: z.infer<typeof generatedDateIdeasSchema>
+    try {
+      const text = getAiResponseText(data, provider, '')
+      dateIdeas = generatedDateIdeasSchema.parse(JSON.parse(text))
+    } catch (error) {
+      console.error('Date ideas AI response parsing failed:', error)
+      return NextResponse.json(
+        { error: 'AI service returned an invalid response.' },
+        { status: 502 }
+      )
     }
 
     return NextResponse.json({ dateIdeas })

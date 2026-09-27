@@ -2,10 +2,16 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
+import {
+  AI_ROUTE_RATE_LIMIT,
+  getAiResponseText,
+  MAX_TOKENS,
+  optionalString,
+} from '@/lib/ai/route-helpers'
 
 // Validation schema
 const messageSuggestionsSchema = z.object({
-  context: z.string().max(1000).optional(),
+  context: optionalString(1000),
 })
 
 export async function POST(req: NextRequest) {
@@ -38,7 +44,11 @@ export async function POST(req: NextRequest) {
     const userId = user.id
 
     // 2. Rate limiting
-    const rateLimitResult = await checkRateLimit(userId, 10, 60000)
+    const rateLimitResult = await checkRateLimit(
+      userId,
+      AI_ROUTE_RATE_LIMIT.limit,
+      AI_ROUTE_RATE_LIMIT.windowMs
+    )
     if (!rateLimitResult.allowed) {
       return NextResponse.json(
         { error: 'Rate limit exceeded. Try again later.' },
@@ -85,7 +95,7 @@ export async function POST(req: NextRequest) {
               content: `Generate message suggestions for: ${validated.context}`,
             },
           ],
-          max_tokens: 600,
+          max_tokens: MAX_TOKENS,
         }),
       })
     } else {
@@ -111,21 +121,17 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json()
     
-    let suggestions: string[] = []
-    
-    if (process.env.GROQ_API_KEY) {
-      try {
-        suggestions = JSON.parse(data.choices?.[0]?.message?.content || '[]')
-      } catch {
-        suggestions = []
-      }
-    } else {
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '[]'
-      try {
-        suggestions = JSON.parse(text)
-      } catch {
-        suggestions = []
-      }
+    const provider = process.env.GROQ_API_KEY ? 'groq' : 'gemini'
+    let suggestions: string[]
+    try {
+      const text = getAiResponseText(data, provider, '')
+      suggestions = z.array(z.string()).parse(JSON.parse(text))
+    } catch (error) {
+      console.error('Message suggestions AI response parsing failed:', error)
+      return NextResponse.json(
+        { error: 'AI service returned an invalid response.' },
+        { status: 502 }
+      )
     }
 
     return NextResponse.json({ suggestions })
