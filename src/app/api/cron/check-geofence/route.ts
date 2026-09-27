@@ -1,29 +1,22 @@
 import { NextResponse } from 'next/server'
+import {
+  callEdgeFunction,
+  parseEdgeFunctionResponse,
+  validateCronRequest,
+} from '@/lib/api/cron-helpers'
 
 export const runtime = 'nodejs'
 
 export async function GET(request: Request) {
-  const cronSecret = process.env.CRON_SECRET
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const validation = validateCronRequest(request)
+  if (!validation.ok) return validation.response
 
-  if (!cronSecret || !supabaseUrl || !serviceRole) {
-    return NextResponse.json({ error: 'Cron environment is not configured' }, { status: 500 })
-  }
+  const response = await callEdgeFunction(
+    validation.supabaseUrl,
+    validation.serviceRole,
+    'check-geofence'
+  )
 
-  if (request.headers.get('authorization') !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  const response = await fetch(`${supabaseUrl}/functions/v1/check-geofence`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${serviceRole}`,
-      'Content-Type': 'application/json',
-    },
-    cache: 'no-store',
-  })
-
-  const payload = await response.json().catch(() => ({ error: 'Invalid Edge Function response' }))
+  const payload = await parseEdgeFunctionResponse(response)
   return NextResponse.json(payload, { status: response.ok ? 200 : 500 })
 }

@@ -15,6 +15,13 @@
     "build:android": "eas build --platform android",
     "build:preview": "eas build --platform android --profile preview"
   },
+  "overrides": {
+    "@babel/runtime": "^7.26.10",
+    "browserslist": "^4.28.7",
+    "decode-uri-component": "^0.5.0",
+    "postcss": "^8.5.23",
+    "uuid": "^11.1.1"
+  },
   "dependencies": {
     "@config-plugins/react-native-webrtc": "^15.0.2",
     "@expo-google-fonts/inter": "^0.2.3",
