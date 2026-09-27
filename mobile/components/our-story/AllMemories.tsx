@@ -114,7 +114,7 @@ function AllMemories({
             onPress={() => setCategory(item)}
             style={[styles.chip, category === item && styles.active]}
           >
-            <Text style={styles.chipText}>{item.replaceAll(/_/g, ' ')}</Text>
+            <Text style={styles.chipText}>{item.replaceAll('_', ' ')}</Text>
           </TouchableOpacity>
         ))}
       </View>

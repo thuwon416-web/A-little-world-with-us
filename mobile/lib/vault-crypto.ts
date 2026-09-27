@@ -52,11 +52,11 @@ function getSubtle(): SubtleCrypto {
 }
 
 function bytesToBase64(data: Uint8Array): string {
-  return btoa(String.fromCharCode(...data))
+  return btoa(String.fromCodePoint(...data))
 }
 
 function base64ToBytes(value: string): Uint8Array {
-  return Uint8Array.from(atob(value), (character) => character.charCodeAt(0))
+  return Uint8Array.from(atob(value), (character) => character.codePointAt(0) ?? 0)
 }
 
 function toArrayBuffer(bytes: Uint8Array): ArrayBuffer {

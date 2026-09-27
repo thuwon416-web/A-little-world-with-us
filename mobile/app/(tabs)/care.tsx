@@ -691,7 +691,7 @@ export default function CareScreen() {
         log.waterIntake ?? '',
         log.weight ?? '',
         log.basalTemp ?? '',
-        `"${(log.notes ?? '').replaceAll(/"/g, '""')}"`,
+        `"${(log.notes ?? '').replaceAll('"', '""')}"`,
       ].join(',')
     )
     await Share.share({ message: [header, ...rows].join('\n'), title: 'Care data export.csv' })

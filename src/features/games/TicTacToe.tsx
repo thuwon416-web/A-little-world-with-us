@@ -14,7 +14,7 @@ const LINES = [
 ]
 
 export default function TicTacToe() {
-  const [board, setBoard] = useState<(null | 'X' | 'O')[]>(Array(9).fill(null))
+  const [board, setBoard] = useState<(null | 'X' | 'O')[]>(new Array(9).fill(null))
   const [xTurn, setXTurn] = useState(true)
   const [winner, setWinner] = useState<null | 'X' | 'O' | 'Draw'>(null)
 
@@ -45,7 +45,7 @@ export default function TicTacToe() {
   }
 
   const reset = () => {
-    setBoard(Array(9).fill(null))
+    setBoard(new Array(9).fill(null))
     setWinner(null)
     setXTurn(true)
   }

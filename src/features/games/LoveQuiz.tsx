@@ -23,7 +23,7 @@ const QUESTIONS = [
 ]
 
 export default function LoveQuiz() {
-  const [answers, setAnswers] = useState<number[]>(Array(QUESTIONS.length).fill(-1))
+  const [answers, setAnswers] = useState<number[]>(new Array(QUESTIONS.length).fill(-1))
   const [submitted, setSubmitted] = useState(false)
 
   const handleSelect = (qi: number, oi: number) => {

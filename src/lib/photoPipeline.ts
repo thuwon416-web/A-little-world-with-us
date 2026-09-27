@@ -48,7 +48,7 @@ export async function generateThumbnail(
   maxSize: number = 400
 ): Promise<Blob> {
   const img = new Image()
-  const url = file instanceof File ? URL.createObjectURL(file) : URL.createObjectURL(file)
+  const url = URL.createObjectURL(file)
 
   return new Promise((resolve) => {
     img.onload = () => {

@@ -98,7 +98,9 @@ export default function OurStorySection() {
           ) : null}
           {tab === 'telegram' ? <TelegramArchive coupleId={coupleId} /> : null}
           {category ? (
-            <Text style={styles.filterNote}>Category shortcut: {category.replace(/_/g, ' ')}</Text>
+            <Text style={styles.filterNote}>
+              Category shortcut: {category.replaceAll('_', ' ')}
+            </Text>
           ) : null}
         </View>
       )}

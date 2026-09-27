@@ -88,7 +88,7 @@ export async function encryptMessage(text: string, key: CryptoKey): Promise<stri
   combined.set(CHAT_FORMAT_MAGIC, 0)
   combined.set(iv, CHAT_FORMAT_MAGIC.length)
   combined.set(new Uint8Array(ciphertext), CHAT_FORMAT_MAGIC.length + iv.length)
-  return btoa(String.fromCharCode(...combined))
+  return btoa(String.fromCodePoint(...combined))
 }
 
 /**
@@ -99,7 +99,7 @@ export async function decryptMessage(
   newKey: CryptoKey,
   coupleId: string
 ): Promise<string> {
-  const combined = Uint8Array.from(atob(encrypted), (c) => c.charCodeAt(0))
+  const combined = Uint8Array.from(atob(encrypted), (c) => c.codePointAt(0) ?? 0)
   const decoder = new TextDecoder()
   
   const hasMagic = CHAT_FORMAT_MAGIC.every((byte, index) => combined[index] === byte)

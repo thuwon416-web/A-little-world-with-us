@@ -28,7 +28,7 @@ function decodeVapidKey(base64Key: string) {
   const padding = '='.repeat((4 - (base64Key.length % 4)) % 4)
   const base64 = `${base64Key}${padding}`.replace(/-/g, '+').replace(/_/g, '/')
   const raw = window.atob(base64)
-  return Uint8Array.from(raw, (character) => character.charCodeAt(0))
+  return Uint8Array.from(raw, (character) => character.codePointAt(0) ?? 0)
 }
 
 /** Register this browser's worker, then save the subscription to the signed-in account. */

@@ -74,7 +74,7 @@ export default function DateArchive() {
             <div className="flex items-center justify-between gap-3">
               <div className="font-medium text-text-1">{entry.title}</div>
               <div className="flex items-center gap-1 text-accent-2">
-                {[...Array(5)].map((_, index) => (
+                {[...new Array(5)].map((_, index) => (
                   <Star
                     key={index}
                     className={`w-3.5 h-3.5 ${index < entry.rating ? 'fill-current' : 'opacity-40'}`}

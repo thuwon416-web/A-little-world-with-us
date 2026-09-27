@@ -97,7 +97,7 @@ function base64Encode(bytes: Uint8Array): string {
   let binary = ''
   const len = bytes.byteLength
   for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i])
+    binary += String.fromCodePoint(bytes[i])
   }
   return btoa(binary)
 }
@@ -109,7 +109,7 @@ function base64Decode(base64: string): Uint8Array {
   const binary = atob(base64)
   const bytes = new Uint8Array(binary.length)
   for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i)
+    bytes[i] = binary.codePointAt(i) ?? 0
   }
   return bytes
 }

@@ -145,7 +145,7 @@ export default function SharedWishlist() {
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={secret} onChange={(e) => setSecret(e.target.checked)} />
-          Secret gift
+          <span>Secret gift</span>
         </label>
         <button onClick={addItem} className="glass-button w-full text-sm">
           Add to wishlist

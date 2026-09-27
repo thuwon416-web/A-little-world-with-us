@@ -7,7 +7,7 @@ import { MapPin } from 'lucide-react'
 import { supabase, type Memory } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui/empty-state'
 
-const Map = dynamic(() => import('@/features/memories/MemoryMap'), { ssr: false, loading: () => <div className="h-[70vh] animate-pulse rounded-panel bg-soft-tint" /> })
+const MemoryMapView = dynamic(() => import('@/features/memories/MemoryMap'), { ssr: false, loading: () => <div className="h-[70vh] animate-pulse rounded-panel bg-soft-tint" /> })
 
 export default function MemoryMapContent() {
   const router = useRouter()
@@ -56,7 +56,7 @@ export default function MemoryMapContent() {
       {loading ? <div className="h-96 animate-pulse rounded-panel bg-card" aria-label="Loading memory map" /> : !coupleId ? (
         <EmptyState icon={MapPin} title="Link your partner to see your shared map" description="Your located memories will appear here after you connect your accounts." action={{ label: 'Link your partner', onClick: () => router.push('/couple-linking') }} />
       ) : memories.length ? (
-        <Map memories={memories} coupleId={coupleId} />
+        <MemoryMapView memories={memories} coupleId={coupleId} />
       ) : (
         <EmptyState icon={MapPin} title="No located memories yet" description="Add a location when you save a memory to place it on your shared map." action={{ label: 'Add a located memory', onClick: () => router.push('/memories') }} />
       )}

@@ -75,7 +75,7 @@ function MemoryCard({ memory }: { memory: RelationshipMemory }) {
           })()}
           <View style={styles.flex}>
             <Text style={[styles.category, { color: colors.textPrimary }]} numberOfLines={1}>
-              {memory.category.replace(/_/g, ' ')}
+              {memory.category.replaceAll('_', ' ')}
             </Text>
             <Text style={[styles.date, { color: colors.accent2 }]}>
               {formatMemoryDate(memory.date_time)}

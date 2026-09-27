@@ -321,7 +321,7 @@ export async function exportSettingsData(
   const rows = (data ?? []) as Record<string, unknown>[]
   if (!rows.length) return 'No records found.'
   const columns = Object.keys(rows[0])
-  const escape = (value: unknown) => `"${String(value ?? '').replace(/"/g, '""')}"`
+  const escape = (value: unknown) => `"${String(value ?? '').replaceAll('"', '""')}"`
   return [
     columns.join(','),
     ...rows.map((row) => columns.map((column) => escape(row[column])).join(',')),

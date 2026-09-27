@@ -33,11 +33,11 @@ function asBufferSource(data: Uint8Array): ArrayBuffer {
 }
 
 export function b64encode(data: Uint8Array): string {
-  return btoa(String.fromCharCode(...data))
+  return btoa(String.fromCodePoint(...data))
 }
 
 export function b64decode(value: string): Uint8Array {
-  return Uint8Array.from(atob(value), (character) => character.charCodeAt(0))
+  return Uint8Array.from(atob(value), (character) => character.codePointAt(0) ?? 0)
 }
 
 export function generateSalt(): string {

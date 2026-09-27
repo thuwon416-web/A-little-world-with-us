@@ -94,7 +94,7 @@ function Categories({
               const Icon = icons[category] ?? MessageCircle
               return <Icon color={colors.accent1} size={28} />
             })()}
-            <Text style={styles.name}>{category.replace(/_/g, ' ')}</Text>
+            <Text style={styles.name}>{category.replaceAll('_', ' ')}</Text>
             <Text style={styles.count}>{count}</Text>
           </TouchableOpacity>
           {expanded === category ? (

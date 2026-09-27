@@ -82,7 +82,7 @@ export default function GamesScreen() {
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
-  const [board, setBoard] = useState<string[]>(Array(9).fill(''))
+  const [board, setBoard] = useState<string[]>(new Array(9).fill(''))
   const [xNext, setXNext] = useState(true)
   const [loveScore, setLoveScore] = useState(0)
 
@@ -156,7 +156,7 @@ export default function GamesScreen() {
           <TouchableOpacity
             style={[styles.button, { backgroundColor: colors.accent1 }]}
             onPress={() => {
-              setBoard(Array(9).fill(''))
+              setBoard(new Array(9).fill(''))
               setXNext(true)
             }}
           >

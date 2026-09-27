@@ -81,7 +81,7 @@ export default function SettleUpModal({
         </p>
 
         <label className="mt-5 block text-sm font-medium text-text-1">
-          Amount
+          <span>Amount</span>
           <input
             type="number"
             min="1"

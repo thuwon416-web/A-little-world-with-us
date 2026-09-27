@@ -695,7 +695,7 @@ export default function SettingsScreen() {
                 originWhitelist={['*']}
                 javaScriptEnabled={false}
                 source={{
-                  html: `<html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;display:grid;place-items:center;height:100vh;background:white"><img width="220" height="220" src="${mfaQrCode.replaceAll(/"/g, '&quot;')}" /></body></html>`,
+                  html: `<html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;display:grid;place-items:center;height:100vh;background:white"><img width="220" height="220" src="${mfaQrCode.replaceAll('"', '&quot;')}" /></body></html>`,
                 }}
                 style={styles.qrPreview}
               />

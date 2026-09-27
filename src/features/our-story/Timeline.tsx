@@ -59,7 +59,7 @@ function Timeline({ coupleId }: { coupleId: string }) {
   return (
     <div className="space-y-6">
       <label className="flex items-center gap-3 text-sm text-text-2">
-        Filter by year
+        <span>Filter by year</span>
         <select value={year} onChange={(event) => setYear(event.target.value)} className="rounded-xl border border-accent-1/20 bg-card px-3 py-2 text-text-1">
           <option value="all">All years</option>
           {years.map((item) => <option key={item} value={item}>{item}</option>)}
