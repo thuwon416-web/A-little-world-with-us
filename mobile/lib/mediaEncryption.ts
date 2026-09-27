@@ -76,7 +76,7 @@ export async function downloadDecryptAndCache(
     cachePath,
     arrayBufferToBase64(new Uint8Array(decrypted).buffer),
     {
-    encoding: FileSystem.EncodingType.Base64,
+      encoding: FileSystem.EncodingType.Base64,
     }
   )
 

@@ -14,10 +14,18 @@ import { supabase } from '@/lib/supabase'
 import { getSharingStatus, startLocationTracking } from '@/services/location'
 
 if (typeof globalThis.TextEncoder === 'undefined') {
-  Object.defineProperty(globalThis, 'TextEncoder', { value: TextEncoder, configurable: true, writable: true })
+  Object.defineProperty(globalThis, 'TextEncoder', {
+    value: TextEncoder,
+    configurable: true,
+    writable: true,
+  })
 }
 if (typeof globalThis.TextDecoder === 'undefined') {
-  Object.defineProperty(globalThis, 'TextDecoder', { value: TextDecoder, configurable: true, writable: true })
+  Object.defineProperty(globalThis, 'TextDecoder', {
+    value: TextDecoder,
+    configurable: true,
+    writable: true,
+  })
 }
 
 class ErrorBoundary extends React.Component<

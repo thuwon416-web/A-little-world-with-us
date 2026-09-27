@@ -38,11 +38,7 @@ export default function PasswordCard({
     try {
       if (!data)
         setData(
-          await decryptCredential(
-            credential.encryptedPayload,
-            credential.encryptionIv,
-            masterKey
-          )
+          await decryptCredential(credential.encryptedPayload, credential.encryptionIv, masterKey)
         )
       setRevealed(true)
       setTimeout(() => setRevealed(false), 30_000)

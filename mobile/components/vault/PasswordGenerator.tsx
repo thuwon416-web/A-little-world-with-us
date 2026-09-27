@@ -60,7 +60,9 @@ export default function PasswordGenerator({
     setGenerationError('')
     void generate().catch((caught: unknown) => {
       if (active) {
-        setGenerationError(caught instanceof Error ? caught.message : 'Unable to generate a password securely.')
+        setGenerationError(
+          caught instanceof Error ? caught.message : 'Unable to generate a password securely.'
+        )
       }
     })
 

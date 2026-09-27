@@ -3,7 +3,13 @@ import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
 
 import SecondaryPage, { secondaryStyles as s } from '@/components/SecondaryPage'
 import { useTheme } from '@/context/ThemeContext'
-import { acceptLink, createLinkInvite, declineLink, getContext, unlinkCoupleLink } from '@/services/secondary'
+import {
+  acceptLink,
+  createLinkInvite,
+  declineLink,
+  getContext,
+  unlinkCoupleLink,
+} from '@/services/secondary'
 
 type CoupleLinkContext = Awaited<ReturnType<typeof getContext>>
 
@@ -99,7 +105,11 @@ export default function CoupleLinkingScreen() {
         ) : null}
       </View>
       {!context?.link ? (
-        <TouchableOpacity style={s.button} onPress={() => void createInvite()} disabled={isCreating}>
+        <TouchableOpacity
+          style={s.button}
+          onPress={() => void createInvite()}
+          disabled={isCreating}
+        >
           <Text style={s.buttonText}>{isCreating ? 'Creating…' : 'Create invite code'}</Text>
         </TouchableOpacity>
       ) : null}
