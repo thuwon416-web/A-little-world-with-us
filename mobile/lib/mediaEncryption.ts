@@ -59,7 +59,7 @@ export async function downloadDecryptAndCache(
   coupleId: string,
   bucket: string,
   path: string,
-  mimeType: string
+  _mimeType: string
 ): Promise<string> {
   const { data, error } = await supabase.storage.from(bucket).download(path)
   if (error) throw error

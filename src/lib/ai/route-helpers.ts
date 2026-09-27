@@ -1,11 +1,63 @@
+import { type NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
+import { checkRateLimit } from '@/lib/rate-limit'
+
+type AiRouteAuthContext = {
+  userId: string
+  supabase: ReturnType<typeof createServerClient>
+}
 
 export const AI_ROUTE_RATE_LIMIT = {
   limit: 10,
   windowMs: 60_000,
 } as const
 
-export const MAX_TOKENS = 800
+export const AI_COMPLETION_BUDGET = 800
+
+export function withAiRouteAuth(
+  handler: (request: NextRequest, context: AiRouteAuthContext) => Promise<NextResponse>
+) {
+  return async function handleAiRoute(request: NextRequest): Promise<NextResponse> {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll() {
+            // Handle cookie updates if needed
+          },
+        },
+      }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      )
+    }
+
+    const rateLimitResult = await checkRateLimit(
+      user.id,
+      AI_ROUTE_RATE_LIMIT.limit,
+      AI_ROUTE_RATE_LIMIT.windowMs
+    )
+    if (!rateLimitResult.allowed) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded. Try again later.' },
+        { status: 429 }
+      )
+    }
+
+    return handler(request, { userId: user.id, supabase })
+  }
+}
 
 export type AiRouteProvider = 'groq' | 'gemini'
 

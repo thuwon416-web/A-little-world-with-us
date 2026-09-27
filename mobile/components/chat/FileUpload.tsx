@@ -17,7 +17,7 @@ type Props = {
 export function FileUpload({ visible, onClose, onFileSelect }: Props) {
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
-  const styles = createStyles(colors)
+  const styles = createStyles()
   const [file, setFile] = useState<ChatAttachment | null>(null)
   const [sending, setSending] = useState(false)
   const choose = async () => {
@@ -84,7 +84,7 @@ export function FileUpload({ visible, onClose, onFileSelect }: Props) {
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
+const createStyles = () =>
   StyleSheet.create({
     overlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
     card: { borderRadius: 24, padding: 20 },

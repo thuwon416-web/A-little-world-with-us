@@ -1,6 +1,7 @@
 import * as Crypto from 'expo-crypto'
 
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
+import { getAcceptedCoupleLink } from '@/services/couple-lookup'
 
 export type CallType = 'audio' | 'video'
 export type CallStatus = 'idle' | 'calling' | 'ringing' | 'in_call' | 'ended' | 'rejected'
@@ -46,12 +47,7 @@ export async function initiateCall(receiverId: string, type: CallType) {
     return null
   }
 
-  const { data: link, error: linkError } = await supabase
-    .from('couple_links')
-    .select('couple_id,inviter_id,accepted_by')
-    .eq('status', 'accepted')
-    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
-    .maybeSingle()
+  const { data: link, error: linkError } = await getAcceptedCoupleLink(supabase, user.id)
   if (
     linkError ||
     !link?.couple_id ||

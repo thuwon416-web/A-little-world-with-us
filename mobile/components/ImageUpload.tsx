@@ -10,7 +10,6 @@ import { supabase } from '@/lib/supabase'
 
 export default function ImageUpload({
   onUpload,
-  folder = 'gallery',
   coupleId,
 }: {
   onUpload?: (image: {

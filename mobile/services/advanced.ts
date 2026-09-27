@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { getAcceptedCoupleLink } from '@/services/couple-lookup'
 
 export type FinanceBudget = {
   amount: number | string | null
@@ -50,12 +51,7 @@ async function context() {
     data: { user },
   } = await supabase.auth.getUser()
   if (!user) throw new Error('User not authenticated')
-  const { data, error } = await supabase
-    .from('couple_links')
-    .select('couple_id')
-    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
-    .eq('status', 'accepted')
-    .maybeSingle()
+  const { data, error } = await getAcceptedCoupleLink(supabase, user.id)
   if (error || !data?.couple_id) throw new Error('Link your partner before using shared features.')
   return { userId: user.id, coupleId: data.couple_id }
 }

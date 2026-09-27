@@ -1,13 +1,11 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
-import { checkRateLimit } from '@/lib/rate-limit'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import {
-  AI_ROUTE_RATE_LIMIT,
+  AI_COMPLETION_BUDGET,
   getAiResponseText,
-  MAX_TOKENS,
   optionalString,
+  withAiRouteAuth,
 } from '@/lib/ai/route-helpers'
 
 // Validation schema
@@ -20,45 +18,7 @@ const loveLetterSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    // 1. Session verification
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return req.cookies.getAll()
-          },
-          setAll() {
-            // Handle cookie updates if needed
-          },
-        },
-      }
-    )
-
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const userId = user.id
-
-    // 2. Rate limiting
-    const rateLimitResult = await checkRateLimit(
-      userId,
-      AI_ROUTE_RATE_LIMIT.limit,
-      AI_ROUTE_RATE_LIMIT.windowMs
-    )
-    if (!rateLimitResult.allowed) {
-      return NextResponse.json(
-        { error: 'Rate limit exceeded. Try again later.' },
-        { status: 429 }
-      )
-    }
+    return await withAiRouteAuth(async (req, { userId }) => {
 
     // 3. Parse and validate request
     const body = await req.json()
@@ -94,7 +54,7 @@ export async function POST(req: NextRequest) {
               content: `Write a love letter to ${validated.partnerName}. Relationship: ${validated.relationshipLength}. Memories: ${validated.specialMemories}. Tone: ${validated.tone}`,
             },
           ],
-          max_tokens: MAX_TOKENS,
+          max_tokens: AI_COMPLETION_BUDGET,
         }),
       })
     } else {
@@ -134,6 +94,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ loveLetter })
 
+    })(req)
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
