@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useId, useState, useEffect } from 'react'
 import { Lock, X } from 'lucide-react'
 
 export default function PINLockWidget({
@@ -17,6 +17,8 @@ export default function PINLockWidget({
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [error, setError] = useState('')
+  const pinInputId = useId()
+  const confirmPinInputId = useId()
 
   const closeModal = () => {
     setShowModal(false)
@@ -146,8 +148,9 @@ export default function PINLockWidget({
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-text-2">PIN (4-6 digits) *</label>
+                <label htmlFor={pinInputId} className="text-sm text-text-2">PIN (4-6 digits) *</label>
                 <input
+                  id={pinInputId}
                   type="password"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
@@ -158,8 +161,9 @@ export default function PINLockWidget({
               </div>
 
               <div>
-                <label className="text-sm text-text-2">Confirm PIN *</label>
+                <label htmlFor={confirmPinInputId} className="text-sm text-text-2">Confirm PIN *</label>
                 <input
+                  id={confirmPinInputId}
                   type="password"
                   value={confirmPin}
                   onChange={(e) => setConfirmPin(e.target.value)}

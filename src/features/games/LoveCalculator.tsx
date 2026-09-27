@@ -1,10 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Heart } from 'lucide-react'
 
 export default function LoveCalculator() {
+  const inputId = useId()
   const [trust, setTrust] = useState(84)
   const [laughter, setLaughter] = useState(92)
   const [adventure, setAdventure] = useState(76)
@@ -29,9 +30,9 @@ export default function LoveCalculator() {
       </div>
 
       <div className="space-y-3">
-        <label htmlFor="love-trust" className="block text-xs uppercase tracking-[0.15em] opacity-60">Trust</label>
+        <label htmlFor={`${inputId}-trust`} className="block text-xs uppercase tracking-[0.15em] opacity-60">Trust</label>
         <input
-          id="love-trust"
+          id={`${inputId}-trust`}
           type="range"
           min={0}
           max={100}
@@ -40,9 +41,9 @@ export default function LoveCalculator() {
           className="w-full"
         />
 
-        <label htmlFor="love-laughter" className="block text-xs uppercase tracking-[0.15em] opacity-60">Laughter</label>
+        <label htmlFor={`${inputId}-laughter`} className="block text-xs uppercase tracking-[0.15em] opacity-60">Laughter</label>
         <input
-          id="love-laughter"
+          id={`${inputId}-laughter`}
           type="range"
           min={0}
           max={100}
@@ -51,9 +52,9 @@ export default function LoveCalculator() {
           className="w-full"
         />
 
-        <label htmlFor="love-adventure" className="block text-xs uppercase tracking-[0.15em] opacity-60">Adventure</label>
+        <label htmlFor={`${inputId}-adventure`} className="block text-xs uppercase tracking-[0.15em] opacity-60">Adventure</label>
         <input
-          id="love-adventure"
+          id={`${inputId}-adventure`}
           type="range"
           min={0}
           max={100}
@@ -79,8 +80,9 @@ export default function LoveCalculator() {
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs uppercase tracking-[0.15em] opacity-60">Guess her answer</label>
+        <label htmlFor={`${inputId}-guess`} className="text-xs uppercase tracking-[0.15em] opacity-60">Guess her answer</label>
         <input
+          id={`${inputId}-guess`}
           value={guess}
           onChange={(e) => setGuess(e.target.value)}
           placeholder="What would she say?"

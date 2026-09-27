@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { Image as ImageIcon, Mic, Music, Paperclip, Smile, Video, X, Reply as ReplyIcon, Send, Edit2, Trash2 } from 'lucide-react'
 
 interface Message {
@@ -30,6 +30,7 @@ interface ReplyThreadProps {
 
 export default function ReplyThread({ message, currentUserId, onReply, onEdit, onDelete, onClose }: ReplyThreadProps) {
   const [replyText, setReplyText] = useState('')
+  const replyInputId = useId()
 
   const handleSendReply = () => {
     if (!replyText.trim()) return
@@ -112,10 +113,11 @@ export default function ReplyThread({ message, currentUserId, onReply, onEdit, o
 
           {/* Reply Input */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-text-1">
+            <label htmlFor={replyInputId} className="block text-sm font-medium text-text-1">
               Your reply
             </label>
             <textarea
+              id={replyInputId}
               value={replyText}
               onChange={(e) => setReplyText(e.target.value)}
               onKeyPress={handleKeyPress}

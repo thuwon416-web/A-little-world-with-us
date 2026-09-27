@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable @next/next/no-img-element -- This is a local data-URL upload preview. */
 
-import { useState, useRef } from 'react'
+import { useId, useState, useRef } from 'react'
 import Image from 'next/image'
 import { X, Upload, File as FileIcon, Image as ImageIcon, Film, Music, FileText, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -20,6 +20,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
   const [preview, setPreview] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const fileInputId = useId()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,10 +173,11 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
         <div className="p-4 space-y-4">
           {/* File Input */}
           <div>
-            <label className="block text-sm font-medium text-text-1 mb-2">
+            <label htmlFor={fileInputId} className="block text-sm font-medium text-text-1 mb-2">
               Select a file
             </label>
             <input
+              id={fileInputId}
               ref={fileInputRef}
               type="file"
               onChange={handleFileSelect}

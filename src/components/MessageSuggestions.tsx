@@ -57,13 +57,14 @@ export default function MessageSuggestions() {
       {suggestions.length > 0 && (
         <div className="mt-4 space-y-2">
           {suggestions.map((suggestion, i) => (
-            <div
+            <button
+              type="button"
               key={i}
-              className="p-3 bg-card rounded-lg border border-accent-1/10 cursor-pointer hover:bg-card/60 transition"
+              className="block w-full p-3 bg-card rounded-lg border border-accent-1/10 text-left cursor-pointer hover:bg-card/60 transition"
               onClick={() => copyToClipboard(suggestion)}
             >
               {suggestion}
-            </div>
+            </button>
           ))}
         </div>
       )}

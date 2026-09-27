@@ -59,8 +59,8 @@ export default function ChatHistoryExport() {
       </h3>
 
       <div className="space-y-3">
-        <div>
-          <label className="text-sm text-text-2">Date Range</label>
+        <fieldset>
+          <legend className="text-sm text-text-2">Date Range</legend>
           <div className="flex gap-2 mt-2">
             <button
               onClick={() => setDateRange('7d')}
@@ -93,7 +93,7 @@ export default function ChatHistoryExport() {
               All time
             </button>
           </div>
-        </div>
+        </fieldset>
 
         <button
           onClick={handleExport}

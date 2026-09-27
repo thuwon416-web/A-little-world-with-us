@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useId, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Gift, Sparkles } from 'lucide-react'
 
@@ -39,6 +39,7 @@ const gifts: Gift[] = [
 ]
 
 export default function GiftRecommender() {
+  const budgetInputId = useId()
   const [budget, setBudget] = useState(60)
   const [vibe, setVibe] = useState('romantic')
 
@@ -61,8 +62,9 @@ export default function GiftRecommender() {
       </div>
 
       <div className="space-y-3">
-        <label className="block text-xs uppercase tracking-[0.2em] opacity-60">Budget</label>
+        <label htmlFor={budgetInputId} className="block text-xs uppercase tracking-[0.2em] opacity-60">Budget</label>
         <input
+          id={budgetInputId}
           type="range"
           min={20}
           max={120}

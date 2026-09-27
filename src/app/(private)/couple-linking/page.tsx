@@ -268,14 +268,16 @@ function PendingState({
 
         {/* Code Display */}
         <div className="mb-6 space-y-3">
-          <div
+          <button
+            type="button"
+            aria-label="Copy invite code"
             onClick={onCopyCode}
             className="relative rounded-xl border-2 border-accent-1 bg-card/50 p-6 cursor-pointer transition hover:bg-card/80"
           >
-            <div className="font-mono text-4xl font-bold tracking-widest text-accent-1">
+            <span className="block font-mono text-4xl font-bold tracking-widest text-accent-1">
               {inviteCode}
-            </div>
-          </div>
+            </span>
+          </button>
           <button
             onClick={onCopyCode}
             className="w-full flex items-center justify-center gap-2 rounded-lg bg-card hover:bg-card px-4 py-3 text-text-1 transition"

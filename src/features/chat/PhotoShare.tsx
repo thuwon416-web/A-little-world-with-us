@@ -67,7 +67,15 @@ export default function PhotoShare({ onClose, onPhotoSelect }: Props) {
             </div>
           ) : (
             <div
+              role="button"
+              tabIndex={0}
               onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  fileInputRef.current?.click()
+                }
+              }}
               className="border-2 border-dashed border-accent-1/30 rounded-lg p-8 text-center cursor-pointer hover:bg-soft-tint"
             >
               <ImageIcon className="h-12 w-12 mx-auto mb-2 text-accent-1" />

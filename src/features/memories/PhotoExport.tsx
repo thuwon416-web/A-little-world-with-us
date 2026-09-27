@@ -95,7 +95,16 @@ export default function PhotoExport({ photos }: Props) {
         {photos.map(photo => (
           <div
             key={photo.id}
+            role="button"
+            tabIndex={0}
+            aria-pressed={selectedPhotos.has(photo.id)}
             onClick={() => togglePhoto(photo.id)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                togglePhoto(photo.id)
+              }
+            }}
             className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer ${
               selectedPhotos.has(photo.id)
                 ? 'ring-2 ring-accent-1'

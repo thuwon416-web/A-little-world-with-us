@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { Heart, Shuffle, Sparkles } from 'lucide-react'
 import LoveCalculator from '@/features/games/LoveCalculator'
 import { calculateLoveScore } from '@/lib/love-score'
@@ -13,6 +13,7 @@ type NameField = {
 }
 
 export default function LoveCalculatorMigrated() {
+  const nameInputId = useId()
   const [her, setHer] = useState('Meera')
   const [me, setMe] = useState('Aarav')
   const [values, setValues] = useState([92, 96, 88, 94, 90])
@@ -42,10 +43,11 @@ export default function LoveCalculatorMigrated() {
           Who&apos;s calculating?
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {nameFields.map(({ label, value, onChange }) => (
-            <label key={label} className="text-xs text-text-2">
+          {nameFields.map(({ label, value, onChange }, index) => (
+            <label key={label} htmlFor={`${nameInputId}-${index}`} className="text-xs text-text-2">
               <span className="mb-1.5 block">{label}</span>
               <input
+                id={`${nameInputId}-${index}`}
                 value={value}
                 onChange={(event) => onChange(event.target.value)}
                 className="w-full rounded-xl border border-accent-1/15 bg-card px-4 py-2.5 text-sm text-text-1 outline-none focus:border-accent-1"
@@ -75,12 +77,13 @@ export default function LoveCalculatorMigrated() {
         </div>
         <div className="flex flex-col gap-5">
           {factors.map((factor, index) => (
-            <label key={factor}>
+            <label key={factor} htmlFor={`${nameInputId}-factor-${index}`}>
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span className="text-text-2">{factor}</span>
                 <span className="font-semibold text-text-1">{values[index]}%</span>
               </div>
               <input
+                id={`${nameInputId}-factor-${index}`}
                 type="range"
                 min={0}
                 max={100}
