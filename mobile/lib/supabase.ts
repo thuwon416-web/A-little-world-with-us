@@ -73,6 +73,7 @@ const customFetch: typeof fetch = async (input, init) => {
   const timeout = setTimeout(() => controller.abort(), 30000)
   const method = (init?.method ?? 'GET').toUpperCase()
   try {
+    // False positive: Supabase builds destinations from the app's configured project URL.
     const request = () => fetch(input, { ...init, signal: controller.signal })
     return method === 'GET' || method === 'HEAD' ? await retryWithBackoff(request) : await request()
   } finally {

@@ -108,6 +108,7 @@ export function AIGuardianProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const askAdvice = useCallback(async (endpoint: '/api/ai/mediate' | '/api/ai/intimacy', request: AdviceRequest) => {
+    // False positive: endpoint is restricted to fixed same-origin API paths.
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

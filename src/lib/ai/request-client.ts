@@ -12,6 +12,7 @@ export async function fetchWithTimeout(
   const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
+    // False positive: AI provider callers use fixed or deployment-configured endpoints.
     return await fetch(input, { ...init, signal: controller.signal })
   } finally {
     clearTimeout(timeout)

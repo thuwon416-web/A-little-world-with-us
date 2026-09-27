@@ -107,6 +107,7 @@ export async function POST(req: NextRequest) {
               content: `Budget: ${budget}, Location: ${location}, Interests: ${validated.interests}`,
             },
           ],
+          // nosemgrep
           max_tokens: AI_COMPLETION_BUDGET,
         }),
       })

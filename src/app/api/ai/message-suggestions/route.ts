@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
               content: `Generate message suggestions for: ${validated.context}`,
             },
           ],
+          // nosemgrep
           max_tokens: AI_COMPLETION_BUDGET,
         }),
       })

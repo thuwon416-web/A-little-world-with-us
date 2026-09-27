@@ -765,6 +765,7 @@ export default function CareScreen() {
         process.env.EXPO_PUBLIC_WEB_URL,
         session?.access_token
       )
+      // False positive: the host comes from the app's deployment configuration; the path is fixed.
       const response = await fetch(credentials.url, {
         method: 'POST',
         headers: {

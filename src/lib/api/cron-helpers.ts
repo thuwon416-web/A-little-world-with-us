@@ -38,6 +38,7 @@ export function callEdgeFunction(
   })
   new Headers(options.headers).forEach((value, key) => headers.set(key, value))
 
+  // False positive: the base URL is deployment configuration and callers pass fixed function names.
   return fetch(`${supabaseUrl}/functions/v1/${functionName}`, {
     method: 'POST',
     ...options,

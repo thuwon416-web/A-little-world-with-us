@@ -20,6 +20,7 @@ function loadEnvFile(filePath) {
   }
 }
 
+// False positive: both environment-file paths are fixed relative to this script.
 loadEnvFile(path.join(__dirname, '..', '.env.local'))
 loadEnvFile(path.join(__dirname, '..', '.env'))
 

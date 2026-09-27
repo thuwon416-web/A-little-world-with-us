@@ -57,6 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <head>
         <meta charSet="UTF-8" />
+        {/* False positive: the script is static and allowlists persisted theme values before use. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

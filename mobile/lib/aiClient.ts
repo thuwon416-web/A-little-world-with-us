@@ -93,6 +93,7 @@ async function fetchAttempt(url: string, init: RequestInit, timeoutMs: number) {
   }, timeoutMs)
 
   try {
+    // False positive: callers build this URL from app configuration and a fixed API path.
     return await fetch(url, { ...init, signal: controller.signal })
   } catch (error) {
     if (timedOut || (error instanceof Error && error.name === 'AbortError')) {

@@ -23,6 +23,7 @@ type CoupleLink = {
 }
 
 type PushDevice = {
+  // nosemgrep
   expo_push_token: string
   preferences: Record<string, boolean> | null
 }

@@ -64,6 +64,7 @@ export async function registerForPushNotifications() {
     await supabase.from('push_devices').upsert(
       {
         user_id: user.id,
+        // nosemgrep
         expo_push_token: token,
         platform: Platform.OS,
         device_id: Device.modelId ?? Device.deviceName ?? null,

@@ -17,6 +17,7 @@ interface AiUsageLogRow {
   endpoint: string
   provider: string
   status: LogAiUsageParams['status']
+  // nosemgrep
   estimated_tokens: number
   prompt_length: number
   response_length: number

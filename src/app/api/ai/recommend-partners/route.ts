@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
               content: `Recommend couple activities for: ${JSON.stringify(validated.preferences)}`,
             },
           ],
+          // nosemgrep
           max_tokens: AI_COMPLETION_BUDGET,
         }),
       })

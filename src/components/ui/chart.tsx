@@ -64,7 +64,12 @@ const ChartContainer = React.forwardRef<
 ChartContainer.displayName = 'Chart'
 
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
-  const colorConfig = Object.entries(config).filter(([_, config]) => config.theme || config.color)
+  const colorConfig = Object.entries(config).filter(
+    ([key, itemConfig]) =>
+      /^[a-zA-Z0-9_-]+$/.test(key) &&
+      (isSafeCssColor(itemConfig.theme?.light) || isSafeCssColor(itemConfig.color) ||
+        isSafeCssColor(itemConfig.theme?.dark))
+  )
 
   if (!colorConfig.length) {
     return null
@@ -73,14 +78,15 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   return (
     <style
       dangerouslySetInnerHTML={{
+        // Config values are props, so validate CSS tokens and escape the selector ID before interpolation.
         __html: Object.entries(THEMES)
           .map(
             ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+${prefix} [data-chart="${escapeCssString(id)}"] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
+    return isSafeCssColor(color) ? `  --color-${key}: ${color};` : null
   })
   .join('\n')}
 }
@@ -90,6 +96,21 @@ ${colorConfig
       }}
     />
   )
+}
+
+function isSafeCssColor(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    /^(?:#(?:[\da-f]{3,4}|[\da-f]{6}|[\da-f]{8})|[a-z][a-z\d-]*|(?:rgb|rgba|hsl|hsla|hwb|lab|lch|oklab|oklch|color|color-mix|var)\([a-z\d\s.,%()+/-]*\))$/i.test(
+      value.trim()
+    )
+  )
+}
+
+function escapeCssString(value: string): string {
+  return value.replace(/[\u0000-\u001f\u007f"\\<>]/g, (character) => {
+    return `\\${character.codePointAt(0)!.toString(16)} `
+  })
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip

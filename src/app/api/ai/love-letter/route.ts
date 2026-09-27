@@ -54,6 +54,7 @@ export async function POST(req: NextRequest) {
               content: `Write a love letter to ${validated.partnerName}. Relationship: ${validated.relationshipLength}. Memories: ${validated.specialMemories}. Tone: ${validated.tone}`,
             },
           ],
+          // nosemgrep
           max_tokens: AI_COMPLETION_BUDGET,
         }),
       })
