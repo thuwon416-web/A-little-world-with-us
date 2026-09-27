@@ -26,6 +26,7 @@ import {
   saveSharedPeriodDates,
   getCareData,
   saveCareSettings,
+  type CareCheckIn,
   type CareLog,
   type CareSettings,
 } from '@/services/care'
@@ -98,6 +99,102 @@ const activityOptions = [
   'Cycling',
   'Walking',
 ]
+
+type CareData = {
+  logs: CareLog[]
+  settings: CareSettings
+  coupleId: string
+  userId: string
+}
+
+type CareCheckInDraft = Omit<CareCheckIn, 'periodStarted'> & {
+  periodStarted: boolean
+  overrideDate?: string
+}
+
+type IntimacyResponse = {
+  response?: string
+  consentDisclaimer?: string
+  error?: string
+}
+
+function getCycleSummary(data: CareData | null): NativeCycleSummary | null {
+  if (!data) return null
+  return calculateNativeCycleSummary(
+    data.logs.map((log) => ({
+      log_date: log.logDate,
+      period_day: log.periodDay,
+      mood: log.mood,
+      symptoms: log.symptoms,
+    })),
+    {
+      cycle_length: data.settings.cycleLength,
+      period_length: data.settings.periodLength,
+      last_period_start: data.settings.lastPeriodStart,
+    }
+  )
+}
+
+function createCareCheckIn(draft: CareCheckInDraft): CareCheckIn {
+  return {
+    mood: draft.mood || undefined,
+    symptoms: draft.symptoms,
+    sex: draft.sex,
+    discharge: draft.discharge,
+    digestion: draft.digestion,
+    pregnancyTest: draft.pregnancyTest,
+    ovulationTest: draft.ovulationTest || undefined,
+    contraceptives: draft.contraceptives,
+    activities: draft.activities,
+    waterIntake: draft.waterIntake,
+    weight: draft.weight,
+    basalTemp: draft.basalTemp,
+    notes: draft.notes || undefined,
+    periodStarted: draft.overrideDate ? true : draft.periodStarted,
+  }
+}
+
+function getToggledPeriodDates(logs: CareLog[], date: string): string[] {
+  const selected = new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
+  if (selected.has(date)) selected.delete(date)
+  else selected.add(date)
+  return [...selected]
+}
+
+function createCareExport(logs: CareLog[]): string {
+  const header = 'date,period,mood,symptoms,water,weight,basal_temperature,notes'
+  const rows = logs.map((log) =>
+    [
+      log.logDate,
+      log.periodDay,
+      log.mood ?? '',
+      `"${(log.symptoms ?? []).join('; ')}"`,
+      log.waterIntake ?? '',
+      log.weight ?? '',
+      log.basalTemp ?? '',
+      `"${(log.notes ?? '').replaceAll('"', '""')}"`,
+    ].join(',')
+  )
+  return [header, ...rows].join('\n')
+}
+
+function getIntimacyCredentials(
+  webUrl: string | undefined,
+  accessToken: string | undefined
+): { url: string; authorization: string } {
+  if (!webUrl || !accessToken) throw new Error('Please sign in again.')
+  return {
+    url: `${webUrl.replace(/\/$/, '')}/api/ai/intimacy`,
+    authorization: `Bearer ${accessToken}`,
+  }
+}
+
+function getIntimacyResult(responseOk: boolean, body: IntimacyResponse): string {
+  if (!responseOk || !body.response) {
+    throw new Error(body.error || 'AI advice is unavailable.')
+  }
+  return body.consentDisclaimer ? `${body.response}\n\n${body.consentDisclaimer}` : body.response
+}
 
 function Chips({
   options,
@@ -543,12 +640,7 @@ export default function CareScreen() {
   const [activeTab, setActiveTab] = useState<
     'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
   >('Today')
-  const [data, setData] = useState<{
-    logs: CareLog[]
-    settings: CareSettings
-    coupleId: string
-    userId: string
-  } | null>(null)
+  const [data, setData] = useState<CareData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -594,30 +686,12 @@ export default function CareScreen() {
   useEffect(() => {
     void refresh()
   }, [])
-  const summary = useMemo(
-    () =>
-      data
-        ? calculateNativeCycleSummary(
-            data.logs.map((log) => ({
-              log_date: log.logDate,
-              period_day: log.periodDay,
-              mood: log.mood,
-              symptoms: log.symptoms,
-            })),
-            {
-              cycle_length: data.settings.cycleLength,
-              period_length: data.settings.periodLength,
-              last_period_start: data.settings.lastPeriodStart,
-            }
-          )
-        : null,
-    [data]
-  )
+  const summary = useMemo(() => getCycleSummary(data), [data])
   const save = async (overrideDate?: string) => {
     if (!data) return
     try {
       setSaving(true)
-      const checkIn = {
+      const checkIn = createCareCheckIn({
         mood: mood || undefined,
         symptoms: selectedSymptoms,
         sex,
@@ -631,8 +705,9 @@ export default function CareScreen() {
         weight: weight ? Number(weight) : undefined,
         basalTemp: basalTemp ? Number(basalTemp) : undefined,
         notes: notes || undefined,
-        periodStarted: overrideDate ? true : periodDay,
-      }
+        periodStarted: periodDay,
+        overrideDate,
+      })
       if (overrideDate) await saveCareLogForDate(data.coupleId, data.userId, overrideDate, checkIn)
       else await saveTodayCareLog(checkIn)
       Alert.alert('Saved', 'Your shared Care log was saved.')
@@ -645,15 +720,9 @@ export default function CareScreen() {
   }
   const toggleSharedPeriodDate = async (date: string) => {
     if (!data) return
-    const selected = new Set(data.logs.filter((log) => log.periodDay).map((log) => log.logDate))
-    if (selected.has(date)) {
-      selected.delete(date)
-    } else {
-      selected.add(date)
-    }
     try {
       setSaving(true)
-      await saveSharedPeriodDates(data.coupleId, [...selected])
+      await saveSharedPeriodDates(data.coupleId, getToggledPeriodDates(data.logs, date))
       await refresh()
     } catch (error_) {
       Alert.alert(
@@ -681,20 +750,7 @@ export default function CareScreen() {
   }
   const exportData = async () => {
     if (!data) return
-    const header = 'date,period,mood,symptoms,water,weight,basal_temperature,notes'
-    const rows = data.logs.map((log) =>
-      [
-        log.logDate,
-        log.periodDay,
-        log.mood ?? '',
-        `"${(log.symptoms ?? []).join('; ')}"`,
-        log.waterIntake ?? '',
-        log.weight ?? '',
-        log.basalTemp ?? '',
-        `"${(log.notes ?? '').replaceAll('"', '""')}"`,
-      ].join(',')
-    )
-    await Share.share({ message: [header, ...rows].join('\n'), title: 'Care data export.csv' })
+    await Share.share({ message: createCareExport(data.logs), title: 'Care data export.csv' })
   }
   const askIntimacy = async () => {
     if (!intimacyMessage.trim() || intimacyLoading) return
@@ -705,27 +761,20 @@ export default function CareScreen() {
       const {
         data: { session },
       } = await supabase.auth.getSession()
-      const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
-      if (!webUrl || !session?.access_token) throw new Error('Please sign in again.')
-      const response = await fetch(`${webUrl}/api/ai/intimacy`, {
+      const credentials = getIntimacyCredentials(
+        process.env.EXPO_PUBLIC_WEB_URL,
+        session?.access_token
+      )
+      const response = await fetch(credentials.url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
+          Authorization: credentials.authorization,
         },
         body: JSON.stringify({ message: intimacyMessage.trim() }),
       })
-      const body = (await response.json()) as {
-        response?: string
-        consentDisclaimer?: string
-        error?: string
-      }
-      if (!response.ok || !body.response) {
-        throw new Error(body.error || 'AI advice is unavailable.')
-      }
-      setIntimacyResult(
-        body.consentDisclaimer ? `${body.response}\n\n${body.consentDisclaimer}` : body.response
-      )
+      const body = (await response.json()) as IntimacyResponse
+      setIntimacyResult(getIntimacyResult(response.ok, body))
     } catch (error_) {
       setIntimacyError(error_ instanceof Error ? error_.message : 'AI advice is unavailable.')
     } finally {

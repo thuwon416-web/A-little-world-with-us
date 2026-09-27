@@ -347,9 +347,9 @@ export default function RealtimeChat() {
       }
     }
 
-    void initChat().catch((caught: unknown) => {
+    void initChat().catch((error_: unknown) => {
       if (isMounted) {
-        setLoadError(caught instanceof Error ? caught.message : 'Unable to initialize chat.')
+        setLoadError(error_ instanceof Error ? error_.message : 'Unable to initialize chat.')
       }
     })
 
@@ -522,8 +522,8 @@ export default function RealtimeChat() {
       if (!isTranscriptResponse(data)) throw new Error('Transcription returned an invalid response.')
       if (!response.ok || !data.transcript) throw new Error(data.error ?? 'Unable to transcribe this voice message.')
       setMessages((current) => current.map((item) => item.id === message.id ? { ...item, transcript: data.transcript ?? null } : item))
-    } catch (caught) {
-      window.alert(caught instanceof Error ? caught.message : 'Unable to transcribe this voice message.')
+    } catch (error_) {
+      window.alert(error_ instanceof Error ? error_.message : 'Unable to transcribe this voice message.')
     }
   }
 

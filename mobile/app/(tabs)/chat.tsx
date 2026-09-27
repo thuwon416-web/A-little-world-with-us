@@ -69,6 +69,166 @@ function formatMessageTime(value: string) {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
+type RawChatRecord = { id: string; _get: (column: string) => unknown }
+type MessageLocation = { latitude: number; longitude: number; accuracy?: number }
+type MediaBucket = 'chat_photos' | 'voice_messages' | 'chat_files'
+
+function parseMessageLocation(value: unknown): MessageLocation | null {
+  if (typeof value !== 'string' || !value) return null
+  try {
+    return JSON.parse(value) as MessageLocation
+  } catch {
+    return null
+  }
+}
+
+function normalizeMessageType(value: unknown): ChatMessageType {
+  switch (value) {
+    case 'voice':
+    case 'photo':
+    case 'sticker':
+    case 'gif':
+    case 'file':
+    case 'video':
+    case 'audio':
+    case 'location':
+    case 'sos':
+      return value
+    default:
+      return 'text'
+  }
+}
+
+function getMediaBucket(type: ChatMessageType): MediaBucket | null {
+  switch (type) {
+    case 'photo':
+      return 'chat_photos'
+    case 'voice':
+    case 'audio':
+      return 'voice_messages'
+    case 'file':
+      return 'chat_files'
+    default:
+      return null
+  }
+}
+
+async function resolveMessageMediaUrl(
+  mediaUrl: unknown,
+  bucket: MediaBucket | null,
+  coupleId: string | null
+): Promise<string | null> {
+  if (bucket && typeof mediaUrl === 'string') {
+    if (isExternalUrl(mediaUrl)) return getChatMediaUrl(bucket, mediaUrl)
+    if (coupleId) {
+      return downloadDecryptAndCache(coupleId, bucket, mediaUrl, guessMimeTypeFromPath(mediaUrl))
+    }
+    return getChatMediaUrl(bucket, mediaUrl)
+  }
+  return typeof mediaUrl === 'string' ? mediaUrl : null
+}
+
+async function deserializeChatMessage(
+  record: RawChatRecord,
+  userId: string | undefined,
+  coupleId: string | null
+): Promise<ChatMessage> {
+  const serializedLocation = record._get('location_payload')
+  const location = parseMessageLocation(serializedLocation)
+  const content = record._get('content')
+  const createdAt = record._get('created_at')
+  const mediaUrl = record._get('media_url')
+  const mediaDuration = record._get('media_duration')
+  const replyTo = record._get('reply_to')
+  const encrypted = record._get('encrypted')
+  const encryptionVersion = record._get('encryption_version')
+  let displayContent = typeof content === 'string' ? content : ''
+
+  if (encrypted && encryptionVersion && coupleId && typeof content === 'string') {
+    try {
+      const key = await deriveChatKey(coupleId)
+      displayContent = await decryptMessage(content, key, coupleId)
+    } catch (error) {
+      console.error('Failed to decrypt message:', error)
+      displayContent = '[Encrypted message]'
+    }
+  }
+
+  const normalizedType = normalizeMessageType(record._get('message_type'))
+  const resolvedMediaUrl = await resolveMessageMediaUrl(
+    mediaUrl,
+    getMediaBucket(normalizedType),
+    coupleId
+  )
+  return {
+    id: record.id,
+    sender: (record._get('sender_id') === userId ? 'me' : 'them') as 'me' | 'them',
+    content: displayContent,
+    senderId:
+      typeof record._get('sender_id') === 'string' ? (record._get('sender_id') as string) : '',
+    text: displayContent,
+    time: formatMessageTime(
+      typeof createdAt === 'number' ? new Date(createdAt).toISOString() : new Date().toISOString()
+    ),
+    type: normalizedType,
+    messageType: normalizedType,
+    mediaUrl: resolvedMediaUrl,
+    mediaPath: typeof mediaUrl === 'string' ? mediaUrl : null,
+    mediaDuration: typeof mediaDuration === 'number' ? mediaDuration : null,
+    replyTo: typeof replyTo === 'string' ? replyTo : null,
+    createdAt:
+      typeof createdAt === 'number' ? new Date(createdAt).toISOString() : new Date().toISOString(),
+    location,
+  }
+}
+
+async function deserializeChatMessages(
+  records: RawChatRecord[],
+  userId: string | undefined,
+  coupleId: string | null
+): Promise<ChatMessage[]> {
+  return Promise.all(records.map((record) => deserializeChatMessage(record, userId, coupleId)))
+}
+
+function createLocationRecordWriter(
+  userId: string,
+  coupleId: string,
+  payload: MessageLocation,
+  synced: boolean
+): (record: unknown) => void {
+  return function assignLocationFields(record) {
+    const rawRecord = record as {
+      content: string
+      sender_id: string
+      couple_id: string
+      created_at: number
+      synced: boolean
+      message_type: string
+      location_payload: string
+    }
+    rawRecord.content = 'Shared a location'
+    rawRecord.sender_id = userId
+    rawRecord.couple_id = coupleId
+    rawRecord.created_at = Date.now()
+    rawRecord.message_type = 'location'
+    rawRecord.location_payload = JSON.stringify(payload)
+    rawRecord.synced = synced
+  }
+}
+
+async function persistLocationMessage(
+  userId: string,
+  coupleId: string,
+  payload: MessageLocation,
+  synced: boolean
+): Promise<void> {
+  const createRecord = createLocationRecordWriter(userId, coupleId, payload, synced)
+  const writeRecord = async function writeLocationRecord() {
+    await database.get('messages').create(createRecord)
+  }
+  await database.write(writeRecord)
+}
+
 export default function ChatScreen() {
   const { user } = useAuth()
   const { colors } = useTheme()
@@ -95,107 +255,8 @@ export default function ChatScreen() {
       .query(Q.sortBy('created_at', 'asc'))
       .observe()
       .subscribe((records) => {
-        void Promise.all(
-          records.map(async (record) => {
-            const rawRecord = record as unknown as { id: string; _get: (column: string) => unknown }
-            const serializedLocation = rawRecord._get('location_payload')
-            let location: { latitude: number; longitude: number; accuracy?: number } | null = null
-            if (typeof serializedLocation === 'string' && serializedLocation) {
-              try {
-                location = JSON.parse(serializedLocation) as {
-                  latitude: number
-                  longitude: number
-                  accuracy?: number
-                }
-              } catch {
-                location = null
-              }
-            }
-            const content = rawRecord._get('content')
-            const createdAt = rawRecord._get('created_at')
-            const messageType = rawRecord._get('message_type')
-            const mediaUrl = rawRecord._get('media_url')
-            const mediaDuration = rawRecord._get('media_duration')
-            const replyTo = rawRecord._get('reply_to')
-            const encrypted = rawRecord._get('encrypted')
-            const encryptionVersion = rawRecord._get('encryption_version')
-
-            let displayContent = typeof content === 'string' ? content : ''
-
-            // Decrypt if encrypted
-            if (encrypted && encryptionVersion && coupleId && typeof content === 'string') {
-              try {
-                const key = await deriveChatKey(coupleId)
-                displayContent = await decryptMessage(content, key, coupleId)
-              } catch (error) {
-                console.error('Failed to decrypt message:', error)
-                displayContent = '[Encrypted message]'
-              }
-            }
-
-            const normalizedType: ChatMessageType =
-              messageType === 'voice' ||
-              messageType === 'photo' ||
-              messageType === 'sticker' ||
-              messageType === 'gif' ||
-              messageType === 'file' ||
-              messageType === 'video' ||
-              messageType === 'audio' ||
-              messageType === 'location' ||
-              messageType === 'sos'
-                ? messageType
-                : 'text'
-            const bucket =
-              normalizedType === 'photo'
-                ? 'chat_photos'
-                : normalizedType === 'voice' || normalizedType === 'audio'
-                  ? 'voice_messages'
-                  : normalizedType === 'file'
-                    ? 'chat_files'
-                    : null
-            const resolvedMediaUrl =
-              bucket && typeof mediaUrl === 'string'
-                ? isExternalUrl(mediaUrl)
-                  ? await getChatMediaUrl(bucket, mediaUrl)
-                  : coupleId
-                    ? await downloadDecryptAndCache(
-                        coupleId,
-                        bucket,
-                        mediaUrl,
-                        guessMimeTypeFromPath(mediaUrl)
-                      )
-                    : await getChatMediaUrl(bucket, mediaUrl)
-                : typeof mediaUrl === 'string'
-                  ? mediaUrl
-                  : null
-            return {
-              id: rawRecord.id,
-              sender: (rawRecord._get('sender_id') === user?.id ? 'me' : 'them') as 'me' | 'them',
-              content: displayContent,
-              senderId:
-                typeof rawRecord._get('sender_id') === 'string'
-                  ? (rawRecord._get('sender_id') as string)
-                  : '',
-              text: displayContent,
-              time: formatMessageTime(
-                typeof createdAt === 'number'
-                  ? new Date(createdAt).toISOString()
-                  : new Date().toISOString()
-              ),
-              type: normalizedType,
-              messageType: normalizedType,
-              mediaUrl: resolvedMediaUrl,
-              mediaPath: typeof mediaUrl === 'string' ? mediaUrl : null,
-              mediaDuration: typeof mediaDuration === 'number' ? mediaDuration : null,
-              replyTo: typeof replyTo === 'string' ? replyTo : null,
-              createdAt:
-                typeof createdAt === 'number'
-                  ? new Date(createdAt).toISOString()
-                  : new Date().toISOString(),
-              location,
-            }
-          })
-        ).then((nextMessages) => setMessages(nextMessages))
+        const rawRecords = records.map((record) => record as unknown as RawChatRecord)
+        void deserializeChatMessages(rawRecords, user?.id, coupleId).then(setMessages)
       })
 
     return () => subscription.unsubscribe()
@@ -296,26 +357,7 @@ export default function ChatScreen() {
         longitude: point.coords.longitude,
         accuracy: point.coords.accuracy ?? undefined,
       }
-      await database.write(async () => {
-        await database.get('messages').create((record) => {
-          const rawRecord = record as unknown as {
-            content: string
-            sender_id: string
-            couple_id: string
-            created_at: number
-            synced: boolean
-            message_type: string
-            location_payload: string
-          }
-          rawRecord.content = 'Shared a location'
-          rawRecord.sender_id = user.id
-          rawRecord.couple_id = coupleId
-          rawRecord.created_at = Date.now()
-          rawRecord.message_type = 'location'
-          rawRecord.location_payload = JSON.stringify(payload)
-          rawRecord.synced = !isOffline
-        })
-      })
+      await persistLocationMessage(user.id, coupleId, payload, !isOffline)
       if (!isOffline) await refresh()
     } catch {
       Alert.alert('Could not get location', 'Check GPS and try again.')
