@@ -97,6 +97,20 @@ export default function WatchTogetherScreen() {
     setPlaying(next)
     if (coupleId) await sendWatchSync(coupleId, next ? 'play' : 'pause', { position })
   }
+  const removeVideo = async (itemId: string) => {
+    await removeWatchlistItem(itemId)
+    setItems((old) => old.filter((row) => row.id !== itemId))
+  }
+  const confirmRemoveVideo = (item: WatchlistItem) => {
+    Alert.alert('Remove video?', item.title, [
+      { text: 'Cancel' },
+      {
+        text: 'Remove',
+        style: 'destructive',
+        onPress: removeVideo.bind(null, item.id),
+      },
+    ])
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -151,21 +165,7 @@ export default function WatchTogetherScreen() {
             <Text style={styles.itemTitle}>{item.title}</Text>
             <Text style={styles.muted}>Play together</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() =>
-              Alert.alert('Remove video?', item.title, [
-                { text: 'Cancel' },
-                {
-                  text: 'Remove',
-                  style: 'destructive',
-                  onPress: () =>
-                    void removeWatchlistItem(item.id).then(() =>
-                      setItems((old) => old.filter((row) => row.id !== item.id))
-                    ),
-                },
-              ])
-            }
-          >
+          <TouchableOpacity onPress={() => confirmRemoveVideo(item)}>
             <Text style={styles.remove}>Remove</Text>
           </TouchableOpacity>
         </View>

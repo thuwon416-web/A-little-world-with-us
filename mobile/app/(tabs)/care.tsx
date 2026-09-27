@@ -633,13 +633,298 @@ function HealthProfile() {
   )
 }
 
+type CareTab = 'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
+
+type TodayCareProps = {
+  summary: NativeCycleSummary
+  saving: boolean
+  mood: string
+  setMood: (value: string) => void
+  selectedSymptoms: string[]
+  sex: string[]
+  discharge: string[]
+  digestion: string[]
+  pregnancyTest: string[]
+  ovulationTest: string
+  contraceptives: string[]
+  activities: string[]
+  water: string
+  setWater: (value: string) => void
+  weight: string
+  setWeight: (value: string) => void
+  basalTemp: string
+  setBasalTemp: (value: string) => void
+  notes: string
+  setNotes: (value: string) => void
+  periodDay: boolean
+  setPeriodDay: (value: boolean | ((current: boolean) => boolean)) => void
+  onToggle: (current: string[], value: string, setter: (next: string[]) => void) => void
+  setSelectedSymptoms: (next: string[]) => void
+  setSex: (next: string[]) => void
+  setDischarge: (next: string[]) => void
+  setDigestion: (next: string[]) => void
+  setPregnancyTest: (next: string[]) => void
+  setOvulationTest: (value: string) => void
+  setContraceptives: (next: string[]) => void
+  setActivities: (next: string[]) => void
+  onSave: () => void
+}
+
+function TodayCareTab({
+  summary,
+  saving,
+  mood,
+  setMood,
+  selectedSymptoms,
+  sex,
+  discharge,
+  digestion,
+  pregnancyTest,
+  ovulationTest,
+  contraceptives,
+  activities,
+  water,
+  setWater,
+  weight,
+  setWeight,
+  basalTemp,
+  setBasalTemp,
+  notes,
+  setNotes,
+  periodDay,
+  setPeriodDay,
+  onToggle,
+  setSelectedSymptoms,
+  setSex,
+  setDischarge,
+  setDigestion,
+  setPregnancyTest,
+  setOvulationTest,
+  setContraceptives,
+  setActivities,
+  onSave,
+}: TodayCareProps) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors, sizes)
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <Text style={styles.eyebrow}>CYCLE CARE · SHARED WITH YOUR PARTNER</Text>
+      <Text style={styles.title}>Today</Text>
+      <View style={styles.hero}>
+        <Text style={styles.heroLabel}>CYCLE DAY</Text>
+        <Text style={styles.days}>{summary.day ?? '—'}</Text>
+        <Text style={styles.heroNote}>
+          {summary.nextPeriodStart
+            ? summary.nextPeriodStart === dateKey(new Date())
+              ? 'Period expected today'
+              : `Next period ${summary.nextPeriodStart}`
+            : 'Log a period to begin forecasting.'}
+        </Text>
+      </View>
+      <Card title="Mood">
+        <Chips
+          options={moods}
+          selected={mood ? [mood] : []}
+          onToggle={(value) => setMood(mood === value ? '' : value)}
+          tone="purple"
+        />
+      </Card>
+      <Card title="Symptoms">
+        <Chips
+          options={symptoms}
+          selected={selectedSymptoms}
+          onToggle={(value) => onToggle(selectedSymptoms, value, setSelectedSymptoms)}
+        />
+      </Card>
+      <Card title="Period day">
+        <Reminder
+          label="I am on my period today"
+          value={periodDay}
+          onChange={() => setPeriodDay((value) => !value)}
+        />
+      </Card>
+      <Card title="Sexual activity">
+        <Chips
+          options={sexOptions}
+          selected={sex}
+          onToggle={(value) => onToggle(sex, value, setSex)}
+        />
+      </Card>
+      <Card title="Contraception">
+        <Chips
+          options={contraceptionOptions}
+          selected={contraceptives}
+          onToggle={(value) => onToggle(contraceptives, value, setContraceptives)}
+          tone="green"
+        />
+      </Card>
+      <Card title="Discharge">
+        <Chips
+          options={dischargeOptions}
+          selected={discharge}
+          onToggle={(value) => onToggle(discharge, value, setDischarge)}
+          tone="purple"
+        />
+      </Card>
+      <Card title="Digestion">
+        <Chips
+          options={digestionOptions}
+          selected={digestion}
+          onToggle={(value) => onToggle(digestion, value, setDigestion)}
+        />
+      </Card>
+      <Card title="Pregnancy test">
+        <Chips
+          options={pregnancyOptions}
+          selected={pregnancyTest}
+          onToggle={(value) => onToggle(pregnancyTest, value, setPregnancyTest)}
+        />
+      </Card>
+      <Card title="Activities">
+        <Chips
+          options={activityOptions}
+          selected={activities}
+          onToggle={(value) => onToggle(activities, value, setActivities)}
+          tone="green"
+        />
+      </Card>
+      <Card title="Ovulation test">
+        <Chips
+          options={['Positive', 'Negative', "Didn't take"]}
+          selected={ovulationTest ? [ovulationTest] : []}
+          onToggle={(value) => setOvulationTest(ovulationTest === value ? '' : value)}
+        />
+      </Card>
+      <Card title="Daily details">
+        <TextInput
+          value={water}
+          onChangeText={setWater}
+          keyboardType="numeric"
+          placeholder="Water (ml)"
+          placeholderTextColor={colors.textSecondary}
+          style={styles.input}
+        />
+        <TextInput
+          value={weight}
+          onChangeText={setWeight}
+          keyboardType="decimal-pad"
+          placeholder="Weight (kg)"
+          placeholderTextColor={colors.textSecondary}
+          style={styles.input}
+        />
+        <TextInput
+          value={basalTemp}
+          onChangeText={setBasalTemp}
+          keyboardType="decimal-pad"
+          placeholder="Basal temperature (°C)"
+          placeholderTextColor={colors.textSecondary}
+          style={styles.input}
+        />
+        <TextInput
+          value={notes}
+          onChangeText={setNotes}
+          multiline
+          placeholder="Notes"
+          placeholderTextColor={colors.textSecondary}
+          style={[styles.input, styles.notes]}
+        />
+      </Card>
+      <TouchableOpacity
+        disabled={saving}
+        style={[styles.saveButton, saving && styles.disabled]}
+        onPress={onSave}
+      >
+        {saving ? (
+          <ActivityIndicator color={colors.background} />
+        ) : (
+          <Text style={styles.saveText}>Save shared daily log</Text>
+        )}
+      </TouchableOpacity>
+    </ScrollView>
+  )
+}
+
+type SettingsCareProps = {
+  cycleLength: string
+  setCycleLength: (value: string) => void
+  periodLength: string
+  setPeriodLength: (value: string) => void
+  lastPeriodStart: string
+  setLastPeriodStart: (value: string) => void
+  shareCycle: boolean
+  setShareCycle: (value: boolean | ((current: boolean) => boolean)) => void
+  onSave: () => void
+  onExport: () => void
+}
+
+function SettingsCareTab({
+  cycleLength,
+  setCycleLength,
+  periodLength,
+  setPeriodLength,
+  lastPeriodStart,
+  setLastPeriodStart,
+  shareCycle,
+  setShareCycle,
+  onSave,
+  onExport,
+}: SettingsCareProps) {
+  const { colors } = useTheme()
+  const styles = createStyles(colors, sizes)
+  return (
+    <ScrollView contentContainerStyle={styles.content}>
+      <Text style={styles.eyebrow}>CYCLE CARE</Text>
+      <Text style={styles.title}>Settings</Text>
+      <Card title="Cycle settings">
+        <TextInput
+          value={cycleLength}
+          onChangeText={setCycleLength}
+          keyboardType="numeric"
+          placeholder="Average cycle length (days)"
+          placeholderTextColor={colors.textSecondary}
+          style={styles.input}
+        />
+        <TextInput
+          value={periodLength}
+          onChangeText={setPeriodLength}
+          keyboardType="numeric"
+          placeholder="Average period length (days)"
+          placeholderTextColor={colors.textSecondary}
+          style={styles.input}
+        />
+        <TextInput
+          value={lastPeriodStart}
+          onChangeText={setLastPeriodStart}
+          placeholder="Last period start (YYYY-MM-DD)"
+          placeholderTextColor={colors.textSecondary}
+          style={styles.input}
+        />
+        <TouchableOpacity style={styles.saveButton} onPress={onSave}>
+          <Text style={styles.saveText}>Save cycle settings</Text>
+        </TouchableOpacity>
+      </Card>
+      <Card title="Privacy">
+        <Reminder
+          label="Share cycle data with partner"
+          value={shareCycle}
+          onChange={() => setShareCycle((value) => !value)}
+        />
+      </Card>
+      <Card title="Export">
+        <TouchableOpacity style={styles.secondaryButton} onPress={onExport}>
+          <Text style={styles.saveText}>Export cycle data (CSV)</Text>
+        </TouchableOpacity>
+      </Card>
+      <HealthProfile />
+    </ScrollView>
+  )
+}
+
 export default function CareScreen() {
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
-  const [activeTab, setActiveTab] = useState<
-    'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
-  >('Today')
+  const [activeTab, setActiveTab] = useState<CareTab>('Today')
   const [data, setData] = useState<CareData | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -897,186 +1182,53 @@ export default function CareScreen() {
       ) : activeTab === 'Reminders' ? (
         <Reminders />
       ) : activeTab === 'Settings' ? (
-        <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.eyebrow}>CYCLE CARE</Text>
-          <Text style={styles.title}>Settings</Text>
-          <Card title="Cycle settings">
-            <TextInput
-              value={cycleLength}
-              onChangeText={setCycleLength}
-              keyboardType="numeric"
-              placeholder="Average cycle length (days)"
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-            />
-            <TextInput
-              value={periodLength}
-              onChangeText={setPeriodLength}
-              keyboardType="numeric"
-              placeholder="Average period length (days)"
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-            />
-            <TextInput
-              value={lastPeriodStart}
-              onChangeText={setLastPeriodStart}
-              placeholder="Last period start (YYYY-MM-DD)"
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-            />
-            <TouchableOpacity style={styles.saveButton} onPress={() => void saveSettings()}>
-              <Text style={styles.saveText}>Save cycle settings</Text>
-            </TouchableOpacity>
-          </Card>
-          <Card title="Privacy">
-            <Reminder
-              label="Share cycle data with partner"
-              value={shareCycle}
-              onChange={() => setShareCycle((value) => !value)}
-            />
-          </Card>
-          <Card title="Export">
-            <TouchableOpacity style={styles.secondaryButton} onPress={() => void exportData()}>
-              <Text style={styles.saveText}>Export cycle data (CSV)</Text>
-            </TouchableOpacity>
-          </Card>
-          <HealthProfile />
-        </ScrollView>
+        <SettingsCareTab
+          cycleLength={cycleLength}
+          setCycleLength={setCycleLength}
+          periodLength={periodLength}
+          setPeriodLength={setPeriodLength}
+          lastPeriodStart={lastPeriodStart}
+          setLastPeriodStart={setLastPeriodStart}
+          shareCycle={shareCycle}
+          setShareCycle={setShareCycle}
+          onSave={() => void saveSettings()}
+          onExport={() => void exportData()}
+        />
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
-          <Text style={styles.eyebrow}>CYCLE CARE · SHARED WITH YOUR PARTNER</Text>
-          <Text style={styles.title}>Today</Text>
-          <View style={styles.hero}>
-            <Text style={styles.heroLabel}>CYCLE DAY</Text>
-            <Text style={styles.days}>{summary.day ?? '—'}</Text>
-            <Text style={styles.heroNote}>
-              {summary.nextPeriodStart
-                ? summary.nextPeriodStart === dateKey(new Date())
-                  ? 'Period expected today'
-                  : `Next period ${summary.nextPeriodStart}`
-                : 'Log a period to begin forecasting.'}
-            </Text>
-          </View>
-          <Card title="Mood">
-            <Chips
-              options={moods}
-              selected={mood ? [mood] : []}
-              onToggle={(value) => setMood(mood === value ? '' : value)}
-              tone="purple"
-            />
-          </Card>
-          <Card title="Symptoms">
-            <Chips
-              options={symptoms}
-              selected={selectedSymptoms}
-              onToggle={(value) => toggle(selectedSymptoms, value, setSelectedSymptoms)}
-            />
-          </Card>
-          <Card title="Period day">
-            <Reminder
-              label="I am on my period today"
-              value={periodDay}
-              onChange={() => setPeriodDay((value) => !value)}
-            />
-          </Card>
-          <Card title="Sexual activity">
-            <Chips
-              options={sexOptions}
-              selected={sex}
-              onToggle={(value) => toggle(sex, value, setSex)}
-            />
-          </Card>
-          <Card title="Contraception">
-            <Chips
-              options={contraceptionOptions}
-              selected={contraceptives}
-              onToggle={(value) => toggle(contraceptives, value, setContraceptives)}
-              tone="green"
-            />
-          </Card>
-          <Card title="Discharge">
-            <Chips
-              options={dischargeOptions}
-              selected={discharge}
-              onToggle={(value) => toggle(discharge, value, setDischarge)}
-              tone="purple"
-            />
-          </Card>
-          <Card title="Digestion">
-            <Chips
-              options={digestionOptions}
-              selected={digestion}
-              onToggle={(value) => toggle(digestion, value, setDigestion)}
-            />
-          </Card>
-          <Card title="Pregnancy test">
-            <Chips
-              options={pregnancyOptions}
-              selected={pregnancyTest}
-              onToggle={(value) => toggle(pregnancyTest, value, setPregnancyTest)}
-            />
-          </Card>
-          <Card title="Activities">
-            <Chips
-              options={activityOptions}
-              selected={activities}
-              onToggle={(value) => toggle(activities, value, setActivities)}
-              tone="green"
-            />
-          </Card>
-          <Card title="Ovulation test">
-            <Chips
-              options={['Positive', 'Negative', "Didn't take"]}
-              selected={ovulationTest ? [ovulationTest] : []}
-              onToggle={(value) => setOvulationTest(ovulationTest === value ? '' : value)}
-            />
-          </Card>
-          <Card title="Daily details">
-            <TextInput
-              value={water}
-              onChangeText={setWater}
-              keyboardType="numeric"
-              placeholder="Water (ml)"
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-            />
-            <TextInput
-              value={weight}
-              onChangeText={setWeight}
-              keyboardType="decimal-pad"
-              placeholder="Weight (kg)"
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-            />
-            <TextInput
-              value={basalTemp}
-              onChangeText={setBasalTemp}
-              keyboardType="decimal-pad"
-              placeholder="Basal temperature (°C)"
-              placeholderTextColor={colors.textSecondary}
-              style={styles.input}
-            />
-            <TextInput
-              value={notes}
-              onChangeText={setNotes}
-              multiline
-              placeholder="Notes"
-              placeholderTextColor={colors.textSecondary}
-              style={[styles.input, styles.notes]}
-            />
-          </Card>
-          <TouchableOpacity
-            disabled={saving}
-            style={[styles.saveButton, saving && styles.disabled]}
-            onPress={() => void save()}
-          >
-            {saving ? (
-              <ActivityIndicator color={colors.background} />
-            ) : (
-              <Text style={styles.saveText}>Save shared daily log</Text>
-            )}
-          </TouchableOpacity>
-        </ScrollView>
+        <TodayCareTab
+          summary={summary}
+          saving={saving}
+          mood={mood}
+          setMood={setMood}
+          selectedSymptoms={selectedSymptoms}
+          sex={sex}
+          discharge={discharge}
+          digestion={digestion}
+          pregnancyTest={pregnancyTest}
+          ovulationTest={ovulationTest}
+          contraceptives={contraceptives}
+          activities={activities}
+          water={water}
+          setWater={setWater}
+          weight={weight}
+          setWeight={setWeight}
+          basalTemp={basalTemp}
+          setBasalTemp={setBasalTemp}
+          notes={notes}
+          setNotes={setNotes}
+          periodDay={periodDay}
+          setPeriodDay={setPeriodDay}
+          onToggle={toggle}
+          setSelectedSymptoms={setSelectedSymptoms}
+          setSex={setSex}
+          setDischarge={setDischarge}
+          setDigestion={setDigestion}
+          setPregnancyTest={setPregnancyTest}
+          setOvulationTest={setOvulationTest}
+          setContraceptives={setContraceptives}
+          setActivities={setActivities}
+          onSave={() => void save()}
+        />
       )}
     </View>
   )

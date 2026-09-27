@@ -13,6 +13,53 @@ import {
 
 type CoupleLinkContext = Awaited<ReturnType<typeof getContext>>
 
+function getStatusLabel(context: CoupleLinkContext | null) {
+  if (context?.link?.status === 'accepted') return 'Linked and accepted'
+  if (context?.link?.status !== 'pending') return 'Not linked'
+  return context.link.inviter_id === context.user?.id ? 'Invitation sent' : 'Invitation received'
+}
+
+function getPartnerLabel(context: CoupleLinkContext | null) {
+  if (!context?.link) return 'No partner linked'
+  if (context.link.status === 'accepted') return 'Linked partner'
+  return context.link.inviter_id === context.user?.id ? 'Invitation recipient' : 'Invitation sender'
+}
+
+function showUnlinkConfirmation(onUnlink: () => void) {
+  Alert.alert('Unlink couple?', 'This revokes the accepted link.', [
+    { text: 'Cancel' },
+    { text: 'Unlink', style: 'destructive', onPress: onUnlink },
+  ])
+}
+
+type LinkStatusCardProps = {
+  context: CoupleLinkContext | null
+  onUnlink: () => void
+  onDecline: () => void
+}
+
+function LinkStatusCard({ context, onUnlink, onDecline }: LinkStatusCardProps) {
+  const accepted = context?.link?.status === 'accepted'
+  const isInviter = context?.link?.inviter_id === context?.user?.id
+
+  return (
+    <View style={s.card}>
+      <Text style={s.buttonText}>Status: {getStatusLabel(context)}</Text>
+      <Text style={s.muted}>Partner: {getPartnerLabel(context)}</Text>
+      {accepted ? (
+        <TouchableOpacity onPress={() => showUnlinkConfirmation(onUnlink)}>
+          <Text style={s.danger}>Unlink couple</Text>
+        </TouchableOpacity>
+      ) : null}
+      {context?.link?.status === 'pending' && !isInviter ? (
+        <TouchableOpacity onPress={onDecline}>
+          <Text style={s.danger}>Decline invitation</Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  )
+}
+
 export default function CoupleLinkingScreen() {
   const { colors } = useTheme()
   const [context, setContext] = useState<CoupleLinkContext | null>(null)
@@ -30,15 +77,6 @@ export default function CoupleLinkingScreen() {
   useEffect(() => {
     void load()
   }, [])
-  const accepted = context?.link?.status === 'accepted'
-  const isInviter = context?.link?.inviter_id === context?.user?.id
-  const statusLabel = accepted
-    ? 'Linked and accepted'
-    : context?.link?.status === 'pending'
-      ? isInviter
-        ? 'Invitation sent'
-        : 'Invitation received'
-      : 'Not linked'
   const createInvite = async () => {
     try {
       setIsCreating(true)
@@ -64,46 +102,15 @@ export default function CoupleLinkingScreen() {
       Alert.alert('Unable to link', error_ instanceof Error ? error_.message : 'Please try again.')
     }
   }
+  const unlink = () => {
+    void unlinkCoupleLink().then(load)
+  }
+  const decline = () => {
+    if (context?.link) void declineLink(context.link.id).then(load)
+  }
   return (
     <SecondaryPage title="Couple Linking">
-      <View style={s.card}>
-        <Text style={s.buttonText}>Status: {statusLabel}</Text>
-        <Text style={s.muted}>
-          Partner:{' '}
-          {context?.link
-            ? accepted
-              ? 'Linked partner'
-              : isInviter
-                ? 'Invitation recipient'
-                : 'Invitation sender'
-            : 'No partner linked'}
-        </Text>
-        {context?.link?.status === 'accepted' ? (
-          <TouchableOpacity
-            onPress={() =>
-              Alert.alert('Unlink couple?', 'This revokes the accepted link.', [
-                { text: 'Cancel' },
-                {
-                  text: 'Unlink',
-                  style: 'destructive',
-                  onPress: () => (context.link ? void unlinkCoupleLink().then(load) : undefined),
-                },
-              ])
-            }
-          >
-            <Text style={s.danger}>Unlink couple</Text>
-          </TouchableOpacity>
-        ) : null}
-        {context?.link?.status === 'pending' && context.link.inviter_id !== context.user?.id ? (
-          <TouchableOpacity
-            onPress={() =>
-              context.link ? void declineLink(context.link.id).then(load) : undefined
-            }
-          >
-            <Text style={s.danger}>Decline invitation</Text>
-          </TouchableOpacity>
-        ) : null}
-      </View>
+      <LinkStatusCard context={context} onUnlink={unlink} onDecline={decline} />
       {!context?.link ? (
         <TouchableOpacity
           style={s.button}

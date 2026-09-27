@@ -11,7 +11,7 @@ import Constants from 'expo-constants'
 import * as Linking from 'expo-linking'
 import * as Location from 'expo-location'
 import { Redirect } from 'expo-router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import {
   Alert,
   Modal,
@@ -122,6 +122,497 @@ const tabs = [
   'Safety/SOS',
 ] as const
 type Tab = (typeof tabs)[number]
+
+type LocationStyles = ReturnType<typeof createStyles>
+type CurrentLocation = ReturnType<typeof useLocation>['currentLocation']
+
+function renderLiveMapTab({
+  colors,
+  center,
+  routeShape,
+  history,
+  displayedRows,
+  savedPlaces,
+  userId,
+  styles,
+  hasAnyLocation,
+  error,
+  lastUpdated,
+  distanceKm,
+  onRefresh,
+}: {
+  colors: ThemeColors
+  center: [number, number]
+  routeShape: GeoJSON.Feature<GeoJSON.LineString>
+  history: LocationHistoryRow[]
+  displayedRows: LocationRow[]
+  savedPlaces: SavedPlace[]
+  userId: string | undefined
+  styles: LocationStyles
+  hasAnyLocation: boolean
+  error: string | null
+  lastUpdated: string | null
+  distanceKm: number | null
+  onRefresh: () => void
+}): ReactNode {
+  return (
+    <>
+      <MapView style={styles.map} mapStyle={mapStyle} logoEnabled={false} attributionEnabled>
+        <Camera
+          centerCoordinate={center}
+          zoomLevel={12}
+          animationDuration={450}
+          animationMode="easeTo"
+        />
+        {history.length > 1 ? (
+          <ShapeSource id="seven-day-route" shape={routeShape}>
+            <LineLayer
+              id="route-line"
+              style={{ lineColor: colors.accent1, lineWidth: 4, lineOpacity: 0.82 }}
+            />
+          </ShapeSource>
+        ) : null}
+        {displayedRows.map((row) => (
+          <PointAnnotation
+            id={row.user_id}
+            key={row.user_id}
+            coordinate={[row.longitude, row.latitude]}
+          >
+            <View style={styles.marker}>
+              <Text style={styles.markerText}>{row.user_id === userId ? 'You' : 'P'}</Text>
+            </View>
+          </PointAnnotation>
+        ))}
+        {displayedRows.map((row) =>
+          row.accuracy ? (
+            <ShapeSource
+              key={`${row.user_id}-accuracy`}
+              id={`${row.user_id}-accuracy`}
+              shape={{
+                type: 'Feature',
+                properties: {},
+                geometry: { type: 'Point', coordinates: [row.longitude, row.latitude] },
+              }}
+            >
+              <CircleLayer
+                id={`${row.user_id}-accuracy-circle`}
+                style={{
+                  circleRadius: Math.min(Math.max(row.accuracy / 2, 10), 50),
+                  circleColor: colors.accent1,
+                  circleOpacity: 0.15,
+                }}
+              />
+            </ShapeSource>
+          ) : null
+        )}
+        {savedPlaces.map((place) => (
+          <ShapeSource
+            key={`saved-place-${place.id}`}
+            id={`saved-place-${place.id}`}
+            shape={buildCirclePolygon(place.latitude, place.longitude, place.radius_meters)}
+          >
+            <FillLayer
+              id={`saved-place-fill-${place.id}`}
+              style={{
+                fillColor: colors.success,
+                fillOpacity: 0.15,
+              }}
+            />
+            <LineLayer
+              id={`saved-place-line-${place.id}`}
+              style={{
+                lineColor: colors.success,
+                lineWidth: 1.5,
+                lineOpacity: 0.7,
+              }}
+            />
+          </ShapeSource>
+        ))}
+        {savedPlaces.map((place) => (
+          <PointAnnotation
+            key={`saved-place-label-${place.id}`}
+            id={`saved-place-label-${place.id}`}
+            coordinate={[place.longitude, place.latitude]}
+          >
+            <View style={styles.savedPlaceLabel}>
+              <Text style={styles.savedPlaceLabelText}>{place.name}</Text>
+            </View>
+          </PointAnnotation>
+        ))}
+      </MapView>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>
+          {hasAnyLocation ? 'Live location' : 'Waiting for GPS data'}
+        </Text>
+        <Text style={styles.meta}>
+          {error ??
+            (lastUpdated
+              ? `Your last device sync: ${new Date(lastUpdated).toLocaleString()}`
+              : 'Each person must enable sharing in Settings > Privacy.')}
+        </Text>
+        {distanceKm !== null ? (
+          <Text style={styles.distance}>{distanceKm.toFixed(1)} km apart</Text>
+        ) : null}
+        <TouchableOpacity style={styles.button} onPress={onRefresh}>
+          <Text style={styles.buttonText}>Refresh my device</Text>
+        </TouchableOpacity>
+      </View>
+    </>
+  )
+}
+
+function renderTimelineTab(history: LocationHistoryRow[], styles: LocationStyles): ReactNode {
+  return (
+    <ScrollView contentContainerStyle={styles.list}>
+      {history
+        .slice()
+        .reverse()
+        .slice(0, 50)
+        .map((entry) => (
+          <View key={`${entry.captured_at}-${entry.latitude}`} style={styles.listItem}>
+            <Text style={styles.cardTitle}>{entry.place_label ?? 'Location update'}</Text>
+            <Text style={styles.meta}>{new Date(entry.captured_at).toLocaleString()}</Text>
+          </View>
+        ))}
+      {!history.length ? <Empty label="No location history in the last seven days." /> : null}
+    </ScrollView>
+  )
+}
+
+function renderDeviceStatusTab(
+  rows: LocationRow[],
+  currentLocation: CurrentLocation,
+  userId: string | undefined,
+  styles: LocationStyles
+): ReactNode {
+  return (
+    <ScrollView contentContainerStyle={styles.list}>
+      {rows.map((row) => (
+        <View key={row.user_id} style={styles.listItem}>
+          <Text style={styles.cardTitle}>
+            {row.user_id === userId ? 'Your device' : 'Partner device'}
+          </Text>
+          <Text style={styles.meta}>
+            {row.place_label ?? 'Address pending'} · {row.device_name ?? 'Unknown device'} ·{' '}
+            {row.battery_level ?? '—'}% · {row.is_charging ? 'charging' : 'not charging'} ·{' '}
+            {row.network_type ?? 'offline'} · {new Date(row.updated_at).toLocaleString()}
+          </Text>
+          <Text style={styles.meta}>
+            App version: {APP_VERSION} · Accuracy:{' '}
+            {row.user_id === userId
+              ? (currentLocation?.accuracy ?? row.accuracy) === null
+                ? 'Not reported'
+                : `±${Math.round(currentLocation?.accuracy ?? row.accuracy ?? 0)}m`
+              : row.accuracy === null
+                ? 'Not reported'
+                : `±${Math.round(row.accuracy)}m`}
+          </Text>
+        </View>
+      ))}
+      {!rows.length ? <Empty label="No linked device has shared a location yet." /> : null}
+    </ScrollView>
+  )
+}
+
+function renderGeofenceEvents(
+  geofenceEvents: GeofenceEvent[],
+  savedPlaces: SavedPlace[],
+  userId: string | undefined,
+  styles: LocationStyles
+): ReactNode {
+  if (geofenceEvents.length === 0) {
+    return <Empty label="No geofence events yet." />
+  }
+  return geofenceEvents.map((event) => {
+    const place = savedPlaces.find((savedPlace) => savedPlace.id === event.saved_place_id)
+    const isYou = event.user_id === userId
+    const direction = event.event_type === 'entered' ? 'Arrived at' : 'Left'
+    const when = new Date(event.occurred_at).toLocaleString()
+    return (
+      <View key={event.id} style={styles.listItem}>
+        <Text style={styles.cardTitle}>
+          {isYou ? 'You' : 'Partner'} {direction} {place?.name ?? 'a saved place'}
+        </Text>
+        <Text style={styles.meta}>{when}</Text>
+        {!event.notified ? <Text style={styles.meta}>Notified: pending</Text> : null}
+      </View>
+    )
+  })
+}
+
+function renderSavedPlacesTab({
+  savedPlaces,
+  geofenceEvents,
+  userId,
+  styles,
+  onAdd,
+  onEdit,
+  onDelete,
+}: {
+  savedPlaces: SavedPlace[]
+  geofenceEvents: GeofenceEvent[]
+  userId: string | undefined
+  styles: LocationStyles
+  onAdd: () => void
+  onEdit: (place: SavedPlace) => void
+  onDelete: (place: SavedPlace) => void
+}): ReactNode {
+  return (
+    <ScrollView contentContainerStyle={styles.list}>
+      <TouchableOpacity style={styles.button} onPress={onAdd}>
+        <Text style={styles.buttonText}>Add place from current location</Text>
+      </TouchableOpacity>
+      {savedPlaces.map((place) => (
+        <View key={place.id} style={styles.listItem}>
+          <Text style={styles.cardTitle}>{place.name}</Text>
+          <Text style={styles.meta}>Safe zone · {place.radius_meters}m radius</Text>
+          <TouchableOpacity onPress={() => onEdit(place)}>
+            <Text style={styles.meta}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => onDelete(place)}>
+            <Text style={styles.danger}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+      {!savedPlaces.length ? <Empty label="No saved places yet." /> : null}
+      <View style={styles.eventsSection}>
+        <Text style={styles.cardTitle}>Geofence events</Text>
+        {renderGeofenceEvents(geofenceEvents, savedPlaces, userId, styles)}
+      </View>
+    </ScrollView>
+  )
+}
+
+function renderAppCallsTab(calls: CallEvent[], styles: LocationStyles): ReactNode {
+  return (
+    <ScrollView contentContainerStyle={styles.list}>
+      {calls.map((call) => (
+        <View key={call.id} style={styles.listItem}>
+          <Text style={styles.cardTitle}>
+            {call.type === 'video' ? 'Video call' : 'Audio call'} · {call.status}
+          </Text>
+          <Text style={styles.meta}>{new Date(call.created_at).toLocaleString()}</Text>
+        </View>
+      ))}
+      {!calls.length ? (
+        <Empty label="No in-app call events yet. Phone and Telegram call logs are never collected." />
+      ) : null}
+    </ScrollView>
+  )
+}
+
+function renderCheckins(checkins: SafetyCheckin[], styles: LocationStyles): ReactNode {
+  return checkins.slice(0, 5).map((checkin) => (
+    <View key={checkin.id} style={styles.listItem}>
+      <Text style={styles.cardTitle}>
+        {checkin.checkinType.replace('_', ' ')} · {checkin.status}
+      </Text>
+      <Text style={styles.meta}>
+        {new Date(checkin.createdAt).toLocaleString()}
+        {checkin.expectedUntil
+          ? ` · expected by ${new Date(checkin.expectedUntil).toLocaleString()}`
+          : ''}
+      </Text>
+    </View>
+  ))
+}
+
+function renderSosCard({
+  colors,
+  styles,
+  coupleId,
+  sosSending,
+  sosSentAt,
+  sosLocation,
+  sosError,
+  locationPermissionDenied,
+  onConfirm,
+}: {
+  colors: ThemeColors
+  styles: LocationStyles
+  coupleId: string | null
+  sosSending: boolean
+  sosSentAt: string | null
+  sosLocation: { latitude: number; longitude: number; accuracy: number | null } | null
+  sosError: string
+  locationPermissionDenied: boolean
+  onConfirm: () => void
+}): ReactNode {
+  return (
+    <View style={[styles.sosCard, { backgroundColor: colors.cardBg, borderColor: colors.error }]}>
+      <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Emergency SOS</Text>
+      <Text style={[styles.meta, { color: colors.textSecondary }]}>
+        Share your current location with your partner immediately.
+      </Text>
+      <TouchableOpacity
+        style={[styles.sosButton, { backgroundColor: colors.error }]}
+        onPress={onConfirm}
+        disabled={sosSending || !coupleId}
+        accessibilityRole="button"
+        accessibilityLabel="Send emergency SOS"
+      >
+        <Text style={styles.sosButtonText}>{sosSending ? 'Sending...' : 'EMERGENCY SOS'}</Text>
+      </TouchableOpacity>
+      {sosSentAt ? (
+        <Text style={[styles.sosSuccess, { color: colors.success }]}>
+          SOS sent {new Date(sosSentAt).toLocaleString()}
+        </Text>
+      ) : null}
+      {sosLocation ? (
+        <Text style={[styles.meta, { color: colors.textSecondary }]}>
+          Location shared: {sosLocation.latitude.toFixed(6)}, {sosLocation.longitude.toFixed(6)}
+        </Text>
+      ) : null}
+      {sosError ? <Text style={[styles.sosError, { color: colors.error }]}>{sosError}</Text> : null}
+      {locationPermissionDenied ? (
+        <View
+          style={[
+            styles.permissionDeniedCard,
+            { backgroundColor: colors.surface, borderColor: colors.accent1 },
+          ]}
+        >
+          <Text style={[styles.permissionDeniedTitle, { color: colors.textPrimary }]}>
+            Location Permission Required
+          </Text>
+          <Text style={[styles.permissionDeniedText, { color: colors.textSecondary }]}>
+            Enable location access in your device settings to use emergency SOS features.
+          </Text>
+          <TouchableOpacity
+            onPress={() => Linking.openSettings()}
+            style={[styles.permissionDeniedButton, { backgroundColor: colors.accent1 }]}
+          >
+            <Text style={styles.permissionDeniedButtonText}>Open Settings</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+    </View>
+  )
+}
+
+function renderSosAlerts(
+  sosAlerts: SosAlert[],
+  colors: ThemeColors,
+  styles: LocationStyles,
+  onResolve: (alert: SosAlert) => void
+): ReactNode {
+  return (
+    <>
+      {sosAlerts.map((alert) => (
+        <View key={alert.id} style={styles.listItem}>
+          <Text style={styles.cardTitle}>{alert.resolved_at ? 'Resolved SOS' : 'Active SOS'}</Text>
+          <Text style={styles.meta}>
+            {alert.message ?? 'Safety alert'} · {new Date(alert.created_at).toLocaleString()}
+          </Text>
+          {alert.resolved_at ? (
+            <Text style={[styles.meta, { color: colors.success }]}>
+              Resolved {new Date(alert.resolved_at).toLocaleString()}
+              {alert.resolution_note ? ` · ${alert.resolution_note}` : ''}
+            </Text>
+          ) : (
+            <TouchableOpacity
+              style={[styles.button, { marginTop: 10 }]}
+              onPress={() => onResolve(alert)}
+            >
+              <Text style={styles.buttonText}>Resolve</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      ))}
+      {!sosAlerts.length ? (
+        <Empty label="No SOS alerts. This stays empty until someone uses the in-app safety action." />
+      ) : null}
+    </>
+  )
+}
+
+function renderSafetyTab({
+  colors,
+  styles,
+  checkins,
+  setCheckinType,
+  sosAlerts,
+  onConfirmSos,
+  onResolveAlert,
+  sosCard,
+}: {
+  colors: ThemeColors
+  styles: LocationStyles
+  checkins: SafetyCheckin[]
+  setCheckinType: (type: SafetyCheckin['checkinType']) => void
+  sosAlerts: SosAlert[]
+  onConfirmSos: () => void
+  onResolveAlert: (alert: SosAlert) => void
+  sosCard: Omit<Parameters<typeof renderSosCard>[0], 'colors' | 'styles' | 'onConfirm'>
+}): ReactNode {
+  return (
+    <ScrollView contentContainerStyle={styles.list}>
+      <View style={styles.checkinGrid}>
+        {(
+          [
+            ['safe', 'I am safe', colors.success],
+            ['need_help', 'I need help', colors.error],
+            ['home', 'I am home', colors.accent1],
+          ] as const
+        ).map(([type, label, color]) => (
+          <TouchableOpacity
+            key={type}
+            style={[styles.checkinButton, { backgroundColor: color }]}
+            onPress={() => setCheckinType(type)}
+          >
+            <Text style={styles.buttonText}>{label}</Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      {renderCheckins(checkins, styles)}
+      {renderSosCard({ ...sosCard, colors, styles, onConfirm: onConfirmSos })}
+      {renderSosAlerts(sosAlerts, colors, styles, onResolveAlert)}
+    </ScrollView>
+  )
+}
+
+function renderActiveTab({
+  activeTab,
+  styles,
+  liveMap,
+  timeline,
+  deviceStatus,
+  savedPlaces,
+  appCalls,
+  safety,
+}: {
+  activeTab: Tab
+  styles: LocationStyles
+  liveMap: Parameters<typeof renderLiveMapTab>[0]
+  timeline: LocationHistoryRow[]
+  deviceStatus: {
+    rows: LocationRow[]
+    currentLocation: CurrentLocation
+    userId: string | undefined
+  }
+  savedPlaces: Parameters<typeof renderSavedPlacesTab>[0]
+  appCalls: CallEvent[]
+  safety: Parameters<typeof renderSafetyTab>[0]
+}): ReactNode {
+  switch (activeTab) {
+    case 'Live Map':
+      return renderLiveMapTab(liveMap)
+    case 'Timeline':
+      return renderTimelineTab(timeline, styles)
+    case 'Device Status':
+      return renderDeviceStatusTab(
+        deviceStatus.rows,
+        deviceStatus.currentLocation,
+        deviceStatus.userId,
+        styles
+      )
+    case 'Saved Places':
+      return renderSavedPlacesTab(savedPlaces)
+    case 'App Calls':
+      return renderAppCallsTab(appCalls, styles)
+    default:
+      return renderSafetyTab(safety)
+  }
+}
 
 export default function LocationScreen() {
   const { colors } = useTheme()
@@ -378,25 +869,22 @@ export default function LocationScreen() {
     setPlaceRadius('100')
   }
 
+  const deleteSavedPlace = async (place: SavedPlace) => {
+    const { error: deleteError } = await supabase.from('saved_places').delete().eq('id', place.id)
+    if (deleteError) {
+      Alert.alert('Unable to delete place', deleteError.message)
+      return
+    }
+    setSavedPlaces((places) => places.filter((item) => item.id !== place.id))
+  }
+
   const deletePlace = (place: SavedPlace) => {
     Alert.alert('Delete saved place?', place.name, [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => {
-          void supabase
-            .from('saved_places')
-            .delete()
-            .eq('id', place.id)
-            .then(({ error: deleteError }) => {
-              if (deleteError) {
-                Alert.alert('Unable to delete place', deleteError.message)
-                return
-              }
-              setSavedPlaces((places) => places.filter((item) => item.id !== place.id))
-            })
-        },
+        onPress: () => void deleteSavedPlace(place),
       },
     ])
   }
@@ -554,320 +1042,54 @@ export default function LocationScreen() {
         ))}
       </ScrollView>
 
-      {activeTab === 'Live Map' ? (
-        <>
-          <MapView style={styles.map} mapStyle={mapStyle} logoEnabled={false} attributionEnabled>
-            <Camera
-              centerCoordinate={center}
-              zoomLevel={12}
-              animationDuration={450}
-              animationMode="easeTo"
-            />
-            {history.length > 1 ? (
-              <ShapeSource id="seven-day-route" shape={routeShape}>
-                <LineLayer
-                  id="route-line"
-                  style={{ lineColor: colors.accent1, lineWidth: 4, lineOpacity: 0.82 }}
-                />
-              </ShapeSource>
-            ) : null}
-            {displayedRows.map((row) => (
-              <PointAnnotation
-                id={row.user_id}
-                key={row.user_id}
-                coordinate={[row.longitude, row.latitude]}
-              >
-                <View style={styles.marker}>
-                  <Text style={styles.markerText}>{row.user_id === user?.id ? 'You' : 'P'}</Text>
-                </View>
-              </PointAnnotation>
-            ))}
-            {displayedRows.map((row) =>
-              row.accuracy ? (
-                <ShapeSource
-                  key={`${row.user_id}-accuracy`}
-                  id={`${row.user_id}-accuracy`}
-                  shape={{
-                    type: 'Feature',
-                    properties: {},
-                    geometry: { type: 'Point', coordinates: [row.longitude, row.latitude] },
-                  }}
-                >
-                  <CircleLayer
-                    id={`${row.user_id}-accuracy-circle`}
-                    style={{
-                      circleRadius: Math.min(Math.max(row.accuracy / 2, 10), 50),
-                      circleColor: colors.accent1,
-                      circleOpacity: 0.15,
-                    }}
-                  />
-                </ShapeSource>
-              ) : null
-            )}
-            {savedPlaces.map((place) => (
-              <ShapeSource
-                key={`saved-place-${place.id}`}
-                id={`saved-place-${place.id}`}
-                shape={buildCirclePolygon(place.latitude, place.longitude, place.radius_meters)}
-              >
-                <FillLayer
-                  id={`saved-place-fill-${place.id}`}
-                  style={{
-                    fillColor: colors.success,
-                    fillOpacity: 0.15,
-                  }}
-                />
-                <LineLayer
-                  id={`saved-place-line-${place.id}`}
-                  style={{
-                    lineColor: colors.success,
-                    lineWidth: 1.5,
-                    lineOpacity: 0.7,
-                  }}
-                />
-              </ShapeSource>
-            ))}
-            {savedPlaces.map((place) => (
-              <PointAnnotation
-                key={`saved-place-label-${place.id}`}
-                id={`saved-place-label-${place.id}`}
-                coordinate={[place.longitude, place.latitude]}
-              >
-                <View style={styles.savedPlaceLabel}>
-                  <Text style={styles.savedPlaceLabelText}>{place.name}</Text>
-                </View>
-              </PointAnnotation>
-            ))}
-          </MapView>
-          <View style={styles.card}>
-            <Text style={styles.cardTitle}>
-              {hasAnyLocation ? 'Live location' : 'Waiting for GPS data'}
-            </Text>
-            <Text style={styles.meta}>
-              {error ??
-                (lastUpdated
-                  ? `Your last device sync: ${new Date(lastUpdated).toLocaleString()}`
-                  : 'Each person must enable sharing in Settings > Privacy.')}
-            </Text>
-            {distanceKm !== null ? (
-              <Text style={styles.distance}>{distanceKm.toFixed(1)} km apart</Text>
-            ) : null}
-            <TouchableOpacity style={styles.button} onPress={() => void refreshCurrentLocation()}>
-              <Text style={styles.buttonText}>Refresh my device</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      ) : activeTab === 'Timeline' ? (
-        <ScrollView contentContainerStyle={styles.list}>
-          {history
-            .slice()
-            .reverse()
-            .slice(0, 50)
-            .map((entry) => (
-              <View key={`${entry.captured_at}-${entry.latitude}`} style={styles.listItem}>
-                <Text style={styles.cardTitle}>{entry.place_label ?? 'Location update'}</Text>
-                <Text style={styles.meta}>{new Date(entry.captured_at).toLocaleString()}</Text>
-              </View>
-            ))}
-          {!history.length ? <Empty label="No location history in the last seven days." /> : null}
-        </ScrollView>
-      ) : activeTab === 'Device Status' ? (
-        <ScrollView contentContainerStyle={styles.list}>
-          {rows.map((row) => (
-            <View key={row.user_id} style={styles.listItem}>
-              <Text style={styles.cardTitle}>
-                {row.user_id === user?.id ? 'Your device' : 'Partner device'}
-              </Text>
-              <Text style={styles.meta}>
-                {row.place_label ?? 'Address pending'} · {row.device_name ?? 'Unknown device'} ·{' '}
-                {row.battery_level ?? '—'}% · {row.is_charging ? 'charging' : 'not charging'} ·{' '}
-                {row.network_type ?? 'offline'} · {new Date(row.updated_at).toLocaleString()}
-              </Text>
-              <Text style={styles.meta}>
-                App version: {APP_VERSION} · Accuracy:{' '}
-                {row.user_id === user?.id
-                  ? (currentLocation?.accuracy ?? row.accuracy) === null
-                    ? 'Not reported'
-                    : `±${Math.round(currentLocation?.accuracy ?? row.accuracy ?? 0)}m`
-                  : row.accuracy === null
-                    ? 'Not reported'
-                    : `±${Math.round(row.accuracy)}m`}
-              </Text>
-            </View>
-          ))}
-          {!rows.length ? <Empty label="No linked device has shared a location yet." /> : null}
-        </ScrollView>
-      ) : activeTab === 'Saved Places' ? (
-        <ScrollView contentContainerStyle={styles.list}>
-          <TouchableOpacity style={styles.button} onPress={openAddPlace}>
-            <Text style={styles.buttonText}>Add place from current location</Text>
-          </TouchableOpacity>
-          {savedPlaces.map((place) => (
-            <View key={place.id} style={styles.listItem}>
-              <Text style={styles.cardTitle}>{place.name}</Text>
-              <Text style={styles.meta}>Safe zone · {place.radius_meters}m radius</Text>
-              <TouchableOpacity onPress={() => editPlace(place)}>
-                <Text style={styles.meta}>Edit</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => deletePlace(place)}>
-                <Text style={styles.danger}>Delete</Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-          {!savedPlaces.length ? <Empty label="No saved places yet." /> : null}
-          <View style={styles.eventsSection}>
-            <Text style={styles.cardTitle}>Geofence events</Text>
-            {geofenceEvents.length === 0 ? (
-              <Empty label="No geofence events yet." />
-            ) : (
-              geofenceEvents.map((event) => {
-                const place = savedPlaces.find(
-                  (savedPlace) => savedPlace.id === event.saved_place_id
-                )
-                const isYou = event.user_id === user?.id
-                const direction = event.event_type === 'entered' ? 'Arrived at' : 'Left'
-                const when = new Date(event.occurred_at).toLocaleString()
-                return (
-                  <View key={event.id} style={styles.listItem}>
-                    <Text style={styles.cardTitle}>
-                      {isYou ? 'You' : 'Partner'} {direction} {place?.name ?? 'a saved place'}
-                    </Text>
-                    <Text style={styles.meta}>{when}</Text>
-                    {!event.notified ? <Text style={styles.meta}>Notified: pending</Text> : null}
-                  </View>
-                )
-              })
-            )}
-          </View>
-        </ScrollView>
-      ) : activeTab === 'App Calls' ? (
-        <ScrollView contentContainerStyle={styles.list}>
-          {calls.map((call) => (
-            <View key={call.id} style={styles.listItem}>
-              <Text style={styles.cardTitle}>
-                {call.type === 'video' ? 'Video call' : 'Audio call'} · {call.status}
-              </Text>
-              <Text style={styles.meta}>{new Date(call.created_at).toLocaleString()}</Text>
-            </View>
-          ))}
-          {!calls.length ? (
-            <Empty label="No in-app call events yet. Phone and Telegram call logs are never collected." />
-          ) : null}
-        </ScrollView>
-      ) : (
-        <ScrollView contentContainerStyle={styles.list}>
-          <View style={styles.checkinGrid}>
-            {(
-              [
-                ['safe', 'I am safe', colors.success],
-                ['need_help', 'I need help', colors.error],
-                ['home', 'I am home', colors.accent1],
-              ] as const
-            ).map(([type, label, color]) => (
-              <TouchableOpacity
-                key={type}
-                style={[styles.checkinButton, { backgroundColor: color }]}
-                onPress={() => setCheckinType(type)}
-              >
-                <Text style={styles.buttonText}>{label}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          {checkins.slice(0, 5).map((checkin) => (
-            <View key={checkin.id} style={styles.listItem}>
-              <Text style={styles.cardTitle}>
-                {checkin.checkinType.replace('_', ' ')} · {checkin.status}
-              </Text>
-              <Text style={styles.meta}>
-                {new Date(checkin.createdAt).toLocaleString()}
-                {checkin.expectedUntil
-                  ? ` · expected by ${new Date(checkin.expectedUntil).toLocaleString()}`
-                  : ''}
-              </Text>
-            </View>
-          ))}
-          <View
-            style={[styles.sosCard, { backgroundColor: colors.cardBg, borderColor: colors.error }]}
-          >
-            <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Emergency SOS</Text>
-            <Text style={[styles.meta, { color: colors.textSecondary }]}>
-              Share your current location with your partner immediately.
-            </Text>
-            <TouchableOpacity
-              style={[styles.sosButton, { backgroundColor: colors.error }]}
-              onPress={confirmSOS}
-              disabled={sosSending || !coupleId}
-              accessibilityRole="button"
-              accessibilityLabel="Send emergency SOS"
-            >
-              <Text style={styles.sosButtonText}>
-                {sosSending ? 'Sending...' : 'EMERGENCY SOS'}
-              </Text>
-            </TouchableOpacity>
-            {sosSentAt ? (
-              <Text style={[styles.sosSuccess, { color: colors.success }]}>
-                SOS sent {new Date(sosSentAt).toLocaleString()}
-              </Text>
-            ) : null}
-            {sosLocation ? (
-              <Text style={[styles.meta, { color: colors.textSecondary }]}>
-                Location shared: {sosLocation.latitude.toFixed(6)},{' '}
-                {sosLocation.longitude.toFixed(6)}
-              </Text>
-            ) : null}
-            {sosError ? (
-              <Text style={[styles.sosError, { color: colors.error }]}>{sosError}</Text>
-            ) : null}
-            {locationPermissionDenied ? (
-              <View
-                style={[
-                  styles.permissionDeniedCard,
-                  { backgroundColor: colors.surface, borderColor: colors.accent1 },
-                ]}
-              >
-                <Text style={[styles.permissionDeniedTitle, { color: colors.textPrimary }]}>
-                  Location Permission Required
-                </Text>
-                <Text style={[styles.permissionDeniedText, { color: colors.textSecondary }]}>
-                  Enable location access in your device settings to use emergency SOS features.
-                </Text>
-                <TouchableOpacity
-                  onPress={() => Linking.openSettings()}
-                  style={[styles.permissionDeniedButton, { backgroundColor: colors.accent1 }]}
-                >
-                  <Text style={styles.permissionDeniedButtonText}>Open Settings</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
-          </View>
-          {sosAlerts.map((alert) => (
-            <View key={alert.id} style={styles.listItem}>
-              <Text style={styles.cardTitle}>
-                {alert.resolved_at ? 'Resolved SOS' : 'Active SOS'}
-              </Text>
-              <Text style={styles.meta}>
-                {alert.message ?? 'Safety alert'} · {new Date(alert.created_at).toLocaleString()}
-              </Text>
-              {alert.resolved_at ? (
-                <Text style={[styles.meta, { color: colors.success }]}>
-                  Resolved {new Date(alert.resolved_at).toLocaleString()}
-                  {alert.resolution_note ? ` · ${alert.resolution_note}` : ''}
-                </Text>
-              ) : (
-                <TouchableOpacity
-                  style={[styles.button, { marginTop: 10 }]}
-                  onPress={() => setResolveModalAlert(alert)}
-                >
-                  <Text style={styles.buttonText}>Resolve</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          ))}
-          {!sosAlerts.length ? (
-            <Empty label="No SOS alerts. This stays empty until someone uses the in-app safety action." />
-          ) : null}
-        </ScrollView>
-      )}
+      {renderActiveTab({
+        activeTab,
+        styles,
+        liveMap: {
+          colors,
+          center,
+          routeShape,
+          history,
+          displayedRows,
+          savedPlaces,
+          userId: user?.id,
+          styles,
+          hasAnyLocation,
+          error,
+          lastUpdated,
+          distanceKm,
+          onRefresh: () => void refreshCurrentLocation(),
+        },
+        timeline: history,
+        deviceStatus: { rows, currentLocation, userId: user?.id },
+        savedPlaces: {
+          savedPlaces,
+          geofenceEvents,
+          userId: user?.id,
+          styles,
+          onAdd: openAddPlace,
+          onEdit: editPlace,
+          onDelete: deletePlace,
+        },
+        appCalls: calls,
+        safety: {
+          colors,
+          styles,
+          checkins,
+          setCheckinType,
+          sosAlerts,
+          onConfirmSos: confirmSOS,
+          onResolveAlert: setResolveModalAlert,
+          sosCard: {
+            coupleId,
+            sosSending,
+            sosSentAt,
+            sosLocation,
+            sosError,
+            locationPermissionDenied,
+          },
+        },
+      })}
       <Modal
         visible={Boolean(checkinType)}
         transparent

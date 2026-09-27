@@ -190,6 +190,65 @@ async function deserializeChatMessages(
   return Promise.all(records.map((record) => deserializeChatMessage(record, userId, coupleId)))
 }
 
+type PreparedTextMessage = {
+  content: string
+  encrypted: boolean
+  encryptionVersion: number | null
+}
+
+async function prepareTextMessage(content: string, coupleId: string): Promise<PreparedTextMessage> {
+  try {
+    const key = await deriveChatKey(coupleId)
+    return {
+      content: await encryptMessage(content, key),
+      encrypted: true,
+      encryptionVersion: 1,
+    }
+  } catch (error) {
+    console.error('Failed to encrypt message:', error)
+    return { content, encrypted: false, encryptionVersion: null }
+  }
+}
+
+function createTextMessageRecordWriter(
+  userId: string,
+  coupleId: string,
+  message: PreparedTextMessage,
+  synced: boolean
+): (record: unknown) => void {
+  return function assignTextMessageFields(record) {
+    const rawRecord = record as {
+      content: string
+      sender_id: string
+      couple_id: string
+      created_at: number
+      synced: boolean
+      encrypted: boolean
+      encryption_version: number | null
+    }
+    rawRecord.content = message.content
+    rawRecord.sender_id = userId
+    rawRecord.couple_id = coupleId
+    rawRecord.created_at = Date.now()
+    rawRecord.synced = synced
+    rawRecord.encrypted = message.encrypted
+    rawRecord.encryption_version = message.encryptionVersion
+  }
+}
+
+async function persistTextMessage(
+  userId: string,
+  coupleId: string,
+  message: PreparedTextMessage,
+  synced: boolean
+): Promise<void> {
+  const createRecord = createTextMessageRecordWriter(userId, coupleId, message, synced)
+  const writeRecord = async function writeTextMessage() {
+    await database.get('messages').create(createRecord)
+  }
+  await database.write(writeRecord)
+}
+
 function createLocationRecordWriter(
   userId: string,
   coupleId: string,
@@ -291,41 +350,8 @@ export default function ChatScreen() {
     const trimmed = draft.trim()
     if (!trimmed || !user?.id || !coupleId) return
 
-    let encryptedContent = trimmed
-    let isEncrypted = false
-    let encryptionVersion: number | null = null
-
-    // Encrypt text messages
-    try {
-      const key = await deriveChatKey(coupleId)
-      encryptedContent = await encryptMessage(trimmed, key)
-      isEncrypted = true
-      encryptionVersion = 1
-    } catch (error) {
-      console.error('Failed to encrypt message:', error)
-      // Fall back to plaintext if encryption fails
-    }
-
-    await database.write(async () => {
-      await database.get('messages').create((record) => {
-        const rawRecord = record as unknown as {
-          content: string
-          sender_id: string
-          couple_id: string
-          created_at: number
-          synced: boolean
-          encrypted: boolean
-          encryption_version: number | null
-        }
-        rawRecord.content = encryptedContent
-        rawRecord.sender_id = user.id
-        rawRecord.couple_id = coupleId
-        rawRecord.created_at = Date.now()
-        rawRecord.synced = !isOffline
-        rawRecord.encrypted = isEncrypted
-        rawRecord.encryption_version = encryptionVersion
-      })
-    })
+    const message = await prepareTextMessage(trimmed, coupleId)
+    await persistTextMessage(user.id, coupleId, message, !isOffline)
 
     setDraft('')
 

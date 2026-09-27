@@ -167,6 +167,196 @@ function formatTime(seconds: number) {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`
 }
 
+type WellnessStyles = ReturnType<typeof createStyles>
+
+function renderWorkoutSection({
+  selectedWorkout,
+  remaining,
+  workoutHistory,
+  styles,
+  onCompleteWorkout,
+  onStartWorkout,
+}: {
+  selectedWorkout: Workout | null
+  remaining: number
+  workoutHistory: WellnessLog[]
+  styles: WellnessStyles
+  onCompleteWorkout: () => void
+  onStartWorkout: (workout: Workout) => void
+}) {
+  return (
+    <>
+      <Text style={styles.sectionTitle}>Workouts</Text>
+      {selectedWorkout ? (
+        <View style={styles.timerCard}>
+          <Text style={styles.cardTitle}>{selectedWorkout.name}</Text>
+          <Text style={styles.timer}>{formatTime(remaining)}</Text>
+          <Text style={styles.muted}>
+            {remaining === 0 ? 'Time is up - mark it complete.' : 'Move at a comfortable pace.'}
+          </Text>
+          <TouchableOpacity style={styles.primary} onPress={onCompleteWorkout}>
+            <Text style={styles.primaryText}>Complete workout</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+      {workouts.map((workout) => (
+        <View key={workout.id} style={styles.workout}>
+          <View style={styles.workoutInfo}>
+            <Text style={styles.cardTitle}>{workout.name}</Text>
+            <Text style={styles.muted}>
+              {workout.duration} min · {workout.difficulty}
+            </Text>
+            <Text style={styles.muted}>{workout.description}</Text>
+          </View>
+          <TouchableOpacity style={styles.smallButton} onPress={() => onStartWorkout(workout)}>
+            <Text style={styles.smallButtonText}>Start</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+      <Text style={styles.sectionTitle}>Workout history</Text>
+      {workoutHistory.length ? (
+        workoutHistory.slice(0, 5).map((log) => (
+          <Text key={log.id} style={styles.history}>
+            {workouts.find((workout) => workout.id === log.activity_id)?.name ?? log.activity_id} ·{' '}
+            {new Date(log.completed_at).toLocaleDateString()}
+          </Text>
+        ))
+      ) : (
+        <EmptyState
+          icon={Dumbbell}
+          title="No workouts yet"
+          description="Complete a workout to start your history."
+        />
+      )}
+    </>
+  )
+}
+
+function renderQuestSection({
+  completedQuestIds,
+  colors,
+  styles,
+  onCompleteQuest,
+}: {
+  completedQuestIds: Set<string>
+  colors: ThemeColors
+  styles: WellnessStyles
+  onCompleteQuest: (questId: string) => void
+}) {
+  return (
+    <>
+      <Text style={styles.sectionTitle}>Challenges</Text>
+      {quests.map((quest) => {
+        const isCompleted = completedQuestIds.has(quest.id)
+
+        return (
+          <TouchableOpacity
+            key={quest.id}
+            style={[styles.quest, isCompleted && styles.completed]}
+            onPress={() => onCompleteQuest(quest.id)}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+              {isCompleted ? <Check size={14} color={colors.success} /> : null}
+              <Text style={styles.cardTitle}>{quest.title}</Text>
+            </View>
+            <Text style={styles.muted}>{isCompleted ? 'Completed' : quest.reward}</Text>
+          </TouchableOpacity>
+        )
+      })}
+    </>
+  )
+}
+
+function renderBoards(
+  filteredBoards: WellnessBoard[],
+  styles: WellnessStyles,
+  colors: ThemeColors,
+  onSelectBoard: (board: WellnessBoard) => void
+) {
+  return (
+    <>
+      {filteredBoards.length === 0 ? (
+        <Text style={styles.muted}>More activities are coming to this category.</Text>
+      ) : null}
+      <FlatList
+        data={filteredBoards}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item: board }) => {
+          const BoardIcon = boardIconMap[board.icon] ?? Sparkles
+
+          return (
+            <TouchableOpacity style={styles.boardButton} onPress={() => onSelectBoard(board)}>
+              <BoardIcon size={28} color={colors.accent1} />
+              <View style={styles.boardInfo}>
+                <Text style={styles.boardName}>{board.name}</Text>
+                <Text style={styles.muted}>{board.description}</Text>
+              </View>
+            </TouchableOpacity>
+          )
+        }}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        removeClippedSubviews
+      />
+    </>
+  )
+}
+
+function renderCategoryContent({
+  category,
+  completedQuestIds,
+  filteredBoards,
+  workoutHistory,
+  selectedWorkout,
+  remaining,
+  colors,
+  styles,
+  onCompleteWorkout,
+  onStartWorkout,
+  onCompleteQuest,
+  onSelectBoard,
+}: {
+  category: Category
+  completedQuestIds: Set<string>
+  filteredBoards: WellnessBoard[]
+  workoutHistory: WellnessLog[]
+  selectedWorkout: Workout | null
+  remaining: number
+  colors: ThemeColors
+  styles: WellnessStyles
+  onCompleteWorkout: () => void
+  onStartWorkout: (workout: Workout) => void
+  onCompleteQuest: (questId: string) => void
+  onSelectBoard: (board: WellnessBoard) => void
+}) {
+  return (
+    <>
+      {category === 'health'
+        ? renderWorkoutSection({
+            selectedWorkout,
+            remaining,
+            workoutHistory,
+            styles,
+            onCompleteWorkout,
+            onStartWorkout,
+          })
+        : null}
+      {category === 'quests'
+        ? renderQuestSection({ completedQuestIds, colors, styles, onCompleteQuest })
+        : null}
+      {category !== 'health' && category !== 'quests' ? (
+        <>
+          <Text style={styles.sectionTitle}>
+            {categories.find((item) => item.id === category)?.label} boards
+          </Text>
+          {renderBoards(filteredBoards, styles, colors, onSelectBoard)}
+        </>
+      ) : null}
+    </>
+  )
+}
+
 export default function WellnessScreen() {
   const { colors } = useTheme()
   const { user } = useAuth()
@@ -267,35 +457,6 @@ export default function WellnessScreen() {
 
   const styles = useMemo(() => createStyles(colors, sizes), [colors, sizes])
 
-  const renderBoards = () => (
-    <>
-      {filteredBoards.length === 0 ? (
-        <Text style={styles.muted}>More activities are coming to this category.</Text>
-      ) : null}
-      <FlatList
-        data={filteredBoards}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item: board }) => {
-          const BoardIcon = boardIconMap[board.icon] ?? Sparkles
-
-          return (
-            <TouchableOpacity style={styles.boardButton} onPress={() => setSelectedBoard(board)}>
-              <BoardIcon size={28} color={colors.accent1} />
-              <View style={styles.boardInfo}>
-                <Text style={styles.boardName}>{board.name}</Text>
-                <Text style={styles.muted}>{board.description}</Text>
-              </View>
-            </TouchableOpacity>
-          )
-        }}
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
-        windowSize={5}
-        removeClippedSubviews
-      />
-    </>
-  )
-
   if (selectedBoard) {
     const BoardComponent = componentMap[selectedBoard.component]
     return (
@@ -349,85 +510,20 @@ export default function WellnessScreen() {
       </ScrollView>
       <ScrollView contentContainerStyle={styles.content}>
         {error ? <Text style={styles.error}>{error}</Text> : null}
-        {category === 'health' ? (
-          <>
-            <Text style={styles.sectionTitle}>Workouts</Text>
-            {selectedWorkout ? (
-              <View style={styles.timerCard}>
-                <Text style={styles.cardTitle}>{selectedWorkout.name}</Text>
-                <Text style={styles.timer}>{formatTime(remaining)}</Text>
-                <Text style={styles.muted}>
-                  {remaining === 0
-                    ? 'Time is up - mark it complete.'
-                    : 'Move at a comfortable pace.'}
-                </Text>
-                <TouchableOpacity style={styles.primary} onPress={() => void completeWorkout()}>
-                  <Text style={styles.primaryText}>Complete workout</Text>
-                </TouchableOpacity>
-              </View>
-            ) : null}
-            {workouts.map((workout) => (
-              <View key={workout.id} style={styles.workout}>
-                <View style={styles.workoutInfo}>
-                  <Text style={styles.cardTitle}>{workout.name}</Text>
-                  <Text style={styles.muted}>
-                    {workout.duration} min · {workout.difficulty}
-                  </Text>
-                  <Text style={styles.muted}>{workout.description}</Text>
-                </View>
-                <TouchableOpacity style={styles.smallButton} onPress={() => startWorkout(workout)}>
-                  <Text style={styles.smallButtonText}>Start</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
-            <Text style={styles.sectionTitle}>Workout history</Text>
-            {workoutHistory.length ? (
-              workoutHistory.slice(0, 5).map((log) => (
-                <Text key={log.id} style={styles.history}>
-                  {workouts.find((workout) => workout.id === log.activity_id)?.name ??
-                    log.activity_id}{' '}
-                  · {new Date(log.completed_at).toLocaleDateString()}
-                </Text>
-              ))
-            ) : (
-              <EmptyState
-                icon={Dumbbell}
-                title="No workouts yet"
-                description="Complete a workout to start your history."
-              />
-            )}
-          </>
-        ) : null}
-        {category === 'quests' ? (
-          <>
-            <Text style={styles.sectionTitle}>Challenges</Text>
-            {quests.map((quest) => (
-              <TouchableOpacity
-                key={quest.id}
-                style={[styles.quest, completedQuestIds.has(quest.id) && styles.completed]}
-                onPress={() => void completeQuest(quest.id)}
-              >
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
-                  {completedQuestIds.has(quest.id) ? (
-                    <Check size={14} color={colors.success} />
-                  ) : null}
-                  <Text style={styles.cardTitle}>{quest.title}</Text>
-                </View>
-                <Text style={styles.muted}>
-                  {completedQuestIds.has(quest.id) ? 'Completed' : quest.reward}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </>
-        ) : null}
-        {category !== 'health' && category !== 'quests' ? (
-          <>
-            <Text style={styles.sectionTitle}>
-              {categories.find((item) => item.id === category)?.label} boards
-            </Text>
-            {renderBoards()}
-          </>
-        ) : null}
+        {renderCategoryContent({
+          category,
+          completedQuestIds,
+          filteredBoards,
+          workoutHistory,
+          selectedWorkout,
+          remaining,
+          colors,
+          styles,
+          onCompleteWorkout: () => void completeWorkout(),
+          onStartWorkout: startWorkout,
+          onCompleteQuest: (questId) => void completeQuest(questId),
+          onSelectBoard: setSelectedBoard,
+        })}
         <TouchableOpacity style={styles.adviceButton} onPress={() => void requestAdvice()}>
           <Text style={styles.adviceText}>Need guidance?</Text>
         </TouchableOpacity>
