@@ -1,19 +1,30 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { Bell, X, Calendar } from 'lucide-react'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { insertRow, readUserRows, deleteRow, getCurrentUserId, type Reminder } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui/empty-state'
 
-interface DisplayReminder {
-  id: string
-  title: string
-  description: string | null
-  reminder_date: string
-  reminder_type: 'custom' | 'anniversary' | 'birthday' | 'cycle' | 'medication'
-  repeat_interval: 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly' | null
-}
+type DisplayReminder = Pick<
+  Reminder,
+  'id' | 'title' | 'description' | 'reminder_date' | 'reminder_type' | 'repeat_interval'
+>
+
+const REMINDER_TYPES: DisplayReminder['reminder_type'][] = [
+  'custom',
+  'anniversary',
+  'birthday',
+  'cycle',
+  'medication',
+]
+const REPEAT_INTERVALS: Exclude<DisplayReminder['repeat_interval'], null | undefined>[] = [
+  'once',
+  'daily',
+  'weekly',
+  'monthly',
+  'yearly',
+]
 
 export default function RemindersWidget({
   modalBlocked,
@@ -24,6 +35,7 @@ export default function RemindersWidget({
   onModalOpen: () => void
   onModalClose: () => void
 }) {
+  const fieldId = useId()
   const [reminders, setReminders] = useState<DisplayReminder[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -37,19 +49,19 @@ export default function RemindersWidget({
     onModalClose()
   }
 
-  useEffect(() => {
-    loadReminders()
-  }, [])
-
-  const loadReminders = async () => {
-    const data = await readUserRows<Reminder>('reminders', '*', {
+  const loadReminders = useCallback(async (): Promise<void> => {
+    const data = await readUserRows<DisplayReminder>('reminders', '*', {
       column: 'reminder_date',
       ascending: true,
     })
-    setReminders(data as unknown as DisplayReminder[])
-  }
+    setReminders(data)
+  }, [])
 
-  const handleAdd = async () => {
+  useEffect(() => {
+    void loadReminders()
+  }, [loadReminders])
+
+  const handleAdd = async (): Promise<void> => {
     if (!newTitle.trim() || !newDate) return
 
     await insertRow('reminders', {
@@ -66,14 +78,14 @@ export default function RemindersWidget({
     setNewType('custom')
     setNewRepeat('once')
     closeModal()
-    loadReminders()
+    await loadReminders()
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string): Promise<void> => {
     const userId = await getCurrentUserId()
     if (!userId) return
     await deleteRow('reminders', id, userId)
-    loadReminders()
+    await loadReminders()
   }
 
   return (
@@ -150,8 +162,9 @@ export default function RemindersWidget({
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-text-2">Title *</label>
+                <label htmlFor={`${fieldId}-title`} className="text-sm text-text-2">Title *</label>
                 <input
+                  id={`${fieldId}-title`}
                   type="text"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
@@ -161,8 +174,9 @@ export default function RemindersWidget({
               </div>
 
               <div>
-                <label className="text-sm text-text-2">Description</label>
+                <label htmlFor={`${fieldId}-description`} className="text-sm text-text-2">Description</label>
                 <textarea
+                  id={`${fieldId}-description`}
                   value={newDescription}
                   onChange={(e) => setNewDescription(e.target.value)}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
@@ -172,8 +186,9 @@ export default function RemindersWidget({
               </div>
 
               <div>
-                <label className="text-sm text-text-2">Date *</label>
+                <label htmlFor={`${fieldId}-date`} className="text-sm text-text-2">Date *</label>
                 <input
+                  id={`${fieldId}-date`}
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
@@ -182,10 +197,16 @@ export default function RemindersWidget({
               </div>
 
               <div>
-                <label className="text-sm text-text-2">Type</label>
+                <label htmlFor={`${fieldId}-type`} className="text-sm text-text-2">Type</label>
                 <select
+                  id={`${fieldId}-type`}
                   value={newType}
-                  onChange={(e) => setNewType(e.target.value as 'custom' | 'anniversary' | 'birthday' | 'cycle' | 'medication')}
+                  onChange={(event) => {
+                    const value = REMINDER_TYPES.find((type) => type === event.target.value)
+                    if (value) {
+                      setNewType(value)
+                    }
+                  }}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 >
                   <option value="custom">Custom</option>
@@ -197,10 +218,16 @@ export default function RemindersWidget({
               </div>
 
               <div>
-                <label className="text-sm text-text-2">Repeat</label>
+                <label htmlFor={`${fieldId}-repeat`} className="text-sm text-text-2">Repeat</label>
                 <select
+                  id={`${fieldId}-repeat`}
                   value={newRepeat}
-                  onChange={(e) => setNewRepeat(e.target.value as 'once' | 'daily' | 'weekly' | 'monthly' | 'yearly')}
+                  onChange={(event) => {
+                    const value = REPEAT_INTERVALS.find((interval) => interval === event.target.value)
+                    if (value) {
+                      setNewRepeat(value)
+                    }
+                  }}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 >
                   <option value="once">Once</option>

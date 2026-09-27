@@ -55,7 +55,7 @@ export function periodStarts(logs: NativeCareLog[]) {
   const days = logs
     .filter((log) => log.period_day)
     .map((log) => log.log_date)
-    .sort()
+    .sort((a, b) => a.localeCompare(b))
   return days.filter((day, index) => index === 0 || daysBetween(days[index - 1], day) > 1).reverse()
 }
 

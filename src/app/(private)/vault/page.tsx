@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 import Link from 'next/link'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Fingerprint, KeyRound, Lock, Eye, Plus, X, Save, Sparkles } from 'lucide-react'
 import VaultCard from '@/features/vault/VaultCard'
@@ -16,7 +16,41 @@ import { getCurrentUserId, insertRow, type VaultItem } from '@/lib/supabase'
 import { supabase } from '@/lib/supabase'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
 
-type VaultCategory = 'all' | 'private' | 'celebration' | 'ritual' | 'travel'
+const VAULT_CATEGORIES = ['all', 'private', 'celebration', 'ritual', 'travel'] as const
+type VaultCategory = (typeof VAULT_CATEGORIES)[number]
+type LetterCategory = Exclude<VaultCategory, 'all'>
+
+function isLetterCategory(value: string): value is LetterCategory {
+  return value === 'private' || value === 'celebration' || value === 'ritual' || value === 'travel'
+}
+
+function isVaultItem(value: unknown): value is VaultItem {
+  if (typeof value !== 'object' || value === null) return false
+  return (
+    'id' in value &&
+    typeof value.id === 'string' &&
+    'couple_id' in value &&
+    typeof value.couple_id === 'string' &&
+    'user_id' in value &&
+    typeof value.user_id === 'string' &&
+    'created_at' in value &&
+    typeof value.created_at === 'string' &&
+    'updated_at' in value &&
+    typeof value.updated_at === 'string' &&
+    'title' in value &&
+    typeof value.title === 'string' &&
+    'content' in value &&
+    (typeof value.content === 'string' || value.content === null) &&
+    'photo_url' in value &&
+    (typeof value.photo_url === 'string' || value.photo_url === null) &&
+    'category' in value &&
+    (typeof value.category === 'string' || value.category === null) &&
+    'is_locked' in value &&
+    typeof value.is_locked === 'boolean' &&
+    'reveal_at' in value &&
+    (typeof value.reveal_at === 'string' || value.reveal_at === null)
+  )
+}
 
 export default function VaultPage() {
   return (
@@ -29,6 +63,7 @@ export default function VaultPage() {
 }
 
 function VaultPageContent() {
+  const fieldId = useId()
   const { masterKey, isUnlocked: isPasswordVaultUnlocked, unlockWithPassphrase, unlockWithBiometric } = useVaultKey()
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -47,6 +82,7 @@ function VaultPageContent() {
   const [hasWrappedKey, setHasWrappedKey] = useState<boolean | null>(null)
   const [passphrase, setPassphrase] = useState('')
   const [passwordVaultError, setPasswordVaultError] = useState('')
+  const [authError, setAuthError] = useState<string | null>(null)
   const prefersReduced = usePrefersReducedMotion()
   const [showVaultSetup, setShowVaultSetup] = useState(false)
   const isPinValid = /^\d{4,6}$/.test(pin)
@@ -66,23 +102,47 @@ function VaultPageContent() {
   )
 
   useEffect(() => {
+    let active = true
     const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) {
-        window.location.href = '/login'
-        return
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!active) return
+        if (!user) {
+          window.location.href = '/login'
+          return
+        }
+        const [currentUserId, coupleStatus] = await Promise.all([getCurrentUserId(), getCoupleStatus()])
+        if (!active) return
+        setUserId(currentUserId)
+        setCoupleId(coupleStatus.status === 'accepted' ? coupleStatus.couple?.id ?? null : null)
+        setIsAuthenticated(true)
+      } catch (caught) {
+        if (active) {
+          setAuthError(caught instanceof Error ? caught.message : 'Unable to check authentication.')
+        }
       }
-      const [currentUserId, coupleStatus] = await Promise.all([getCurrentUserId(), getCoupleStatus()])
-      setUserId(currentUserId)
-      setCoupleId(coupleStatus.status === 'accepted' ? coupleStatus.couple?.id ?? null : null)
-      setIsAuthenticated(true)
     }
 
-    checkAuth()
+    void checkAuth()
+    return () => {
+      active = false
+    }
   }, [])
 
   useEffect(() => {
-    void loadWrappedKey().then((stored) => setHasWrappedKey(Boolean(stored)))
+    let active = true
+    void loadWrappedKey()
+      .then((stored) => {
+        if (active) setHasWrappedKey(Boolean(stored))
+      })
+      .catch((caught: unknown) => {
+        if (active) {
+          setPasswordVaultError(caught instanceof Error ? caught.message : 'Unable to load the vault key.')
+        }
+      })
+    return () => {
+      active = false
+    }
   }, [isPasswordVaultUnlocked])
 
   const fetchLetters = async () => {
@@ -106,7 +166,7 @@ function VaultPageContent() {
     }
 
     setLettersError(null)
-    setLetters((data ?? []) as VaultItem[])
+    setLetters((data ?? []).filter(isVaultItem))
   }
 
   const handleUnlock = async () => {
@@ -168,7 +228,9 @@ function VaultPageContent() {
     return (
       <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-10">
         <div className="text-center">
-          <p className="text-sm text-text-2">Checking authentication...</p>
+          <p className={authError ? 'text-sm text-error' : 'text-sm text-text-2'}>
+            {authError ?? 'Checking authentication...'}
+          </p>
         </div>
       </div>
     )
@@ -367,8 +429,9 @@ function VaultPageContent() {
             <div className="rounded-[32px] border border-accent-1/20 bg-card p-5 shadow-xl backdrop-blur-xl">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <label className="text-sm text-text-2">Title</label>
+                  <label htmlFor={`${fieldId}-title`} className="text-sm text-text-2">Title</label>
                   <input
+                    id={`${fieldId}-title`}
                     type="text"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
@@ -377,8 +440,9 @@ function VaultPageContent() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label className="text-sm text-text-2">Message</label>
+                  <label htmlFor={`${fieldId}-message`} className="text-sm text-text-2">Message</label>
                   <textarea
+                    id={`${fieldId}-message`}
                     value={newContent}
                     onChange={(e) => setNewContent(e.target.value)}
                     placeholder="Write your heart out..."
@@ -387,10 +451,13 @@ function VaultPageContent() {
                   />
                 </div>
                <div>
-                 <label className="text-sm text-text-2">Category</label>
+                 <label htmlFor={`${fieldId}-category`} className="text-sm text-text-2">Category</label>
                  <select
+                   id={`${fieldId}-category`}
                    value={vaultCategory === 'all' ? 'private' : vaultCategory}
-                   onChange={(e) => setVaultCategory(e.target.value as Exclude<VaultCategory, 'all'>)}
+                   onChange={(event) => {
+                     if (isLetterCategory(event.target.value)) setVaultCategory(event.target.value)
+                   }}
                    className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1 outline-none"
                  >
                    <option value="private">Private</option>
@@ -400,8 +467,9 @@ function VaultPageContent() {
                  </select>
                </div>
                <div>
-                 <label className="text-sm text-text-2">Reveal date</label>
+                 <label htmlFor={`${fieldId}-reveal-date`} className="text-sm text-text-2">Reveal date</label>
                  <input
+                   id={`${fieldId}-reveal-date`}
                    type="date"
                    value={revealDate}
                    onChange={(e) => setRevealDate(e.target.value)}
@@ -427,7 +495,7 @@ function VaultPageContent() {
       </AnimatePresence>
 
       <div className="mb-6 flex flex-wrap gap-2">
-       {(['all', 'private', 'celebration', 'ritual', 'travel'] as VaultCategory[]).map((option) => (
+       {VAULT_CATEGORIES.map((option) => (
          <button
            key={option}
            type="button"

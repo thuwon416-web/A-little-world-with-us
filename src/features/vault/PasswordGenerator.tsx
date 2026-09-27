@@ -3,6 +3,12 @@
 import { useMemo, useState } from 'react'
 import { Copy, RefreshCw, X } from 'lucide-react'
 
+type Toggle = {
+  label: string
+  checked: boolean
+  onChange: (checked: boolean) => void
+}
+
 type PasswordGeneratorProps = {
   onSelect: (password: string) => void
   onClose: () => void
@@ -44,6 +50,14 @@ export default function PasswordGenerator({ onSelect, onClose }: PasswordGenerat
 
   const sets = [uppercase, lowercase, numbers, symbols].filter(Boolean).length
 
+  const toggles: Toggle[] = [
+    { label: 'Uppercase', checked: uppercase, onChange: setUppercase },
+    { label: 'Lowercase', checked: lowercase, onChange: setLowercase },
+    { label: 'Numbers', checked: numbers, onChange: setNumbers },
+    { label: 'Symbols', checked: symbols, onChange: setSymbols },
+    { label: 'Exclude ambiguous', checked: excludeAmbiguous, onChange: setExcludeAmbiguous },
+  ]
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="dialog" aria-modal="true">
       <div className="w-full max-w-lg rounded-modal border border-accent-1/20 bg-card p-6 shadow-2xl backdrop-blur-xl">
@@ -62,16 +76,10 @@ export default function PasswordGenerator({ onSelect, onClose }: PasswordGenerat
           <input type="range" min={8} max={64} value={length} onChange={(event) => setLength(Number(event.target.value))} className="mt-2 w-full accent-accent-1" />
         </label>
         <div className="mt-4 grid grid-cols-2 gap-2 text-sm text-text-1">
-          {[
-            ['Uppercase', uppercase, setUppercase],
-            ['Lowercase', lowercase, setLowercase],
-            ['Numbers', numbers, setNumbers],
-            ['Symbols', symbols, setSymbols],
-            ['Exclude ambiguous', excludeAmbiguous, setExcludeAmbiguous],
-          ].map(([label, checked, setChecked]) => (
-            <label key={label as string} className="flex items-center gap-2">
-              <input type="checkbox" checked={checked as boolean} onChange={(event) => (setChecked as (value: boolean) => void)(event.target.checked)} />
-              {label as string}
+          {toggles.map(({ label, checked, onChange }) => (
+            <label key={label} className="flex items-center gap-2">
+              <input type="checkbox" checked={checked} onChange={(event) => onChange(event.target.checked)} />
+              {label}
             </label>
           ))}
         </div>

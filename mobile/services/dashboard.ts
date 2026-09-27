@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto'
+
 import { supabase } from '@/lib/supabase'
 import type { MemoryRecord } from '@/services/memories'
 import type { PlaylistSong } from '@/services/music'
@@ -42,7 +43,7 @@ async function getCoupleId() {
 }
 
 function longestConsecutiveDays(values: string[]) {
-  const days = [...new Set(values)].sort()
+  const days = [...new Set(values)].sort((a, b) => a.localeCompare(b))
   let longest = days.length ? 1 : 0
   let current = longest
   for (let index = 1; index < days.length; index += 1) {

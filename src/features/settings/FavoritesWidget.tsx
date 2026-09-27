@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { X, ExternalLink, Heart, Gift, Tag, Star } from 'lucide-react'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -21,6 +21,7 @@ const CATEGORIES: { id: FavoriteCategory; label: string; icon: typeof Tag }[] = 
 ]
 
 export default function FavoritesWidget() {
+  const fieldId = useId()
   const [activeCategory, setActiveCategory] = useState<FavoriteCategory>('size')
   const [items, setItems] = useState<FavoriteItem[]>([])
   const [partnerItems, setPartnerItems] = useState<FavoriteItem[]>([])
@@ -30,7 +31,7 @@ export default function FavoritesWidget() {
   const [newItemUrl, setNewItemUrl] = useState('')
   const [newItemNotes, setNewItemNotes] = useState('')
 
-  const loadFavorites = useCallback(async () => {
+  const loadFavorites = useCallback(async (): Promise<void> => {
     const [myItems, partnerItems] = await Promise.all([
       getFavorites(activeCategory),
       getPartnerFavorites(activeCategory),
@@ -40,10 +41,10 @@ export default function FavoritesWidget() {
   }, [activeCategory])
 
   useEffect(() => {
-    loadFavorites()
+    void loadFavorites()
   }, [loadFavorites])
 
-  const handleAdd = async () => {
+  const handleAdd = async (): Promise<void> => {
     if (!newItemName.trim()) return
 
     await addFavorite(
@@ -59,12 +60,12 @@ export default function FavoritesWidget() {
     setNewItemUrl('')
     setNewItemNotes('')
     setShowAddModal(false)
-    loadFavorites()
+    await loadFavorites()
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: string): Promise<void> => {
     await deleteFavorite(id)
-    loadFavorites()
+    await loadFavorites()
   }
 
   return (
@@ -201,8 +202,9 @@ export default function FavoritesWidget() {
 
             <div className="space-y-3">
               <div>
-                <label className="text-sm text-text-2">Name *</label>
+                <label htmlFor={`${fieldId}-name`} className="text-sm text-text-2">Name *</label>
                 <input
+                  id={`${fieldId}-name`}
                   type="text"
                   value={newItemName}
                   onChange={(e) => setNewItemName(e.target.value)}
@@ -213,8 +215,9 @@ export default function FavoritesWidget() {
 
               {activeCategory === 'size' && (
                 <div>
-                  <label className="text-sm text-text-2">Value</label>
+                  <label htmlFor={`${fieldId}-value`} className="text-sm text-text-2">Value</label>
                   <input
+                    id={`${fieldId}-value`}
                     type="text"
                     value={newItemValue}
                     onChange={(e) => setNewItemValue(e.target.value)}
@@ -227,8 +230,9 @@ export default function FavoritesWidget() {
               {activeCategory !== 'size' && (
                 <>
                   <div>
-                    <label className="text-sm text-text-2">URL (optional)</label>
+                    <label htmlFor={`${fieldId}-url`} className="text-sm text-text-2">URL (optional)</label>
                     <input
+                      id={`${fieldId}-url`}
                       type="url"
                       value={newItemUrl}
                       onChange={(e) => setNewItemUrl(e.target.value)}
@@ -238,8 +242,9 @@ export default function FavoritesWidget() {
                   </div>
 
                   <div>
-                    <label className="text-sm text-text-2">Notes (optional)</label>
+                    <label htmlFor={`${fieldId}-notes`} className="text-sm text-text-2">Notes (optional)</label>
                     <textarea
+                      id={`${fieldId}-notes`}
                       value={newItemNotes}
                       onChange={(e) => setNewItemNotes(e.target.value)}
                       className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"

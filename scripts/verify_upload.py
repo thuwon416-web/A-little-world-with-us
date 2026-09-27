@@ -4,11 +4,15 @@ from __future__ import annotations
 
 import os
 import sys
+from typing import TYPE_CHECKING
 
 from dotenv import load_dotenv
 
+if TYPE_CHECKING:
+    from supabase import Client
 
-def get_client():
+
+def get_client() -> Client:
     load_dotenv()
     url = os.environ.get("SUPABASE_URL") or os.environ.get("NEXT_PUBLIC_SUPABASE_URL")
     key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")

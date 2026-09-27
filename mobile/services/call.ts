@@ -1,4 +1,5 @@
 import * as Crypto from 'expo-crypto'
+
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
 export type CallType = 'audio' | 'video'

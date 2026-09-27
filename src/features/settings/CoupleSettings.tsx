@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
+import type { FormEvent } from 'react'
 import { Heart, UserPlus, Check, X, LogOut, Calendar, AlertCircle, Cake, Plus, Trash2 } from 'lucide-react'
 import {
   getCoupleStatus,
@@ -14,12 +15,30 @@ import {
 import { supabase } from '@/lib/supabase'
 
 type CoupleOccasion = { id: string; title: string; month: number; day: number; kind: 'anniversary' | 'birthday' | 'custom' }
+const OCCASION_KINDS: CoupleOccasion['kind'][] = ['anniversary', 'birthday', 'custom']
+
+function isCoupleOccasion(value: unknown): value is CoupleOccasion {
+  if (typeof value !== 'object' || value === null) return false
+  return (
+    'id' in value &&
+    typeof value.id === 'string' &&
+    'title' in value &&
+    typeof value.title === 'string' &&
+    'month' in value &&
+    typeof value.month === 'number' &&
+    'day' in value &&
+    typeof value.day === 'number' &&
+    'kind' in value &&
+    OCCASION_KINDS.some((kind) => kind === value.kind)
+  )
+}
 
 function errorMessage(error: unknown, fallback: string): string {
   return error instanceof Error ? error.message : fallback
 }
 
 export default function CoupleSettings() {
+  const fieldId = useId()
   const [status, setStatus] = useState<CoupleStatusResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -39,9 +58,15 @@ export default function CoupleSettings() {
   const [occasionDate, setOccasionDate] = useState('')
   const [occasionKind, setOccasionKind] = useState<CoupleOccasion['kind']>('birthday')
 
-  const loadOccasions = useCallback(async (coupleId: string) => {
-    const { data } = await supabase.from('couple_occasions').select('id,title,month,day,kind').eq('couple_id', coupleId).order('month').order('day')
-    setOccasions((data ?? []) as CoupleOccasion[])
+  const loadOccasions = useCallback(async (coupleId: string): Promise<void> => {
+    const { data, error: occasionsError } = await supabase
+      .from('couple_occasions')
+      .select('id,title,month,day,kind')
+      .eq('couple_id', coupleId)
+      .order('month')
+      .order('day')
+    if (occasionsError) throw occasionsError
+    setOccasions((data ?? []).filter(isCoupleOccasion))
   }, [])
 
   const loadStatus = useCallback(async () => {
@@ -65,7 +90,7 @@ export default function CoupleSettings() {
     void loadStatus()
   }, [loadStatus])
 
-  const handleInvite = async (e: React.FormEvent) => {
+  const handleInvite = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
     if (!email.trim()) return
 
@@ -84,7 +109,7 @@ export default function CoupleSettings() {
     }
   }
 
-  const handleAccept = async () => {
+  const handleAccept = async (): Promise<void> => {
     if (!status?.invite) return
 
     try {
@@ -97,7 +122,7 @@ export default function CoupleSettings() {
     }
   }
 
-  const handleDecline = async () => {
+  const handleDecline = async (): Promise<void> => {
     if (!status?.invite) return
 
     try {
@@ -110,7 +135,7 @@ export default function CoupleSettings() {
     }
   }
 
-  const handleLeave = async () => {
+  const handleLeave = async (): Promise<void> => {
     if (!confirm('Are you sure you want to leave this couple? This cannot be undone.')) {
       return
     }
@@ -125,7 +150,7 @@ export default function CoupleSettings() {
     }
   }
 
-  const handleUpdateCouple = async (e: React.FormEvent) => {
+  const handleUpdateCouple = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault()
     if (!status?.couple) return
 
@@ -155,7 +180,7 @@ export default function CoupleSettings() {
     }
   }
 
-  const addOccasion = async (event: React.FormEvent) => {
+  const addOccasion = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
     if (!status?.couple || !occasionTitle.trim() || !occasionDate) return
     const date = new Date(`${occasionDate}T00:00:00`)
@@ -174,7 +199,7 @@ export default function CoupleSettings() {
     await loadOccasions(status.couple.id)
   }
 
-  const deleteOccasion = async (id: string) => {
+  const deleteOccasion = async (id: string): Promise<void> => {
     const { error: deleteError } = await supabase.from('couple_occasions').delete().eq('id', id)
     if (deleteError) { setError(deleteError.message); return }
     setOccasions((current) => current.filter((occasion) => occasion.id !== id))
@@ -223,8 +248,9 @@ export default function CoupleSettings() {
           </p>
           <form onSubmit={handleInvite} className="space-y-3">
             <div>
-              <label className="text-sm text-text-2">Partner&apos;s email</label>
+              <label htmlFor={`${fieldId}-partner-email`} className="text-sm text-text-2">Partner&apos;s email</label>
               <input
+                id={`${fieldId}-partner-email`}
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -235,8 +261,9 @@ export default function CoupleSettings() {
               />
             </div>
             <div>
-              <label className="text-sm text-text-2">Couple name (optional)</label>
+              <label htmlFor={`${fieldId}-couple-name`} className="text-sm text-text-2">Couple name (optional)</label>
               <input
+                id={`${fieldId}-couple-name`}
                 type="text"
                 value={coupleName}
                 onChange={(e) => setCoupleName(e.target.value)}
@@ -316,8 +343,9 @@ export default function CoupleSettings() {
 
             <form onSubmit={handleUpdateCouple} className="space-y-3">
               <div>
-                <label className="text-xs text-text-2">Couple name</label>
+                <label htmlFor={`${fieldId}-edit-couple-name`} className="text-xs text-text-2">Couple name</label>
                 <input
+                  id={`${fieldId}-edit-couple-name`}
                   type="text"
                   value={editingName}
                   onChange={(e) => setEditingName(e.target.value)}
@@ -325,8 +353,9 @@ export default function CoupleSettings() {
                 />
               </div>
               <div>
-                <label className="text-xs text-text-2">Anniversary</label>
+                <label htmlFor={`${fieldId}-anniversary`} className="text-xs text-text-2">Anniversary</label>
                 <input
+                  id={`${fieldId}-anniversary`}
                   type="date"
                   value={editingAnniversary}
                   onChange={(e) => setEditingAnniversary(e.target.value)}
@@ -354,9 +383,12 @@ export default function CoupleSettings() {
             <div className="flex items-center gap-2"><Cake className="h-4 w-4 text-accent-2" /><p className="text-sm font-medium text-text-1">Shared occasions</p></div>
             <p className="mt-1 text-xs text-text-2">Birthdays and special dates add a gentle visual touch for both of you.</p>
             <form onSubmit={addOccasion} className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
-              <input value={occasionTitle} onChange={(event) => setOccasionTitle(event.target.value)} maxLength={80} placeholder="Her birthday" className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
-              <input type="date" value={occasionDate} onChange={(event) => setOccasionDate(event.target.value)} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
-              <select value={occasionKind} onChange={(event) => setOccasionKind(event.target.value as CoupleOccasion['kind'])} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1"><option value="birthday">Birthday</option><option value="custom">Special day</option></select>
+              <input aria-label="Occasion title" value={occasionTitle} onChange={(event) => setOccasionTitle(event.target.value)} maxLength={80} placeholder="Her birthday" className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
+              <input aria-label="Occasion date" type="date" value={occasionDate} onChange={(event) => setOccasionDate(event.target.value)} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
+              <select aria-label="Occasion type" value={occasionKind} onChange={(event) => {
+                const kind = OCCASION_KINDS.find((item) => item === event.target.value)
+                if (kind) setOccasionKind(kind)
+              }} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1"><option value="birthday">Birthday</option><option value="custom">Special day</option></select>
               <button type="submit" className="inline-flex items-center justify-center gap-1 rounded-lg bg-accent-1 px-3 py-1.5 text-xs font-medium text-white"><Plus className="h-3.5 w-3.5" />Add</button>
             </form>
             {occasions.length > 0 && <ul className="mt-3 space-y-2">{occasions.map((occasion) => <li key={occasion.id} className="flex items-center justify-between gap-3 rounded-lg bg-card px-3 py-2 text-xs"><span className="text-text-1">{occasion.title} · {String(occasion.month).padStart(2, '0')}/{String(occasion.day).padStart(2, '0')}</span><button type="button" onClick={() => void deleteOccasion(occasion.id)} aria-label={`Delete ${occasion.title}`} className="text-error hover:text-error/80"><Trash2 className="h-3.5 w-3.5" /></button></li>)}</ul>}

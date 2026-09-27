@@ -9,6 +9,17 @@ const BACKUP_WORDS = [
   'olive', 'pearl', 'petal', 'river', 'saffron', 'silver', 'summer', 'willow',
 ]
 
+export type CredentialData = Record<string, string>
+
+function isCredentialData(value: unknown): value is CredentialData {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every((item) => typeof item === 'string')
+  )
+}
+
 const getCrypto = () => {
   const crypto = typeof window !== 'undefined' ? window.crypto : globalThis.crypto
   if (!crypto?.subtle) {
@@ -103,14 +114,18 @@ export async function decryptCredential(
   encryptedPayload: string,
   iv: string,
   masterKey: Uint8Array
-): Promise<object> {
+): Promise<CredentialData> {
   const key = await importRawKey(masterKey, ['decrypt'])
   const decrypted = await getCrypto().subtle.decrypt(
     { name: 'AES-GCM', iv: asBufferSource(b64decode(iv)) },
     key,
     asBufferSource(b64decode(encryptedPayload))
   )
-  return JSON.parse(new TextDecoder().decode(decrypted)) as object
+  const data: unknown = JSON.parse(new TextDecoder().decode(decrypted))
+  if (!isCredentialData(data)) {
+    throw new Error('Decrypted credential data has an invalid format.')
+  }
+  return data
 }
 
 export function generateBackupKeyPhrase(): string[] {

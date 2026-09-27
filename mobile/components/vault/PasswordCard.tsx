@@ -38,11 +38,11 @@ export default function PasswordCard({
     try {
       if (!data)
         setData(
-          (await decryptCredential(
+          await decryptCredential(
             credential.encryptedPayload,
             credential.encryptionIv,
             masterKey
-          )) as Record<string, string>
+          )
         )
       setRevealed(true)
       setTimeout(() => setRevealed(false), 30_000)
@@ -98,11 +98,11 @@ export default function PasswordCard({
           onPress={async () => {
             const current =
               data ??
-              ((await decryptCredential(
+              (await decryptCredential(
                 credential.encryptedPayload,
                 credential.encryptionIv,
                 masterKey
-              )) as Record<string, string>)
+              ))
             onEdit(credential, current)
           }}
         >

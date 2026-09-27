@@ -42,6 +42,14 @@ describe('Vault crypto', () => {
     expect(await decryptCredential(encrypted.encryptedPayload, encrypted.iv, master)).toEqual(data)
   })
 
+  it('rejects decrypted credential data that is not a string record', async () => {
+    const master = await generateMasterKey()
+    const invalid = await encryptCredential({ password: 42 }, master)
+    await expect(
+      decryptCredential(invalid.encryptedPayload, invalid.iv, master)
+    ).rejects.toThrow('Decrypted credential data has an invalid format.')
+  })
+
   it('rejects a wrong passphrase', async () => {
     const salt = generateSalt()
     const master = await generateMasterKey()

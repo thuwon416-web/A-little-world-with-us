@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { Heart, HeartPulse, AlertCircle, X, Save, Eye, EyeOff } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
 import {
@@ -20,6 +20,7 @@ function errorMessage(error: unknown, fallback: string): string {
 }
 
 export default function HealthProfileWidget() {
+  const fieldId = useId()
   const [profile, setProfile] = useState<HealthProfile | null>(null)
   const [partnerProfile, setPartnerProfile] = useState<HealthProfile | null>(null)
   const [loading, setLoading] = useState(true)
@@ -39,11 +40,7 @@ export default function HealthProfileWidget() {
   const [emergencyPhone, setEmergencyPhone] = useState('')
   const [emergencyRelationship, setEmergencyRelationship] = useState('')
 
-  useEffect(() => {
-    loadProfiles()
-  }, [])
-
-  const loadProfiles = async () => {
+  const loadProfiles = useCallback(async (): Promise<void> => {
     try {
       setLoading(true)
       const myProfile = await getHealthProfile()
@@ -68,7 +65,11 @@ export default function HealthProfileWidget() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    void loadProfiles()
+  }, [loadProfiles])
 
   const handleSave = async () => {
     try {
@@ -76,8 +77,8 @@ export default function HealthProfileWidget() {
       const data: HealthProfileInput = {}
 
       if (bloodType) data.blood_type = bloodType
-      if (height) data.height_cm = parseInt(height)
-      if (weight) data.weight_kg = parseFloat(weight)
+      if (height) data.height_cm = Number.parseInt(height, 10)
+      if (weight) data.weight_kg = Number.parseFloat(weight)
       if (allergies) data.allergies = allergies.split(',').map(a => a.trim()).filter(Boolean)
       if (medications) data.medications = medications.split(',').map(m => m.trim()).filter(Boolean)
       if (conditions) data.conditions = conditions.split(',').map(c => c.trim()).filter(Boolean)
@@ -139,7 +140,17 @@ export default function HealthProfileWidget() {
     }
   }
 
-  const bmi = height && weight ? calculateBMI(parseInt(height), parseFloat(weight)) : null
+  const parsedHeight = Number.parseInt(height, 10)
+  const parsedWeight = Number.parseFloat(weight)
+  const bmi =
+    height &&
+    weight &&
+    Number.isFinite(parsedHeight) &&
+    parsedHeight > 0 &&
+    Number.isFinite(parsedWeight) &&
+    parsedWeight > 0
+      ? calculateBMI(parsedHeight, parsedWeight)
+      : null
   const bmiCategory = bmi ? getBMICategory(bmi) : null
 
   if (loading) {
@@ -303,8 +314,9 @@ export default function HealthProfileWidget() {
           ) : (
             <form onSubmit={(e) => { e.preventDefault(); handleSave(); }} className="space-y-3">
               <div>
-                <label className="text-sm text-text-2">Blood Type</label>
+                <label htmlFor={`${fieldId}-blood-type`} className="text-sm text-text-2">Blood Type</label>
                 <select
+                  id={`${fieldId}-blood-type`}
                   value={bloodType}
                   onChange={(e) => setBloodType(e.target.value)}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
@@ -320,8 +332,9 @@ export default function HealthProfileWidget() {
 
               <div className="grid gap-3 md:grid-cols-2">
                 <div>
-                  <label className="text-sm text-text-2">Height (cm)</label>
+                  <label htmlFor={`${fieldId}-height`} className="text-sm text-text-2">Height (cm)</label>
                   <input
+                    id={`${fieldId}-height`}
                     type="number"
                     value={height}
                     onChange={(e) => setHeight(e.target.value)}
@@ -330,8 +343,9 @@ export default function HealthProfileWidget() {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-text-2">Weight (kg)</label>
+                  <label htmlFor={`${fieldId}-weight`} className="text-sm text-text-2">Weight (kg)</label>
                   <input
+                    id={`${fieldId}-weight`}
                     type="number"
                     value={weight}
                     onChange={(e) => setWeight(e.target.value)}
@@ -351,8 +365,9 @@ export default function HealthProfileWidget() {
               )}
 
               <div>
-                <label className="text-sm text-text-2">Allergies (comma-separated)</label>
+                <label htmlFor={`${fieldId}-allergies`} className="text-sm text-text-2">Allergies (comma-separated)</label>
                 <input
+                  id={`${fieldId}-allergies`}
                   type="text"
                   value={allergies}
                   onChange={(e) => setAllergies(e.target.value)}
@@ -362,8 +377,9 @@ export default function HealthProfileWidget() {
               </div>
 
               <div>
-                <label className="text-sm text-text-2">Medications (comma-separated)</label>
+                <label htmlFor={`${fieldId}-medications`} className="text-sm text-text-2">Medications (comma-separated)</label>
                 <input
+                  id={`${fieldId}-medications`}
                   type="text"
                   value={medications}
                   onChange={(e) => setMedications(e.target.value)}
@@ -373,8 +389,9 @@ export default function HealthProfileWidget() {
               </div>
 
               <div>
-                <label className="text-sm text-text-2">Conditions (comma-separated)</label>
+                <label htmlFor={`${fieldId}-conditions`} className="text-sm text-text-2">Conditions (comma-separated)</label>
                 <input
+                  id={`${fieldId}-conditions`}
                   type="text"
                   value={conditions}
                   onChange={(e) => setConditions(e.target.value)}
@@ -386,21 +403,27 @@ export default function HealthProfileWidget() {
               <div className="rounded-xl border border-accent-1/20 bg-soft-tint p-3">
                 <p className="text-xs font-medium text-text-1 mb-2">Emergency Contact</p>
                 <div className="space-y-2">
+                  <label htmlFor={`${fieldId}-emergency-name`} className="sr-only">Emergency contact name</label>
                   <input
+                    id={`${fieldId}-emergency-name`}
                     type="text"
                     value={emergencyName}
                     onChange={(e) => setEmergencyName(e.target.value)}
                     placeholder="Name"
                     className="w-full rounded-lg border border-accent-1/20 bg-soft-tint px-2 py-1.5 text-sm text-text-1"
                   />
+                  <label htmlFor={`${fieldId}-emergency-phone`} className="sr-only">Emergency contact phone</label>
                   <input
+                    id={`${fieldId}-emergency-phone`}
                     type="text"
                     value={emergencyPhone}
                     onChange={(e) => setEmergencyPhone(e.target.value)}
                     placeholder="Phone"
                     className="w-full rounded-lg border border-accent-1/20 bg-soft-tint px-2 py-1.5 text-sm text-text-1"
                   />
+                  <label htmlFor={`${fieldId}-emergency-relationship`} className="sr-only">Emergency contact relationship</label>
                   <input
+                    id={`${fieldId}-emergency-relationship`}
                     type="text"
                     value={emergencyRelationship}
                     onChange={(e) => setEmergencyRelationship(e.target.value)}

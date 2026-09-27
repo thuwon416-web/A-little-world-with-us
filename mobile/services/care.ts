@@ -37,7 +37,7 @@ export async function saveSharedPeriodDates(
 ): Promise<string[]> {
   const { data, error } = await supabase.rpc('save_care_period_dates', {
     target_couple_id: coupleId,
-    selected_dates: [...new Set(selectedDates)].sort(),
+    selected_dates: [...new Set(selectedDates)].sort((a, b) => a.localeCompare(b)),
   })
   if (error) throw error
   return (data ?? []).map((row: { log_date: string }) => row.log_date)

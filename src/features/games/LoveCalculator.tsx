@@ -29,8 +29,9 @@ export default function LoveCalculator() {
       </div>
 
       <div className="space-y-3">
-        <label className="block text-xs uppercase tracking-[0.15em] opacity-60">Trust</label>
+        <label htmlFor="love-trust" className="block text-xs uppercase tracking-[0.15em] opacity-60">Trust</label>
         <input
+          id="love-trust"
           type="range"
           min={0}
           max={100}
@@ -39,8 +40,9 @@ export default function LoveCalculator() {
           className="w-full"
         />
 
-        <label className="block text-xs uppercase tracking-[0.15em] opacity-60">Laughter</label>
+        <label htmlFor="love-laughter" className="block text-xs uppercase tracking-[0.15em] opacity-60">Laughter</label>
         <input
+          id="love-laughter"
           type="range"
           min={0}
           max={100}
@@ -49,8 +51,9 @@ export default function LoveCalculator() {
           className="w-full"
         />
 
-        <label className="block text-xs uppercase tracking-[0.15em] opacity-60">Adventure</label>
+        <label htmlFor="love-adventure" className="block text-xs uppercase tracking-[0.15em] opacity-60">Adventure</label>
         <input
+          id="love-adventure"
           type="range"
           min={0}
           max={100}

@@ -51,7 +51,7 @@ function AllMemories({
   }, [coupleId, search])
 
   const categories = useMemo(
-    () => [...new Set(memories.map((item) => item.category))].sort(),
+    () => [...new Set(memories.map((item) => item.category))].sort((a, b) => a.localeCompare(b)),
     [memories]
   )
   const visible = useMemo(

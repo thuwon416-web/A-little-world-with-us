@@ -1,7 +1,7 @@
 'use client'
 
 import type { FormEvent } from 'react'
-import { useState } from 'react'
+import { useId, useState } from 'react'
 import { X } from 'lucide-react'
 
 import { createExpense, type SplitType } from '@/services/finance-splitwise'
@@ -14,9 +14,10 @@ type AddExpenseModalProps = {
   onSaved: () => void
 }
 
-const today = () => new Date().toISOString().slice(0, 10)
+const today = (): string => new Date().toISOString().slice(0, 10)
 
 export default function AddExpenseModal({ currentUserId, partnerId, onClose, onSaved }: AddExpenseModalProps) {
+  const fieldId = useId()
   const [title, setTitle] = useState('')
   const [amount, setAmount] = useState('')
   const [category, setCategory] = useState('other')
@@ -35,7 +36,7 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
   const parsedPartnerExact = Number(partnerExact)
   const parsedYourShare = Number(yourShare)
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault()
     if (!title.trim()) return setError('Title is required.')
     if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) return setError('Amount must be greater than zero.')
@@ -83,28 +84,28 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
           </button>
         </div>
 
-        <label className="mt-5 block text-sm font-medium text-text-1">Title
-          <input required value={title} onChange={(event) => setTitle(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
+        <label htmlFor={`${fieldId}-title`} className="mt-5 block text-sm font-medium text-text-1">Title
+          <input id={`${fieldId}-title`} required value={title} onChange={(event) => setTitle(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
         </label>
-        <label className="mt-4 block text-sm font-medium text-text-1">Amount (MMK)
-          <input required type="number" min="1" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
+        <label htmlFor={`${fieldId}-amount`} className="mt-4 block text-sm font-medium text-text-1">Amount (MMK)
+          <input id={`${fieldId}-amount`} required type="number" min="1" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
         </label>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <label className="text-sm font-medium text-text-1">Category
-            <select value={category} onChange={(event) => setCategory(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-3 py-3">
+          <label htmlFor={`${fieldId}-category`} className="text-sm font-medium text-text-1">Category
+            <select id={`${fieldId}-category`} value={category} onChange={(event) => setCategory(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-3 py-3">
               {EXPENSE_CATEGORIES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
             </select>
           </label>
-          <label className="text-sm font-medium text-text-1">Date
-            <input type="date" value={spentAt} onChange={(event) => setSpentAt(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-3 py-3" />
+          <label htmlFor={`${fieldId}-date`} className="text-sm font-medium text-text-1">Date
+            <input id={`${fieldId}-date`} type="date" value={spentAt} onChange={(event) => setSpentAt(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-3 py-3" />
           </label>
         </div>
 
         <fieldset className="mt-5">
           <legend className="text-sm font-medium text-text-1">Paid by</legend>
           <div className="mt-2 flex gap-4 text-sm text-text-2">
-            <label><input type="radio" checked={paidBy === currentUserId} onChange={() => setPaidBy(currentUserId)} /> <span className="ml-1">You</span></label>
-            <label><input type="radio" checked={paidBy === partnerId} onChange={() => partnerId && setPaidBy(partnerId)} /> <span className="ml-1">Partner</span></label>
+            <label htmlFor={`${fieldId}-paid-by-you`}><input id={`${fieldId}-paid-by-you`} type="radio" checked={paidBy === currentUserId} onChange={() => setPaidBy(currentUserId)} /> <span className="ml-1">You</span></label>
+            <label htmlFor={`${fieldId}-paid-by-partner`}><input id={`${fieldId}-paid-by-partner`} type="radio" checked={paidBy === partnerId} onChange={() => partnerId && setPaidBy(partnerId)} /> <span className="ml-1">Partner</span></label>
           </div>
         </fieldset>
 
@@ -112,31 +113,31 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
           <legend className="text-sm font-medium text-text-1">Split type</legend>
           <div className="mt-2 flex flex-wrap gap-3 text-sm text-text-2">
             {SPLIT_TYPES.map((item) => (
-              <label key={item.value}><input type="radio" checked={splitType === item.value} onChange={() => setSplitType(item.value)} /> <span className="ml-1">{item.label}</span></label>
+              <label key={item.value} htmlFor={`${fieldId}-split-${item.value}`}><input id={`${fieldId}-split-${item.value}`} type="radio" checked={splitType === item.value} onChange={() => setSplitType(item.value)} /> <span className="ml-1">{item.label}</span></label>
             ))}
           </div>
         </fieldset>
 
         {splitType === 'percentage' && (
-          <label className="mt-4 block text-sm font-medium text-text-1">Partner percentage
-            <input type="number" min="0" max="100" step="0.01" value={partnerPercentage} onChange={(event) => setPartnerPercentage(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
+          <label htmlFor={`${fieldId}-partner-percentage`} className="mt-4 block text-sm font-medium text-text-1">Partner percentage
+            <input id={`${fieldId}-partner-percentage`} type="number" min="0" max="100" step="0.01" value={partnerPercentage} onChange={(event) => setPartnerPercentage(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
             <span className="mt-1 block text-xs text-text-2">Your percentage: {100 - parsedPartnerPercentage}%</span>
           </label>
         )}
 
         {splitType === 'custom' && (
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <label className="text-sm font-medium text-text-1">Your share
-              <input type="number" min="0" step="0.01" value={yourShare} onChange={(event) => setYourShare(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
+            <label htmlFor={`${fieldId}-your-share`} className="text-sm font-medium text-text-1">Your share
+              <input id={`${fieldId}-your-share`} type="number" min="0" step="0.01" value={yourShare} onChange={(event) => setYourShare(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
             </label>
-            <label className="text-sm font-medium text-text-1">Partner share
-              <input type="number" min="0" step="0.01" value={partnerExact} onChange={(event) => setPartnerExact(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
+            <label htmlFor={`${fieldId}-partner-share`} className="text-sm font-medium text-text-1">Partner share
+              <input id={`${fieldId}-partner-share`} type="number" min="0" step="0.01" value={partnerExact} onChange={(event) => setPartnerExact(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
             </label>
           </div>
         )}
 
-        <label className="mt-4 block text-sm font-medium text-text-1">Notes <span className="font-normal text-text-2">(optional)</span>
-          <textarea maxLength={500} rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 w-full resize-none rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
+        <label htmlFor={`${fieldId}-notes`} className="mt-4 block text-sm font-medium text-text-1">Notes <span className="font-normal text-text-2">(optional)</span>
+          <textarea id={`${fieldId}-notes`} maxLength={500} rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} className="mt-2 w-full resize-none rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
         </label>
 
         {error && <p className="mt-3 text-sm text-error" role="alert">{error}</p>}

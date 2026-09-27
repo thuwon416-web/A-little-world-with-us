@@ -35,9 +35,7 @@ export default function PasswordHealth({
     void Promise.all(
       credentials.map(async (item) => ({
         item,
-        data: (await decryptCredential(item.encryptedPayload, item.encryptionIv, masterKey)) as {
-          password?: string
-        },
+        data: await decryptCredential(item.encryptedPayload, item.encryptionIv, masterKey),
       }))
     )
       .then((values) => {

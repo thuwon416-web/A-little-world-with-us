@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useId, useMemo, useState } from 'react'
 import { CalendarDays, CheckCircle2, Flag, Plus, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -25,6 +25,58 @@ type PlanRecord = {
   created_at: string
 }
 
+type PlanItemRecord = { id: string; plan_id: string; title: string; completed: boolean }
+
+function isPlanRecord(value: unknown): value is PlanRecord {
+  if (typeof value !== 'object' || value === null) return false
+  return (
+    'id' in value &&
+    typeof value.id === 'string' &&
+    'title' in value &&
+    typeof value.title === 'string' &&
+    'type' in value &&
+    typeof value.type === 'string' &&
+    'due_date' in value &&
+    (typeof value.due_date === 'string' || value.due_date === null) &&
+    'status' in value &&
+    typeof value.status === 'string' &&
+    'updated_at' in value &&
+    typeof value.updated_at === 'string' &&
+    'created_at' in value &&
+    typeof value.created_at === 'string'
+  )
+}
+
+function isPlanItemRecord(value: unknown): value is PlanItemRecord {
+  if (typeof value !== 'object' || value === null) return false
+  return (
+    'id' in value &&
+    typeof value.id === 'string' &&
+    'plan_id' in value &&
+    typeof value.plan_id === 'string' &&
+    'title' in value &&
+    typeof value.title === 'string' &&
+    'completed' in value &&
+    typeof value.completed === 'boolean'
+  )
+}
+
+function toPlan(plan: PlanRecord, items: PlanItemRecord[]): Plan {
+  return {
+    id: plan.id,
+    title: plan.title,
+    type: plan.type,
+    dueDate: plan.due_date
+      ? new Date(`${plan.due_date}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      : '',
+    status: plan.status === 'completed' ? 'Completed' : 'In progress',
+    updated_at: plan.updated_at || plan.created_at,
+    items: items
+      .filter((item) => item.plan_id === plan.id)
+      .map((item) => ({ id: item.id, label: item.title, done: item.completed })),
+  }
+}
+
 const bucketList = [
   'Watch the sunrise together in a new city',
   'Take a road trip with no itinerary',
@@ -32,6 +84,7 @@ const bucketList = [
 ]
 
 export default function PlansPage() {
+  const fieldId = useId()
   const [plans, setPlans] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
@@ -84,27 +137,19 @@ export default function PlansPage() {
         if (plansError) throw plansError
 
         const planIds = (plansData ?? []).map((plan) => plan.id)
-        let itemsData: Array<{ id: string; plan_id: string; title: string; completed: boolean }> = []
+        let itemsData: PlanItemRecord[] = []
         if (planIds.length) {
           const { data, error: itemsError } = await supabase
             .from('plan_items')
             .select('id,plan_id,title,completed')
             .in('plan_id', planIds)
           if (itemsError) throw itemsError
-          itemsData = data ?? []
+          itemsData = (data ?? []).filter(isPlanItemRecord)
         }
 
-        const plansWithItems = (plansData ?? []).map((plan: PlanRecord) => ({
-          id: plan.id,
-          title: plan.title,
-          type: plan.type,
-          dueDate: plan.due_date ? new Date(`${plan.due_date}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
-          status: (plan.status === 'completed' ? 'Completed' : 'In progress') as 'In progress' | 'Completed',
-          updated_at: plan.updated_at || plan.created_at,
-          items: itemsData
-            .filter((item) => item.plan_id === plan.id)
-            .map((item) => ({ id: item.id, label: item.title, done: item.completed })),
-        })) as Plan[]
+        const plansWithItems = (plansData ?? [])
+          .filter(isPlanRecord)
+          .map((plan) => toPlan(plan, itemsData))
         if (active) setPlans(plansWithItems)
       } catch (caught) {
         if (active) setLoadError(caught instanceof Error ? caught.message : 'Unable to load shared plans.')
@@ -137,7 +182,7 @@ export default function PlansPage() {
     return totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100)
   }, [plans])
 
-  const toggleItem = async (planId: string, itemId: string) => {
+  const toggleItem = async (planId: string, itemId: string): Promise<void> => {
     const plan = plans.find((p) => p.id === planId)
     const item = plan?.items.find((i) => i.id === itemId)
     if (!item || !plan) return
@@ -165,7 +210,7 @@ export default function PlansPage() {
     }
   }
 
-  const createPlan = async () => {
+  const createPlan = async (): Promise<void> => {
     if (!coupleId || !newTitle.trim()) return
     setCreating(true)
     setCreateError('')
@@ -184,15 +229,8 @@ export default function PlansPage() {
         .select('id,title,type,due_date,status,updated_at,created_at')
         .single()
       if (error) throw error
-      setPlans((current) => [{
-        id: data.id,
-        title: data.title,
-        type: data.type,
-        dueDate: data.due_date ? new Date(`${data.due_date}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : '',
-        status: data.status === 'completed' ? 'Completed' : 'In progress',
-        updated_at: data.updated_at || data.created_at,
-        items: [],
-      }, ...current])
+      if (!isPlanRecord(data)) throw new Error('The saved plan response was incomplete.')
+      setPlans((current) => [toPlan(data, []), ...current])
       setNewTitle('')
       setNewType('goal')
       setNewDueDate('')
@@ -364,16 +402,16 @@ export default function PlansPage() {
               <button type="button" onClick={() => setCreateOpen(false)} className="rounded-full px-2 py-1 text-text-2" aria-label="Close new plan">×</button>
             </div>
             <div className="mt-4 space-y-3">
-              <label className="block text-sm text-text-2">Plan name
-                <input autoFocus value={newTitle} onChange={(event) => setNewTitle(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" maxLength={120} />
+              <label htmlFor={`${fieldId}-plan-name`} className="block text-sm text-text-2">Plan name
+                <input id={`${fieldId}-plan-name`} autoFocus value={newTitle} onChange={(event) => setNewTitle(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" maxLength={120} />
               </label>
-              <label className="block text-sm text-text-2">Type
-                <select value={newType} onChange={(event) => setNewType(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1">
+              <label htmlFor={`${fieldId}-plan-type`} className="block text-sm text-text-2">Type
+                <select id={`${fieldId}-plan-type`} value={newType} onChange={(event) => setNewType(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1">
                   <option value="goal">Shared goal</option><option value="date">Date plan</option><option value="trip">Trip</option><option value="home">Home</option><option value="other">Other</option>
                 </select>
               </label>
-              <label className="block text-sm text-text-2">Due date (optional)
-                <input type="date" value={newDueDate} onChange={(event) => setNewDueDate(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
+              <label htmlFor={`${fieldId}-due-date`} className="block text-sm text-text-2">Due date (optional)
+                <input id={`${fieldId}-due-date`} type="date" value={newDueDate} onChange={(event) => setNewDueDate(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
               </label>
               {createError ? <p className="text-sm text-error" role="alert">{createError}</p> : null}
               <div className="flex justify-end gap-2 pt-2">

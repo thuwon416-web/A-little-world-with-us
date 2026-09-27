@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useId } from 'react'
 import { useRouter } from 'next/navigation'
-import { Check, ChevronRight, ChevronLeft, Heart, Sparkles, Star, User, Activity, Moon, Zap } from 'lucide-react'
+import { Check, ChevronRight, ChevronLeft, Heart, Sparkles, Star, User, Activity, Moon } from 'lucide-react'
 import {
   getOnboardingProgress,
   initializeOnboarding,
@@ -145,7 +145,7 @@ export default function OnboardingWizard() {
               const isCurrent = currentStep === stepNum
               return (
                 <span
-                  key={index}
+                  key={stepNum}
                   className={`h-2.5 w-2.5 rounded-full transition-all ${
                     isCompleted
                       ? 'bg-accent-1'
@@ -249,6 +249,8 @@ function ProfileStep({
   onBack: () => void
   saving: boolean
 }) {
+  const fieldId = useId()
+
   return (
     <div className="space-y-6">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
@@ -267,8 +269,9 @@ function ProfileStep({
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm text-text-2">Name</label>
+          <label htmlFor={`${fieldId}-name`} className="mb-2 block text-sm text-text-2">Name</label>
           <input
+            id={`${fieldId}-name`}
             type="text"
             value={data.name || ''}
             onChange={(e) => onChange({ ...data, name: e.target.value })}
@@ -278,8 +281,9 @@ function ProfileStep({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-text-2">Birth Date</label>
+          <label htmlFor={`${fieldId}-birth-date`} className="mb-2 block text-sm text-text-2">Birth Date</label>
           <input
+            id={`${fieldId}-birth-date`}
             type="date"
             value={data.birth_date || ''}
             onChange={(e) => onChange({ ...data, birth_date: e.target.value })}
@@ -288,10 +292,22 @@ function ProfileStep({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-text-2">Gender (Optional)</label>
+          <label htmlFor={`${fieldId}-gender`} className="mb-2 block text-sm text-text-2">Gender (Optional)</label>
           <select
+            id={`${fieldId}-gender`}
             value={data.gender || ''}
-            onChange={(e) => onChange({ ...data, gender: e.target.value as 'male' | 'female' | 'other' | 'prefer_not_to_say' })}
+            onChange={(event) => {
+              const gender = event.target.value
+              if (
+                gender === '' ||
+                gender === 'male' ||
+                gender === 'female' ||
+                gender === 'other' ||
+                gender === 'prefer_not_to_say'
+              ) {
+                onChange({ ...data, gender: gender || undefined })
+              }
+            }}
             className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1"
           >
             <option value="">Select...</option>
@@ -413,6 +429,8 @@ function HealthStep({
   onSkip: () => void
   saving: boolean
 }) {
+  const fieldId = useId()
+
   return (
     <div className="space-y-6">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
@@ -431,8 +449,9 @@ function HealthStep({
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm text-text-2">Blood Type</label>
+          <label htmlFor={`${fieldId}-blood-type`} className="mb-2 block text-sm text-text-2">Blood Type</label>
           <select
+            id={`${fieldId}-blood-type`}
             value={data.blood_type || ''}
             onChange={(e) => onChange({ ...data, blood_type: e.target.value })}
             className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1"
@@ -451,21 +470,23 @@ function HealthStep({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-2 block text-sm text-text-2">Height (cm)</label>
+            <label htmlFor={`${fieldId}-height`} className="mb-2 block text-sm text-text-2">Height (cm)</label>
             <input
+              id={`${fieldId}-height`}
               type="number"
               value={data.height_cm || ''}
-              onChange={(e) => onChange({ ...data, height_cm: parseInt(e.target.value) || undefined })}
+              onChange={(e) => onChange({ ...data, height_cm: Number.parseInt(e.target.value, 10) || undefined })}
               placeholder="170"
               className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1 placeholder:text-text-2/50"
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm text-text-2">Weight (kg)</label>
+            <label htmlFor={`${fieldId}-weight`} className="mb-2 block text-sm text-text-2">Weight (kg)</label>
             <input
+              id={`${fieldId}-weight`}
               type="number"
               value={data.weight_kg || ''}
-              onChange={(e) => onChange({ ...data, weight_kg: parseFloat(e.target.value) || undefined })}
+              onChange={(e) => onChange({ ...data, weight_kg: Number.parseFloat(e.target.value) || undefined })}
               placeholder="70"
               className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1 placeholder:text-text-2/50"
             />
@@ -519,6 +540,8 @@ function CycleStep({
   onSkip: () => void
   saving: boolean
 }) {
+  const fieldId = useId()
+
   return (
     <div className="space-y-6">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
@@ -537,8 +560,9 @@ function CycleStep({
 
       <div className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm text-text-2">Last Period Start</label>
+          <label htmlFor={`${fieldId}-last-period-start`} className="mb-2 block text-sm text-text-2">Last Period Start</label>
           <input
+            id={`${fieldId}-last-period-start`}
             type="date"
             value={data.last_period_date || ''}
             onChange={(e) => onChange({ ...data, last_period_date: e.target.value })}
@@ -547,11 +571,12 @@ function CycleStep({
         </div>
 
         <div>
-          <label className="mb-2 block text-sm text-text-2">Cycle Length (days)</label>
+          <label htmlFor={`${fieldId}-cycle-length`} className="mb-2 block text-sm text-text-2">Cycle Length (days)</label>
           <input
+            id={`${fieldId}-cycle-length`}
             type="number"
             value={data.cycle_length || ''}
-            onChange={(e) => onChange({ ...data, cycle_length: parseInt(e.target.value) || undefined })}
+            onChange={(e) => onChange({ ...data, cycle_length: Number.parseInt(e.target.value, 10) || undefined })}
             placeholder="28"
             className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-4 py-3 text-text-1 placeholder:text-text-2/50"
           />
@@ -581,74 +606,6 @@ function CycleStep({
             className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Next'}
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function _AstrologyStep({
-  data: _data,
-  onChange: _onChange,
-  onNext,
-  onBack,
-  onSkip,
-  saving,
-}: {
-  data: OnboardingData
-  onChange: (data: OnboardingData) => void
-  onNext: () => void
-  onBack: () => void
-  onSkip: () => void
-  saving: boolean
-}) {
-  return (
-    <div className="space-y-6">
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
-        <Zap className="h-6 w-6" />
-      </div>
-
-      <div>
-        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Astrology</p>
-        <h1 className="mt-3 text-2xl font-serif text-text-1">
-          Astrology Profile
-        </h1>
-        <p className="mt-2 text-sm text-text-2">
-          Optional - birth date already collected.
-        </p>
-      </div>
-
-      <div className="rounded-xl bg-soft-tint p-4">
-        <p className="text-sm text-text-2">
-          Your astrology profile will be automatically calculated from your birth date. You can view it in the wellness section.
-        </p>
-      </div>
-
-      <div className="flex items-center justify-between gap-3">
-        <button
-          onClick={onBack}
-          disabled={saving}
-          className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-1 disabled:opacity-40"
-        >
-          <ChevronLeft className="mr-2 inline h-4 w-4" />
-          Back
-        </button>
-        <div className="flex gap-3">
-          <button
-            onClick={onSkip}
-            disabled={saving}
-            className="rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-2 disabled:opacity-40"
-          >
-            Skip for now
-          </button>
-          <button
-            onClick={onNext}
-            disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
-          >
-            Next
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>

@@ -6,12 +6,21 @@ import LoveCalculator from '@/features/games/LoveCalculator'
 import { calculateLoveScore } from '@/lib/love-score'
 
 const factors = ['Chemistry', 'Trust', 'Humor', 'Romance', 'Shared dreams']
+type NameField = {
+  label: string
+  value: string
+  onChange: (value: string) => void
+}
 
 export default function LoveCalculatorMigrated() {
   const [her, setHer] = useState('Meera')
   const [me, setMe] = useState('Aarav')
   const [values, setValues] = useState([92, 96, 88, 94, 90])
   const calculatedScore = calculateLoveScore(her, me)
+  const nameFields: NameField[] = [
+    { label: 'Their name', value: her, onChange: setHer },
+    { label: 'Your name', value: me, onChange: setMe },
+  ]
 
   useEffect(() => {
     if (!her.trim() || !me.trim()) return
@@ -33,15 +42,12 @@ export default function LoveCalculatorMigrated() {
           Who&apos;s calculating?
         </div>
         <div className="grid grid-cols-2 gap-4">
-          {[
-            ['Their name', her, setHer],
-            ['Your name', me, setMe],
-          ].map(([label, value, setter]) => (
-            <label key={label as string} className="text-xs text-text-2">
-              <span className="mb-1.5 block">{label as string}</span>
+          {nameFields.map(({ label, value, onChange }) => (
+            <label key={label} className="text-xs text-text-2">
+              <span className="mb-1.5 block">{label}</span>
               <input
-                value={value as string}
-                onChange={(event) => (setter as (next: string) => void)(event.target.value)}
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
                 className="w-full rounded-xl border border-accent-1/15 bg-card px-4 py-2.5 text-sm text-text-1 outline-none focus:border-accent-1"
               />
             </label>

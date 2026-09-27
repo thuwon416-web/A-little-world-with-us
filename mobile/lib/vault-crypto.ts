@@ -30,6 +30,17 @@ const BACKUP_WORDS = [
   'willow',
 ]
 
+export type CredentialData = Record<string, string>
+
+function isCredentialData(value: unknown): value is CredentialData {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.values(value).every((item) => typeof item === 'string')
+  )
+}
+
 function getSubtle(): SubtleCrypto {
   // Expo Crypto supplies secure randomness; PBKDF2/AES-GCM use the platform Web Crypto
   // implementation so their parameters and output remain compatible with the Web app.
@@ -147,14 +158,18 @@ export async function decryptCredential(
   encryptedPayload: string,
   iv: string,
   masterKey: Uint8Array
-): Promise<object> {
+): Promise<CredentialData> {
   const key = await importRawKey(masterKey, ['decrypt'])
   const decrypted = await getSubtle().decrypt(
     { name: 'AES-GCM', iv: toArrayBuffer(base64ToBytes(iv)) },
     key,
     toArrayBuffer(base64ToBytes(encryptedPayload))
   )
-  return JSON.parse(new TextDecoder().decode(decrypted)) as object
+  const data: unknown = JSON.parse(new TextDecoder().decode(decrypted))
+  if (!isCredentialData(data)) {
+    throw new Error('Decrypted credential data has an invalid format.')
+  }
+  return data
 }
 
 export function generateBackupKeyPhrase(): string[] {

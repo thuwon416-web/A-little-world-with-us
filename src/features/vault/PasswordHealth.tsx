@@ -11,7 +11,7 @@ export default function PasswordHealth({ credentials, masterKey, onFocus }: { cr
   const [health, setHealth] = useState<Health>({ weak: [], reused: [], old: [], secure: 0 })
   useEffect(() => {
     let active = true
-    void Promise.all(credentials.map(async (item) => ({ item, data: await decryptCredential(item.encryptedPayload, item.encryptionIv, masterKey) as { password?: string } }))).then((values) => {
+    void Promise.all(credentials.map(async (item) => ({ item, data: await decryptCredential(item.encryptedPayload, item.encryptionIv, masterKey) }))).then((values) => {
       if (!active) return
       const counts = new Map<string, VaultCredential[]>()
       values.forEach(({ item, data }) => { const password = data.password ?? ''; counts.set(password, [...(counts.get(password) ?? []), item]) })

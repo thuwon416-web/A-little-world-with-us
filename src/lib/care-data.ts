@@ -88,7 +88,7 @@ export async function saveCareLog(coupleId: string, userId: string, draft: CareD
 // long historical period selection feel stalled. This groups the work into at
 // most three database requests and runs those requests together.
 export async function savePeriodDates(coupleId: string, selectedDates: string[]) {
-  const dates = [...new Set(selectedDates)].sort()
+  const dates = [...new Set(selectedDates)].sort((a, b) => a.localeCompare(b))
   const { error } = await supabase.rpc('save_care_period_dates', {
     target_couple_id: coupleId,
     selected_dates: dates,
@@ -97,7 +97,7 @@ export async function savePeriodDates(coupleId: string, selectedDates: string[])
 }
 
 export function periodStarts(logs: CareLog[]) {
-  const days = logs.filter((log) => log.period_day).map((log) => log.log_date).sort()
+  const days = logs.filter((log) => log.period_day).map((log) => log.log_date).sort((a, b) => a.localeCompare(b))
   return days.filter((day, index) => index === 0 || daysBetween(days[index - 1], day) > 1).reverse()
 }
 

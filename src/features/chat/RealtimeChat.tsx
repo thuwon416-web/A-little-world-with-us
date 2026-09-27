@@ -40,8 +40,109 @@ interface Message {
   transcript?: string | null
 }
 
+type AIContext = { id: string; category: string; sender_role: string; matched_keywords: string[] }
 type StickerSelection = { emoji: string }
 type GifSelection = { url: string }
+
+const MESSAGE_TYPES: Message['message_type'][] = [
+  'text',
+  'voice',
+  'photo',
+  'sticker',
+  'gif',
+  'file',
+  'video',
+  'audio',
+  'location',
+  'sos',
+]
+
+function isChatMessage(value: unknown): value is Message {
+  if (typeof value !== 'object' || value === null) return false
+  const hasValidBaseFields =
+    'id' in value &&
+    typeof value.id === 'string' &&
+    'sender_id' in value &&
+    typeof value.sender_id === 'string' &&
+    'content' in value &&
+    (typeof value.content === 'string' || value.content === null) &&
+    'message_type' in value &&
+    MESSAGE_TYPES.some((type) => type === value.message_type) &&
+    'media_url' in value &&
+    (typeof value.media_url === 'string' || value.media_url === null) &&
+    'media_duration' in value &&
+    (typeof value.media_duration === 'number' || value.media_duration === null) &&
+    'encrypted' in value &&
+    typeof value.encrypted === 'boolean' &&
+    'reply_to' in value &&
+    (typeof value.reply_to === 'string' || value.reply_to === null) &&
+    'created_at' in value &&
+    typeof value.created_at === 'string' &&
+    'edited_at' in value &&
+    (typeof value.edited_at === 'string' || value.edited_at === null) &&
+    'deleted_at' in value &&
+    (typeof value.deleted_at === 'string' || value.deleted_at === null) &&
+    'delivered_at' in value &&
+    (typeof value.delivered_at === 'string' || value.delivered_at === null) &&
+    'seen_at' in value &&
+    (typeof value.seen_at === 'string' || value.seen_at === null)
+  if (!hasValidBaseFields) return false
+
+  const hasValidMediaMimeType =
+    !('media_mime_type' in value) ||
+    typeof value.media_mime_type === 'string' ||
+    value.media_mime_type === null
+  const hasValidTranscript =
+    !('transcript' in value) ||
+    typeof value.transcript === 'string' ||
+    value.transcript === null
+  const hasValidLocation =
+    !('location_payload' in value) ||
+    value.location_payload === null ||
+    (typeof value.location_payload === 'object' &&
+      value.location_payload !== null &&
+      'latitude' in value.location_payload &&
+      typeof value.location_payload.latitude === 'number' &&
+      'longitude' in value.location_payload &&
+      typeof value.location_payload.longitude === 'number' &&
+      (!('accuracy' in value.location_payload) ||
+        typeof value.location_payload.accuracy === 'number') &&
+      (!('label' in value.location_payload) ||
+        typeof value.location_payload.label === 'string'))
+
+  return hasValidMediaMimeType && hasValidTranscript && hasValidLocation
+}
+
+function isAIContext(value: unknown): value is AIContext {
+  if (typeof value !== 'object' || value === null) return false
+  return (
+    'id' in value &&
+    typeof value.id === 'string' &&
+    'category' in value &&
+    typeof value.category === 'string' &&
+    'sender_role' in value &&
+    typeof value.sender_role === 'string' &&
+    'matched_keywords' in value &&
+    Array.isArray(value.matched_keywords) &&
+    value.matched_keywords.every((keyword) => typeof keyword === 'string')
+  )
+}
+
+function isGuardianResponse(value: unknown): value is { response?: string; error?: string } {
+  if (typeof value !== 'object' || value === null) return false
+  const response = 'response' in value ? value.response : undefined
+  const error = 'error' in value ? value.error : undefined
+  return (response === undefined || typeof response === 'string') &&
+    (error === undefined || typeof error === 'string')
+}
+
+function isTranscriptResponse(value: unknown): value is { transcript?: string; error?: string } {
+  if (typeof value !== 'object' || value === null) return false
+  const transcript = 'transcript' in value ? value.transcript : undefined
+  const error = 'error' in value ? value.error : undefined
+  return (transcript === undefined || typeof transcript === 'string') &&
+    (error === undefined || typeof error === 'string')
+}
 
 function isExternalUrl(value: string | null | undefined): boolean {
   if (!value) return false
@@ -64,7 +165,7 @@ export default function RealtimeChat() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [editContent, setEditContent] = useState('')
   const [contextCount, setContextCount] = useState(0)
-  const [contexts, setContexts] = useState<Array<{ id: string; category: string; sender_role: string; matched_keywords: string[] }>>([])
+  const [contexts, setContexts] = useState<AIContext[]>([])
   const [showAIPanel, setShowAIPanel] = useState(false)
   const [aiResponse, setAiResponse] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
@@ -98,7 +199,7 @@ export default function RealtimeChat() {
         .is('processed_at', null)
         .gte('expires_at', new Date().toISOString())
       setContextCount(count ?? 0)
-      setContexts((contextRows ?? []) as typeof contexts)
+      setContexts((contextRows ?? []).filter(isAIContext))
 
       // Load Initial Messages
       const { data: loadedMessages } = await supabase
@@ -109,8 +210,9 @@ export default function RealtimeChat() {
         .limit(50)
 
       const chatKey = await deriveChatKey(couple.id)
+      const initialMessages = (loadedMessages ?? []).filter(isChatMessage)
       const decryptedMessages = await Promise.all(
-        (loadedMessages || []).map(async (msg: Message) => {
+        initialMessages.map(async (msg) => {
           let mediaUrl = msg.media_url
           try {
             if (isExternalUrl(msg.media_url)) {
@@ -170,7 +272,8 @@ export default function RealtimeChat() {
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'messages', filter: `couple_id=eq.${couple.id}` },
           async (payload) => {
-            const rawMessage = payload.new as Message
+            if (!isChatMessage(payload.new)) return
+            const rawMessage = payload.new
             let mediaUrl = rawMessage.media_url
             try {
               if (isExternalUrl(rawMessage.media_url)) {
@@ -208,7 +311,8 @@ export default function RealtimeChat() {
           'postgres_changes',
           { event: 'UPDATE', schema: 'public', table: 'messages', filter: `couple_id=eq.${couple.id}` },
           async (payload) => {
-            const rawMessage = payload.new as Message
+            if (!isChatMessage(payload.new)) return
+            const rawMessage = payload.new
             let mediaUrl = rawMessage.media_url
             try {
               if (isExternalUrl(rawMessage.media_url)) {
@@ -237,7 +341,11 @@ export default function RealtimeChat() {
       }
     }
 
-    void initChat()
+    void initChat().catch((caught: unknown) => {
+      if (isMounted) {
+        setLoadError(caught instanceof Error ? caught.message : 'Unable to initialize chat.')
+      }
+    })
 
     return () => {
       isMounted = false
@@ -288,7 +396,7 @@ export default function RealtimeChat() {
       if (olderMessages && olderMessages.length > 0) {
         const chatKey = await deriveChatKey(coupleId)
         const decryptedMessages = await Promise.all(
-          olderMessages.map(async (msg: Message) => {
+          olderMessages.filter(isChatMessage).map(async (msg) => {
             let mediaUrl = msg.media_url
             try {
               mediaUrl = msg.message_type === 'voice'
@@ -352,7 +460,8 @@ export default function RealtimeChat() {
     setAiLoading(true)
     try {
       const response = await fetch('/api/ai/guardian', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Please review my recent context and give me a gentle, practical suggestion.' }) })
-      const payload = await response.json() as { response?: string; error?: string }
+      const payload: unknown = await response.json()
+      if (!isGuardianResponse(payload)) throw new Error('AI Guardian returned an invalid response.')
       if (!response.ok) throw new Error(payload.error ?? 'AI Guardian is unavailable.')
       setAiResponse(payload.response ?? '')
       setContextCount(0)
@@ -403,7 +512,8 @@ export default function RealtimeChat() {
       form.set('audio', new File([blob], 'voice-message.webm', { type: blob.type || 'audio/webm' }))
       form.set('messageId', message.id)
       const response = await fetch('/api/ai/transcribe', { method: 'POST', body: form })
-      const data = await response.json() as { transcript?: string; error?: string }
+      const data: unknown = await response.json()
+      if (!isTranscriptResponse(data)) throw new Error('Transcription returned an invalid response.')
       if (!response.ok || !data.transcript) throw new Error(data.error ?? 'Unable to transcribe this voice message.')
       setMessages((current) => current.map((item) => item.id === message.id ? { ...item, transcript: data.transcript ?? null } : item))
     } catch (caught) {

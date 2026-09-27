@@ -23,14 +23,14 @@ export default function PasswordCard({ credential, masterKey, onEdit, onDelete, 
   const reveal = async () => {
     if (!data) {
       const decrypted = await decryptCredential(credential.encryptedPayload, credential.encryptionIv, masterKey)
-      setData(decrypted as Record<string, string>)
+      setData(decrypted)
     }
     setRevealed(true)
     window.setTimeout(() => setRevealed(false), 30_000)
   }
 
   const edit = async () => {
-    const current = data ?? await decryptCredential(credential.encryptedPayload, credential.encryptionIv, masterKey) as Record<string, string>
+    const current = data ?? await decryptCredential(credential.encryptedPayload, credential.encryptionIv, masterKey)
     onEdit(credential, current)
   }
 

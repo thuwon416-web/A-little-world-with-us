@@ -45,7 +45,7 @@ function AllMemories({ coupleId, initialCategory = 'all' }: { coupleId: string; 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coupleId, search])
 
-  const categories = useMemo(() => [...new Set(memories.map((memory) => memory.category))].sort(), [memories])
+  const categories = useMemo(() => [...new Set(memories.map((memory) => memory.category))].sort((a, b) => a.localeCompare(b)), [memories])
   const filtered = useMemo(() => memories.filter((memory) => {
     const date = new Date(memory.date_time)
     return (category === 'all' || memory.category === category) &&
