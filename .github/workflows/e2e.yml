@@ -33,7 +33,7 @@ jobs:
 
       - name: Install Playwright browsers
         if: ${{ env.NEXT_PUBLIC_SUPABASE_URL != '' && env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}
-        run: npx playwright@1.63.0 install --with-deps
+        run: ./node_modules/.bin/playwright install --with-deps
       
       - name: Run Playwright tests
         if: ${{ env.NEXT_PUBLIC_SUPABASE_URL != '' && env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}

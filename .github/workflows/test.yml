@@ -27,13 +27,13 @@ jobs:
         run: npm run lint
       
       - name: Run TypeScript check
-        run: npx --yes --package=typescript@5.9.3 tsc --noEmit
+        run: ./node_modules/.bin/tsc --noEmit
       
       - name: Run web tests with coverage (Vitest)
         run: npm run test:coverage
       
       - name: Run A11Y tests
-        run: npx vitest@2.1.9 run src/tests/a11y.test.tsx
+        run: ./node_modules/.bin/vitest run src/tests/a11y.test.tsx
       
       - name: Upload coverage reports
         if: always()
