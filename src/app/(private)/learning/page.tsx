@@ -64,6 +64,10 @@ export default function LearningPage() {
 
   const getLessonVocab = (lesson: KoreanLesson) =>
     KOREAN_VOCAB.filter((vocab) => vocab.lessonId === lesson.id)
+  let vocabularyMasteryPercentage = 0
+  if (KOREAN_VOCAB.length > 0) {
+    vocabularyMasteryPercentage = (masteredIds.size / KOREAN_VOCAB.length) * 100
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 animate-fade-in" data-theme={mode}>
@@ -102,7 +106,7 @@ export default function LearningPage() {
           >
             <div
               className="h-full rounded-full bg-accent-1 transition-[width] duration-300"
-              style={{ width: `${KOREAN_VOCAB.length ? (masteredIds.size / KOREAN_VOCAB.length) * 100 : 0}%` }}
+              style={{ width: `${vocabularyMasteryPercentage}%` }}
             />
           </div>
         </div>
@@ -110,6 +114,10 @@ export default function LearningPage() {
 
       <nav className="flex gap-2 overflow-x-auto pb-2" aria-label="Korean levels">
         {levels.map((level) => {
+          let levelTabClassName = 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
+          if (selectedLevel === level) {
+            levelTabClassName = 'border-accent-1 bg-accent-1 text-white'
+          }
           return (
             <button
               key={level}
@@ -119,11 +127,7 @@ export default function LearningPage() {
                 setSelectedLevel(level)
                 setOpenLessonId(null)
               }}
-              className={`shrink-0 rounded-full border px-4 py-2 text-left transition ${
-                selectedLevel === level
-                  ? 'border-accent-1 bg-accent-1 text-white'
-                  : 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
-              }`}
+              className={`shrink-0 rounded-full border px-4 py-2 text-left transition ${levelTabClassName}`}
               aria-selected={selectedLevel === level}
             >
               <span className="block text-xs uppercase tracking-wider">Level {level}</span>

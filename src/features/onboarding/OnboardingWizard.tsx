@@ -143,16 +143,13 @@ export default function OnboardingWizard() {
               const stepNum = index + 1
               const isCompleted = completedSteps.includes(stepNum)
               const isCurrent = currentStep === stepNum
+              let stepIndicatorClassName = 'bg-soft-tint/20'
+              if (isCurrent) stepIndicatorClassName = 'bg-accent-1 scale-125'
+              if (isCompleted) stepIndicatorClassName = 'bg-accent-1'
               return (
                 <span
                   key={stepNum}
-                  className={`h-2.5 w-2.5 rounded-full transition-all ${
-                    isCompleted
-                      ? 'bg-accent-1'
-                      : isCurrent
-                      ? 'bg-accent-1 scale-125'
-                      : 'bg-soft-tint/20'
-                  }`}
+                  className={`h-2.5 w-2.5 rounded-full transition-all ${stepIndicatorClassName}`}
                 />
               )
             })}

@@ -149,6 +149,12 @@ function isExternalUrl(value: string | null | undefined): boolean {
   return value.startsWith('http://') || value.startsWith('https://')
 }
 
+function getContextHintDescription(contextCount: number): string {
+  if (contextCount === 0) return 'No unprocessed context hints.'
+  if (contextCount === 1) return '1 unprocessed context hint detected.'
+  return `${contextCount} unprocessed context hints detected.`
+}
+
 export default function RealtimeChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -216,11 +222,11 @@ export default function RealtimeChat() {
           let mediaUrl = msg.media_url
           try {
             if (isExternalUrl(msg.media_url)) {
-              mediaUrl = msg.message_type === 'voice'
-                ? await resolveChatMediaUrl(msg.media_url, 'voice')
-                : msg.message_type === 'photo'
-                  ? await resolveChatMediaUrl(msg.media_url, 'photo')
-                  : msg.media_url
+              if (msg.message_type === 'voice') {
+                mediaUrl = await resolveChatMediaUrl(msg.media_url, 'voice')
+              } else if (msg.message_type === 'photo') {
+                mediaUrl = await resolveChatMediaUrl(msg.media_url, 'photo')
+              }
             } else if (msg.media_url) {
               const mimeType = msg.media_mime_type || (msg.message_type === 'voice' ? 'audio/m4a' : 'image/jpeg')
               const bucket = msg.message_type === 'voice' ? 'voice_messages' : 'chat_photos'
@@ -277,11 +283,11 @@ export default function RealtimeChat() {
             let mediaUrl = rawMessage.media_url
             try {
               if (isExternalUrl(rawMessage.media_url)) {
-                mediaUrl = rawMessage.message_type === 'voice'
-                  ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
-                  : rawMessage.message_type === 'photo'
-                    ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
-                    : rawMessage.media_url
+                if (rawMessage.message_type === 'voice') {
+                  mediaUrl = await resolveChatMediaUrl(rawMessage.media_url, 'voice')
+                } else if (rawMessage.message_type === 'photo') {
+                  mediaUrl = await resolveChatMediaUrl(rawMessage.media_url, 'photo')
+                }
               } else if (rawMessage.media_url) {
                 const mimeType = rawMessage.media_mime_type || (rawMessage.message_type === 'voice' ? 'audio/m4a' : 'image/jpeg')
                 const bucket = rawMessage.message_type === 'voice' ? 'voice_messages' : 'chat_photos'
@@ -316,11 +322,11 @@ export default function RealtimeChat() {
             let mediaUrl = rawMessage.media_url
             try {
               if (isExternalUrl(rawMessage.media_url)) {
-                mediaUrl = rawMessage.message_type === 'voice'
-                  ? await resolveChatMediaUrl(rawMessage.media_url, 'voice')
-                  : rawMessage.message_type === 'photo'
-                    ? await resolveChatMediaUrl(rawMessage.media_url, 'photo')
-                    : rawMessage.media_url
+                if (rawMessage.message_type === 'voice') {
+                  mediaUrl = await resolveChatMediaUrl(rawMessage.media_url, 'voice')
+                } else if (rawMessage.message_type === 'photo') {
+                  mediaUrl = await resolveChatMediaUrl(rawMessage.media_url, 'photo')
+                }
               } else if (rawMessage.media_url) {
                 const mimeType = rawMessage.media_mime_type || (rawMessage.message_type === 'voice' ? 'audio/m4a' : 'image/jpeg')
                 const bucket = rawMessage.message_type === 'voice' ? 'voice_messages' : 'chat_photos'
@@ -399,11 +405,11 @@ export default function RealtimeChat() {
           olderMessages.filter(isChatMessage).map(async (msg) => {
             let mediaUrl = msg.media_url
             try {
-              mediaUrl = msg.message_type === 'voice'
-                ? await resolveChatMediaUrl(msg.media_url, 'voice')
-                : msg.message_type === 'photo'
-                  ? await resolveChatMediaUrl(msg.media_url, 'photo')
-                  : msg.media_url
+              if (msg.message_type === 'voice') {
+                mediaUrl = await resolveChatMediaUrl(msg.media_url, 'voice')
+              } else if (msg.message_type === 'photo') {
+                mediaUrl = await resolveChatMediaUrl(msg.media_url, 'photo')
+              }
             } catch { mediaUrl = null }
             if (msg.encrypted && msg.content) {
               try {
@@ -633,7 +639,7 @@ export default function RealtimeChat() {
       {loadError && <div role="alert" className="border-b border-error/30 bg-error/10 px-4 py-2 text-sm text-error">{loadError}</div>}
       {showAIPanel && <section className="border-b border-accent-1/20 bg-card p-4">
         <div className="flex items-center justify-between"><p className="text-sm font-semibold text-text-1">AI Guardian context</p><button type="button" onClick={() => setShowAIPanel(false)} aria-label="Close AI Guardian"><X className="h-4 w-4 text-text-2" /></button></div>
-        <p className="mt-2 text-xs text-text-2">{contextCount ? `${contextCount} unprocessed context hint${contextCount === 1 ? '' : 's'} detected.` : 'No unprocessed context hints.'}</p>
+        <p className="mt-2 text-xs text-text-2">{getContextHintDescription(contextCount)}</p>
         {contexts.length > 0 && <ul className="mt-3 space-y-2">{contexts.map((context) => <li key={context.id} className="flex items-center justify-between rounded-input bg-card px-3 py-2 text-xs text-text-1"><span>{context.category} · {context.sender_role}</span><button type="button" onClick={() => void deleteContext(context.id)} className="text-text-2 underline">Delete</button></li>)}</ul>}
         <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-pill bg-accent-1 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
         {aiResponse && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-text-1">{aiResponse}</p>}
@@ -648,6 +654,9 @@ export default function RealtimeChat() {
         )}
         {messages.length === 0 ? <div className="flex h-full items-center justify-center text-center text-text-2"><p>Say hello to your love <Heart className="inline h-4 w-4" /></p></div> : messages.map((message) => {
           const replyToMessage = message.reply_to ? messages.find((m) => m.id === message.reply_to) : null
+          let deliveryStatus = <span>✓</span>
+          if (message.delivered_at) deliveryStatus = <span>✓✓</span>
+          if (message.seen_at) deliveryStatus = <span className="text-blue-400">✓✓</span>
           return (
             <div key={message.id} className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} group`}>
               <div className="flex flex-col gap-1">
@@ -675,7 +684,7 @@ export default function RealtimeChat() {
                     {message.edited_at && <span className="text-accent-2">(edited)</span>}
                     {message.sender_id === currentUserId && (
                       <span className="flex items-center gap-0.5">
-                        {message.seen_at ? <span className="text-blue-400">✓✓</span> : message.delivered_at ? <span>✓✓</span> : <span>✓</span>}
+                        {deliveryStatus}
                       </span>
                     )}
                     <span aria-hidden="true" />
