@@ -7,11 +7,11 @@ export default function PINLockWidget({
   modalBlocked,
   onModalOpen,
   onModalClose,
-}: {
+}: Readonly<{
   modalBlocked: boolean
   onModalOpen: () => void
   onModalClose: () => void
-}) {
+}>) {
   const [hasPin, setHasPin] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [pin, setPin] = useState('')
@@ -36,8 +36,8 @@ export default function PINLockWidget({
         const result = await response.json() as { hasPIN?: boolean; error?: string }
         if (!response.ok) throw new Error(result.error || 'Unable to load PIN status')
         setHasPin(Boolean(result.hasPIN))
-      } catch (caught) {
-        setError(caught instanceof Error ? caught.message : 'Unable to load PIN status')
+      } catch (error_) {
+        setError(error_ instanceof Error ? error_.message : 'Unable to load PIN status')
       }
     }
     void loadStatus()
@@ -70,8 +70,8 @@ export default function PINLockWidget({
       setPin('')
       setConfirmPin('')
       setError('')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Failed to set PIN')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Failed to set PIN')
     }
   }
 
@@ -91,8 +91,8 @@ export default function PINLockWidget({
       }
       setHasPin(false)
       setError('')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Failed to remove PIN')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Failed to remove PIN')
     }
   }
 

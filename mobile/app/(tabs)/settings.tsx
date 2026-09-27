@@ -71,7 +71,7 @@ const privacyLabels = [
   ['share_location', 'Share location'],
 ] as const
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({ title, children }: Readonly<{ title: string; children: React.ReactNode }>) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   return (
@@ -85,11 +85,11 @@ function Toggle({
   label,
   value,
   onChange,
-}: {
+}: Readonly<{
   label: string
   value: boolean
   onChange: (value: boolean) => void
-}) {
+}>) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   return (
@@ -108,12 +108,12 @@ function Button({
   onPress,
   danger = false,
   disabled = false,
-}: {
+}: Readonly<{
   title: string
   onPress: () => void
   danger?: boolean
   disabled?: boolean
-}) {
+}>) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   return (
@@ -186,8 +186,8 @@ export default function SettingsScreen() {
       setAnniversary(next.anniversary ?? '')
       if (savedNotifications) setNotifications({ ...defaults, ...JSON.parse(savedNotifications) })
       setSafetyNotifications(savedSafetyNotifications)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load settings.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load settings.')
     } finally {
       setLoading(false)
     }
@@ -212,11 +212,11 @@ export default function SettingsScreen() {
     setSafetyNotifications((current) => ({ ...current, [key]: value }))
     try {
       await updateSafetyNotificationPreference(key, value)
-    } catch (caught) {
+    } catch (error_) {
       setSafetyNotifications((current) => ({ ...current, [key]: !value }))
       Alert.alert(
         'Notifications',
-        caught instanceof Error ? caught.message : 'Unable to save preference.'
+        error_ instanceof Error ? error_.message : 'Unable to save preference.'
       )
     }
   }
@@ -225,10 +225,10 @@ export default function SettingsScreen() {
     try {
       await saveHealthProfile(user.id, health)
       Alert.alert('Saved', 'Health profile updated.')
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to save',
-        caught instanceof Error ? caught.message : 'Please check your values.'
+        error_ instanceof Error ? error_.message : 'Please check your values.'
       )
     }
   }
@@ -237,8 +237,8 @@ export default function SettingsScreen() {
     try {
       await savePrivacy(user.id, privacy)
       Alert.alert('Saved', 'Privacy settings updated.')
-    } catch (caught) {
-      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    } catch (error_) {
+      Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
     }
   }
   const saveCoupleSettings = async () => {
@@ -246,8 +246,8 @@ export default function SettingsScreen() {
     try {
       await saveCouple(data.coupleId, anniversary, name)
       Alert.alert('Saved', 'Couple settings updated.')
-    } catch (caught) {
-      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    } catch (error_) {
+      Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
     }
   }
   const exportData = async (kind: 'photos' | 'chat' | 'care' | 'finance') => {
@@ -258,10 +258,10 @@ export default function SettingsScreen() {
         title: `${kind} export.${kind === 'chat' ? 'json' : 'csv'}`,
         message: content,
       })
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Export failed',
-        caught instanceof Error ? caught.message : 'Unable to export data.'
+        error_ instanceof Error ? error_.message : 'Unable to export data.'
       )
     }
   }
@@ -275,8 +275,8 @@ export default function SettingsScreen() {
         enabled ? pin : undefined
       )
       setData((current) => (current ? { ...current, pinEnabled: enabled } : current))
-    } catch (caught) {
-      Alert.alert('Security', caught instanceof Error ? caught.message : 'Unable to update PIN.')
+    } catch (error_) {
+      Alert.alert('Security', error_ instanceof Error ? error_.message : 'Unable to update PIN.')
     }
   }
   const startMfaSetup = async () => {
@@ -310,8 +310,8 @@ export default function SettingsScreen() {
       setMfaSecret(data.totp.secret)
       setMfaCode('')
       setMfaVisible(true)
-    } catch (caught) {
-      Alert.alert('Setup failed', caught instanceof Error ? caught.message : 'Please try again.')
+    } catch (error_) {
+      Alert.alert('Setup failed', error_ instanceof Error ? error_.message : 'Please try again.')
     } finally {
       setMfaBusy(false)
     }
@@ -337,10 +337,10 @@ export default function SettingsScreen() {
       setMfaSecret('')
       setMfaCode('')
       Alert.alert('Complete', 'Two-factor authentication has been enabled.')
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Code verification failed',
-        caught instanceof Error ? caught.message : 'Please check the code and try again.'
+        error_ instanceof Error ? error_.message : 'Please check the code and try again.'
       )
     } finally {
       setMfaBusy(false)
@@ -377,10 +377,10 @@ export default function SettingsScreen() {
                 if (removeError) throw removeError
                 setMfaEnabled(false)
                 Alert.alert('Complete', 'Two-factor authentication has been disabled.')
-              } catch (caught) {
+              } catch (error_) {
                 Alert.alert(
                   'Unable to disable',
-                  caught instanceof Error ? caught.message : 'Please try again.'
+                  error_ instanceof Error ? error_.message : 'Please try again.'
                 )
               } finally {
                 setMfaBusy(false)
@@ -526,9 +526,9 @@ export default function SettingsScreen() {
                           link &&
                           unlinkCouple(link.id)
                             .then(load)
-                            .catch((caught) =>
+                            .catch((error_) =>
                               setError(
-                                caught instanceof Error ? caught.message : 'Unable to unlink.'
+                                error_ instanceof Error ? error_.message : 'Unable to unlink.'
                               )
                             )
                       ),
@@ -695,7 +695,7 @@ export default function SettingsScreen() {
                 originWhitelist={['*']}
                 javaScriptEnabled={false}
                 source={{
-                  html: `<html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;display:grid;place-items:center;height:100vh;background:white"><img width="220" height="220" src="${mfaQrCode.replace(/"/g, '&quot;')}" /></body></html>`,
+                  html: `<html><meta name="viewport" content="width=device-width,initial-scale=1"><body style="margin:0;display:grid;place-items:center;height:100vh;background:white"><img width="220" height="220" src="${mfaQrCode.replaceAll(/"/g, '&quot;')}" /></body></html>`,
                 }}
                 style={styles.qrPreview}
               />
@@ -708,7 +708,7 @@ export default function SettingsScreen() {
             </Text>
             <TextInput
               value={mfaCode}
-              onChangeText={(value) => setMfaCode(value.replace(/\D/g, '').slice(0, 6))}
+              onChangeText={(value) => setMfaCode(value.replaceAll(/\D/g, '').slice(0, 6))}
               placeholder="Six-digit code"
               placeholderTextColor={colors.textSecondary}
               keyboardType="number-pad"

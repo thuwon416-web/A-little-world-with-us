@@ -104,12 +104,12 @@ function Chips({
   selected,
   onToggle,
   tone = 'pink',
-}: {
+}: Readonly<{
   options: string[]
   selected: string[]
   onToggle: (value: string) => void
   tone?: 'pink' | 'purple' | 'green'
-}) {
+}>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   return (
@@ -137,7 +137,7 @@ function Chips({
   )
 }
 
-function Card({ title, children }: { title: string; children: ReactNode }) {
+function Card({ title, children }: Readonly<{ title: string; children: ReactNode }>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   return (
@@ -152,11 +152,11 @@ function Insights({
   logs,
   summary,
   savedCycleLength,
-}: {
+}: Readonly<{
   logs: CareLog[]
   summary: NativeCycleSummary
   savedCycleLength: number
-}) {
+}>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   const moodCounts = useMemo(
@@ -245,7 +245,7 @@ function Insights({
   )
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: Readonly<{ label: string; value: string }>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   return (
@@ -260,11 +260,11 @@ function Calendar({
   logs,
   summary,
   onLog,
-}: {
+}: Readonly<{
   logs: CareLog[]
   summary: NativeCycleSummary
   onLog: (date: string) => void
-}) {
+}>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   const [month, setMonth] = useState(new Date())
@@ -446,11 +446,11 @@ function Reminder({
   label,
   value,
   onChange,
-}: {
+}: Readonly<{
   label: string
   value: boolean
   onChange: () => void
-}) {
+}>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   return (
@@ -585,8 +585,8 @@ export default function CareScreen() {
       setCycleLength(String(next.settings.cycleLength))
       setPeriodLength(String(next.settings.periodLength))
       setLastPeriodStart(next.settings.lastPeriodStart ?? '')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load Care data.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load Care data.')
     } finally {
       setLoading(false)
     }
@@ -637,8 +637,8 @@ export default function CareScreen() {
       else await saveTodayCareLog(checkIn)
       Alert.alert('Saved', 'Your shared Care log was saved.')
       await refresh()
-    } catch (caught) {
-      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    } catch (error_) {
+      Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
     } finally {
       setSaving(false)
     }
@@ -655,10 +655,10 @@ export default function CareScreen() {
       setSaving(true)
       await saveSharedPeriodDates(data.coupleId, [...selected])
       await refresh()
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Could not save period dates',
-        caught instanceof Error ? caught.message : 'Please try again. Your calendar remains open.'
+        error_ instanceof Error ? error_.message : 'Please try again. Your calendar remains open.'
       )
     } finally {
       setSaving(false)
@@ -675,8 +675,8 @@ export default function CareScreen() {
       })
       await refresh()
       Alert.alert('Saved', 'Cycle settings updated.')
-    } catch (caught) {
-      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    } catch (error_) {
+      Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
     }
   }
   const exportData = async () => {
@@ -691,7 +691,7 @@ export default function CareScreen() {
         log.waterIntake ?? '',
         log.weight ?? '',
         log.basalTemp ?? '',
-        `"${(log.notes ?? '').replace(/"/g, '""')}"`,
+        `"${(log.notes ?? '').replaceAll(/"/g, '""')}"`,
       ].join(',')
     )
     await Share.share({ message: [header, ...rows].join('\n'), title: 'Care data export.csv' })
@@ -726,8 +726,8 @@ export default function CareScreen() {
       setIntimacyResult(
         body.consentDisclaimer ? `${body.response}\n\n${body.consentDisclaimer}` : body.response
       )
-    } catch (caught) {
-      setIntimacyError(caught instanceof Error ? caught.message : 'AI advice is unavailable.')
+    } catch (error_) {
+      setIntimacyError(error_ instanceof Error ? error_.message : 'AI advice is unavailable.')
     } finally {
       setIntimacyLoading(false)
     }

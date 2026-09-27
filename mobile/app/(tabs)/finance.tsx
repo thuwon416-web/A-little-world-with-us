@@ -60,8 +60,8 @@ export default function FinanceScreen() {
     setLoadingExpenses(true)
     try {
       setSplitExpenses(await getExpenses())
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load shared expenses.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load shared expenses.')
     } finally {
       setLoadingExpenses(false)
     }
@@ -70,8 +70,8 @@ export default function FinanceScreen() {
     try {
       setData(await getAdvancedData())
       setError('')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load shared finance.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load shared finance.')
     }
   }
   useEffect(() => {
@@ -111,10 +111,10 @@ export default function FinanceScreen() {
       setTarget('')
       setCurrent('')
       await load()
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to add goal',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     }
   }
@@ -124,10 +124,10 @@ export default function FinanceScreen() {
     try {
       await saveBudget(data.coupleId, user.id, data.month, Number(budget))
       await load()
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to save budget',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     }
   }
@@ -148,10 +148,10 @@ export default function FinanceScreen() {
       setBillAmount('')
       setBillDate('')
       await load()
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to add bill',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     }
   }
@@ -160,10 +160,10 @@ export default function FinanceScreen() {
     try {
       const streak = await checkInStreak(data.coupleId)
       setData((current) => (current ? { ...current, streak } : current))
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to check in',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     }
   }
@@ -172,10 +172,10 @@ export default function FinanceScreen() {
       const settings = await getSettingsData()
       const location = settings.privacy.allow_ai_read_location ? 'nearby' : 'unspecified'
       setIdeas(await getDateIdeas('happy', 'clear', location))
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Date ideas unavailable',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     }
   }

@@ -84,19 +84,19 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
           </button>
         </div>
 
-        <label htmlFor={`${fieldId}-title`} className="mt-5 block text-sm font-medium text-text-1">Title
+        <label htmlFor={`${fieldId}-title`} className="mt-5 block text-sm font-medium text-text-1">Title{' '}
           <input id={`${fieldId}-title`} required value={title} onChange={(event) => setTitle(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
         </label>
-        <label htmlFor={`${fieldId}-amount`} className="mt-4 block text-sm font-medium text-text-1">Amount (MMK)
+        <label htmlFor={`${fieldId}-amount`} className="mt-4 block text-sm font-medium text-text-1">Amount (MMK){' '}
           <input id={`${fieldId}-amount`} required type="number" min="1" step="0.01" value={amount} onChange={(event) => setAmount(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
         </label>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <label htmlFor={`${fieldId}-category`} className="text-sm font-medium text-text-1">Category
+          <label htmlFor={`${fieldId}-category`} className="text-sm font-medium text-text-1">Category{' '}
             <select id={`${fieldId}-category`} value={category} onChange={(event) => setCategory(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-3 py-3">
               {EXPENSE_CATEGORIES.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
             </select>
           </label>
-          <label htmlFor={`${fieldId}-date`} className="text-sm font-medium text-text-1">Date
+          <label htmlFor={`${fieldId}-date`} className="text-sm font-medium text-text-1">Date{' '}
             <input id={`${fieldId}-date`} type="date" value={spentAt} onChange={(event) => setSpentAt(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-3 py-3" />
           </label>
         </div>
@@ -119,7 +119,7 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
         </fieldset>
 
         {splitType === 'percentage' && (
-          <label htmlFor={`${fieldId}-partner-percentage`} className="mt-4 block text-sm font-medium text-text-1">Partner percentage
+          <label htmlFor={`${fieldId}-partner-percentage`} className="mt-4 block text-sm font-medium text-text-1">Partner percentage{' '}
             <input id={`${fieldId}-partner-percentage`} type="number" min="0" max="100" step="0.01" value={partnerPercentage} onChange={(event) => setPartnerPercentage(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
             <span className="mt-1 block text-xs text-text-2">Your percentage: {100 - parsedPartnerPercentage}%</span>
           </label>
@@ -127,10 +127,10 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
 
         {splitType === 'custom' && (
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
-            <label htmlFor={`${fieldId}-your-share`} className="text-sm font-medium text-text-1">Your share
+            <label htmlFor={`${fieldId}-your-share`} className="text-sm font-medium text-text-1">Your share{' '}
               <input id={`${fieldId}-your-share`} type="number" min="0" step="0.01" value={yourShare} onChange={(event) => setYourShare(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
             </label>
-            <label htmlFor={`${fieldId}-partner-share`} className="text-sm font-medium text-text-1">Partner share
+            <label htmlFor={`${fieldId}-partner-share`} className="text-sm font-medium text-text-1">Partner share{' '}
               <input id={`${fieldId}-partner-share`} type="number" min="0" step="0.01" value={partnerExact} onChange={(event) => setPartnerExact(event.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3" />
             </label>
           </div>

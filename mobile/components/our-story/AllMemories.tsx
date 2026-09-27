@@ -14,10 +14,10 @@ const PAGE_SIZE = 50
 function AllMemories({
   coupleId,
   initialCategory = 'all',
-}: {
+}: Readonly<{
   coupleId: string
   initialCategory?: string
-}) {
+}>) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
   const [memories, setMemories] = useState<RelationshipMemory[]>([])
@@ -38,8 +38,8 @@ function AllMemories({
         : await relationshipMemoriesService.getByCouple(coupleId, { limit: PAGE_SIZE, offset })
       setMemories((current) => (offset && !search.trim() ? [...current, ...next] : next))
       setHasMore(!search.trim() && next.length === PAGE_SIZE)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load memories.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load memories.')
     } finally {
       if (offset) setLoadingMore(false)
       else setLoading(false)
@@ -114,7 +114,7 @@ function AllMemories({
             onPress={() => setCategory(item)}
             style={[styles.chip, category === item && styles.active]}
           >
-            <Text style={styles.chipText}>{item.replace(/_/g, ' ')}</Text>
+            <Text style={styles.chipText}>{item.replaceAll(/_/g, ' ')}</Text>
           </TouchableOpacity>
         ))}
       </View>

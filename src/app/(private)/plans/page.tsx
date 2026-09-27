@@ -402,15 +402,15 @@ export default function PlansPage() {
               <button type="button" onClick={() => setCreateOpen(false)} className="rounded-full px-2 py-1 text-text-2" aria-label="Close new plan">×</button>
             </div>
             <div className="mt-4 space-y-3">
-              <label htmlFor={`${fieldId}-plan-name`} className="block text-sm text-text-2">Plan name
+              <label htmlFor={`${fieldId}-plan-name`} className="block text-sm text-text-2">Plan name{' '}
                 <input id={`${fieldId}-plan-name`} autoFocus value={newTitle} onChange={(event) => setNewTitle(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" maxLength={120} />
               </label>
-              <label htmlFor={`${fieldId}-plan-type`} className="block text-sm text-text-2">Type
+              <label htmlFor={`${fieldId}-plan-type`} className="block text-sm text-text-2">Type{' '}
                 <select id={`${fieldId}-plan-type`} value={newType} onChange={(event) => setNewType(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1">
                   <option value="goal">Shared goal</option><option value="date">Date plan</option><option value="trip">Trip</option><option value="home">Home</option><option value="other">Other</option>
                 </select>
               </label>
-              <label htmlFor={`${fieldId}-due-date`} className="block text-sm text-text-2">Due date (optional)
+              <label htmlFor={`${fieldId}-due-date`} className="block text-sm text-text-2">Due date (optional){' '}
                 <input id={`${fieldId}-due-date`} type="date" value={newDueDate} onChange={(event) => setNewDueDate(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
               </label>
               {createError ? <p className="text-sm text-error" role="alert">{createError}</p> : null}

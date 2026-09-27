@@ -226,8 +226,8 @@ export default function LocationScreen() {
         },
         ...current,
       ])
-    } catch (caught) {
-      setSosError(caught instanceof Error ? caught.message : 'Failed to send SOS.')
+    } catch (error_) {
+      setSosError(error_ instanceof Error ? error_.message : 'Failed to send SOS.')
     } finally {
       setSosSending(false)
     }
@@ -265,10 +265,10 @@ export default function LocationScreen() {
       setCheckinType(null)
       setCheckinNote('')
       setCheckinExpected('')
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to send check-in',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     } finally {
       setCheckinSending(false)
@@ -293,10 +293,10 @@ export default function LocationScreen() {
       )
       setResolveModalAlert(null)
       setResolutionNote('')
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to resolve SOS',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     } finally {
       setResolving(false)
@@ -1003,7 +1003,7 @@ export default function LocationScreen() {
   )
 }
 
-function Empty({ label }: { label: string }) {
+function Empty({ label }: Readonly<{ label: string }>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes, 0)
   return (

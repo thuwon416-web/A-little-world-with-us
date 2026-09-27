@@ -5,13 +5,13 @@ import { HeartCrack } from 'lucide-react'
 import { useEffect } from 'react'
 import { logError } from '@/lib/errorLogger'
 
-export default function Error({
+export default function ErrorBoundary({
   error,
   reset,
-}: {
+}: Readonly<{
   error: Error & { digest?: string }
   reset: () => void
-}) {
+}>) {
   useEffect(() => {
     logError(error, {
       source: 'app-error-boundary',

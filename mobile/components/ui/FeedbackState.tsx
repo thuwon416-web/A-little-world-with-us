@@ -4,7 +4,7 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 
 import { useTheme } from '@/context/ThemeContext'
 
-export function LoadingState({ label = 'Loading...' }: { label?: string }) {
+export function LoadingState({ label = 'Loading...' }: Readonly<{ label?: string }>) {
   const { colors } = useTheme()
   return (
     <View style={styles.state}>
@@ -20,13 +20,13 @@ export function EmptyState({
   message,
   actionLabel,
   onAction,
-}: {
+}: Readonly<{
   icon?: LucideIcon
   title: string
   message: string
   actionLabel?: string
   onAction?: () => void
-}) {
+}>) {
   const { colors } = useTheme()
   return (
     <View style={styles.state}>
@@ -47,7 +47,10 @@ export function EmptyState({
   )
 }
 
-export function ErrorState({ message, onRetry }: { message: string; onRetry?: () => void }) {
+export function ErrorState({
+  message,
+  onRetry,
+}: Readonly<{ message: string; onRetry?: () => void }>) {
   const { colors } = useTheme()
   return (
     <View style={styles.state}>
@@ -72,11 +75,11 @@ export function Skeleton({
   width = '100%',
   height = 18,
   radius = 8,
-}: {
+}: Readonly<{
   width?: number | `${number}%`
   height?: number
   radius?: number
-}) {
+}>) {
   return (
     <View
       accessible

@@ -132,8 +132,8 @@ export default function MemoryJournal() {
     void loadCoupleId()
     void loadMemories()
       .then(setMemories)
-      .catch((caught) =>
-        setError(caught instanceof Error ? caught.message : 'Unable to load memories.')
+      .catch((error_) =>
+        setError(error_ instanceof Error ? error_.message : 'Unable to load memories.')
       )
   }, [])
   useEffect(
@@ -157,8 +157,8 @@ export default function MemoryJournal() {
         onPress: () =>
           void deleteMemory(memory.id)
             .then(() => setMemories((current) => current.filter((item) => item.id !== memory.id)))
-            .catch((caught) =>
-              setError(caught instanceof Error ? caught.message : 'Unable to delete memory.')
+            .catch((error_) =>
+              setError(error_ instanceof Error ? error_.message : 'Unable to delete memory.')
             ),
       },
     ])
@@ -335,10 +335,10 @@ export default function MemoryJournal() {
           : [saved, ...current]
       )
       closeJournalModal()
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to save journal',
-        caught instanceof Error ? caught.message : 'Unable to save journal.'
+        error_ instanceof Error ? error_.message : 'Unable to save journal.'
       )
     } finally {
       setJournalUploadingVoice(false)
@@ -371,10 +371,10 @@ export default function MemoryJournal() {
             : item
         )
       )
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'AI reflection',
-        caught instanceof Error ? caught.message : 'Unable to reflect right now.'
+        error_ instanceof Error ? error_.message : 'Unable to reflect right now.'
       )
     } finally {
       setReflectingId(null)
@@ -434,9 +434,9 @@ export default function MemoryJournal() {
         throw new Error(body.error || 'Unable to create a story right now.')
       }
       setCurationStory(body.story)
-    } catch (caught) {
+    } catch (error_) {
       setCurationError(
-        caught instanceof Error ? caught.message : 'Unable to create a story right now.'
+        error_ instanceof Error ? error_.message : 'Unable to create a story right now.'
       )
     } finally {
       setCurationLoading(false)
@@ -469,8 +469,8 @@ export default function MemoryJournal() {
         throw new Error(body.error || 'AI advice is unavailable.')
       }
       setMediatorResult(body.response)
-    } catch (caught) {
-      setMediatorError(caught instanceof Error ? caught.message : 'AI advice is unavailable.')
+    } catch (error_) {
+      setMediatorError(error_ instanceof Error ? error_.message : 'AI advice is unavailable.')
     } finally {
       setMediatorLoading(false)
     }

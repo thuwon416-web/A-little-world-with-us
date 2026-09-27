@@ -185,8 +185,8 @@ export default function WellnessScreen() {
     try {
       setLogs(await getWellnessLogs(user.id))
       setError('')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load wellness history.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load wellness history.')
     }
   }
 
@@ -230,10 +230,10 @@ export default function WellnessScreen() {
       setSelectedWorkout(null)
       setRemaining(0)
       await loadLogs()
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to save workout',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     }
   }
@@ -243,10 +243,10 @@ export default function WellnessScreen() {
     try {
       await logWellnessActivity(user.id, 'quest', questId)
       await loadLogs()
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Unable to save quest',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     }
   }
@@ -255,10 +255,10 @@ export default function WellnessScreen() {
     try {
       setLoading(true)
       setAdvice(await getResetAdvice(category, 'neutral'))
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Guidance unavailable',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     } finally {
       setLoading(false)

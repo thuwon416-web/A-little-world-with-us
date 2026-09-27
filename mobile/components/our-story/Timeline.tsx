@@ -11,7 +11,7 @@ import type { RelationshipMemory } from '@/shared-types'
 
 const PAGE_SIZE = 50
 
-function Timeline({ coupleId }: { coupleId: string }) {
+function Timeline({ coupleId }: Readonly<{ coupleId: string }>) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
   const [memories, setMemories] = useState<RelationshipMemory[]>([])
@@ -29,8 +29,8 @@ function Timeline({ coupleId }: { coupleId: string }) {
         more ? memories.length + PAGE_SIZE : PAGE_SIZE
       )
       setMemories(next)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load the timeline.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load the timeline.')
     } finally {
       if (more) setLoadingMore(false)
       else setLoading(false)
@@ -131,12 +131,12 @@ function Chip({
   label,
   active,
   onPress,
-}: {
+}: Readonly<{
   colors: ReturnType<typeof useTheme>['colors']
   label: string
   active: boolean
   onPress: () => void
-}) {
+}>) {
   const styles = createStyles(colors)
   return (
     <TouchableOpacity onPress={onPress} style={[styles.chip, active && styles.chipActive]}>
@@ -144,7 +144,7 @@ function Chip({
     </TouchableOpacity>
   )
 }
-function Loading({ colors }: { colors: ReturnType<typeof useTheme>['colors'] }) {
+function Loading({ colors }: Readonly<{ colors: ReturnType<typeof useTheme>['colors'] }>) {
   const styles = createStyles(colors)
   return (
     <View style={styles.list}>
@@ -158,11 +158,11 @@ function Message({
   colors,
   text,
   onRetry,
-}: {
+}: Readonly<{
   colors: ReturnType<typeof useTheme>['colors']
   text: string
   onRetry?: () => void
-}) {
+}>) {
   const styles = createStyles(colors)
   return (
     <View style={styles.message}>

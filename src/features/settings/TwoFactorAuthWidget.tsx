@@ -27,7 +27,7 @@ export default function TwoFactorAuthWidget() {
     return { verified, unverified: totpFactors.find((item) => item.status === 'unverified') ?? null }
   }, [])
 
-  useEffect(() => { void refreshFactors().catch((caught) => setError(caught instanceof Error ? caught.message : 'အတည်ပြုမှုအခြေအနေကို ဖတ်မရပါ။')) }, [refreshFactors])
+  useEffect(() => { void refreshFactors().catch((error_) => setError(error_ instanceof Error ? error_.message : 'အတည်ပြုမှုအခြေအနေကို ဖတ်မရပါ။')) }, [refreshFactors])
 
   const beginSetup = async () => {
     setLoading(true)
@@ -50,8 +50,8 @@ export default function TwoFactorAuthWidget() {
       setSecret(data.totp.secret)
       setCode('')
       setShowSetup(true)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'စနစ်ထည့်သွင်းမှု မအောင်မြင်ပါ။')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'စနစ်ထည့်သွင်းမှု မအောင်မြင်ပါ။')
     } finally {
       setLoading(false)
     }
@@ -73,8 +73,8 @@ export default function TwoFactorAuthWidget() {
       setSecret('')
       setCode('')
       setMessage('အတည်ပြုမှုအဆင့် ၂ ကို ဖွင့်ပြီးပါပြီ။ နောက်တစ်ကြိမ် ဝင်ရောက်ချိန်တွင် ကုဒ်တောင်းပါမည်။')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'ကုဒ်ကို အတည်မပြုနိုင်ပါ။')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'ကုဒ်ကို အတည်မပြုနိုင်ပါ။')
     } finally {
       setLoading(false)
     }
@@ -98,8 +98,8 @@ export default function TwoFactorAuthWidget() {
       if (unenrollError) throw unenrollError
       setFactor(null)
       setMessage('အတည်ပြုမှုအဆင့် ၂ ကို ပိတ်ပြီးပါပြီ။')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'ပိတ်၍မရပါ။ ပြန်ဝင်ပြီး ထပ်ကြိုးစားပါ။')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'ပိတ်၍မရပါ။ ပြန်ဝင်ပြီး ထပ်ကြိုးစားပါ။')
     } finally {
       setLoading(false)
     }

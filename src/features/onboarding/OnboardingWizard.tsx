@@ -208,7 +208,7 @@ export default function OnboardingWizard() {
   )
 }
 
-function WelcomeStep({ onNext }: { onNext: () => void }) {
+function WelcomeStep({ onNext }: Readonly<{ onNext: () => void }>) {
   return (
     <div className="space-y-6">
       <div className="flex h-16 w-16 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
@@ -242,13 +242,13 @@ function ProfileStep({
   onNext,
   onBack,
   saving,
-}: {
+}: Readonly<{
   data: OnboardingData
   onChange: (data: OnboardingData) => void
   onNext: () => void
   onBack: () => void
   saving: boolean
-}) {
+}>) {
   const fieldId = useId()
 
   return (
@@ -348,14 +348,14 @@ function PairReadyStep({
   onBack,
   onSkip,
   saving,
-}: {
+}: Readonly<{
   data: OnboardingData
   onChange: (data: OnboardingData) => void
   onNext: () => void
   onBack: () => void
   onSkip: () => void
   saving: boolean
-}) {
+}>) {
   return (
     <div className="space-y-6">
       <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
@@ -421,14 +421,14 @@ function HealthStep({
   onBack,
   onSkip,
   saving,
-}: {
+}: Readonly<{
   data: OnboardingData
   onChange: (data: OnboardingData) => void
   onNext: () => void
   onBack: () => void
   onSkip: () => void
   saving: boolean
-}) {
+}>) {
   const fieldId = useId()
 
   return (
@@ -532,14 +532,14 @@ function CycleStep({
   onBack,
   onSkip,
   saving,
-}: {
+}: Readonly<{
   data: OnboardingData
   onChange: (data: OnboardingData) => void
   onNext: () => void
   onBack: () => void
   onSkip: () => void
   saving: boolean
-}) {
+}>) {
   const fieldId = useId()
 
   return (
@@ -614,7 +614,7 @@ function CycleStep({
   )
 }
 
-function CompleteStep({ onFinish, saving }: { onFinish: () => void; saving: boolean }) {
+function CompleteStep({ onFinish, saving }: Readonly<{ onFinish: () => void; saving: boolean }>) {
   return (
     <div className="space-y-6 text-center">
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">

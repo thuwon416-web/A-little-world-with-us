@@ -76,7 +76,7 @@ const config: Config = {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {
-          DEFAULT: 'hsl(var(--card))',
+          DEFAULT: 'rgb(var(--card) / <alpha-value>)',
           foreground: 'hsl(var(--card-foreground))',
         },
         popover: {
@@ -103,7 +103,9 @@ const config: Config = {
           DEFAULT: 'hsl(var(--destructive))',
           foreground: 'hsl(var(--destructive-foreground))',
         },
-        border: 'hsl(var(--border))',
+        border: {
+          DEFAULT: 'rgb(var(--border) / <alpha-value>)',
+        },
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
         chart: {
@@ -145,8 +147,6 @@ const config: Config = {
         },
         // Theme token CSS variables (B2)
         bg: 'rgb(var(--bg) / <alpha-value>)',
-        card: 'rgb(var(--card) / <alpha-value>)',
-        border: 'rgb(var(--border) / <alpha-value>)',
         'text-1': 'rgb(var(--text-1) / <alpha-value>)',
         'text-2': 'rgb(var(--text-2) / <alpha-value>)',
         label: 'rgb(var(--label) / <alpha-value>)',

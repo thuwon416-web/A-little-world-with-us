@@ -23,8 +23,8 @@ export default function CoupleLinkingScreen() {
   const load = async () => {
     try {
       setContext(await getContext())
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load link status.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load link status.')
     }
   }
   useEffect(() => {
@@ -46,8 +46,8 @@ export default function CoupleLinkingScreen() {
       const created = await createLinkInvite()
       setInviteCode(created)
       await load()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to create invite.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to create invite.')
     } finally {
       setIsCreating(false)
     }
@@ -60,8 +60,8 @@ export default function CoupleLinkingScreen() {
       await acceptLink(code.trim())
       setCode('')
       await load()
-    } catch (caught) {
-      Alert.alert('Unable to link', caught instanceof Error ? caught.message : 'Please try again.')
+    } catch (error_) {
+      Alert.alert('Unable to link', error_ instanceof Error ? error_.message : 'Please try again.')
     }
   }
   return (

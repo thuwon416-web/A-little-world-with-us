@@ -11,6 +11,7 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  turbopack: {},
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
