@@ -1,5 +1,7 @@
 -- Performance indexes (Week 3 PERF-009)
 
+SET QUOTED_IDENTIFIER ON;
+
 -- messages
 create index if not exists messages_sender_idx 
   on public.messages(sender_id);

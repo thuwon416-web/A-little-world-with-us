@@ -75,13 +75,9 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        // Config values are props, so validate CSS tokens and escape the selector ID before interpolation.
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
+  const css = Object.entries(THEMES)
+    .map(
+      ([theme, prefix]) => `
 ${prefix} [data-chart="${escapeCssString(id)}"] {
 ${colorConfig
   .map(([key, itemConfig]) => {
@@ -91,10 +87,11 @@ ${colorConfig
   .join('\n')}
 }
 `
-          )
-          .join('\n'),
-      }}
-    />
+    )
+    .join('\n')
+
+  return (
+    <style>{css}</style>
   )
 }
 

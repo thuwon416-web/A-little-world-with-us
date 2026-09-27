@@ -20,7 +20,7 @@ export default function SignupPage() {
     setError('')
     setMessage('')
 
-    // False positive: this compares client-entered fields for UX before server-side signup validation.
+    // False positive for timing-attack detection: this client-side comparison only provides UX feedback.
     if (password !== confirmPassword) {
       setError('Passwords do not match.')
       return
