@@ -53,7 +53,6 @@ export function QuizQuestion({
           placeholder={question.questionType === 'typing' ? 'Type Korean or romanization' : 'Type your answer'}
           className="w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 outline-none focus:border-accent-1"
           disabled={disabled}
-          autoFocus
         />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">

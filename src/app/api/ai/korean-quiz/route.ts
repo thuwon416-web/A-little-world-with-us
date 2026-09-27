@@ -58,7 +58,14 @@ Use only the requested question types. For fill_blank, listening, and typing, op
 }
 
 function parseGeneratedJson(content: string) {
-  const jsonText = content.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '').trim()
+  let jsonText = content
+  if (jsonText.startsWith('```')) {
+    jsonText = jsonText.slice(3)
+    if (jsonText.slice(0, 4).toLowerCase() === 'json') jsonText = jsonText.slice(4)
+    jsonText = jsonText.trimStart()
+  }
+  if (jsonText.endsWith('```')) jsonText = jsonText.slice(0, -3).trimEnd()
+  jsonText = jsonText.trim()
   return generatedResponseSchema.parse(JSON.parse(jsonText))
 }
 

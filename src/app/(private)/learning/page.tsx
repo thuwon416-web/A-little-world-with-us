@@ -261,16 +261,19 @@ export default function LearningPage() {
 
       {selectedVocab && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
-          role="presentation"
-          onClick={() => setSelectedVocab(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
         >
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/60"
+            aria-label="Close vocabulary details"
+            onClick={() => setSelectedVocab(null)}
+          />
           <section
-            className="relative w-full max-w-lg rounded-panel border border-accent-1/25 bg-card p-6 shadow-2xl"
+            className="relative z-10 w-full max-w-lg rounded-panel border border-accent-1/25 bg-card p-6 shadow-2xl"
             role="dialog"
             aria-modal="true"
             aria-labelledby="vocab-title"
-            onClick={(event) => event.stopPropagation()}
           >
             <button
               type="button"

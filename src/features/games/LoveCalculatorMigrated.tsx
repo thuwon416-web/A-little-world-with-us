@@ -85,6 +85,7 @@ export default function LoveCalculatorMigrated() {
               <input
                 id={`${nameInputId}-factor-${index}`}
                 type="range"
+                aria-label={factor}
                 min={0}
                 max={100}
                 value={values[index]}

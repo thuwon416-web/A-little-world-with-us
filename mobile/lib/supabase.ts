@@ -15,10 +15,10 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const isSupabaseConfigured = true
 
-export let networkStatus = { isConnected: true }
+export const networkStatus = { isConnected: true }
 
 export const setNetworkStatus = (connected: boolean) => {
-  networkStatus = { isConnected: connected }
+  networkStatus.isConnected = connected
 }
 
 export async function queueFailedRequest(request: { method: string; url: string; body?: unknown }) {
