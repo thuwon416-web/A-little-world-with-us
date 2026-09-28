@@ -29,8 +29,8 @@ export default function CallsScreen() {
               : context.link.inviter_id
           )
         if (context.coupleId) setCalls(await getCalls(context.coupleId))
-      } catch (caught) {
-        setError(caught instanceof Error ? caught.message : 'Unable to load call history.')
+      } catch (error_) {
+        setError(error_ instanceof Error ? error_.message : 'Unable to load call history.')
       }
     })()
   }, [])
