@@ -38,8 +38,8 @@ export default function ListsScreen() {
       const data = await getCalendarData()
       setCoupleId(data.coupleId)
       setItems(tab === 'bucket' ? data.bucket : data.wishlist)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load lists.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load lists.')
     }
   }
   useEffect(() => {
@@ -52,8 +52,8 @@ export default function ListsScreen() {
       await saveListItem(coupleId, user.id, tab, draft.trim())
       setDraft('')
       await load()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to add item.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to add item.')
     }
   }
   return (
