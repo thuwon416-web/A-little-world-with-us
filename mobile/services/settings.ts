@@ -303,14 +303,9 @@ export async function exportSettingsData(
   coupleId: string,
   kind: 'photos' | 'chat' | 'care' | 'finance'
 ) {
-  const table =
-    kind === 'photos'
-      ? 'memories'
-      : kind === 'chat'
-        ? 'messages'
-        : kind === 'care'
-          ? 'care_daily_logs'
-          : 'financial_goals'
+  const careOrFinanceTable = kind === 'care' ? 'care_daily_logs' : 'financial_goals'
+  const chatOrLaterTable = kind === 'chat' ? 'messages' : careOrFinanceTable
+  const table = kind === 'photos' ? 'memories' : chatOrLaterTable
   const { data, error } = await supabase
     .from(table)
     .select('*')
