@@ -39,8 +39,8 @@ export default function OurStorySection() {
         if (linkError) throw linkError
         setCoupleId(link?.couple_id ?? null)
       })
-      .catch((caught: unknown) =>
-        setError(caught instanceof Error ? caught.message : 'Unable to load your shared story.')
+      .catch((error_: unknown) =>
+        setError(error_ instanceof Error ? error_.message : 'Unable to load your shared story.')
       )
       .finally(() => setLoading(false))
   }, [])
