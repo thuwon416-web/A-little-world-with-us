@@ -21,8 +21,8 @@ export default function TimeCapsulesSection() {
       const next = await getContext()
       setContext(next)
       if (next.coupleId) setItems(await getCapsules(next.coupleId))
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load capsules.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load capsules.')
     }
   }
   useEffect(() => {
@@ -51,8 +51,8 @@ export default function TimeCapsulesSection() {
       setContent('')
       setUnlock('')
       await load()
-    } catch (caught) {
-      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    } catch (error_) {
+      Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
     }
   }
   return (

@@ -265,8 +265,8 @@ export default function PlansPage() {
           .filter(isPlanRecord)
           .map((plan) => toPlan(plan, itemsData))
         if (active) setPlans(plansWithItems)
-      } catch (caught) {
-        if (active) setLoadError(caught instanceof Error ? caught.message : 'Unable to load shared plans.')
+      } catch (error_) {
+        if (active) setLoadError(error_ instanceof Error ? error_.message : 'Unable to load shared plans.')
       } finally {
         if (showLoading && active) setLoading(false)
       }
@@ -349,8 +349,8 @@ export default function PlansPage() {
       setNewType('goal')
       setNewDueDate('')
       setCreateOpen(false)
-    } catch (caught) {
-      setCreateError(caught instanceof Error ? caught.message : 'Unable to create the plan.')
+    } catch (error_) {
+      setCreateError(error_ instanceof Error ? error_.message : 'Unable to create the plan.')
     } finally {
       setCreating(false)
     }

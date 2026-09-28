@@ -46,9 +46,9 @@ export default function FinancialGoals() {
     setExpensesError(null)
     try {
       setExpenses(await getExpenses())
-    } catch (caught) {
+    } catch (error_) {
       setExpenses([])
-      setExpensesError(caught instanceof Error ? caught.message : 'Unable to load expenses.')
+      setExpensesError(error_ instanceof Error ? error_.message : 'Unable to load expenses.')
     } finally {
       setLoadingExpenses(false)
     }

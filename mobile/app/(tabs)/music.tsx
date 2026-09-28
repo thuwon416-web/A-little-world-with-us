@@ -123,8 +123,8 @@ export default function MusicScreen() {
     try {
       setSongs(await getPlaylist())
       setError('')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load playlist.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load playlist.')
     }
   }
   useEffect(() => {
@@ -142,8 +142,8 @@ export default function MusicScreen() {
       setTitle('')
       setNote('')
       await reload()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to add song.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to add song.')
     }
   }
   return (

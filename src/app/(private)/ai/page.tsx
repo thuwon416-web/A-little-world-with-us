@@ -102,8 +102,8 @@ export default function AIFeaturePage() {
       const category: FavoriteCategory = tool === 'gift' ? 'gift_ideas' : 'favorites'
       await addFavorite(category, result.slice(0, 120), tool, undefined, result)
       setSaveStatus('Saved')
-    } catch (caught) {
-      setSaveStatus(caught instanceof Error ? caught.message : 'Save failed')
+    } catch (error_) {
+      setSaveStatus(error_ instanceof Error ? error_.message : 'Save failed')
     }
     window.setTimeout(() => setSaveStatus(''), 2500)
   }

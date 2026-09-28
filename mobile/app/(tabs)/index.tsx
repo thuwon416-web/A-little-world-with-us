@@ -157,8 +157,8 @@ export default function DashboardScreen() {
           .maybeSingle()
         setCoupleId(link?.couple_id ?? null)
       }
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load your dashboard.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load your dashboard.')
     } finally {
       setLoading(false)
     }
@@ -169,9 +169,9 @@ export default function DashboardScreen() {
   useEffect(() => {
     void loadDashboardLayout()
       .then(setDashboardLayout)
-      .catch((caught) =>
+      .catch((error_) =>
         setLayoutError(
-          caught instanceof Error ? caught.message : 'Unable to load dashboard layout.'
+          error_ instanceof Error ? error_.message : 'Unable to load dashboard layout.'
         )
       )
   }, [])
@@ -220,8 +220,8 @@ export default function DashboardScreen() {
   const littleRitual = getLittleRitual()
   const updateLayout = (next: DashboardLayout) => {
     setDashboardLayout(next)
-    void saveDashboardLayout(next).catch((caught) =>
-      setLayoutError(caught instanceof Error ? caught.message : 'Unable to save dashboard layout.')
+    void saveDashboardLayout(next).catch((error_) =>
+      setLayoutError(error_ instanceof Error ? error_.message : 'Unable to save dashboard layout.')
     )
   }
   const moveWidget = (id: DashboardWidgetId, direction: -1 | 1) => {

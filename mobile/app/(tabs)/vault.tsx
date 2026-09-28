@@ -193,8 +193,8 @@ function VaultScreenContent() {
       setCoupleId(context.coupleId)
       setUserId(context.user.id)
       setItems(await getVaultItems(context.coupleId))
-    } catch (caught) {
-      setError(getErrorMessage(caught, 'Unable to load vault.'))
+    } catch (error_) {
+      setError(getErrorMessage(error_, 'Unable to load vault.'))
     }
   }
   const unlock = async () => {
@@ -244,8 +244,8 @@ function VaultScreenContent() {
       setContent('')
       setPhotoUrl('')
       await load()
-    } catch (caught) {
-      Alert.alert('Unable to save', getErrorMessage(caught, 'Please try again.'))
+    } catch (error_) {
+      Alert.alert('Unable to save', getErrorMessage(error_, 'Please try again.'))
     }
   }
   const deleteItem = (id: string) => {

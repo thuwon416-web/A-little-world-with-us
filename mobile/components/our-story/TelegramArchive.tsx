@@ -44,8 +44,8 @@ export default function TelegramArchive({ coupleId }: { coupleId: string }) {
         setMessages((current) =>
           offset ? [...current, ...page.slice(0, PAGE_SIZE)] : page.slice(0, PAGE_SIZE)
         )
-      } catch (caught) {
-        setError(caught instanceof Error ? caught.message : 'Unable to load Telegram messages.')
+      } catch (error_) {
+        setError(error_ instanceof Error ? error_.message : 'Unable to load Telegram messages.')
       } finally {
         setLoading(false)
       }
@@ -72,10 +72,10 @@ export default function TelegramArchive({ coupleId }: { coupleId: string }) {
       const content = await FileSystem.readAsStringAsync(file.uri)
       setPreview(parseTelegramExport(JSON.parse(content)))
       setFileName(file.name)
-    } catch (caught) {
+    } catch (error_) {
       setPreview([])
       setFileName('')
-      setError(caught instanceof Error ? caught.message : 'Unable to read this file.')
+      setError(error_ instanceof Error ? error_.message : 'Unable to read this file.')
     }
   }
 
@@ -100,8 +100,8 @@ export default function TelegramArchive({ coupleId }: { coupleId: string }) {
       setPreview([])
       setFileName('')
       await load()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Import failed.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Import failed.')
     } finally {
       setBusy(false)
     }

@@ -68,8 +68,8 @@ export function useNotifications() {
       }
     }
 
-    void load().catch((caught: unknown) => {
-      setError(caught instanceof Error ? caught.message : 'Unable to load reminders.')
+    void load().catch((error_: unknown) => {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load reminders.')
     })
   }, [])
 
@@ -104,15 +104,15 @@ export function useNotifications() {
           filter: `couple_id=eq.${coupleId}`,
         },
         () => {
-          void refresh().catch((caught: unknown) => {
-            setError(caught instanceof Error ? caught.message : 'Unable to refresh reminders.')
+          void refresh().catch((error_: unknown) => {
+            setError(error_ instanceof Error ? error_.message : 'Unable to refresh reminders.')
           })
         }
       )
       .subscribe((status) => {
         if (status === 'SUBSCRIBED') {
-          void refresh().catch((caught: unknown) => {
-            setError(caught instanceof Error ? caught.message : 'Unable to refresh reminders.')
+          void refresh().catch((error_: unknown) => {
+            setError(error_ instanceof Error ? error_.message : 'Unable to refresh reminders.')
           })
         }
       })

@@ -35,8 +35,8 @@ export default function ImportedTelegramMessages({ coupleId }: { coupleId: strin
       setHasMore(page.length > PAGE_SIZE)
       const visible = page.slice(0, PAGE_SIZE)
       setMessages((current) => offset ? [...current, ...visible] : visible)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'မှတ်တမ်းများကို ဖတ်မရပါ။')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'မှတ်တမ်းများကို ဖတ်မရပါ။')
     } finally {
       setLoading(false)
       setLoadingMore(false)

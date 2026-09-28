@@ -361,8 +361,8 @@ export default function ChatScreen() {
 
     try {
       await refresh()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to sync chat.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to sync chat.')
     }
   }
 
@@ -418,9 +418,9 @@ export default function ChatScreen() {
         .eq('id', message.id)
       if (updateError) throw new Error(updateError.message)
       await refresh()
-    } catch (caught) {
+    } catch (error_) {
       await supabase.from('messages').delete().eq('id', message.id).eq('sender_id', user.id)
-      throw caught
+      throw error_
     }
   }
 

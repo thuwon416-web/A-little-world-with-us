@@ -78,9 +78,9 @@ export default function GallerySection() {
         .sort((a, b) => b.created_at.localeCompare(a.created_at))
 
       setItems(galleryItems)
-    } catch (caught) {
+    } catch (error_) {
       setItems([])
-      setError(caught instanceof Error ? caught.message : 'Unable to load gallery.')
+      setError(error_ instanceof Error ? error_.message : 'Unable to load gallery.')
     } finally {
       setLoading(false)
     }

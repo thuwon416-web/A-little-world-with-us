@@ -64,8 +64,8 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
       })
       onSaved()
       onClose()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to save expense.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to save expense.')
     } finally {
       setSubmitting(false)
     }

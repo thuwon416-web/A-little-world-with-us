@@ -56,8 +56,8 @@ export default function SettleUpModal({
       })
       await onSuccess()
       onClose()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to create settlement.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to create settlement.')
     } finally {
       setSubmitting(false)
     }

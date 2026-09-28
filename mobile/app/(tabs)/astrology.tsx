@@ -68,10 +68,10 @@ export default function AstrologyScreen() {
           ? data
           : (data?.horoscope ?? data?.advice ?? 'Today is a good day to listen with care.')
       )
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Horoscope unavailable',
-        caught instanceof Error ? caught.message : 'Please try again.'
+        error_ instanceof Error ? error_.message : 'Please try again.'
       )
     }
   }

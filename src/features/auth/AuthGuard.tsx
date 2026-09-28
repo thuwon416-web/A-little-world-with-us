@@ -42,9 +42,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         } catch {
           if (mounted) setPairStatus('error')
         }
-      } catch (caught) {
+      } catch (error_) {
         if (mounted) {
-          console.error('[auth] session check failed:', caught)
+          console.error('[auth] session check failed:', error_)
           setAuthError('Auth check failed. Please sign in again.')
           setIsAuth(false)
         }

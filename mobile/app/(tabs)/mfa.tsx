@@ -53,10 +53,10 @@ export default function MfaScreen() {
       }
     }
     void startChallenge()
-      .catch((caught) => {
+      .catch((error_) => {
         if (active)
           setError(
-            caught instanceof Error ? caught.message : 'Unable to request a verification code.'
+            error_ instanceof Error ? error_.message : 'Unable to request a verification code.'
           )
       })
       .finally(() => {
