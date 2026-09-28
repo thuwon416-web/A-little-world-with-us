@@ -48,9 +48,9 @@ export function useFinanceBalance(): FinanceBalanceState {
 
       const [expenses, settlements] = await Promise.all([getExpenses(), getSettlements()])
       setBalance(calculateBalance(expenses, settlements, userId, partnerId))
-    } catch (caught) {
+    } catch (error_) {
       setBalance(null)
-      setError(caught instanceof Error ? caught.message : 'Unable to load finance balance.')
+      setError(error_ instanceof Error ? error_.message : 'Unable to load finance balance.')
     } finally {
       setLoading(false)
     }
