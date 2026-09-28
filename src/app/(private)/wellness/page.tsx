@@ -49,9 +49,9 @@ export default function WellnessPage() {
         { ...workout, completedAt: new Date().toISOString() },
       ])
       setSelectedWorkout(null)
-    } catch (caught) {
-      console.error('[wellness] log failed:', caught)
-      setActionError(caught instanceof Error ? caught.message : 'Failed to save activity')
+    } catch (error_) {
+      console.error('[wellness] log failed:', error_)
+      setActionError(error_ instanceof Error ? error_.message : 'Failed to save activity')
     }
   }
 
@@ -61,9 +61,9 @@ export default function WellnessPage() {
     try {
       await logWellnessActivity(user.id, questId, 'quest')
       setActionError(null)
-    } catch (caught) {
-      console.error('[wellness] log failed:', caught)
-      setActionError(caught instanceof Error ? caught.message : 'Failed to save activity')
+    } catch (error_) {
+      console.error('[wellness] log failed:', error_)
+      setActionError(error_ instanceof Error ? error_.message : 'Failed to save activity')
     }
   }
 
@@ -74,9 +74,9 @@ export default function WellnessPage() {
       await logWellnessActivity(user.id, 'relationship-games', 'game')
       setActionError(null)
       setCompletedGame(true)
-    } catch (caught) {
-      console.error('[wellness] log failed:', caught)
-      setActionError(caught instanceof Error ? caught.message : 'Failed to save activity')
+    } catch (error_) {
+      console.error('[wellness] log failed:', error_)
+      setActionError(error_ instanceof Error ? error_.message : 'Failed to save activity')
     }
   }
 
