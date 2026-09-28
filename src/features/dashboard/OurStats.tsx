@@ -1,9 +1,8 @@
 'use client'
 
 import { BookHeart } from 'lucide-react'
-import { memo } from 'react'
+import { memo, useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
 import { EmptyState } from '@/components/ui/empty-state'
 import { calculateDaysTogether } from '@/lib/relationship-days'
 import { relationshipMemoriesService } from '@/services/relationship-memories'

@@ -16,7 +16,7 @@ import {
 } from 'react-native'
 import { WebView } from 'react-native-webview'
 
-import { useTheme, type ThemeColors, type ThemePreference } from '@/context/ThemeContext'
+import { useTheme, type ThemeColors, type ThemeName } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { useLocation } from '@/hooks/useLocation'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -464,7 +464,7 @@ export default function SettingsScreen() {
               'mint-whisper',
               'ocean-calm',
               'monochrome',
-            ] as ThemePreference[]
+            ] as ThemeName[]
           ).map((option) => (
             <TouchableOpacity
               key={option}

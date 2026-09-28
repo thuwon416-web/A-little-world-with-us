@@ -3,13 +3,12 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 export type ThemeMode = 'lavender-mist' | 'peach-cream' | 'mint-whisper' | 'ocean-calm' | 'monochrome'
-export type ThemePreference = ThemeMode
 
 export type ThemeContextType = {
   mode: ThemeMode
   setMode: (mode: ThemeMode) => void
-  preference: ThemePreference
-  setPreference: (preference: ThemePreference) => void
+  preference: ThemeMode
+  setPreference: (preference: ThemeMode) => void
 }
 
 const ThemeContext = createContext<ThemeContextType>({
@@ -40,7 +39,7 @@ function migrateThemeValue(value: string | null): string | null {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
   const [mode, setModeState] = useState<ThemeMode>('lavender-mist')
-  const [preference, setPreferenceState] = useState<ThemePreference>('lavender-mist')
+  const [preference, setPreferenceState] = useState<ThemeMode>('lavender-mist')
 
   useEffect(() => {
     setMounted(true)

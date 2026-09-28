@@ -7,7 +7,6 @@ type CanonicalThemeName =
   'lavender-mist' | 'peach-cream' | 'mint-whisper' | 'ocean-calm' | 'monochrome'
 type LegacyThemeName = 'midnight' | 'sunset' | 'romantic' | 'ocean'
 export type ThemeName = CanonicalThemeName | LegacyThemeName
-export type ThemePreference = ThemeName
 export type ThemeColors = {
   background: string
   surface: string
@@ -140,10 +139,10 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
 }
 
 type ThemeContextValue = {
-  preference: ThemePreference
+  preference: ThemeName
   theme: ThemeName
   colors: ThemeColors
-  setPreference: (preference: ThemePreference) => void
+  setPreference: (preference: ThemeName) => void
 }
 
 const ThemeContext = createContext<ThemeContextValue>({
@@ -162,7 +161,7 @@ const LEGACY_MAP: Record<string, ThemeName> = {
   monochrome: 'monochrome',
 }
 
-function resolveTheme(preference: ThemePreference): CanonicalThemeName {
+function resolveTheme(preference: ThemeName): CanonicalThemeName {
   if (preference === 'midnight') return 'lavender-mist'
   if (preference === 'sunset') return 'peach-cream'
   if (preference === 'romantic') return 'mint-whisper'
@@ -171,13 +170,13 @@ function resolveTheme(preference: ThemePreference): CanonicalThemeName {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreferenceState] = useState<ThemePreference>('lavender-mist')
+  const [preference, setPreferenceState] = useState<ThemeName>('lavender-mist')
   const [theme, setTheme] = useState<CanonicalThemeName>('lavender-mist')
 
   useEffect(() => {
     void AsyncStorage.getItem(STORAGE_KEY).then((stored) => {
       const migrated = stored !== null && LEGACY_MAP[stored] ? LEGACY_MAP[stored] : stored
-      const next: ThemePreference =
+      const next: ThemeName =
         migrated === 'lavender-mist' ||
         migrated === 'peach-cream' ||
         migrated === 'mint-whisper' ||
@@ -191,7 +190,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const setPreference = (next: ThemePreference) => {
+  const setPreference = (next: ThemeName) => {
     const canonical = resolveTheme(next)
     setPreferenceState(canonical)
     setTheme(canonical)

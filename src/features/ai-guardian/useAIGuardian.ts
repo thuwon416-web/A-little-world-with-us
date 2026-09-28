@@ -1,7 +1,7 @@
 import { useContext } from 'react'
-import { AIGuardianContext, type AdviceRequest, type AdviceResult } from './AIGuardianProvider'
+import { AIGuardianContext } from './AIGuardianProvider'
 
-export type { AdviceRequest, AdviceResult }
+export type { AdviceRequest, AdviceResult } from './AIGuardianProvider'
 
 export function useAIGuardian() {
   const context = useContext(AIGuardianContext)
