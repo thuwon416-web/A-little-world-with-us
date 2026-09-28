@@ -28,8 +28,8 @@ export default function FeedbackWidget() {
       }
       setFeedback('')
       setMessage('တုံ့ပြန်ချက်ကို ပို့ပြီးပါပြီ။ ကျေးဇူးတင်ပါတယ်။')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'တုံ့ပြန်ချက်ကို ပို့မရပါ။')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'တုံ့ပြန်ချက်ကို ပို့မရပါ။')
     } finally {
       setBusy(false)
     }
