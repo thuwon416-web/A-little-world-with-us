@@ -106,8 +106,8 @@ export default function AIAssistantScreen() {
       }
       setCustomResult(generated)
       setCustomState('success')
-    } catch (caught) {
-      setCustomError(caught instanceof Error ? caught.message : 'Unable to generate a response')
+    } catch (error_) {
+      setCustomError(error_ instanceof Error ? error_.message : 'Unable to generate a response')
       setCustomState('error')
     }
   }
@@ -120,10 +120,10 @@ export default function AIAssistantScreen() {
     try {
       await saveAISuggestion(content, tab)
       Alert.alert('Saved', 'Suggestion saved to favorites')
-    } catch (caught) {
+    } catch (error_) {
       Alert.alert(
         'Save failed',
-        caught instanceof Error ? caught.message : 'Unable to save suggestion.'
+        error_ instanceof Error ? error_.message : 'Unable to save suggestion.'
       )
     }
   }
