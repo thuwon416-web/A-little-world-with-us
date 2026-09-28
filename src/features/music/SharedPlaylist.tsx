@@ -21,11 +21,11 @@ export function parseYouTubeId(value: string): string | null {
 
   try {
     const url = new URL(input)
-    if (url.hostname === 'youtu.be') return url.pathname.slice(1).match(/^[A-Za-z0-9_-]{11}$/)?.[0] ?? null
+    if (url.hostname === 'youtu.be') return /^[A-Za-z0-9_-]{11}$/.exec(url.pathname.slice(1))?.[0] ?? null
     if (url.hostname.endsWith('youtube.com')) {
       const queryId = url.searchParams.get('v')
       if (queryId && /^[A-Za-z0-9_-]{11}$/.test(queryId)) return queryId
-      const pathId = url.pathname.match(/\/(?:embed|shorts|live)\/([A-Za-z0-9_-]{11})/)
+      const pathId = /\/(?:embed|shorts|live)\/([A-Za-z0-9_-]{11})/.exec(url.pathname)
       return pathId?.[1] ?? null
     }
   } catch {

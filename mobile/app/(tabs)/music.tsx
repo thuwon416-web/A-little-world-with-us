@@ -103,10 +103,8 @@ const moodBoard = [
 
 function extractId(value: string) {
   const trimmed = value.trim()
-  const match = trimmed.match(
-    /(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/
-  )
-  return match?.[1] ?? trimmed.match(/^[A-Za-z0-9_-]{11}$/)?.[0] ?? null
+  const match = /(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/embed\/)([A-Za-z0-9_-]{11})/.exec(trimmed)
+  return match?.[1] ?? /^[A-Za-z0-9_-]{11}$/.exec(trimmed)?.[0] ?? null
 }
 
 export default function MusicScreen() {
