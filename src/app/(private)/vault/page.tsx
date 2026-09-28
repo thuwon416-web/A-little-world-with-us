@@ -365,9 +365,9 @@ function VaultPageContent() {
         setUserId(currentUserId)
         setCoupleId(coupleStatus.status === 'accepted' ? coupleStatus.couple?.id ?? null : null)
         setIsAuthenticated(true)
-      } catch (caught) {
+      } catch (error_) {
         if (active) {
-          setAuthError(caught instanceof Error ? caught.message : 'Unable to check authentication.')
+          setAuthError(error_ instanceof Error ? error_.message : 'Unable to check authentication.')
         }
       }
     }
@@ -384,9 +384,9 @@ function VaultPageContent() {
       .then((stored) => {
         if (active) setHasWrappedKey(Boolean(stored))
       })
-      .catch((caught: unknown) => {
+      .catch((error_: unknown) => {
         if (active) {
-          setPasswordVaultError(caught instanceof Error ? caught.message : 'Unable to load the vault key.')
+          setPasswordVaultError(error_ instanceof Error ? error_.message : 'Unable to load the vault key.')
         }
       })
     return () => {
