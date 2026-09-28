@@ -46,8 +46,8 @@ export default function MemoryMapSection() {
       const rows = await getMemories()
       setMemories(rows.filter((row) => row.latitude !== null && row.longitude !== null))
     }
-    void loadData().catch((caught) =>
-      setError(caught instanceof Error ? caught.message : 'Unable to load memory locations.')
+    void loadData().catch((error_) =>
+      setError(error_ instanceof Error ? error_.message : 'Unable to load memory locations.')
     )
   }, [])
   useEffect(() => {
