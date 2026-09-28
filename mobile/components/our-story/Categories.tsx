@@ -47,8 +47,8 @@ function Categories({
     relationshipMemoriesService
       .getStats(coupleId)
       .then(setStats)
-      .catch((caught) =>
-        setError(caught instanceof Error ? caught.message : 'Unable to load categories.')
+      .catch((error_) =>
+        setError(error_ instanceof Error ? error_.message : 'Unable to load categories.')
       )
       .finally(() => setLoading(false))
   }, [coupleId])
@@ -60,8 +60,8 @@ function Categories({
     setExpanded(category)
     try {
       setMemories((await relationshipMemoriesService.getByCategory(coupleId, category)).slice(0, 5))
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load category memories.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load category memories.')
     }
   }
   if (loading) return <Text style={styles.muted}>Loading categories…</Text>
