@@ -36,8 +36,8 @@ export default function MfaPage() {
         setReady(true)
       }
     }
-    void prepareChallenge().catch((caught) => {
-      if (active) setError(caught instanceof Error ? caught.message : 'ကုဒ်တောင်း၍ မရပါ။')
+    void prepareChallenge().catch((error_) => {
+      if (active) setError(error_ instanceof Error ? error_.message : 'ကုဒ်တောင်း၍ မရပါ။')
     })
     return () => { active = false }
   }, [destination, router])
