@@ -371,11 +371,11 @@ function PairReadyStep({
 
       <div className="space-y-3">
         <label className="flex cursor-pointer gap-3 rounded-btn border border-accent-1/20 bg-soft-tint p-4">
-          <input type="checkbox" checked={data.notifications_enabled ?? false} onChange={(event) => onChange({ ...data, notifications_enabled: event.target.checked })} />
+          <input aria-label="Allow gentle notifications" type="checkbox" checked={data.notifications_enabled ?? false} onChange={(event) => onChange({ ...data, notifications_enabled: event.target.checked })} />
           <span><strong className="block text-sm text-text-1">Allow gentle notifications</strong><span className="mt-1 block text-xs text-text-2">Reminders and scheduled surprises can notify this device.</span></span>
         </label>
         <label className="flex cursor-pointer gap-3 rounded-btn border border-accent-1/20 bg-soft-tint p-4">
-          <input type="checkbox" checked={data.location_consent ?? false} onChange={(event) => onChange({ ...data, location_consent: event.target.checked })} />
+          <input aria-label="Review location sharing later" type="checkbox" checked={data.location_consent ?? false} onChange={(event) => onChange({ ...data, location_consent: event.target.checked })} />
           <span><strong className="block text-sm text-text-1">Review location sharing later</strong><span className="mt-1 block text-xs text-text-2">Background sharing always needs separate device permission and can be stopped in Privacy.</span></span>
         </label>
       </div>
