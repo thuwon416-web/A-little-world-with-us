@@ -40,8 +40,8 @@ export default function MemoryMapContent() {
           .order('date', { ascending: false })
         if (loadError) throw loadError
         if (active) setMemories((data ?? []) as Memory[])
-      } catch (caught) {
-        if (active) setError(caught instanceof Error ? caught.message : 'Unable to load located memories.')
+      } catch (error_) {
+        if (active) setError(error_ instanceof Error ? error_.message : 'Unable to load located memories.')
       } finally {
         if (active) setLoading(false)
       }
