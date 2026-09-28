@@ -69,8 +69,8 @@ export default function CalendarScreen() {
       setWishlist(data.wishlist)
       setCoupleId(data.coupleId)
       if (user) setShared(await getSharedCalendarPreference(user.id))
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to load calendar.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to load calendar.')
     }
   }
   useEffect(() => {
@@ -114,8 +114,8 @@ export default function CalendarScreen() {
       setEditingId(undefined)
       setShowAdd(false)
       await load()
-    } catch (caught) {
-      Alert.alert('Unable to save', caught instanceof Error ? caught.message : 'Please try again.')
+    } catch (error_) {
+      Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
     }
   }
   const editEvent = (event: CalendarEvent) => {
@@ -138,8 +138,8 @@ export default function CalendarScreen() {
       await saveListItem(coupleId, user.id, 'wishlist', wishlistDraft.trim())
       setWishlistDraft('')
       await load()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to add wishlist item.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to add wishlist item.')
     }
   }
   return (
