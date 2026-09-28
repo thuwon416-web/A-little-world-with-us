@@ -84,15 +84,14 @@ export function calculateSynastry(profile1: AstrologyProfile, profile2: Astrolog
   }
   const element1 = elements[profile1.westernSign]
   const element2 = elements[profile2.westernSign]
-  const western =
-    element1 === element2
-      ? 15
-      : (element1 === 'Fire' && element2 === 'Air') ||
-          (element1 === 'Air' && element2 === 'Fire') ||
-          (element1 === 'Earth' && element2 === 'Water') ||
-          (element1 === 'Water' && element2 === 'Earth')
-        ? 10
-        : 5
+  const hasComplementaryElements =
+    (element1 === 'Fire' && element2 === 'Air') ||
+    (element1 === 'Air' && element2 === 'Fire') ||
+    (element1 === 'Earth' && element2 === 'Water') ||
+    (element1 === 'Water' && element2 === 'Earth')
+  const sameElementScore = element1 === element2 ? 15 : null
+  const differentElementScore = hasComplementaryElements ? 10 : 5
+  const western = sameElementScore ?? differentElementScore
   const distance = Math.abs(
     chineseSigns.indexOf(profile1.chineseSign as (typeof chineseSigns)[number]) -
       chineseSigns.indexOf(profile2.chineseSign as (typeof chineseSigns)[number])

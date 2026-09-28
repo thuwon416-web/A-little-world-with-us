@@ -191,11 +191,11 @@ async function callWithFallback(
       console.warn(`AI provider ${candidate} selected`)
       return { content, provider: candidate }
     } catch (error) {
-      const message = error instanceof Error && error.name === 'AbortError'
-        ? 'Request timed out'
-        : error instanceof Error
-          ? error.message
-          : 'Unknown provider error'
+      const timeoutMessage =
+        error instanceof Error && error.name === 'AbortError' ? 'Request timed out' : null
+      const message =
+        timeoutMessage ??
+        (error instanceof Error ? error.message : 'Unknown provider error')
       failures.push({ provider: candidate, error: message })
       console.warn(`AI provider ${candidate} unavailable`, message)
     }

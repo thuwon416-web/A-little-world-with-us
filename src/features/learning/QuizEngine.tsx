@@ -33,17 +33,19 @@ function makePrompt(vocab: KoreanVocab, type: QuizType, pool: KoreanVocab[]): Qu
   const answer = type === 'typing' ? vocab.korean : vocab.english
   const distractors = shuffle(pool.filter((item) => item.id !== vocab.id)).slice(0, 3).map((item) => item.english)
   const options = shuffle([answer, ...distractors])
-  const prompt =
-    type === 'listening'
-      ? `Which meaning matches this Korean word? (${vocab.romanization})`
-      : type === 'typing'
-        ? `Type the Korean word for "${vocab.english}".`
-        : `What does "${vocab.korean}" mean?`
+  let prompt: string
+  if (type === 'listening') prompt = `Which meaning matches this Korean word? (${vocab.romanization})`
+  else if (type === 'typing') prompt = `Type the Korean word for "${vocab.english}".`
+  else prompt = `What does "${vocab.korean}" mean?`
   return { vocab, questionType: type, options, prompt }
 }
 
-const reviewDelayDays = (mastery: KoreanProgress['masteryLevel']) =>
-  mastery <= 1 ? 1 : mastery <= 3 ? 3 : mastery === 4 ? 7 : 30
+const reviewDelayDays = (mastery: KoreanProgress['masteryLevel']) => {
+  if (mastery <= 1) return 1
+  if (mastery <= 3) return 3
+  if (mastery === 4) return 7
+  return 30
+}
 
 export function QuizEngine({
   level,

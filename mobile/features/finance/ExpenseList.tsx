@@ -38,12 +38,9 @@ export default function ExpenseList({
   return (
     <View style={styles.list}>
       {expenses.map((expense) => {
-        const paidBy =
-          expense.paidBy === currentUserId
-            ? 'Paid by You'
-            : expense.paidBy === partnerId
-              ? 'Paid by Partner'
-              : 'Paid by Unknown'
+        let paidBy = 'Paid by Unknown'
+        if (expense.paidBy === currentUserId) paidBy = 'Paid by You'
+        else if (expense.paidBy === partnerId) paidBy = 'Paid by Partner'
         const splitLabel =
           SPLIT_TYPES.find((item) => item.value === expense.splitType)?.label ?? expense.splitType
         return (

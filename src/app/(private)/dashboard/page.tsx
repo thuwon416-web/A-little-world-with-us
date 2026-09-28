@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import type { JSX } from 'react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import {
   DEFAULT_WIDGETS,

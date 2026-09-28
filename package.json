@@ -87,7 +87,7 @@
     "react-dom": "^19.3.0",
     "react-hook-form": "^7.86.0",
     "react-leaflet": "^5.0.0",
-    "react-resizable-panels": "^4.13.3",
+    "react-resizable-panels": "^2.1.9",
     "recharts": "^3.10.1",
     "server-only": "0.0.1",
     "serwist": "^9.5.12",

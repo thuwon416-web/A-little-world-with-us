@@ -16,8 +16,12 @@ const shuffle = <T,>(items: T[]) =>
     .map((item) => ({ item, key: Crypto.randomUUID() }))
     .sort((left, right) => left.key.localeCompare(right.key))
     .map(({ item }) => item)
-const delayDays = (mastery: KoreanProgress['masteryLevel']) =>
-  mastery <= 1 ? 1 : mastery <= 3 ? 3 : mastery === 4 ? 7 : 30
+const delayDays = (mastery: KoreanProgress['masteryLevel']) => {
+  if (mastery <= 1) return 1
+  if (mastery <= 3) return 3
+  if (mastery === 4) return 7
+  return 30
+}
 
 function makePrompt(vocab: KoreanVocab, type: QuizType, pool: KoreanVocab[]): MobileQuizPrompt {
   const answer = type === 'typing' ? vocab.korean : vocab.english

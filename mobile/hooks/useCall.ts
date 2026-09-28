@@ -132,15 +132,11 @@ export function useCall() {
     const signal = await getCallSignal(id)
     if (signal) {
       callIdRef.current = signal.id
-      setState(
-        signal.status === 'in_call'
-          ? 'in_call'
-          : signal.status === 'calling'
-            ? 'calling'
-            : signal.status === 'rejected'
-              ? 'rejected'
-              : 'ended'
-      )
+      let callState: CallState = 'ended'
+      if (signal.status === 'in_call') callState = 'in_call'
+      else if (signal.status === 'calling') callState = 'calling'
+      else if (signal.status === 'rejected') callState = 'rejected'
+      setState(callState)
       setCallDuration(0)
     }
   }, [])
