@@ -35,8 +35,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           data: { session },
         } = await supabase.auth.getSession()
         setUser(session?.user ?? null)
-      } catch (caught) {
-        console.error('[auth] session load failed:', caught)
+      } catch (error_) {
+        console.error('[auth] session load failed:', error_)
         setUser(null)
       } finally {
         setLoading(false)
