@@ -410,8 +410,8 @@ function MemoriesPageContent() {
           : [saved, ...current]
       )
       closeJournalModal()
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to save journal entry.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to save journal entry.')
     } finally {
       setJournalSaving(false)
     }
@@ -439,8 +439,8 @@ function MemoriesPageContent() {
           ? { ...item, metadata: { ...(item.metadata ?? {}), ai_reflection: body.reflection } }
           : item
       ))
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to reflect right now.')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to reflect right now.')
     } finally {
       setReflectingId(null)
     }
