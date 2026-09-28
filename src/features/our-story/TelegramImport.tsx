@@ -26,8 +26,8 @@ export default function TelegramImport({ coupleId }: { coupleId: string }) {
       const parsed = parseTelegramExport(JSON.parse(await file.text()))
       setRows(parsed)
       setFileName(file.name)
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'ဖိုင်ကို ဖတ်မရပါ။')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'ဖိုင်ကို ဖတ်မရပါ။')
     } finally {
       event.target.value = ''
     }
@@ -59,8 +59,8 @@ export default function TelegramImport({ coupleId }: { coupleId: string }) {
       setMessage(`မှတ်တမ်း ${inserted} ခု ထည့်ပြီးပါပြီ။ ထပ်နေသော မှတ်တမ်းများကို မထည့်ပါ။`)
       setRows([])
       setFileName('')
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'မှတ်တမ်းတင်သွင်းမှု မအောင်မြင်ပါ။')
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'မှတ်တမ်းတင်သွင်းမှု မအောင်မြင်ပါ။')
     } finally {
       setLoading(false)
     }
