@@ -7,6 +7,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -21,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 24.x
           cache: 'npm'
       
       - name: Install dependencies
@@ -37,6 +40,7 @@ jobs:
       
       - name: Run Playwright tests
         if: ${{ env.NEXT_PUBLIC_SUPABASE_URL != '' && env.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}
+        id: playwright
         run: npm run test:e2e
       
       - name: Upload Playwright report
@@ -46,3 +50,24 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+      - name: Report E2E outcome
+        if: always()
+        env:
+          E2E_SECRETS_AVAILABLE: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL != '' && secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY != '' }}
+          PLAYWRIGHT_OUTCOME: ${{ steps.playwright.outcome }}
+        run: |
+          if [ "$E2E_SECRETS_AVAILABLE" != "true" ]; then
+            echo "E2E NOT RUN / ENVIRONMENT UNAVAILABLE" >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::E2E NOT RUN / ENVIRONMENT UNAVAILABLE: Supabase E2E secrets are not configured."
+            exit 1
+          fi
+
+          if [ "$PLAYWRIGHT_OUTCOME" = "success" ]; then
+            echo "E2E PASSED" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo "E2E FAILED (Playwright outcome: $PLAYWRIGHT_OUTCOME)" >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::E2E FAILED (Playwright outcome: $PLAYWRIGHT_OUTCOME)."
+          exit 1

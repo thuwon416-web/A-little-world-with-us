@@ -17,13 +17,16 @@ type EmergencyContact = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
 const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-if (!supabaseUrl || !serviceRole) throw new Error('Missing Supabase Edge Function environment.')
+const cronSecret = Deno.env.get('CRON_SECRET')
+if (!supabaseUrl || !serviceRole || !cronSecret) {
+  throw new Error('Missing Supabase Edge Function environment.')
+}
 
 const supabase = createClient(supabaseUrl, serviceRole)
 
 Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
-  if (request.headers.get('Authorization') !== `Bearer ${Deno.env.get('CRON_SECRET')}`) {
+  if (request.headers.get('x-cron-secret') !== cronSecret) {
     return new Response('Unauthorized', { status: 401 })
   }
 

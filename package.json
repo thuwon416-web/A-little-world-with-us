@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A premium minimalist app for two lives gracefully becoming one",
   "private": true,
+  "engines": {
+    "node": ">=24.3.0 <25"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -121,7 +124,7 @@
     "jest-axe": "^11.0.0",
     "jsdom": "^30.1.1",
     "prettier": "^3.4.2",
-    "tailwindcss": "^4.3.3",
+    "tailwindcss": "3.4.17",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "~6.0.3",
     "vitest": "^5.0.2",

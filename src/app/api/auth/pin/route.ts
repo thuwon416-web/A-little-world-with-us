@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
 import bcrypt from 'bcrypt'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { createServerClient } from '@/lib/supabase-server'
 
 const SALT_ROUNDS = 10
 const pinRequestSchema = z.object({
@@ -13,20 +13,7 @@ const pinRequestSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return req.cookies.getAll()
-          },
-          setAll() {
-            // Handle cookie updates if needed
-          },
-        },
-      }
-    )
+    const supabase = await createServerClient()
 
     const { data: { user } } = await supabase.auth.getUser()
 
