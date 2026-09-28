@@ -4,7 +4,7 @@ import AppShell from '@/features/auth/app-shell'
 import PWAInstallPrompt from '@/features/settings/PWAInstallPrompt'
 import { AIGuardianProvider } from '@/features/ai-guardian/AIGuardianProvider'
 
-export default function PrivateLayout({ children }: { children: React.ReactNode }) {
+export default function PrivateLayout({ children }: { readonly children: React.ReactNode }) {
   return (
     <AuthGuard>
       <AIGuardianProvider>

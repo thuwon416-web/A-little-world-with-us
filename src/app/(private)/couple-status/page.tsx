@@ -133,8 +133,8 @@ function ErrorState({
   error,
   onRetry,
 }: {
-  error: string
-  onRetry: () => void
+  readonly error: string
+  readonly onRetry: () => void
 }) {
   return (
     <motion.div
@@ -161,8 +161,8 @@ function StatusCards({
   coupleInfo,
   isInviter,
 }: {
-  coupleInfo: CoupleInfo
-  isInviter: boolean
+  readonly coupleInfo: CoupleInfo
+  readonly isInviter: boolean
 }) {
   const statusColors = {
     pending: { bg: 'var(--card-bg)', border: 'rgb(var(--accent-1))', text: 'rgb(var(--accent-2))', icon: Clock },

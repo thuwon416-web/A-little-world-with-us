@@ -279,13 +279,13 @@ function VocabCard({
   speaking,
   onSpeak,
 }: {
-  vocab: KoreanVocab
-  mastered: boolean
-  colors: ThemeColors
-  t: (key: string) => string
-  ttsSupported: boolean
-  speaking: boolean
-  onSpeak: () => void
+  readonly vocab: KoreanVocab
+  readonly mastered: boolean
+  readonly colors: ThemeColors
+  readonly t: (key: string) => string
+  readonly ttsSupported: boolean
+  readonly speaking: boolean
+  readonly onSpeak: () => void
 }) {
   const styles = createStyles(colors, sizes)
   return (

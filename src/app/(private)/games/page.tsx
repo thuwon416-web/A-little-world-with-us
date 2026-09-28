@@ -15,7 +15,7 @@ const LoveWeather = dynamic(() => import('@/features/games/LoveWeather'), { load
 const FuturePredictions = dynamic(() => import('@/features/games/FuturePredictions'), { loading: gameLoading })
 const RelationshipQuests = dynamic(() => import('@/features/games/RelationshipQuests'), { loading: gameLoading })
 
-function GameCard({ children }: { children: React.ReactNode }) {
+function GameCard({ children }: { readonly children: React.ReactNode }) {
   return <div className="glass-card rounded-panel p-5">{children}</div>
 }
 

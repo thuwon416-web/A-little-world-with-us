@@ -33,9 +33,9 @@ function showUnlinkConfirmation(onUnlink: () => void) {
 }
 
 type LinkStatusCardProps = {
-  context: CoupleLinkContext | null
-  onUnlink: () => void
-  onDecline: () => void
+  readonly context: CoupleLinkContext | null
+  readonly onUnlink: () => void
+  readonly onDecline: () => void
 }
 
 function LinkStatusCard({ context, onUnlink, onDecline }: LinkStatusCardProps) {

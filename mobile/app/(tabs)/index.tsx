@@ -106,7 +106,7 @@ function nextAnniversary() {
   return `${year}-02-02`
 }
 
-function StatCard({ title, value }: { title: string; value: number }) {
+function StatCard({ title, value }: { readonly title: string; readonly value: number }) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   return (

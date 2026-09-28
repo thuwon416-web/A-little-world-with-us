@@ -28,9 +28,9 @@ function Section({
   icon: Icon,
   children,
 }: {
-  title: string
-  icon: LucideIcon
-  children: ReactNode
+  readonly title: string
+  readonly icon: LucideIcon
+  readonly children: ReactNode
 }) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
@@ -54,10 +54,10 @@ function GameCard({
   onPress,
   action = 'Play',
 }: {
-  title: string
-  subtitle: string
-  onPress: () => void
-  action?: string
+  readonly title: string
+  readonly subtitle: string
+  readonly onPress: () => void
+  readonly action?: string
 }) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])

@@ -83,7 +83,7 @@ const bucketList = [
   'Create a mini home gallery wall',
 ]
 
-function PlanCard({ plan, onToggleItem }: { plan: Plan; onToggleItem: (planId: string, itemId: string) => void }) {
+function PlanCard({ plan, onToggleItem }: { readonly plan: Plan; readonly onToggleItem: (planId: string, itemId: string) => void }) {
   const doneCount = plan.items.filter((item) => item.done).length
   const planProgress = plan.items.length ? Math.round((doneCount / plan.items.length) * 100) : 0
 
@@ -155,17 +155,17 @@ function PlanCreationModal({
   onClose,
   onCreate,
 }: {
-  fieldId: string
-  title: string
-  type: string
-  dueDate: string
-  creating: boolean
-  error: string
-  onTitleChange: (value: string) => void
-  onTypeChange: (value: string) => void
-  onDueDateChange: (value: string) => void
-  onClose: () => void
-  onCreate: () => void
+  readonly fieldId: string
+  readonly title: string
+  readonly type: string
+  readonly dueDate: string
+  readonly creating: boolean
+  readonly error: string
+  readonly onTitleChange: (value: string) => void
+  readonly onTypeChange: (value: string) => void
+  readonly onDueDateChange: (value: string) => void
+  readonly onClose: () => void
+  readonly onCreate: () => void
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="new-plan-title">

@@ -26,12 +26,12 @@ const kindMeta: Record<
 
 const prompts = ['First prompt?', 'Second prompt?', 'Third prompt?', 'Fourth prompt?']
 
-type WellnessBoardProps = { title: string }
+type WellnessBoardProps = { readonly title: string }
 
 export default function WellnessBoard({ title }: WellnessBoardProps) {
   const { colors } = useTheme()
   const [items, setItems] = useState<Item[]>(starterItems)
-  const [title, setTitle] = useState('')
+  const [inputTitle, setInputTitle] = useState('')
   const [kind, setKind] = useState<Item['kind']>('one')
   const [promptIndex, setPromptIndex] = useState(0)
 
@@ -47,13 +47,13 @@ export default function WellnessBoard({ title }: WellnessBoardProps) {
   }
 
   const addItem = () => {
-    const value = title.trim()
+    const value = inputTitle.trim()
     if (!value) return
     setItems((current) => [
       ...current,
       { id: `item-${Date.now()}`, title: value, kind, done: false },
     ])
-    setTitle('')
+    setInputTitle('')
   }
 
   const rotatePrompt = () => {
@@ -114,8 +114,8 @@ export default function WellnessBoard({ title }: WellnessBoardProps) {
           ))}
         </View>
         <TextInput
-          value={title}
-          onChangeText={setTitle}
+          value={inputTitle}
+          onChangeText={setInputTitle}
           placeholder="Add a moment"
           placeholderTextColor={colors.textSecondary}
           style={styles.input}

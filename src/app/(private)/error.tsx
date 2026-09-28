@@ -8,8 +8,8 @@ export default function PrivateError({
   error,
   reset,
 }: {
-  error: Error & { digest?: string }
-  reset: () => void
+  readonly error: Error & { digest?: string }
+  readonly reset: () => void
 }) {
   useEffect(() => {
     logError(error, {

@@ -636,38 +636,38 @@ function HealthProfile() {
 type CareTab = 'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
 
 type TodayCareProps = {
-  summary: NativeCycleSummary
-  saving: boolean
-  mood: string
-  setMood: (value: string) => void
-  selectedSymptoms: string[]
-  sex: string[]
-  discharge: string[]
-  digestion: string[]
-  pregnancyTest: string[]
-  ovulationTest: string
-  contraceptives: string[]
-  activities: string[]
-  water: string
-  setWater: (value: string) => void
-  weight: string
-  setWeight: (value: string) => void
-  basalTemp: string
-  setBasalTemp: (value: string) => void
-  notes: string
-  setNotes: (value: string) => void
-  periodDay: boolean
-  setPeriodDay: (value: boolean | ((current: boolean) => boolean)) => void
-  onToggle: (current: string[], value: string, setter: (next: string[]) => void) => void
-  setSelectedSymptoms: (next: string[]) => void
-  setSex: (next: string[]) => void
-  setDischarge: (next: string[]) => void
-  setDigestion: (next: string[]) => void
-  setPregnancyTest: (next: string[]) => void
-  setOvulationTest: (value: string) => void
-  setContraceptives: (next: string[]) => void
-  setActivities: (next: string[]) => void
-  onSave: () => void
+  readonly summary: NativeCycleSummary
+  readonly saving: boolean
+  readonly mood: string
+  readonly setMood: (value: string) => void
+  readonly selectedSymptoms: string[]
+  readonly sex: string[]
+  readonly discharge: string[]
+  readonly digestion: string[]
+  readonly pregnancyTest: string[]
+  readonly ovulationTest: string
+  readonly contraceptives: string[]
+  readonly activities: string[]
+  readonly water: string
+  readonly setWater: (value: string) => void
+  readonly weight: string
+  readonly setWeight: (value: string) => void
+  readonly basalTemp: string
+  readonly setBasalTemp: (value: string) => void
+  readonly notes: string
+  readonly setNotes: (value: string) => void
+  readonly periodDay: boolean
+  readonly setPeriodDay: (value: boolean | ((current: boolean) => boolean)) => void
+  readonly onToggle: (current: string[], value: string, setter: (next: string[]) => void) => void
+  readonly setSelectedSymptoms: (next: string[]) => void
+  readonly setSex: (next: string[]) => void
+  readonly setDischarge: (next: string[]) => void
+  readonly setDigestion: (next: string[]) => void
+  readonly setPregnancyTest: (next: string[]) => void
+  readonly setOvulationTest: (value: string) => void
+  readonly setContraceptives: (next: string[]) => void
+  readonly setActivities: (next: string[]) => void
+  readonly onSave: () => void
 }
 
 function TodayCareTab({
@@ -845,16 +845,16 @@ function TodayCareTab({
 }
 
 type SettingsCareProps = {
-  cycleLength: string
-  setCycleLength: (value: string) => void
-  periodLength: string
-  setPeriodLength: (value: string) => void
-  lastPeriodStart: string
-  setLastPeriodStart: (value: string) => void
-  shareCycle: boolean
-  setShareCycle: (value: boolean | ((current: boolean) => boolean)) => void
-  onSave: () => void
-  onExport: () => void
+  readonly cycleLength: string
+  readonly setCycleLength: (value: string) => void
+  readonly periodLength: string
+  readonly setPeriodLength: (value: string) => void
+  readonly lastPeriodStart: string
+  readonly setLastPeriodStart: (value: string) => void
+  readonly shareCycle: boolean
+  readonly setShareCycle: (value: boolean | ((current: boolean) => boolean)) => void
+  readonly onSave: () => void
+  readonly onExport: () => void
 }
 
 function SettingsCareTab({

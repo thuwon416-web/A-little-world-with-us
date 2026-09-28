@@ -172,12 +172,12 @@ function CreateInviteState({
   isAccepting,
   onAccept,
 }: {
-  onCreateInvite: () => void
-  isCreating: boolean
-  acceptCode: string
-  setAcceptCode: (value: string) => void
-  isAccepting: boolean
-  onAccept: () => void
+  readonly onCreateInvite: () => void
+  readonly isCreating: boolean
+  readonly acceptCode: string
+  readonly setAcceptCode: (value: string) => void
+  readonly isAccepting: boolean
+  readonly onAccept: () => void
 }) {
   return (
     <motion.div
@@ -240,9 +240,9 @@ function PendingState({
   onCopyCode,
   copied,
 }: {
-  inviteCode: string
-  onCopyCode: () => void
-  copied: boolean
+  readonly inviteCode: string
+  readonly onCopyCode: () => void
+  readonly copied: boolean
 }) {
   const _prefersReduced = usePrefersReducedMotion()
   return (
@@ -346,8 +346,8 @@ function ErrorState({
   error,
   onRetry,
 }: {
-  error: string
-  onRetry: () => void
+  readonly error: string
+  readonly onRetry: () => void
 }) {
   return (
     <motion.div

@@ -630,16 +630,16 @@ function JournalEntryModal({
   onClose,
   onSave,
 }: {
-  isEditing: boolean
-  title: string
-  body: string
-  mood: JournalMood
-  saving: boolean
-  onTitleChange: (value: string) => void
-  onBodyChange: (value: string) => void
-  onMoodChange: (value: JournalMood) => void
-  onClose: () => void
-  onSave: () => void
+  readonly isEditing: boolean
+  readonly title: string
+  readonly body: string
+  readonly mood: JournalMood
+  readonly saving: boolean
+  readonly onTitleChange: (value: string) => void
+  readonly onBodyChange: (value: string) => void
+  readonly onMoodChange: (value: JournalMood) => void
+  readonly onClose: () => void
+  readonly onSave: () => void
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={isEditing ? 'Edit journal entry' : 'New journal entry'}>
@@ -694,25 +694,25 @@ function MemoryUploadPanel({
   onFileChange,
   onUpload,
 }: {
-  caption: string
-  memoryDate: string
-  memoryCategory: MemoryCategory
-  location: { latitude: number; longitude: number } | null
-  locationLabel: string
-  isLocationOpen: boolean
-  isUploading: boolean
-  uploadProgress: number
-  uploadSummary: string
-  error: string
-  onCaptionChange: (value: string) => void
-  onMemoryDateChange: (value: string) => void
-  onMemoryCategoryChange: (value: MemoryCategory) => void
-  onLocationChange: (value: { latitude: number; longitude: number } | null) => void
-  onLocationLabelChange: (value: string) => void
-  onLocationOpenChange: (value: boolean) => void
-  onErrorChange: (value: string) => void
-  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
-  onUpload: (event: React.FormEvent<HTMLFormElement>) => void
+  readonly caption: string
+  readonly memoryDate: string
+  readonly memoryCategory: MemoryCategory
+  readonly location: { latitude: number; longitude: number } | null
+  readonly locationLabel: string
+  readonly isLocationOpen: boolean
+  readonly isUploading: boolean
+  readonly uploadProgress: number
+  readonly uploadSummary: string
+  readonly error: string
+  readonly onCaptionChange: (value: string) => void
+  readonly onMemoryDateChange: (value: string) => void
+  readonly onMemoryCategoryChange: (value: MemoryCategory) => void
+  readonly onLocationChange: (value: { latitude: number; longitude: number } | null) => void
+  readonly onLocationLabelChange: (value: string) => void
+  readonly onLocationOpenChange: (value: boolean) => void
+  readonly onErrorChange: (value: string) => void
+  readonly onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
+  readonly onUpload: (event: React.FormEvent<HTMLFormElement>) => void
 }) {
   return (
     <>
@@ -778,15 +778,15 @@ function MemoryGrid({
   onOpenMemory,
   onDeleteMemory,
 }: {
-  memories: JournalMemory[]
-  reflectingId: string | null
-  speakingJournalId: string | null
-  onEditJournal: (memory: JournalMemory) => void
-  onDeleteJournal: (memory: JournalMemory) => void
-  onSpeakReflection: (memory: JournalMemory) => void
-  onRequestReflection: (memory: JournalMemory) => void
-  onOpenMemory: (memory: DisplayMemory) => void
-  onDeleteMemory: (memory: DisplayMemory) => void
+  readonly memories: JournalMemory[]
+  readonly reflectingId: string | null
+  readonly speakingJournalId: string | null
+  readonly onEditJournal: (memory: JournalMemory) => void
+  readonly onDeleteJournal: (memory: JournalMemory) => void
+  readonly onSpeakReflection: (memory: JournalMemory) => void
+  readonly onRequestReflection: (memory: JournalMemory) => void
+  readonly onOpenMemory: (memory: DisplayMemory) => void
+  readonly onDeleteMemory: (memory: DisplayMemory) => void
 }) {
   return (
     <section className="grid gap-4 md:grid-cols-2">
@@ -875,7 +875,7 @@ function MemoryGrid({
   )
 }
 
-function MemoryDetail({ memory, onClose, onSaved }: { memory: DisplayMemory; onClose: () => void; onSaved: (memory: Partial<DisplayMemory> & { id: string }) => void }) {
+function MemoryDetail({ memory, onClose, onSaved }: { readonly memory: DisplayMemory; readonly onClose: () => void; readonly onSaved: (memory: Partial<DisplayMemory> & { id: string }) => void }) {
   const [title, setTitle] = useState(memory.title ?? memory.caption ?? '')
   const [date, setDate] = useState(memory.date)
   const [category, setCategory] = useState<Exclude<MemoryCategory, 'all'>>((memory.category as Exclude<MemoryCategory, 'all'>) ?? 'favorite')
