@@ -41,5 +41,15 @@ export default defineConfig([
       'no-console': ['warn', { allow: ['warn', 'error'] }],
     },
   },
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+  globalIgnores([
+    '.next/**',
+    'out/**',
+    'build/**',
+    'next-env.d.ts',
+    'mobile/**',
+    'public/sw.js',
+    'public/workbox-*.js',
+    'next.config.js',
+    'scripts/*.js',
+  ]),
 ])
