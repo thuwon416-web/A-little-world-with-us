@@ -22,6 +22,7 @@ type Props = {
   replyPreview?: string
   highlighted?: boolean
   onDelete?: (message: ChatMessage) => void
+  onEdit?: (message: ChatMessage) => void
 }
 
 export function ChatBubble({
@@ -31,6 +32,7 @@ export function ChatBubble({
   replyPreview,
   highlighted,
   onDelete,
+  onEdit,
 }: Props) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
@@ -155,8 +157,15 @@ export function ChatBubble({
             {message.type === 'sticker' ? message.content : message.text}
           </Text>
         )}
+        {message.transcript && (message.type === 'voice' || message.type === 'audio') ? (
+          <View style={styles.transcriptBox}>
+            <Text style={styles.transcriptLabel}>Transcript</Text>
+            <Text style={styles.transcriptText}>{message.transcript}</Text>
+          </View>
+        ) : null}
         <View style={styles.timestampRow}>
           <Text style={styles.time}>{message.time}</Text>
+          {message.editedAt ? <Text style={styles.edited}>edited</Text> : null}
           <Text style={styles.statusPlaceholder} accessibilityLabel="Message status" />
         </View>
         <View style={styles.actions}>
@@ -168,11 +177,16 @@ export function ChatBubble({
               <Reply color={colors.accent2} size={15} />
             </TouchableOpacity>
           )}
-          {isMe && onDelete && message.type !== 'text' && (
+          {isMe && onEdit && message.type === 'text' ? (
+            <TouchableOpacity onPress={() => onEdit(message)} accessibilityLabel="Edit message">
+              <Text style={styles.editAction}>Edit</Text>
+            </TouchableOpacity>
+          ) : null}
+          {isMe && onDelete ? (
             <TouchableOpacity onPress={remove} accessibilityLabel="Delete message">
               <Trash2 color={colors.error} size={15} />
             </TouchableOpacity>
-          )}
+          ) : null}
         </View>
       </View>
       <View style={styles.reactionPlaceholder} accessible={false} />
@@ -225,6 +239,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
       color: colors.background,
       fontSize: 10,
     },
+    edited: { color: colors.background, fontSize: 10, opacity: 0.75 },
+    editAction: { color: colors.accent2, fontSize: 12, fontWeight: '700' },
+    transcriptBox: { marginTop: 8, padding: 8, borderRadius: 10, backgroundColor: `${colors.background}18` },
+    transcriptLabel: { color: colors.accent2, fontSize: 10, fontWeight: '700', marginBottom: 2 },
+    transcriptText: { color: colors.textPrimary, fontSize: 12, lineHeight: 17 },
     statusPlaceholder: {
       width: 0,
       height: 0,
