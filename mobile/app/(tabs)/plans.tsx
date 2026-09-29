@@ -33,7 +33,7 @@ export default function PlansScreen() {
   const handleCreate = async () => {
     const trimmed = title.trim()
     const validDueDate = !dueDate || (() => {
-      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(dueDate)) return false
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) return false
       const [year, month, day] = dueDate.split('-').map(Number)
       const value = new Date(year, month - 1, day)
       return value.getFullYear() === year && value.getMonth() === month - 1 && value.getDate() === day
