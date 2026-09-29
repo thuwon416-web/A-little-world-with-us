@@ -20,6 +20,10 @@ type MessageFields = {
   synced: boolean
   encrypted: boolean
   encryption_version: number | null
+  media_mime_type: string
+  edited_at: string | null
+  deleted_at: string | null
+  transcript: string
 }
 type LocalMessage = MessageModel & MessageFields & { _get<T>(column: string): T }
 
@@ -95,6 +99,10 @@ export async function pushPendingMessages() {
       reply_to: rawMessage._get('reply_to') || null,
       encrypted: rawMessage._get('encrypted') || false,
       encryption_version: rawMessage._get('encryption_version') || null,
+      media_mime_type: rawMessage._get('media_mime_type') || null,
+      edited_at: rawMessage._get('edited_at') || null,
+      deleted_at: rawMessage._get('deleted_at') || null,
+      transcript: rawMessage._get('transcript') || null,
     }
 
     const { error } = await supabase.from('messages').upsert(payload).select()
@@ -203,6 +211,10 @@ async function performSyncMessages() {
             fields.synced = true
             fields.encrypted = remoteMessage.encrypted ?? false
             fields.encryption_version = remoteMessage.encryption_version ?? null
+            fields.media_mime_type = remoteMessage.media_mime_type ?? fields.media_mime_type
+            fields.edited_at = (remoteMessage as ChatMessage & { edited_at?: string | null }).edited_at ?? fields.edited_at
+            fields.deleted_at = (remoteMessage as ChatMessage & { deleted_at?: string | null }).deleted_at ?? fields.deleted_at
+            fields.transcript = (remoteMessage as ChatMessage & { transcript?: string | null }).transcript ?? fields.transcript
           })
         } else {
           const remoteCreatedAt = remoteMessage.created_at
