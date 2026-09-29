@@ -1,5 +1,5 @@
 import { Audio } from 'expo-av'
-import { FileText, MapPin, Play, Reply, Siren, Square, Trash2 } from 'lucide-react-native'
+import { Captions, FileText, MapPin, Play, Reply, Siren, Square, Trash2 } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
@@ -23,6 +23,7 @@ type Props = {
   highlighted?: boolean
   onDelete?: (message: ChatMessage) => void
   onEdit?: (message: ChatMessage) => void
+  onTranscribe?: (message: ChatMessage) => void
 }
 
 export function ChatBubble({
@@ -33,6 +34,7 @@ export function ChatBubble({
   highlighted,
   onDelete,
   onEdit,
+  onTranscribe,
 }: Props) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
@@ -157,6 +159,12 @@ export function ChatBubble({
             {message.type === 'sticker' ? message.content : message.text}
           </Text>
         )}
+        {(message.type === 'voice' || message.type === 'audio') && message.mediaUrl && onTranscribe ? (
+          <TouchableOpacity style={styles.transcribeButton} onPress={() => onTranscribe(message)}>
+            <Captions color={colors.accent2} size={14} />
+            <Text style={styles.transcribeText}>{message.transcript ? 'Refresh transcript' : 'Transcribe'}</Text>
+          </TouchableOpacity>
+        ) : null}
         {message.transcript && (message.type === 'voice' || message.type === 'audio') ? (
           <View style={styles.transcriptBox}>
             <Text style={styles.transcriptLabel}>Transcript</Text>
@@ -244,6 +252,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
     transcriptBox: { marginTop: 8, padding: 8, borderRadius: 10, backgroundColor: `${colors.background}18` },
     transcriptLabel: { color: colors.accent2, fontSize: 10, fontWeight: '700', marginBottom: 2 },
     transcriptText: { color: colors.textPrimary, fontSize: 12, lineHeight: 17 },
+    transcribeButton: { flexDirection: 'row', alignItems: 'center', gap: 5, marginTop: 8 },
+    transcribeText: { color: colors.accent2, fontSize: 12, fontWeight: '700' },
     statusPlaceholder: {
       width: 0,
       height: 0,
