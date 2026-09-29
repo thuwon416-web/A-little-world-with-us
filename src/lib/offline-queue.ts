@@ -76,12 +76,14 @@ export async function processQueue(supabase: SupabaseClient, coupleId: string): 
 
     try {
       const { error } = await supabase.from('messages').insert({
+        id: message.id,
         couple_id: message.couple_id,
         sender_id: message.sender_id,
         content: message.content,
         message_type: message.message_type,
         encrypted: message.encrypted,
         reply_to: message.reply_to,
+        created_at: message.created_at,
       })
 
       if (!error) {
