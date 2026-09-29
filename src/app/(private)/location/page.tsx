@@ -1,5 +1,5 @@
-import AdminLocationsPage from '@/app/(admin)/locations/page'
+import CoupleLocationDashboard from '@/features/location/CoupleLocationDashboard'
 
 export default function LocationPage() {
-  return <AdminLocationsPage requireAdmin={false} />
+  return <CoupleLocationDashboard />
 }
