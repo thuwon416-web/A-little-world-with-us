@@ -27,6 +27,10 @@ begin
     raise exception 'You are already in a couple.';
   end if;
 
+  if exists (select 1 from public.couple_links) then
+    raise exception 'This private app already has its one couple.';
+  end if;
+
   select profile.full_name
   into caller_name
   from public.profiles as profile
@@ -207,6 +211,10 @@ begin
       and caller_id in (inviter_id, accepted_by)
   ) then
     raise exception 'You are already in a couple.';
+  end if;
+
+  if exists (select 1 from public.couple_links) then
+    raise exception 'This private app already has its one couple.';
   end if;
 
   if exists (
