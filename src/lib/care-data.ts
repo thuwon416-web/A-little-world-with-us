@@ -8,7 +8,8 @@ export type CycleSettings = { couple_id: string; cycle_length: number; period_le
 export type CareReminder = { id: string; couple_id: string; reminder_type: 'pms' | 'period' | 'fertile' | 'symptom'; enabled: boolean }
 export type CareDraft = Omit<Partial<CareLog>, 'id' | 'user_id' | 'couple_id' | 'updated_at' | 'updated_by'> & { log_date: string }
 export type CycleHistoryEntry = { startDate: string; endDate: string; length: number; status: 'actual' | 'predicted'; variationMin: number; variationMax: number }
-export type CycleSummary = { cycleLength: number; periodLength: number; lastPeriodStart: string | null; nextPeriodStart: string | null; fertileStart: string | null; fertileEnd: string | null; ovulationDate: string | null; day: number | null; regular: boolean; estimateReady: boolean; variationMin: number; variationMax: number; cycleHistory: CycleHistoryEntry[] }
+export type FertilityStatus = 'higher' | 'lower' | 'uncertain'
+export type CycleSummary = { cycleLength: number; periodLength: number; lastPeriodStart: string | null; nextPeriodStart: string | null; fertileStart: string | null; fertileEnd: string | null; ovulationDate: string | null; day: number | null; regular: boolean; estimateReady: boolean; variationMin: number; variationMax: number; fertilityStatus: FertilityStatus; cycleHistory: CycleHistoryEntry[] }
 
 // Parse date-only values at local noon. This avoids UTC rollover and DST midnight
 // surprises while keeping cycle calculations independent from the user's timezone.
@@ -107,7 +108,8 @@ export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings):
   // Use the floor of the median for predictions: Jun 25 → Jul 22 (27 days)
   // and Jul 22 → Aug 17 (26 days) therefore predict 26, not rounded 27.
   const cycleLength = historicalLengths.length ? floorMedian(historicalLengths) : settings.cycle_length
-  const lastPeriodStart = settings.last_period_start ?? starts[0] ?? null
+  // Logged period starts are the source of truth; the manual setting is only a fallback.
+  const lastPeriodStart = starts[0] ?? settings.last_period_start ?? null
   const variationMin = historicalLengths.length ? Math.min(...historicalLengths) : cycleLength
   const variationMax = historicalLengths.length ? Math.max(...historicalLengths) : cycleLength
   const variation = variationMax - variationMin
@@ -116,18 +118,24 @@ export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings):
     const length = older ? daysBetween(older, start) : 0
     return older && length >= 15 && length <= 60 ? [{ startDate: older, endDate: addDays(start, -1), length, status: 'actual' as const, variationMin, variationMax }] : []
   }).reverse()
-  if (!lastPeriodStart) return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular: variation <= 7, estimateReady: false, variationMin, variationMax, cycleHistory: actualHistory }
+  if (!lastPeriodStart) return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular: variation <= 7, estimateReady: false, variationMin, variationMax, fertilityStatus: 'uncertain', cycleHistory: actualHistory }
   const nextPeriodStart = addDays(lastPeriodStart, cycleLength)
   const ovulationDate = addDays(nextPeriodStart, -14)
+  const earliestOvulation = addDays(lastPeriodStart, variationMin - 14)
+  const latestOvulation = addDays(lastPeriodStart, variationMax - 14)
+  const fertileStart = addDays(earliestOvulation, -5)
+  const fertileEnd = addDays(latestOvulation, 1)
   const today = dateKey(new Date())
+  const estimateReady = starts.length >= 2 || settings.last_period_start !== null
+  const fertilityStatus: FertilityStatus = !estimateReady ? 'uncertain' : today >= fertileStart && today <= fertileEnd ? 'higher' : 'lower'
   const cycleHistory = [...actualHistory, { startDate: lastPeriodStart, endDate: addDays(nextPeriodStart, -1), length: cycleLength, status: 'predicted' as const, variationMin, variationMax }]
-  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, fertileStart: addDays(ovulationDate, -5), fertileEnd: addDays(ovulationDate, 1), ovulationDate, day: Math.max(1, daysBetween(lastPeriodStart, today) + 1), regular: variation <= 7, estimateReady, variationMin, variationMax, cycleHistory }
+  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, fertileStart, fertileEnd, ovulationDate, day: Math.max(1, daysBetween(lastPeriodStart, today) + 1), regular: variation <= 7, estimateReady, variationMin, variationMax, fertilityStatus, cycleHistory }
 }
 
 export function getFertilityLabel(summary: CycleSummary) {
-  if (!summary.estimateReady || !summary.fertileStart || !summary.fertileEnd) return 'Fertility estimate unavailable'
-  const today = dateKey(new Date())
-  return today >= summary.fertileStart && today <= summary.fertileEnd ? 'Higher estimated fertility' : 'Lower estimated fertility'
+  if (summary.fertilityStatus === 'higher') return 'Higher estimated chance of pregnancy'
+  if (summary.fertilityStatus === 'lower') return 'Lower estimated chance of pregnancy'
+  return 'Pregnancy chance estimate unavailable'
 }
 
 // Backward-compatible exports retained while older Care widgets are retired.
