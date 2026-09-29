@@ -32,8 +32,18 @@ export default function PlansScreen() {
 
   const handleCreate = async () => {
     const trimmed = title.trim()
+    const validDueDate = !dueDate || (() => {
+      if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(dueDate)) return false
+      const [year, month, day] = dueDate.split('-').map(Number)
+      const value = new Date(year, month - 1, day)
+      return value.getFullYear() === year && value.getMonth() === month - 1 && value.getDate() === day
+    })()
     if (!trimmed) {
       Alert.alert('Plan needed', 'Give your plan a title first.')
+      return
+    }
+    if (!validDueDate) {
+      Alert.alert('Check due date', 'Use a real date in YYYY-MM-DD format.')
       return
     }
 
