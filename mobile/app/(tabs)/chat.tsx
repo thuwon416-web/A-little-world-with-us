@@ -351,7 +351,7 @@ export default function ChatScreen() {
     if (!trimmed || !user?.id || !coupleId) return
 
     const message = await prepareTextMessage(trimmed, coupleId)
-    await persistTextMessage(user.id, coupleId, message, !isOffline)
+    await persistTextMessage(user.id, coupleId, message, false)
 
     setDraft('')
 
@@ -383,7 +383,7 @@ export default function ChatScreen() {
         longitude: point.coords.longitude,
         accuracy: point.coords.accuracy ?? undefined,
       }
-      await persistLocationMessage(user.id, coupleId, payload, !isOffline)
+      await persistLocationMessage(user.id, coupleId, payload, false)
       if (!isOffline) await refresh()
     } catch {
       Alert.alert('Could not get location', 'Check GPS and try again.')
