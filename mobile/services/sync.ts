@@ -119,7 +119,7 @@ export async function pushPendingMessages() {
   return pending.length
 }
 
-export async function syncMessages(lastSyncAt?: string) {
+async function performSyncMessages(lastSyncAt?: string) {
   if (!isSupabaseConfigured) {
     const pending = await countPendingMessages()
     return { synced: 0, pending }
@@ -137,8 +137,7 @@ export async function syncMessages(lastSyncAt?: string) {
   let page = 0
   const pageSize = 100
 
-  const effectiveLastSyncAt =
-    lastSyncAt ?? (await AsyncStorage.getItem(`messages:last-synced:${coupleId}`))
+  const effectiveLastSyncAt = lastSyncAt
   while (true) {
     let query = supabase
       .from('messages')
@@ -148,7 +147,7 @@ export async function syncMessages(lastSyncAt?: string) {
 
     query = query.eq('couple_id', coupleId)
 
-    // Filter by last sync time if provided
+    // Full reconciliation is the default so remote edits and hard deletes cannot be missed.
     if (effectiveLastSyncAt) {
       query = query.gte('created_at', effectiveLastSyncAt)
     }
@@ -167,17 +166,15 @@ export async function syncMessages(lastSyncAt?: string) {
     if (data.length < pageSize) break
   }
 
-  // Batch insert/update locally
-  if (allMessages.length > 0) {
+  // Reconcile the local couple cache against the remote source of truth.
+  {
+    const remoteIds = new Set(allMessages.map((message) => message.id))
     await database.write(async () => {
-      // First, collect all message IDs to check against local database
       const messageIds = allMessages.map((msg) => msg.id)
-
-      // Batch fetch existing messages to avoid N+1 queries
-      const existingMessages = await database
-        .get('messages')
-        .query(Q.where('id', Q.oneOf(messageIds)))
-        .fetch()
+      const existingMessages =
+        messageIds.length > 0
+          ? await database.get('messages').query(Q.where('id', Q.oneOf(messageIds))).fetch()
+          : []
 
       const existingMap = new Map(
         existingMessages.map((msg) => [msg.id, msg as unknown as LocalMessage])
@@ -209,13 +206,11 @@ export async function syncMessages(lastSyncAt?: string) {
             fields.encryption_version = remoteMessage.encryption_version ?? null
           })
         } else {
-          // Update existing message if remote is newer
-          const localCreatedAt = localMessage._get<number>('created_at') ?? 0
           const remoteCreatedAt = remoteMessage.created_at
             ? new Date(remoteMessage.created_at).getTime()
-            : 0
-          if (remoteCreatedAt > localCreatedAt) {
-            await localMessage.update((record) => {
+            : localMessage._get<number>('created_at') ?? Date.now()
+
+          await localMessage.update((record) => {
               const fields = record as unknown as MessageFields
               fields.content = remoteMessage.content ?? fields.content
               fields.sender_id = remoteMessage.sender_id ?? fields.sender_id
@@ -233,15 +228,34 @@ export async function syncMessages(lastSyncAt?: string) {
               fields.encryption_version =
                 remoteMessage.encryption_version ?? fields.encryption_version
             })
+        }
+
+        const localCoupleMessages = await database
+          .get('messages')
+          .query(Q.where('couple_id', coupleId), Q.where('synced', true))
+          .fetch()
+
+        for (const localMessage of localCoupleMessages as unknown as LocalMessage[]) {
+          if (!remoteIds.has(localMessage.id)) {
+            await localMessage.markAsDeleted()
           }
         }
-      }
-    })
+      })
   }
 
   const pending = await pushPendingMessages()
   await AsyncStorage.setItem(`messages:last-synced:${coupleId}`, new Date().toISOString())
   return { synced: allMessages.length, pending }
+}
+
+let syncInFlight: Promise<{ synced: number; pending: number }> | null = null
+
+export function syncMessages(lastSyncAt?: string) {
+  if (syncInFlight) return syncInFlight
+  syncInFlight = performSyncMessages(lastSyncAt).finally(() => {
+    syncInFlight = null
+  })
+  return syncInFlight
 }
 
 export async function flushOfflineQueue() {
@@ -262,7 +276,8 @@ export async function flushOfflineQueue() {
           updated.retry_count = nextRetry
         })
       })
-      if (nextRetry >= 3) await database.write(async () => item.markAsDeleted())
+      // Keep failed work durable. It must remain available for a later retry rather than
+      // disappearing after an arbitrary attempt count.
     }
   }
   return flushed
