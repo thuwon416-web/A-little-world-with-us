@@ -66,7 +66,7 @@ export default function FutureDatePlanner() {
       },
     ])
     setTitle('')
-    setDate(new Date().toISOString().slice(0, 10))
+    setDate(localDateKey(new Date()))
     setNote('')
   }
 
