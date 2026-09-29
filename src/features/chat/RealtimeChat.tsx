@@ -454,7 +454,7 @@ export default function RealtimeChat() {
 
     const { data: savedMessage, error } = await supabase.from('messages').insert({ id: messageId, couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', encrypted: true, created_at: createdAt }).select('id').single()
     if (error || !savedMessage) {
-      await enqueueMessage({ id: crypto.randomUUID(), couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', encrypted: true, reply_to: null, created_at: new Date().toISOString(), timestamp: Date.now() })
+      await enqueueMessage({ id: messageId, couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', encrypted: true, reply_to: null, created_at: createdAt, timestamp: Date.now() })
       setPendingCount(await getQueueCount())
       return
     }
