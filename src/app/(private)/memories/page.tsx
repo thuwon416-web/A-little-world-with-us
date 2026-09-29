@@ -227,6 +227,20 @@ function MemoriesPageContent() {
   useEffect(() => {
     loadMemories()
   }, [])
+
+  useEffect(() => {
+    if (!coupleLinkId) return
+    const channel = supabase
+      .channel(`web-memories-${coupleLinkId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'memories',
+        filter: `couple_id=eq.${coupleLinkId}`,
+      }, () => { void loadMemories() })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [coupleLinkId])
   useEffect(() => () => {
     if (typeof window !== 'undefined') window.speechSynthesis.cancel()
   }, [])
