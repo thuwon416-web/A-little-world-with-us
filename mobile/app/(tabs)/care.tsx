@@ -463,77 +463,98 @@ function Calendar({
   )
 }
 
-function Reminders() {
+function Reminders({ coupleId, userId }: Readonly<{ coupleId: string; userId: string }>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
-  const [enabled, setEnabled] = useState({
-    period: true,
-    fertile: true,
-    ovulation: true,
-    daily: true,
+  const [enabled, setEnabled] = useState<Record<string, boolean>>({
+    pms: false,
+    period: false,
+    fertile: false,
+    symptom: false,
   })
-  const [time, setTime] = useState('09:00')
+  const [saving, setSaving] = useState<string | null>(null)
+
+  const refresh = async () => {
+    const { data, error } = await supabase
+      .from('care_reminders')
+      .select('reminder_type,enabled')
+      .eq('couple_id', coupleId)
+    if (error) throw error
+    setEnabled((current) => (data ?? []).reduce((next, record) => ({
+      ...next,
+      [record.reminder_type]: Boolean(record.enabled),
+    }), current))
+  }
+
   useEffect(() => {
-    void AsyncStorage.getItem('care.reminders')
-      .then((value) => {
-        if (!value) return
-        const saved = JSON.parse(value) as { enabled?: typeof enabled; time?: string }
-        if (saved.enabled) setEnabled(saved.enabled)
-        if (saved.time) setTime(saved.time)
+    void refresh().catch((error) => console.error('Unable to load shared Care reminders', error))
+    const channel = supabase
+      .channel(`care-reminders-${coupleId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_reminders',
+        filter: `couple_id=eq.${coupleId}`,
+      }, () => {
+        void refresh().catch((error) => console.error('Unable to refresh shared Care reminders', error))
       })
-      .catch((error) => console.error('Unable to load Care reminders', error))
-  }, [])
-  const persist = (nextEnabled: typeof enabled, nextTime: string) => {
-    void AsyncStorage.setItem(
-      'care.reminders',
-      JSON.stringify({ enabled: nextEnabled, time: nextTime })
-    ).catch((error) => console.error('Unable to save Care reminders', error))
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [coupleId])
+
+  const toggle = async (key: string) => {
+    const next = !enabled[key]
+    setSaving(key)
+    try {
+      const { data: existing, error: lookupError } = await supabase
+        .from('care_reminders')
+        .select('id')
+        .eq('couple_id', coupleId)
+        .eq('reminder_type', key)
+        .maybeSingle()
+      if (lookupError) throw lookupError
+      const request = existing
+        ? supabase.from('care_reminders').update({ enabled: next }).eq('id', existing.id)
+        : supabase.from('care_reminders').insert({
+            couple_id: coupleId,
+            user_id: userId,
+            reminder_type: key,
+            enabled: next,
+          })
+      const { error } = await request
+      if (error) throw error
+      await refresh()
+    } catch (error) {
+      Alert.alert('Unable to save', error instanceof Error ? error.message : 'Please try again.')
+    } finally {
+      setSaving(null)
+    }
   }
-  const toggle = (key: keyof typeof enabled) =>
-    setEnabled((current) => {
-      const next = { ...current, [key]: !current[key] }
-      persist(next, time)
-      return next
-    })
-  const updateTime = (next: string) => {
-    setTime(next)
-    persist(enabled, next)
-  }
+
+  const options: Array<[string, string, string]> = [
+    ['pms', 'PMS reminder', '5–7 days before an expected period'],
+    ['period', 'Period reminder', '1 day before expected period'],
+    ['fertile', 'Fertile window alert', 'When the estimated fertile window begins'],
+    ['symptom', 'Daily check-in', 'A gentle prompt to log symptoms'],
+  ]
+
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.eyebrow}>CYCLE CARE</Text>
       <Text style={styles.title}>Reminders</Text>
       <Card title="Smart reminders">
-        <Reminder
-          label="Period coming soon (2 days before)"
-          value={enabled.period}
-          onChange={() => toggle('period')}
-        />
-        <Reminder
-          label="Fertile window starting"
-          value={enabled.fertile}
-          onChange={() => toggle('fertile')}
-        />
-        <Reminder
-          label="Ovulation expected"
-          value={enabled.ovulation}
-          onChange={() => toggle('ovulation')}
-        />
-        <Reminder
-          label="Log mood and symptoms daily"
-          value={enabled.daily}
-          onChange={() => toggle('daily')}
-        />
+        {options.map(([key, label, note]) => (
+          <Reminder
+            key={key}
+            label={`${label} — ${note}`}
+            value={Boolean(enabled[key])}
+            onChange={() => void toggle(key)}
+          />
+        ))}
       </Card>
       <Card title="Notification time">
         <Text style={styles.muted}>Choose when daily reminders are delivered.</Text>
-        <TextInput
-          value={time}
-          onChangeText={updateTime}
-          placeholder="09:00"
-          placeholderTextColor={colors.textSecondary}
-          style={styles.input}
-        />
+        <Text style={styles.muted}>Reminder choices are shared between both devices; notification permission remains device-specific.</Text>
       </Card>
     </ScrollView>
   )
