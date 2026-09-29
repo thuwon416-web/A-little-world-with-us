@@ -42,6 +42,7 @@ Run this sequence only when preparing a **fresh or disposable** database. `00_co
 | 29 | `29_single_couple_scope.sql` | Enforce a single private couple at the invite boundary |
 | 30 | `30_remove_location_admin_helper.sql` | Remove retired location-admin RLS helper |
 | 31 | `31_sync_contract_parity.sql` | Restore Web ↔ Mobile message fields and remove ambiguous Care RPC overload |
+| 32 | `32_enable_shared_feature_realtime.sql` | Enable Realtime publication for shared Web ↔ Mobile feature tables |
 
 ## Warning
 
