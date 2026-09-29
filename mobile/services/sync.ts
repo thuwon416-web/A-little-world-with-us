@@ -183,6 +183,12 @@ async function performSyncMessages(lastSyncAt?: string) {
       // Process each remote message
       for (const remoteMessage of allMessages) {
         const localMessage = existingMap.get(remoteMessage.id)
+        const remoteDeletedAt = (remoteMessage as ChatMessage & { deleted_at?: string | null }).deleted_at
+
+        if (remoteDeletedAt) {
+          if (localMessage) await localMessage.markAsDeleted()
+          continue
+        }
 
         if (!localMessage) {
           // Create new message
