@@ -1,8 +1,0 @@
-node_modules/
-.next/
-mobile/
-next-env.d.ts
-public/sw.js
-public/workbox-*.js
-next.config.js
-scripts/*.js
