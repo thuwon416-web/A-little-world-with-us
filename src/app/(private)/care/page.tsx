@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, Bell, CalendarDays, ChevronDown, ChevronUp, Droplet, Heart, Plus, Settings2, Sparkles, X } from 'lucide-react'
 import { calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, saveCareLog, saveCareReminder, saveCycleSettings, savePeriodDates, type CareDraft, type CareLog, type CareReminder, type CycleSettings } from '@/lib/care-data'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
+import { supabase } from '@/lib/supabase'
 
 type Tab = 'today' | 'insights' | 'calendar' | 'reminders' | 'settings'
 type Section = 'mood' | 'symptoms' | 'sex' | 'discharge' | 'digestion' | 'pregnancy_test' | 'ovulation_test' | 'contraceptives' | 'activities'
@@ -37,6 +38,32 @@ export default function CarePage() {
     try { const next = await getAcceptedCareContext(); setContext(next); if (next) { const [nextLogs, nextSettings] = await Promise.all([getCareLogs(next.coupleId), getCycleSettings(next.coupleId)]); setLogs(nextLogs); setSettings(nextSettings) } } catch (error_) { console.error('[care] load failed:', error_); setLoadError(error_ instanceof Error ? error_.message : 'Unable to load care data.') } finally { setLoading(false) }
   }
   useEffect(() => { void reload() }, [])
+
+  useEffect(() => {
+    if (!context?.coupleId) return
+    const channel = supabase
+      .channel(`care-shared-${context.coupleId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_daily_logs',
+        filter: `couple_id=eq.${context.coupleId}`,
+      }, () => { void reload() })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_cycle_settings',
+        filter: `couple_id=eq.${context.coupleId}`,
+      }, () => { void reload() })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_reminders',
+        filter: `couple_id=eq.${context.coupleId}`,
+      }, () => { void reload() })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [context?.coupleId])
   const summary = useMemo(() => calculateCycleSummary(logs, settings ?? { couple_id: '', cycle_length: 28, period_length: 5, last_period_start: null, updated_at: '' }), [logs, settings])
   const openLog = (section: Section | null = null) => { setInitialSection(section); setLogOpen(true) }
   const daysUntil = summary.nextPeriodStart ? Math.ceil((new Date(`${summary.nextPeriodStart}T12:00:00`).getTime() - Date.now()) / 86400000) : null
