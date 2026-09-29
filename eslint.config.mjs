@@ -2,6 +2,13 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
 
+const eslint10CompatibilityRules = Object.fromEntries(
+  [...nextVitals, ...nextTs]
+    .flatMap((config) => Object.keys(config.rules ?? {}))
+    .filter((rule) => rule.startsWith('react/') || rule.startsWith('jsx-a11y/') || rule.startsWith('import/'))
+    .map((rule) => [rule, 'off']),
+)
+
 export default defineConfig([
   ...nextVitals,
   ...nextTs,
@@ -12,6 +19,7 @@ export default defineConfig([
       },
     },
     rules: {
+      ...eslint10CompatibilityRules,
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {
