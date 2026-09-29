@@ -67,6 +67,20 @@ const migrations = schemaMigrations({
         }),
       ],
     },
+    {
+      toVersion: 7,
+      steps: [
+        addColumns({
+          table: 'messages',
+          columns: [
+            { name: 'media_mime_type', type: 'string', isOptional: true },
+            { name: 'edited_at', type: 'string', isOptional: true },
+            { name: 'deleted_at', type: 'string', isOptional: true },
+            { name: 'transcript', type: 'string', isOptional: true },
+          ],
+        }),
+      ],
+    },
   ],
 })
 
