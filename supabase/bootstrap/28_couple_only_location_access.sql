@@ -2,7 +2,9 @@
 begin;
 
 drop policy if exists locations_admin_pair_read on public.user_locations;
+drop policy if exists locations_pair_member_read on public.user_locations;
 drop policy if exists location_history_admin_pair_read on public.location_history;
+drop policy if exists location_history_pair_member_read on public.location_history;
 
 create policy locations_pair_member_read
   on public.user_locations for select to authenticated
