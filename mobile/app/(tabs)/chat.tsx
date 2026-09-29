@@ -566,31 +566,59 @@ export default function ChatScreen() {
 
   const deleteMessage = async (message: ChatMessage) => {
     if (!user?.id || message.senderId !== user.id) return
-    if (
-      message.mediaPath &&
-      (message.messageType === 'photo' ||
-        message.messageType === 'voice' ||
-        message.messageType === 'audio' ||
-        message.messageType === 'file')
-    ) {
-      const bucket = getBucketForMimeType(
-        message.messageType === 'photo'
-          ? 'image/*'
-          : message.messageType === 'voice' || message.messageType === 'audio'
-            ? 'audio/*'
-            : 'application/octet-stream'
-      )
-      await deleteChatMedia(bucket, message.mediaPath)
+    const deletedAt = new Date().toISOString()
+
+    if (isOffline) {
+      try {
+        const local = await database.get('messages').find(message.id)
+        await database.write(async () => {
+          await local.update((record) => {
+            const raw = record as unknown as { deleted_at: string | null; synced: boolean }
+            raw.deleted_at = deletedAt
+            raw.synced = false
+          })
+          await local.markAsDeleted()
+        })
+        await refresh()
+      } catch (error_) {
+        setError(error_ instanceof Error ? error_.message : 'Unable to delete message offline.')
+      }
+      return
     }
+
+    // Keep the message row authoritative before removing its media. If media deletion
+    // fails, the chat record remains recoverable and can be cleaned up later.
     const { error: deleteError } = await supabase
       .from('messages')
-      .update({ deleted_at: new Date().toISOString() })
+      .update({ deleted_at: deletedAt })
       .eq('id', message.id)
       .eq('sender_id', user.id)
     if (deleteError) {
       setError(deleteError.message)
       return
     }
+
+    try {
+      if (
+        message.mediaPath &&
+        (message.messageType === 'photo' ||
+          message.messageType === 'voice' ||
+          message.messageType === 'audio' ||
+          message.messageType === 'file')
+      ) {
+        const bucket = getBucketForMimeType(
+          message.messageType === 'photo'
+            ? 'image/*'
+            : message.messageType === 'voice' || message.messageType === 'audio'
+              ? 'audio/*'
+              : 'application/octet-stream'
+        )
+        await deleteChatMedia(bucket, message.mediaPath)
+      }
+    } catch {
+      // Preserve the deleted message row even if media cleanup is temporarily unavailable.
+    }
+
     try {
       const local = await database.get('messages').find(message.id)
       await database.write(async () => local.markAsDeleted())
