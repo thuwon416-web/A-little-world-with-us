@@ -19,6 +19,10 @@ export class MessageModel extends Model {
         { name: 'synced', type: 'boolean' },
         { name: 'encrypted', type: 'boolean', isOptional: true },
         { name: 'encryption_version', type: 'number', isOptional: true },
+        { name: 'media_mime_type', type: 'string', isOptional: true },
+        { name: 'edited_at', type: 'string', isOptional: true },
+        { name: 'deleted_at', type: 'string', isOptional: true },
+        { name: 'transcript', type: 'string', isOptional: true }
       ],
     })
   }
@@ -61,7 +65,7 @@ export class OfflineQueueModel extends Model {
 }
 
 export default appSchema({
-  version: 6,
+  version: 7,
   tables: [
     MessageModel.createTableSchema(),
     UserModel.createTableSchema(),
