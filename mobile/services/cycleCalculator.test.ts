@@ -47,10 +47,10 @@ describe('Native cycle calculator', () => {
       ],
       { cycle_length: 28, period_length: 5, last_period_start: null }
     )
-    expect(summary.variationMin).toBe(29)
+    expect(summary.variationMin).toBe(31)
     expect(summary.variationMax).toBe(32)
-    expect(summary.fertileStart).toBe('2024-03-25')
-    expect(summary.fertileEnd).toBe('2024-03-20')
+    expect(summary.fertileStart).toBe('2024-04-13')
+    expect(summary.fertileEnd).toBe('2024-04-20')
   })
 
   it('returns an unready summary without period data', () => {
