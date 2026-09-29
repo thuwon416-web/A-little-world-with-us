@@ -40,7 +40,14 @@ export default function LoveCalendar() {
   const [entries, setEntries] = useState<Entry[]>([])
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const localDateKey = (date: Date) => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const [selectedDate, setSelectedDate] = useState(() => localDateKey(new Date()))
   const [label, setLabel] = useState('')
   const [mood, setMood] = useState<Entry['mood']>('sweet')
   const [type, setType] = useState<Entry['type']>('plan')
