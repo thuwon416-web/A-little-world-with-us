@@ -26,7 +26,8 @@ export default function PlansScreen() {
   const { plans, loading, error, createPlan, togglePlanItem, updatePlan } = usePlans()
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [type, setType] = useState<'date' | 'trip' | 'goal' | 'life' | 'other'>('date')
+  const [type, setType] = useState<'date' | 'trip' | 'goal' | 'home' | 'other'>('date')
+  const [dueDate, setDueDate] = useState('')
   const [showComposer, setShowComposer] = useState(false)
 
   const handleCreate = async () => {
@@ -40,12 +41,14 @@ export default function PlansScreen() {
       title: trimmed,
       description,
       type,
+      due_date: dueDate || null,
       status: 'active',
     })
 
     if (result) {
       setTitle('')
       setDescription('')
+      setDueDate('')
       setShowComposer(false)
     }
   }
@@ -95,8 +98,16 @@ export default function PlansScreen() {
             style={[styles.input, styles.textArea]}
             multiline
           />
+          <TextInput
+            value={dueDate}
+            onChangeText={setDueDate}
+            placeholder="Due date (YYYY-MM-DD, optional)"
+            placeholderTextColor={colors.textSecondary}
+            style={styles.input}
+            maxLength={10}
+          />
           <View style={styles.typeRow}>
-            {(['date', 'trip', 'goal', 'life', 'other'] as const).map(renderTypeButton)}
+            {(['date', 'trip', 'goal', 'home', 'other'] as const).map(renderTypeButton)}
           </View>
           <Button title="Save plan" onPress={() => void handleCreate()} />
         </View>
