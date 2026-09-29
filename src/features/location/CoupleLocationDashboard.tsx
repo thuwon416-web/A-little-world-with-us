@@ -84,7 +84,7 @@ export default function CoupleLocationDashboard() {
     setGeofenceEvents((geofenceEventsResult.data ?? []) as GeofenceEvent[])
     setSelectedUser((current) => current && userIds.includes(current) ? current : user.id)
     setLoading(false)
-  }, []
+  }, [])
 
   const savePlace = async () => {
     const latitude = Number(placeForm.latitude)
