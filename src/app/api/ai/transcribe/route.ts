@@ -12,6 +12,7 @@ import {
 const messageIdSchema = z.string().uuid()
 const maxAudioBytes = 25 * 1024 * 1024
 
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServerClient(
@@ -34,8 +35,14 @@ export async function POST(request: NextRequest) {
     if (audio.size > maxAudioBytes) return NextResponse.json({ error: 'Voice recordings must be 25 MB or smaller.' }, { status: 413 })
 
     // RLS verifies that the requester belongs to the voice message's accepted couple.
-    const { data: message, error: messageError } = await supabase.from('messages').select('id').eq('id', messageId).eq('message_type', 'voice').maybeSingle()
+    const { data: message, error: messageError } = await supabase
+      .from('messages')
+      .select('id,sender_id')
+      .eq('id', messageId)
+      .eq('message_type', 'voice')
+      .maybeSingle()
     if (messageError || !message) return NextResponse.json({ error: 'Voice message not found.' }, { status: 404 })
+    await assertAiScope(message.sender_id, 'chat')
 
     const groqForm = new FormData()
     groqForm.set('file', audio, audio.name || 'voice-message.webm')
