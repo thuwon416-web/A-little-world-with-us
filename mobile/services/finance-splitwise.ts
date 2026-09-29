@@ -261,7 +261,6 @@ export function calculateBalance(
     expensesCount += 1
     if (expense.isSettled || !expense.paidBy || ![myUserId, partnerUserId].includes(expense.paidBy))
       continue
-    if (expense.splitWith === myUserId || expense.splitWith === partnerUserId) continue
     const amount = roundToInteger(expense.amount)
     const share = expense.splitType === 'percentage'
       ? Math.round(amount * (expense.splitPercentage ?? 50) / 100)
