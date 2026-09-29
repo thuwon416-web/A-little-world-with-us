@@ -189,7 +189,8 @@ async function deserializeChatMessages(
   userId: string | undefined,
   coupleId: string | null
 ): Promise<ChatMessage[]> {
-  return Promise.all(records.map((record) => deserializeChatMessage(record, userId, coupleId)))
+  const visibleRecords = records.filter((record) => !record._get('deleted_at'))
+  return Promise.all(visibleRecords.map((record) => deserializeChatMessage(record, userId, coupleId)))
 }
 
 type PreparedTextMessage = {
@@ -577,7 +578,6 @@ export default function ChatScreen() {
             raw.deleted_at = deletedAt
             raw.synced = false
           })
-          await local.markAsDeleted()
         })
         await refresh()
       } catch (error_) {
