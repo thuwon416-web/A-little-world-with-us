@@ -50,50 +50,57 @@ export default function BucketList() {
   const [items, setItems] = useState<BucketItem[]>([])
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(true)
+  const [coupleId, setCoupleId] = useState<string | null>(null)
 
-  useEffect(() => {
-    const fetchBucketList = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
-
-      const { data: coupleData } = await supabase
-        .from('couple_links')
-        .select('couple_id')
-        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
-        .eq('status', 'accepted')
-        .maybeSingle()
-
-      if (!coupleData?.couple_id) {
-        setLoading(false)
-        return
-      }
-
-      const { data } = await supabase
-        .from('bucket_list')
-        .select('*')
-        .eq('couple_id', coupleData.couple_id)
-        .order('created_at', { ascending: false })
-
-      if (data) {
-        setItems(
-          data.map((item) => ({
-            id: item.id,
-            label: item.title || item.item || '',
-            done: item.completed,
-            progress: item.completed ? 100 : 15,
-            target: 'New plan',
-          }))
-        )
-      }
+  const fetchBucketList = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
       setLoading(false)
+      return
     }
 
-    fetchBucketList()
+    const { data: coupleData } = await supabase
+      .from('couple_links')
+      .select('couple_id')
+      .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+      .eq('status', 'accepted')
+      .maybeSingle()
 
-    // Real-time subscription
+    if (!coupleData?.couple_id) {
+      setCoupleId(null)
+      setItems([])
+      setLoading(false)
+      return
+    }
+
+    setCoupleId(coupleData.couple_id)
+
+    const { data } = await supabase
+      .from('bucket_list')
+      .select('*')
+      .eq('couple_id', coupleData.couple_id)
+      .order('created_at', { ascending: false })
+
+    if (data) {
+      setItems(
+        data.map((item) => ({
+          id: item.id,
+          label: item.title || item.item || '',
+          done: item.completed,
+          progress: item.completed ? 100 : 15,
+          target: 'New plan',
+        }))
+      )
+    }
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    void fetchBucketList()
+
     const channel = supabase
       .channel('bucket-list-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'bucket_list' }, () => fetchBucketList())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bucket_list' }, () => void fetchBucketList())
       .subscribe()
 
     return () => {
@@ -113,19 +120,19 @@ export default function BucketList() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
-    const { data: coupleData } = await supabase
+    const { data: activeCouple } = await supabase
       .from('couple_links')
       .select('couple_id')
       .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
       .eq('status', 'accepted')
       .maybeSingle()
 
-    if (!coupleData?.couple_id) return
+    if (!activeCouple?.couple_id) return
 
     const { error } = await supabase
       .from('bucket_list')
       .insert({
-        couple_id: coupleData.couple_id,
+        couple_id: activeCouple.couple_id,
         user_id: user.id,
         title: value,
         item: value,
@@ -141,16 +148,16 @@ export default function BucketList() {
 
   const toggleItem = async (id: string) => {
     const item = items.find((i) => i.id === id)
-    if (!item) return
+    if (!item || !coupleId) return
 
     const { error } = await supabase
       .from('bucket_list')
-      .update({ 
+      .update({
         completed: !item.done,
-        completed_at: !item.done ? new Date().toISOString() : null
+        completed_at: !item.done ? new Date().toISOString() : null,
       })
       .eq('id', id)
-      .eq('couple_id', coupleData.couple_id)
+      .eq('couple_id', coupleId)
 
     if (error) {
       console.error('Failed to toggle item:', error)
