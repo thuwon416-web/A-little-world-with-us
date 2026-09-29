@@ -20,10 +20,10 @@ type MessageFields = {
   synced: boolean
   encrypted: boolean
   encryption_version: number | null
-  media_mime_type: string
+  media_mime_type: string | null
   edited_at: string | null
   deleted_at: string | null
-  transcript: string
+  transcript: string | null
 }
 type LocalMessage = MessageModel & MessageFields & { _get<T>(column: string): T }
 
@@ -211,10 +211,10 @@ async function performSyncMessages() {
             fields.synced = true
             fields.encrypted = remoteMessage.encrypted ?? false
             fields.encryption_version = remoteMessage.encryption_version ?? null
-            fields.media_mime_type = remoteMessage.media_mime_type ?? fields.media_mime_type
-            fields.edited_at = (remoteMessage as ChatMessage & { edited_at?: string | null }).edited_at ?? fields.edited_at
-            fields.deleted_at = (remoteMessage as ChatMessage & { deleted_at?: string | null }).deleted_at ?? fields.deleted_at
-            fields.transcript = (remoteMessage as ChatMessage & { transcript?: string | null }).transcript ?? fields.transcript
+            fields.media_mime_type = remoteMessage.media_mime_type ?? null
+            fields.edited_at = remoteMessage.edited_at ?? null
+            fields.deleted_at = remoteMessage.deleted_at ?? null
+            fields.transcript = remoteMessage.transcript ?? null
           })
         } else {
           const remoteCreatedAt = remoteMessage.created_at
@@ -238,6 +238,10 @@ async function performSyncMessages() {
               fields.encrypted = remoteMessage.encrypted ?? fields.encrypted
               fields.encryption_version =
                 remoteMessage.encryption_version ?? fields.encryption_version
+              fields.media_mime_type = remoteMessage.media_mime_type ?? fields.media_mime_type
+              fields.edited_at = remoteMessage.edited_at ?? fields.edited_at
+              fields.deleted_at = remoteMessage.deleted_at ?? fields.deleted_at
+              fields.transcript = remoteMessage.transcript ?? fields.transcript
             })
         }
       }
