@@ -90,7 +90,14 @@ export default function MemoriesPage() {
 function MemoriesPageContent() {
   const [memories, setMemories] = useState<JournalMemory[]>([])
   const [caption, setCaption] = useState('')
-  const [memoryDate, setMemoryDate] = useState(() => new Date().toISOString().slice(0, 10))
+  const localDateKey = (value: Date) => {
+    const year = value.getFullYear()
+    const month = String(value.getMonth() + 1).padStart(2, '0')
+    const day = String(value.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
+  const [memoryDate, setMemoryDate] = useState(() => localDateKey(new Date()))
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [memoryCategory, setMemoryCategory] = useState<MemoryCategory>('favorite')
   const [sortBy, setSortBy] = useState<MemorySort>('newest')
