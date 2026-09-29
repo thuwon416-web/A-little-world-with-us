@@ -61,7 +61,8 @@ export async function saveTodayCareLog(checkIn: CareCheckIn): Promise<void> {
   } = await supabase.auth.getUser()
   if (authError || !user) throw new Error('Please sign in again to save your check-in.')
 
-  const logDate = new Date().toISOString().slice(0, 10)
+  const now = new Date()
+  const logDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
   const coupleId = await getActiveCareCoupleId(user.id)
   if (!coupleId) throw new Error('Accept a partner link before saving shared Care data.')
   const { data: existing, error: readError } = await supabase
