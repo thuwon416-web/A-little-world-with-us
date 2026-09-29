@@ -150,6 +150,7 @@ export default function BucketList() {
         completed_at: !item.done ? new Date().toISOString() : null
       })
       .eq('id', id)
+      .eq('couple_id', coupleData.couple_id)
 
     if (error) {
       console.error('Failed to toggle item:', error)
