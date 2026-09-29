@@ -56,6 +56,7 @@ export async function GET(req: NextRequest) {
     .select('id,couple_id,title,message,scheduled_at')
     .eq('active', true)
     .is('web_notified_at', null)
+    .or(`web_claimed_at.is.null,web_claimed_at.lt.${new Date(Date.now() - 5 * 60_000).toISOString()}`)
     .lte('scheduled_at', now)
     .order('scheduled_at', { ascending: true })
     .limit(50)
@@ -68,6 +69,20 @@ export async function GET(req: NextRequest) {
   let processed = 0
   let sent = 0
   for (const reminder of (reminders ?? []) as DueReminder[]) {
+    const { data: claim, error: claimError } = await admin
+      .from('reminders')
+      .update({ web_claimed_at: now })
+      .eq('id', reminder.id)
+      .is('web_notified_at', null)
+      .or(`web_claimed_at.is.null,web_claimed_at.lt.${new Date(Date.now() - 5 * 60_000).toISOString()}`)
+      .select('id')
+      .maybeSingle()
+    if (claimError) {
+      console.error('Unable to claim reminder:', claimError)
+      continue
+    }
+    if (!claim) continue
+
     let shouldMarkProcessed = true
     const { data: link, error: linkError } = await admin
       .from('couple_links')
@@ -106,6 +121,7 @@ export async function GET(req: NextRequest) {
             if (pushError.statusCode === 404 || pushError.statusCode === 410) {
               await admin.from('web_push_subscriptions').delete().eq('id', row.id)
             } else {
+              shouldMarkProcessed = false
               console.error('Browser push send failed:', pushError)
             }
           }
@@ -114,10 +130,13 @@ export async function GET(req: NextRequest) {
     }
 
     // Mark the one-time reminder after one dispatch pass so retries cannot duplicate alerts.
-    if (!shouldMarkProcessed) continue
+    if (!shouldMarkProcessed) {
+      await admin.from('reminders').update({ web_claimed_at: null }).eq('id', reminder.id).is('web_notified_at', null)
+      continue
+    }
     const { error: markError } = await admin
       .from('reminders')
-      .update({ web_notified_at: now })
+      .update({ web_notified_at: now, web_claimed_at: null })
       .eq('id', reminder.id)
       .is('web_notified_at', null)
     if (!markError) processed += 1
