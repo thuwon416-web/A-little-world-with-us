@@ -12,7 +12,7 @@ import {
   X,
 } from 'lucide-react-native'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Alert, FlatList, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
@@ -174,6 +174,8 @@ async function deserializeChatMessage(
     messageType: normalizedType,
     mediaUrl: resolvedMediaUrl,
     mediaPath: typeof mediaUrl === 'string' ? mediaUrl : null,
+    editedAt: typeof record._get('edited_at') === 'string' ? (record._get('edited_at') as string) : null,
+    transcript: typeof record._get('transcript') === 'string' ? (record._get('transcript') as string) : null,
     mediaDuration: typeof mediaDuration === 'number' ? mediaDuration : null,
     replyTo: typeof replyTo === 'string' ? replyTo : null,
     createdAt:
@@ -309,6 +311,9 @@ export default function ChatScreen() {
   const [attachmentsOpen, setAttachmentsOpen] = useState(false)
   const [replyMessage, setReplyMessage] = useState<NativeChatMessage | null>(null)
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
+  const [editingMessage, setEditingMessage] = useState<ChatMessage | null>(null)
+  const [editDraft, setEditDraft] = useState('')
+  const [editSaving, setEditSaving] = useState(false)
   const listRef = useRef<FlatList<ChatMessage>>(null)
   const { status, isOffline, pendingCount, refresh } = useSync(coupleId ?? undefined)
 
@@ -470,6 +475,43 @@ export default function ChatScreen() {
     await refresh()
   }
 
+  const editMessage = async () => {
+    if (!editingMessage || !user?.id || !coupleId || !editDraft.trim()) return
+    setEditSaving(true)
+    try {
+      const key = await deriveChatKey(coupleId)
+      const encryptedContent = await encryptMessage(editDraft.trim(), key)
+      const editedAt = new Date().toISOString()
+      const { error: updateError } = await supabase
+        .from('messages')
+        .update({ content: encryptedContent, edited_at: editedAt })
+        .eq('id', editingMessage.id)
+        .eq('sender_id', user.id)
+      if (updateError) throw updateError
+
+      const local = await database.get('messages').find(editingMessage.id)
+      await database.write(async () => {
+        await local.update((record) => {
+          const raw = record as unknown as {
+            content: string
+            edited_at: string | null
+            synced: boolean
+          }
+          raw.content = encryptedContent
+          raw.edited_at = editedAt
+          raw.synced = true
+        })
+      })
+      setEditingMessage(null)
+      setEditDraft('')
+      await refresh()
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to edit message.')
+    } finally {
+      setEditSaving(false)
+    }
+  }
+
   const deleteMessage = async (message: ChatMessage) => {
     if (!user?.id || message.senderId !== user.id) return
     if (
@@ -490,11 +532,20 @@ export default function ChatScreen() {
     }
     const { error: deleteError } = await supabase
       .from('messages')
-      .delete()
+      .update({ deleted_at: new Date().toISOString() })
       .eq('id', message.id)
       .eq('sender_id', user.id)
-    if (deleteError) setError(deleteError.message)
-    else await refresh()
+    if (deleteError) {
+      setError(deleteError.message)
+      return
+    }
+    try {
+      const local = await database.get('messages').find(message.id)
+      await database.write(async () => local.markAsDeleted())
+    } catch {
+      // The remote soft-delete is authoritative; a later sync will reconcile local state.
+    }
+    await refresh()
   }
 
   const handleCall = (type: 'audio' | 'video') => {
@@ -587,6 +638,10 @@ export default function ChatScreen() {
               })
             }
             onDelete={(selected) => void deleteMessage(selected)}
+            onEdit={(selected) => {
+              setEditingMessage(selected)
+              setEditDraft(selected.text)
+            }}
           />
         )}
         style={styles.list}
@@ -597,6 +652,42 @@ export default function ChatScreen() {
         }
       />
       <VoiceMessageGallery messages={messages} />
+      <Modal
+        visible={Boolean(editingMessage)}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          if (!editSaving) {
+            setEditingMessage(null)
+            setEditDraft('')
+          }
+        }}
+      >
+        <View style={styles.editOverlay}>
+          <View style={[styles.editModal, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+            <Text style={[styles.editTitle, { color: colors.textPrimary }]}>Edit message</Text>
+            <TextInput
+              value={editDraft}
+              onChangeText={setEditDraft}
+              multiline
+              autoFocus
+              style={[styles.editInput, { color: colors.textPrimary, backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
+            />
+            <View style={styles.editButtons}>
+              <TouchableOpacity
+                disabled={editSaving}
+                onPress={() => { setEditingMessage(null); setEditDraft('') }}
+              >
+                <Text style={styles.linkText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity disabled={editSaving || !editDraft.trim()} onPress={() => void editMessage()}>
+                <Text style={styles.saveEditText}>{editSaving ? 'Saving…' : 'Save'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
 
       <View style={styles.callRow}>
         <TouchableOpacity
@@ -888,4 +979,11 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       gap: 6,
     },
     attachmentLabel: { fontSize: sizes.text.xs, fontWeight: '600' },
+    editOverlay: { flex: 1, backgroundColor: '#0008', justifyContent: 'center', padding: 20 },
+    editModal: { borderWidth: 1, borderRadius: 18, padding: 18, gap: 14 },
+    editTitle: { fontSize: sizes.text.hSm, fontWeight: '800' },
+    editInput: { minHeight: 110, borderWidth: 1, borderRadius: 12, padding: 12, textAlignVertical: 'top' },
+    editButtons: { flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', gap: 18 },
+    linkText: { color: colors.textSecondary, fontWeight: '700' },
+    saveEditText: { color: colors.accent1, fontWeight: '800' },
   })
