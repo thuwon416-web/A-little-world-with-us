@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
   LogOut, Calendar, Camera, HeartPulse, HelpCircle, Home, Info,
   Leaf, LockKeyhole, MapPin, MessageCircleHeart, Gamepad2, Music,
@@ -70,6 +71,27 @@ const navGroups = [
 export default function Sidebar() {
   const pathname = usePathname()
   const { t } = useLanguage()
+  const [canViewLocation, setCanViewLocation] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    void supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) {
+        if (active) setCanViewLocation(false)
+        return
+      }
+      const { data: link } = await supabase
+        .from('couple_links')
+        .select('inviter_id')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
+      if (active) setCanViewLocation(link?.inviter_id === user.id)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
 
   return (
     <aside aria-label="Main sidebar" className="flex h-full w-full flex-col rounded-panel border border-accent-1/20 bg-card px-3 py-6 shadow-lg backdrop-blur-xl">
@@ -90,14 +112,17 @@ export default function Sidebar() {
       </Link>
 
       <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-2 overflow-y-auto">
-        {navGroups.map(({ label, items }) => (
+        {navGroups.map(({ label, items }) => {
+          const visibleItems = items.filter((item) => item.href !== '/location' || canViewLocation)
+          if (!visibleItems.length) return null
+          return (
           <details key={label} open={items.some(({ href }) => pathname === href)} className="group/nav rounded-xl">
             <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-text-2 hover:bg-soft-tint [&::-webkit-details-marker]:hidden">
               {label}
               <span aria-hidden="true" className="transition-transform group-open/nav:rotate-180">⌄</span>
             </summary>
             <div className="flex flex-col gap-1 pt-1">
-              {items.map(({ href, key, icon: Icon }) => {
+              {visibleItems.map(({ href, key, icon: Icon }) => {
                 const active = pathname === href
 
                 return (
@@ -118,7 +143,8 @@ export default function Sidebar() {
               })}
             </div>
           </details>
-        ))}
+          )
+        })}
       </nav>
 
       <button
