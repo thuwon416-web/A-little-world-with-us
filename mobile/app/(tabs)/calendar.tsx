@@ -76,6 +76,32 @@ export default function CalendarScreen() {
   useEffect(() => {
     void load()
   }, [user?.id])
+
+  useEffect(() => {
+    if (!coupleId) return
+    const channel = supabase
+      .channel(`mobile-calendar-${coupleId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'events',
+        filter: `couple_id=eq.${coupleId}`,
+      }, () => { void load() })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'bucket_list',
+        filter: `couple_id=eq.${coupleId}`,
+      }, () => { void load() })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'wishlist',
+        filter: `couple_id=eq.${coupleId}`,
+      }, () => { void load() })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [coupleId])
   const year = month.getFullYear()
   const monthIndex = month.getMonth()
   const days = new Date(year, monthIndex + 1, 0).getDate()
