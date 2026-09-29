@@ -23,7 +23,7 @@ import {
   Languages,
   Home,
 } from 'lucide-react-native'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -32,6 +32,7 @@ import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
+import { supabase } from '@/lib/supabase'
 
 const sections = [
   {
@@ -94,6 +95,24 @@ export default function MoreScreen() {
   const styles = createStyles(colors, sizes)
   const { t } = useTranslation()
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
+  const [canViewLocation, setCanViewLocation] = useState(false)
+
+  useEffect(() => {
+    let active = true
+    void supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return
+      const { data: link } = await supabase
+        .from('couple_links')
+        .select('inviter_id')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
+      if (active) setCanViewLocation(link?.inviter_id === user.id)
+    })
+    return () => {
+      active = false
+    }
+  }, [])
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.eyebrow}>{t('nav.more')}</Text>
@@ -117,7 +136,9 @@ export default function MoreScreen() {
           </TouchableOpacity>
           {!collapsed[sectionTitle] ? (
             <View style={styles.grid}>
-              {sectionItems.map(({ href, key, Icon }) => {
+              {sectionItems
+                .filter(({ key }) => key !== 'locationSafety' || canViewLocation)
+                .map(({ href, key, Icon }) => {
                 const label = t(`nav.${key}`)
                 return (
                   <TouchableOpacity
