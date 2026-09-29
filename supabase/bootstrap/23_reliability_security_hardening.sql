@@ -52,7 +52,7 @@ returns trigger
 language plpgsql
 security invoker
 set search_path = public
-as $
+as $$
 begin
   if auth.uid() is not null and auth.uid() <> old.user_id then
     if new.couple_id is distinct from old.couple_id
@@ -67,8 +67,7 @@ begin
   end if;
   return new;
 end;
-$;
-
+$$;
 drop trigger if exists protect_safety_checkin_updates on public.safety_checkins;
 create trigger protect_safety_checkin_updates
 before update on public.safety_checkins
