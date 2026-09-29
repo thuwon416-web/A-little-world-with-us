@@ -6,9 +6,8 @@ const pushEndpoint = z
   .string()
   .url()
   .max(2048)
-  .refine((value) => {
-    const url = new URL(value)
-    return url.protocol === 'https:' && url.hostname.includes('.') && !url.hostname.endsWith('.local')
+  .refine(isAllowedPushEndpoint, {
+    message: 'Unsupported push service endpoint.',
   })
 
 const subscriptionSchema = z.object({
@@ -16,6 +15,20 @@ const subscriptionSchema = z.object({
   expirationTime: z.number().nullable().optional(),
   keys: z.object({ p256dh: z.string().min(1).max(256), auth: z.string().min(1).max(256) }),
 })
+
+function isAllowedPushEndpoint(value: string): boolean {
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'https:') return false
+    if (url.username || url.password || url.port) return false
+    if (url.hostname === 'fcm.googleapis.com') return true
+    if (url.hostname.endsWith('.push.services.mozilla.com')) return true
+    if (url.hostname.endsWith('.push.apple.com')) return true
+    return false
+  } catch {
+    return false
+  }
+}
 
 function getSessionClient(req: NextRequest) {
   return createServerClient(
