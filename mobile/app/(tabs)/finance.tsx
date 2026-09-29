@@ -80,6 +80,26 @@ export default function FinanceScreen() {
   useEffect(() => {
     void loadSplitExpenses()
   }, [user?.id])
+
+  useEffect(() => {
+    const coupleId = data?.coupleId
+    if (!coupleId) return
+    const channel = supabase
+      .channel(`mobile-finance-${coupleId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'finance_expenses', filter: `couple_id=eq.${coupleId}` }, () => {
+        void load()
+        void loadSplitExpenses()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settlements', filter: `couple_id=eq.${coupleId}` }, () => {
+        void load()
+        void loadSplitExpenses()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'financial_goals', filter: `couple_id=eq.${coupleId}` }, () => {
+        void load()
+      })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [data?.coupleId, user?.id])
   useEffect(() => {
     const loadPartner = async () => {
       if (!user?.id) return
