@@ -337,7 +337,7 @@ function MemoriesPageContent() {
         }
       }
       setCaption('')
-      setMemoryDate(new Date().toISOString().slice(0, 10))
+      setMemoryDate(localDateKey(new Date()))
       setSelectedFiles([])
       setMemoryCategory('favorite')
       setLocation(null)
@@ -416,7 +416,7 @@ function MemoriesPageContent() {
         title: journalTitle.trim(),
         description: journalBody.trim() || null,
         category: 'journal' as const,
-        date: new Date().toISOString().slice(0, 10),
+        date: localDateKey(new Date()),
         metadata: { mood_tag: journalMood },
       }
       const query = editingJournalId
