@@ -44,6 +44,7 @@ Run this sequence only when preparing a **fresh or disposable** database. `00_co
 | 33 | `33_harden_security_definer_search_path.sql` | Harden SECURITY DEFINER helper search paths |
 | 34 | `34_add_fk_covering_indexes.sql` | Add covering indexes for currently unindexed foreign keys (excluding location-sharing scope) |
 | 35 | `35_optimize_rls_auth_initplan.sql` | Optimize auth.uid() evaluation in RLS policies without changing authorization semantics |
+| 37 | `37_schedule_retention_cleanup.sql` | Schedule 7-day location-history cleanup and 30-day temporary AI-context cleanup |
 
 ## Warning
 
@@ -57,7 +58,7 @@ The bootstrap set is the maintained schema source. Older source migrations are p
 
 ## Updating an Existing Database
 
-Do **not** rerun `00_core.sql` on an existing production database. Review and apply follow-on scripts individually. Scripts 15a–34 are intended to be repeatable and preserve existing rows.
+Do **not** rerun `00_core.sql` on an existing production database. Review and apply follow-on scripts individually. Scripts 15a–35 and 37 are intended to be repeatable and preserve user-curated rows.
 
 For browser reminder push, keep VAPID private keys and the cron secret server-side only. For mobile live calls, `22_call_media_signals.sql` requires a native Expo build; WebRTC does not run in Expo Go.
 
@@ -68,3 +69,9 @@ The role-based admin system replaces hardcoded email checks with PostgreSQL sett
 ## Production Safety
 
 Production schema changes should use a reviewed follow-on migration and then verify the affected schema/RLS/advisors. Never use the destructive bootstrap sequence on a database containing real user data.
+
+## Retention policy
+
+- `location_history`: automatically purged after 7 days.
+- `ai_context_memory`: each row expires after 30 days and is automatically purged daily.
+- `memories`, `relationship_memories`, chat history, and user media are **not** auto-deleted by this retention job.
