@@ -43,6 +43,7 @@ Run this sequence only when preparing a **fresh or disposable** database. `00_co
 | 32 | `32_enable_shared_feature_realtime.sql` | Enable Realtime publication for shared Web ↔ Mobile feature tables |
 | 33 | `33_harden_security_definer_search_path.sql` | Harden SECURITY DEFINER helper search paths |
 | 34 | `34_add_fk_covering_indexes.sql` | Add covering indexes for currently unindexed foreign keys (excluding location-sharing scope) |
+| 35 | `35_optimize_rls_auth_initplan.sql` | Optimize auth.uid() evaluation in RLS policies without changing authorization semantics |
 
 ## Warning
 
