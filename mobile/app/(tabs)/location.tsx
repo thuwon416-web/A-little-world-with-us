@@ -899,7 +899,7 @@ export default function LocationScreen() {
     const load = async () => {
       const { data: link } = await supabase
         .from('couple_links')
-        .select('couple_id')
+        .select('couple_id,inviter_id')
         .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
         .eq('status', 'accepted')
         .not('couple_id', 'is', null)
@@ -964,14 +964,18 @@ export default function LocationScreen() {
       setCalls((callEvents.data ?? []) as CallEvent[])
       setSosAlerts((alerts.data ?? []) as SosAlert[])
       setCheckins((checkinRows.data ?? []) as SafetyCheckin[])
+      if (active) setOwnerLoading(false)
     }
     void load()
-  }, [isAdmin, user])
+    return () => {
+      active = false
+    }
+  }, [user])
 
   useEffect(() => {
     if (!dashboardOwnerId || dashboardOwnerId !== user?.id || !coupleId) return
     const channel = supabase
-      .channel(`admin-location-${coupleId}`)
+      .channel(`couple-location-${coupleId}`)
       .on(
         'postgres_changes',
         {
