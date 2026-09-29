@@ -45,7 +45,7 @@ export default function DailyQuestionGame() {
   }, [answer])
 
   const handleSave = () => {
-    const todayKey = new Date().toISOString().slice(0, 10)
+    const todayKey = localDateKey(new Date())
     localStorage.setItem(`daily-question-${todayKey}`, answer)
     localStorage.setItem('daily-question-streak', String(streak + 1))
     setSaved(true)
