@@ -482,29 +482,46 @@ export default function ChatScreen() {
       const key = await deriveChatKey(coupleId)
       const encryptedContent = await encryptMessage(editDraft.trim(), key)
       const editedAt = new Date().toISOString()
-      const { error: updateError } = await supabase
-        .from('messages')
-        .update({ content: encryptedContent, edited_at: editedAt })
-        .eq('id', editingMessage.id)
-        .eq('sender_id', user.id)
-      if (updateError) throw updateError
-
       const local = await database.get('messages').find(editingMessage.id)
-      await database.write(async () => {
-        await local.update((record) => {
-          const raw = record as unknown as {
-            content: string
-            edited_at: string | null
-            synced: boolean
-          }
-          raw.content = encryptedContent
-          raw.edited_at = editedAt
-          raw.synced = true
+
+      if (isOffline) {
+        await database.write(async () => {
+          await local.update((record) => {
+            const raw = record as unknown as {
+              content: string
+              edited_at: string | null
+              synced: boolean
+            }
+            raw.content = encryptedContent
+            raw.edited_at = editedAt
+            raw.synced = false
+          })
         })
-      })
+      } else {
+        const { error: updateError } = await supabase
+          .from('messages')
+          .update({ content: encryptedContent, edited_at: editedAt })
+          .eq('id', editingMessage.id)
+          .eq('sender_id', user.id)
+        if (updateError) throw updateError
+
+        await database.write(async () => {
+          await local.update((record) => {
+            const raw = record as unknown as {
+              content: string
+              edited_at: string | null
+              synced: boolean
+            }
+            raw.content = encryptedContent
+            raw.edited_at = editedAt
+            raw.synced = true
+          })
+        })
+        await refresh()
+      }
+
       setEditingMessage(null)
       setEditDraft('')
-      await refresh()
     } catch (error_) {
       setError(error_ instanceof Error ? error_.message : 'Unable to edit message.')
     } finally {
