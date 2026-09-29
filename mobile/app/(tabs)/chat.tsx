@@ -218,6 +218,7 @@ function createTextMessageRecordWriter(
 ): (record: unknown) => void {
   return function assignTextMessageFields(record) {
     const rawRecord = record as {
+      _raw: { id: string }
       content: string
       sender_id: string
       couple_id: string
@@ -226,6 +227,7 @@ function createTextMessageRecordWriter(
       encrypted: boolean
       encryption_version: number | null
     }
+    rawRecord._raw.id = crypto.randomUUID()
     rawRecord.content = message.content
     rawRecord.sender_id = userId
     rawRecord.couple_id = coupleId
@@ -266,6 +268,7 @@ function createLocationRecordWriter(
       message_type: string
       location_payload: string
     }
+    rawRecord._raw.id = crypto.randomUUID()
     rawRecord.content = 'Shared a location'
     rawRecord.sender_id = userId
     rawRecord.couple_id = coupleId
