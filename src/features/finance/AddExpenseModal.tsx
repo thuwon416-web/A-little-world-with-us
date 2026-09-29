@@ -14,7 +14,10 @@ type AddExpenseModalProps = {
   onSaved: () => void
 }
 
-const today = (): string => new Date().toISOString().slice(0, 10)
+const today = (): string => {
+  const value = new Date()
+  return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`
+}
 
 export default function AddExpenseModal({ currentUserId, partnerId, onClose, onSaved }: AddExpenseModalProps) {
   const fieldId = useId()
