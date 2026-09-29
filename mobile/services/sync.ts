@@ -229,18 +229,19 @@ async function performSyncMessages(lastSyncAt?: string) {
                 remoteMessage.encryption_version ?? fields.encryption_version
             })
         }
+      }
 
-        const localCoupleMessages = await database
-          .get('messages')
-          .query(Q.where('couple_id', coupleId), Q.where('synced', true))
-          .fetch()
+      const localCoupleMessages = await database
+        .get('messages')
+        .query(Q.where('couple_id', coupleId), Q.where('synced', true))
+        .fetch()
 
-        for (const localMessage of localCoupleMessages as unknown as LocalMessage[]) {
-          if (!remoteIds.has(localMessage.id)) {
-            await localMessage.markAsDeleted()
-          }
+      for (const localMessage of localCoupleMessages as unknown as LocalMessage[]) {
+        if (!remoteIds.has(localMessage.id)) {
+          await localMessage.markAsDeleted()
         }
-      })
+      }
+    })
   }
 
   const pending = await pushPendingMessages()
