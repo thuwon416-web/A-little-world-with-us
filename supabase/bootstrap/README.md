@@ -32,9 +32,7 @@ Run this sequence only when preparing a **fresh or disposable** database. `00_co
 | 21 | `21_web_reminder_push.sql` | Browser push subscriptions/reminder tracking |
 | 22 | `22_call_media_signals.sql` | Protected WebRTC signaling data |
 | 23a | `23_reliability_security_hardening.sql` | Reliability idempotency + RLS/API hardening |
-| 23b | `23_shared_care_period_dates.sql` | Shared care-period date RPC support |
 | 24a | `24_couple_invite_rpc.sql` | Couple invite RPCs |
-| 24b | `24_message_trigger_security_invoker.sql` | Invoker-scoped message protection trigger |
 | 25 | `25_security_hardening.sql` | Harden legacy RPC execution/search path |
 | 26 | `26_targeted_performance_indexes.sql` | Targeted high-value lookup indexes |
 | 27 | `27_consolidate_permissive_policies.sql` | Consolidate redundant permissive RLS policies |
@@ -56,7 +54,7 @@ The bootstrap set is the maintained schema source. Older source migrations are p
 
 ## Updating an Existing Database
 
-Do **not** rerun `00_core.sql` on an existing production database. Review and apply follow-on scripts individually. Scripts 15a–27 are intended to be repeatable and preserve existing rows.
+Do **not** rerun `00_core.sql` on an existing production database. Review and apply follow-on scripts individually. Scripts 15a–32 are intended to be repeatable and preserve existing rows.
 
 For browser reminder push, keep VAPID private keys and the cron secret server-side only. For mobile live calls, `22_call_media_signals.sql` requires a native Expo build; WebRTC does not run in Expo Go.
 
