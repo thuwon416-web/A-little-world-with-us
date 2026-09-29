@@ -217,6 +217,9 @@ async function performSyncMessages() {
             fields.transcript = remoteMessage.transcript ?? null
           })
         } else {
+          const localSynced = localMessage._get<boolean>('synced')
+          if (!localSynced) continue
+
           const remoteCreatedAt = remoteMessage.created_at
             ? new Date(remoteMessage.created_at).getTime()
             : localMessage._get<number>('created_at') ?? Date.now()
