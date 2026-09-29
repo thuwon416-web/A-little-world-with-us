@@ -1,6 +1,6 @@
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
-export type PlanType = 'date' | 'trip' | 'goal' | 'life' | 'other'
+export type PlanType = 'date' | 'trip' | 'goal' | 'home' | 'other'
 export type PlanStatus = 'active' | 'completed' | 'archived'
 
 export interface PlanItemRecord {
@@ -115,6 +115,7 @@ export async function updatePlan(
     .from('plans')
     .update(updates)
     .eq('id', planId)
+    .eq('couple_id', await getCoupleId())
     .select('*')
     .single()
 
@@ -130,7 +131,7 @@ export async function deletePlan(planId: string) {
     return true
   }
 
-  const { error } = await supabase.from('plans').delete().eq('id', planId)
+  const { error } = await supabase.from('plans').delete().eq('id', planId).eq('couple_id', await getCoupleId())
 
   if (error) {
     throw new Error(error.message)
@@ -144,6 +145,9 @@ export async function addPlanItem(planId: string, title: string) {
     return null
   }
 
+  const coupleId = await getCoupleId()
+  const { data: plan } = await supabase.from('plans').select('id').eq('id', planId).eq('couple_id', coupleId).maybeSingle()
+  if (!plan) throw new Error('Plan not found in the active couple.')
   const { data, error } = await supabase
     .from('plan_items')
     .insert({ plan_id: planId, title, completed: false })
@@ -162,6 +166,9 @@ export async function togglePlanItem(planId: string, itemId: string, completed: 
     return null
   }
 
+  const coupleId = await getCoupleId()
+  const { data: plan } = await supabase.from('plans').select('id').eq('id', planId).eq('couple_id', coupleId).maybeSingle()
+  if (!plan) throw new Error('Plan not found in the active couple.')
   const { data, error } = await supabase
     .from('plan_items')
     .update({ completed })
@@ -236,6 +243,7 @@ export async function toggleBucketItem(itemId: string, completed: boolean) {
       completed_at: completed ? new Date().toISOString() : null,
     })
     .eq('id', itemId)
+    .eq('couple_id', await getCoupleId())
     .select('*')
     .single()
 
