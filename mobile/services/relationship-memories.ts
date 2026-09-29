@@ -94,22 +94,23 @@ export const relationshipMemoriesService = {
   },
 
   async getOnThisDay(coupleId: string, date: Date) {
-    const memories = await fetchAllBatched<RelationshipMemory>('relationship_memories', coupleId)
-    return memories.filter((memory) => {
-      const memoryDate = new Date(memory.date_time)
-      return memoryDate.getMonth() === date.getMonth() && memoryDate.getDate() === date.getDate()
+    const { data, error } = await supabase.rpc('on_this_day_memories', {
+      p_couple_id: coupleId,
+      p_month: date.getMonth() + 1,
+      p_day: date.getDate(),
     })
+    if (error) throw error
+    return (data ?? []) as RelationshipMemory[]
   },
 
   async getStats(coupleId: string) {
-    const rows = await fetchAllBatched<{ category: string }>(
-      'relationship_memories',
-      coupleId,
-      'category'
-    )
-    return rows.reduce<Record<string, number>>((stats, row) => {
+    const { data, error } = await supabase.rpc('memory_category_stats', {
+      p_couple_id: coupleId,
+    })
+    if (error) throw error
+    return (data ?? []).reduce((stats: Record<string, number>, row: { category: string; count: number }) => {
       const category = normalizeCategory(row.category)
-      stats[category] = (stats[category] ?? 0) + 1
+      stats[category] = (stats[category] ?? 0) + (row.count ?? 0)
       return stats
     }, {})
   },
