@@ -48,6 +48,13 @@ type JournalMemory = MemoryRecord & {
   description?: string | null
   metadata?: { mood_tag?: string; ai_reflection?: string; voice_url?: string } | null
 }
+const localDateKey = (value: Date) => {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const JOURNAL_MOODS: { id: JournalMood; label: string; Icon: typeof Smile }[] = [
   { id: 'happy', label: 'Happy', Icon: Smile },
   { id: 'okay', label: 'Okay', Icon: Meh },
@@ -313,7 +320,7 @@ export default function MemoryJournal() {
         title: journalTitle.trim(),
         description: journalBody.trim() || null,
         category: 'journal' as const,
-        date: new Date().toISOString().slice(0, 10),
+        date: localDateKey(new Date()),
         mime_type: 'audio/m4a',
         metadata: {
           ...existingMeta,
