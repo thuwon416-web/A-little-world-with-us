@@ -134,11 +134,6 @@ create trigger on_auth_user_created after insert on auth.users for each row exec
 create or replace function public.is_couple_member(target_couple_id uuid) returns boolean language sql stable security definer set search_path = public as $$
   select exists (select 1 from public.couple_links cl where cl.couple_id = target_couple_id and cl.status = 'accepted' and auth.uid() in (cl.inviter_id, cl.accepted_by));
 $$;
-create or replace function public.is_location_admin() returns boolean language sql stable security definer set search_path = public as $$
--- NOTE: This function is also created in 12_admin_roles.sql
--- Keep both in sync when changing admin logic.
-  select exists (select 1 from public.profiles where id = auth.uid() and role = 'admin');
-$$;
 create or replace function public.is_linked_user(target_user_id uuid) returns boolean language sql stable security definer set search_path = public as $$
   select auth.uid() = target_user_id or exists (select 1 from public.couple_links cl where cl.status = 'accepted' and ((cl.inviter_id = auth.uid() and cl.accepted_by = target_user_id) or (cl.accepted_by = auth.uid() and cl.inviter_id = target_user_id)));
 $$;
@@ -365,8 +360,6 @@ create policy location_history_pair_member_read on public.location_history for s
 );
 alter table public.location_sharing_settings enable row level security;
 create policy location_sharing_owner_access on public.location_sharing_settings for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-alter table public.location_address_cache enable row level security;
-create policy location_address_admin_read on public.location_address_cache for select using (public.is_location_admin());
 alter table public.push_devices enable row level security;
 create policy push_devices_owner_access on public.push_devices for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 alter table public.saved_places enable row level security;
