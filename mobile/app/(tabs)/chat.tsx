@@ -475,6 +475,41 @@ export default function ChatScreen() {
     await refresh()
   }
 
+  const transcribeMessage = async (message: ChatMessage) => {
+    if (!message.mediaUrl || !message.id) return
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+      const webUrl = process.env.EXPO_PUBLIC_WEB_URL
+      if (!webUrl || !session?.access_token) throw new Error('Please sign in again.')
+      const media = await fetch(message.mediaUrl)
+      if (!media.ok) throw new Error('Unable to read this voice message.')
+      const blob = await media.blob()
+      const form = new FormData()
+      form.append('audio', blob as unknown as Blob, 'voice-message.webm')
+      form.append('messageId', message.id)
+      const response = await fetch(`${webUrl.replace(/\/$/, "")}/api/ai/transcribe`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session.access_token}` },
+        body: form,
+      })
+      const body = (await response.json()) as { transcript?: string; error?: string }
+      if (!response.ok || !body.transcript) throw new Error(body.error || 'Unable to transcribe this voice message.')
+      const local = await database.get('messages').find(message.id)
+      await database.write(async () => {
+        await local.update((record) => {
+          const raw = record as unknown as { transcript: string | null; synced: boolean }
+          raw.transcript = body.transcript ?? null
+          raw.synced = true
+        })
+      })
+      await refresh()
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : 'Unable to transcribe this voice message.')
+    }
+  }
+
   const editMessage = async () => {
     if (!editingMessage || !user?.id || !coupleId || !editDraft.trim()) return
     setEditSaving(true)
@@ -659,6 +694,7 @@ export default function ChatScreen() {
               setEditingMessage(selected)
               setEditDraft(selected.text)
             }}
+            onTranscribe={(selected) => void transcribeMessage(selected)}
           />
         )}
         style={styles.list}
