@@ -741,6 +741,14 @@ function TodayCareTab({
               : `Next period ${summary.nextPeriodStart}`
             : 'Log a period to begin forecasting.'}
         </Text>
+        <Text style={styles.heroFertility}>
+          {summary.fertilityStatus === 'higher'
+            ? 'Higher estimated chance of pregnancy'
+            : summary.fertilityStatus === 'lower'
+              ? 'Lower estimated chance of pregnancy'
+              : 'Pregnancy chance estimate unavailable'}
+        </Text>
+        <Text style={styles.heroDisclaimer}>Calendar estimate only — not contraception or medical advice.</Text>
       </View>
       <Card title="Mood">
         <Chips
@@ -1356,6 +1364,19 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       letterSpacing: 1.5,
     },
     days: { color: colors.accent3, fontWeight: '800', fontSize: 38, marginTop: 8 },
+    heroFertility: {
+      color: colors.accent1,
+      fontSize: sizes.text.sm,
+      fontWeight: '800',
+      marginTop: 12,
+      textAlign: 'center',
+    },
+    heroDisclaimer: {
+      color: colors.textSecondary,
+      fontSize: sizes.text.xs,
+      marginTop: 6,
+      textAlign: 'center',
+    },
     heroNote: {
       color: colors.textPrimary,
       fontSize: sizes.text.body,
