@@ -39,6 +39,7 @@ Run this sequence only when preparing a **fresh or disposable** database. `00_co
 | 26 | `26_targeted_performance_indexes.sql` | Targeted high-value lookup indexes |
 | 27 | `27_consolidate_permissive_policies.sql` | Consolidate redundant permissive RLS policies |
 | 28 | `28_couple_only_location_access.sql` | Remove legacy admin bypass from shared location RLS |
+| 29 | `29_single_couple_scope.sql` | Enforce a single private couple at the invite boundary |
 
 ## Warning
 
