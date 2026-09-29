@@ -11,6 +11,8 @@ export type NativeChatMessage = {
   mediaDuration?: number | null
   replyTo?: string | null
   createdAt?: string
+  editedAt?: string | null
+  transcript?: string | null
 }
 
 export type ChatAttachment = {
