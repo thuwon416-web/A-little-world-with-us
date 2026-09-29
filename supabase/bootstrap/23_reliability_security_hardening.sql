@@ -45,6 +45,35 @@ create trigger protect_message_updates
 before update on public.messages
 for each row execute function public.protect_message_updates();
 
+-- Prevent partners from changing who a safety check-in belongs to while still
+-- allowing the couple to acknowledge/update its status and message.
+create or replace function public.protect_safety_checkin_updates()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $
+begin
+  if auth.uid() is not null and auth.uid() <> old.user_id then
+    if new.couple_id is distinct from old.couple_id
+      or new.user_id is distinct from old.user_id
+      or new.checkin_type is distinct from old.checkin_type
+      or new.latitude is distinct from old.latitude
+      or new.longitude is distinct from old.longitude
+      or new.accuracy is distinct from old.accuracy
+      or new.expected_until is distinct from old.expected_until then
+      raise exception 'Only the check-in owner may change check-in ownership or details';
+    end if;
+  end if;
+  return new;
+end;
+$;
+
+drop trigger if exists protect_safety_checkin_updates on public.safety_checkins;
+create trigger protect_safety_checkin_updates
+before update on public.safety_checkins
+for each row execute function public.protect_safety_checkin_updates();
+
 -- Remove the duplicate permissive export policy created by the generic couple loop.
 drop policy if exists export_jobs_couple_access on public.export_jobs;
 drop policy if exists export_jobs_own_access on public.export_jobs;
