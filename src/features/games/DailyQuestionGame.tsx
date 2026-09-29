@@ -3,6 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { MessageSquareQuote, Sparkles } from 'lucide-react'
 
+const localDateKey = (value: Date) => {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 const questions = [
   'What is one tiny thing that made you smile today?',
   'What do you think our next adventure should be?',
@@ -17,7 +24,7 @@ export default function DailyQuestionGame() {
   const [streak, setStreak] = useState(3)
 
   useEffect(() => {
-    const todayKey = new Date().toISOString().slice(0, 10)
+    const todayKey = localDateKey(new Date())
     const storedAnswer = localStorage.getItem(`daily-question-${todayKey}`)
     const storedStreak = Number(localStorage.getItem('daily-question-streak') || '3')
     const questionIndex = new Date().getDate() % questions.length
