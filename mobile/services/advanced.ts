@@ -29,6 +29,15 @@ export type FinanceExpense = {
   amount: number | string
 }
 
+const localDateKey = (value: Date) => {
+  const year = value.getFullYear()
+  const month = String(value.getMonth() + 1).padStart(2, '0')
+  const day = String(value.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const localMonthKey = (value: Date) => localDateKey(value).slice(0, 7)
+
 export type AdvancedFinanceData = {
   coupleId: string
   month: string
@@ -58,7 +67,7 @@ async function context() {
 
 export async function getAdvancedData(): Promise<AdvancedFinanceData> {
   const { coupleId } = await context()
-  const month = new Date().toISOString().slice(0, 7)
+  const month = localMonthKey(new Date())
   const [budget, goals, bills, streak, expenses] = await Promise.all([
     supabase
       .from('monthly_budgets')
@@ -121,11 +130,16 @@ export async function checkInStreak(coupleId: string): Promise<LoveStreak> {
     .eq('couple_id', coupleId)
     .maybeSingle()
   if (readError) throw new Error(readError.message)
-  const today = new Date().toISOString().slice(0, 10)
-  if (current?.last_check_in?.slice(0, 10) === today) return current
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
-  const next =
-    current?.last_check_in?.slice(0, 10) === yesterday ? (current.current_streak ?? 0) + 1 : 1
+  const today = new Date()
+  const todayKey = localDateKey(today)
+  const currentCheckInKey = current?.last_check_in
+    ? localDateKey(new Date(current.last_check_in))
+    : null
+  if (currentCheckInKey === todayKey) return current
+  const yesterday = new Date(today)
+  yesterday.setDate(yesterday.getDate() - 1)
+  const yesterdayKey = localDateKey(yesterday)
+  const next = currentCheckInKey === yesterdayKey ? (current.current_streak ?? 0) + 1 : 1
   const { data, error } = await supabase
     .from('love_streaks')
     .upsert({ couple_id: coupleId, current_streak: next, last_check_in: new Date().toISOString() })
