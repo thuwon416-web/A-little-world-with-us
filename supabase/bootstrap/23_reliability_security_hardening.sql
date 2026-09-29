@@ -16,7 +16,7 @@ create index if not exists reminders_web_claim_idx
 create or replace function public.protect_message_updates()
 returns trigger
 language plpgsql
-security definer
+security invoker
 set search_path = public
 as $$
 begin
