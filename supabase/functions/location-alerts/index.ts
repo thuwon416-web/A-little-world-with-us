@@ -29,8 +29,7 @@ Deno.serve(async (request) => {
     .maybeSingle()
   if (!link) return Response.json({ sent: 0 })
 
-  const { data: pairProfiles } = await supabase.from('profiles').select('id,role').in('id', [link.inviter_id, link.accepted_by])
-  const recipientId = pairProfiles?.find((profile) => profile.role === 'admin')?.id
+  const recipientId = link.inviter_id
   if (!recipientId) return Response.json({ sent: 0 })
   const { data: devices } = await supabase.from('push_devices').select('expo_push_token,preferences').eq('user_id', recipientId)
   const eligible = ((devices ?? []) as PushDevice[]).filter((device) => device.preferences?.[body.type] !== false)
