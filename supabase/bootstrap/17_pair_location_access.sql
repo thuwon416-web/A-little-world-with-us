@@ -21,7 +21,6 @@ create policy locations_pair_member_read
         where s.user_id = user_locations.user_id and s.enabled
       )
     )
-    or (public.is_location_admin() and public.is_linked_user(user_id))
   );
 
 drop policy if exists location_history_admin_pair_read on public.location_history;
@@ -37,7 +36,6 @@ create policy location_history_pair_member_read
         where s.user_id = location_history.user_id and s.enabled
       )
     )
-    or (public.is_location_admin() and public.is_linked_user(user_id))
   );
 
 drop policy if exists saved_places_admin_access on public.saved_places;
