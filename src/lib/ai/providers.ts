@@ -56,7 +56,7 @@ const openAiCompatibleProviders: Partial<Record<AiProvider, { key: string; endpo
   groq: {
     key: 'GROQ_API_KEY',
     endpoint: 'https://api.groq.com/openai/v1/chat/completions',
-    model: 'llama-3.1-8b-instant',
+    model: 'openai/gpt-oss-20b',
   },
   openrouter: {
     key: 'OPENROUTER_API_KEY',
@@ -71,7 +71,7 @@ const openAiCompatibleProviders: Partial<Record<AiProvider, { key: string; endpo
   cerebras: {
     key: 'CEREBRAS_API_KEY',
     endpoint: 'https://api.cerebras.ai/v1/chat/completions',
-    model: 'llama3.1-8b',
+    model: 'gpt-oss-120b',
   },
   nvidia: {
     key: 'NVIDIA_API_KEY',
@@ -126,7 +126,7 @@ async function callGemini(messages: AiMessage[], maxTokens: number): Promise<str
   const key = process.env.GEMINI_API_KEY
   if (!key) throw new Error('gemini is not configured')
   const prompt = messages.map((message) => `${message.role}: ${message.content}`).join('\n\n')
-  const model = getModel('gemini', 'gemini-2.0-flash')
+  const model = getModel('gemini', 'gemini-2.5-flash')
   const response = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
