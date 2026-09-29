@@ -56,19 +56,23 @@ create policy export_jobs_own_access
 
 -- Emergency contacts are shared for reading, but only their creator may mutate/delete them.
 drop policy if exists emergency_contacts_couple_access on public.emergency_contacts;
+drop policy if exists emergency_contacts_read on public.emergency_contacts;
 create policy emergency_contacts_read
   on public.emergency_contacts
   for select
   using (public.is_couple_member(couple_id));
+drop policy if exists emergency_contacts_insert on public.emergency_contacts;
 create policy emergency_contacts_insert
   on public.emergency_contacts
   for insert
   with check (public.is_couple_member(couple_id) and created_by = auth.uid());
+drop policy if exists emergency_contacts_update on public.emergency_contacts;
 create policy emergency_contacts_update
   on public.emergency_contacts
   for update
   using (public.is_couple_member(couple_id) and created_by = auth.uid())
   with check (public.is_couple_member(couple_id) and created_by = auth.uid());
+drop policy if exists emergency_contacts_delete on public.emergency_contacts;
 create policy emergency_contacts_delete
   on public.emergency_contacts
   for delete
@@ -77,19 +81,23 @@ create policy emergency_contacts_delete
 -- A check-in belongs to its creator. Partners may acknowledge/update status,
 -- but may not reassign the check-in or delete it.
 drop policy if exists safety_checkins_couple_access on public.safety_checkins;
+drop policy if exists safety_checkins_read on public.safety_checkins;
 create policy safety_checkins_read
   on public.safety_checkins
   for select
   using (public.is_couple_member(couple_id));
+drop policy if exists safety_checkins_insert on public.safety_checkins;
 create policy safety_checkins_insert
   on public.safety_checkins
   for insert
   with check (public.is_couple_member(couple_id) and user_id = auth.uid());
+drop policy if exists safety_checkins_update on public.safety_checkins;
 create policy safety_checkins_update
   on public.safety_checkins
   for update
   using (public.is_couple_member(couple_id))
   with check (public.is_couple_member(couple_id));
+drop policy if exists safety_checkins_delete on public.safety_checkins;
 create policy safety_checkins_delete
   on public.safety_checkins
   for delete
@@ -97,19 +105,23 @@ create policy safety_checkins_delete
 
 -- Settlement records are readable by the couple, but only the initiator can mutate them.
 drop policy if exists settlements_couple_access on public.settlements;
+drop policy if exists settlements_read on public.settlements;
 create policy settlements_read
   on public.settlements
   for select
   using (public.is_couple_member(couple_id));
+drop policy if exists settlements_insert on public.settlements;
 create policy settlements_insert
   on public.settlements
   for insert
   with check (public.is_couple_member(couple_id) and from_user = auth.uid());
+drop policy if exists settlements_update on public.settlements;
 create policy settlements_update
   on public.settlements
   for update
   using (public.is_couple_member(couple_id) and from_user = auth.uid())
   with check (public.is_couple_member(couple_id) and from_user = auth.uid());
+drop policy if exists settlements_delete on public.settlements;
 create policy settlements_delete
   on public.settlements
   for delete
