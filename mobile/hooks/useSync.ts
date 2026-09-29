@@ -10,16 +10,20 @@ export function useSync(coupleId?: string) {
   const [pendingCount, setPendingCount] = useState(0)
 
   const refresh = useCallback(async () => {
+    if (!isConnected) return
+
     setStatus('syncing')
 
     try {
+      // Full reconciliation is intentional: it catches edits and deletions that
+      // an incremental created_at query could otherwise miss.
       const result = await syncMessages()
       setPendingCount(result.pending)
       setStatus('synced')
     } catch {
       setStatus('error')
     }
-  }, [])
+  }, [isConnected])
 
   useEffect(() => {
     if (!isConnected) {
@@ -32,7 +36,23 @@ export function useSync(coupleId?: string) {
 
   useEffect(() => {
     if (!coupleId) return
-    const subscription = subscribeToChanges(() => void refresh(), coupleId)
+
+    const subscription = subscribeToChanges(
+      () => void refresh(),
+      (subscriptionStatus) => {
+        if (subscriptionStatus === 'SUBSCRIBED') {
+          void refresh()
+        } else if (
+          subscriptionStatus === 'CHANNEL_ERROR' ||
+          subscriptionStatus === 'TIMED_OUT' ||
+          subscriptionStatus === 'CLOSED'
+        ) {
+          setStatus('error')
+        }
+      },
+      coupleId
+    )
+
     return () => subscription.unsubscribe()
   }, [coupleId, refresh])
 

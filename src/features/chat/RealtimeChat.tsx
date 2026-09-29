@@ -439,15 +439,20 @@ export default function RealtimeChat() {
     const messageText = text.trim()
     const chatKey = await deriveChatKey(coupleId)
     const encryptedContent = await encryptMessage(messageText, chatKey)
+    // Use one stable ID for the whole send attempt. If the network reports an
+    // error after the server accepted the insert, retrying with a new ID would
+    // create a duplicate message.
+    const messageId = crypto.randomUUID()
+    const createdAt = new Date().toISOString()
 
     if (!isOnline) {
-      await enqueueMessage({ id: crypto.randomUUID(), couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', encrypted: true, reply_to: null, created_at: new Date().toISOString(), timestamp: Date.now() })
+      await enqueueMessage({ id: messageId, couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', encrypted: true, reply_to: null, created_at: createdAt, timestamp: Date.now() })
       setPendingCount(await getQueueCount())
       setInput('')
       return
     }
 
-    const { data: savedMessage, error } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', encrypted: true }).select('id').single()
+    const { data: savedMessage, error } = await supabase.from('messages').insert({ id: messageId, couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', encrypted: true, created_at: createdAt }).select('id').single()
     if (error || !savedMessage) {
       await enqueueMessage({ id: crypto.randomUUID(), couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', encrypted: true, reply_to: null, created_at: new Date().toISOString(), timestamp: Date.now() })
       setPendingCount(await getQueueCount())

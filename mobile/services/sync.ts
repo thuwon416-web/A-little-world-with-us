@@ -119,7 +119,7 @@ export async function pushPendingMessages() {
   return pending.length
 }
 
-async function performSyncMessages(lastSyncAt?: string) {
+async function performSyncMessages() {
   if (!isSupabaseConfigured) {
     const pending = await countPendingMessages()
     return { synced: 0, pending }
@@ -136,8 +136,6 @@ async function performSyncMessages(lastSyncAt?: string) {
   let allMessages: ChatMessage[] = []
   let page = 0
   const pageSize = 100
-
-  const effectiveLastSyncAt = lastSyncAt
   while (true) {
     let query = supabase
       .from('messages')
@@ -146,11 +144,6 @@ async function performSyncMessages(lastSyncAt?: string) {
       .range(page * pageSize, (page + 1) * pageSize - 1)
 
     query = query.eq('couple_id', coupleId)
-
-    // Full reconciliation is the default so remote edits and hard deletes cannot be missed.
-    if (effectiveLastSyncAt) {
-      query = query.gte('created_at', effectiveLastSyncAt)
-    }
 
     const { data, error } = await query
 
@@ -257,9 +250,9 @@ async function performSyncMessages(lastSyncAt?: string) {
 
 let syncInFlight: Promise<{ synced: number; pending: number }> | null = null
 
-export function syncMessages(lastSyncAt?: string) {
+export function syncMessages() {
   if (syncInFlight) return syncInFlight
-  syncInFlight = performSyncMessages(lastSyncAt).finally(() => {
+  syncInFlight = performSyncMessages().finally(() => {
     syncInFlight = null
   })
   return syncInFlight
@@ -290,7 +283,11 @@ export async function flushOfflineQueue() {
   return flushed
 }
 
-export function subscribeToChanges(onChange: () => void, coupleId?: string) {
+export function subscribeToChanges(
+  onChange: () => void,
+  onStatus?: (status: string) => void,
+  coupleId?: string
+) {
   if (!isSupabaseConfigured) {
     return { unsubscribe: () => undefined }
   }
@@ -309,7 +306,9 @@ export function subscribeToChanges(onChange: () => void, coupleId?: string) {
         onChange()
       }
     )
-    .subscribe()
+    .subscribe((status) => {
+      onStatus?.(status)
+    })
 
   return {
     unsubscribe: () => {
