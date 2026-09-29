@@ -257,6 +257,7 @@ function createLocationRecordWriter(
 ): (record: unknown) => void {
   return function assignLocationFields(record) {
     const rawRecord = record as {
+      _raw: { id: string }
       content: string
       sender_id: string
       couple_id: string
