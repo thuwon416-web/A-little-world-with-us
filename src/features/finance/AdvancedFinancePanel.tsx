@@ -18,7 +18,8 @@ export default function AdvancedFinancePanel() {
   const [bills, setBills] = useState<Bill[]>([])
   const [streak, setStreak] = useState(0)
   const [ideas, setIdeas] = useState<string[]>([])
-  const month = new Date().toISOString().slice(0, 7)
+  const now = new Date()
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
 
   const load = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
