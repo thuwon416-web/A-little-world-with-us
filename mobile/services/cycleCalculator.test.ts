@@ -25,6 +25,34 @@ describe('Native cycle calculator', () => {
     expect(summary.estimateReady).toBe(true)
   })
 
+  it('uses a newly logged period instead of an old manual setting', () => {
+    const summary = calculateNativeCycleSummary(
+      [
+        { log_date: '2024-04-01', period_day: true },
+        { log_date: '2024-03-01', period_day: true },
+      ],
+      { cycle_length: 28, period_length: 5, last_period_start: '2024-02-01' }
+    )
+    expect(summary.lastPeriodStart).toBe('2024-04-01')
+    expect(summary.nextPeriodStart).toBe('2024-04-29')
+    expect(summary.fertilityStatus).toBe('lower')
+  })
+
+  it('widens the fertile estimate when observed cycle lengths vary', () => {
+    const summary = calculateNativeCycleSummary(
+      [
+        { log_date: '2024-04-01', period_day: true },
+        { log_date: '2024-03-01', period_day: true },
+        { log_date: '2024-01-29', period_day: true },
+      ],
+      { cycle_length: 28, period_length: 5, last_period_start: null }
+    )
+    expect(summary.variationMin).toBe(29)
+    expect(summary.variationMax).toBe(32)
+    expect(summary.fertileStart).toBe('2024-03-25')
+    expect(summary.fertileEnd).toBe('2024-03-20')
+  })
+
   it('returns an unready summary without period data', () => {
     const summary = calculateNativeCycleSummary([], {
       cycle_length: 28,
