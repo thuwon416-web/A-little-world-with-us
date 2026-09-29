@@ -992,6 +992,32 @@ export default function CareScreen() {
   useEffect(() => {
     void refresh()
   }, [])
+
+  useEffect(() => {
+    if (!data?.coupleId) return
+    const channel = supabase
+      .channel(`care-shared-${data.coupleId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_daily_logs',
+        filter: `couple_id=eq.${data.coupleId}`,
+      }, () => { void refresh() })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_cycle_settings',
+        filter: `couple_id=eq.${data.coupleId}`,
+      }, () => { void refresh() })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_reminders',
+        filter: `couple_id=eq.${data.coupleId}`,
+      }, () => { void refresh() })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [data?.coupleId])
   const summary = useMemo(() => getCycleSummary(data), [data])
   const save = async (overrideDate?: string) => {
     if (!data) return
