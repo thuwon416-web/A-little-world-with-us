@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import { useNetwork } from './useNetwork'
 
@@ -8,7 +8,6 @@ export function useSync(coupleId?: string) {
   const { isConnected } = useNetwork()
   const [status, setStatus] = useState<SyncStatus>('idle')
   const [pendingCount, setPendingCount] = useState(0)
-  const lastSyncAtRef = useRef<string | undefined>(undefined)
 
   const refresh = useCallback(async () => {
     if (!isConnected) return
@@ -16,10 +15,9 @@ export function useSync(coupleId?: string) {
     setStatus('syncing')
 
     try {
-      // Keep the marker for observability, but syncMessages still performs
-      // full reconciliation so deletions and edits cannot be missed.
-      const result = await syncMessages(lastSyncAtRef.current)
-      lastSyncAtRef.current = new Date().toISOString()
+      // Full reconciliation is intentional: it catches edits and deletions that
+      // an incremental created_at query could otherwise miss.
+      const result = await syncMessages()
       setPendingCount(result.pending)
       setStatus('synced')
     } catch {
