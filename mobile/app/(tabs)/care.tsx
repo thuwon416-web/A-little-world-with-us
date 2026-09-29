@@ -1201,7 +1201,7 @@ export default function CareScreen() {
           onLog={(date) => void toggleSharedPeriodDate(date)}
         />
       ) : activeTab === 'Reminders' ? (
-        <Reminders />
+        <Reminders coupleId={data.coupleId} userId={data.userId} />
       ) : activeTab === 'Settings' ? (
         <SettingsCareTab
           cycleLength={cycleLength}
