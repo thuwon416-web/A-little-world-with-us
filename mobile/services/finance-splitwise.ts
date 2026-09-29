@@ -262,10 +262,11 @@ export function calculateBalance(
     if (expense.isSettled || !expense.paidBy || ![myUserId, partnerUserId].includes(expense.paidBy))
       continue
     const amount = roundToInteger(expense.amount)
-    const share = expense.splitType === 'percentage'
+    const partnerShare = expense.splitType === 'percentage'
       ? Math.round(amount * (expense.splitPercentage ?? 50) / 100)
       : Math.round(amount / 2)
-    netBalance += expense.paidBy === myUserId ? share : -share
+    const myShare = amount - partnerShare
+    netBalance += expense.paidBy === myUserId ? partnerShare : -myShare
   }
   for (const settlement of settlements) {
     if (settlement.fromUser === myUserId && settlement.toUser === partnerUserId)
