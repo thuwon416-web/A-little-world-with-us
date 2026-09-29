@@ -103,6 +103,20 @@ export default function CalendarPage() {
     }
   }, [loadEvents, userId, showSharedCalendar])
 
+  useEffect(() => {
+    if (!coupleId) return
+    const channel = supabase
+      .channel(`web-calendar-${coupleId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'events',
+        filter: `couple_id=eq.${coupleId}`,
+      }, () => { void loadEvents() })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [coupleId, loadEvents])
+
   const addEvent = useCallback(async () => {
     if (!selectedDate || !userId || !coupleId) return
 
