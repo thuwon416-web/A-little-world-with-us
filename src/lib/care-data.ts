@@ -121,7 +121,7 @@ export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings):
   const ovulationDate = addDays(nextPeriodStart, -14)
   const today = dateKey(new Date())
   const cycleHistory = [...actualHistory, { startDate: lastPeriodStart, endDate: addDays(nextPeriodStart, -1), length: cycleLength, status: 'predicted' as const, variationMin, variationMax }]
-  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, fertileStart: addDays(ovulationDate, -5), fertileEnd: addDays(ovulationDate, 1), ovulationDate, day: Math.max(1, daysBetween(lastPeriodStart, today) + 1), regular: variation <= 7, estimateReady: starts.length >= 2 || settings.last_period_start !== null, variationMin, variationMax, cycleHistory }
+  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, fertileStart: addDays(ovulationDate, -5), fertileEnd: addDays(ovulationDate, 1), ovulationDate, day: Math.max(1, daysBetween(lastPeriodStart, today) + 1), regular: variation <= 7, estimateReady, variationMin, variationMax, cycleHistory }
 }
 
 export function getFertilityLabel(summary: CycleSummary) {
