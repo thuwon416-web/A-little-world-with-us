@@ -50,11 +50,15 @@ Deno.serve(async (request) => {
     let contactsConsidered = 0
 
     for (const checkin of (checkins ?? []) as SafetyCheckin[]) {
-      const { error: updateError } = await supabase
+      const { data: expiredCheckin, error: updateError } = await supabase
         .from('safety_checkins')
         .update({ status: 'expired', updated_at: new Date().toISOString() })
         .eq('id', checkin.id)
+        .eq('status', 'pending')
+        .select('id')
+        .maybeSingle()
       if (updateError) return Response.json({ error: updateError.message }, { status: 500 })
+      if (!expiredCheckin) continue
       processed += 1
 
       const link = (links ?? []).find((candidate: CoupleLink) =>
