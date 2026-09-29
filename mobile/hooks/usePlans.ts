@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 
+import { supabase } from '@/lib/supabase'
+
 import {
   addBucketItem,
   addPlanItem,
@@ -38,6 +40,16 @@ export function usePlans() {
 
   useEffect(() => {
     void refresh()
+  }, [refresh])
+
+  useEffect(() => {
+    const channel = supabase
+      .channel('mobile-shared-plans-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'plans' }, () => { void refresh() })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'plan_items' }, () => { void refresh() })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bucket_list' }, () => { void refresh() })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
   }, [refresh])
 
   const handleCreatePlan = useCallback(async (payload: Parameters<typeof createPlanRecord>[0]) => {
