@@ -306,6 +306,7 @@ export default function PlansPage() {
       .from('plans')
       .select('updated_at')
       .eq('id', planId)
+      .eq('couple_id', coupleId)
       .single()
 
     if (latestPlan && new Date(latestPlan.updated_at) > new Date(plan.updated_at)) {
@@ -318,6 +319,7 @@ export default function PlansPage() {
       .from('plan_items')
       .update({ completed: !item.done })
       .eq('id', itemId)
+      .eq('plan_id', planId)
 
     if (error) {
       console.error('Failed to toggle item:', error)
