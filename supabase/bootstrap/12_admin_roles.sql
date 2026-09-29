@@ -45,21 +45,8 @@ as $$
   );
 $$;
 
--- Update is_location_admin() to use is_admin()
--- NOTE: This function is also created in 00_core.sql
--- Keep both in sync when changing admin logic.
-create or replace function public.is_location_admin() returns boolean 
-language sql 
-stable 
-security definer 
-set search_path = public 
-as $$
-  select public.is_admin();
-$$;
-
--- Add index on role for performance
+-- Add index on role for compatibility with any legacy role data.
 create index if not exists idx_profiles_role on public.profiles(role);
 
--- Grant execute permission on is_admin() (only for authenticated users)
+-- Grant execute permission on is_admin() for legacy role compatibility.
 grant execute on function public.is_admin() to authenticated;
-grant execute on function public.is_location_admin() to authenticated;
