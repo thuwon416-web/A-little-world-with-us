@@ -78,10 +78,13 @@ export default function LoveCalendar() {
     })
   }, [])
 
-  const upcoming = useMemo(
-    () => [...entries].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 4),
-    [entries]
-  )
+  const upcoming = useMemo(() => {
+    const today = localDateKey(new Date())
+    return [...entries]
+      .filter((entry) => entry.date >= today)
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .slice(0, 4)
+  }, [entries])
 
   const addEntry = async () => {
     const value = label.trim()
