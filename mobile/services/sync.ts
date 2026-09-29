@@ -71,6 +71,8 @@ export async function pushPendingMessages() {
     throw new Error('No accepted couple link found')
   }
 
+  const failures: string[] = []
+
   for (const message of pending) {
     const rawMessage = message as unknown as LocalMessage
     const payload = {
@@ -97,14 +99,21 @@ export async function pushPendingMessages() {
 
     const { error } = await supabase.from('messages').upsert(payload).select()
 
-    if (!error) {
-      await database.write(async () => {
-        await rawMessage.update((record) => {
-          const fields = record as unknown as MessageFields
-          fields.synced = true
-        })
-      })
+    if (error) {
+      failures.push(error.message)
+      continue
     }
+
+    await database.write(async () => {
+      await rawMessage.update((record) => {
+        const fields = record as unknown as MessageFields
+        fields.synced = true
+      })
+    })
+  }
+
+  if (failures.length > 0) {
+    throw new Error(`Failed to sync ${failures.length} pending message(s): ${failures.join('; ')}`)
   }
 
   return pending.length
@@ -230,8 +239,8 @@ export async function syncMessages(lastSyncAt?: string) {
     })
   }
 
-  await AsyncStorage.setItem(`messages:last-synced:${coupleId}`, new Date().toISOString())
   const pending = await pushPendingMessages()
+  await AsyncStorage.setItem(`messages:last-synced:${coupleId}`, new Date().toISOString())
   return { synced: allMessages.length, pending }
 }
 
