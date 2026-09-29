@@ -54,7 +54,7 @@ export interface RelationshipMemory {
 export type MemoryImportance = RelationshipMemory['importance']
 
 export type MessageType =
-  'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location'
+  'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location' | 'sos'
 
 export interface ChatMessage {
   id: string
@@ -63,9 +63,12 @@ export interface ChatMessage {
   content: string | null
   message_type: MessageType
   media_url: string | null
+  media_mime_type: string | null
   media_duration: number | null
   reply_to: string | null
   transcript: string | null
+  edited_at: string | null
+  deleted_at: string | null
   location_payload: Record<string, unknown> | null
   encrypted: boolean
   encryption_version: number | null
