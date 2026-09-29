@@ -27,7 +27,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
-import { useAdmin } from '@/hooks/useAdmin'
 import { useLocation } from '@/hooks/useLocation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
@@ -618,8 +617,9 @@ export default function LocationScreen() {
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes, insets.top), [colors, insets.top])
-  const { isAdmin, loading: adminLoading } = useAdmin()
   const { user } = useAuth()
+  const [dashboardOwnerId, setDashboardOwnerId] = useState<string | null>(null)
+  const [ownerLoading, setOwnerLoading] = useState(true)
   const {
     currentLocation,
     partnerLocation,
@@ -890,7 +890,12 @@ export default function LocationScreen() {
   }
 
   useEffect(() => {
-    if (!isAdmin || !user) return
+    if (!user) {
+      setDashboardOwnerId(null)
+      setOwnerLoading(false)
+      return
+    }
+    let active = true
     const load = async () => {
       const { data: link } = await supabase
         .from('couple_links')
@@ -900,6 +905,12 @@ export default function LocationScreen() {
         .not('couple_id', 'is', null)
         .maybeSingle()
       if (!link?.couple_id) {
+        if (active) setOwnerLoading(false)
+        return
+      }
+      if (active) setDashboardOwnerId(link.inviter_id)
+      if (link.inviter_id !== user.id) {
+        if (active) setOwnerLoading(false)
         return
       }
       setCoupleId(link.couple_id)
@@ -958,7 +969,7 @@ export default function LocationScreen() {
   }, [isAdmin, user])
 
   useEffect(() => {
-    if (!isAdmin || !coupleId) return
+    if (!dashboardOwnerId || dashboardOwnerId !== user?.id || !coupleId) return
     const channel = supabase
       .channel(`admin-location-${coupleId}`)
       .on(
@@ -978,7 +989,7 @@ export default function LocationScreen() {
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [coupleId, isAdmin])
+  }, [coupleId, dashboardOwnerId, user?.id])
 
   const displayedRows = useMemo(() => {
     if (!currentLocation || !user?.id || rows.some((row) => row.user_id === user.id)) {
@@ -1019,12 +1030,12 @@ export default function LocationScreen() {
     [history]
   )
 
-  if (adminLoading) return null
-  if (!isAdmin) return <Redirect href="/(tabs)" />
+  if (ownerLoading) return null
+  if (dashboardOwnerId !== user?.id) return <Redirect href="/(tabs)" />
 
   return (
     <View style={styles.container}>
-      <Text style={styles.eyebrow}>Admin safety map</Text>
+      <Text style={styles.eyebrow}>Couple safety map</Text>
       <Text style={styles.title}>Location</Text>
       <ScrollView
         horizontal
