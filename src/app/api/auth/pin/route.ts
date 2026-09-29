@@ -71,10 +71,13 @@ export async function POST(req: NextRequest) {
       // Store the hashed PIN in user_settings
       const { error } = await supabase
         .from('user_settings')
-        .upsert({
-          user_id: user.id,
-          lock_pin_hash: hashedPin,
-        })
+        .upsert(
+          {
+            user_id: user.id,
+            lock_pin_hash: hashedPin,
+          },
+          { onConflict: 'user_id' }
+        )
 
       if (error) {
         console.error('Error storing PIN:', error)
