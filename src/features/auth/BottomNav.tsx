@@ -67,18 +67,26 @@ export default function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
   const [moreMenuOpen, setMoreMenuOpen] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
+  const [canViewLocation, setCanViewLocation] = useState(false)
 
   useEffect(() => {
+    let active = true
     void supabase.auth.getUser().then(async ({ data: { user } }) => {
-      if (!user) return
-      const { data } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
+      if (!user) {
+        if (active) setCanViewLocation(false)
+        return
+      }
+      const { data: link } = await supabase
+        .from('couple_links')
+        .select('inviter_id')
+        .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+        .eq('status', 'accepted')
         .maybeSingle()
-      setIsAdmin(data?.role === 'admin')
+      if (active) setCanViewLocation(link?.inviter_id === user.id)
     })
+    return () => {
+      active = false
+    }
   }, [])
 
   const handleExit = async () => {
@@ -152,7 +160,7 @@ export default function BottomNav() {
 
             <div className="space-y-3">
               {moreGroups.map((group) => {
-                const pages = group.pages.filter((page) => page.href !== '/location' || isAdmin)
+                const pages = group.pages.filter((page) => page.href !== '/location' || canViewLocation)
                 return (
                   <details key={group.name} open={pages.some((page) => pathname === page.href)} className="rounded-xl border border-accent-1/15">
                     <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-text-1">{group.name}</summary>
