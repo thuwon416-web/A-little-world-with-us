@@ -74,6 +74,23 @@ export default function FinancialGoals() {
     if (userId && coupleId) void loadGoals()
   }, [userId, coupleId, loadGoals])
 
+  useEffect(() => {
+    if (!coupleId) return
+    const channel = supabase
+      .channel(`web-finance-${coupleId}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'finance_expenses', filter: `couple_id=eq.${coupleId}` }, () => {
+        void loadExpenses()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settlements', filter: `couple_id=eq.${coupleId}` }, () => {
+        void loadExpenses()
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'financial_goals', filter: `couple_id=eq.${coupleId}` }, () => {
+        void loadGoals()
+      })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [coupleId, loadExpenses, loadGoals])
+
   const addGoal = async () => {
     const targetAmount = Number(newGoal.target)
     const currentAmount = Number(newGoal.current || 0)
