@@ -1,0 +1,259 @@
+'use client'
+
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Activity, Bell, CalendarDays, ChevronDown, ChevronUp, Droplet, Heart, Plus, Settings2, Sparkles, X } from 'lucide-react'
+import { addDays, calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, periodStarts, saveCareLog, saveCareReminder, saveCycleSettings, savePeriodDates, type CareDraft, type CareLog, type CareReminder, type CycleHistoryEntry, type CycleSettings } from '@/lib/care-data'
+import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
+import { supabase } from '@/lib/supabase'
+
+type Tab = 'today' | 'insights' | 'calendar' | 'reminders' | 'settings'
+type Section = 'mood' | 'symptoms' | 'sex' | 'discharge' | 'digestion' | 'pregnancy_test' | 'ovulation_test' | 'contraceptives' | 'activities'
+const sections: Array<{ id: Section; title: string; options: string[] }> = [
+  { id: 'mood', title: 'Mood', options: ['Calm', 'Happy', 'Energetic', 'Frisky', 'Mood swings', 'Irritated', 'Sad', 'Anxious'] },
+  { id: 'symptoms', title: 'Symptoms', options: ['Everything is fine', 'Cramps', 'Tender breasts', 'Headache', 'Acne', 'Backache', 'Fatigue', 'Cravings', 'Insomnia', 'Abdominal pain', 'Hot flashes'] },
+  { id: 'sex', title: 'Sex & sex drive', options: ["Didn't have sex", 'Protected sex', 'Unprotected sex', 'Oral sex', 'Anal sex', 'Masturbation', 'Sensual touch', 'Sex toys', 'Orgasm', 'No orgasm', 'High sex drive', 'Neutral sex drive', 'Low sex drive'] },
+  { id: 'discharge', title: 'Discharge', options: ['No discharge', 'Creamy', 'Watery', 'Sticky', 'Egg white', 'Spotting', 'Unusual'] },
+  { id: 'digestion', title: 'Digestion & stool', options: ['Nausea', 'Bloating', 'Constipation', 'Diarrhea'] },
+  { id: 'pregnancy_test', title: 'Pregnancy test', options: ["Didn't take test", 'Positive', 'Negative', 'Faint line'] },
+  { id: 'ovulation_test', title: 'Ovulation test', options: ["Didn't take test", 'Positive', 'Negative'] },
+  { id: 'contraceptives', title: 'Contraceptives', options: ['Taken on time', "Yesterday's pill", 'Missed pill'] },
+  { id: 'activities', title: 'Physical activity', options: ["Didn't exercise", 'Yoga', 'Gym', 'Aerobics & dancing', 'Swimming', 'Team sports', 'Running', 'Cycling', 'Walking'] },
+]
+const dateKey = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+const formatDate = (value: string) => new Date(`${value}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+
+export default function CarePage() {
+  const [tab, setTab] = useState<Tab>('today')
+  const [logs, setLogs] = useState<CareLog[]>([])
+  const [settings, setSettings] = useState<CycleSettings | null>(null)
+  const [context, setContext] = useState<{ userId: string; coupleId: string } | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [logOpen, setLogOpen] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
+  const [initialSection, setInitialSection] = useState<Section | null>(null)
+  const reload = async () => {
+    setLoading(true)
+    setLoadError(null)
+    try { const next = await getAcceptedCareContext(); setContext(next); if (next) { const [nextLogs, nextSettings] = await Promise.all([getCareLogs(next.coupleId), getCycleSettings(next.coupleId)]); setLogs(nextLogs); setSettings(nextSettings) } } catch (error_) { console.error('[care] load failed:', error_); setLoadError(error_ instanceof Error ? error_.message : 'Unable to load care data.') } finally { setLoading(false) }
+  }
+  useEffect(() => { void reload() }, [])
+
+  useEffect(() => {
+    if (!context?.coupleId) return
+    const channel = supabase
+      .channel(`care-shared-${context.coupleId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_daily_logs',
+        filter: `couple_id=eq.${context.coupleId}`,
+      }, () => { void reload() })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_cycle_settings',
+        filter: `couple_id=eq.${context.coupleId}`,
+      }, () => { void reload() })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'care_reminders',
+        filter: `couple_id=eq.${context.coupleId}`,
+      }, () => { void reload() })
+      .subscribe()
+    return () => { void supabase.removeChannel(channel) }
+  }, [context?.coupleId])
+  const summary = useMemo(() => calculateCycleSummary(logs, settings ?? { couple_id: '', cycle_length: 28, period_length: 5, last_period_start: null, updated_at: '' }), [logs, settings])
+  const openLog = (section: Section | null = null) => { setInitialSection(section); setLogOpen(true) }
+  const daysUntil = summary.nextPeriodStart ? Math.ceil((new Date(`${summary.nextPeriodStart}T12:00:00`).getTime() - Date.now()) / 86400000) : null
+
+  if (loading) return <div className="flex min-h-[420px] items-center justify-center"><div className="h-9 w-9 animate-spin rounded-full border-2 border-accent-1/25 border-t-accent-1" /></div>
+  if (loadError) return <section className="glass-card mx-auto max-w-xl p-7 text-center"><Heart className="mx-auto h-8 w-8 text-error" /><h1 className="mt-3 text-2xl text-text-1">Unable to load care data</h1><p className="mt-2 text-sm text-text-2">{loadError}</p><button type="button" onClick={() => void reload()} className="glass-button mt-5 px-4 py-2 text-sm font-semibold">Retry</button></section>
+  if (!context || !settings) return <section className="glass-card mx-auto max-w-xl p-7 text-center"><Heart className="mx-auto h-8 w-8 text-accent-1" /><h1 className="mt-3 text-2xl text-text-1">Cycle Care is shared</h1><p className="mt-2 text-sm text-text-2">Accept your couple link before creating shared cycle records.</p></section>
+
+  const tabs: Array<{ id: Tab; label: string; icon: typeof Sparkles }> = [{ id: 'today', label: 'Today', icon: Sparkles }, { id: 'insights', label: 'Insights', icon: Activity }, { id: 'calendar', label: 'Calendar', icon: CalendarDays }, { id: 'reminders', label: 'Reminders', icon: Bell }, { id: 'settings', label: 'Settings', icon: Settings2 }]
+  return <div className="mx-auto max-w-5xl space-y-5 pb-8">
+    <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.22em] text-text-2">Shared Cycle Care</p><h1 className="mt-1 text-3xl text-text-1">Cycle Care</h1></div><button onClick={() => openLog()} className="glass-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold"><Plus className="h-4 w-4" />Log today</button></header>
+    <nav className="flex gap-2 overflow-x-auto pb-1">{tabs.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => id === 'calendar' ? setCalendarOpen(true) : setTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm ${tab === id && id !== 'calendar' ? 'border-accent-1/50 bg-accent-1/15 text-accent-1' : 'border-border/20 bg-card text-text-2'}`}><Icon className="h-4 w-4" />{label}</button>)}</nav>
+    {tab === 'today' && <Today summary={summary} savedCycleLength={settings.cycle_length} daysUntil={daysUntil} onLogPeriod={() => setCalendarOpen(true)} onOpen={openLog} onInsights={() => setTab('insights')} onReminders={() => setTab('reminders')} logs={logs} />}
+    {tab === 'insights' && <Insights logs={logs} summary={summary} />}
+    {tab === 'reminders' && <Reminders coupleId={context.coupleId} userId={context.userId} />}
+    {tab === 'settings' && <CycleSettings settings={settings} logs={logs} onSave={async (next) => { await saveCycleSettings({ ...next, couple_id: context.coupleId }); await reload() }} />}
+    {logOpen && <DailyLog log={logs.find((entry) => entry.log_date === dateKey(new Date()))} initial={initialSection} onClose={() => setLogOpen(false)} onSave={async (draft) => { await saveCareLog(context.coupleId, context.userId, draft); setLogOpen(false); await reload() }} />}
+    {calendarOpen && <PeriodCalendarModal logs={logs} summary={summary} onClose={() => setCalendarOpen(false)} onSave={async (selected) => {
+      await savePeriodDates(context.coupleId, selected)
+      setCalendarOpen(false); await reload()
+    }} />}
+    <ExplicitAdviceControl mode="intimacy" title="Ask before discussing intimacy" description="Share only what you choose for consent-led, non-graphic guidance." placeholder="What would help us talk about closeness or boundaries?" />
+  </div>
+}
+
+function cycleDaysBetween(start: string, end: string) {
+  return Math.round((new Date(`${end}T12:00:00`).getTime() - new Date(`${start}T12:00:00`).getTime()) / 86400000)
+}
+
+function getPeriodRunLength(logs: CareLog[], startDate: string, endDate: string, fallback: number) {
+  const periodDays = new Set(logs.filter((log) => log.period_day).map((log) => log.log_date))
+  let length = 0
+  for (let offset = 0; offset <= cycleDaysBetween(startDate, endDate); offset += 1) {
+    if (!periodDays.has(addDays(startDate, offset))) break
+    length += 1
+  }
+  return length || fallback
+}
+
+function buildAllCycleHistory(logs: CareLog[], summary: ReturnType<typeof calculateCycleSummary>): CycleHistoryEntry[] {
+  const starts = [...periodStarts(logs)].reverse()
+  return starts.map((startDate, index) => {
+    const nextStart = starts[index + 1] ?? (startDate === summary.lastPeriodStart ? summary.nextPeriodStart : null)
+    const endDate = nextStart ? addDays(nextStart, -1) : startDate
+    const length = nextStart ? cycleDaysBetween(startDate, nextStart) : 0
+    return {
+      startDate,
+      endDate,
+      length: length || summary.cycleLength,
+      status: nextStart && startDate !== summary.lastPeriodStart ? 'actual' : 'predicted',
+      variationMin: summary.variationMin,
+      variationMax: summary.variationMax,
+    }
+  }).filter((cycle) => cycle.startDate >= '2024-01-01' && cycle.length > 0)
+}
+
+function CycleStrip({ cycle, logs, current, fallbackPeriodLength }: Readonly<{ cycle: CycleHistoryEntry; logs: CareLog[]; current: boolean; fallbackPeriodLength: number }>) {
+  const periodLength = getPeriodRunLength(logs, cycle.startDate, cycle.endDate, current ? fallbackPeriodLength : 0)
+  const ovulation = addDays(cycle.startDate, cycle.length - 14)
+  const fertileStart = addDays(ovulation, -5)
+  const fertileEnd = addDays(ovulation, 1)
+  return <div className="mt-3 flex items-center gap-1 overflow-hidden">
+    {Array.from({ length: cycle.length }, (_, index) => {
+      const date = addDays(cycle.startDate, index)
+      const isPeriod = index < periodLength
+      const isFertile = date >= fertileStart && date <= fertileEnd
+      return <span key={date} title={`Cycle day ${index + 1} · ${date}`} className={`h-3 w-3 shrink-0 rounded-full border ${isPeriod ? 'border-rose-500 bg-rose-500' : isFertile ? 'border-success bg-success' : 'border-white/50 bg-white'}`} />
+    })}
+  </div>
+}
+
+function Today({ summary, savedCycleLength, daysUntil, onLogPeriod, onOpen, onInsights, onReminders, logs }: Readonly<{ summary: ReturnType<typeof calculateCycleSummary>; savedCycleLength: number; daysUntil: number | null; onLogPeriod: () => void; onOpen: (section: Section | null) => void; onInsights: () => void; onReminders: () => void; logs: CareLog[] }>) {
+  const days = Array.from({ length: 7 }, (_, index) => { const day = new Date(); day.setDate(day.getDate() - day.getDay() + index); return day })
+  const actions: Array<{ Icon: typeof Droplet; label: string; action: () => void }> = [{ Icon: Droplet, label: 'Log period', action: onLogPeriod }, { Icon: Plus, label: 'Symptoms', action: () => onOpen('symptoms') }, { Icon: Heart, label: 'Intimacy', action: () => onOpen('sex') }]
+  return <div className="space-y-5"><section className="glass-card p-3"><div className="grid grid-cols-7 gap-1">{days.map((day) => <button key={day.toISOString()} onClick={onLogPeriod} className={`rounded-btn py-2 text-center ${dateKey(day) === dateKey(new Date()) ? 'bg-accent-1/15 text-accent-1' : 'text-text-2'}`}><span className="block text-[10px] uppercase">{day.toLocaleDateString(undefined, { weekday: 'narrow' })}</span><span className="mt-1 flex h-8 w-8 items-center justify-center rounded-full text-sm font-semibold mx-auto">{day.getDate()}</span></button>)}</div></section>
+    <section className="glass-card relative overflow-hidden p-7 text-center"><div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgb(var(--accent-1)),transparent_55%)] opacity-15" /><div className="relative"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-text-2">Today&apos;s cycle</p><h2 className="mt-3 text-5xl text-accent-2">   {daysUntil === null      ? '—'      : daysUntil > 0        ? `Period in ${daysUntil} days`        : daysUntil === 0          ? 'Period expected today'          : `Period late by ${Math.abs(daysUntil)} days`} </h2><p className="mt-4 text-sm text-text-2">{getFertilityLabel(summary)} · calendar-based estimate, not contraception or medical advice</p>{((daysUntil !== null && daysUntil < 0) || !summary.regular) && <p className="mt-2 text-xs text-warning">{daysUntil !== null && daysUntil < 0 ? 'Your period is later than the current estimate; the next prediction will update when a new period is logged.' : 'Recent cycles vary, so this estimate may be less accurate.'}</p>}</div></section>
+    <section className="grid grid-cols-3 gap-3">{actions.map(({ Icon, label, action }) => <button key={label} onClick={action} className="flex flex-col items-center gap-2 py-2 text-sm text-text-2"><span className="flex h-16 w-16 items-center justify-center rounded-full border border-accent-1/40 bg-card text-accent-1 shadow-[0_0_22px_color-mix(in_srgb,var(--accent-1)_25%,transparent)]"><Icon className="h-7 w-7" /></span>{label}</button>)}</section>
+    <section><div className="mb-3 flex items-center justify-between"><h2 className="text-xl text-text-1">My daily insights</h2><button onClick={onInsights} className="text-sm text-accent-1">See all</button></div><div className="grid gap-3 md:grid-cols-2"><InfoCard title="Cycle day" body={summary.day ? `Day ${summary.day} of an estimated ${summary.cycleLength}-day cycle.` : 'Log your period to begin your estimate.'} /><InfoCard title="Shared check-in" body={logs.length ? `${logs.length} shared Care days recorded together.` : 'Your first shared check-in starts the timeline.'} /></div></section>
+    <section className="glass-card p-6"><div className="flex items-center justify-between"><h2 className="text-xl text-text-1">Cycle history</h2><button onClick={onInsights} className="text-sm text-accent-1">See all</button></div>{buildAllCycleHistory(logs, summary).slice(-3).reverse().map((cycle, index) => <div key={cycle.startDate} className="mt-5 border-b border-border/10 pb-4 last:border-0 last:pb-0"><div className="flex items-center justify-between gap-3"><div><p className="font-semibold text-text-1">{index === 0 ? 'Current cycle' : index === 1 ? 'Previous' : 'Previous 2'}</p><p className="text-sm text-text-2">{cycle.length} days · {formatDate(cycle.startDate)} – {formatDate(cycle.endDate)}</p></div><span className="text-xs text-text-2">Day {index === 0 && summary.day ? summary.day : '—'}</span></div><CycleStrip cycle={cycle} logs={logs} current={index === 0} fallbackPeriodLength={summary.periodLength} /></div>)}<div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-text-2"><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-rose-500" />Period</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-success" />Fertile estimate</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full border border-white/50 bg-white" />Normal</span></div></section>
+    <button onClick={onReminders} className="glass-card flex w-full items-center gap-3 p-4 text-left"><Bell className="h-5 w-5 text-accent-1" /><span><strong className="block text-text-1">Smart reminders</strong><small className="text-text-2">Period, fertile, and daily check-in alerts</small></span></button></div>
+}
+function InfoCard({ title, body }: Readonly<{ title: string; body: string }>) { return <div className="glass-card p-4"><p className="font-semibold text-text-1">{title}</p><p className="mt-1 text-sm leading-6 text-text-2">{body}</p></div> }
+
+function DailyLog({ log, initial, onClose, onSave }: Readonly<{ log?: CareLog; initial: Section | null; onClose: () => void; onSave: (draft: CareDraft) => Promise<void> }>) {
+  const [draft, setDraft] = useState<CareDraft>(() => ({ log_date: dateKey(new Date()), mood: log?.mood ?? null, symptoms: log?.symptoms ?? [], sex: log?.sex ?? [], discharge: log?.discharge ?? [], digestion: log?.digestion ?? [], pregnancy_test: log?.pregnancy_test ?? [], ovulation_test: log?.ovulation_test ?? null, contraceptives: log?.contraceptives ?? [], other_pills: log?.other_pills ?? [], activities: log?.activities ?? [], water_intake: log?.water_intake ?? 0, weight: log?.weight ?? null, basal_temp: log?.basal_temp ?? null, notes: log?.notes ?? '' }))
+  const [closed, setClosed] = useState<Set<string>>(new Set(sections.filter((section) => section.id !== initial).map((section) => section.id)))
+  const [saving, setSaving] = useState(false)
+  const toggle = (field: Section, value: string) => setDraft((current) => {
+    if (field === 'mood') return { ...current, mood: current.mood === value ? null : value }
+    if (field === 'ovulation_test') return { ...current, ovulation_test: current.ovulation_test === value ? null : value }
+    const values = (current[field] as string[] | undefined) ?? []
+    return { ...current, [field]: values.includes(value) ? values.filter((item) => item !== value) : [...values, value] }
+  })
+  return <div className="fixed inset-0 z-50"><button aria-label="Close log" onClick={onClose} className="absolute inset-0 bg-black/60 backdrop-blur-sm" /><aside className="absolute inset-y-0 right-0 flex w-full max-w-lg flex-col border-l border-border bg-soft-tint shadow-2xl"><header className="flex items-center justify-between border-b border-border p-5"><div><h2 className="text-xl text-text-1">Daily Log</h2><p className="text-sm text-text-2">{new Date().toLocaleDateString()}</p></div><button onClick={onClose} className="rounded-full bg-card/10 p-2 text-text-1"><X className="h-5 w-5" /></button></header><div className="flex-1 overflow-y-auto p-4"><div className="space-y-3">{sections.map((section) => { const isClosed = closed.has(section.id); const chosen = section.id === 'mood' ? (draft.mood ? [draft.mood] : []) : section.id === 'ovulation_test' ? (draft.ovulation_test ? [draft.ovulation_test] : []) : ((draft[section.id] as string[] | undefined) ?? []); return <section key={section.id} className="glass-card overflow-hidden"><button onClick={() => setClosed((current) => { const next = new Set(current); next.has(section.id) ? next.delete(section.id) : next.add(section.id); return next })} className="flex w-full items-center justify-between p-4"><span className="font-semibold text-text-1">{section.title}{chosen.length ? <small className="ml-2 rounded-full bg-accent-1/15 px-2 py-0.5 text-accent-1">{chosen.length}</small> : null}</span>{isClosed ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}</button>{!isClosed && <div className="flex flex-wrap gap-2 px-4 pb-4">{section.options.map((option) => <button key={option} onClick={() => toggle(section.id, option)} className={`rounded-full border px-3 py-2 text-sm transition ${chosen.includes(option) ? 'border-accent-1 bg-accent-1/15 text-accent-1' : 'border-border/20 bg-soft-tint/10 text-text-2'}`}>{option}</button>)}</div>}</section> })}
+    <section className="glass-card grid gap-3 p-4 sm:grid-cols-3"><label className="text-sm text-text-2">Water (ml)<input type="number" min="0" value={draft.water_intake ?? 0} onChange={(event) => setDraft({ ...draft, water_intake: Number(event.target.value) })} className="mt-2 w-full rounded-xl border border-border/20 bg-soft-tint/10 p-2 text-text-1" /></label><label className="text-sm text-text-2">Weight (kg)<input type="number" step="0.1" value={draft.weight ?? ''} onChange={(event) => setDraft({ ...draft, weight: event.target.value ? Number(event.target.value) : null })} className="mt-2 w-full rounded-xl border border-border/20 bg-soft-tint/10 p-2 text-text-1" /></label><label className="text-sm text-text-2">Basal temp (°C)<input type="number" step="0.1" value={draft.basal_temp ?? ''} onChange={(event) => setDraft({ ...draft, basal_temp: event.target.value ? Number(event.target.value) : null })} className="mt-2 w-full rounded-xl border border-border/20 bg-soft-tint/10 p-2 text-text-1" /></label></section><section className="glass-card p-4"><label className="text-sm font-semibold text-text-1">Notes<textarea value={draft.notes ?? ''} onChange={(event) => setDraft({ ...draft, notes: event.target.value })} placeholder="How have you been feeling?" className="mt-3 min-h-24 w-full rounded-xl border border-border/20 bg-soft-tint/10 p-3 text-sm text-text-1" /></label></section></div></div><footer className="border-t border-border/20 p-4"><button disabled={saving} onClick={async () => { setSaving(true); try { await onSave(draft) } finally { setSaving(false) } }} className="glass-button w-full py-3 font-semibold">{saving ? 'Saving…' : 'Save shared daily log'}</button></footer></aside></div>
+}
+
+function PeriodCalendarModal({ logs, summary, onClose, onSave }: Readonly<{ logs: CareLog[]; summary: ReturnType<typeof calculateCycleSummary>; onClose: () => void; onSave: (dates: string[]) => Promise<void> }>) {
+  const existing = useMemo(() => new Set(logs.filter((log) => log.period_day).map((log) => log.log_date)), [logs])
+  const [selected, setSelected] = useState<Set<string>>(existing)
+  const [editing, setEditing] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(dateKey(new Date()))
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
+  const months = useMemo(() => {
+    const start = new Date(2024, 0, 1)
+    const now = new Date()
+    const end = new Date(now.getFullYear(), now.getMonth() + 6, 1)
+    const values: Date[] = []
+    for (const month of new Date(start); month <= end; month.setMonth(month.getMonth() + 1)) values.push(new Date(month))
+    return values
+  }, [])
+  const currentMonth = useRef<HTMLDivElement>(null)
+  useEffect(() => { currentMonth.current?.scrollIntoView({ block: 'start' }) }, [])
+  const toggle = (value: string) => {
+    if (!editing || saving) return
+    setSelected((current) => { const next = new Set(current); next.has(value) ? next.delete(value) : next.add(value); return next })
+  }
+  const cancelEditing = () => { setSelected(existing); setEditing(false); setSaveError(null) }
+  const selectedCycleDay = summary.lastPeriodStart && cycleDaysBetween(summary.lastPeriodStart, selectedDate) >= 0 ? cycleDaysBetween(summary.lastPeriodStart, selectedDate) + 1 : null
+  const selectedFertile = Boolean(summary.fertileStart && summary.fertileEnd && selectedDate >= summary.fertileStart && selectedDate <= summary.fertileEnd)
+  const selectedOvulation = selectedDate === summary.ovulationDate
+  const selectedPredictedPeriod = Boolean(summary.nextPeriodStart && selectedDate >= summary.nextPeriodStart && selectedDate < addDays(summary.nextPeriodStart, summary.periodLength))
+  const selectedLabel = selected.has(selectedDate)
+    ? 'Period'
+    : selectedOvulation
+      ? 'Higher estimated chance of pregnancy · predicted ovulation'
+      : selectedFertile
+        ? 'Estimated chance of pregnancy · fertile estimate'
+        : selectedPredictedPeriod
+          ? 'Predicted period'
+          : summary.estimateReady
+            ? 'Lower estimated chance of pregnancy'
+            : 'Pregnancy chance estimate unavailable'
+  return <div className="fixed inset-0 z-50"><button disabled={saving} onClick={onClose} aria-label="Close period calendar" className="absolute inset-0 bg-black/60 backdrop-blur-sm" /><section className="absolute inset-x-0 bottom-0 mx-auto flex max-h-[90vh] max-w-2xl flex-col rounded-t-[2rem] border border-border bg-soft-tint"><header className="flex items-center justify-between p-5"><div><h2 className="text-2xl text-text-1">{editing ? 'Edit period dates' : 'Log Period'}</h2><p className="mt-1 text-sm text-text-2">{editing ? 'Select or unselect period dates, then save your changes.' : 'Tap a date to view its cycle day and estimate. Choose Edit period dates to make changes.'}</p></div><button disabled={saving} onClick={onClose} className="rounded-full bg-card/10 p-2"><X className="h-5 w-5" /></button></header><div className="overflow-y-auto px-5 pb-4"><div className="grid gap-6 md:grid-cols-2">{months.map((month) => <div key={month.toISOString()} ref={month.getMonth() === new Date().getMonth() && month.getFullYear() === new Date().getFullYear() ? currentMonth : undefined}><MonthGrid month={month} selected={selected} summary={summary} editing={editing} selectedDate={selectedDate} onInspect={setSelectedDate} onToggle={toggle} /></div>)}</div><div className="mt-4 rounded-2xl border border-border/10 bg-card/20 p-4"><p className="text-sm text-text-2">{formatDate(selectedDate)}</p><p className="mt-1 text-lg font-semibold text-text-1">{selectedCycleDay ? `Cycle day ${selectedCycleDay}` : 'Outside the current cycle'}</p><p className={`mt-1 text-sm ${selected.has(selectedDate) ? 'text-accent-1' : selectedOvulation || selectedFertile ? 'text-success' : 'text-text-2'}`}>{selectedLabel}</p></div></div><footer className="sticky bottom-0 border-t border-border bg-soft-tint p-4"><div className="mb-3 flex flex-wrap gap-3 text-xs text-text-2"><span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full bg-accent-1" aria-hidden="true" /><b className="text-accent-1">Period</b></span><span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full border-2 border-success" aria-hidden="true" /><b className="text-success">Fertile estimate</b></span><span className="flex items-center gap-1"><span className="inline-block h-3 w-3 rounded-full border-2 border-accent-2" aria-hidden="true" /><b className="text-accent-2">Today</b></span></div>{saveError ? <p role="alert" className="mb-3 text-sm text-error">{saveError}</p> : null}{editing ? <div className="grid grid-cols-2 gap-3"><button disabled={saving} onClick={cancelEditing} className="glass-button py-3 font-semibold">Cancel</button><button disabled={saving} onClick={async () => { setSaving(true); setSaveError(null); try { await onSave([...selected]); setEditing(false) } catch (error) { setSaveError(error instanceof Error ? error.message : 'Could not save period dates. Please try again.') } finally { setSaving(false) } }} className="glass-button py-3 font-semibold">{saving ? 'Saving…' : 'Save period dates'}</button></div> : <button onClick={() => setEditing(true)} className="glass-button w-full py-3 font-semibold">Edit period dates</button>}</footer></section></div>
+}
+function MonthGrid({ month, selected, summary, editing, selectedDate, onInspect, onToggle }: { readonly month: Date; readonly selected: Set<string>; readonly summary: ReturnType<typeof calculateCycleSummary>; readonly editing: boolean; readonly selectedDate: string; readonly onInspect: (value: string) => void; readonly onToggle: (value: string) => void }) { const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate(); const leading = new Date(month.getFullYear(), month.getMonth(), 1).getDay(); const today = dateKey(new Date()); return <section><h3 className="mb-3 text-center text-lg text-text-1">{month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</h3><div className="grid grid-cols-7 gap-1 text-center text-xs text-text-2">{['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}{Array.from({ length: leading }).map((_, index) => <span key={`empty-${index}`} />)}{Array.from({ length: days }, (_, index) => { const current = new Date(month.getFullYear(), month.getMonth(), index + 1); const value = dateKey(current); const isSelected = selected.has(value); const fertile = summary.fertileStart && summary.fertileEnd && value >= summary.fertileStart && value <= summary.fertileEnd; const predictedPeriod = summary.nextPeriodStart && value >= summary.nextPeriodStart && value < addDays(summary.nextPeriodStart, summary.periodLength); const state = isSelected ? 'Period (logged)' : predictedPeriod ? 'Predicted period' : value === today ? 'Today' : fertile ? 'Fertile window estimate' : 'Normal cycle day'; return <button type="button" key={value} onClick={() => editing ? onToggle(value) : onInspect(value)} aria-label={`${month.toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}: ${state}`} className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm transition ${isSelected ? 'bg-accent-1 text-white' : predictedPeriod ? 'border-2 border-dashed border-accent-1 text-accent-1' : value === today ? 'border border-accent-2 text-accent-2' : fertile ? 'border border-success text-success' : 'text-text-1'} ${selectedDate === value ? 'ring-2 ring-accent-2/60' : ''} hover:bg-card/10`}>{index + 1}</button> })}</div></section> }
+
+function Insights({ logs, summary }: Readonly<{ logs: CareLog[]; summary: ReturnType<typeof calculateCycleSummary> }>) {
+  const moods = logs.reduce<Record<string, number>>((all, log) => { if (log.mood) all[log.mood] = (all[log.mood] ?? 0) + 1; return all }, {})
+  const symptoms = logs.flatMap((log) => log.symptoms ?? []).reduce<Record<string, number>>((all, item) => { all[item] = (all[item] ?? 0) + 1; return all }, {})
+  const moodEntries = Object.entries(moods).sort((a, b) => b[1] - a[1])
+  const symptomEntries = Object.entries(symptoms).sort((a, b) => b[1] - a[1]).slice(0, 8)
+  const allCycles = buildAllCycleHistory(logs, summary)
+  const cyclesByYear = allCycles.reduce<Record<string, CycleHistoryEntry[]>>((groups, cycle) => {
+    const year = cycle.startDate.slice(0, 4)
+    ;(groups[year] ??= []).push(cycle)
+    return groups
+  }, {})
+  const years = Object.keys(cyclesByYear).sort((a, b) => Number(b) - Number(a))
+  return <div className="space-y-4">
+    <section className="glass-card p-6">
+      <h2 className="text-2xl text-text-1">Insights & trends</h2>
+      <p className="mt-1 text-sm text-text-2">Your shared check-ins and cycle history, shown as tracking patterns—not medical conclusions.</p>
+      {!summary.regular && <p className="mt-3 rounded-xl bg-warning/10 p-3 text-sm text-warning">Recent cycle lengths vary. Predictions can move when a new period is logged.</p>}
+    </section>
+    <Stats title="Mood this month" items={moodEntries} empty="No mood entries yet. Use the daily log to start." />
+    <Stats title="Most common symptoms" items={symptomEntries} empty="No symptom entries yet." />
+    <section className="glass-card grid gap-4 p-6 sm:grid-cols-3">
+      {[['Current cycle', summary.day ? `Day ${summary.day}` : '—'], ['Estimated cycle', `${summary.cycleLength} days`], ['Recent range', `${summary.variationMin}–${summary.variationMax} days`]].map(([label, value]) => <div key={label}><p className="text-sm text-text-2">{label}</p><p className="mt-1 text-lg text-text-1">{value}</p></div>)}
+    </section>
+    <section className="glass-card p-6">
+      <div className="flex items-center justify-between gap-3"><div><h2 className="text-xl text-text-1">Cycle history</h2><p className="mt-1 text-sm text-text-2">From 2024 onward · {allCycles.length} tracked cycles</p></div><span className="text-xs text-text-2">R = period · G = fertile · W = normal</span></div>
+      <div className="mt-5 space-y-7">
+        {years.map((year) => <div key={year}><h3 className="text-lg font-semibold text-text-1">{year}</h3><div className="mt-3 space-y-4">{cyclesByYear[year].slice().reverse().map((cycle) => <div key={cycle.startDate} className="rounded-2xl border border-border/10 bg-card/20 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-semibold text-text-1">{cycle.status === 'predicted' ? 'Current cycle' : `${cycle.length} days`}</p><p className="text-sm text-text-2">{formatDate(cycle.startDate)} – {formatDate(cycle.endDate)}</p></div>{cycle.status === 'predicted' && <span className="rounded-full bg-success/10 px-2 py-1 text-xs text-success">Predicted</span>}</div><CycleStrip cycle={cycle} logs={logs} current={cycle.status === 'predicted'} fallbackPeriodLength={summary.periodLength} /></div>)}</div></div>)}
+      </div>
+      <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-text-2"><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-rose-500" />Period</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-success" />Fertile estimate</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full border border-white/50 bg-white" />Normal</span></div>
+    </section>
+  </div>
+}
+
+function Stats({ title, items, empty }: Readonly<{ title: string; items: Array<[string, number]>; empty: string }>) { const highest = Math.max(...items.map(([, count]) => count), 1); return <section className="glass-card p-6"><h2 className="text-xl text-text-1">{title}</h2>{items.length ? <div className="mt-4 space-y-3">{items.map(([label, count]) => <div key={label} className="flex items-center gap-3"><span className="w-28 truncate text-sm text-text-2">{label}</span><span className="h-2 flex-1 overflow-hidden rounded-full bg-soft-tint/20"><span className="block h-full rounded-full bg-accent-1" style={{ width: `${count / highest * 100}%` }} /></span><span className="w-8 text-right text-sm text-text-1">{count}</span></div>)}</div> : <p className="mt-3 text-sm text-text-2">{empty}</p>}</section> }
+
+function Reminders({ coupleId, userId }: Readonly<{ coupleId: string; userId: string }>) {
+  const [enabled, setEnabled] = useState<Record<CareReminder['reminder_type'], boolean>>({ pms: false, period: false, fertile: false, symptom: false })
+  const [saving, setSaving] = useState<string | null>(null)
+  useEffect(() => { void getCareReminders(coupleId).then((records) => setEnabled((current) => records.reduce((next, record) => ({ ...next, [record.reminder_type]: record.enabled }), current))).catch(() => undefined) }, [coupleId])
+  const toggle = async (key: CareReminder['reminder_type']) => {
+    const next = !enabled[key]
+    if (next && 'Notification' in window && Notification.permission === 'default') await Notification.requestPermission()
+    setSaving(key)
+    try { await saveCareReminder(coupleId, userId, key, next); setEnabled((current) => ({ ...current, [key]: next })) } finally { setSaving(null) }
+  }
+  const options: Array<[CareReminder['reminder_type'], string, string]> = [['pms', 'PMS reminder', '5–7 days before an expected period'], ['period', 'Period reminder', '1 day before expected period'], ['fertile', 'Fertile window alert', 'When the estimated fertile window begins'], ['symptom', 'Daily check-in', 'A gentle prompt to log symptoms']]
+  return <section className="glass-card p-6"><div className="flex items-center gap-3"><Bell className="h-6 w-6 text-accent-1" /><div><h2 className="text-xl text-text-1">Smart reminders</h2><p className="text-sm text-text-2">Reminder choices are shared; browser permission remains per device.</p></div></div><div className="mt-5 space-y-3">{options.map(([key, title, note]) => <label key={key} className="flex items-center justify-between rounded-btn bg-soft-tint/10 p-4"><span><strong className="block text-text-1">{title}</strong><small className="text-text-2">{note}</small></span><input aria-label={title} disabled={saving === key} type="checkbox" checked={enabled[key]} onChange={() => void toggle(key)} className="h-5 w-5 accent-accent-1" /></label>)}</div></section>
+}
+
+function CycleSettings({ settings, logs, onSave }: Readonly<{ settings: CycleSettings; logs: CareLog[]; onSave: (settings: Omit<CycleSettings, 'couple_id' | 'updated_at'>) => Promise<void> }>) { const [draft, setDraft] = useState({ cycle_length: settings.cycle_length, period_length: settings.period_length, last_period_start: settings.last_period_start ?? '' }); const [saving, setSaving] = useState(false); return <section className="glass-card max-w-2xl p-6"><div className="flex items-center gap-3"><Settings2 className="h-6 w-6 text-accent-1" /><div><h2 className="text-xl text-text-1">Cycle settings</h2><p className="text-sm text-text-2">These shared settings improve estimates when history is limited.</p></div></div><div className="mt-5 grid gap-4 sm:grid-cols-3"><label className="text-sm text-text-2">Saved setting (days)<input type="number" min="15" max="60" value={draft.cycle_length} onChange={(event) => setDraft({ ...draft, cycle_length: Number(event.target.value) })} className="mt-2 w-full rounded-xl border border-border/20 bg-soft-tint/10 p-3 text-text-1" /></label><label className="text-sm text-text-2">Period length (days)<input type="number" min="1" max="14" value={draft.period_length} onChange={(event) => setDraft({ ...draft, period_length: Number(event.target.value) })} className="mt-2 w-full rounded-xl border border-border/20 bg-soft-tint/10 p-3 text-text-1" /></label><label className="text-sm text-text-2">Last period start<input type="date" value={draft.last_period_start} onChange={(event) => setDraft({ ...draft, last_period_start: event.target.value })} className="mt-2 w-full rounded-xl border border-border/20 bg-soft-tint/10 p-3 text-text-1" /></label></div><p className="mt-4 text-sm text-text-2">{logs.filter((log) => log.period_day).length >= 2 ? 'Recent period history will also be used to improve this estimate.' : 'Log at least 2–3 periods for a more personalized estimate.'}</p><button disabled={saving} onClick={async () => { setSaving(true); try { await onSave({ ...draft, last_period_start: draft.last_period_start || null }) } finally { setSaving(false) }}} className="glass-button mt-5 px-5 py-3">{saving ? 'Saving…' : 'Save shared settings'}</button></section> }

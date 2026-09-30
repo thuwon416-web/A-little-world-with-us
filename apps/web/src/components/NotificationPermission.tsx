@@ -1,0 +1,39 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Bell } from 'lucide-react'
+import { requestNotificationPermission } from '@/lib/notifications'
+
+export default function NotificationPermission() {
+  const [permissionGranted, setPermissionGranted] = useState(false)
+
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPermissionGranted(Notification.permission === 'granted')
+    }
+  }, [])
+
+  const handleRequest = async () => {
+    const granted = await requestNotificationPermission()
+    setPermissionGranted(granted)
+  }
+
+  if (permissionGranted) {
+    return null
+  }
+
+  return (
+    <div className="p-4 bg-accent-1/10 rounded-btn border border-accent-1/20">
+      <h3 className="mb-2 flex items-center gap-2 font-medium text-text-1"><Bell className="icon-wiggle-once h-4 w-4" /> Enable Notifications</h3>
+      <p className="text-sm text-text-2 mb-4">
+        Stay updated with reminders and important alerts
+      </p>
+      <button
+        onClick={handleRequest}
+        className="px-4 py-2 bg-accent-1 hover:bg-accent-1/60 rounded-lg text-sm transition text-white"
+      >
+        Enable Notifications
+      </button>
+    </div>
+  )
+}

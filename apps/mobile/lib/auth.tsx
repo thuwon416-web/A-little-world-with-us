@@ -1,0 +1,69 @@
+import type { User } from '@supabase/supabase-js'
+import { useRouter } from 'expo-router'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+
+import { supabase } from './supabase'
+
+type AuthContextType = {
+  user: User | null
+  loading: boolean
+  signOut: () => Promise<void>
+}
+
+const AuthContext = createContext<AuthContextType>({
+  user: null,
+  loading: true,
+  signOut: async () => {},
+})
+
+export async function getAuthToken() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  return session?.access_token ?? null
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    const loadSession = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession()
+        setUser(session?.user ?? null)
+      } catch (error_) {
+        console.error('[auth] session load failed:', error_)
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    void loadSession()
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+      if (!session && event !== 'INITIAL_SESSION') {
+        router.replace('/login')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const signOut = async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
+
+  return <AuthContext.Provider value={{ user, loading, signOut }}>{children}</AuthContext.Provider>
+}
+
+export const useAuth = () => useContext(AuthContext)

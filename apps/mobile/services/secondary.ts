@@ -1,0 +1,155 @@
+import { supabase } from '@/lib/supabase'
+import type { VaultItem } from '@/shared-types'
+
+export async function getContext() {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) throw new Error('Please sign in again.')
+
+  const { data: accepted, error: acceptedError } = await supabase
+    .from('couple_links')
+    .select('id,couple_id,inviter_id,accepted_by,status,invite_code')
+    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+    .eq('status', 'accepted')
+    .maybeSingle()
+  if (acceptedError) throw new Error(acceptedError.message)
+  if (accepted) return { user, link: accepted, coupleId: accepted.couple_id }
+
+  const { data: pending, error: pendingError } = await supabase
+    .from('couple_links')
+    .select('id,couple_id,inviter_id,accepted_by,status,invite_code')
+    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+    .eq('status', 'pending')
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (pendingError) throw new Error(pendingError.message)
+  return { user, link: pending, coupleId: null }
+}
+
+export async function getVaultItems(coupleId: string): Promise<VaultItem[]> {
+  const context = await getContext()
+  if (!context.coupleId || context.coupleId !== coupleId) {
+    throw new Error('You can only view vault items for your accepted couple.')
+  }
+  const { data, error } = await supabase
+    .from('vault_items')
+    .select('id,couple_id,user_id,title,content,photo_url,created_at,updated_at')
+    .eq('couple_id', coupleId)
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return (data ?? []) as VaultItem[]
+}
+export async function addVaultItem(
+  coupleId: string,
+  userId: string,
+  title: string,
+  content: string,
+  photoUrl?: string
+) {
+  const context = await getContext()
+  if (!context.coupleId || context.coupleId !== coupleId || context.user.id !== userId) {
+    throw new Error('You can only add vault items for your accepted couple.')
+  }
+  const { error } = await supabase
+    .from('vault_items')
+    .insert({ couple_id: coupleId, user_id: userId, title, content, photo_url: photoUrl || null })
+  if (error) throw new Error(error.message)
+}
+export async function deleteVaultItem(id: string) {
+  const { coupleId } = await getContext()
+  if (!coupleId) throw new Error('Accept a partner link before managing vault items.')
+  const { error } = await supabase
+    .from('vault_items')
+    .delete()
+    .eq('id', id)
+    .eq('couple_id', coupleId)
+  if (error) throw new Error(error.message)
+}
+
+export async function getCapsules(coupleId: string) {
+  const { data, error } = await supabase
+    .from('time_capsules')
+    .select('*')
+    .eq('couple_id', coupleId)
+    .order('unlock_at')
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+export async function addCapsule(
+  coupleId: string,
+  userId: string,
+  recipientId: string,
+  title: string,
+  content: string,
+  unlockAt: string
+) {
+  const { error } = await supabase.from('time_capsules').insert({
+    couple_id: coupleId,
+    user_id: userId,
+    recipient_id: recipientId,
+    title,
+    content,
+    unlock_at: unlockAt,
+  })
+  if (error) throw new Error(error.message)
+}
+export async function deleteCapsule(id: string) {
+  const { error } = await supabase.from('time_capsules').delete().eq('id', id)
+  if (error) throw new Error(error.message)
+}
+
+export async function getCalls(coupleId: string) {
+  const { data, error } = await supabase
+    .from('call_logs')
+    .select('*')
+    .eq('couple_id', coupleId)
+    .order('created_at', { ascending: false })
+  if (error) throw new Error(error.message)
+  return data ?? []
+}
+
+export async function createLinkInvite() {
+  const { data, error } = await supabase.rpc('create_couple_code_invite')
+  if (error || !data) throw new Error(error?.message || 'Failed to create invite')
+  return data as string
+}
+
+export async function acceptLink(code: string) {
+  const normalized = code.trim().toUpperCase()
+  if (!/^[A-Z0-9]{8}$/.test(normalized)) throw new Error('Invalid invite code')
+
+  const { data: coupleId, error } = await supabase.rpc('accept_couple_code_invite', {
+    p_invite_code: normalized,
+  })
+  if (error || !coupleId) {
+    throw new Error(error?.message || 'Failed to accept invite')
+  }
+  return coupleId
+}
+export async function unlinkCoupleLink() {
+  const { error } = await supabase.rpc('leave_couple')
+  if (error) throw new Error(error.message || 'Failed to leave couple')
+}
+export async function declineLink(id: string) {
+  const { error } = await supabase.rpc('decline_couple_invite', {
+    p_link_id: id,
+  })
+  if (error) throw new Error(error.message || 'Failed to decline invite')
+}
+
+export function moonPhase(date = new Date()) {
+  const knownNewMoon = Date.UTC(2000, 0, 6, 18, 14)
+  const synodicMonth = 29.530588853
+  const age = ((date.getTime() - knownNewMoon) / 86400000) % synodicMonth
+  const phase = (age + synodicMonth) % synodicMonth
+  if (phase < 1.85 || phase > 27.68) return 'New Moon'
+  if (phase < 7.38) return 'Waxing Crescent'
+  if (phase < 9.23) return 'First Quarter'
+  if (phase < 14.77) return 'Waxing Gibbous'
+  if (phase < 16.61) return 'Full Moon'
+  if (phase < 22.15) return 'Waning Gibbous'
+  if (phase < 23.99) return 'Last Quarter'
+  return 'Waning Crescent'
+}

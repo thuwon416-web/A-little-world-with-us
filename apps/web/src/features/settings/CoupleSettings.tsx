@@ -1,0 +1,405 @@
+'use client'
+
+import { useState, useEffect, useCallback, useId } from 'react'
+import type { FormEvent } from 'react'
+import { Heart, UserPlus, Check, X, LogOut, Calendar, AlertCircle, Cake, Plus, Trash2 } from 'lucide-react'
+import {
+  getCoupleStatus,
+  createCoupleAndInvite,
+  acceptCoupleInvite,
+  declineCoupleInvite,
+  leaveCouple,
+  updateCouple,
+  type CoupleStatusResult,
+} from '@/lib/couples'
+import { supabase } from '@/lib/supabase'
+
+type CoupleOccasion = { id: string; title: string; month: number; day: number; kind: 'anniversary' | 'birthday' | 'custom' }
+const OCCASION_KINDS: CoupleOccasion['kind'][] = ['anniversary', 'birthday', 'custom']
+
+function isCoupleOccasion(value: unknown): value is CoupleOccasion {
+  if (typeof value !== 'object' || value === null) return false
+  return (
+    'id' in value &&
+    typeof value.id === 'string' &&
+    'title' in value &&
+    typeof value.title === 'string' &&
+    'month' in value &&
+    typeof value.month === 'number' &&
+    'day' in value &&
+    typeof value.day === 'number' &&
+    'kind' in value &&
+    OCCASION_KINDS.some((kind) => kind === value.kind)
+  )
+}
+
+function errorMessage(error: unknown, fallback: string): string {
+  return error instanceof Error ? error.message : fallback
+}
+
+export default function CoupleSettings() {
+  const fieldId = useId()
+  const [status, setStatus] = useState<CoupleStatusResult | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+
+  // Invite form state
+  const [email, setEmail] = useState('')
+  const [coupleName, setCoupleName] = useState('')
+  const [inviting, setInviting] = useState(false)
+
+  // Edit couple state
+  const [editingName, setEditingName] = useState('')
+  const [editingAnniversary, setEditingAnniversary] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [occasions, setOccasions] = useState<CoupleOccasion[]>([])
+  const [occasionTitle, setOccasionTitle] = useState('')
+  const [occasionDate, setOccasionDate] = useState('')
+  const [occasionKind, setOccasionKind] = useState<CoupleOccasion['kind']>('birthday')
+
+  const loadOccasions = useCallback(async (coupleId: string): Promise<void> => {
+    const { data, error: occasionsError } = await supabase
+      .from('couple_occasions')
+      .select('id,title,month,day,kind')
+      .eq('couple_id', coupleId)
+      .order('month')
+      .order('day')
+    if (occasionsError) throw occasionsError
+    setOccasions((data ?? []).filter(isCoupleOccasion))
+  }, [])
+
+  const loadStatus = useCallback(async () => {
+    try {
+      setLoading(true)
+      const result = await getCoupleStatus()
+      setStatus(result)
+      if (result.couple) {
+        setEditingName(result.couple.name || '')
+        setEditingAnniversary(result.couple.anniversary || '')
+        await loadOccasions(result.couple.id)
+      }
+    } catch {
+      setError('Failed to load couple status')
+    } finally {
+      setLoading(false)
+    }
+  }, [loadOccasions])
+
+  useEffect(() => {
+    void loadStatus()
+  }, [loadStatus])
+
+  const handleInvite = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault()
+    if (!email.trim()) return
+
+    try {
+      setInviting(true)
+      setError(null)
+      await createCoupleAndInvite(email.trim(), coupleName.trim() || undefined)
+      setSuccess('Invite sent successfully!')
+      setEmail('')
+      setCoupleName('')
+      await loadStatus()
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to send invite'))
+    } finally {
+      setInviting(false)
+    }
+  }
+
+  const handleAccept = async (): Promise<void> => {
+    if (!status?.invite) return
+
+    try {
+      setError(null)
+      await acceptCoupleInvite(status.invite.id)
+      setSuccess('You are now coupled!')
+      await loadStatus()
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to accept invite'))
+    }
+  }
+
+  const handleDecline = async (): Promise<void> => {
+    if (!status?.invite) return
+
+    try {
+      setError(null)
+      await declineCoupleInvite(status.invite.id)
+      setSuccess('Invite declined')
+      await loadStatus()
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to decline invite'))
+    }
+  }
+
+  const handleLeave = async (): Promise<void> => {
+    if (!confirm('Are you sure you want to leave this couple? This cannot be undone.')) {
+      return
+    }
+
+    try {
+      setError(null)
+      await leaveCouple()
+      setSuccess('You have left the couple')
+      await loadStatus()
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to leave couple'))
+    }
+  }
+
+  const handleUpdateCouple = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault()
+    if (!status?.couple) return
+
+    try {
+      setSaving(true)
+      setError(null)
+      await updateCouple(status.couple.id, {
+        name: editingName.trim() || undefined,
+        anniversary: editingAnniversary || undefined,
+      })
+      if (editingAnniversary) {
+        const date = new Date(`${editingAnniversary}T00:00:00`)
+        await supabase.from('couple_occasions').upsert({
+          couple_id: status.couple.id,
+          title: 'Our anniversary',
+          month: date.getMonth() + 1,
+          day: date.getDate(),
+          kind: 'anniversary',
+        }, { onConflict: 'couple_id,kind,title' })
+      }
+      setSuccess('Couple updated successfully!')
+      await loadStatus()
+    } catch (err) {
+      setError(errorMessage(err, 'Failed to update couple'))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const addOccasion = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault()
+    if (!status?.couple || !occasionTitle.trim() || !occasionDate) return
+    const date = new Date(`${occasionDate}T00:00:00`)
+    const { data: { user } } = await supabase.auth.getUser()
+    const { error: insertError } = await supabase.from('couple_occasions').insert({
+      couple_id: status.couple.id,
+      title: occasionTitle.trim(),
+      month: date.getMonth() + 1,
+      day: date.getDate(),
+      kind: occasionKind,
+      created_by: user?.id ?? null,
+    })
+    if (insertError) { setError(insertError.message); return }
+    setOccasionTitle('')
+    setOccasionDate('')
+    await loadOccasions(status.couple.id)
+  }
+
+  const deleteOccasion = async (id: string): Promise<void> => {
+    const { error: deleteError } = await supabase.from('couple_occasions').delete().eq('id', id)
+    if (deleteError) { setError(deleteError.message); return }
+    setOccasions((current) => current.filter((occasion) => occasion.id !== id))
+  }
+
+  if (loading) {
+    return (
+      <div className="glass-card p-5">
+        <div className="animate-pulse">
+          <div className="h-5 w-1/3 rounded bg-accent-1/10" />
+          <div className="mt-4 h-20 rounded bg-accent-1/10" />
+        </div>
+      </div>
+    )
+  }
+
+  if (!status) {
+    return null
+  }
+
+  return (
+    <div className="glass-card p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Heart className="h-5 w-5 text-accent-1" />
+        <h3 className="text-lg font-semibold text-text-1">Couple / Relationship</h3>
+      </div>
+
+      {error && (
+        <div className="mb-4 flex items-start gap-2 rounded-xl bg-error/10 p-3 text-sm text-error">
+          <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+          <p>{error}</p>
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-4 rounded-xl bg-success/10 p-3 text-sm text-success">
+          {success}
+        </div>
+      )}
+
+      {/* No Couple */}
+      {status.status === 'none' && (
+        <div className="space-y-4">
+          <p className="text-sm text-text-2">
+            You&apos;re not currently coupled with anyone. Invite your partner to start sharing your journey together.
+          </p>
+          <form onSubmit={handleInvite} className="space-y-3">
+            <div>
+              <label htmlFor={`${fieldId}-partner-email`} className="text-sm text-text-2">Partner&apos;s email</label>
+              <input
+                id={`${fieldId}-partner-email`}
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="partner@example.com"
+                autoComplete="email"
+                className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
+                required
+              />
+            </div>
+            <div>
+              <label htmlFor={`${fieldId}-couple-name`} className="text-sm text-text-2">Couple name (optional)</label>
+              <input
+                id={`${fieldId}-couple-name`}
+                type="text"
+                value={coupleName}
+                onChange={(e) => setCoupleName(e.target.value)}
+                placeholder="Our Little World"
+                autoComplete="off"
+                className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={inviting}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+            >
+              <UserPlus className="h-4 w-4" />
+              {inviting ? 'Sending invite...' : 'Send Invite'}
+            </button>
+          </form>
+        </div>
+      )}
+
+      {/* Pending Invite */}
+      {status.status === 'pending' && status.invite && (
+        <div className="space-y-4">
+          {status.partner ? (
+            <div className="rounded-xl bg-soft-tint p-4">
+              <p className="text-sm text-text-2 mb-2">
+                <span className="font-medium text-text-1">{status.partner.full_name || status.partner.email}</span> has invited you to be their partner.
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAccept}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-success/20 px-3 py-2 text-sm font-medium text-success hover:bg-success/30"
+                >
+                  <Check className="h-4 w-4" />
+                  Accept
+                </button>
+                <button
+                  onClick={handleDecline}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-error/20 px-3 py-2 text-sm font-medium text-error hover:bg-error/30"
+                >
+                  <X className="h-4 w-4" />
+                  Decline
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-text-2">
+              You have sent an invite. Waiting for your partner to accept...
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Accepted Couple */}
+      {status.status === 'accepted' && status.couple && (
+        <div className="space-y-4">
+          <div className="rounded-xl bg-soft-tint p-4">
+            <div className="mb-4 rounded-lg border border-accent-1/15 bg-card px-3 py-2.5">
+              <p className="text-sm font-semibold text-text-1">Connected with ${status.partner?.full_name || status.partner?.email || "your partner"}</p>
+              <p className="mt-0.5 text-xs text-success">Status: Connected</p>
+              <p className="mt-1 text-xs text-text-2">Manage relationship</p>
+            </div>
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-sm font-medium text-text-1">
+                  {status.couple.name || 'My Couple'}
+                </p>
+                {status.partner && (
+                  <p className="text-xs text-text-2">
+                    Partner: {status.partner.full_name || status.partner.email}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={handleLeave}
+                className="flex items-center gap-1 rounded-lg bg-error/10 px-2 py-1 text-xs text-error hover:bg-error/20"
+              >
+                <LogOut className="h-3 w-3" />
+                Leave
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateCouple} className="space-y-3">
+              <div>
+                <label htmlFor={`${fieldId}-edit-couple-name`} className="text-xs text-text-2">Couple name</label>
+                <input
+                  id={`${fieldId}-edit-couple-name`}
+                  type="text"
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-accent-1/20 bg-soft-tint px-2 py-1.5 text-sm text-text-1"
+                />
+              </div>
+              <div>
+                <label htmlFor={`${fieldId}-anniversary`} className="text-xs text-text-2">Anniversary</label>
+                <input
+                  id={`${fieldId}-anniversary`}
+                  type="date"
+                  value={editingAnniversary}
+                  onChange={(e) => setEditingAnniversary(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-accent-1/20 bg-soft-tint px-2 py-1.5 text-sm text-text-1"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={saving}
+                className="w-full rounded-lg bg-accent-1 px-2 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+              >
+                {saving ? 'Saving...' : 'Update'}
+              </button>
+            </form>
+          </div>
+
+          {status.couple.anniversary && (
+            <div className="flex items-center gap-2 text-xs text-text-2">
+              <Calendar className="h-4 w-4" />
+              <span>Anniversary: {new Date(status.couple.anniversary).toLocaleDateString()}</span>
+            </div>
+          )}
+
+          <div className="rounded-xl border border-accent-1/15 bg-soft-tint p-4">
+            <div className="flex items-center gap-2"><Cake className="h-4 w-4 text-accent-2" /><p className="text-sm font-medium text-text-1">Shared occasions</p></div>
+            <p className="mt-1 text-xs text-text-2">Birthdays and special dates add a gentle visual touch for both of you.</p>
+            <form onSubmit={addOccasion} className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
+              <input aria-label="Occasion title" value={occasionTitle} onChange={(event) => setOccasionTitle(event.target.value)} maxLength={80} placeholder="Her birthday" className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
+              <input aria-label="Occasion date" type="date" value={occasionDate} onChange={(event) => setOccasionDate(event.target.value)} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
+              <select aria-label="Occasion type" value={occasionKind} onChange={(event) => {
+                const kind = OCCASION_KINDS.find((item) => item === event.target.value)
+                if (kind) setOccasionKind(kind)
+              }} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1"><option value="birthday">Birthday</option><option value="custom">Special day</option></select>
+              <button type="submit" className="inline-flex items-center justify-center gap-1 rounded-lg bg-accent-1 px-3 py-1.5 text-xs font-medium text-white"><Plus className="h-3.5 w-3.5" />Add</button>
+            </form>
+            {occasions.length > 0 && <ul className="mt-3 space-y-2">{occasions.map((occasion) => <li key={occasion.id} className="flex items-center justify-between gap-3 rounded-lg bg-card px-3 py-2 text-xs"><span className="text-text-1">{occasion.title} · {String(occasion.month).padStart(2, '0')}/{String(occasion.day).padStart(2, '0')}</span><button type="button" onClick={() => void deleteOccasion(occasion.id)} aria-label={`Delete ${occasion.title}`} className="text-error hover:text-error/80"><Trash2 className="h-3.5 w-3.5" /></button></li>)}</ul>}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

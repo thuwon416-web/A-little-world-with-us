@@ -1,0 +1,63 @@
+{
+  "Chat": {
+    "title": "Chat",
+    "placeholder": "Type a message...",
+    "send": "Send"
+  },
+  "Care": {
+    "title": "Care",
+    "dailyLog": "Daily Log",
+    "mood": "Mood",
+    "symptoms": "Symptoms"
+  },
+  "Settings": {
+    "title": "Settings",
+    "language": "Language"
+  },
+  "Nav": {
+    "chat": "Chat",
+    "care": "Care",
+    "settings": "Settings"
+  },
+  "nav": {
+    "home": "Home",
+    "memories": "Memories",
+    "memoryMap": "Memory Map",
+    "ourStory": "Our Story",
+    "whispers": "Whispers",
+    "calls": "Calls",
+    "care": "Care",
+    "wellness": "Wellness & Play",
+    "plans": "Plans",
+    "astrology": "Astrology",
+    "ai": "AI Companion",
+    "vault": "Vault",
+    "finance": "Finance",
+    "watchTogether": "Watch Together",
+    "learning": "Korean Tutor",
+    "games": "Games",
+    "music": "Music",
+    "gallery": "Gallery",
+    "location": "Location",
+    "settings": "Settings",
+    "about": "About",
+    "help": "Help",
+    "logout": "Logout",
+    "more": "More",
+    "everythingElse": "Everything else",
+    "ourMemories": "Our Memories",
+    "locationSafety": "Location Safety",
+    "aiGuardian": "AI Guardian",
+    "profile": "Profile",
+    "privateVault": "Private Vault",
+    "coupleGames": "Couple Games",
+    "timeCapsules": "Time Capsules",
+    "coupleLinking": "Couple Linking",
+    "helpCenter": "Help Center",
+    "terms": "Terms",
+    "lists": "Lists",
+    "reminders": "Reminders",
+    "signOut": "Sign out",
+    "todaysWhisper": "Today's whisper"
+  }
+}
