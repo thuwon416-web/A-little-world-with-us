@@ -3,3 +3,8 @@ alter table public.google_drive_connections enable row level security;
 revoke all on public.google_drive_connections from anon, authenticated;
 grant all on public.google_drive_connections to service_role;
 create index if not exists google_drive_connections_expires_at_idx on public.google_drive_connections (expires_at);
+alter table public.memories add column if not exists storage_provider text not null default 'supabase';
+alter table public.memories add column if not exists drive_file_id text;
+alter table public.memories drop constraint if exists memories_storage_provider_check;
+alter table public.memories add constraint memories_storage_provider_check check (storage_provider in ('supabase', 'google_drive'));
+create index if not exists memories_drive_file_id_idx on public.memories (drive_file_id) where drive_file_id is not null;
