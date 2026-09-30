@@ -1,3 +1,4 @@
+import * as Clipboard from 'expo-clipboard'
 import { Check, Copy, ShieldCheck } from 'lucide-react-native'
 import { useState } from 'react'
 import { Pressable, Text, TextInput, View } from 'react-native'
@@ -57,7 +58,7 @@ export default function VaultSetupModal({
           <Text style={{ color: colors.text, marginTop: 14, lineHeight: 24 }}>
             {phrase.join(' ')}
           </Text>
-          <Pressable onPress={() => void navigator.clipboard?.writeText(phrase.join(' '))}>
+          <Pressable onPress={() => void Clipboard.setStringAsync(phrase.join(' '))}>
             <Copy size={17} color={colors.accent1} />
           </Pressable>
         </View>
