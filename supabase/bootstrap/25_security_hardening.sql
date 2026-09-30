@@ -31,7 +31,7 @@ begin
   )
   select target_couple_id, auth.uid(), value, true, auth.uid(), auth.uid(), now()
   from unnest(normalized_dates) as value
-  on conflict (couple_id, log_date)
+  on conflict on constraint care_daily_logs_couple_id_log_date_key
   do update set
     period_day = true,
     updated_by = auth.uid(),
