@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { createCipheriv, createDecipheriv, createHmac, randomBytes } from 'node:crypto'
+import { createCipheriv, createDecipheriv, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
@@ -63,7 +63,7 @@ export function verifyOAuthState(state: string, userId: string): boolean {
   if (!payload || !signature) return false
   const expected = createHmac('sha256', stateSecret()).update(payload).digest('base64url')
   if (signature.length !== expected.length) return false
-  const valid = requireTimingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+  const valid = timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
   if (!valid) return false
   try {
     const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as { userId?: string; exp?: number }
