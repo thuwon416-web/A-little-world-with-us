@@ -32,6 +32,7 @@ import {
 } from '@/services/care'
 import {
   addDays,
+  buildNativeCycleHistory,
   calculateNativeCycleSummary,
   dateKey,
   type NativeCycleSummary,
@@ -238,6 +239,42 @@ function Card({ title, children }: Readonly<{ title: string; children: ReactNode
   )
 }
 
+function getNativePeriodRunLength(logs: CareLog[], startDate: string, endDate: string, fallback: number) {
+  const periodDays = new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
+  let length = 0
+  let cursor = startDate
+  while (cursor <= endDate && periodDays.has(cursor)) {
+    length += 1
+    cursor = addDays(cursor, 1)
+  }
+  return length || fallback
+}
+
+function NativeCycleStrip({ cycle, logs, fallbackPeriodLength }: Readonly<{ cycle: NativeCycleSummary['cycleHistory'][number]; logs: CareLog[]; fallbackPeriodLength: number }>) {
+  const periodLength = getNativePeriodRunLength(logs, cycle.startDate, cycle.endDate, fallbackPeriodLength)
+  const ovulation = addDays(cycle.startDate, cycle.length - 14)
+  const fertileStart = addDays(ovulation, -5)
+  const fertileEnd = addDays(ovulation, 1)
+  return (
+    <View style={nativeStripStyles.row}>
+      {Array.from({ length: cycle.length }, (_, index) => {
+        const date = addDays(cycle.startDate, index)
+        const period = index < periodLength
+        const fertile = date >= fertileStart && date <= fertileEnd
+        return <View key={date} style={[nativeStripStyles.dot, period ? nativeStripStyles.period : fertile ? nativeStripStyles.fertile : nativeStripStyles.normal]} />
+      })}
+    </View>
+  )
+}
+
+const nativeStripStyles = {
+  row: { flexDirection: 'row' as const, flexWrap: 'wrap' as const, gap: 4, marginTop: 10 },
+  dot: { width: 10, height: 10, borderRadius: 5 },
+  period: { backgroundColor: '#ef4444' },
+  fertile: { backgroundColor: '#22c55e' },
+  normal: { backgroundColor: '#ffffff', borderWidth: 1, borderColor: '#d1d5db' },
+}
+
 function Insights({
   logs,
   summary,
@@ -249,33 +286,12 @@ function Insights({
 }>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
-  const moodCounts = useMemo(
-    () =>
-      Object.entries(
-        logs.reduce<Record<string, number>>((counts, log) => {
-          if (log.mood) counts[log.mood] = (counts[log.mood] ?? 0) + 1
-          return counts
-        }, {})
-      )
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6),
-    [logs]
-  )
-  const symptomCounts = useMemo(
-    () =>
-      Object.entries(
-        logs
-          .flatMap((log) => log.symptoms ?? [])
-          .reduce<Record<string, number>>((counts, symptom) => {
-            counts[symptom] = (counts[symptom] ?? 0) + 1
-            return counts
-          }, {})
-      )
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 6),
-    [logs]
-  )
+  const moodCounts = useMemo(() => Object.entries(logs.reduce<Record<string, number>>((counts, log) => { if (log.mood) counts[log.mood] = (counts[log.mood] ?? 0) + 1; return counts }, {})).sort((a, b) => b[1] - a[1]).slice(0, 6), [logs])
+  const symptomCounts = useMemo(() => Object.entries(logs.flatMap((log) => log.symptoms ?? []).reduce<Record<string, number>>((counts, symptom) => { counts[symptom] = (counts[symptom] ?? 0) + 1; return counts }, {})).sort((a, b) => b[1] - a[1]).slice(0, 6), [logs])
   const maxMood = Math.max(1, ...moodCounts.map(([, count]) => count))
+  const allCycles = buildNativeCycleHistory(logs.map((log) => ({ log_date: log.logDate, period_day: log.periodDay, mood: log.mood, symptoms: log.symptoms })), summary)
+  const cyclesByYear = allCycles.reduce<Record<string, typeof allCycles>>((groups, cycle) => { const year = cycle.startDate.slice(0, 4); (groups[year] ??= []).push(cycle); return groups }, {})
+  const years = Object.keys(cyclesByYear).sort((a, b) => Number(b) - Number(a))
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.eyebrow}>CYCLE CARE</Text>
@@ -284,52 +300,38 @@ function Insights({
         <View style={styles.statGrid}>
           <Stat label="Calculated average" value={`${summary.cycleLength} days`} />
           <Stat label="Saved setting" value={`${savedCycleLength} days`} />
-          <Stat label="Variation" value={`${summary.variationMin}-${summary.variationMax} days`} />
-          <Stat label="Regularity" value={summary.regular ? 'Regular' : 'Irregular'} />
+          <Stat label="Recent range" value={`${summary.variationMin}-${summary.variationMax} days`} />
+          <Stat label="Regularity" value={summary.regular ? 'Regular' : 'Varies recently'} />
           <Stat label="Period average" value={`${summary.periodLength} days`} />
         </View>
       </Card>
       <Card title="Mood trends">
-        {moodCounts.length ? (
-          moodCounts.map(([mood, count]) => (
-            <View key={mood} style={styles.barRow}>
-              <Text style={styles.barLabel}>{mood}</Text>
-              <View style={styles.barTrack}>
-                <View style={[styles.bar, { width: `${(count / maxMood) * 100}%` }]} />
-              </View>
-              <Text style={styles.barValue}>{count}</Text>
-            </View>
-          ))
-        ) : (
-          <Text style={styles.muted}>Log moods to see your trend.</Text>
-        )}
+        {moodCounts.length ? moodCounts.map(([mood, count]) => (
+          <View key={mood} style={styles.barRow}><Text style={styles.barLabel}>{mood}</Text><View style={styles.barTrack}><View style={[styles.bar, { width: `${(count / maxMood) * 100}%` }]} /></View><Text style={styles.barValue}>{count}</Text></View>
+        )) : <Text style={styles.muted}>Log moods to see your trend.</Text>}
       </Card>
       <Card title="Most frequent symptoms">
-        {symptomCounts.length ? (
-          symptomCounts.map(([symptom, count]) => (
-            <View key={symptom} style={styles.frequencyRow}>
-              <Text style={styles.text}>{symptom}</Text>
-              <Text style={styles.accentText}>{count} days</Text>
-            </View>
-          ))
-        ) : (
-          <Text style={styles.muted}>Log symptoms to see patterns.</Text>
-        )}
+        {symptomCounts.length ? symptomCounts.map(([symptom, count]) => (
+          <View key={symptom} style={styles.frequencyRow}><Text style={styles.text}>{symptom}</Text><Text style={styles.accentText}>{count} days</Text></View>
+        )) : <Text style={styles.muted}>Log symptoms to see patterns.</Text>}
       </Card>
       <Card title="Cycle history">
-        {summary.cycleHistory
-          .slice(-6)
-          .reverse()
-          .map((cycle) => (
-            <View key={`${cycle.startDate}-${cycle.status}`} style={styles.frequencyRow}>
-              <Text style={styles.text}>
-                {cycle.startDate} - {cycle.endDate}
-              </Text>
-              <Text style={styles.accentText}>
-                {cycle.length}d · {cycle.status}
-              </Text>
-            </View>
-          ))}
+        <Text style={styles.muted}>From 2024 onward · {allCycles.length} tracked cycles</Text>
+        {years.map((year) => (
+          <View key={year} style={{ marginTop: 18 }}>
+            <Text style={styles.cardTitle}>{year}</Text>
+            {cyclesByYear[year].slice().reverse().map((cycle) => (
+              <View key={cycle.startDate} style={styles.frequencyRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.text}>{cycle.status === 'predicted' ? 'Current cycle' : `${cycle.length} days`}</Text>
+                  <Text style={styles.muted}>{cycle.startDate} – {cycle.endDate}</Text>
+                  <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} />
+                </View>
+              </View>
+            ))}
+          </View>
+        ))}
+        <Text style={styles.muted}>Red = period · Green = fertile estimate · White = normal</Text>
       </Card>
     </ScrollView>
   )
