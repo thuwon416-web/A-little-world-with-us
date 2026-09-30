@@ -1,17 +1,20 @@
 # Project Documentation
 
-This directory is the maintained documentation hub for **A Little World With Us**.
+Documentation for **A Little World With Us**.
 
-## Sections
+## Guides
 
 - [Architecture](architecture/overview.md) — platform boundaries and data flow.
-- [Setup](SETUP.md) — local development and environment basics.
+- [Setup](SETUP.md) — local development and environment configuration.
 - [Deployment](deployment/DEPLOYMENT.md) — production release and verification.
-- [Google Drive](setup/google-drive.md) — web OAuth and Drive-backed memory storage.
-- [Security](security/data-retention.md) — retention and storage rules.
+- [Google Drive](setup/google-drive.md) — optional Web OAuth and Drive-backed memory storage.
+- [Data retention and storage](security/data-retention.md) — retention rules and storage responsibilities.
+- [Media encryption](MEDIA-ENCRYPTION.md) — encrypted media format and limitations.
 
-## Documentation rules
+## Repository rules
 
-- Keep operational instructions here instead of adding one-off Markdown files at the repository root.
-- Keep framework-specific instructions next to the platform when they are tightly coupled to that platform.
-- Never put credentials, access tokens, OAuth client secrets, or production environment values in documentation.
+- Keep operational documentation under `docs/` unless a root-level policy file is required.
+- Never document real credentials, tokens, OAuth secrets, encryption keys, or production environment values.
+- Keep Web ↔ Mobile behavior aligned.
+- Treat Supabase RLS and server-side authorization as security boundaries.
+- Use additive, reviewed database migrations for existing production databases.
