@@ -47,9 +47,15 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
     if (splitType === 'percentage' && (!Number.isFinite(parsedPartnerPercentage) || parsedPartnerPercentage < 0 || parsedPartnerPercentage > 100)) {
       return setError("Partner's percentage must be between 0 and 100.")
     }
-    if (splitType === 'custom' && (!Number.isFinite(parsedYourShare) || !Number.isFinite(parsedPartnerExact) || Math.abs(parsedYourShare + parsedPartnerExact - parsedAmount) > 0.01)) {
+    if (splitType === 'custom' && (!Number.isFinite(parsedYourShare) || !Number.isFinite(parsedPartnerExact) || parsedYourShare < 0 || parsedPartnerExact < 0 || Math.abs(parsedYourShare + parsedPartnerExact - parsedAmount) > 0.01)) {
       return setError('Your share and partner share must add up to the total amount.')
     }
+
+    const storedPartnerPercentage = splitType === 'percentage'
+      ? parsedPartnerPercentage
+      : splitType === 'custom'
+        ? (parsedPartnerExact / parsedAmount) * 100
+        : 50
 
     setSubmitting(true)
     setError(null)
@@ -62,7 +68,7 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
         paidBy,
         splitType,
         splitWith: partnerId,
-        splitPercentage: splitType === 'percentage' ? parsedPartnerPercentage : null,
+        splitPercentage: storedPartnerPercentage,
         notes: notes.trim() || null,
       })
       onSaved()
