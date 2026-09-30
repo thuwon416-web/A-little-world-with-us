@@ -154,13 +154,6 @@ function createCareCheckIn(draft: CareCheckInDraft): CareCheckIn {
   }
 }
 
-function getToggledPeriodDates(logs: CareLog[], date: string): string[] {
-  const selected = new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
-  if (selected.has(date)) selected.delete(date)
-  else selected.add(date)
-  return [...selected]
-}
-
 function createCareExport(logs: CareLog[]): string {
   const header = 'date,period,mood,symptoms,water,weight,basal_temperature,notes'
   const rows = logs.map((log) =>
@@ -1069,21 +1062,6 @@ export default function CareScreen() {
       await refresh()
     } catch (error_) {
       Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
-    } finally {
-      setSaving(false)
-    }
-  }
-  const toggleSharedPeriodDate = async (date: string) => {
-    if (!data) return
-    try {
-      setSaving(true)
-      await saveSharedPeriodDates(data.coupleId, getToggledPeriodDates(data.logs, date))
-      await refresh()
-    } catch (error_) {
-      Alert.alert(
-        'Could not save period dates',
-        error_ instanceof Error ? error_.message : 'Please try again. Your calendar remains open.'
-      )
     } finally {
       setSaving(false)
     }
