@@ -1,4 +1,3 @@
-import { useRouter } from 'expo-router'
 import { Gamepad2, type LucideIcon } from 'lucide-react-native'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -65,7 +64,6 @@ function Section({
 }
 
 export default function GamesScreen() {
-  const router = useRouter()
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
