@@ -59,6 +59,7 @@ const settingCards = [
 export default function SettingsPage() {
   const [driveConnected, setDriveConnected] = useState(false)
   const [driveLoading, setDriveLoading] = useState(true)
+  const [driveDisconnecting, setDriveDisconnecting] = useState(false)
   useEffect(() => {
     void fetch('/api/drive/status', { cache: 'no-store' }).then(async (response) => {
       const body = await response.json() as { connected?: boolean }
@@ -66,6 +67,20 @@ export default function SettingsPage() {
     }).catch(() => setDriveConnected(false)).finally(() => setDriveLoading(false))
   }, [])
   const [activeSettingsModal, setActiveSettingsModal] = useState<'reminder' | 'pin' | null>(null)
+
+  const disconnectDrive = async () => {
+    if (driveDisconnecting) return
+    setDriveDisconnecting(true)
+    try {
+      const response = await fetch('/api/drive/disconnect', { method: 'POST' })
+      if (!response.ok) throw new Error('Unable to disconnect Google Drive.')
+      setDriveConnected(false)
+    } catch (error) {
+      window.alert(error instanceof Error ? error.message : 'Unable to disconnect Google Drive.')
+    } finally {
+      setDriveDisconnecting(false)
+    }
+  }
 
   return (
     <div className="space-y-6 p-4 md:p-6 animate-fade-in">
@@ -142,6 +157,7 @@ export default function SettingsPage() {
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="text-sm text-text-2">{driveLoading ? 'Checking…' : driveConnected ? 'Connected' : 'Not connected'}</span>
           {!driveLoading && !driveConnected ? <a href="/api/drive/start" className="rounded-full bg-accent-1 px-4 py-2 text-sm font-semibold text-white">Connect Google Drive</a> : null}
+          {!driveLoading && driveConnected ? <button type="button" onClick={() => void disconnectDrive()} disabled={driveDisconnecting} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-text-1 disabled:opacity-50">{driveDisconnecting ? 'Disconnecting…' : 'Disconnect'}</button> : null}
         </div>
       </section>
 
