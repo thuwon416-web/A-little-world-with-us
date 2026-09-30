@@ -186,7 +186,39 @@ function PeriodCalendarModal({ logs, summary, onClose, onSave }: Readonly<{ logs
 }
 function MonthGrid({ month, selected, summary, onToggle }: { readonly month: Date; readonly selected: Set<string>; readonly summary: ReturnType<typeof calculateCycleSummary>; readonly onToggle: (value: string) => void }) { const days = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate(); const leading = new Date(month.getFullYear(), month.getMonth(), 1).getDay(); const today = dateKey(new Date()); return <section><h3 className="mb-3 text-center text-lg text-text-1">{month.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</h3><div className="grid grid-cols-7 gap-1 text-center text-xs text-text-2">{['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => <span key={`${day}-${index}`}>{day}</span>)}{Array.from({ length: leading }).map((_, index) => <span key={`empty-${index}`} />)}{Array.from({ length: days }, (_, index) => { const current = new Date(month.getFullYear(), month.getMonth(), index + 1); const value = dateKey(current); const isSelected = selected.has(value); const fertile = summary.fertileStart && summary.fertileEnd && value >= summary.fertileStart && value <= summary.fertileEnd; const state = isSelected ? 'Period (selected)' : value === today ? 'Today' : fertile ? 'Fertile window estimate' : 'Not selected'; return <button key={value} onClick={() => onToggle(value)} aria-label={`${month.toLocaleDateString(undefined, { month: 'long', day: 'numeric' })}: ${state}`} className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full text-sm transition ${isSelected ? 'bg-accent-1 text-white' : value === today ? 'border border-accent-2 text-accent-2' : fertile ? 'border border-success text-success' : 'text-text-1 hover:bg-card/10'}`}>{index + 1}</button> })}</div></section> }
 
-function Insights({ logs, summary }: Readonly<{ logs: CareLog[]; summary: ReturnType<typeof calculateCycleSummary> }>) { const moods = logs.reduce<Record<string, number>>((all, log) => { if (log.mood) all[log.mood] = (all[log.mood] ?? 0) + 1; return all }, {}); const symptoms = logs.flatMap((log) => log.symptoms ?? []).reduce<Record<string, number>>((all, item) => { all[item] = (all[item] ?? 0) + 1; return all }, {}); const moodEntries = Object.entries(moods).sort((a, b) => b[1] - a[1]); const symptomEntries = Object.entries(symptoms).sort((a, b) => b[1] - a[1]).slice(0, 8); return <div className="space-y-4"><section className="glass-card p-6"><h2 className="text-2xl text-text-1">Insights & trends</h2><p className="mt-1 text-sm text-text-2">Your shared check-ins, shown as gentle patterns—not medical conclusions.</p></section><Stats title="Mood this month" items={moodEntries} empty="No mood entries yet. Use the daily log to start." /><Stats title="Most common symptoms" items={symptomEntries} empty="No symptom entries yet." /><section className="glass-card grid gap-4 p-6 sm:grid-cols-3">{[['Average', `${summary.cycleLength} days`], ['Cycle range', summary.regular ? 'Regular pattern' : 'Varies recently'], ['Period length', `${summary.periodLength} days`]].map(([label, value]) => <div key={label}><p className="text-sm text-text-2">{label}</p><p className="mt-1 text-lg text-text-1">{value}</p></div>)}</section></div> }
+function Insights({ logs, summary }: Readonly<{ logs: CareLog[]; summary: ReturnType<typeof calculateCycleSummary> }>) {
+  const moods = logs.reduce<Record<string, number>>((all, log) => { if (log.mood) all[log.mood] = (all[log.mood] ?? 0) + 1; return all }, {})
+  const symptoms = logs.flatMap((log) => log.symptoms ?? []).reduce<Record<string, number>>((all, item) => { all[item] = (all[item] ?? 0) + 1; return all }, {})
+  const moodEntries = Object.entries(moods).sort((a, b) => b[1] - a[1])
+  const symptomEntries = Object.entries(symptoms).sort((a, b) => b[1] - a[1]).slice(0, 8)
+  const allCycles = buildAllCycleHistory(logs, summary)
+  const cyclesByYear = allCycles.reduce<Record<string, CycleHistoryEntry[]>>((groups, cycle) => {
+    const year = cycle.startDate.slice(0, 4)
+    ;(groups[year] ??= []).push(cycle)
+    return groups
+  }, {})
+  const years = Object.keys(cyclesByYear).sort((a, b) => Number(b) - Number(a))
+  return <div className="space-y-4">
+    <section className="glass-card p-6">
+      <h2 className="text-2xl text-text-1">Insights & trends</h2>
+      <p className="mt-1 text-sm text-text-2">Your shared check-ins and cycle history, shown as tracking patterns—not medical conclusions.</p>
+      {!summary.regular && <p className="mt-3 rounded-xl bg-warning/10 p-3 text-sm text-warning">Recent cycle lengths vary. Predictions can move when a new period is logged.</p>}
+    </section>
+    <Stats title="Mood this month" items={moodEntries} empty="No mood entries yet. Use the daily log to start." />
+    <Stats title="Most common symptoms" items={symptomEntries} empty="No symptom entries yet." />
+    <section className="glass-card grid gap-4 p-6 sm:grid-cols-3">
+      {[['Current cycle', summary.day ? `Day ${summary.day}` : '—'], ['Estimated cycle', `${summary.cycleLength} days`], ['Recent range', `${summary.variationMin}–${summary.variationMax} days`]].map(([label, value]) => <div key={label}><p className="text-sm text-text-2">{label}</p><p className="mt-1 text-lg text-text-1">{value}</p></div>)}
+    </section>
+    <section className="glass-card p-6">
+      <div className="flex items-center justify-between gap-3"><div><h2 className="text-xl text-text-1">Cycle history</h2><p className="mt-1 text-sm text-text-2">From 2024 onward · {allCycles.length} tracked cycles</p></div><span className="text-xs text-text-2">R = period · G = fertile · W = normal</span></div>
+      <div className="mt-5 space-y-7">
+        {years.map((year) => <div key={year}><h3 className="text-lg font-semibold text-text-1">{year}</h3><div className="mt-3 space-y-4">{cyclesByYear[year].slice().reverse().map((cycle) => <div key={cycle.startDate} className="rounded-2xl border border-border/10 bg-card/20 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-semibold text-text-1">{cycle.status === 'predicted' ? 'Current cycle' : `${cycle.length} days`}</p><p className="text-sm text-text-2">{formatDate(cycle.startDate)} – {formatDate(cycle.endDate)}</p></div>{cycle.status === 'predicted' && <span className="rounded-full bg-success/10 px-2 py-1 text-xs text-success">Predicted</span>}</div><CycleStrip cycle={cycle} logs={logs} current={cycle.status === 'predicted'} /></div>)}</div></div>)}
+      </div>
+      <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-text-2"><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-rose-500" />Period</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-success" />Fertile estimate</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full border border-white/50 bg-white" />Normal</span></div>
+    </section>
+  </div>
+}
+
 function Stats({ title, items, empty }: Readonly<{ title: string; items: Array<[string, number]>; empty: string }>) { const highest = Math.max(...items.map(([, count]) => count), 1); return <section className="glass-card p-6"><h2 className="text-xl text-text-1">{title}</h2>{items.length ? <div className="mt-4 space-y-3">{items.map(([label, count]) => <div key={label} className="flex items-center gap-3"><span className="w-28 truncate text-sm text-text-2">{label}</span><span className="h-2 flex-1 overflow-hidden rounded-full bg-soft-tint/20"><span className="block h-full rounded-full bg-accent-1" style={{ width: `${count / highest * 100}%` }} /></span><span className="w-8 text-right text-sm text-text-1">{count}</span></div>)}</div> : <p className="mt-3 text-sm text-text-2">{empty}</p>}</section> }
 
 function Reminders({ coupleId, userId }: Readonly<{ coupleId: string; userId: string }>) {
