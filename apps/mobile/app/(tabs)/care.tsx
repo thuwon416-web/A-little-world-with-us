@@ -461,7 +461,7 @@ function Calendar({
         {editing ? (
           <View style={styles.editActions}>
             <TouchableOpacity style={styles.secondaryButton} disabled={saving} onPress={() => {
-              setSelected(new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
+              setSelected(new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate)))
               setEditing(false)
             }}>
               <Text style={styles.saveText}>Cancel</Text>
@@ -480,7 +480,7 @@ function Calendar({
           </View>
         ) : (
           <TouchableOpacity style={styles.saveButton} onPress={() => {
-            setSelected(new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
+            setSelected(new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate)))
             setEditing(true)
           }}>
             <Text style={styles.saveText}>Edit period dates</Text>
