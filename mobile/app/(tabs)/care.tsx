@@ -1293,7 +1293,7 @@ export default function CareScreen() {
               Alert.alert('Could not save period dates', error_ instanceof Error ? error_.message : 'Please try again.')
               throw error_
             }
-          } />
+          }} />
       ) : activeTab === 'Reminders' ? (
         <Reminders coupleId={data.coupleId} userId={data.userId} />
       ) : activeTab === 'Settings' ? (
