@@ -1,5 +1,5 @@
-import { Gamepad2, type LucideIcon } from 'lucide-react-native'
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Gamepad2 } from 'lucide-react-native'
+import { useMemo, useState } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -18,49 +18,6 @@ const winLines = [
 
 function winner(board: string[]) {
   return winLines.find(([a, b, c]) => board[a] && board[a] === board[b] && board[a] === board[c])
-}
-
-function Section({
-  title,
-  icon: Icon,
-  children,
-}: {
-  readonly title: string
-  readonly icon: LucideIcon
-  readonly children: ReactNode
-}) {
-  const { colors } = useTheme()
-  const styles = useMemo(() => createStyles(colors, sizes), [colors])
-
-  return (
-    <View style={styles.section}>
-      <View style={styles.sectionHeader}>
-        <Icon size={16} color={colors.textSecondary} />
-        <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-          {title.toUpperCase()}
-        </Text>
-      </View>
-      <View style={styles.sectionContent}>{children}</View>
-    </View>
-  )
-}
-
-  const { colors } = useTheme()
-  const styles = useMemo(() => createStyles(colors, sizes), [colors])
-
-  return (
-    <TouchableOpacity
-      accessibilityRole="button"
-      onPress={onPress}
-      style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
-    >
-      <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>{title}</Text>
-      <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>{subtitle}</Text>
-      <Text style={[styles.cardAction, { color: colors.accent1 }]}>
-        {action} {'\u2192'}
-      </Text>
-    </TouchableOpacity>
-  )
 }
 
 export default function GamesScreen() {
@@ -84,55 +41,42 @@ export default function GamesScreen() {
       style={[styles.scroll, { backgroundColor: colors.background }]}
       contentContainerStyle={[styles.container, { paddingTop: insets.top }]}
     >
-      <View
-        style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
-      >
+      <View style={[styles.hero, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}>
         <Gamepad2 size={28} color={colors.accent1} />
-        <Text style={[styles.title, { color: colors.textPrimary }]}>Couple Games</Text>
+        <Text style={[styles.title, { color: colors.textPrimary }]}>Play</Text>
         <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-          Little games for two hearts.
+          A tiny game for two hearts.
         </Text>
       </View>
 
-      <Section title="Playful" icon={Gamepad2}>
-        <View
-          style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
-        >
-          <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Love Calculator</Text>
-          <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
-            A playful score for your shared story.
-          </Text>
-          <Text style={[styles.score, { color: colors.accent2 }]}>{loveScore}%</Text>
+      <View style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+        <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Tic-Tac-Toe</Text>
+        <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+          Take a quick turn together.
+        </Text>
+        <View style={styles.board}>
+          {board.map((value, index) => (
+            <TouchableOpacity
+              key={index}
+              accessibilityRole="button"
+              accessibilityLabel={value ? `Cell ${index + 1}: ${value}` : `Empty cell ${index + 1}`}
+              onPress={() => play(index)}
+              style={[styles.cell, { borderColor: colors.cardBorder }]}
+            >
+              <Text style={[styles.cellText, { color: colors.accent2 }]}>{value}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-
-        <View
-          style={[styles.card, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: colors.accent1 }]}
+          onPress={() => {
+            setBoard(new Array(9).fill(''))
+            setXNext(true)
+          }}
         >
-          <Text style={[styles.cardTitle, { color: colors.textPrimary }]}>Tic-Tac-Toe</Text>
-          <View style={styles.board}>
-            {board.map((value, index) => (
-              <TouchableOpacity
-                key={index}
-                accessibilityRole="button"
-                onPress={() => play(index)}
-                style={[styles.cell, { borderColor: colors.cardBorder }]}
-              >
-                <Text style={[styles.cellText, { color: colors.accent2 }]}>{value}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <TouchableOpacity
-            style={[styles.button, { backgroundColor: colors.accent1 }]}
-            onPress={() => {
-              setBoard(new Array(9).fill(''))
-              setXNext(true)
-            }}
-          >
-            <Text style={[styles.buttonText, { color: colors.background }]}>New game</Text>
-          </TouchableOpacity>
-        </View>
-      </Section>
-
+          <Text style={[styles.buttonText, { color: colors.background }]}>New game</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   )
 }
@@ -140,19 +84,14 @@ export default function GamesScreen() {
 const createStyles = (colors: ThemeColors, sizes: Sizes) =>
   StyleSheet.create({
     scroll: { flex: 1 },
-    container: { padding: 20, paddingBottom: 40, gap: 28 },
+    container: { padding: 20, paddingBottom: 40, gap: 20 },
     hero: { borderWidth: 1, borderRadius: sizes.radius.panel, padding: 20, gap: 8 },
     title: { fontSize: sizes.text.hLg, fontWeight: '700' },
     subtitle: { fontSize: sizes.text.body, lineHeight: 22 },
-    section: { gap: 12 },
-    sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-    sectionTitle: { fontSize: sizes.text.xs, fontWeight: '700', letterSpacing: 1.5 },
-    sectionContent: { gap: 12 },
     card: { borderWidth: 1, borderRadius: sizes.radius.card, padding: 16, gap: 8 },
     cardTitle: { fontSize: sizes.text.bodyLg, fontWeight: '700' },
     cardSubtitle: { fontSize: sizes.text.sm, lineHeight: 20 },
-    cardAction: { fontSize: sizes.text.sm, fontWeight: '700', marginTop: 4 },
-    board: { width: 210, flexDirection: 'row', flexWrap: 'wrap', marginTop: 4 },
+    board: { width: 210, flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, alignSelf: 'center' },
     cell: { width: 70, height: 70, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
     cellText: { fontSize: sizes.text.hLg },
     button: { borderRadius: sizes.radius.input, padding: 13, alignItems: 'center', marginTop: 8 },
