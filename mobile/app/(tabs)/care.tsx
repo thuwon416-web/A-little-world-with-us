@@ -361,6 +361,7 @@ function Calendar({
   const styles = createStyles(colors, sizes)
   const [month, setMonth] = useState(new Date())
   const [editing, setEditing] = useState(false)
+  const [selectedDate, setSelectedDate] = useState(dateKey(new Date()))
   const [selected, setSelected] = useState<Set<string>>(() => new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate)))
   const [saving, setSaving] = useState(false)
   const year = month.getFullYear()
@@ -404,6 +405,10 @@ function Calendar({
                 key={date}
                 disabled={!editing}
                 onPress={() => {
+                  if (!editing) {
+                    setSelectedDate(date)
+                    return
+                  }
                   setSelected((current) => {
                     const next = new Set(current)
                     if (next.has(date)) next.delete(date)
@@ -432,6 +437,23 @@ function Calendar({
           <Text style={styles.legendText}>◌ Predicted</Text>
           <Text style={styles.legendText}>● Fertile</Text>
           <Text style={styles.legendText}>● Ovulation</Text>
+        </View>
+        <View style={styles.cycleDayDetail}>
+          <Text style={styles.muted}>{selectedDate}</Text>
+          <Text style={styles.cycleDayTitle}>
+            {summary.lastPeriodStart && selectedDate >= summary.lastPeriodStart
+              ? `Cycle day ${Math.round((new Date(`${selectedDate}T12:00:00`).getTime() - new Date(`${summary.lastPeriodStart}T12:00:00`).getTime()) / 86400000) + 1}`
+              : 'Outside the current cycle'}
+          </Text>
+          <Text style={styles.accentText}>
+            {periodDays.has(selectedDate)
+              ? 'Period'
+              : selectedDate === summary.ovulationDate
+                ? 'Higher estimated chance of pregnancy · predicted ovulation'
+                : summary.fertileStart && summary.fertileEnd && selectedDate >= summary.fertileStart && selectedDate <= summary.fertileEnd
+                  ? 'Estimated chance of pregnancy · fertile estimate'
+                  : 'Lower estimated chance of pregnancy'}
+          </Text>
         </View>
         <Text style={styles.muted}>
           {editing ? 'Select or unselect dates, then save your changes.' : 'Review your cycle. Choose Edit period dates before changing any date.'}
@@ -1513,6 +1535,8 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     },
     bar: { height: '100%', backgroundColor: colors.accent1, borderRadius: 5 },
     barValue: { color: colors.textSecondary, width: 20, textAlign: 'right' },
+    cycleDayDetail: { marginTop: 14, padding: 12, borderRadius: sizes.radius.input, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.cardBorder, gap: 4 },
+    cycleDayTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
     frequencyRow: {
       flexDirection: 'row',
       justifyContent: 'space-between',
