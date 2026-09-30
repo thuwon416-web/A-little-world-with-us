@@ -568,7 +568,7 @@ function MemoriesPageContent() {
         </div>
       </section>
 
-      <MemoryCurationAI memories={memories.map((memory) => ({ id: memory.id, title: memory.title ?? memory.caption ?? 'A memory together', date: memory.date }))} />
+      <section className="glass-card rounded-modal border border-accent-1/15 p-5"><div className="mb-4"><p className="text-xs uppercase tracking-[0.2em] text-text-2">AI companion</p><h2 className="mt-1 text-xl font-serif text-text-1">Make more of a memory</h2><p className="mt-1 text-sm text-text-2">Reflect on a moment, turn it into a story, or talk it through gently.</p></div><MemoryCurationAI memories={memories.map((memory) => ({ id: memory.id, title: memory.title ?? memory.caption ?? 'A memory together', date: memory.date }))} /><div className="mt-4 border-t border-border/30 pt-4"><ExplicitAdviceControl title="Talk through a memory" description="Ask for a gentle, two-sided reflection about a memory." placeholder="What happened, and what would you like help understanding?" /></div></section>
 
       {isLoading && <p className="text-sm text-text-2">Loading memories...</p>}
       <MemoryGrid
@@ -614,7 +614,7 @@ function MemoriesPageContent() {
           onSave={() => void saveJournal()}
         />
       ) : null}
-      <section aria-labelledby="our-story-heading" className="border-t border-border/30 pt-8">
+      <details className="group rounded-modal border border-border/40 bg-card p-5"><summary className="cursor-pointer list-none font-semibold text-text-1">Explore more of our memories <span className="float-right text-text-2 group-open:rotate-180">⌄</span></summary><div className="mt-6 space-y-8">
         <h2 id="our-story-heading" className="mb-4 text-2xl font-serif text-text-1">Our Story</h2>
         <OurStoryContent />
       </section>
@@ -629,12 +629,7 @@ function MemoriesPageContent() {
       <section aria-labelledby="capsules-heading" className="border-t border-border/30 pt-8">
         <h2 id="capsules-heading" className="mb-4 text-2xl font-serif text-text-1">Time capsules</h2>
         <TimeCapsulesContent />
-      </section>
-      <ExplicitAdviceControl
-        title="Talk through a memory"
-        description="Choose a memory and ask for a gentle, two-sided reflection."
-        placeholder="What happened, and what would you like help understanding?"
-      />
+      </div></details>
     </div>
   )
 }
@@ -738,7 +733,7 @@ function MemoryUploadPanel({
   return (
     <>
       <section className="glass-card p-5">
-        <h2 className="text-xl text-text-1">Add a memory</h2>
+        <h2 className="text-xl text-text-1">Add to our memories</h2><p className="mt-1 text-sm text-text-2">Add photos, a journal entry, date, category, or an optional location without leaving this flow.</p>
         <form className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr_0.8fr_0.7fr_auto]" onSubmit={onUpload}>
           <input
             type="file"
