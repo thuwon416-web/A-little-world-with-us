@@ -741,6 +741,9 @@ function TodayCareTab({
 }: TodayCareProps) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
+  const daysUntil = summary.nextPeriodStart
+    ? Math.ceil((new Date(`${summary.nextPeriodStart}T12:00:00`).getTime() - Date.now()) / 86400000)
+    : null
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.eyebrow}>CYCLE CARE · SHARED WITH YOUR PARTNER</Text>
@@ -763,6 +766,13 @@ function TodayCareTab({
               : 'Pregnancy chance estimate unavailable'}
         </Text>
         <Text style={styles.heroDisclaimer}>Calendar estimate only — not contraception or medical advice.</Text>
+        {((daysUntil !== null && daysUntil < 0) || !summary.regular) ? (
+          <Text style={styles.heroWarning}>
+            {daysUntil !== null && daysUntil < 0
+              ? 'Your period is later than the current estimate; a new logged period will update the next prediction.'
+              : 'Recent cycles vary, so this estimate may be less accurate.'}
+          </Text>
+        ) : null}
       </View>
       <Card title="Cycle history">
         <View style={styles.cycleHistoryHeader}>
