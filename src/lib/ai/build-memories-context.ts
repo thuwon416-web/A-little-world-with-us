@@ -33,7 +33,7 @@ export async function buildMemoriesContext(
   const keyword = userQuery.trim()
   if (!keyword) return ''
 
-  const escapedKeyword = keyword.replace(/[%_,]/g, (character) => `\\${character}`)
+  const escapedKeyword = keyword.replace(/[\\%_]/g, (character) => `\\${character}`).replace(/[(),]/g, ' ')
   const { data: memories, error: memoriesError } = await options.supabase
     .from('relationship_memories')
     .select('date_time,quote_burmese,category,context')
