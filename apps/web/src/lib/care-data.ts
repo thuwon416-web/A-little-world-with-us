@@ -25,11 +25,11 @@ const parseDateOnly = (value: string) => {
 }
 export const addDays = (date: string, amount: number) => { const result = parseDateOnly(date); result.setDate(result.getDate() + amount); return dateKey(result) }
 const daysBetween = (start: string, end: string) => Math.round((parseDateOnly(end).getTime() - parseDateOnly(start).getTime()) / 86400000)
-const floorMedian = (values: number[]) => {
+const medianCycleLength = (values: number[]) => {
   const ordered = [...values].sort((a, b) => a - b)
   const middle = Math.floor(ordered.length / 2)
   const median = ordered.length % 2 ? ordered[middle] : (ordered[middle - 1] + ordered[middle]) / 2
-  return Math.floor(median)
+  return Math.round(median)
 }
 
 export async function getAcceptedCareContext() {
@@ -105,9 +105,9 @@ export function periodStarts(logs: CareLog[]) {
 export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings): CycleSummary {
   const starts = periodStarts(logs)
   const historicalLengths = starts.slice(0, 6).flatMap((start, index) => { const older = starts[index + 1]; const length = older ? daysBetween(older, start) : 0; return length >= 15 && length <= 60 ? [length] : [] })
-  // Use the floor of the median for predictions: Jun 25 → Jul 22 (27 days)
-  // and Jul 22 → Aug 17 (26 days) therefore predict 26, not rounded 27.
-  const cycleLength = historicalLengths.length ? floorMedian(historicalLengths) : settings.cycle_length
+  // Use the median cycle length; when the middle falls between two whole days,
+  // round to the nearest day so Web and Mobile share the same calendar estimate.
+  const cycleLength = historicalLengths.length ? medianCycleLength(historicalLengths) : settings.cycle_length
   // Logged period starts are the source of truth; the manual setting is only a fallback.
   const lastPeriodStart = starts[0] ?? settings.last_period_start ?? null
   const variationMin = historicalLengths.length ? Math.min(...historicalLengths) : cycleLength
