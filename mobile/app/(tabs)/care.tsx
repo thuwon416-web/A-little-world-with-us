@@ -365,6 +365,7 @@ function Calendar({
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   const [month, setMonth] = useState(new Date())
+  const [editing, setEditing] = useState(false)
   const year = month.getFullYear()
   const monthIndex = month.getMonth()
   const days = new Date(year, monthIndex + 1, 0).getDate()
@@ -375,57 +376,39 @@ function Calendar({
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.eyebrow}>CYCLE CARE</Text>
       <Text style={styles.title}>Calendar</Text>
-      <Card title={monthName}>
+      <Card title={editing ? 'Edit period dates' : monthName}>
         <View style={styles.calendarHeader}>
-          <TouchableOpacity
-            disabled={year === 2024 && monthIndex === 0}
-            onPress={() => setMonth(new Date(year, monthIndex - 1, 1))}
-          >
+          <TouchableOpacity disabled={year === 2024 && monthIndex === 0} onPress={() => setMonth(new Date(year, monthIndex - 1, 1))}>
             <Text style={styles.nav}>‹</Text>
           </TouchableOpacity>
           <Text style={styles.calendarMonth}>{monthName}</Text>
           <TouchableOpacity
-            disabled={
-              new Date(year, monthIndex + 1, 1) >
-              new Date(new Date().getFullYear(), new Date().getMonth() + 6, 1)
-            }
+            disabled={new Date(year, monthIndex + 1, 1) > new Date(new Date().getFullYear(), new Date().getMonth() + 6, 1)}
             onPress={() => setMonth(new Date(year, monthIndex + 1, 1))}
           >
             <Text style={styles.nav}>›</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.weekRow}>
-          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => (
-            <Text key={`${day}-${index}`} style={styles.weekDay}>
-              {day}
-            </Text>
-          ))}
+          {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, index) => <Text key={`${day}-${index}`} style={styles.weekDay}>{day}</Text>)}
         </View>
         <View style={styles.calendarGrid}>
-          {Array.from({ length: firstDay }).map((_, index) => (
-            <View key={`empty-${index}`} style={styles.dayCell} />
-          ))}
+          {Array.from({ length: firstDay }).map((_, index) => <View key={`empty-${index}`} style={styles.dayCell} />)}
           {Array.from({ length: days }, (_, index) => {
             const day = index + 1
             const date = `${year}-${String(monthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
             const actual = periodDays.has(date)
-            const predicted = Boolean(
-              summary.nextPeriodStart &&
-              date >= summary.nextPeriodStart &&
-              date < addDays(summary.nextPeriodStart, summary.periodLength)
-            )
-            const fertile = Boolean(
-              summary.fertileStart &&
-              summary.fertileEnd &&
-              date >= summary.fertileStart &&
-              date <= summary.fertileEnd
-            )
+            const predicted = Boolean(summary.nextPeriodStart && date >= summary.nextPeriodStart && date < addDays(summary.nextPeriodStart, summary.periodLength))
+            const fertile = Boolean(summary.fertileStart && summary.fertileEnd && date >= summary.fertileStart && date <= summary.fertileEnd)
             const ovulation = date === summary.ovulationDate
             const today = date === dateKey(new Date())
             return (
               <TouchableOpacity
                 key={date}
+                disabled={!editing}
                 onPress={() => onLog(date)}
+                accessibilityRole="button"
+                accessibilityLabel={`${date}: ${actual ? 'Period logged' : predicted ? 'Predicted period' : fertile ? 'Fertile estimate' : 'Normal cycle day'}`}
                 style={[
                   styles.dayCell,
                   actual && styles.periodDay,
@@ -446,18 +429,27 @@ function Calendar({
           <Text style={styles.legendText}>● Fertile</Text>
           <Text style={styles.legendText}>● Ovulation</Text>
         </View>
+        <Text style={styles.muted}>
+          {editing ? 'Select or unselect dates, then save your changes.' : 'Review your cycle. Choose Edit period dates before changing any date.'}
+        </Text>
+        {editing ? (
+          <View style={styles.editActions}>
+            <TouchableOpacity style={styles.secondaryButton} onPress={() => setEditing(false)}>
+              <Text style={styles.saveText}>Cancel</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.saveButton} onPress={() => setEditing(false)}>
+              <Text style={styles.saveText}>Save period dates</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.saveButton} onPress={() => setEditing(true)}>
+            <Text style={styles.saveText}>Edit period dates</Text>
+          </TouchableOpacity>
+        )}
       </Card>
       <Card title="Forecast">
-        <Text style={styles.text}>
-          {summary.nextPeriodStart
-            ? `Next period: ${summary.nextPeriodStart}`
-            : 'Log at least one period to begin forecasting.'}
-        </Text>
-        <Text style={styles.muted}>
-          {summary.day
-            ? `Today is cycle day ${summary.day}. Tap a date to add or remove it.`
-            : 'Tap a date to add or remove a period day.'}
-        </Text>
+        <Text style={styles.text}>{summary.nextPeriodStart ? `Next period: ${summary.nextPeriodStart}` : 'Log at least one period to begin forecasting.'}</Text>
+        <Text style={styles.muted}>{summary.day ? `Today is cycle day ${summary.day}.` : 'Log a period to begin the cycle.'}</Text>
       </Card>
     </ScrollView>
   )
