@@ -614,22 +614,27 @@ function MemoriesPageContent() {
           onSave={() => void saveJournal()}
         />
       ) : null}
-      <details className="group rounded-modal border border-border/40 bg-card p-5"><summary className="cursor-pointer list-none font-semibold text-text-1">Explore more of our memories <span className="float-right text-text-2 group-open:rotate-180">⌄</span></summary><div className="mt-6 space-y-8">
-        <h2 id="our-story-heading" className="mb-4 text-2xl font-serif text-text-1">Our Story</h2>
-        <OurStoryContent />
-      </section>
-      <section aria-labelledby="photo-memories-heading" className="border-t border-border/30 pt-8">
-        <h2 id="photo-memories-heading" className="mb-4 text-2xl font-serif text-text-1">Photo memories</h2>
-        <GalleryContent />
-      </section>
-      <section aria-labelledby="places-heading" className="border-t border-border/30 pt-8">
-        <h2 id="places-heading" className="mb-4 text-2xl font-serif text-text-1">Places we remember</h2>
-        <MemoryMapContent />
-      </section>
-      <section aria-labelledby="capsules-heading" className="border-t border-border/30 pt-8">
-        <h2 id="capsules-heading" className="mb-4 text-2xl font-serif text-text-1">Time capsules</h2>
-        <TimeCapsulesContent />
-      </div></details>
+      <details className="group rounded-modal border border-border/40 bg-card p-5">
+        <summary className="cursor-pointer list-none font-semibold text-text-1">Explore more of our memories <span className="float-right text-text-2 group-open:rotate-180">⌄</span></summary>
+        <div className="mt-6 space-y-8">
+          <section aria-labelledby="our-story-heading" className="border-t border-border/30 pt-8">
+            <h2 id="our-story-heading" className="mb-4 text-2xl font-serif text-text-1">Our Story</h2>
+            <OurStoryContent />
+          </section>
+          <section aria-labelledby="photo-memories-heading" className="border-t border-border/30 pt-8">
+            <h2 id="photo-memories-heading" className="mb-4 text-2xl font-serif text-text-1">Photo memories</h2>
+            <GalleryContent />
+          </section>
+          <section aria-labelledby="places-heading" className="border-t border-border/30 pt-8">
+            <h2 id="places-heading" className="mb-4 text-2xl font-serif text-text-1">Places we remember</h2>
+            <MemoryMapContent />
+          </section>
+          <section aria-labelledby="capsules-heading" className="border-t border-border/30 pt-8">
+            <h2 id="capsules-heading" className="mb-4 text-2xl font-serif text-text-1">Time capsules</h2>
+            <TimeCapsulesContent />
+          </section>
+        </div>
+      </details>
     </div>
   )
 }
