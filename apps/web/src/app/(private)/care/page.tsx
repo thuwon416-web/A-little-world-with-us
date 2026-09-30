@@ -178,7 +178,7 @@ function PeriodCalendarModal({ logs, summary, onClose, onSave }: Readonly<{ logs
     const now = new Date()
     const end = new Date(now.getFullYear(), now.getMonth() + 6, 1)
     const values: Date[] = []
-    for (const month of new Date(start); month <= end; month.setMonth(month.getMonth() + 1)) values.push(new Date(month))
+    for (let month = new Date(start); month <= end; month.setMonth(month.getMonth() + 1)) values.push(new Date(month))
     return values
   }, [])
   const currentMonth = useRef<HTMLDivElement>(null)
