@@ -190,7 +190,12 @@ function MemoriesPageContent() {
 
       const displayMemories = await Promise.all(
         (data as Memory[]).map(async (memory) => {
+          const provider = (memory as Memory & { storage_provider?: string }).storage_provider ?? 'supabase'
+          const driveFileId = (memory as Memory & { drive_file_id?: string | null }).drive_file_id
           const path = memory.storage_path ?? memory.image_url ?? ''
+          if (provider === 'google_drive' && driveFileId) {
+            return { ...memory, displayUrl: `/api/drive/file?fileId=${encodeURIComponent(driveFileId)}&download=1`, mime_type: memory.mime_type }
+          }
           if (!path || path.startsWith('/')) {
             return { ...memory, displayUrl: memory.image_url ?? '', mime_type: memory.mime_type }
           }
@@ -303,18 +308,41 @@ function MemoriesPageContent() {
       for (const file of selectedFiles) {
         try {
           const compressedImage = await compressImage(file)
-          const path = `${userData.user.id}/${crypto.randomUUID()}.webp`
-          const { path: storedPath, mimeType } = await encryptAndUpload(
-            compressedImage,
-            coupleLinkId,
-            'memories',
-            path
-          )
+          const driveStatusResponse = await fetch('/api/drive/status')
+          const driveStatus = driveStatusResponse.ok
+            ? (await driveStatusResponse.json()) as { connected?: boolean }
+            : { connected: false }
+
+          let storageProvider: 'supabase' | 'google_drive' = 'supabase'
+          let storedPath: string | null = null
+          let mimeType = 'image/webp'
+          let driveFileId: string | null = null
+
+          if (driveStatus.connected) {
+            const formData = new FormData()
+            formData.append('file', new File([compressedImage], `${crypto.randomUUID()}.webp`, { type: 'image/webp' }))
+            const driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
+            const driveBody = (await driveResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
+            if (!driveResponse.ok || !driveBody.file?.id) {
+              throw new Error(driveBody.error || 'Google Drive upload failed.')
+            }
+            storageProvider = 'google_drive'
+            driveFileId = driveBody.file.id
+            mimeType = driveBody.file.mimeType || mimeType
+          } else {
+            const path = `${userData.user.id}/${crypto.randomUUID()}.webp`
+            const result = await encryptAndUpload(compressedImage, coupleLinkId, 'memories', path)
+            storedPath = result.path
+            mimeType = result.mimeType
+          }
+
           const { error: insertError } = await supabase.from('memories').insert({
             user_id: userData.user.id,
             couple_id: coupleLinkId,
             image_url: storedPath,
             storage_path: storedPath,
+            storage_provider: storageProvider,
+            drive_file_id: driveFileId,
             mime_type: mimeType,
             title: caption.trim() || 'A memory together',
             caption: caption.trim() || 'A memory together',
@@ -326,7 +354,15 @@ function MemoriesPageContent() {
             location_label: locationLabel.trim() || null,
           })
           if (insertError) {
-            await supabase.storage.from('memories').remove([storedPath])
+            if (storageProvider === 'google_drive' && driveFileId) {
+              await fetch('/api/drive/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileId: driveFileId }),
+              })
+            } else if (storedPath) {
+              await supabase.storage.from('memories').remove([storedPath])
+            }
             throw insertError
           }
           uploadedCount += 1
@@ -365,13 +401,23 @@ function MemoriesPageContent() {
       return
     }
 
-    if (memory.image_url && !memory.image_url.startsWith('/')) {
+    const provider = (memory as Memory & { storage_provider?: string }).storage_provider ?? 'supabase'
+    const driveFileId = (memory as Memory & { drive_file_id?: string | null }).drive_file_id
+    if (provider === 'google_drive' && driveFileId) {
+      const response = await fetch('/api/drive/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileId: driveFileId }),
+      })
+      if (!response.ok) {
+        const body = (await response.json().catch(() => ({}))) as { error?: string }
+        setError(body.error || 'Google Drive file deletion failed.')
+      }
+    } else if (memory.image_url && !memory.image_url.startsWith('/')) {
       const { error: storageError } = await supabase.storage
         .from('memories')
         .remove([memory.storage_path ?? memory.image_url])
-      if (storageError) {
-        setError(storageError.message)
-      }
+      if (storageError) setError(storageError.message)
     }
 
     setMemories((current) => current.filter((item) => item.id !== memory.id))
