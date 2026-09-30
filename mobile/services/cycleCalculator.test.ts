@@ -39,6 +39,51 @@ describe('Native cycle calculator', () => {
     expect(summary.fertilityStatus).toBe('lower')
   })
 
+  it('adapts gradually across normal 27-29 day variation', () => {
+    const summary = calculateNativeCycleSummary(
+      [
+        { log_date: '2024-04-01', period_day: true },
+        { log_date: '2024-03-03', period_day: true },
+        { log_date: '2024-02-04', period_day: true },
+        { log_date: '2024-01-07', period_day: true },
+        { log_date: '2023-12-10', period_day: true },
+        { log_date: '2023-11-13', period_day: true },
+      ],
+      { cycle_length: 28, period_length: 5, last_period_start: null }
+    )
+    expect(summary.variationMin).toBe(27)
+    expect(summary.variationMax).toBe(29)
+    expect(summary.cycleLength).toBe(28)
+    expect(summary.nextPeriodStart).toBe('2024-04-29')
+  })
+
+  it('follows a repeated shift without overreacting to one isolated change', () => {
+    const isolated = calculateNativeCycleSummary(
+      [
+        { log_date: '2024-04-01', period_day: true },
+        { log_date: '2024-03-04', period_day: true },
+        { log_date: '2024-02-05', period_day: true },
+        { log_date: '2024-01-07', period_day: true },
+        { log_date: '2023-12-10', period_day: true },
+        { log_date: '2023-11-13', period_day: true },
+      ],
+      { cycle_length: 28, period_length: 5, last_period_start: null }
+    )
+    const repeated = calculateNativeCycleSummary(
+      [
+        { log_date: '2024-04-01', period_day: true },
+        { log_date: '2024-03-03', period_day: true },
+        { log_date: '2024-02-03', period_day: true },
+        { log_date: '2024-01-05', period_day: true },
+        { log_date: '2023-12-07', period_day: true },
+        { log_date: '2023-11-09', period_day: true },
+      ],
+      { cycle_length: 28, period_length: 5, last_period_start: null }
+    )
+    expect(isolated.cycleLength).toBe(28)
+    expect(repeated.cycleLength).toBe(29)
+  })
+
   it('widens the fertile estimate when observed cycle lengths vary', () => {
     const summary = calculateNativeCycleSummary(
       [
