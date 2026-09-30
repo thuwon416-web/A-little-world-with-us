@@ -108,11 +108,11 @@ export function calculateNativeCycleSummary(
     }
   }
   const nextPeriodStart = addDays(lastPeriodStart, cycleLength)
+  // Keep the primary fertile estimate tied to the current predicted cycle,
+  // rather than stretching it from historical min/max cycle lengths.
   const ovulationDate = addDays(nextPeriodStart, -14)
-  const earliestOvulation = addDays(lastPeriodStart, variationMin - 14)
-  const latestOvulation = addDays(lastPeriodStart, variationMax - 14)
-  const fertileStart = addDays(earliestOvulation, -5)
-  const fertileEnd = addDays(latestOvulation, 1)
+  const fertileStart = addDays(ovulationDate, -5)
+  const fertileEnd = addDays(ovulationDate, 1)
   const today = dateKey(new Date())
   const estimateReady = starts.length >= 2 || settings.last_period_start !== null
   const fertilityStatus: 'higher' | 'lower' | 'uncertain' = !estimateReady
