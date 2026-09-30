@@ -1,3 +1,4 @@
+import * as Clipboard from 'expo-clipboard'
 import { Copy, Edit3, Eye, EyeOff, Globe, Trash2 } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
@@ -50,7 +51,7 @@ export default function PasswordCard({
     }
   }
   const copy = async (value: string) => {
-    await navigator.clipboard?.writeText(value)
+    await Clipboard.setStringAsync(value)
     Alert.alert('Copied', 'Copied to clipboard.')
   }
   return (
