@@ -351,7 +351,7 @@ function Stat({ label, value }: Readonly<{ label: string; value: string }>) {
 function Calendar({
   logs,
   summary,
-  onLog,
+  onSave,
 }: Readonly<{
   logs: CareLog[]
   summary: NativeCycleSummary
