@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
-import { supabase } from '@/lib/supabase'
 
 const winLines = [
   [0, 1, 2],
@@ -47,17 +46,6 @@ function Section({
   )
 }
 
-function GameCard({
-  title,
-  subtitle,
-  onPress,
-  action = 'Play',
-}: {
-  readonly title: string
-  readonly subtitle: string
-  readonly onPress: () => void
-  readonly action?: string
-}) {
   const { colors } = useTheme()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
 
