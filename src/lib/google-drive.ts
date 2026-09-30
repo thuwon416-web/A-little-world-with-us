@@ -73,10 +73,6 @@ export function verifyOAuthState(state: string, userId: string): boolean {
   }
 }
 
-function requireTimingSafeEqual(a: Buffer, b: Buffer): boolean {
-  return a.length === b.length && require('node:crypto').timingSafeEqual(a, b)
-}
-
 export async function exchangeCode(code: string): Promise<{
   access_token: string
   refresh_token?: string
@@ -112,7 +108,6 @@ export async function saveConnection(userId: string, token: Awaited<ReturnType<t
   const refresh = token.refresh_token ? encrypt(token.refresh_token) : null
   const existing = await getConnection(userId)
   if (!token.refresh_token && existing?.refresh_token_enc && existing.refresh_token_iv) {
-    refresh?.ciphertext
     const payload = {
       user_id: userId,
       access_token_enc: access.ciphertext,
@@ -208,6 +203,42 @@ export async function downloadDriveFile(userId: string, fileId: string) {
   })
   if (!response.ok) throw new Error('Google Drive file download failed.')
   return response
+}
+
+export async function disconnectDrive(userId: string) {
+  const connection = await getConnection(userId)
+  if (!connection) return
+  const encryptedRefresh = connection.refresh_token_enc
+  const refreshIv = connection.refresh_token_iv
+  if (typeof encryptedRefresh === 'string' && typeof refreshIv === 'string') {
+    try {
+      const refreshToken = decrypt(encryptedRefresh, refreshIv)
+      await fetch('https://oauth2.googleapis.com/revoke?token=' + encodeURIComponent(refreshToken), { method: 'POST' })
+    } catch {
+      // Local credentials are still removed even if Google revocation is unavailable.
+    }
+  }
+  const { error } = await adminClient().from('google_drive_connections').delete().eq('user_id', userId)
+  if (error) throw error
+}
+
+export async function assertDriveFileAccessible(userId: string, fileId: string) {
+  const { data: memory, error: memoryError } = await adminClient()
+    .from('memories')
+    .select('couple_id')
+    .eq('drive_file_id', fileId)
+    .maybeSingle()
+  if (memoryError) throw memoryError
+  if (!memory?.couple_id) return false
+  const { data: link, error: linkError } = await adminClient()
+    .from('couple_links')
+    .select('id')
+    .eq('couple_id', memory.couple_id)
+    .eq('status', 'accepted')
+    .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+    .maybeSingle()
+  if (linkError) throw linkError
+  return Boolean(link)
 }
 
 export async function deleteDriveFile(userId: string, fileId: string) {
