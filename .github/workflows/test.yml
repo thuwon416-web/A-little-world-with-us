@@ -22,20 +22,26 @@ jobs:
         with:
           node-version: 24.x
           cache: 'npm'
+          cache-dependency-path: apps/web/package-lock.json
       
-      - name: Install dependencies
+      - name: Install web dependencies
+        working-directory: ./apps/web
         run: npm ci --ignore-scripts
       
-      - name: Run lint
+      - name: Run web lint
+        working-directory: ./apps/web
         run: npm run lint
       
-      - name: Run TypeScript check
+      - name: Run web TypeScript check
+        working-directory: ./apps/web
         run: ./node_modules/.bin/tsc --noEmit
       
       - name: Run web tests with coverage (Vitest)
+        working-directory: ./apps/web
         run: npm run test:coverage
       
-      - name: Run A11Y tests
+      - name: Run web A11Y tests
+        working-directory: ./apps/web
         run: ./node_modules/.bin/vitest run src/tests/a11y.test.tsx
       
       - name: Upload coverage reports
@@ -43,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-coverage
-          path: coverage/
+          path: apps/web/coverage/
           retention-days: 7
 
   mobile:
@@ -60,11 +66,11 @@ jobs:
           cache: 'npm'
       
       - name: Install mobile dependencies
-        working-directory: ./mobile
+        working-directory: ./apps/mobile
         run: npm ci --ignore-scripts
       
       - name: Run mobile TypeScript check
-        working-directory: ./mobile
+        working-directory: ./apps/mobile
         run: npm run typecheck
 
       - name: Run mobile lint
@@ -80,5 +86,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mobile-coverage
-          path: mobile/coverage/
+          path: apps/mobile/coverage/
           retention-days: 7
