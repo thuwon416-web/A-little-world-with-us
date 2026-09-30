@@ -1,0 +1,16 @@
+# Supabase CLI project configuration for the backend boundary.
+# Production migrations are tracked remotely; the repository's bootstrap SQL
+# under ./bootstrap is kept as the canonical fresh-environment schema source.
+project_id = "mktfnwdvzbdrxfcvnolp"
+
+[api]
+enabled = true
+port = 54321
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+deno_version = 2
+
+# All production Edge Functions currently require JWT verification.
+# Keep function-specific overrides here if that policy changes.
