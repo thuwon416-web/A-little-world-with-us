@@ -668,6 +668,8 @@ type CareTab = 'Today' | 'Insights' | 'Calendar' | 'Reminders' | 'Settings'
 
 type TodayCareProps = {
   readonly summary: NativeCycleSummary
+  readonly logs: CareLog[]
+  readonly onInsights: () => void
   readonly saving: boolean
   readonly mood: string
   readonly setMood: (value: string) => void
@@ -703,6 +705,8 @@ type TodayCareProps = {
 
 function TodayCareTab({
   summary,
+  logs,
+  onInsights,
   saving,
   mood,
   setMood,
@@ -760,6 +764,26 @@ function TodayCareTab({
         </Text>
         <Text style={styles.heroDisclaimer}>Calendar estimate only — not contraception or medical advice.</Text>
       </View>
+      <Card title="Cycle history">
+        <View style={styles.cycleHistoryHeader}>
+          <View>
+            <Text style={styles.cardTitle}>Current & previous cycles</Text>
+            <Text style={styles.muted}>Red = period · Green = fertile · White = normal</Text>
+          </View>
+          <TouchableOpacity onPress={onInsights}>
+            <Text style={styles.accentText}>See all</Text>
+          </TouchableOpacity>
+        </View>
+        {buildNativeCycleHistory(logs.map((log) => ({ log_date: log.logDate, period_day: log.periodDay, mood: log.mood, symptoms: log.symptoms })), summary).slice(-3).reverse().map((cycle, index) => (
+          <View key={cycle.startDate} style={styles.cycleHistoryItem}>
+            <View style={styles.cycleHistoryText}>
+              <Text style={styles.text}>{index === 0 ? 'Current cycle' : index === 1 ? 'Previous' : 'Previous 2'}</Text>
+              <Text style={styles.muted}>{cycle.length} days · {cycle.startDate} – {cycle.endDate}</Text>
+            </View>
+            <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} />
+          </View>
+        ))}
+      </Card>
       <Card title="Mood">
         <Chips
           options={moods}
@@ -1247,6 +1271,8 @@ export default function CareScreen() {
       ) : (
         <TodayCareTab
           summary={summary}
+          logs={data.logs}
+          onInsights={() => setActiveTab('Insights')}
           saving={saving}
           mood={mood}
           setMood={setMood}
