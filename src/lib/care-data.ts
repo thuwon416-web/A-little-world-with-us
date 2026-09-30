@@ -120,11 +120,13 @@ export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings):
   }).reverse()
   if (!lastPeriodStart) return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular: variation <= 7, estimateReady: false, variationMin, variationMax, fertilityStatus: 'uncertain', cycleHistory: actualHistory }
   const nextPeriodStart = addDays(lastPeriodStart, cycleLength)
+  // Keep the primary fertile estimate tied to the current predicted cycle,
+  // rather than stretching it from the historical min/max cycle lengths.
+  // This gives a stable seven-day window (5 days before ovulation through
+  // the day after) while cycle variability is surfaced separately as a warning.
   const ovulationDate = addDays(nextPeriodStart, -14)
-  const earliestOvulation = addDays(lastPeriodStart, variationMin - 14)
-  const latestOvulation = addDays(lastPeriodStart, variationMax - 14)
-  const fertileStart = addDays(earliestOvulation, -5)
-  const fertileEnd = addDays(latestOvulation, 1)
+  const fertileStart = addDays(ovulationDate, -5)
+  const fertileEnd = addDays(ovulationDate, 1)
   const today = dateKey(new Date())
   const estimateReady = starts.length >= 2 || settings.last_period_start !== null
   const fertilityStatus: FertilityStatus = !estimateReady ? 'uncertain' : today >= fertileStart && today <= fertileEnd ? 'higher' : 'lower'
