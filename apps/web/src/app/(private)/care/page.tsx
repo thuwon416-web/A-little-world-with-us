@@ -118,7 +118,7 @@ function buildAllCycleHistory(logs: CareLog[], summary: ReturnType<typeof calcul
       startDate,
       endDate,
       length: length || summary.cycleLength,
-      status: nextStart && startDate !== summary.lastPeriodStart ? 'actual' : 'predicted',
+      status: nextStart && startDate !== summary.lastPeriodStart ? ('actual' as const) : ('predicted' as const),
       variationMin: summary.variationMin,
       variationMax: summary.variationMax,
     }
