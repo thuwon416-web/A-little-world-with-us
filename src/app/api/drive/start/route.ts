@@ -10,5 +10,13 @@ export async function GET() {
   const redirectUri = process.env.GOOGLE_DRIVE_REDIRECT_URI
   if (!clientId || !redirectUri) return NextResponse.json({ error: 'Google Drive OAuth is not configured yet.' }, { status: 503 })
   const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', access_type: 'offline', prompt: 'consent', scope: 'https://www.googleapis.com/auth/drive.file', state: createOAuthState(user.id) })
-  return NextResponse.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString())
+  const response = NextResponse.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString())
+  response.cookies.set('drive_oauth_state', params.get('state') ?? '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    path: '/api/drive',
+    maxAge: 10 * 60,
+  })
+  return response
 }
