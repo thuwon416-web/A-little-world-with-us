@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, Bell, CalendarDays, ChevronDown, ChevronUp, Droplet, Heart, Plus, Settings2, Sparkles, X } from 'lucide-react'
-import { calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, saveCareLog, saveCareReminder, saveCycleSettings, savePeriodDates, type CareDraft, type CareLog, type CareReminder, type CycleSettings } from '@/lib/care-data'
+import { addDays, calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, periodStarts, saveCareLog, saveCareReminder, saveCycleSettings, savePeriodDates, type CareDraft, type CareLog, type CareReminder, type CycleHistoryEntry, type CycleSettings } from '@/lib/care-data'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { supabase } from '@/lib/supabase'
 
@@ -94,6 +94,52 @@ export default function CarePage() {
   </div>
 }
 
+function cycleDaysBetween(start: string, end: string) {
+  return Math.round((new Date(`${end}T12:00:00`).getTime() - new Date(`${start}T12:00:00`).getTime()) / 86400000)
+}
+
+function getPeriodRunLength(logs: CareLog[], startDate: string, endDate: string, fallback: number) {
+  const periodDays = new Set(logs.filter((log) => log.period_day).map((log) => log.log_date))
+  let length = 0
+  for (let offset = 0; offset <= cycleDaysBetween(startDate, endDate); offset += 1) {
+    if (!periodDays.has(addDays(startDate, offset))) break
+    length += 1
+  }
+  return length || fallback
+}
+
+function buildAllCycleHistory(logs: CareLog[], summary: ReturnType<typeof calculateCycleSummary>): CycleHistoryEntry[] {
+  const starts = [...periodStarts(logs)].reverse()
+  return starts.map((startDate, index) => {
+    const nextStart = starts[index + 1] ?? (startDate === summary.lastPeriodStart ? summary.nextPeriodStart : null)
+    const endDate = nextStart ? addDays(nextStart, -1) : startDate
+    const length = nextStart ? cycleDaysBetween(startDate, nextStart) : 0
+    return {
+      startDate,
+      endDate,
+      length: length || summary.cycleLength,
+      status: nextStart && startDate !== summary.lastPeriodStart ? 'actual' : 'predicted',
+      variationMin: summary.variationMin,
+      variationMax: summary.variationMax,
+    }
+  }).filter((cycle) => cycle.startDate >= '2024-01-01' && cycle.length > 0)
+}
+
+function CycleStrip({ cycle, logs, current }: Readonly<{ cycle: CycleHistoryEntry; logs: CareLog[]; current: boolean }>) {
+  const periodLength = getPeriodRunLength(logs, cycle.startDate, cycle.endDate, current ? 5 : 0)
+  const ovulation = addDays(cycle.startDate, cycle.length - 14)
+  const fertileStart = addDays(ovulation, -5)
+  const fertileEnd = addDays(ovulation, 1)
+  return <div className="mt-3 flex items-center gap-1 overflow-hidden">
+    {Array.from({ length: cycle.length }, (_, index) => {
+      const date = addDays(cycle.startDate, index)
+      const isPeriod = index < periodLength
+      const isFertile = date >= fertileStart && date <= fertileEnd
+      return <span key={date} title={`Cycle day ${index + 1} · ${date}`} className={`h-3 w-3 shrink-0 rounded-full border ${isPeriod ? 'border-rose-500 bg-rose-500' : isFertile ? 'border-success bg-success' : 'border-white/50 bg-white'}`} />
+    })}
+  </div>
+}
+
 function Today({ summary, savedCycleLength, daysUntil, onLogPeriod, onOpen, onInsights, onReminders, logs }: Readonly<{ summary: ReturnType<typeof calculateCycleSummary>; savedCycleLength: number; daysUntil: number | null; onLogPeriod: () => void; onOpen: (section: Section | null) => void; onInsights: () => void; onReminders: () => void; logs: CareLog[] }>) {
   const days = Array.from({ length: 7 }, (_, index) => { const day = new Date(); day.setDate(day.getDate() - day.getDay() + index); return day })
   const actions: Array<{ Icon: typeof Droplet; label: string; action: () => void }> = [{ Icon: Droplet, label: 'Log period', action: onLogPeriod }, { Icon: Plus, label: 'Symptoms', action: () => onOpen('symptoms') }, { Icon: Heart, label: 'Intimacy', action: () => onOpen('sex') }]
@@ -101,7 +147,7 @@ function Today({ summary, savedCycleLength, daysUntil, onLogPeriod, onOpen, onIn
     <section className="glass-card relative overflow-hidden p-7 text-center"><div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgb(var(--accent-1)),transparent_55%)] opacity-15" /><div className="relative"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-text-2">Today&apos;s cycle</p><h2 className="mt-3 text-5xl text-accent-2">   {daysUntil === null      ? '—'      : daysUntil > 0        ? `Period in ${daysUntil} days`        : daysUntil === 0          ? 'Period expected today'          : `Period late by ${Math.abs(daysUntil)} days`} </h2><p className="mt-4 text-sm text-text-2">{getFertilityLabel(summary)} · calendar-based estimate, not contraception or medical advice</p>{!summary.regular && <p className="mt-2 text-xs text-warning">Recent cycles vary, so this estimate may be less accurate.</p>}</div></section>
     <section className="grid grid-cols-3 gap-3">{actions.map(({ Icon, label, action }) => <button key={label} onClick={action} className="flex flex-col items-center gap-2 py-2 text-sm text-text-2"><span className="flex h-16 w-16 items-center justify-center rounded-full border border-accent-1/40 bg-card text-accent-1 shadow-[0_0_22px_color-mix(in_srgb,var(--accent-1)_25%,transparent)]"><Icon className="h-7 w-7" /></span>{label}</button>)}</section>
     <section><div className="mb-3 flex items-center justify-between"><h2 className="text-xl text-text-1">My daily insights</h2><button onClick={onInsights} className="text-sm text-accent-1">See all</button></div><div className="grid gap-3 md:grid-cols-2"><InfoCard title="Cycle day" body={summary.day ? `Day ${summary.day} of an estimated ${summary.cycleLength}-day cycle.` : 'Log your period to begin your estimate.'} /><InfoCard title="Shared check-in" body={logs.length ? `${logs.length} shared Care days recorded together.` : 'Your first shared check-in starts the timeline.'} /></div></section>
-    <section className="glass-card p-6"><div className="flex items-center justify-between"><h2 className="text-xl text-text-1">Cycle history</h2><span className="text-sm text-accent-1">Shared</span></div><div className="mt-4 flex gap-1">{Array.from({ length: summary.cycleLength }, (_, index) => <span key={index} className={`h-3 flex-1 rounded-full ${index < summary.periodLength ? 'bg-accent-1' : summary.day !== null && index >= summary.cycleLength - 19 && index <= summary.cycleLength - 13 ? 'bg-success' : 'bg-card/10'}`} />)}</div><div className="mt-4 grid grid-cols-2 gap-4 text-sm"><div><p className="text-text-2">Calculated average</p><p className="mt-1 text-xl text-text-1">{summary.cycleLength} days</p></div><div><p className="text-text-2">Saved setting</p><p className="mt-1 text-xl text-text-1">{savedCycleLength} days</p></div><div><p className="text-text-2">Next period</p><p className="mt-1 font-semibold text-text-1">{summary.nextPeriodStart ? formatDate(summary.nextPeriodStart) : 'Not available'}</p></div></div></section>
+    <section className="glass-card p-6"><div className="flex items-center justify-between"><h2 className="text-xl text-text-1">Cycle history</h2><button onClick={onInsights} className="text-sm text-accent-1">See all</button></div>{buildAllCycleHistory(logs, summary).slice(-3).reverse().map((cycle, index) => <div key={cycle.startDate} className="mt-5 border-b border-border/10 pb-4 last:border-0 last:pb-0"><div className="flex items-center justify-between gap-3"><div><p className="font-semibold text-text-1">{index === 0 ? 'Current cycle' : index === 1 ? 'Previous' : 'Previous 2'}</p><p className="text-sm text-text-2">{cycle.length} days · {formatDate(cycle.startDate)} – {formatDate(cycle.endDate)}</p></div><span className="text-xs text-text-2">Day {index === 0 && summary.day ? summary.day : '—'}</span></div><CycleStrip cycle={cycle} logs={logs} current={index === 0} /></div>)}<div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-text-2"><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-rose-500" />Period</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-success" />Fertile estimate</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full border border-white/50 bg-white" />Normal</span></div></section>
     <button onClick={onReminders} className="glass-card flex w-full items-center gap-3 p-4 text-left"><Bell className="h-5 w-5 text-accent-1" /><span><strong className="block text-text-1">Smart reminders</strong><small className="text-text-2">Period, fertile, and daily check-in alerts</small></span></button></div>
 }
 function InfoCard({ title, body }: Readonly<{ title: string; body: string }>) { return <div className="glass-card p-4"><p className="font-semibold text-text-1">{title}</p><p className="mt-1 text-sm leading-6 text-text-2">{body}</p></div> }
