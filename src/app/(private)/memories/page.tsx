@@ -395,14 +395,9 @@ function MemoriesPageContent() {
     }
 
     setError('')
-    const { error: deleteError } = await supabase.from('memories').delete().eq('id', memory.id)
-    if (deleteError) {
-      setError(deleteError.message)
-      return
-    }
-
     const provider = (memory as Memory & { storage_provider?: string }).storage_provider ?? 'supabase'
     const driveFileId = (memory as Memory & { drive_file_id?: string | null }).drive_file_id
+
     if (provider === 'google_drive' && driveFileId) {
       const response = await fetch('/api/drive/delete', {
         method: 'POST',
@@ -412,12 +407,22 @@ function MemoriesPageContent() {
       if (!response.ok) {
         const body = (await response.json().catch(() => ({}))) as { error?: string }
         setError(body.error || 'Google Drive file deletion failed.')
+        return
       }
     } else if (memory.image_url && !memory.image_url.startsWith('/')) {
       const { error: storageError } = await supabase.storage
         .from('memories')
         .remove([memory.storage_path ?? memory.image_url])
-      if (storageError) setError(storageError.message)
+      if (storageError) {
+        setError(storageError.message)
+        return
+      }
+    }
+
+    const { error: deleteError } = await supabase.from('memories').delete().eq('id', memory.id)
+    if (deleteError) {
+      setError(deleteError.message)
+      return
     }
 
     setMemories((current) => current.filter((item) => item.id !== memory.id))
