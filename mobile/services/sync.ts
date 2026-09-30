@@ -69,11 +69,17 @@ export async function pushPendingMessages() {
     return 0
   }
 
-  const pending = await database.get('messages').query(Q.where('synced', false)).fetch()
   const coupleId = await getCoupleId()
   if (!coupleId) {
     throw new Error('No accepted couple link found')
   }
+
+  // Only pending rows for the active couple may be uploaded. Empty couple IDs
+  // are legacy local rows and are safely adopted by the active couple below.
+  const pending = await database
+    .get('messages')
+    .query(Q.where('synced', false), Q.or(Q.where('couple_id', coupleId), Q.where('couple_id', '')))
+    .fetch()
 
   const failures: string[] = []
 
@@ -83,7 +89,7 @@ export async function pushPendingMessages() {
       id: rawMessage.id,
       content: rawMessage._get('content'),
       sender_id: rawMessage._get('sender_id'),
-      couple_id: rawMessage._get('couple_id') || coupleId,
+      couple_id: coupleId,
       created_at: new Date(rawMessage._get('created_at')).toISOString(),
       message_type: rawMessage._get('message_type') || 'text',
       location_payload: (() => {
