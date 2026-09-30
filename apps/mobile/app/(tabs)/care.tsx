@@ -1490,6 +1490,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       marginTop: 10,
     },
     notes: { minHeight: 82, textAlignVertical: 'top' },
+    editActions: { flexDirection: 'row', gap: 10, marginTop: 16 },
     saveButton: {
       marginTop: 16,
       alignItems: 'center',
