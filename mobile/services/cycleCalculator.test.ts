@@ -25,7 +25,7 @@ describe('Native cycle calculator', () => {
     expect(summary.estimateReady).toBe(true)
   })
 
-  it('uses a newly logged period instead of an old manual setting', () => {
+  it('uses observed cycle length instead of the old manual setting', () => {
     const summary = calculateNativeCycleSummary(
       [
         { log_date: '2024-04-01', period_day: true },
@@ -34,7 +34,7 @@ describe('Native cycle calculator', () => {
       { cycle_length: 28, period_length: 5, last_period_start: '2024-02-01' }
     )
     expect(summary.lastPeriodStart).toBe('2024-04-01')
-    expect(summary.nextPeriodStart).toBe('2024-04-29')
+    expect(summary.nextPeriodStart).toBe('2024-05-02')
     expect(summary.fertilityStatus).toBe('lower')
   })
 
