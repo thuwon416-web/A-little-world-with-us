@@ -90,9 +90,10 @@ export function calculateNativeCycleSummary(
   })
   const ordered = [...historicalLengths].sort((a, b) => a - b)
   const middle = Math.floor(ordered.length / 2)
-  const cycleLength = ordered.length
-    ? Math.floor(ordered.length % 2 ? ordered[middle] : (ordered[middle - 1] + ordered[middle]) / 2)
+  const median = ordered.length
+    ? (ordered.length % 2 ? ordered[middle] : (ordered[middle - 1] + ordered[middle]) / 2)
     : settings.cycle_length
+  const cycleLength = Math.round(median)
   // Logged period history is the source of truth; the saved setting is only a fallback.
   const lastPeriodStart = starts[0] ?? settings.last_period_start ?? null
   const variationMin = historicalLengths.length ? Math.min(...historicalLengths) : cycleLength
