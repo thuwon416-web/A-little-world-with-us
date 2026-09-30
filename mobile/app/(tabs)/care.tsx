@@ -752,11 +752,13 @@ function TodayCareTab({
         <Text style={styles.heroLabel}>CYCLE DAY</Text>
         <Text style={styles.days}>{summary.day ?? '—'}</Text>
         <Text style={styles.heroNote}>
-          {summary.nextPeriodStart
-            ? summary.nextPeriodStart === dateKey(new Date())
-              ? 'Period expected today'
-              : `Next period ${summary.nextPeriodStart}`
-            : 'Log a period to begin forecasting.'}
+          {daysUntil === null
+            ? 'Log a period to begin forecasting.'
+            : daysUntil > 0
+              ? `Period in ${daysUntil} days`
+              : daysUntil === 0
+                ? 'Period expected today'
+                : `Period late by ${Math.abs(daysUntil)} days`}
         </Text>
         <Text style={styles.heroFertility}>
           {summary.fertilityStatus === 'higher'
