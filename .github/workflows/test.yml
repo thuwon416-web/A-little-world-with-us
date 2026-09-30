@@ -57,7 +57,7 @@ jobs:
           cache-dependency-path: apps/mobile/package-lock.json
       - name: Install mobile dependencies
         working-directory: ./apps/mobile
-        run: npm ci --ignore-scripts
+        run: npm ci --include=dev --ignore-scripts
       - name: Run mobile TypeScript check
         working-directory: ./apps/mobile
         run: npm run typecheck
