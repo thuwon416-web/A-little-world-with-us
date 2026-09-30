@@ -224,7 +224,7 @@ export default function CoupleSettings() {
     <div className="glass-card p-5">
       <div className="flex items-center gap-2 mb-4">
         <Heart className="h-5 w-5 text-accent-1" />
-        <h3 className="text-lg font-semibold text-text-1">Couple Settings</h3>
+        <h3 className="text-lg font-semibold text-text-1">Couple / Relationship</h3>
       </div>
 
       {error && (
@@ -321,6 +321,11 @@ export default function CoupleSettings() {
       {status.status === 'accepted' && status.couple && (
         <div className="space-y-4">
           <div className="rounded-xl bg-soft-tint p-4">
+            <div className="mb-4 rounded-lg border border-accent-1/15 bg-card px-3 py-2.5">
+              <p className="text-sm font-semibold text-text-1">Connected with ${status.partner?.full_name || status.partner?.email || "your partner"}</p>
+              <p className="mt-0.5 text-xs text-success">Status: Connected</p>
+              <p className="mt-1 text-xs text-text-2">Manage relationship</p>
+            </div>
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm font-medium text-text-1">
