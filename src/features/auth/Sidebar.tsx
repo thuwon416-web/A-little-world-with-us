@@ -27,7 +27,6 @@ const navGroups = [
       { href: '/chat', key: 'whispers', icon: MessageCircleHeart },
       { href: '/calls', key: 'calls', icon: PhoneCall },
       { href: '/location', key: 'location', icon: MapPin },
-      { href: '/couple-linking', key: 'coupleLinking', icon: Users },
     ],
   },
   {
@@ -52,7 +51,6 @@ const navGroups = [
       { href: '/games', key: 'games', icon: Gamepad2 },
       { href: '/music', key: 'music', icon: Music },
       { href: '/astrology', key: 'astrology', icon: Star },
-      { href: '/ai', key: 'ai', icon: Sparkles },
     ],
   },
   {

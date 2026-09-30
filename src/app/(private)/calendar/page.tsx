@@ -8,7 +8,6 @@ import { getCoupleStatus } from '@/lib/couples'
 import LoveCalendar from '@/features/planning/LoveCalendar'
 import BucketList from '@/features/planning/BucketList'
 import SharedWishlist from '@/features/planning/SharedWishlist'
-import PlansPage from '@/app/(private)/plans/page'
 import RemindersPage from '@/app/(private)/reminders/page'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 
@@ -91,7 +90,7 @@ export default function CalendarPage() {
 
     setCalendarLoading(false)
     if (error) {
-      setCalendarError('ပြက္ခဒိန်အစီအစဉ်များကို ဖတ်မရပါ။ ခဏနေမှ ထပ်ကြိုးစားပါ။')
+      setCalendarError('Unable to load calendar events. Please try again.')
       return
     }
     setEvents((data ?? []) as CalendarEvent[])
@@ -142,7 +141,7 @@ export default function CalendarPage() {
     })
 
     if (error) {
-      setCalendarError('အစီအစဉ်ကို မသိမ်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။')
+      setCalendarError('Unable to save the event. Please try again.')
       return
     }
 
@@ -184,7 +183,7 @@ export default function CalendarPage() {
             </button>
           ))}
         </nav>
-        {activeTab === 'plans' && <div className="space-y-8"><FuturePlansContent /><PlansPage /></div>}
+        {activeTab === 'plans' && <FuturePlansContent />}
         {activeTab === 'reminders' && <RemindersPage />}
         {activeTab === 'finance' && <FinanceContent />}
         {activeTab === 'calendar' && (
@@ -215,7 +214,7 @@ export default function CalendarPage() {
               {showSharedCalendar && (
                 <div className="mt-4 space-y-4">
                   {calendarError && <p role="alert" className="rounded-xl border border-error/30 bg-error/10 p-3 text-sm text-error">{calendarError}</p>}
-                  {calendarLoading && <p role="status" className="text-sm text-text-2">ပြက္ခဒိန်အစီအစဉ်များကို ဖတ်နေသည်…</p>}
+                  {calendarLoading && <p role="status" className="text-sm text-text-2">Loading calendar events…</p>}
                   {/* Navigation */}
                   <div className="flex justify-between items-center">
                     <button
