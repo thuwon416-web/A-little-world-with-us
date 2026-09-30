@@ -1,0 +1,24 @@
+{
+  "name": "a-little-world-with-us-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=24.3.0 <25"
+  },
+  "scripts": {
+    "dev": "npm --prefix apps/web run dev",
+    "build": "npm --prefix apps/web run build",
+    "start": "npm --prefix apps/web run start",
+    "lint": "npm --prefix apps/web run lint",
+    "typecheck": "npm --prefix apps/web run typecheck",
+    "test": "npm --prefix apps/web run test",
+    "test:coverage": "npm --prefix apps/web run test:coverage",
+    "test:e2e": "npm --prefix apps/web run test:e2e",
+    "web:install": "npm --prefix apps/web install",
+    "mobile:install": "npm --prefix apps/mobile install",
+    "mobile:dev": "npm --prefix apps/mobile run start",
+    "mobile:typecheck": "npm --prefix apps/mobile run typecheck",
+    "mobile:lint": "npm --prefix apps/mobile run lint",
+    "mobile:test": "npm --prefix apps/mobile run test:coverage"
+  }
+}
