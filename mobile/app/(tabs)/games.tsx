@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router'
-import { Gamepad2, Sparkles, Trophy, type LucideIcon } from 'lucide-react-native'
+import { Gamepad2, type LucideIcon } from 'lucide-react-native'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -7,7 +7,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
-import { calculateLoveScore } from '@/lib/love-score'
 import { supabase } from '@/lib/supabase'
 
 const winLines = [
@@ -84,14 +83,6 @@ export default function GamesScreen() {
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [board, setBoard] = useState<string[]>(new Array(9).fill(''))
   const [xNext, setXNext] = useState(true)
-  const [loveScore, setLoveScore] = useState(0)
-
-  useEffect(() => {
-    void supabase.auth.getUser().then(({ data }) => {
-      const name = String(data.user?.user_metadata?.full_name ?? data.user?.email ?? 'you')
-      setLoveScore(calculateLoveScore(name, 'partner'))
-    })
-  }, [])
 
   const play = (index: number) => {
     if (board[index] || winner(board)) return
@@ -116,15 +107,6 @@ export default function GamesScreen() {
           Little games for two hearts.
         </Text>
       </View>
-
-      <Section title="Quizzes" icon={Sparkles}>
-        <GameCard
-          title="Korean Quiz"
-          subtitle="Practice Korean words and phrases together."
-          action="Start quiz"
-          onPress={() => router.push('/(tabs)/quiz?level=1')}
-        />
-      </Section>
 
       <Section title="Playful" icon={Gamepad2}>
         <View
@@ -165,14 +147,6 @@ export default function GamesScreen() {
         </View>
       </Section>
 
-      <Section title="Quests" icon={Trophy}>
-        <GameCard
-          title="Relationship Quests"
-          subtitle="Complete shared quests and earn love points."
-          action="Open Wellness"
-          onPress={() => router.push('/(tabs)/wellness')}
-        />
-      </Section>
     </ScrollView>
   )
 }
@@ -192,7 +166,6 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     cardTitle: { fontSize: sizes.text.bodyLg, fontWeight: '700' },
     cardSubtitle: { fontSize: sizes.text.sm, lineHeight: 20 },
     cardAction: { fontSize: sizes.text.sm, fontWeight: '700', marginTop: 4 },
-    score: { fontSize: sizes.text.hLg, fontWeight: '800', marginTop: 4 },
     board: { width: 210, flexDirection: 'row', flexWrap: 'wrap', marginTop: 4 },
     cell: { width: 70, height: 70, borderWidth: 1, alignItems: 'center', justifyContent: 'center' },
     cellText: { fontSize: sizes.text.hLg },
