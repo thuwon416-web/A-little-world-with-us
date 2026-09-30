@@ -57,7 +57,6 @@ const sections = [
     items: [
       { href: '/(tabs)/chat', key: 'chat', Icon: Phone },
       { href: '/(tabs)/calls', key: 'calls', Icon: Phone },
-      { href: '/(tabs)/couple-linking', key: 'coupleLinking', Icon: Users },
       { href: '/(tabs)/location', key: 'locationSafety', Icon: MapPin },
     ],
   },
@@ -69,7 +68,6 @@ const sections = [
       { href: '/(tabs)/learning', key: 'learning', Icon: Languages },
       { href: '/(tabs)/games', key: 'coupleGames', Icon: Gamepad2 },
       { href: '/(tabs)/watch-together', key: 'watchTogether', Icon: MonitorPlay },
-      { href: '/(tabs)/ai', key: 'aiGuardian', Icon: Sparkles },
       { href: '/(tabs)/astrology', key: 'astrology', Icon: Moon },
     ],
   },
