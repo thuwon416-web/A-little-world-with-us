@@ -60,6 +60,24 @@ export function periodStarts(logs: NativeCareLog[]) {
   return days.filter((day, index) => index === 0 || daysBetween(days[index - 1], day) > 1).reverse()
 }
 
+export function buildNativeCycleHistory(
+  logs: NativeCareLog[],
+  summary: NativeCycleSummary
+): NativeCycleSummary['cycleHistory'] {
+  const starts = [...periodStarts(logs)].reverse()
+  return starts.map((startDate, index) => {
+    const nextStart = starts[index + 1] ?? (startDate === summary.lastPeriodStart ? summary.nextPeriodStart : null)
+    const endDate = nextStart ? addDays(nextStart, -1) : startDate
+    const length = nextStart ? daysBetween(startDate, nextStart) : summary.cycleLength
+    return {
+      startDate,
+      endDate,
+      length,
+      status: nextStart && startDate !== summary.lastPeriodStart ? 'actual' as const : 'predicted' as const,
+    }
+  }).filter((cycle) => cycle.startDate >= '2024-01-01' && cycle.length > 0)
+}
+
 export function calculateNativeCycleSummary(
   logs: NativeCareLog[],
   settings: NativeCycleSettings
