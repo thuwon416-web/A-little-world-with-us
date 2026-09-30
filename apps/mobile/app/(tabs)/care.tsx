@@ -1294,7 +1294,6 @@ export default function CareScreen() {
               throw error_
             }
           } />
-        />
       ) : activeTab === 'Reminders' ? (
         <Reminders coupleId={data.coupleId} userId={data.userId} />
       ) : activeTab === 'Settings' ? (
