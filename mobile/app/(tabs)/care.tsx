@@ -360,17 +360,19 @@ function Calendar({
 }: Readonly<{
   logs: CareLog[]
   summary: NativeCycleSummary
-  onLog: (date: string) => void
+  onSave: (dates: string[]) => Promise<void>
 }>) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
   const [month, setMonth] = useState(new Date())
   const [editing, setEditing] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(() => new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate)))
+  const [saving, setSaving] = useState(false)
   const year = month.getFullYear()
   const monthIndex = month.getMonth()
   const days = new Date(year, monthIndex + 1, 0).getDate()
   const firstDay = new Date(year, monthIndex, 1).getDay()
-  const periodDays = new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
+  const periodDays = selected
   const monthName = month.toLocaleDateString([], { month: 'long', year: 'numeric' })
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -406,7 +408,14 @@ function Calendar({
               <TouchableOpacity
                 key={date}
                 disabled={!editing}
-                onPress={() => onLog(date)}
+                onPress={() => {
+                  setSelected((current) => {
+                    const next = new Set(current)
+                    if (next.has(date)) next.delete(date)
+                    else next.add(date)
+                    return next
+                  })
+                }}
                 accessibilityRole="button"
                 accessibilityLabel={`${date}: ${actual ? 'Period logged' : predicted ? 'Predicted period' : fertile ? 'Fertile estimate' : 'Normal cycle day'}`}
                 style={[
@@ -434,15 +443,29 @@ function Calendar({
         </Text>
         {editing ? (
           <View style={styles.editActions}>
-            <TouchableOpacity style={styles.secondaryButton} onPress={() => setEditing(false)}>
+            <TouchableOpacity style={styles.secondaryButton} disabled={saving} onPress={() => {
+              setSelected(new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
+              setEditing(false)
+            }}>
               <Text style={styles.saveText}>Cancel</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.saveButton} onPress={() => setEditing(false)}>
-              <Text style={styles.saveText}>Save period dates</Text>
+            <TouchableOpacity style={[styles.saveButton, saving && styles.disabled]} disabled={saving} onPress={async () => {
+              setSaving(true)
+              try {
+                await onSave([...selected])
+                setEditing(false)
+              } finally {
+                setSaving(false)
+              }
+            }}>
+              <Text style={styles.saveText}>{saving ? 'Saving…' : 'Save period dates'}</Text>
             </TouchableOpacity>
           </View>
         ) : (
-          <TouchableOpacity style={styles.saveButton} onPress={() => setEditing(true)}>
+          <TouchableOpacity style={styles.saveButton} onPress={() => {
+            setSelected(new Set(logs.filter((log) => log.periodDay).map((log) => log.logDate))
+            setEditing(true)
+          }}>
             <Text style={styles.saveText}>Edit period dates</Text>
           </TouchableOpacity>
         )}
@@ -1224,7 +1247,7 @@ export default function CareScreen() {
         <Calendar
           logs={data.logs}
           summary={summary}
-          onLog={(date) => void toggleSharedPeriodDate(date)}
+          onSave={(dates) => saveSharedPeriodDates(data.coupleId, dates).then(() => refresh())}
         />
       ) : activeTab === 'Reminders' ? (
         <Reminders coupleId={data.coupleId} userId={data.userId} />
