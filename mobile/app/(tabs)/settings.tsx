@@ -486,9 +486,12 @@ export default function SettingsScreen() {
           ))}
         </View>
       </Section>
-      <Section title="Couple settings">
-        <Text style={styles.muted}>Partner: {data.partnerEmail ?? 'Not linked'}</Text>
-        <Text style={styles.muted}>Status: {data.relationshipStatus}</Text>
+      <Section title="Couple / Relationship">
+        <View style={styles.card}>
+          <Text style={styles.label}>Connected with {data.partnerEmail ?? 'your partner'}</Text>
+          <Text style={styles.muted}>Status: {data.relationshipStatus === 'accepted' ? 'Connected' : data.relationshipStatus}</Text>
+          <Text style={styles.muted}>Manage relationship</Text>
+        </View>
         <TextInput
           value={name}
           onChangeText={setName}
