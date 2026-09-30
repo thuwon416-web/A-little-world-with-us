@@ -1,45 +1,30 @@
 # Changelog
 
-## [Unreleased] — Phases 1–21
+## [Unreleased] — Project completion and maintenance
 
-### Completed Phases (coding)
+The current `main` line contains the completed Web ↔ Mobile feature-parity, Care/Period, chat/realtime, location/safety, media, and reliability/security work tracked in the project plan.
 
-| Phase | Task |
-|-------|------|
-| 1 | Critical Bugs (7 sub-stages) |
-| 2 | Theme System (5 themes) |
-| 3 | Design System + Icon + Games + Parity (30+ sub-stages) |
-| 4 | Encoding + Cleanup |
-| 5 | Chat Visual (Telegram bubbles) |
-| 8 | Data Integrity |
-| 9 | Location & Vault |
-| 10 | Wellness Consolidation (42→20 boards) |
-| 12 | Korean Feature (160 entries) |
-| 14 | Vault Password Manager (Zero-Knowledge) |
-| 16 | Safety System (6 stages) |
-| 17 | AI Voice + Mood Journal (17.0–17.5) |
-| 18 | Memory Slideshow + Map + On This Day |
-| 19 | Finance Splitwise Balance |
-| 21 | Background Location Safety (21.1–21.7e) |
+### Completed
 
-### Skipped Phases
+- Web and Expo Mobile feature parity for shared couple features.
+- Care period-date persistence through the canonical `save_care_period_dates(uuid, date[])` RPC.
+- Calendar-based cycle estimates with explicit uncertainty-aware pregnancy-chance wording.
+- Chat media, voice, reactions/edit/reply support and realtime synchronization.
+- Couple-scoped RLS and security hardening across shared data.
+- Location sharing, realtime updates, geofence, battery and missed-check-in safety flows.
+- Private media handling with signed access and versioned encryption helpers.
+- Google Drive web OAuth preparation for optional Drive-backed memory media.
+- Retention cleanup for location history (7 days) and temporary AI context (30 days).
+- CI coverage for Web lint/typecheck/tests/A11Y and Mobile lint/typecheck/tests.
 
-| Phase | Reason |
-|-------|--------|
-| 13 | Existing generate+save flow sufficient |
-| 15 | Telegram Bot not in current scope |
+### Intentionally deferred
 
-### Pending
+- Google Cloud/Vercel OAuth credentials and production Drive configuration require operator setup.
+- Native Android/mobile Google Drive OAuth is a separate deployment setup step.
+- Supabase unused-index cleanup remains an optimization decision.
+- Remaining unindexed foreign-key warnings outside the already-covered indexes can be reviewed separately; `user_locations.couple_id` is intentionally excluded from the broader migration scope and has its own index migration.
 
-| Phase | Task |
-|-------|------|
-| 20 | Manual E2E testing (pending) |
-| 11 | Build & VPN release |
+### Verification
 
-### Key Additions (Phase 17 + 21)
+Before production release, run the repository CI checks and complete real-device smoke tests for authentication, couple linking, Memories, Care/Period, Calendar, Finance, Reminders, chat, and location permissions.
 
-- **Phase 21**: Background geofence detection, low-battery alerts, missed check-in detection
-- **Phase 21.7**: Push preference UI (geofence/battery_low/missed_checkin toggles)
-- **Phase 21.7b/c**: Geofence events list on Mobile + Web
-- **Phase 17**: AI mood journal with Lucide mood icons, AI reflection, voice notes, TTS readback
-- **Phase 17.0**: `memories.metadata` JSONB column for journal metadata
