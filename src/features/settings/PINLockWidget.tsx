@@ -97,7 +97,7 @@ export default function PINLockWidget({
   }
 
   return (
-    <div className="glass-card p-5">
+    <section className="glass-card min-h-[180px] rounded-panel border border-accent-1/15 p-5">
       <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
         <Lock className="h-5 w-5 text-accent-1" />
         PIN Lock
@@ -135,8 +135,8 @@ export default function PINLockWidget({
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="glass-card p-6 max-w-sm w-full mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
+          <div className="glass-card my-8 w-full max-w-sm rounded-modal border border-accent-1/20 p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-text-1">
                 Set PIN
@@ -152,6 +152,8 @@ export default function PINLockWidget({
                 <input
                   id={pinInputId}
                   type="password"
+                  inputMode="numeric"
+                  autoComplete="new-password"
                   value={pin}
                   onChange={(e) => setPin(e.target.value)}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
@@ -165,6 +167,8 @@ export default function PINLockWidget({
                 <input
                   id={confirmPinInputId}
                   type="password"
+                  inputMode="numeric"
+                  autoComplete="new-password"
                   value={confirmPin}
                   onChange={(e) => setConfirmPin(e.target.value)}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
@@ -188,6 +192,6 @@ export default function PINLockWidget({
           </div>
         </div>
       )}
-    </div>
+    </section>
   )
 }
