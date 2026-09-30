@@ -1,7 +1,7 @@
 {
-  "name": "a-little-world-with-us",
+  "name": "a-little-world-with-us-web",
   "version": "1.0.0",
-  "description": "A premium minimalist app for two lives gracefully becoming one",
+  "description": "Next.js web application for A Little World With Us.",
   "private": true,
   "engines": {
     "node": ">=24.3.0 <25"
