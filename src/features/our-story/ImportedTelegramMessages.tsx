@@ -10,7 +10,7 @@ type ImportedMessage = {
   message_text: string
 }
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 5
 
 export default function ImportedTelegramMessages({ coupleId }: { coupleId: string }) {
   const [messages, setMessages] = useState<ImportedMessage[]>([])
@@ -29,10 +29,10 @@ export default function ImportedTelegramMessages({ coupleId }: { coupleId: strin
         .select('id,message_date,sender_name,message_text')
         .eq('couple_id', coupleId)
         .order('message_date', { ascending: false })
-        .range(offset, offset + PAGE_SIZE)
+        .range(offset, offset + PAGE_SIZE - 1)
       if (queryError) throw queryError
       const page = (data ?? []) as ImportedMessage[]
-      setHasMore(page.length > PAGE_SIZE)
+      setHasMore(page.length === PAGE_SIZE)
       const visible = page.slice(0, PAGE_SIZE)
       setMessages((current) => offset ? [...current, ...visible] : visible)
     } catch (error_) {
@@ -55,6 +55,6 @@ export default function ImportedTelegramMessages({ coupleId }: { coupleId: strin
       <div className="flex flex-wrap items-baseline justify-between gap-2"><strong className="text-sm text-text-1">{message.sender_name}</strong><time className="text-xs text-text-2" dateTime={message.message_date}>{new Date(message.message_date).toLocaleString()}</time></div>
       <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-text-1">{message.message_text}</p>
     </li>)}</ol>
-    {hasMore ? <button type="button" disabled={loadingMore} onClick={() => void load(messages.length)} className="rounded-xl border border-accent-1/25 px-4 py-2 text-sm text-text-1 disabled:opacity-60">{loadingMore ? 'ဖွင့်နေသည်…' : 'နောက်ထပ်ဖွင့်ရန်'}</button> : null}
+    {hasMore ? <button type="button" disabled={loadingMore} onClick={() => void load(messages.length)} className="rounded-xl border border-accent-1/25 px-4 py-2 text-sm text-text-1 disabled:opacity-60">{loadingMore ? 'Loading…' : 'View all / Load more'}</button> : null}
   </div>
 }
