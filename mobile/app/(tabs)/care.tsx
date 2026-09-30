@@ -1261,7 +1261,15 @@ export default function CareScreen() {
         <Calendar
           logs={data.logs}
           summary={summary}
-          onSave={(dates) => saveSharedPeriodDates(data.coupleId, dates).then(() => refresh())}
+          onSave={async (dates) => {
+            try {
+              await saveSharedPeriodDates(data.coupleId, dates)
+              await refresh()
+            } catch (error_) {
+              Alert.alert('Could not save period dates', error_ instanceof Error ? error_.message : 'Please try again.')
+              throw error_
+            }
+          }>
         />
       ) : activeTab === 'Reminders' ? (
         <Reminders coupleId={data.coupleId} userId={data.userId} />
