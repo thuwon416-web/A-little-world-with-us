@@ -20,11 +20,11 @@ begin
   into normalized_dates
   from unnest(coalesce(selected_dates, '{}'::date[])) as value;
 
-  update public.care_daily_logs
+  update public.care_daily_logs as log
   set period_day = false, updated_by = auth.uid(), updated_at = now()
-  where couple_id = target_couple_id
-    and period_day = true
-    and not (log_date = any(normalized_dates));
+  where log.couple_id = target_couple_id
+    and log.period_day = true
+    and not (log.log_date = any(normalized_dates));
 
   insert into public.care_daily_logs (
     couple_id, user_id, log_date, period_day, created_by, updated_by, updated_at
