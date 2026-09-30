@@ -1,6 +1,7 @@
 'use client'
 
 import { BellRing, NotebookPen, ShieldCheck, Wand2 } from 'lucide-react'
+import { useEffect } from 'react'
 import { useState } from 'react'
 import dynamic from 'next/dynamic'
 
@@ -56,6 +57,14 @@ const settingCards = [
 ]
 
 export default function SettingsPage() {
+  const [driveConnected, setDriveConnected] = useState(false)
+  const [driveLoading, setDriveLoading] = useState(true)
+  useEffect(() => {
+    void fetch('/api/drive/status', { cache: 'no-store' }).then(async (response) => {
+      const body = await response.json() as { connected?: boolean }
+      setDriveConnected(Boolean(body.connected))
+    }).catch(() => setDriveConnected(false)).finally(() => setDriveLoading(false))
+  }, [])
   const [activeSettingsModal, setActiveSettingsModal] = useState<'reminder' | 'pin' | null>(null)
 
   return (
@@ -123,6 +132,16 @@ export default function SettingsPage() {
           <SecuritySettings />
           <LanguageSwitcher />
           <TwoFactorAuthWidget />
+        </div>
+      </section>
+
+      <section className="rounded-modal border border-border bg-card p-5">
+        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">Storage</p>
+        <h2 className="mt-1 text-xl font-semibold text-text-1">Google Drive</h2>
+        <p className="mt-2 text-sm text-text-2">Connect your Drive for future photo storage. The app keeps only the Drive file reference so saved photos can remain readable later.</p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <span className="text-sm text-text-2">{driveLoading ? 'Checking…' : driveConnected ? 'Connected' : 'Not connected'}</span>
+          {!driveLoading && !driveConnected ? <a href="/api/drive/start" className="rounded-full bg-accent-1 px-4 py-2 text-sm font-semibold text-white">Connect Google Drive</a> : null}
         </div>
       </section>
 
