@@ -13,17 +13,14 @@ import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes } from '@/design-tokens'
 
 type Section = 'memories' | 'gallery' | 'map' | 'story' | 'capsules'
-const sections: { id: Section; label: string; Icon: typeof Heart }[] = [
-  { id: 'memories', label: 'Memories', Icon: Heart },
+const exploreSections: { id: Exclude<Section, 'memories'>; label: string; Icon: typeof Heart }[] = [
   { id: 'gallery', label: 'Gallery', Icon: Heart },
   { id: 'map', label: 'Map', Icon: Map },
   { id: 'story', label: 'Our Story', Icon: BookHeart },
   { id: 'capsules', label: 'Time Capsules', Icon: Clock3 },
 ]
-
-function isSection(value: unknown): value is Section {
-  return sections.some((section) => section.id === value)
-}
+const isExploreSection = (value: unknown): value is Exclude<Section, 'memories'> =>
+  exploreSections.some((item) => item.id === value)
 
 export default function MemoriesHub() {
   const { colors } = useTheme()
@@ -33,7 +30,7 @@ export default function MemoriesHub() {
   const styles = createStyles(colors)
 
   useEffect(() => {
-    if (isSection(section)) setActiveSection(section)
+    if (section === 'memories' || isExploreSection(section)) setActiveSection(section)
   }, [section])
 
   const selectSection = (next: Section) => {
@@ -43,31 +40,36 @@ export default function MemoriesHub() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.nav}
-      >
-        {sections.map(({ id, label, Icon }) => (
-          <TouchableOpacity
-            key={id}
-            accessibilityRole="tab"
-            accessibilityState={{ selected: activeSection === id }}
-            onPress={() => selectSection(id)}
-            style={[styles.navItem, activeSection === id && styles.navItemActive]}
-          >
-            <Icon color={activeSection === id ? colors.accent1 : colors.textSecondary} size={17} />
-            <Text
-              style={[
-                styles.navText,
-                { color: activeSection === id ? colors.accent1 : colors.textSecondary },
-              ]}
-            >
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+      <View style={styles.primaryNav}>
+        <TouchableOpacity
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeSection === 'memories' }}
+          onPress={() => selectSection('memories')}
+          style={[styles.primaryNavItem, activeSection === 'memories' && styles.navItemActive]}
+        >
+          <Heart color={activeSection === 'memories' ? colors.accent1 : colors.textSecondary} size={18} />
+          <Text style={[styles.navText, { color: activeSection === 'memories' ? colors.accent1 : colors.textSecondary }]}>Memories</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          accessibilityRole="tab"
+          accessibilityState={{ selected: activeSection !== 'memories' }}
+          onPress={() => selectSection(activeSection === 'memories' ? 'gallery' : activeSection)}
+          style={[styles.primaryNavItem, activeSection !== 'memories' && styles.navItemActive]}
+        >
+          <Map color={activeSection !== 'memories' ? colors.accent1 : colors.textSecondary} size={18} />
+          <Text style={[styles.navText, { color: activeSection !== 'memories' ? colors.accent1 : colors.textSecondary }]}>Explore</Text>
+        </TouchableOpacity>
+      </View>
+      {activeSection !== 'memories' ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.nav}>
+          {exploreSections.map(({ id, label, Icon }) => (
+            <TouchableOpacity key={id} accessibilityRole="tab" accessibilityState={{ selected: activeSection === id }} onPress={() => selectSection(id)} style={[styles.navItem, activeSection === id && styles.navItemActive]}>
+              <Icon color={activeSection === id ? colors.accent1 : colors.textSecondary} size={17} />
+              <Text style={[styles.navText, { color: activeSection === id ? colors.accent1 : colors.textSecondary }]}>{label}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      ) : null}
       <View style={styles.content}>
         {activeSection === 'memories' ? <MemoryJournal /> : null}
         {activeSection === 'gallery' ? <GallerySection /> : null}
@@ -82,7 +84,9 @@ export default function MemoriesHub() {
 const createStyles = (colors: ThemeColors) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: colors.background },
-    nav: { gap: 8, paddingHorizontal: 16, paddingVertical: 10 },
+    primaryNav: { flexDirection: 'row', gap: 8, paddingHorizontal: 16, paddingVertical: 10 },
+    primaryNavItem: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, borderRadius: sizes.radius.input, paddingHorizontal: 12, paddingVertical: 10 },
+    nav: { gap: 8, paddingHorizontal: 16, paddingBottom: 10 },
     navItem: {
       flexDirection: 'row',
       alignItems: 'center',
