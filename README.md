@@ -2,30 +2,92 @@
 
 A private couple app for shared memories, chat, Care, planning, wellness, and an admin-only location dashboard.
 
-## Local setup
+## Repository structure
 
-1. Install web dependencies with `npm install` and mobile dependencies with `npm install --prefix mobile`.
-2. Copy `.env.example` to `.env.local` and add Supabase, Upstash, the existing matching web/server chat-encryption value, an optional server-side AI provider (such as `GROQ_API_KEY`), and Sentry values as needed. Copy `mobile/.env.example` to `mobile/.env` and use the same chat-encryption value there.
-3. Run the web app with `npm run dev`; run checks with `npx tsc --noEmit`, `npm run lint`, and `npm run build`.
+```text
+.
+├── src/                 # Next.js web application
+├── public/              # Web static assets
+├── mobile/              # Expo / React Native application
+├── supabase/            # PostgreSQL bootstrap + Edge Functions
+├── docs/                # Architecture, setup, deployment, security
+├── scripts/             # Project automation and maintenance
+└── .github/             # CI workflows
+```
+
+The web application intentionally remains at the repository root because it is a full-stack Next.js application: UI and server Route Handlers live together under `src/`. Moving it into `web-platform/frontend` would require changing the Vercel project root, build/install paths, CI assumptions, and local tooling for no functional gain.
+
+## Start locally
+
+### Web
+
+1. Install dependencies with `npm install`.
+2. Copy `.env.example` to `.env.local`.
+3. Add the required Supabase, chat-encryption, AI, and optional integration values.
+4. Run `npm run dev`.
+
+### Mobile
+
+1. Copy `mobile/.env.example` to `mobile/.env`.
+2. Install and start with:
+
+```bash
+npm install --prefix mobile
+npm start --prefix mobile
+```
+
+## Checks
+
+Web:
+
+```bash
+npm run typecheck
+npm run lint
+npm run test:coverage
+npm run build
+```
+
+Mobile:
+
+```bash
+cd mobile
+npm run typecheck
+npm run lint
+npm run test:coverage
+```
+
+## Documentation
+
+- [Documentation hub](docs/README.md)
+- [Architecture overview](docs/architecture/overview.md)
+- [Local setup](docs/SETUP.md)
+- [Deployment](docs/deployment/DEPLOYMENT.md)
+- [Google Drive setup](docs/setup/google-drive.md)
+- [Data retention and storage](docs/security/data-retention.md)
+- [Mobile build instructions](mobile/BUILD_INSTRUCTIONS.md)
+- [Supabase bootstrap](supabase/bootstrap/README.md)
 
 ## Database
 
-The current database scripts are in [supabase/bootstrap](supabase/bootstrap/README.md). The first script, `00_core.sql`, is a destructive reset and must only be used for a fresh or disposable database. Never run it against data you need to keep.
+The maintained database scripts are in [supabase/bootstrap](supabase/bootstrap/README.md).
 
-For an existing database with the missing `memories.mime_type` column, review and apply the additive [15_media_mime_types.sql](supabase/bootstrap/15_media_mime_types.sql) script. It adds the media type columns used by the app. This is a database change and must be applied to the Supabase project separately from deploying web or mobile code.
+**Important:** `supabase/bootstrap/00_core.sql` is a destructive reset and must only be used for a fresh or disposable database. Never use it to repair an existing production database. Existing production databases should receive reviewed additive changes only.
 
-To enable linked partners to use the shared location page, review and apply [17_pair_location_access.sql](supabase/bootstrap/17_pair_location_access.sql). The migration only allows partner access when the location owner has enabled sharing. Apply it separately to the Supabase project.
+## Storage
 
-For an existing database, review and apply [18_storage_pair_scope.sql](supabase/bootstrap/18_storage_pair_scope.sql) to limit private media reads to the uploader and their accepted partner. Apply [19_reminder_realtime.sql](supabase/bootstrap/19_reminder_realtime.sql) so both phones can synchronize reminder changes, [20_call_signals_realtime.sql](supabase/bootstrap/20_call_signals_realtime.sql) so both call participants receive call-state updates, [21_web_reminder_push.sql](supabase/bootstrap/21_web_reminder_push.sql) to save browser push subscriptions and track dispatched reminders, and [22_call_media_signals.sql](supabase/bootstrap/22_call_media_signals.sql) to exchange protected WebRTC call data. Browser push needs server-only VAPID keys and a Supabase Cron job that calls `/api/cron/reminders` every minute using the configured cron secret. Mobile calls need a fresh native app build after installing WebRTC. For restrictive networks, add the optional `EXPO_PUBLIC_TURN_*` values from `mobile/.env.example`; use short-lived TURN credentials because public Expo values are bundled into the app. These additive scripts do not require rerunning `00_core.sql`.
+Supabase remains the application data source of record. When Google Drive is connected, memory image binaries can be stored in Drive while the memory metadata and Drive file reference remain in Supabase. The application reads Drive-backed media through authenticated server routes.
 
-## Maps and monitoring
+## Security
 
-Web location uses Leaflet with CARTO/OSM tiles; no map API key is required. Sentry is optional but recommended in production. Keep DSNs and auth tokens in ignored local files or Vercel Environment Variables, never in Git.
+Chat and media encryption are client-side protections for data stored in Supabase; they are not end-to-end encryption. Client-prefixed environment variables are bundled into the client and must not be treated as private server secrets.
 
-## Security Model
+Never commit OAuth client secrets, refresh tokens, encryption keys, cron secrets, or provider API keys.
 
-Chat and media encryption are client-side protections for data stored in Supabase; they are **not end-to-end encryption**. The Web `NEXT_PUBLIC_CHAT_ENCRYPTION_KEY` and Mobile `EXPO_PUBLIC_CHAT_ENCRYPTION_KEY` values are bundled into client apps, so a user or attacker with access to an authorized app/device can inspect the key and decrypt data that client can access. Encryption helps protect stored ciphertext if storage is compromised, but does not protect against an authorized couple member, a compromised device/client, or account takeover. Legacy chat messages using a fixed public derivation are not confidential against someone who knows the couple ID.
+## Project principles
 
-Keep the matching chat encryption values in ignored local environment files and the deployment environment. `NEXT_PUBLIC_CHAT_ENCRYPTION_KEY` is included in browser code and is not a private server secret; do not treat it as protection from someone who can inspect the app bundle. See [DEPLOYMENT.md](DEPLOYMENT.md) for the production sequence and [mobile/BUILD_INSTRUCTIONS.md](mobile/BUILD_INSTRUCTIONS.md) for native builds.
-
-For a complete local setup and validation checklist, see [docs/SETUP.md](docs/SETUP.md).
+- Keep active framework conventions intact.
+- Prefer small, reviewable structural changes over broad rewrites.
+- Do not archive active runtime code.
+- Preserve Web ↔ Mobile behavior parity.
+- Treat Supabase RLS and authorization checks as security boundaries.
+- Run automated checks after structural changes.
