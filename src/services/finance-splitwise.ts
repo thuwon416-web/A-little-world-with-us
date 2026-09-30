@@ -271,9 +271,9 @@ export function calculateBalance(
     totalExpenses += amount
     expensesCount += 1
     if (expense.isSettled || !expense.paidBy || ![myUserId, partnerUserId].includes(expense.paidBy)) continue
-    const partnerShare = expense.splitType === 'percentage'
-      ? Math.round(amount * (expense.splitPercentage ?? 50) / 100)
-      : Math.round(amount / 2)
+    const partnerShare = expense.splitType === 'equal'
+      ? Math.round(amount / 2)
+      : Math.round(amount * (expense.splitPercentage ?? 50) / 100)
     const myShare = amount - partnerShare
     netBalance += expense.paidBy === myUserId ? partnerShare : -myShare
   }
