@@ -1408,6 +1408,12 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       marginTop: 6,
       textAlign: 'center',
     },
+    heroWarning: {
+      color: colors.warning,
+      fontSize: sizes.text.xs,
+      marginTop: 8,
+      textAlign: 'center',
+    },
     heroNote: {
       color: colors.textPrimary,
       fontSize: sizes.text.body,
