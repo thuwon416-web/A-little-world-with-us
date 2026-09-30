@@ -13,6 +13,22 @@ import { isTTSSupported, speakKorean, stopSpeaking } from '@/lib/tts'
 
 const levels: KoreanLevel[] = [1, 2, 3, 4, 5, 6, 7]
 
+const curriculumCodeByLessonId: Record<string, string> = {
+  'kr-l1-consonants': '1-1',
+  'kr-l1-double-consonants': '1-1',
+  'kr-l1-vowels': '1-2',
+  'kr-l1-compound-vowels': '1-2',
+  'kr-l2-greetings': '2-1',
+  'kr-l2-politeness': '2-2',
+  'kr-l3-numbers': '3-1',
+  'kr-l3-days': '3-1',
+  'kr-l3-family': '3-1',
+  'kr-l3-colors': '3-2',
+  'kr-l3-food': '3-2',
+  'kr-l3-verbs': '3-2',
+  'kr-l3-places': '3-2',
+}
+
 export default function LearningPage() {
   const { mode } = useTheme()
   const [selectedLevel, setSelectedLevel] = useState<KoreanLevel>(1)
@@ -184,7 +200,7 @@ export default function LearningPage() {
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-xs uppercase tracking-wider text-accent-1">
-                          Lesson {lesson.order}
+                          {curriculumCodeByLessonId[lesson.id] ?? `Lesson ${lesson.order}`}
                         </p>
                         <h3 className="mt-1 text-xl font-semibold text-text-1">
                           {lesson.title}
