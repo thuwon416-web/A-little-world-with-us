@@ -23,6 +23,22 @@ import type { KoreanLevel, KoreanProgress, KoreanVocab } from '@/types/korean'
 
 const levels: KoreanLevel[] = [1, 2, 3, 4, 5, 6, 7]
 
+const curriculumCodeByLessonId: Record<string, string> = {
+  'kr-l1-consonants': '1-1',
+  'kr-l1-double-consonants': '1-1',
+  'kr-l1-vowels': '1-2',
+  'kr-l1-compound-vowels': '1-2',
+  'kr-l2-greetings': '2-1',
+  'kr-l2-politeness': '2-2',
+  'kr-l3-numbers': '3-1',
+  'kr-l3-days': '3-1',
+  'kr-l3-family': '3-1',
+  'kr-l3-colors': '3-2',
+  'kr-l3-food': '3-2',
+  'kr-l3-verbs': '3-2',
+  'kr-l3-places': '3-2',
+}
+
 export default function LearningScreen() {
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
@@ -201,8 +217,8 @@ export default function LearningScreen() {
                 <View style={styles.lessonHeading}>
                   <View style={styles.lessonCopy}>
                     <Text style={[styles.lessonOrder, { color: colors.accent1 }]}>
-                      Lesson {lesson.order}
-                    </Text>
+                        {curriculumCodeByLessonId[lesson.id] ?? `Lesson ${lesson.order}`}
+                      </Text>
                     <Text style={[styles.lessonTitle, { color: colors.textPrimary }]}>
                       {lesson.title}
                     </Text>
