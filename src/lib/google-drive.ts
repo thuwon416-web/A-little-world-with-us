@@ -199,3 +199,22 @@ export async function listDriveFile(userId: string, fileId: string) {
   if (!response.ok) throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive file lookup failed.')
   return data
 }
+
+
+export async function downloadDriveFile(userId: string, fileId: string) {
+  const accessToken = await getDriveAccessToken(userId)
+  const response = await fetch(`${DRIVE_API}/${encodeURIComponent(fileId)}?alt=media`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!response.ok) throw new Error('Google Drive file download failed.')
+  return response
+}
+
+export async function deleteDriveFile(userId: string, fileId: string) {
+  const accessToken = await getDriveAccessToken(userId)
+  const response = await fetch(`${DRIVE_API}/${encodeURIComponent(fileId)}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+  if (!response.ok && response.status !== 404) throw new Error('Google Drive file deletion failed.')
+}
