@@ -81,7 +81,7 @@ export const relationshipMemoriesService = {
   },
 
   async search(coupleId: string, keyword: string, limit = 50, offset = 0) {
-    const safeKeyword = keyword.replace(/[%(),]/g, ' ').trim()
+    const safeKeyword = keyword.replace(/[\\%_]/g, (character) => `\\${character}`).replace(/[(),]/g, ' ').trim()
     const { data, error } = await supabase
       .from('relationship_memories')
       .select('*')
