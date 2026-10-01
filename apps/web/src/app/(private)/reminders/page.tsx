@@ -51,6 +51,28 @@ export default function RemindersPage() {
   }
 
   useEffect(() => {
+    if (!coupleId) return
+    const channel = supabase
+      .channel(`web-reminders-${coupleId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reminders',
+          filter: `couple_id=eq.${coupleId}`,
+        },
+        () => {
+          void loadReminders(coupleId)
+        }
+      )
+      .subscribe()
+    return () => {
+      void supabase.removeChannel(channel)
+    }
+  }, [coupleId])
+
+  useEffect(() => {
     void Promise.all([getCurrentUserId(), getCoupleStatus()]).then(([id, status]) => {
       const activeCoupleId = status.status === 'accepted' ? (status.couple?.id ?? null) : null
       setUserId(id)
