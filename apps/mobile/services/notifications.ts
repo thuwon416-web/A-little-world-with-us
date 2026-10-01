@@ -132,6 +132,16 @@ export async function getSafetyNotificationPreferences(): Promise<SafetyNotifica
   return defaults
 }
 
+export async function unregisterForPushNotifications() {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+  const token = (await Notifications.getExpoPushTokenAsync(
+    Constants.expoConfig?.extra?.eas?.projectId ? { projectId: Constants.expoConfig.extra.eas.projectId as string } : undefined
+  )).data
+  const { error } = await supabase.from('push_devices').delete().eq('user_id', user.id).eq('expo_push_token', token)
+  return !error
+}
+
 export async function scheduleReminder(
   reminder: Omit<Reminder, 'id' | 'user_id'> & { user_id?: string }
 ) {
