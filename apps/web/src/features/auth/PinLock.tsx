@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Heart, Delete } from 'lucide-react'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
@@ -30,6 +30,10 @@ export default function PinLock({
   const [isLocked, setIsLocked] = useState(false)
   const [lockedUntil, setLockedUntil] = useState<number | null>(null)
   const prefersReduced = usePrefersReducedMotion()
+  const floatingHearts = useMemo(
+    () => Array.from({ length: 6 }, () => ({ x: getRandomFraction() * 100, duration: 8 + getRandomFraction() * 4 })),
+    [],
+  )
 
   useEffect(() => {
     if (!lockedUntil) return
@@ -83,13 +87,13 @@ export default function PinLock({
     <div className="flex min-h-screen flex-col items-center justify-center p-6 relative">
       {/* Floating background hearts */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...new Array(6)].map((_, i) => (
+        {floatingHearts.map((heart, i) => (
           <motion.div
             key={i}
-            initial={{ opacity: 0, y: '100vh', x: `${getRandomFraction() * 100}%` }}
+            initial={{ opacity: 0, y: '100vh', x: `${heart.x}%` }}
             animate={prefersReduced ? {} : { opacity: [0, 0.3, 0], y: '-20vh' }}
             transition={prefersReduced ? {} : {
-              duration: 8 + getRandomFraction() * 4,
+              duration: heart.duration,
               repeat: Infinity,
               delay: i * 1.5,
               ease: 'linear',
@@ -180,12 +184,12 @@ export default function PinLock({
       <div className="grid grid-cols-3 gap-4 w-full max-w-xs z-10">
         {keys.map((key, idx) => (
           <motion.button
-            key={idx}
+            key={key || `empty-${idx}`}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.9 }}
             onClick={() => (key === 'del' ? handleDelete() : key && handleNumber(key))}
             disabled={!key || isUnlocked || isLocked}
-            className={`aspect-square rounded-btn text-2xl font-semibold flex items-center justify-center transition-all ${
+            className={`h-16 w-16 sm:h-20 sm:w-20 rounded-full text-2xl font-semibold flex items-center justify-center transition-all ${
               key === ''
                 ? 'pointer-events-none opacity-0'
                 : 'glass-card hover:bg-card active:bg-card/40 shadow-lg'
