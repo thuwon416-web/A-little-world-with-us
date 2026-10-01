@@ -6,10 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "scheme": [
-      "alittleworldwithus",
-      "com.alittleworldwithus.app"
-    ],
+    "scheme": "com.alittleworldwithus.app",
     "description": "A relationship-first companion app for couples to chat, plan, share moments, and stay connected.",
     "privacy": "public",
     "githubUrl": "https://github.com/thuwon416-web/A-little-world-with-us",
@@ -53,12 +50,7 @@
         "FOREGROUND_SERVICE_LOCATION",
         "CAMERA",
         "RECORD_AUDIO",
-        "POST_NOTIFICATIONS",
-        "android.permission.ACCESS_COARSE_LOCATION",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_BACKGROUND_LOCATION",
-        "android.permission.FOREGROUND_SERVICE",
-        "android.permission.FOREGROUND_SERVICE_LOCATION"
+        "POST_NOTIFICATIONS"
       ]
     },
     "web": {
