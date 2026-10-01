@@ -25,6 +25,7 @@ import { supabase } from '@/lib/supabase'
 import GoogleDriveSection from '@/components/settings/GoogleDriveSection'
 import {
   registerForPushNotifications,
+  unregisterForPushNotifications,
   sendLocalNotification,
   updateSafetyNotificationPreference,
   getSafetyNotificationPreferences,
@@ -424,19 +425,25 @@ export default function SettingsScreen() {
           label={`Push notifications · ${notifications.pushEnabled ? 'Enabled' : 'Off'}`}
           value={notifications.pushEnabled}
           onChange={async (value) => {
-            if (value) {
-              const token = await registerForPushNotifications()
-              if (!token)
-                return Alert.alert(
-                  'Notifications',
-                  'Push notifications are unavailable on this device.'
+            try {
+              if (value) {
+                const token = await registerForPushNotifications()
+                if (!token)
+                  return Alert.alert(
+                    'Notifications',
+                    'Push notifications are unavailable on this device.'
+                  )
+                await sendLocalNotification(
+                  'Love reminders ready',
+                  'Your gentle connection nudges are enabled.'
                 )
-              await sendLocalNotification(
-                'Love reminders ready',
-                'Your gentle connection nudges are enabled.'
-              )
+              } else {
+                await unregisterForPushNotifications()
+              }
+              setNotifications((current) => ({ ...current, pushEnabled: value }))
+            } catch (error_) {
+              Alert.alert('Notifications', error_ instanceof Error ? error_.message : 'Unable to update notifications.')
             }
-            setNotifications((current) => ({ ...current, pushEnabled: value }))
           }}
         />
         {(['reminders', 'messages', 'milestones', 'wellness'] as const).map((key) => (
