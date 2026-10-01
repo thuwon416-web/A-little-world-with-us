@@ -58,3 +58,7 @@ Google Drive is optional. Web OAuth preparation is documented in
 `docs/setup/google-drive.md`. Native Mobile Drive OAuth requires the corresponding
 Google Cloud OAuth client and platform configuration before it can be verified on a
 device. Never commit OAuth client secrets or refresh tokens.
+
+## Native Google Drive OAuth
+
+The mobile app includes PKCE-based Google Drive OAuth and stores the resulting tokens in SecureStore. Configure the native Google OAuth client IDs in `apps/mobile/.env` using the variables documented in `apps/mobile/.env.example`. The app uses the `com.alittleworldwithus.app://oauth2redirect` callback and requires a new native build after changing the app scheme or OAuth-related native configuration. Never add a Google client secret to the mobile app.
