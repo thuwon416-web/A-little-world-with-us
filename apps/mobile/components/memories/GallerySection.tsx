@@ -7,6 +7,7 @@ import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { useAuth } from '@/lib/auth'
+import { deleteSharedDriveFile } from '@/lib/googleDrive'
 import { downloadDecryptAndCache, downloadDriveMemoryAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 
@@ -159,19 +160,10 @@ export default function GallerySection() {
         onPress: () => {
           void (async () => {
             if (item.storageProvider === 'google_drive' && item.driveFileId) {
-              const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
-              if (!webUrl) {
-                setError('The shared web service URL is not configured.')
-                return
-              }
-              const response = await fetch(`${webUrl}/api/drive/delete`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileId: item.driveFileId }),
-              })
-              if (!response.ok) {
-                const body = (await response.json().catch(() => ({}))) as { error?: string }
-                setError(body.error || 'Google Drive file deletion failed.')
+              try {
+                await deleteSharedDriveFile(item.driveFileId)
+              } catch (driveError) {
+                setError(driveError instanceof Error ? driveError.message : 'Google Drive file deletion failed.')
                 return
               }
               const { error: memoryDeleteError } = await supabase
