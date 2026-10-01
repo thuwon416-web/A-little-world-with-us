@@ -6,7 +6,7 @@ import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useTheme } from '@/context/ThemeContext'
 import { useAuth } from '@/lib/auth'
 import { downloadDecryptAndCache, downloadDriveMemoryAndCache, encryptMedia } from '@/lib/mediaEncryption'
-import { deleteSharedDriveFile, getSharedDriveStatus, uploadSharedDriveFile } from '@/lib/googleDrive'
+import { getSharedDriveStatus, uploadSharedDriveMemory } from '@/lib/googleDrive'
 import { supabase } from '@/lib/supabase'
 
 export default function ImageUpload({
@@ -73,50 +73,30 @@ export default function ImageUpload({
       const useSharedDrive = await getSharedDriveStatus()
 
       if (useSharedDrive) {
-        const driveFile = await uploadSharedDriveFile(preview, fileName, mimeType)
-        try {
-          const { data: memory, error: memoryError } = await supabase
-            .from('memories')
-            .insert({
-              user_id: user.id,
-              couple_id: coupleId,
-              image_url: null,
-              storage_path: null,
-              storage_provider: 'google_drive',
-              drive_file_id: driveFile.id,
-              mime_type: driveFile.mimeType || mimeType,
-              title: 'A memory together',
-              caption: 'A memory together',
-              date: new Date().toISOString().slice(0, 10),
-              category: 'favorite',
-              visibility: 'shared',
-            })
-            .select('id,created_at')
-            .single()
-          if (memoryError) throw memoryError
-
-          const url = await downloadDriveMemoryAndCache(
-            driveFile.id,
-            driveFile.mimeType || mimeType
-          )
-          const result = {
-            id: memory.id,
-            path: `drive:${driveFile.id}`,
-            ownerId: user.id,
-            mimeType: driveFile.mimeType || mimeType,
-            url,
-            name: driveFile.name || fileName,
-            created_at: memory.created_at,
-            storageProvider: 'google_drive' as const,
-            driveFileId: driveFile.id,
-          }
-          onUpload?.(result)
-          setPreview(null)
-          return
-        } catch (memoryError) {
-          await deleteSharedDriveFile(driveFile.id).catch(() => undefined)
-          throw memoryError
+        const { file: driveFile, memory } = await uploadSharedDriveMemory(
+          preview,
+          fileName,
+          mimeType,
+          coupleId
+        )
+        const url = await downloadDriveMemoryAndCache(
+          driveFile.id,
+          driveFile.mimeType || mimeType
+        )
+        const result = {
+          id: memory.id,
+          path: `drive:${driveFile.id}`,
+          ownerId: user.id,
+          mimeType: driveFile.mimeType || mimeType,
+          url,
+          name: driveFile.name || fileName,
+          created_at: memory.created_at,
+          storageProvider: 'google_drive' as const,
+          driveFileId: driveFile.id,
         }
+        onUpload?.(result)
+        setPreview(null)
+        return
       }
 
       const path = `${user.id}/${Date.now()}-${Crypto.randomUUID()}.jpg`
