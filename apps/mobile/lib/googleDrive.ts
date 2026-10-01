@@ -79,7 +79,7 @@ async function createPkceChallenge(verifier: string) {
 export async function createGoogleDriveAuthorizationUrl(clientId: string) {
   const codeVerifier = await createPkceVerifier()
   const codeChallenge = await createPkceChallenge(codeVerifier)
-  const state = base64Url(await Crypto.getRandomBytesAsync(24))
+  const state = randomUrlSafeValue()
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: getGoogleDriveRedirectUri(),
