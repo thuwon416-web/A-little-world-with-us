@@ -46,34 +46,52 @@ export default function GoogleDriveSection() {
   const [busy, setBusy] = useState(false)
 
   useEffect(() => {
-    const subscription = Linking.addEventListener('url', ({ url }) => {
+    let active = true
+
+    const handleUrl = async (url: string) => {
       const parsed = Linking.parse(url)
       if (parsed.scheme !== 'com.alittleworldwithus.app' || parsed.path !== 'oauth2redirect') return
       const state = typeof parsed.queryParams?.state === 'string' ? parsed.queryParams.state : ''
       const code = typeof parsed.queryParams?.code === 'string' ? parsed.queryParams.code : ''
       const error = typeof parsed.queryParams?.error === 'string' ? parsed.queryParams.error : ''
       const verifierKey = 'a-little-world-with-us-google-drive-pkce'
-      void SecureStore.getItemAsync(verifierKey).then(async (verifier) => {
+      const stateKey = `${verifierKey}-state`
+      try {
+        const verifier = await SecureStore.getItemAsync(verifierKey)
+        const expectedState = await SecureStore.getItemAsync(stateKey)
         await SecureStore.deleteItemAsync(verifierKey)
-        const expectedState = await SecureStore.getItemAsync(verifierKey + '-state')
-        await SecureStore.deleteItemAsync(verifierKey + '-state')
+        await SecureStore.deleteItemAsync(stateKey)
         if (!verifier || !expectedState || state !== expectedState) {
           throw new Error('Google Drive authorization state could not be verified.')
         }
         if (error) throw new Error('Google Drive authorization was cancelled.')
         if (!code) throw new Error('Google Drive did not return an authorization code.')
         await exchangeGoogleDriveCode(clientId, code, verifier)
+        if (!active) return
         setConnected(true)
         setBusy(false)
         Alert.alert('Google Drive', 'Google Drive is connected on this device.')
-      }).catch((error_) => {
+      } catch (error_) {
+        if (!active) return
         setBusy(false)
-        Alert.alert('Google Drive', error_ instanceof Error ? error_.message : 'Unable to finish Google Drive authorization.')
-      })
-    })
-    return () => subscription.remove()
-  }, [clientId])
+        Alert.alert(
+          'Google Drive',
+          error_ instanceof Error ? error_.message : 'Unable to finish Google Drive authorization.'
+        )
+      }
+    }
 
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      void handleUrl(url)
+    })
+    void Linking.getInitialURL().then((url) => {
+      if (url) void handleUrl(url)
+    })
+    return () => {
+      active = false
+      subscription.remove()
+    }
+  }, [clientId])
 
   const connect = async () => {
     if (!clientId) {
