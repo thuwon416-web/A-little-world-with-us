@@ -15,7 +15,12 @@ export type MemoryRecord = Pick<
   | 'location_label'
   | 'created_at'
   | 'mime_type'
->
+  | 'metadata'
+> & {
+  storage_provider?: 'supabase' | 'google_drive'
+  drive_file_id?: string | null
+  description?: string | null
+}
 
 async function getCoupleId() {
   const {
@@ -37,7 +42,7 @@ export async function getMemories(): Promise<MemoryRecord[]> {
   const { data, error } = await supabase
     .from('memories')
     .select(
-      'id,title,caption,date,category,image_url,storage_path,latitude,longitude,location_label,created_at,mime_type'
+      'id,title,caption,description,date,category,image_url,storage_path,latitude,longitude,location_label,created_at,mime_type,metadata,storage_provider,drive_file_id'
     )
     .eq('couple_id', id)
     .order('date', { ascending: false })
