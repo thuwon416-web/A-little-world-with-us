@@ -23,7 +23,11 @@ export default function MemoryMap({ memories, coupleId }: { memories: Memory[]; 
   useEffect(() => {
     let mounted = true
     void Promise.all(memories.map(async (memory) => {
+      const driveFileId = (memory as Memory & { storage_provider?: string; drive_file_id?: string | null }).storage_provider === 'google_drive'
+        ? (memory as Memory & { drive_file_id?: string | null }).drive_file_id
+        : null
       const path = memory.storage_path ?? memory.image_url
+      if (driveFileId) return [memory.id, `/api/drive/file?fileId=${encodeURIComponent(driveFileId)}&download=1`] as const
       if (!path) return null
       if (path.startsWith('/') || path.startsWith('http')) return [memory.id, path] as const
       const mimeType = memory.mime_type || 'image/jpeg'
