@@ -25,8 +25,4 @@ export async function GET() {
     console.error('[drive] start failed', error instanceof Error ? error.message : 'unknown')
     return NextResponse.json({ error: 'Google Drive OAuth server configuration is incomplete.' }, { status: 503 })
   }
-  /*
-  const response = NextResponse.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString())
-  return response
-  */
 }
