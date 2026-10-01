@@ -14,10 +14,10 @@ import { sizes } from '@/design-tokens'
 
 type Section = 'memories' | 'gallery' | 'map' | 'story' | 'capsules'
 const exploreSections: { id: Exclude<Section, 'memories'>; label: string; Icon: typeof Heart }[] = [
-  { id: 'gallery', label: 'Gallery', Icon: Heart },
-  { id: 'map', label: 'Map', Icon: Map },
+  { id: 'gallery', label: 'Photo memories', Icon: Heart },
+  { id: 'map', label: 'Memory Map', Icon: Map },
+  { id: 'capsules', label: 'Time Capsule', Icon: Clock3 },
   { id: 'story', label: 'Our Story', Icon: BookHeart },
-  { id: 'capsules', label: 'Time Capsules', Icon: Clock3 },
 ]
 const isExploreSection = (value: unknown): value is Exclude<Section, 'memories'> =>
   exploreSections.some((item) => item.id === value)
@@ -48,7 +48,7 @@ export default function MemoriesHub() {
           style={[styles.primaryNavItem, activeSection === 'memories' && styles.navItemActive]}
         >
           <Heart color={activeSection === 'memories' ? colors.accent1 : colors.textSecondary} size={18} />
-          <Text style={[styles.navText, { color: activeSection === 'memories' ? colors.accent1 : colors.textSecondary }]}>Memories</Text>
+          <Text style={[styles.navText, { color: activeSection === 'memories' ? colors.accent1 : colors.textSecondary }]}>Add to our memories</Text>
         </TouchableOpacity>
         <TouchableOpacity
           accessibilityRole="tab"
