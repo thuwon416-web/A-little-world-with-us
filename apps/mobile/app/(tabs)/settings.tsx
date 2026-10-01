@@ -54,7 +54,8 @@ const safetyNotificationItems: { key: SafetyNotificationPreference; translationK
   { key: 'battery_low', translationKey: 'settings.safetyNotifications.batteryLow' },
   { key: 'missed_checkin', translationKey: 'settings.safetyNotifications.missedCheckin' },
 ]
-const notificationKey = 'a-little-world-with-us-mobile-notification-settings'
+const notificationStorageKey = (userId?: string) =>
+  userId ? `a-little-world-with-us-mobile-notification-settings:${userId}` : null
 const defaults: NotificationSettings = {
   pushEnabled: false,
   reminders: true,
@@ -178,7 +179,7 @@ export default function SettingsScreen() {
       setError('')
       const [next, savedNotifications, savedSafetyNotifications] = await Promise.all([
         getSettingsData(),
-        AsyncStorage.getItem(notificationKey),
+        AsyncStorage.getItem(notificationStorageKey(user?.id) ?? '__invalid__'),
         getSafetyNotificationPreferences(),
       ])
       setData(next)
@@ -208,7 +209,8 @@ export default function SettingsScreen() {
     }
   }, [])
   useEffect(() => {
-    if (!loading) void AsyncStorage.setItem(notificationKey, JSON.stringify(notifications))
+    const key = notificationStorageKey(user?.id)
+    if (!loading && key) void AsyncStorage.setItem(key, JSON.stringify(notifications))
   }, [loading, notifications])
   const toggleSafetyNotification = async (key: SafetyNotificationPreference, value: boolean) => {
     setSafetyNotifications((current) => ({ ...current, [key]: value }))
