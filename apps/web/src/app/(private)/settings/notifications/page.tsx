@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 import { Bell, Heart, MessageSquareText, Sparkles } from 'lucide-react'
 import {
   getNotificationPermission,
@@ -42,10 +43,15 @@ export default function NotificationSettingsPage() {
     missed_checkin: true,
   })
   const [hasPushDevice, setHasPushDevice] = useState<boolean | null>(null)
+  const [userId, setUserId] = useState<string | null>(null)
 
   useEffect(() => {
     setPermission(getNotificationPermission())
-    setSettings(getNotificationSettings())
+    void supabase.auth.getUser().then(({ data }) => {
+      const id = data.user?.id ?? null
+      setUserId(id)
+      if (id) setSettings(getNotificationSettings(id))
+    })
     void getSafetyNotificationPreferences().then(setSafetyPreferences).catch(() => undefined)
     void hasRegisteredPushDevice().then(setHasPushDevice).catch(() => setHasPushDevice(false))
   }, [])
@@ -66,7 +72,7 @@ export default function NotificationSettingsPage() {
     }
 
     setSettings(nextSettings)
-    updateNotificationSettings(nextSettings)
+    if (userId) updateNotificationSettings(userId, nextSettings)
   }
 
   const handleSafetyToggle = async (key: SafetyNotificationPreference, enabled: boolean) => {
