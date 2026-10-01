@@ -7,7 +7,7 @@ import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { useAuth } from '@/lib/auth'
-import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
+import { downloadDecryptAndCache, downloadDriveMemoryAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 
 function isExternalUrl(v?: string | null) {
@@ -21,6 +21,8 @@ type GalleryItem = {
   url: string
   name: string
   created_at: string
+  storageProvider?: 'supabase' | 'google_drive'
+  driveFileId?: string | null
 }
 
 export default function GallerySection() {
@@ -72,10 +74,46 @@ export default function GallerySection() {
           )
         })
       )
-      const galleryItems = ownerItems
+      const legacyItems = ownerItems
         .flat()
         .filter((item): item is GalleryItem => item !== null)
-        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+
+      const { data: memories, error: memoriesError } = await supabase
+        .from('memories')
+        .select('id,user_id,title,caption,date,created_at,mime_type,storage_provider,drive_file_id')
+        .eq('couple_id', coupleId)
+        .eq('storage_provider', 'google_drive')
+        .not('drive_file_id', 'is', null)
+        .order('created_at', { ascending: false })
+      if (memoriesError) throw memoriesError
+
+      const driveItems = (await Promise.all(
+        (memories ?? []).map(async (memory) => {
+          if (!memory.drive_file_id) return null
+          try {
+            const url = await downloadDriveMemoryAndCache(
+              memory.drive_file_id,
+              memory.mime_type || 'image/jpeg'
+            )
+            return {
+              id: memory.id,
+              path: `drive:${memory.drive_file_id}`,
+              ownerId: memory.user_id,
+              url,
+              name: memory.title || memory.caption || 'gallery-image',
+              created_at: memory.created_at,
+              storageProvider: 'google_drive' as const,
+              driveFileId: memory.drive_file_id,
+            }
+          } catch {
+            return null
+          }
+        })
+      )).filter((item): item is GalleryItem => item !== null)
+
+      const galleryItems = [...legacyItems, ...driveItems].sort((a, b) =>
+        b.created_at.localeCompare(a.created_at)
+      )
 
       setItems(galleryItems)
     } catch (error_) {
@@ -119,17 +157,43 @@ export default function GallerySection() {
         text: 'Delete',
         style: 'destructive',
         onPress: () => {
-          void supabase.storage
-            .from('gallery')
-            .remove([item.path])
-            .then(({ error: deleteError }) => {
+          void (async () => {
+            if (item.storageProvider === 'google_drive' && item.driveFileId) {
+              const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+              if (!webUrl) {
+                setError('The shared web service URL is not configured.')
+                return
+              }
+              const response = await fetch(`${webUrl}/api/drive/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileId: item.driveFileId }),
+              })
+              if (!response.ok) {
+                const body = (await response.json().catch(() => ({}))) as { error?: string }
+                setError(body.error || 'Google Drive file deletion failed.')
+                return
+              }
+              const { error: memoryDeleteError } = await supabase
+                .from('memories')
+                .delete()
+                .eq('id', item.id)
+              if (memoryDeleteError) {
+                setError(memoryDeleteError.message)
+                return
+              }
+            } else {
+              const { error: deleteError } = await supabase.storage
+                .from('gallery')
+                .remove([item.path])
               if (deleteError) {
                 setError(deleteError.message)
                 return
               }
-              setItems((current) => current.filter((candidate) => candidate.id !== item.id))
-            })
-        },
+            }
+            setItems((current) => current.filter((candidate) => candidate.id !== item.id))
+          })()
+        },,
       },
     ])
   }
