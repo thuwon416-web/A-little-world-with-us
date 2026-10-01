@@ -15,7 +15,7 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useTheme } from '@/context/ThemeContext'
-import { downloadDecryptAndCache } from '@/lib/mediaEncryption'
+import { downloadDecryptAndCache, downloadDriveMemoryAndCache } from '@/lib/mediaEncryption'
 import { getMemories } from '@/services/memories'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { RelationshipMemory } from '@/shared-types'
@@ -79,6 +79,10 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
       const resolvedPhotos = await Promise.all(
         photos.map(async (memory) => {
           const path = memory.storage_path ?? memory.image_url
+          if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
+            const uri = await downloadDriveMemoryAndCache(memory.drive_file_id, memory.mime_type || 'image/jpeg')
+            return [memory.id, uri] as const
+          }
           if (!path) return [memory.id, ''] as const
           if (path.startsWith('/') || path.startsWith('http')) return [memory.id, path] as const
           const mimeType = memory.mime_type || 'image/jpeg'
