@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-01 — final UI parity pass
+
+- Memory hub reordered to Photo Memories → Memory Map → Time Capsule → Add to Our Memories → Our Story, with the AI companion kept at the bottom.
+- Memory previews now show five rotating items with an explicit View all action on Web and Mobile.
+- Theme secondary text contrast was strengthened across shared theme tokens.
+- Web reminders now refresh from realtime shared changes, matching Mobile behavior.
+- Google Drive OAuth start/state failures now return controlled setup errors instead of uncaught 500 responses.
+
 ## [Unreleased] — Project completion and maintenance
 
 The current `main` line contains the completed Web ↔ Mobile feature-parity, Care/Period, chat/realtime, location/safety, media, and reliability/security work tracked in the project plan.
