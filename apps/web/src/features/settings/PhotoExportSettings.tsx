@@ -19,9 +19,12 @@ export default function PhotoExportSettings() {
       const { data: userData } = await supabase.auth.getUser()
       if (!userData.user) return
       const { data: link } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
-      const { data } = await supabase.from('memories').select('id,image_url,storage_path,title,caption,created_at,mime_type').order('created_at', { ascending: false })
+      const { data } = await supabase.from('memories').select('id,image_url,storage_path,title,caption,created_at,mime_type,storage_provider,drive_file_id').order('created_at', { ascending: false })
       const resolved = await Promise.all((data ?? []).map(async (memory) => {
         const path = memory.storage_path ?? memory.image_url ?? ''
+        if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
+          return { id: memory.id, url: `/api/drive/file?fileId=${encodeURIComponent(memory.drive_file_id)}&download=1`, filename: memory.title ?? memory.caption ?? 'memory', created_at: memory.created_at }
+        }
         if (!path || path.startsWith('/')) return { id: memory.id, url: path, filename: memory.title ?? memory.caption ?? 'memory', created_at: memory.created_at }
         let url: string | undefined
         if (isExternalUrl(path)) {
