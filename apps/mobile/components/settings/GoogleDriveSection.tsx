@@ -122,8 +122,8 @@ export default function GoogleDriveSection() {
       <Text style={styles.text}>Google Drive</Text>
       <Text style={styles.muted}>
         {connected
-          ? 'Connected. Drive files can be used by the mobile media layer.'
-          : 'Not connected. Your app can connect with Google using PKCE without a client secret.'}
+          ? 'Connected on this device. Shared memories use the secure server-backed Drive connection so Web and Mobile share the same file access.'
+          : 'Not connected on this device. This native connection is for device-local Drive tools; shared memories use the server-backed Drive connection.'}
       </Text>
       <TouchableOpacity
         style={styles.button}
