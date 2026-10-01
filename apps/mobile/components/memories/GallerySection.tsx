@@ -40,7 +40,11 @@ export default function GallerySection() {
   const loadGallery = async () => {
     try {
       setLoading(true)
-      if (!user?.id || !coupleId || galleryOwnerIds.length === 0) return
+      setError(null)
+      if (!user?.id || !coupleId || galleryOwnerIds.length === 0) {
+        setItems([])
+        return
+      }
       const ownerItems = await Promise.all(
         galleryOwnerIds.map(async (ownerId) => {
           const { data, error } = await supabase.storage
