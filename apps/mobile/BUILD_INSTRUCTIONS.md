@@ -2,34 +2,59 @@
 
 ## Prerequisites
 
-Install the mobile dependencies with `npm install --prefix mobile`, configure the same Supabase project values in the mobile environment, and sign in with either accepted account.
+Run all Mobile commands from `apps/mobile` or use the repository-root shortcuts.
+
+```bash
+cd apps/mobile
+npm ci
+```
+
+Configure the same Supabase project values in the Mobile environment, then sign in
+with either accepted account.
 
 ## Native builds
 
-Use EAS from the `mobile` directory:
+From `apps/mobile`:
 
 ```bash
 npx eas build --platform android --profile preview
 npx eas build --platform ios --profile preview
 ```
 
-The EAS project configuration is maintained in `mobile/eas.json`, since builds are
-invoked from this directory. The root `eas.json` is kept identical so commands run
-from either location use the same CLI requirement, version source, and build profiles.
-When changing EAS profiles, update both files together.
+Keep the checked-in EAS configuration and app metadata aligned when changing EAS
+profiles or native settings.
 
-Create a new native build whenever location permissions, background location configuration, notifications, or native dependencies change. MapLibre is a native dependency, so Expo Go cannot load the Location map or validate production background tracking.
+Create a new native build whenever location permissions, background location
+configuration, notifications, or native dependencies change. MapLibre is a native
+dependency, so Expo Go cannot load the Location map or validate production
+background tracking.
 
 ## Location release setup
 
-1. In Supabase Storage, empty old buckets, then run the canonical bootstrap SQL once from the repository root.
-2. Deploy `location-alerts` and `reverse-geocode` from `supabase/functions`. The first sends Expo Push alerts; the second caches Nominatim place labels on a roughly 200m grid.
-3. Build an Android preview APK. The app requests precise foreground permission first, then Android background permission; each person must explicitly enable **Settings > Privacy > Share my location in background**.
-4. Do not expect Android to restart tracking after a user force-stops the app. Opening the app again resumes the registered task when sharing is enabled. Device vendors may impose additional battery restrictions.
+1. Ensure the target Supabase project uses reviewed additive migrations and required
+   Edge Functions. Do not run the destructive `backend/supabase/bootstrap/00_core.sql`
+   against an existing production database.
+2. Build an Android/iOS development or preview artifact with the native configuration.
+3. Grant the required location permissions on the test device and verify foreground
+   and background behavior according to the platform.
+4. Do not expect Android to restart tracking after a user force-stops the app. Opening
+   the app again resumes the registered task when sharing is enabled. Device vendors
+   may impose additional battery restrictions.
 
 ## Two-device verification
 
-1. Install the build on both linked accounts and grant location permission on both devices.
-2. Confirm each device writes its latest location while only the admin sees the Location dashboard.
-3. Test offline queue/reconnect, a one-time chat location pin, battery/network state, and the seven-day history retention.
-4. Confirm shared Care, Memories, Plans, Calendar, Finance, and Reminders data appears for both users.
+1. Install the build on both linked accounts and grant the required permissions.
+2. Confirm each device writes its latest location while only the authorized admin
+   surface can see the Location dashboard.
+3. Test offline queue/reconnect, a one-time chat location pin, battery/network state,
+   and the seven-day history retention.
+4. Confirm shared Care, Memories, Plans, Calendar, Finance, and Reminders data appears
+   for both users.
+5. Confirm chat/realtime updates recover after reconnecting the app.
+
+## Google Drive
+
+Google Drive is optional. Web OAuth preparation is documented in
+`docs/setup/google-drive.md`. Native Mobile Drive OAuth requires the corresponding
+Google Cloud OAuth client and platform configuration before it can be verified on a
+device. Never commit OAuth client secrets or refresh tokens.
