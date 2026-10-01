@@ -21,7 +21,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
   const [isSettingPin, setIsSettingPin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [particles, setParticles] = useState<
-    { id: number; angle: number; distance: number; size: number }[]
+    { id: number; angle: number; distance: number; size: number; rotate: number }[]
   >([])
   const inputRef = useRef<HTMLInputElement>(null)
   const prefersReduced = usePrefersReducedMotion()
@@ -117,6 +117,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
           angle: (i / 24) * Math.PI * 2,
           distance: 120 + getRandomFraction() * 100,
           size: 6 + getRandomFraction() * 14,
+          rotate: p.rotate,
         }))
         setParticles(newParticles)
         setUnlocking(true)
@@ -135,30 +136,26 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
   }
 
   const handleInput = (digit: string) => {
-    const currentPin = isSettingPin && confirmPin ? confirmPin : pin
-    if (currentPin.length >= 4 || unlocking) return
-    
+    if (unlocking) return
     if (isSettingPin && pin.length === 4) {
-      setConfirmPin(confirmPin + digit)
-    } else {
-      setPin(pin + digit)
+      if (confirmPin.length < 4) setConfirmPin((current) => current + digit)
+    } else if (pin.length < 4) {
+      setPin((current) => current + digit)
     }
     setError('')
   }
 
   const handleBackspace = () => {
-    if (isSettingPin && confirmPin.length > 0) {
-      setConfirmPin(confirmPin.slice(0, -1))
+    if (isSettingPin && pin.length === 4) {
+      if (confirmPin.length > 0) setConfirmPin((current) => current.slice(0, -1))
+      else setPin('')
     } else {
-      setPin(pin.slice(0, -1))
+      setPin((current) => current.slice(0, -1))
     }
     setError('')
   }
 
-  const getDisplayPin = () => {
-    if (isSettingPin && confirmPin) return confirmPin
-    return pin
-  }
+  const getDisplayPin = () => (isSettingPin && pin.length === 4 ? confirmPin : pin)
 
   const keypadButtons = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '', '0', '⌫']
 
@@ -256,10 +253,10 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.8 }}
-            className="grid grid-cols-3 gap-4"
+            className="grid w-60 grid-cols-3 place-items-center gap-4 sm:w-64"
           >
             {keypadButtons.map((btn, i) => {
-              if (btn === '') return <div key={i} />
+              if (btn === '') return <div key={`empty-${i}`} className="h-16 w-16 sm:h-20 sm:w-20" />
               return (
                 <motion.button
                   key={i}
@@ -275,7 +272,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
           </motion.div>
 
           {/* Action button */}
-          {isSettingPin && getDisplayPin().length === 4 && (
+          {isSettingPin && pin.length === 4 && confirmPin.length === 4 && (
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
