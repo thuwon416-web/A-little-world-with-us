@@ -948,8 +948,6 @@ type SettingsCareProps = {
   readonly setPeriodLength: (value: string) => void
   readonly lastPeriodStart: string
   readonly setLastPeriodStart: (value: string) => void
-  readonly shareCycle: boolean
-  readonly setShareCycle: (value: boolean | ((current: boolean) => boolean)) => void
   readonly onSave: () => void
   readonly onExport: () => void
 }
@@ -961,8 +959,6 @@ function SettingsCareTab({
   setPeriodLength,
   lastPeriodStart,
   setLastPeriodStart,
-  shareCycle,
-  setShareCycle,
   onSave,
   onExport,
 }: SettingsCareProps) {
@@ -1000,13 +996,6 @@ function SettingsCareTab({
           <Text style={styles.saveText}>Save cycle settings</Text>
         </TouchableOpacity>
       </Card>
-      <Card title="Privacy">
-        <Reminder
-          label="Share cycle data with partner"
-          value={shareCycle}
-          onChange={() => setShareCycle((value) => !value)}
-        />
-      </Card>
       <Card title="Export">
         <TouchableOpacity style={styles.secondaryButton} onPress={onExport}>
           <Text style={styles.saveText}>Export cycle data (CSV)</Text>
@@ -1040,7 +1029,6 @@ export default function CareScreen() {
   const [basalTemp, setBasalTemp] = useState('')
   const [notes, setNotes] = useState('')
   const [periodDay, setPeriodDay] = useState(false)
-  const [shareCycle, setShareCycle] = useState(true)
   const [cycleLength, setCycleLength] = useState('28')
   const [periodLength, setPeriodLength] = useState('5')
   const [lastPeriodStart, setLastPeriodStart] = useState('')
