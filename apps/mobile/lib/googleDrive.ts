@@ -1,6 +1,8 @@
 import * as Crypto from 'expo-crypto'
 import * as SecureStore from 'expo-secure-store'
 
+import { supabase } from '@/lib/supabase'
+
 const TOKEN_KEY = 'a-little-world-with-us-google-drive-token-v1'
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token'
 const DRIVE_FILES_ENDPOINT = 'https://www.googleapis.com/drive/v3/files'
@@ -284,7 +286,7 @@ async function readDriveError(response: Response) {
 export async function getSharedDriveStatus() {
   const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
   if (!webUrl) return false
-  const { data: { session } } = await (await import('@/lib/supabase')).supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   if (!session?.access_token) return false
   const response = await fetch(`${webUrl}/api/drive/status`, {
     headers: { Authorization: `Bearer ${session.access_token}` },
