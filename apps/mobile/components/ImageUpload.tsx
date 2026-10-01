@@ -5,7 +5,8 @@ import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 
 import { useTheme } from '@/context/ThemeContext'
 import { useAuth } from '@/lib/auth'
-import { downloadDecryptAndCache, encryptMedia } from '@/lib/mediaEncryption'
+import { downloadDecryptAndCache, downloadDriveMemoryAndCache, encryptMedia } from '@/lib/mediaEncryption'
+import { getSharedDriveStatus, uploadSharedDriveFile } from '@/lib/googleDrive'
 import { supabase } from '@/lib/supabase'
 
 export default function ImageUpload({
@@ -65,9 +66,67 @@ export default function ImageUpload({
       const response = await fetch(preview)
       const blob = await response.blob()
       if (!user?.id) throw new Error('Please wait for sign-in to finish.')
-      const path = `${user.id}/${Date.now()}-${Crypto.randomUUID()}.jpg`
+      const mimeType = 'image/jpeg'
+      const fileName = `${Date.now()}-${Crypto.randomUUID()}.jpg`
+      const useSharedDrive = await getSharedDriveStatus()
 
-      const encryptedData = await encryptMedia(new Uint8Array(await blob.arrayBuffer()), coupleId)
+      if (useSharedDrive) {
+        const driveFile = await uploadSharedDriveFile(preview, fileName, mimeType)
+        try {
+          const { data: memory, error: memoryError } = await supabase
+            .from('memories')
+            .insert({
+              user_id: user.id,
+              couple_id: coupleId,
+              image_url: null,
+              storage_path: null,
+              storage_provider: 'google_drive',
+              drive_file_id: driveFile.id,
+              mime_type: driveFile.mimeType || mimeType,
+              title: 'A memory together',
+              caption: 'A memory together',
+              date: new Date().toISOString().slice(0, 10),
+              category: 'favorite',
+              visibility: 'shared',
+            })
+            .select('id,created_at')
+            .single()
+          if (memoryError) throw memoryError
+
+          const url = await downloadDriveMemoryAndCache(
+            driveFile.id,
+            driveFile.mimeType || mimeType
+          )
+          const result = {
+            id: memory.id,
+            path: `drive:${driveFile.id}`,
+            ownerId: user.id,
+            mimeType: driveFile.mimeType || mimeType,
+            url,
+            name: driveFile.name || fileName,
+            created_at: memory.created_at,
+          }
+          onUpload?.(result)
+          setPreview(null)
+          return
+        } catch (memoryError) {
+          const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+          if (webUrl) {
+            await fetch(`${webUrl}/api/drive/delete`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ fileId: driveFile.id }),
+            }).catch(() => undefined)
+          }
+          throw memoryError
+        }
+      }
+
+      const path = `${user.id}/${Date.now()}-${Crypto.randomUUID()}.jpg`
+      const encryptedData = await encryptMedia(
+        new Uint8Array(await blob.arrayBuffer()),
+        coupleId
+      )
       const { data, error: uploadError } = await supabase.storage
         .from('gallery')
         .upload(path, encryptedData, {
@@ -75,12 +134,9 @@ export default function ImageUpload({
           upsert: false,
         })
 
-      if (uploadError) {
-        throw uploadError
-      }
+      if (uploadError) throw uploadError
 
       const storedPath = data?.path ?? path
-      const mimeType = 'image/jpeg'
       const url = await downloadDecryptAndCache(coupleId, 'gallery', storedPath, mimeType)
 
       const result = {
