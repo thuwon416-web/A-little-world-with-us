@@ -22,6 +22,7 @@ import { useLocation } from '@/hooks/useLocation'
 import { useTranslation } from '@/i18n/useTranslation'
 import { useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
+import GoogleDriveSection from '@/components/settings/GoogleDriveSection'
 import {
   registerForPushNotifications,
   sendLocalNotification,
@@ -588,6 +589,9 @@ export default function SettingsScreen() {
           />
         ))}
         <Button title="Save privacy settings" onPress={() => void savePrivacySettings()} />
+      </Section>
+      <Section title="Google Drive">
+        <GoogleDriveSection />
       </Section>
       <Section title="Exports">
         <Button title="Export photos (CSV)" onPress={() => void exportData('photos')} />
