@@ -280,3 +280,42 @@ async function readDriveError(response: Response) {
     return `Google Drive request failed (${response.status}).`
   }
 }
+
+export async function getSharedDriveStatus() {
+  const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+  if (!webUrl) return false
+  const { data: { session } } = await (await import('@/lib/supabase')).supabase.auth.getSession()
+  if (!session?.access_token) return false
+  const response = await fetch(`${webUrl}/api/drive/status`, {
+    headers: { Authorization: `Bearer ${session.access_token}` },
+  })
+  if (!response.ok) return false
+  const body = (await response.json()) as { connected?: boolean }
+  return body.connected === true
+}
+
+export async function uploadSharedDriveFile(
+  uri: string,
+  name: string,
+  mimeType: string
+) {
+  const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+  if (!webUrl) throw new Error('The shared web service URL is not configured.')
+  const { data: { session } } = await (await import('@/lib/supabase')).supabase.auth.getSession()
+  if (!session?.access_token) throw new Error('Please sign in again.')
+  const source = await fetch(uri)
+  if (!source.ok) throw new Error('Unable to read the selected media file.')
+  const blob = await source.blob()
+  const form = new FormData()
+  form.append('file', blob, name)
+  const response = await fetch(`${webUrl}/api/drive/upload`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    body: form,
+  })
+  const body = (await response.json()) as { file?: DriveFile; error?: string }
+  if (!response.ok || !body.file?.id) {
+    throw new Error(body.error || 'Google Drive upload failed.')
+  }
+  return body.file
+}
