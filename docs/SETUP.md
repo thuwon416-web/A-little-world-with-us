@@ -85,6 +85,15 @@ The maintained Supabase bootstrap run order is documented in `backend/supabase/b
 
 Google Drive is optional. Web OAuth and Drive-backed memory setup is documented in `docs/setup/google-drive.md`. Production OAuth credentials are operator-managed and must never be committed.
 
+For Mobile, the repository now includes native Google Drive OAuth with PKCE, SecureStore token persistence, Drive file listing/upload/download helpers, and a Settings connection control. The mobile app never accepts a Google client secret. Add the platform OAuth client IDs to `apps/mobile/.env`:
+
+```text
+EXPO_PUBLIC_GOOGLE_DRIVE_ANDROID_CLIENT_ID=
+EXPO_PUBLIC_GOOGLE_DRIVE_IOS_CLIENT_ID=
+```
+
+The native callback scheme is `com.alittleworldwithus.app://oauth2redirect`. Because deep-link configuration is build-time configuration, a new native EAS/development build is required after these OAuth configuration changes. Google Cloud must contain the matching native OAuth client configuration before the user can complete the connection.
+
 ## Production smoke test
 
 Verify authentication, couple linking, Memories, Care/Period, Calendar, Finance, Reminders, chat, realtime updates, and location permissions on the target Web and Mobile builds.
