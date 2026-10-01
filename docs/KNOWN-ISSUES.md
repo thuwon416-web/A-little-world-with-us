@@ -1,72 +1,61 @@
-# Known Issues
+# Known Issues and Deferred Work
 
-**Last Updated:** 2026-09-26
+**Last Updated:** 2026-10-01
 
-This document tracks known security and release debt deferred because remediation
-requires compatibility work or major dependency upgrades. Audit counts are a
-snapshot and can change as the dependency tree and advisories change.
+This document tracks work that is intentionally deferred or requires operator/device
+verification. It is not a statement that the current application is incomplete.
 
-## Dependency Audit Snapshot
+## Dependency and upgrade notes
 
-| Platform  | Critical | High | Moderate | Low | Total |
-|-----------|----------|------|----------|-----|-------|
-| Root/Web  | 3        | 10   | 4        | 0   | 17    |
-| Mobile    | 2        | 7    | 39       | 2   | 50    |
-| **Total** | **5**    | **17**| **43**   | **2**| **67**|
+The current Web and Mobile manifests already use the current project targets:
 
-These are `npm audit` findings, not a statement that every advisory is
-exploitable in the deployed application. The audit output identified GitHub
-Security Advisories (GHSA); it did not provide CVE identifiers for the reported
-items. Do not apply `npm audit fix --force` without validating the resulting
-framework and toolchain changes.
+- Web: Next.js 16, React 19, Vitest 5.
+- Mobile: Expo SDK 57 / React Native 0.86.
+- Node.js: 24.3.x through the repository engine constraint.
 
-## Security Known Debt
+Dependency advisories should still be reassessed against the current lockfiles and
+GitHub Security Advisories before a production release. Do not run
+`npm audit fix --force` blindly; validate framework, Expo, native-module, and
+toolchain compatibility after any major dependency change.
 
-The dependency tree includes build-time and framework-transitive advisories,
-including findings associated with `browserslist` through `@serwist/next`,
-`postcss` through Next.js, and `tar` through the Expo toolchain. These items
-remain tracked rather than being characterized as harmless: their practical
-impact depends on the affected versions, execution path, and deployment
-exposure. Reassess them against the current lockfiles and advisory details before
-release.
+## Operator setup still required
 
-Some remediations previously considered would have required breaking framework
-changes. An earlier `@vercel/analytics` integration also had a peer-dependency
-conflict with the existing build toolchain; SpeedInsights covers Web Vitals,
-but does not provide page-view analytics. Revisit analytics separately if
-product requirements call for visitor analytics.
+These items require credentials, external consoles, or device access and therefore
+cannot be completed safely from repository code alone:
 
-## Deferred Upgrades
+- Google Cloud OAuth client configuration and production redirect URI setup.
+- Vercel environment variables for production Google Drive OAuth.
+- Native Android/mobile Google Drive OAuth configuration if Drive is enabled on Mobile.
+- Production Supabase/Vercel secrets and deployment configuration.
+- Physical-device validation for location/background tracking, notifications, maps,
+  camera/media permissions, and WebRTC calling.
 
-### Vitest 2.x to 5.x
+## Database warnings intentionally deferred
 
-- **Why deferred:** This is a major test-runner upgrade and may change
-  configuration, transforms, mocking behavior, or coverage reporting.
-- **Tests needed:** Run the complete Web unit suite and coverage thresholds;
-  verify API route mocks, aliases, and coverage exclusions; compare CI behavior
-  before and after the upgrade.
+The remaining Supabase advisory cleanup is deliberately separate from the application
+feature work:
 
-### Expo SDK 51 to 57
+- Unused-index warnings can be reviewed as a performance/storage optimization.
+- Remaining unindexed foreign-key warnings should be reviewed table-by-table before
+  adding indexes, based on actual query patterns and write/read trade-offs.
+- `user_locations.couple_id` already has dedicated index coverage in the repository
+  migrations; it should not be treated as an unhandled application defect.
 
-- **Why deferred:** This spans multiple major SDK releases and can require
-  coordinated React Native, native-module, and platform configuration changes.
-- **Tests needed:** Run Mobile typecheck, lint, and unit tests; build Android and
-  iOS development/production artifacts; validate authentication, storage,
-  location permissions/background tracking, notifications, maps, and calling on
-  physical devices.
+Do not apply broad database cleanup directly to an existing production database
+without reviewing the additive migration and its expected query/write impact.
 
-### Next.js 15 to 16
+## Verification that remains external
 
-- **Why deferred:** This is a major framework change that may affect app-router
-  behavior, server components, middleware, build output, and PWA integration.
-- **Tests needed:** Run Web typecheck, lint, unit and E2E suites, and production
-  build; manually verify authentication redirects, private routes, API routes,
-  PWA behavior, and deployment on the target hosting platform.
+Repository CI covers the automated Web and Mobile checks. A production-ready release
+still needs real environment/device verification:
 
-## Historical Decision Context
+- Web authentication and private-route redirects.
+- Couple linking and shared-data synchronization.
+- Memories and private media.
+- Care/Period calculations and persistence.
+- Calendar, Finance, Plans, and Reminders.
+- Chat/realtime recovery.
+- Location permissions, background behavior, and retention.
+- Google Drive OAuth and Drive-backed memory media when enabled.
 
-An earlier assessment deferred four Web findings because the then-available
-remediation appeared to require breaking changes to `@serwist/next` or Next.js.
-That assessment also noted build-time exposure and accepted the risk at the
-time. It is historical context, not a substitute for reassessing the current
-advisories and production dependency paths.
+These checks are validation steps, not known functional defects.
