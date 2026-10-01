@@ -96,3 +96,8 @@ Never commit OAuth client secrets, refresh tokens, encryption keys, cron secrets
 - Preserve Web ↔ Mobile behavior parity.
 - Treat Supabase RLS and authorization checks as security boundaries.
 - Run automated checks after structural changes.
+## CI and release verification
+
+GitHub Actions runs Web and Mobile lint/typecheck/tests, Web accessibility tests, and the Web production build. Playwright E2E requires the repository's Supabase E2E secrets; when they are unavailable, the workflow reports the environment as unavailable instead of treating E2E as passed.
+
+Production/device verification is still required for external services and native capabilities such as Google Drive OAuth, background location, notifications, maps, media permissions, and WebRTC calling.
