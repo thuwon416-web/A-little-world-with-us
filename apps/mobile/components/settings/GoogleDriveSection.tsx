@@ -1,26 +1,20 @@
 'use client'
 
-import * as AuthSession from 'expo-auth-session'
-import * as WebBrowser from 'expo-web-browser'
+import * as Linking from 'expo-linking'
 import { useEffect, useMemo, useState } from 'react'
 import { Alert, Platform, Text, TouchableOpacity, View } from 'react-native'
+import * as SecureStore from 'expo-secure-store'
 
 import { useTheme } from '@/context/ThemeContext'
 import { sizes } from '@/design-tokens'
 import {
   disconnectGoogleDrive,
   getGoogleDriveClientIdForPlatform,
+  createGoogleDriveAuthorizationUrl,
+  exchangeGoogleDriveCode,
   getGoogleDriveRedirectUri,
   hasGoogleDriveConnection,
-  saveGoogleDriveToken,
 } from '@/lib/googleDrive'
-
-WebBrowser.maybeCompleteAuthSession()
-
-const discovery = {
-  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-  tokenEndpoint: 'https://oauth2.googleapis.com/token',
-}
 
 export default function GoogleDriveSection() {
   const { colors } = useTheme()
@@ -51,87 +45,50 @@ export default function GoogleDriveSection() {
   const [connected, setConnected] = useState(false)
   const [busy, setBusy] = useState(false)
 
-  const [request, response, promptAsync] = AuthSession.useAuthRequest(
-    {
-      clientId,
-      redirectUri,
-      responseType: AuthSession.ResponseType.Code,
-      scopes: ['https://www.googleapis.com/auth/drive.file'],
-      usePKCE: true,
-      extraParams: {
-        access_type: 'offline',
-        prompt: 'consent',
-        include_granted_scopes: 'true',
-      },
-    },
-    discovery
-  )
-
   useEffect(() => {
-    void hasGoogleDriveConnection().then(setConnected)
-  }, [])
-
-  useEffect(() => {
-    if (!response || response.type !== 'success' || !request?.codeVerifier || !clientId) return
-    const code = response.params?.code
-    if (!code) return
-
-    let active = true
-    setBusy(true)
-    void AuthSession.exchangeCodeAsync(
-      {
-        clientId,
-        code,
-        redirectUri,
-        scopes: ['https://www.googleapis.com/auth/drive.file'],
-        extraParams: { code_verifier: request.codeVerifier },
-      },
-      discovery
-    )
-      .then(async (token) => {
-        if (!active) return
-        await saveGoogleDriveToken(token)
+    const subscription = Linking.addEventListener('url', ({ url }) => {
+      const parsed = Linking.parse(url)
+      if (parsed.scheme !== 'com.alittleworldwithus.app' || parsed.path !== 'oauth2redirect') return
+      const state = typeof parsed.queryParams?.state === 'string' ? parsed.queryParams.state : ''
+      const code = typeof parsed.queryParams?.code === 'string' ? parsed.queryParams.code : ''
+      const error = typeof parsed.queryParams?.error === 'string' ? parsed.queryParams.error : ''
+      const verifierKey = 'a-little-world-with-us-google-drive-pkce'
+      void SecureStore.getItemAsync(verifierKey).then(async (verifier) => {
+        await SecureStore.deleteItemAsync(verifierKey)
+        const expectedState = await SecureStore.getItemAsync(verifierKey + '-state')
+        await SecureStore.deleteItemAsync(verifierKey + '-state')
+        if (!verifier || !expectedState || state !== expectedState) {
+          throw new Error('Google Drive authorization state could not be verified.')
+        }
+        if (error) throw new Error('Google Drive authorization was cancelled.')
+        if (!code) throw new Error('Google Drive did not return an authorization code.')
+        await exchangeGoogleDriveCode(clientId, code, verifier)
         setConnected(true)
+        setBusy(false)
         Alert.alert('Google Drive', 'Google Drive is connected on this device.')
+      }).catch((error_) => {
+        setBusy(false)
+        Alert.alert('Google Drive', error_ instanceof Error ? error_.message : 'Unable to finish Google Drive authorization.')
       })
-      .catch((error) => {
-        if (active)
-          Alert.alert(
-            'Google Drive',
-            error instanceof Error ? error.message : 'Unable to finish Google Drive authorization.'
-          )
-      })
-      .finally(() => {
-        if (active) setBusy(false)
-      })
+    })
+    return () => subscription.remove()
+  }, [clientId])
 
-    return () => {
-      active = false
-    }
-  }, [clientId, redirectUri, request?.codeVerifier, response])
 
   const connect = async () => {
     if (!clientId) {
-      Alert.alert(
-        'Google Drive',
-        'Add the native Google Drive OAuth client ID to the mobile environment first.'
-      )
-      return
-    }
-    if (!request) {
-      Alert.alert('Google Drive', 'The secure Google authorization request is still loading.')
+      Alert.alert('Google Drive', 'Add the native Google Drive OAuth client ID to the mobile environment first.')
       return
     }
     setBusy(true)
     try {
-      await promptAsync()
+      const { url, codeVerifier, state } = await createGoogleDriveAuthorizationUrl(clientId)
+      await SecureStore.setItemAsync('a-little-world-with-us-google-drive-pkce', codeVerifier)
+      await SecureStore.setItemAsync('a-little-world-with-us-google-drive-pkce-state', state)
+      await Linking.openURL(url)
     } catch (error) {
-      Alert.alert(
-        'Google Drive',
-        error instanceof Error ? error.message : 'Unable to open Google authorization.'
-      )
-    } finally {
       setBusy(false)
+      Alert.alert('Google Drive', error instanceof Error ? error.message : 'Unable to open Google authorization.')
     }
   }
 
