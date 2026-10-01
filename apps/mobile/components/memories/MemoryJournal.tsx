@@ -487,181 +487,6 @@ export default function MemoryJournal() {
       <Text style={[styles.eyebrow, { color: colors.accent2 }]}>Memories</Text>
       <Text style={[styles.title, { color: colors.textPrimary }]}>Our story</Text>
       <SlideshowLaunchButton memories={memories} onPress={() => setIsSlideshowOpen(true)} />
-      <View
-        style={[
-          styles.mediatorCard,
-          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
-        ]}
-      >
-        <View style={styles.mediatorHeader}>
-          <Sparkles color={colors.accent1} size={20} />
-          <View style={styles.mediatorHeaderText}>
-            <Text style={[styles.mediatorTitle, { color: colors.textPrimary }]}>
-              Talk through a memory
-            </Text>
-            <Text style={[styles.mediatorDescription, { color: colors.textSecondary }]}>
-              Choose a memory and ask for a gentle, two-sided reflection.
-            </Text>
-          </View>
-        </View>
-        <TextInput
-          value={mediatorMessage}
-          onChangeText={setMediatorMessage}
-          maxLength={2000}
-          multiline
-          placeholder="What happened, and what would you like help understanding?"
-          placeholderTextColor={colors.textSecondary}
-          style={[
-            styles.mediatorInput,
-            {
-              color: colors.textPrimary,
-              backgroundColor: colors.surface,
-              borderColor: colors.cardBorder,
-            },
-          ]}
-        />
-        <View style={styles.mediatorActions}>
-          <Text style={[styles.privacyNote, { color: colors.textSecondary }]}>
-            Nothing is shared until you press Ask.
-          </Text>
-          <TouchableOpacity
-            style={[styles.askButton, { backgroundColor: colors.accent1 }]}
-            onPress={() => void askMediator()}
-            disabled={!mediatorMessage.trim() || mediatorLoading}
-          >
-            <Text style={[styles.askButtonText, { color: colors.background }]}>
-              {mediatorLoading ? 'Thinking…' : 'Ask mediator'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-        {mediatorError ? (
-          <Text style={[styles.error, { color: colors.error }]}>{mediatorError}</Text>
-        ) : null}
-        {mediatorResult ? (
-          <View
-            style={[
-              styles.result,
-              { backgroundColor: colors.surface, borderColor: colors.cardBorder },
-            ]}
-          >
-            <Text style={[styles.resultText, { color: colors.textPrimary }]}>{mediatorResult}</Text>
-          </View>
-        ) : null}
-      </View>
-      <View
-        style={[
-          styles.curationCard,
-          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
-        ]}
-      >
-        <View style={styles.mediatorHeader}>
-          <Wand2 color={colors.accent2} size={20} />
-          <View style={styles.mediatorHeaderText}>
-            <Text style={[styles.mediatorTitle, { color: colors.textPrimary }]}>
-              Memory curation
-            </Text>
-            <Text style={[styles.mediatorDescription, { color: colors.textSecondary }]}>
-              Only the memories you select below are sent to the AI.
-            </Text>
-          </View>
-        </View>
-        <View style={styles.curationMemoryList}>
-          {memories.length ? (
-            memories.map((memory) => {
-              const isSelected = curationSelected.includes(memory.id)
-              return (
-                <TouchableOpacity
-                  key={memory.id}
-                  hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }}
-                  onPress={() =>
-                    setCurationSelected((current) =>
-                      isSelected
-                        ? current.filter((id) => id !== memory.id)
-                        : [...current, memory.id]
-                    )
-                  }
-                  style={[styles.curationMemory, { backgroundColor: colors.surface }]}
-                >
-                  <View
-                    style={[
-                      styles.checkbox,
-                      {
-                        borderColor: isSelected ? colors.accent1 : colors.cardBorder,
-                        backgroundColor: isSelected ? colors.accent1 : 'transparent',
-                      },
-                    ]}
-                  >
-                    {isSelected ? <Check color={colors.background} size={14} /> : null}
-                  </View>
-                  <Text style={[styles.curationMemoryTitle, { color: colors.textPrimary }]}>
-                    {memory.title || memory.caption || 'A memory together'}
-                  </Text>
-                  <Text style={[styles.curationMemoryDate, { color: colors.textSecondary }]}>
-                    {memory.date}
-                  </Text>
-                </TouchableOpacity>
-              )
-            })
-          ) : (
-            <Text style={[styles.muted, { color: colors.textSecondary }]}>
-              No memories available to curate.
-            </Text>
-          )}
-        </View>
-        <TextInput
-          value={curationTheme}
-          onChangeText={setCurationTheme}
-          placeholder="Theme"
-          placeholderTextColor={colors.textSecondary}
-          style={[
-            styles.curationInput,
-            {
-              color: colors.textPrimary,
-              backgroundColor: colors.surface,
-              borderColor: colors.cardBorder,
-            },
-          ]}
-        />
-        <TextInput
-          value={curationContext}
-          onChangeText={setCurationContext}
-          maxLength={500}
-          multiline
-          placeholder="Optional context (only what you choose to share)"
-          placeholderTextColor={colors.textSecondary}
-          style={[
-            styles.curationInput,
-            styles.curationContextInput,
-            {
-              color: colors.textPrimary,
-              backgroundColor: colors.surface,
-              borderColor: colors.cardBorder,
-            },
-          ]}
-        />
-        <TouchableOpacity
-          style={[styles.askButton, { backgroundColor: colors.accent1 }]}
-          onPress={() => void createCuratedStory()}
-          disabled={!memories.length || curationLoading}
-        >
-          <Text style={[styles.askButtonText, { color: colors.background }]}>
-            {curationLoading ? 'Creating...' : 'Create story'}
-          </Text>
-        </TouchableOpacity>
-        {curationError ? (
-          <Text style={[styles.error, { color: colors.error }]}>{curationError}</Text>
-        ) : null}
-        {curationStory ? (
-          <View
-            style={[
-              styles.result,
-              { backgroundColor: colors.surface, borderColor: colors.cardBorder },
-            ]}
-          >
-            <Text style={[styles.resultText, { color: colors.textPrimary }]}>{curationStory}</Text>
-          </View>
-        ) : null}
-      </View>
       <TouchableOpacity
         style={[styles.secondary, { backgroundColor: colors.success }]}
         onPress={() => router.push('/(tabs)/gallery')}
@@ -957,6 +782,181 @@ export default function MemoryJournal() {
           </TouchableOpacity>
         </View>
       </Modal>
+      <View
+        style={[
+          styles.mediatorCard,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
+        <View style={styles.mediatorHeader}>
+          <Sparkles color={colors.accent1} size={20} />
+          <View style={styles.mediatorHeaderText}>
+            <Text style={[styles.mediatorTitle, { color: colors.textPrimary }]}>
+              Talk through a memory
+            </Text>
+            <Text style={[styles.mediatorDescription, { color: colors.textSecondary }]}>
+              Choose a memory and ask for a gentle, two-sided reflection.
+            </Text>
+          </View>
+        </View>
+        <TextInput
+          value={mediatorMessage}
+          onChangeText={setMediatorMessage}
+          maxLength={2000}
+          multiline
+          placeholder="What happened, and what would you like help understanding?"
+          placeholderTextColor={colors.textSecondary}
+          style={[
+            styles.mediatorInput,
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.surface,
+              borderColor: colors.cardBorder,
+            },
+          ]}
+        />
+        <View style={styles.mediatorActions}>
+          <Text style={[styles.privacyNote, { color: colors.textSecondary }]}>
+            Nothing is shared until you press Ask.
+          </Text>
+          <TouchableOpacity
+            style={[styles.askButton, { backgroundColor: colors.accent1 }]}
+            onPress={() => void askMediator()}
+            disabled={!mediatorMessage.trim() || mediatorLoading}
+          >
+            <Text style={[styles.askButtonText, { color: colors.background }]}>
+              {mediatorLoading ? 'Thinking…' : 'Ask mediator'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        {mediatorError ? (
+          <Text style={[styles.error, { color: colors.error }]}>{mediatorError}</Text>
+        ) : null}
+        {mediatorResult ? (
+          <View
+            style={[
+              styles.result,
+              { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+            ]}
+          >
+            <Text style={[styles.resultText, { color: colors.textPrimary }]}>{mediatorResult}</Text>
+          </View>
+        ) : null}
+      </View>
+      <View
+        style={[
+          styles.curationCard,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+      >
+        <View style={styles.mediatorHeader}>
+          <Wand2 color={colors.accent2} size={20} />
+          <View style={styles.mediatorHeaderText}>
+            <Text style={[styles.mediatorTitle, { color: colors.textPrimary }]}>
+              Memory curation
+            </Text>
+            <Text style={[styles.mediatorDescription, { color: colors.textSecondary }]}>
+              Only the memories you select below are sent to the AI.
+            </Text>
+          </View>
+        </View>
+        <View style={styles.curationMemoryList}>
+          {memories.length ? (
+            memories.map((memory) => {
+              const isSelected = curationSelected.includes(memory.id)
+              return (
+                <TouchableOpacity
+                  key={memory.id}
+                  hitSlop={{ top: 11, bottom: 11, left: 11, right: 11 }}
+                  onPress={() =>
+                    setCurationSelected((current) =>
+                      isSelected
+                        ? current.filter((id) => id !== memory.id)
+                        : [...current, memory.id]
+                    )
+                  }
+                  style={[styles.curationMemory, { backgroundColor: colors.surface }]}
+                >
+                  <View
+                    style={[
+                      styles.checkbox,
+                      {
+                        borderColor: isSelected ? colors.accent1 : colors.cardBorder,
+                        backgroundColor: isSelected ? colors.accent1 : 'transparent',
+                      },
+                    ]}
+                  >
+                    {isSelected ? <Check color={colors.background} size={14} /> : null}
+                  </View>
+                  <Text style={[styles.curationMemoryTitle, { color: colors.textPrimary }]}>
+                    {memory.title || memory.caption || 'A memory together'}
+                  </Text>
+                  <Text style={[styles.curationMemoryDate, { color: colors.textSecondary }]}>
+                    {memory.date}
+                  </Text>
+                </TouchableOpacity>
+              )
+            })
+          ) : (
+            <Text style={[styles.muted, { color: colors.textSecondary }]}>
+              No memories available to curate.
+            </Text>
+          )}
+        </View>
+        <TextInput
+          value={curationTheme}
+          onChangeText={setCurationTheme}
+          placeholder="Theme"
+          placeholderTextColor={colors.textSecondary}
+          style={[
+            styles.curationInput,
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.surface,
+              borderColor: colors.cardBorder,
+            },
+          ]}
+        />
+        <TextInput
+          value={curationContext}
+          onChangeText={setCurationContext}
+          maxLength={500}
+          multiline
+          placeholder="Optional context (only what you choose to share)"
+          placeholderTextColor={colors.textSecondary}
+          style={[
+            styles.curationInput,
+            styles.curationContextInput,
+            {
+              color: colors.textPrimary,
+              backgroundColor: colors.surface,
+              borderColor: colors.cardBorder,
+            },
+          ]}
+        />
+        <TouchableOpacity
+          style={[styles.askButton, { backgroundColor: colors.accent1 }]}
+          onPress={() => void createCuratedStory()}
+          disabled={!memories.length || curationLoading}
+        >
+          <Text style={[styles.askButtonText, { color: colors.background }]}>
+            {curationLoading ? 'Creating...' : 'Create story'}
+          </Text>
+        </TouchableOpacity>
+        {curationError ? (
+          <Text style={[styles.error, { color: colors.error }]}>{curationError}</Text>
+        ) : null}
+        {curationStory ? (
+          <View
+            style={[
+              styles.result,
+              { backgroundColor: colors.surface, borderColor: colors.cardBorder },
+            ]}
+          >
+            <Text style={[styles.resultText, { color: colors.textPrimary }]}>{curationStory}</Text>
+          </View>
+        ) : null}
+      </View>
       {isSlideshowOpen ? (
         <MemorySlideshow
           memories={memories}
