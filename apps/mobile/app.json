@@ -80,8 +80,7 @@
       ],
       "@maplibre/maplibre-react-native",
       "expo-quick-actions",
-      "expo-status-bar",
-      "expo-web-browser"
+      "expo-status-bar"
     ],
     "extra": {
       "router": {
