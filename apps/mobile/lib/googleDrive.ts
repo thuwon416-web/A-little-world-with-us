@@ -1,5 +1,4 @@
 import * as Crypto from 'expo-crypto'
-import * as Linking from 'expo-linking'
 import * as SecureStore from 'expo-secure-store'
 
 const TOKEN_KEY = 'a-little-world-with-us-google-drive-token-v1'
@@ -12,7 +11,6 @@ type StoredToken = {
   accessToken: string
   refreshToken?: string
   expiresAt: number
-  tokenIssuedAt?: number
   scope?: string
   tokenType?: string
 }
@@ -26,11 +24,6 @@ export type DriveFile = {
   thumbnailLink?: string
   createdTime?: string
   modifiedTime?: string
-}
-
-const discovery = {
-  authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-  tokenEndpoint: TOKEN_ENDPOINT,
 }
 
 export const GOOGLE_DRIVE_SCOPE = DRIVE_SCOPE
@@ -58,13 +51,8 @@ export function getGoogleDriveRedirectUri() {
   return 'com.alittleworldwithus.app://oauth2redirect'
 }
 
-function base64Url(bytes: Uint8Array) {
-  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('')
-  return btoa(binary).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '')
-}
-
-async function createPkceVerifier() {
-  return base64Url(await Crypto.getRandomBytesAsync(32))
+function randomUrlSafeValue() {
+  return `${Crypto.randomUUID().replace(/-/g, '')}${Crypto.randomUUID().replace(/-/g, '')}`
 }
 
 async function createPkceChallenge(verifier: string) {
@@ -73,11 +61,11 @@ async function createPkceChallenge(verifier: string) {
     verifier,
     { encoding: Crypto.CryptoEncoding.BASE64 }
   )
-  return digest.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '')
+  return digest.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')
 }
 
 export async function createGoogleDriveAuthorizationUrl(clientId: string) {
-  const codeVerifier = await createPkceVerifier()
+  const codeVerifier = randomUrlSafeValue()
   const codeChallenge = await createPkceChallenge(codeVerifier)
   const state = randomUrlSafeValue()
   const params = new URLSearchParams({
@@ -97,32 +85,6 @@ export async function createGoogleDriveAuthorizationUrl(clientId: string) {
     codeVerifier,
     state,
   }
-}
-
-export async function exchangeGoogleDriveCode(clientId: string, code: string, codeVerifier: string) {
-  const body = new URLSearchParams({
-    client_id: clientId,
-    code,
-    code_verifier: codeVerifier,
-    redirect_uri: getGoogleDriveRedirectUri(),
-    grant_type: 'authorization_code',
-  })
-  const response = await fetch(TOKEN_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-  const data = (await response.json()) as Record<string, unknown>
-  if (!response.ok || typeof data.access_token !== 'string') {
-    throw new Error(typeof data.error_description === 'string' ? data.error_description : 'Google Drive authorization failed.')
-  }
-  return writeToken({
-    accessToken: data.access_token,
-    refreshToken: typeof data.refresh_token === 'string' ? data.refresh_token : undefined,
-    expiresAt: Date.now() + (typeof data.expires_in === 'number' ? data.expires_in : 3600) * 1000,
-    scope: typeof data.scope === 'string' ? data.scope : DRIVE_SCOPE,
-    tokenType: typeof data.token_type === 'string' ? data.token_type : 'Bearer',
-  })
 }
 
 async function readToken(): Promise<StoredToken | null> {
@@ -147,6 +109,41 @@ async function writeToken(token: StoredToken, previous?: StoredToken | null) {
   return next
 }
 
+export async function exchangeGoogleDriveCode(
+  clientId: string,
+  code: string,
+  codeVerifier: string
+) {
+  const body = new URLSearchParams({
+    client_id: clientId,
+    code,
+    code_verifier: codeVerifier,
+    redirect_uri: getGoogleDriveRedirectUri(),
+    grant_type: 'authorization_code',
+  })
+  const response = await fetch(TOKEN_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  const data = (await response.json()) as Record<string, unknown>
+  if (!response.ok || typeof data.access_token !== 'string') {
+    throw new Error(
+      typeof data.error_description === 'string'
+        ? data.error_description
+        : 'Google Drive authorization failed.'
+    )
+  }
+  const expiresIn = typeof data.expires_in === 'number' ? data.expires_in : 3600
+  return writeToken({
+    accessToken: data.access_token,
+    refreshToken: typeof data.refresh_token === 'string' ? data.refresh_token : undefined,
+    expiresAt: Date.now() + expiresIn * 1000,
+    scope: typeof data.scope === 'string' ? data.scope : DRIVE_SCOPE,
+    tokenType: typeof data.token_type === 'string' ? data.token_type : 'Bearer',
+  }, await readToken())
+}
+
 export async function hasGoogleDriveConnection() {
   return Boolean(await readToken())
 }
@@ -165,63 +162,51 @@ export async function getGoogleDriveAccessToken(clientId: string) {
     throw new Error('Google Drive authorization expired. Please connect again.')
   }
 
-  const response = await AuthSession.refreshAsync(
-    {
-      clientId,
-      refreshToken: stored.refreshToken,
-      scopes: [DRIVE_SCOPE],
-    },
-    { tokenEndpoint: TOKEN_ENDPOINT }
-  )
+  const body = new URLSearchParams({
+    client_id: clientId,
+    refresh_token: stored.refreshToken,
+    grant_type: 'refresh_token',
+  })
+  const response = await fetch(TOKEN_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  const data = (await response.json()) as Record<string, unknown>
+  if (!response.ok || typeof data.access_token !== 'string') {
+    await disconnectGoogleDrive()
+    throw new Error('Google Drive authorization expired. Please connect again.')
+  }
+  const expiresIn = typeof data.expires_in === 'number' ? data.expires_in : 3600
   const refreshed = await writeToken({
-    accessToken: response.accessToken,
-    refreshToken: response.refreshToken,
-    expiresAt: Date.now() + response.expiresIn * 1000,
-    scope: response.scope,
-    tokenType: response.tokenType,
+    accessToken: data.access_token,
+    refreshToken: stored.refreshToken,
+    expiresAt: Date.now() + expiresIn * 1000,
+    scope: typeof data.scope === 'string' ? data.scope : stored.scope,
+    tokenType: typeof data.token_type === 'string' ? data.token_type : stored.tokenType,
   }, stored)
   return refreshed.accessToken
 }
 
-async function driveRequest(
-  url: string,
-  clientId: string,
-  init?: RequestInit
-): Promise<Response> {
+async function driveRequest(url: string, clientId: string, init?: RequestInit) {
   const accessToken = await getGoogleDriveAccessToken(clientId)
-  let response = await fetch(url, {
+  return fetch(url, {
     ...init,
     headers: {
       ...(init?.headers ?? {}),
       Authorization: `Bearer ${accessToken}`,
     },
   })
-
-  if (response.status === 401) {
-    const refreshedToken = await getGoogleDriveAccessToken(clientId)
-    response = await fetch(url, {
-      ...init,
-      headers: {
-        ...(init?.headers ?? {}),
-        Authorization: `Bearer ${refreshedToken}`,
-      },
-    })
-  }
-
-  return response
 }
 
 export async function listGoogleDriveFiles(clientId: string, pageSize = 100) {
   const params = new URLSearchParams({
-    q: "trashed = false",
+    q: 'trashed = false',
     pageSize: String(Math.min(Math.max(pageSize, 1), 1000)),
     orderBy: 'modifiedTime desc',
     fields: 'files(id,name,mimeType,size,webViewLink,thumbnailLink,createdTime,modifiedTime)',
   })
-  const response = await driveRequest(
-    `${DRIVE_FILES_ENDPOINT}?${params.toString()}`,
-    clientId
-  )
+  const response = await driveRequest(`${DRIVE_FILES_ENDPOINT}?${params.toString()}`, clientId)
   if (!response.ok) throw new Error(await readDriveError(response))
   const payload = (await response.json()) as { files?: DriveFile[] }
   return payload.files ?? []
@@ -231,10 +216,7 @@ export async function createGoogleDriveFolder(clientId: string, name: string) {
   const response = await driveRequest(DRIVE_FILES_ENDPOINT, clientId, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name,
-      mimeType: 'application/vnd.google-apps.folder',
-    }),
+    body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' }),
   })
   if (!response.ok) throw new Error(await readDriveError(response))
   return (await response.json()) as DriveFile
@@ -250,12 +232,7 @@ export async function uploadGoogleDriveFile(
   const fileResponse = await fetch(uri)
   if (!fileResponse.ok) throw new Error('Unable to read the selected media file.')
   const blob = await fileResponse.blob()
-
-  const metadata = {
-    name,
-    mimeType,
-    ...(parentId ? { parents: [parentId] } : {}),
-  }
+  const metadata = { name, mimeType, ...(parentId ? { parents: [parentId] } : {}) }
   const boundary = `awlu_${Date.now().toString(36)}`
   const body = new Blob([
     `--${boundary}\r\n`,
@@ -266,7 +243,6 @@ export async function uploadGoogleDriveFile(
     blob,
     `\r\n--${boundary}--`,
   ])
-
   const response = await driveRequest(
     `${DRIVE_UPLOAD_ENDPOINT}?uploadType=multipart&fields=id,name,mimeType,size,webViewLink,thumbnailLink,createdTime,modifiedTime`,
     clientId,
@@ -290,9 +266,8 @@ export async function downloadGoogleDriveFile(
     clientId
   )
   if (!response.ok) throw new Error(await readDriveError(response))
-  const blob = await response.blob()
   return {
-    blob,
+    blob: await response.blob(),
     mimeType: response.headers.get('content-type') ?? mimeType,
   }
 }
