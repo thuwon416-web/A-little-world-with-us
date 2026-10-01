@@ -109,6 +109,7 @@ export default function PINLockWidget({
             PIN lock is enabled. You&apos;ll be asked for your PIN when opening the app.
           </p>
           <button
+            type="button"
             onClick={handleRemovePIN}
             className="w-full rounded-xl border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
           >
@@ -121,6 +122,7 @@ export default function PINLockWidget({
             Set a PIN to protect your app and private vault.
           </p>
           <button
+            type="button"
             onClick={() => {
               setShowModal(true)
               onModalOpen()
@@ -135,13 +137,13 @@ export default function PINLockWidget({
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/50 p-4" role="dialog" aria-modal="true" aria-labelledby="pin-lock-title">
           <div className="glass-card my-8 w-full max-w-sm rounded-modal border border-accent-1/20 p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text-1">
+              <h3 id="pin-lock-title" className="text-lg font-semibold text-text-1">
                 Set PIN
               </h3>
-              <button onClick={closeModal} className="text-text-2" aria-label="Close PIN setup">
+              <button type="button" onClick={closeModal} className="text-text-2" aria-label="Close PIN setup">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -182,6 +184,7 @@ export default function PINLockWidget({
               )}
 
               <button
+                type="button"
                 onClick={handleSetPIN}
                 disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin}
                 className="w-full rounded-xl bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
