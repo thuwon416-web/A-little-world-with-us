@@ -38,6 +38,7 @@ import { Modal } from '@/components/ui/Modal'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
+import { deleteSharedDriveFile } from '@/lib/googleDrive'
 import { downloadDecryptAndCache, encryptMedia } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 import { deleteMemory, getMemories, MemoryRecord } from '@/services/memories'
@@ -162,11 +163,17 @@ export default function MemoryJournal() {
         text: 'Delete',
         style: 'destructive',
         onPress: () =>
-          void deleteMemory(memory.id)
-            .then(() => setMemories((current) => current.filter((item) => item.id !== memory.id)))
-            .catch((error_) =>
+          void (async () => {
+            try {
+              if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
+                await deleteSharedDriveFile(memory.drive_file_id)
+              }
+              await deleteMemory(memory.id)
+              setMemories((current) => current.filter((item) => item.id !== memory.id))
+            } catch (error_) {
               setError(error_ instanceof Error ? error_.message : 'Unable to delete memory.')
-            ),
+            }
+          })(),
       },
     ])
   const openNewJournal = () => {
