@@ -6,7 +6,10 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "scheme": "alittleworldwithus",
+    "scheme": [
+      "alittleworldwithus",
+      "com.alittleworldwithus.app"
+    ],
     "description": "A relationship-first companion app for couples to chat, plan, share moments, and stay connected.",
     "privacy": "public",
     "githubUrl": "https://github.com/thuwon416-web/A-little-world-with-us",
@@ -85,7 +88,8 @@
       ],
       "@maplibre/maplibre-react-native",
       "expo-quick-actions",
-      "expo-status-bar"
+      "expo-status-bar",
+      "expo-web-browser"
     ],
     "extra": {
       "router": {
