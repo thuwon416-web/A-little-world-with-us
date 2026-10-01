@@ -185,7 +185,7 @@ export default function GallerySection() {
             }
             setItems((current) => current.filter((candidate) => candidate.id !== item.id))
           })()
-        },,
+        },
       },
     ])
   }
