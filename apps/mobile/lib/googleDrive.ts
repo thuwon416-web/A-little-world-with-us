@@ -323,7 +323,7 @@ export async function uploadSharedDriveFile(
 ) {
   const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
   if (!webUrl) throw new Error('The shared web service URL is not configured.')
-  const { data: { session } } = await (await import('@/lib/supabase')).supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   if (!session?.access_token) throw new Error('Please sign in again.')
   const source = await fetch(uri)
   if (!source.ok) throw new Error('Unable to read the selected media file.')
