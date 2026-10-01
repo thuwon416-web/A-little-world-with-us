@@ -9,7 +9,9 @@ import { useTheme } from '@/context/ThemeContext'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import type { MemoryImportance, RelationshipMemory } from '@/shared-types'
 
-const PAGE_SIZE = 50
+const PAGE_SIZE = 15
+const PREVIEW_SIZE = 5
+const ROTATION_MS = 30_000
 
 function AllMemories({
   coupleId,
@@ -27,6 +29,8 @@ function AllMemories({
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
+  const [showAll, setShowAll] = useState(false)
+  const [rotation, setRotation] = useState(0)
   const [error, setError] = useState('')
 
   const load = async (offset = 0) => {
@@ -38,6 +42,7 @@ function AllMemories({
         : await relationshipMemoriesService.getByCouple(coupleId, { limit: PAGE_SIZE, offset })
       setMemories((current) => (offset && !search.trim() ? [...current, ...next] : next))
       setHasMore(!search.trim() && next.length === PAGE_SIZE)
+      if (!offset) setRotation(0)
     } catch (error_) {
       setError(error_ instanceof Error ? error_.message : 'Unable to load memories.')
     } finally {
@@ -45,10 +50,16 @@ function AllMemories({
       else setLoading(false)
     }
   }
+
   useEffect(() => {
     const timer = setTimeout(() => void load(), 250)
     return () => clearTimeout(timer)
   }, [coupleId, search])
+
+  useEffect(() => {
+    setShowAll(false)
+    setRotation(0)
+  }, [search, category, importance])
 
   const categories = useMemo(
     () => [...new Set(memories.map((item) => item.category))].sort((a, b) => a.localeCompare(b)),
@@ -63,6 +74,18 @@ function AllMemories({
       ),
     [category, importance, memories]
   )
+  const preview = useMemo(() => {
+    if (showAll || visible.length <= PREVIEW_SIZE) return visible
+    const start = (rotation * PREVIEW_SIZE) % visible.length
+    return Array.from({ length: PREVIEW_SIZE }, (_, index) => visible[(start + index) % visible.length])
+  }, [rotation, showAll, visible])
+
+  useEffect(() => {
+    if (showAll || visible.length <= PREVIEW_SIZE) return
+    const timer = setInterval(() => setRotation((current) => current + 1), ROTATION_MS)
+    return () => clearInterval(timer)
+  }, [showAll, visible.length])
+
   if (loading)
     return (
       <View style={styles.message}>
@@ -118,23 +141,26 @@ function AllMemories({
           </TouchableOpacity>
         ))}
       </View>
-      <Text style={styles.muted}>
-        Showing {visible.length} of {memories.length} loaded memories
-      </Text>
+      <View style={styles.previewHeader}>
+        <Text style={styles.previewText}>Showing a rotating preview of {Math.min(PREVIEW_SIZE, visible.length)} memories</Text>
+        <TouchableOpacity onPress={() => setShowAll((current) => !current)}>
+          <Text style={styles.viewAll}>{showAll ? 'Show 5 preview' : 'View all memories'}</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
-        data={visible}
+        data={preview}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <MemoryCard memory={item} />}
         contentContainerStyle={styles.list}
         onEndReached={() => {
-          if (hasMore && !loadingMore) void load(memories.length)
+          if (showAll && hasMore && !loadingMore) void load(memories.length)
         }}
         onEndReachedThreshold={0.5}
         removeClippedSubviews
-        initialNumToRender={10}
-        maxToRenderPerBatch={10}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
         windowSize={5}
-        ListFooterComponent={loadingMore ? <Text style={styles.muted}>Loading more…</Text> : null}
+        ListFooterComponent={showAll && loadingMore ? <Text style={styles.muted}>Loading more…</Text> : null}
       />
     </View>
   )
@@ -162,6 +188,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
     },
     active: { backgroundColor: colors.accent2 },
     chipText: { color: colors.textPrimary, textTransform: 'capitalize' },
+    previewHeader: { gap: 6 },
+    previewText: { color: colors.textPrimary, lineHeight: 22 },
+    viewAll: { color: colors.accent1, fontWeight: '700' },
     list: { gap: 12, paddingBottom: 24 },
     muted: { color: colors.textSecondary, lineHeight: 22, textAlign: 'center' },
     message: { alignItems: 'center', gap: 12, padding: 28 },
