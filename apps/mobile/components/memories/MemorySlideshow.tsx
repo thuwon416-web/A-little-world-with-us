@@ -12,7 +12,7 @@ import {
 } from 'react-native'
 
 import { useTheme } from '@/context/ThemeContext'
-import { downloadDecryptAndCache } from '@/lib/mediaEncryption'
+import { downloadDecryptAndCache, downloadDriveMemoryAndCache } from '@/lib/mediaEncryption'
 import type { MemoryRecord } from '@/services/memories'
 
 const { width, height } = Dimensions.get('window')
@@ -39,6 +39,10 @@ export default function MemorySlideshow({
       photos.map(async (memory) => {
         const path = memory.storage_path ?? memory.image_url
         if (!path) return null
+        if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
+          const uri = await downloadDriveMemoryAndCache(memory.drive_file_id, memory.mime_type || 'image/jpeg')
+          return [memory.id, uri] as const
+        }
         if (path.startsWith('http') || path.startsWith('/')) return [memory.id, path] as const
         const mimeType = memory.mime_type || 'image/jpeg'
         const uri = await downloadDecryptAndCache(coupleId, 'memories', path, mimeType)
