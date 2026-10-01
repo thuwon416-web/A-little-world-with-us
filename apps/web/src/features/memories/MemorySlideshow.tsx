@@ -52,6 +52,7 @@ export default function MemorySlideshow({ memories, onClose, coupleId }: Props) 
           if (memory.displayUrl) return [memory.id, memory.displayUrl] as const
           if (memory.image_url?.startsWith('/')) return [memory.id, memory.image_url] as const
           const path = memory.storage_path ?? memory.image_url
+          if (memory.storage_provider === 'google_drive' && memory.drive_file_id) return [memory.id, `/api/drive/file?fileId=${encodeURIComponent(memory.drive_file_id)}&download=1`] as const
           if (!path) return null
           if (isExternalUrl(path)) {
             const { data, error: signedError } = await supabase.storage
