@@ -36,6 +36,12 @@ jobs:
       - name: Run web A11Y tests
         working-directory: ./apps/web
         run: ./node_modules/.bin/vitest run src/tests/a11y.test.tsx
+      - name: Build web production bundle
+        working-directory: ./apps/web
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+        run: npm run build
       - name: Upload coverage reports
         if: always()
         uses: actions/upload-artifact@v4
