@@ -9,14 +9,24 @@ export async function GET() {
   const clientId = process.env.GOOGLE_CLIENT_ID
   const redirectUri = process.env.GOOGLE_DRIVE_REDIRECT_URI
   if (!clientId || !redirectUri) return NextResponse.json({ error: 'Google Drive OAuth is not configured yet.' }, { status: 503 })
-  const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', access_type: 'offline', prompt: 'consent', scope: 'https://www.googleapis.com/auth/drive.file', state: createOAuthState(user.id) })
+  try {
+    const state = createOAuthState(user.id)
+    const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', access_type: 'offline', prompt: 'consent', scope: 'https://www.googleapis.com/auth/drive.file', state })
+    const response = NextResponse.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString())
+    response.cookies.set('drive_oauth_state', state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/api/drive',
+      maxAge: 10 * 60,
+    })
+    return response
+  } catch (error) {
+    console.error('[drive] start failed', error instanceof Error ? error.message : 'unknown')
+    return NextResponse.json({ error: 'Google Drive OAuth server configuration is incomplete.' }, { status: 503 })
+  }
+  /*
   const response = NextResponse.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString())
-  response.cookies.set('drive_oauth_state', params.get('state') ?? '', {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    path: '/api/drive',
-    maxAge: 10 * 60,
-  })
   return response
+  */
 }
