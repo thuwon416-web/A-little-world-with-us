@@ -222,14 +222,15 @@ export async function disconnectDrive(userId: string) {
   if (error) throw error
 }
 
-export async function assertDriveFileAccessible(userId: string, fileId: string) {
+export async function getDriveFileAccess(userId: string, fileId: string) {
   const { data: memory, error: memoryError } = await adminClient()
     .from('memories')
-    .select('couple_id')
+    .select('couple_id,user_id')
     .eq('drive_file_id', fileId)
     .maybeSingle()
   if (memoryError) throw memoryError
-  if (!memory?.couple_id) return false
+  if (!memory?.couple_id || !memory.user_id) return null
+
   const { data: link, error: linkError } = await adminClient()
     .from('couple_links')
     .select('id')
@@ -238,7 +239,16 @@ export async function assertDriveFileAccessible(userId: string, fileId: string) 
     .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
     .maybeSingle()
   if (linkError) throw linkError
-  return Boolean(link)
+  if (!link) return null
+
+  return {
+    ownerId: memory.user_id as string,
+    canDelete: memory.user_id === userId,
+  }
+}
+
+export async function assertDriveFileAccessible(userId: string, fileId: string) {
+  return Boolean(await getDriveFileAccess(userId, fileId))
 }
 
 export async function deleteDriveFile(userId: string, fileId: string) {
