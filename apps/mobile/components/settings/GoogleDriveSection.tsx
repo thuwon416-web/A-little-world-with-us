@@ -79,6 +79,10 @@ export default function GoogleDriveSection() {
       }
     }
 
+    void hasGoogleDriveConnection().then((value) => {
+      if (active) setConnected(value)
+    })
+
     const subscription = Linking.addEventListener('url', ({ url }) => {
       void handleUrl(url)
     })
