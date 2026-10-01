@@ -21,6 +21,8 @@ export default function ImageUpload({
     url: string
     name: string
     created_at: string
+    storageProvider?: 'supabase' | 'google_drive'
+    driveFileId?: string | null
   }) => void
   folder?: string
   coupleId: string
@@ -105,6 +107,8 @@ export default function ImageUpload({
             url,
             name: driveFile.name || fileName,
             created_at: memory.created_at,
+            storageProvider: 'google_drive' as const,
+            driveFileId: driveFile.id,
           }
           onUpload?.(result)
           setPreview(null)
@@ -140,6 +144,8 @@ export default function ImageUpload({
         url,
         name: storedPath.split('/').pop() ?? 'gallery-image',
         created_at: new Date().toISOString(),
+        storageProvider: 'supabase' as const,
+        driveFileId: null,
       }
 
       onUpload?.(result)
