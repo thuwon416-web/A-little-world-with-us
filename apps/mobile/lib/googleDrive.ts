@@ -316,6 +316,47 @@ export async function deleteSharedDriveFile(fileId: string) {
 }
 
 
+export type SharedDriveMemoryUpload = {
+  file: DriveFile
+  memory: { id: string; created_at: string }
+}
+
+export async function uploadSharedDriveMemory(
+  uri: string,
+  name: string,
+  mimeType: string,
+  coupleId: string
+): Promise<SharedDriveMemoryUpload> {
+  const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+  if (!webUrl) throw new Error('The shared web service URL is not configured.')
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.access_token) throw new Error('Please sign in again.')
+  const source = await fetch(uri)
+  if (!source.ok) throw new Error('Unable to read the selected media file.')
+  const blob = await source.blob()
+  const form = new FormData()
+  form.append('file', blob, name)
+  form.append('coupleId', coupleId)
+  form.append('title', 'A memory together')
+  form.append('caption', 'A memory together')
+  form.append('category', 'favorite')
+  form.append('date', new Date().toISOString().slice(0, 10))
+  const response = await fetch(`${webUrl}/api/drive/upload`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${session.access_token}` },
+    body: form,
+  })
+  const body = (await response.json()) as {
+    file?: DriveFile
+    memory?: { id: string; created_at: string }
+    error?: string
+  }
+  if (!response.ok || !body.file?.id || !body.memory?.id) {
+    throw new Error(body.error || 'Google Drive memory upload failed.')
+  }
+  return { file: body.file, memory: body.memory }
+}
+
 export async function uploadSharedDriveFile(
   uri: string,
   name: string,
