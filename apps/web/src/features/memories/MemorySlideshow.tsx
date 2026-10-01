@@ -20,6 +20,8 @@ type SlideshowMemory = {
   storage_path?: string | null
   displayUrl?: string
   mime_type?: string | null
+  storage_provider?: string
+  drive_file_id?: string | null
 }
 
 type Props = {
@@ -38,7 +40,7 @@ export default function MemorySlideshow({ memories, onClose, coupleId }: Props) 
   const [error, setError] = useState('')
 
   const photos = useMemo(
-    () => memories.filter((memory) => memory.image_url || memory.displayUrl),
+    () => memories.filter((memory) => memory.image_url || memory.displayUrl || (memory.storage_provider === 'google_drive' && memory.drive_file_id)),
     [memories]
   )
 
