@@ -1,4 +1,5 @@
-import * as AuthSession from 'expo-auth-session'
+import * as Crypto from 'expo-crypto'
+import * as Linking from 'expo-linking'
 import * as SecureStore from 'expo-secure-store'
 
 const TOKEN_KEY = 'a-little-world-with-us-google-drive-token-v1'
@@ -11,6 +12,7 @@ type StoredToken = {
   accessToken: string
   refreshToken?: string
   expiresAt: number
+  tokenIssuedAt?: number
   scope?: string
   tokenType?: string
 }
@@ -53,9 +55,73 @@ export function getGoogleDriveClientIdForPlatform(platform: 'android' | 'ios') {
 }
 
 export function getGoogleDriveRedirectUri() {
-  return AuthSession.makeRedirectUri({
-    scheme: 'com.alittleworldwithus.app',
-    path: 'oauth2redirect',
+  return 'com.alittleworldwithus.app://oauth2redirect'
+}
+
+function base64Url(bytes: Uint8Array) {
+  const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('')
+  return btoa(binary).replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '')
+}
+
+async function createPkceVerifier() {
+  return base64Url(await Crypto.getRandomBytesAsync(32))
+}
+
+async function createPkceChallenge(verifier: string) {
+  const digest = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    verifier,
+    { encoding: Crypto.CryptoEncoding.BASE64 }
+  )
+  return digest.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/g, '')
+}
+
+export async function createGoogleDriveAuthorizationUrl(clientId: string) {
+  const codeVerifier = await createPkceVerifier()
+  const codeChallenge = await createPkceChallenge(codeVerifier)
+  const state = base64Url(await Crypto.getRandomBytesAsync(24))
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: getGoogleDriveRedirectUri(),
+    response_type: 'code',
+    scope: DRIVE_SCOPE,
+    access_type: 'offline',
+    prompt: 'consent',
+    include_granted_scopes: 'true',
+    code_challenge: codeChallenge,
+    code_challenge_method: 'S256',
+    state,
+  })
+  return {
+    url: `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
+    codeVerifier,
+    state,
+  }
+}
+
+export async function exchangeGoogleDriveCode(clientId: string, code: string, codeVerifier: string) {
+  const body = new URLSearchParams({
+    client_id: clientId,
+    code,
+    code_verifier: codeVerifier,
+    redirect_uri: getGoogleDriveRedirectUri(),
+    grant_type: 'authorization_code',
+  })
+  const response = await fetch(TOKEN_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  })
+  const data = (await response.json()) as Record<string, unknown>
+  if (!response.ok || typeof data.access_token !== 'string') {
+    throw new Error(typeof data.error_description === 'string' ? data.error_description : 'Google Drive authorization failed.')
+  }
+  return writeToken({
+    accessToken: data.access_token,
+    refreshToken: typeof data.refresh_token === 'string' ? data.refresh_token : undefined,
+    expiresAt: Date.now() + (typeof data.expires_in === 'number' ? data.expires_in : 3600) * 1000,
+    scope: typeof data.scope === 'string' ? data.scope : DRIVE_SCOPE,
+    tokenType: typeof data.token_type === 'string' ? data.token_type : 'Bearer',
   })
 }
 
@@ -70,20 +136,15 @@ async function readToken(): Promise<StoredToken | null> {
   }
 }
 
-async function writeToken(response: AuthSession.TokenResponse, previous?: StoredToken | null) {
-  const token: StoredToken = {
-    accessToken: response.accessToken,
-    refreshToken: response.refreshToken ?? previous?.refreshToken,
-    expiresAt: (response.issuedAt + response.expiresIn) * 1000,
-    scope: response.scope ?? previous?.scope,
-    tokenType: response.tokenType ?? previous?.tokenType,
+async function writeToken(token: StoredToken, previous?: StoredToken | null) {
+  const next: StoredToken = {
+    ...token,
+    refreshToken: token.refreshToken ?? previous?.refreshToken,
+    scope: token.scope ?? previous?.scope,
+    tokenType: token.tokenType ?? previous?.tokenType,
   }
-  await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(token))
-  return token
-}
-
-export async function saveGoogleDriveToken(response: AuthSession.TokenResponse) {
-  return writeToken(response, await readToken())
+  await SecureStore.setItemAsync(TOKEN_KEY, JSON.stringify(next))
+  return next
 }
 
 export async function hasGoogleDriveConnection() {
@@ -112,7 +173,13 @@ export async function getGoogleDriveAccessToken(clientId: string) {
     },
     { tokenEndpoint: TOKEN_ENDPOINT }
   )
-  const refreshed = await writeToken(response, stored)
+  const refreshed = await writeToken({
+    accessToken: response.accessToken,
+    refreshToken: response.refreshToken,
+    expiresAt: Date.now() + response.expiresIn * 1000,
+    scope: response.scope,
+    tokenType: response.tokenType,
+  }, stored)
   return refreshed.accessToken
 }
 
