@@ -83,6 +83,11 @@ The maintained Supabase bootstrap run order is documented in `backend/supabase/b
 
 ## Google Drive
 
+For shared memories, **Web and Mobile use the server-backed Drive connection as the canonical connection**. The `memories` row remains the app's metadata/source of truth and stores `storage_provider` plus `drive_file_id`; the server keeps the owner's Drive refresh token encrypted and authorizes couple members before reading a shared file. This avoids splitting access between separate native and web OAuth tokens.
+
+Mobile also contains a native PKCE Drive integration for device-local Drive tools. It must not be treated as the shared-memory storage authority. Google documents `drive.file` as narrow per-file access, so directly uploading a shared-memory file from a separate native OAuth connection would not automatically make that file readable through the server-side connection. See the official Google Drive scope guidance: https://developers.google.com/workspace/drive/api/guides/api-specific-auth
+
+
 Google Drive is optional. Web OAuth and Drive-backed memory setup is documented in `docs/setup/google-drive.md`. Production OAuth credentials are operator-managed and must never be committed.
 
 For Mobile, the repository now includes native Google Drive OAuth with PKCE, SecureStore token persistence, Drive file listing/upload/download helpers, and a Settings connection control. The mobile app never accepts a Google client secret. Add the platform OAuth client IDs to `apps/mobile/.env`:
