@@ -46,6 +46,18 @@ export async function decryptMediaSafe(
 // Mobile: Download, decrypt, and cache to file system
 // ═══════════════════════════════════════════════════════════
 
+async function getPersistentCachePath(key: string, extension: string) {
+  const digest = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    key
+  )
+  const directory = FileSystem.documentDirectory ?? FileSystem.cacheDirectory
+  if (!directory) throw new Error('Local media storage is unavailable.')
+  const cacheDir = `${directory}media-cache/`
+  await FileSystem.makeDirectoryAsync(cacheDir, { intermediates: true })
+  return `${cacheDir}${digest}.${extension.replace(/[^a-z0-9]+/gi, '') || 'bin'}`
+}
+
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   let binary = ''
   const bytes = new Uint8Array(buffer)
@@ -68,9 +80,8 @@ export async function downloadDecryptAndCache(
   const encrypted = new Uint8Array(arrayBuffer)
   const decrypted = await decryptMediaSafe(encrypted, coupleId)
 
-  const cacheDir = FileSystem.cacheDirectory!
-  const fileName = path.split('/').pop() ?? 'file'
-  const cachePath = `${cacheDir}${fileName}`
+  const extension = path.split('.').pop() ?? 'bin'
+  const cachePath = await getPersistentCachePath(`${bucket}/${path}`, extension)
 
   await FileSystem.writeAsStringAsync(
     cachePath,
@@ -80,6 +91,40 @@ export async function downloadDecryptAndCache(
     }
   )
 
+  return `file://${cachePath}`
+}
+
+export async function downloadDriveMemoryAndCache(
+  fileId: string,
+  mimeType = 'application/octet-stream'
+): Promise<string> {
+  const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+  if (!webUrl) throw new Error('The shared web service URL is not configured.')
+
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!session?.access_token) throw new Error('Please sign in again.')
+
+  const response = await fetch(
+    `${webUrl}/api/drive/file?fileId=${encodeURIComponent(fileId)}&download=1`,
+    { headers: { Authorization: `Bearer ${session.access_token}` } }
+  )
+  if (!response.ok) {
+    const body = await response.json().catch(() => null) as { error?: string } | null
+    throw new Error(body?.error || 'Unable to recover the shared Drive memory.')
+  }
+
+  const bytes = new Uint8Array(await response.arrayBuffer())
+  const extension = guessMimeTypeFromPath(mimeType) === 'application/octet-stream'
+    ? (mimeType.split('/').pop() ?? 'bin')
+    : mimeType.split('/').pop() ?? 'bin'
+  const cachePath = await getPersistentCachePath(`drive/${fileId}`, extension)
+  await FileSystem.writeAsStringAsync(
+    cachePath,
+    arrayBufferToBase64(bytes.buffer),
+    { encoding: FileSystem.EncodingType.Base64 }
+  )
   return `file://${cachePath}`
 }
 
