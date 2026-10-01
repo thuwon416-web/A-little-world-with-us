@@ -296,6 +296,26 @@ export async function getSharedDriveStatus() {
   return body.connected === true
 }
 
+export async function deleteSharedDriveFile(fileId: string) {
+  const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+  if (!webUrl) throw new Error('The shared web service URL is not configured.')
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.access_token) throw new Error('Please sign in again.')
+  const response = await fetch(`${webUrl}/api/drive/delete`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ fileId }),
+  })
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as { error?: string }
+    throw new Error(body.error || 'Google Drive file deletion failed.')
+  }
+}
+
+
 export async function uploadSharedDriveFile(
   uri: string,
   name: string,
