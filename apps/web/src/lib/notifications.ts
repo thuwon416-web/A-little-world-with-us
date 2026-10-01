@@ -112,7 +112,10 @@ export function sendNotification(title: string, body?: string) {
   })
 }
 
-export function getNotificationSettings(): NotificationSettings {
+const notificationStorageKey = (userId?: string) =>
+  userId ? `notificationSettings:${userId}` : 'notificationSettings'
+
+export function getNotificationSettings(userId?: string): NotificationSettings {
   if (typeof window === 'undefined') {
     return {
       reminders: true,
@@ -123,7 +126,7 @@ export function getNotificationSettings(): NotificationSettings {
     }
   }
 
-  const stored = localStorage.getItem('notificationSettings')
+  const stored = userId ? localStorage.getItem(notificationStorageKey(userId)) : null
   if (stored) {
     try {
       return JSON.parse(stored)
@@ -147,10 +150,10 @@ export function getNotificationSettings(): NotificationSettings {
   }
 }
 
-export function updateNotificationSettings(settings: Partial<NotificationSettings>) {
-  const current = getNotificationSettings()
+export function updateNotificationSettings(userId: string, settings: Partial<NotificationSettings>) {
+  const current = getNotificationSettings(userId)
   const updated = { ...current, ...settings }
-  localStorage.setItem('notificationSettings', JSON.stringify(updated))
+  localStorage.setItem(notificationStorageKey(userId), JSON.stringify(updated))
 }
 
 export async function updateSafetyNotificationPreference(
