@@ -6,7 +6,7 @@ import { Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useTheme } from '@/context/ThemeContext'
 import { useAuth } from '@/lib/auth'
 import { downloadDecryptAndCache, downloadDriveMemoryAndCache, encryptMedia } from '@/lib/mediaEncryption'
-import { getSharedDriveStatus, uploadSharedDriveFile } from '@/lib/googleDrive'
+import { deleteSharedDriveFile, getSharedDriveStatus, uploadSharedDriveFile } from '@/lib/googleDrive'
 import { supabase } from '@/lib/supabase'
 
 export default function ImageUpload({
@@ -110,14 +110,7 @@ export default function ImageUpload({
           setPreview(null)
           return
         } catch (memoryError) {
-          const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
-          if (webUrl) {
-            await fetch(`${webUrl}/api/drive/delete`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ fileId: driveFile.id }),
-            }).catch(() => undefined)
-          }
+          await deleteSharedDriveFile(driveFile.id).catch(() => undefined)
           throw memoryError
         }
       }
