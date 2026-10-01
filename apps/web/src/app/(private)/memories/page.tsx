@@ -600,14 +600,6 @@ function MemoriesPageContent() {
 
       </section>
 
-      <section aria-labelledby="our-story-heading" className="space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Our Story</p>
-          <h2 id="our-story-heading" className="mt-1 text-2xl font-serif text-text-1">Every memory we’ve made together</h2>
-        </div>
-        <OurStoryContent />
-      </section>
-
       {birthdayReveal && (
         <section className="glass-card rounded-modal border border-error/30 bg-gradient-to-r from-error/10 via-accent-1/10 to-warning/10 p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-text-2">
@@ -683,6 +675,14 @@ function MemoriesPageContent() {
         </div>
       )}
       {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-accent-1" /><p className="mt-4 text-lg text-text-1">No memories yet. Start creating your little world together!</p></section>}
+      <section aria-labelledby="our-story-heading" className="space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Our Story</p>
+          <h2 id="our-story-heading" className="mt-1 text-2xl font-serif text-text-1">Every memory we’ve made together</h2>
+        </div>
+        <OurStoryContent />
+      </section>
+
       <section className="glass-card rounded-modal border border-accent-1/15 p-5"><div className="mb-4"><p className="text-xs uppercase tracking-[0.2em] text-text-2">AI companion</p><h2 className="mt-1 text-xl font-serif text-text-1">Make more of a memory</h2><p className="mt-1 text-sm text-text-2">Reflect on a moment, turn it into a story, or talk it through gently.</p></div><MemoryCurationAI memories={memories.map((memory) => ({ id: memory.id, title: memory.title ?? memory.caption ?? 'A memory together', date: memory.date }))} /><div className="mt-4 border-t border-border/30 pt-4"><ExplicitAdviceControl title="Talk through a memory" description="Ask for a gentle, two-sided reflection about a memory." placeholder="What happened, and what would you like help understanding?" /></div></section>
 
       {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} coupleId={coupleLinkId ?? ''} /> : null}
