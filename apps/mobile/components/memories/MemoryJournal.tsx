@@ -46,7 +46,7 @@ const categories = ['all', 'favorite', 'travel', 'ritual', 'journal'] as const
 type JournalMood = 'happy' | 'okay' | 'sad' | 'loved' | 'anxious'
 type JournalMemory = MemoryRecord & {
   description?: string | null
-  metadata?: { mood_tag?: string; ai_reflection?: string; voice_url?: string } | null
+  metadata?: { mood_tag?: string; ai_reflection?: string; voice_url?: string; voice_path?: string } | null
 }
 const localDateKey = (value: Date) => {
   const year = value.getFullYear()
@@ -187,7 +187,7 @@ export default function MemoryJournal() {
     setEditingJournalId(memory.id)
     setJournalTitle(memory.title)
     setJournalBody(memory.description ?? '')
-    setJournalVoiceRemoteUrl(memory.metadata?.voice_url ?? null)
+    setJournalVoiceRemoteUrl(memory.metadata?.voice_path ?? memory.metadata?.voice_url ?? null)
     setJournalVoiceUri(null)
     setJournalRecording(null)
     setJournalRecordingTime(0)
@@ -252,7 +252,7 @@ export default function MemoryJournal() {
     setJournalSound(null)
   }
   const playJournalVoice = async (source?: string) => {
-    const uri = source ?? journalVoiceUri ?? journalVoiceRemoteUrl
+    let uri = source ?? journalVoiceUri ?? journalVoiceRemoteUrl
     if (!uri) return
     if (journalPlaying && journalSound) {
       await journalSound.stopAsync()
@@ -260,6 +260,10 @@ export default function MemoryJournal() {
       setJournalSound(null)
       setJournalPlaying(false)
       return
+    }
+    if (!uri.startsWith('http://') && !uri.startsWith('https://') && !uri.startsWith('file://') && !uri.startsWith('content://')) {
+      if (!coupleId) throw new Error('No accepted couple is linked to this account.')
+      uri = await downloadDecryptAndCache(coupleId, 'memories', uri, 'audio/m4a')
     }
     const { sound } = await Audio.Sound.createAsync({ uri })
     sound.setOnPlaybackStatusUpdate((status) => {
@@ -290,7 +294,7 @@ export default function MemoryJournal() {
       if (coupleError || !coupleLink?.couple_id) {
         throw new Error(coupleError?.message || 'No accepted couple is linked to this account.')
       }
-      const voiceUrl = journalVoiceRemoteUrl
+      let voicePath = journalVoiceRemoteUrl
       if (journalVoiceUri && !journalVoiceRemoteUrl) {
         setJournalUploadingVoice(true)
         const filePath = `journal/${coupleLink.couple_id}/${Date.now()}.m4a`
@@ -303,13 +307,15 @@ export default function MemoryJournal() {
             upsert: false,
           })
         if (uploadError) throw new Error(`Voice upload failed: ${uploadError.message}`)
-        const voiceUrl = await downloadDecryptAndCache(
+        const cachedVoiceUrl = await downloadDecryptAndCache(
           coupleLink.couple_id,
           'memories',
           filePath,
           'audio/m4a'
         )
-        setJournalVoiceRemoteUrl(voiceUrl)
+        voicePath = filePath
+        setJournalVoiceRemoteUrl(filePath)
+        setJournalVoiceUri(cachedVoiceUrl)
       }
       const existingMeta = editingJournalId
         ? (memories.find((memory) => memory.id === editingJournalId)?.metadata ?? {})
@@ -325,7 +331,7 @@ export default function MemoryJournal() {
         metadata: {
           ...existingMeta,
           mood_tag: journalMood,
-          ...(voiceUrl ? { voice_url: voiceUrl } : {}),
+          ...(voicePath ? { voice_path: voicePath } : {}),
         },
       }
       const query = editingJournalId
