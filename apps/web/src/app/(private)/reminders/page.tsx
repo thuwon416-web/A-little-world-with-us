@@ -70,6 +70,8 @@ export default function RemindersPage() {
     return () => {
       void supabase.removeChannel(channel)
     }
+  // The loader is intentionally kept local to the page; coupleId is the subscription boundary.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coupleId])
 
   useEffect(() => {
