@@ -73,15 +73,17 @@ export async function downloadDecryptAndCache(
   path: string,
   _mimeType: string
 ): Promise<string> {
+  const extension = path.split('.').pop() ?? 'bin'
+  const cachePath = await getPersistentCachePath(`${bucket}/${path}`, extension)
+  const cached = await FileSystem.getInfoAsync(cachePath)
+  if (cached.exists) return `file://${cachePath}`
+
   const { data, error } = await supabase.storage.from(bucket).download(path)
   if (error) throw error
 
   const arrayBuffer = await data.arrayBuffer()
   const encrypted = new Uint8Array(arrayBuffer)
   const decrypted = await decryptMediaSafe(encrypted, coupleId)
-
-  const extension = path.split('.').pop() ?? 'bin'
-  const cachePath = await getPersistentCachePath(`${bucket}/${path}`, extension)
 
   await FileSystem.writeAsStringAsync(
     cachePath,
@@ -115,11 +117,12 @@ export async function downloadDriveMemoryAndCache(
     throw new Error(body?.error || 'Unable to recover the shared Drive memory.')
   }
 
-  const bytes = new Uint8Array(await response.arrayBuffer())
-  const extension = guessMimeTypeFromPath(mimeType) === 'application/octet-stream'
-    ? (mimeType.split('/').pop() ?? 'bin')
-    : mimeType.split('/').pop() ?? 'bin'
+  const extension = mimeType.split('/').pop() ?? 'bin'
   const cachePath = await getPersistentCachePath(`drive/${fileId}`, extension)
+  const cached = await FileSystem.getInfoAsync(cachePath)
+  if (cached.exists) return `file://${cachePath}`
+
+  const bytes = new Uint8Array(await response.arrayBuffer())
   await FileSystem.writeAsStringAsync(
     cachePath,
     arrayBufferToBase64(bytes.buffer),
