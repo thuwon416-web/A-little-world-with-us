@@ -100,6 +100,11 @@ export async function downloadDriveMemoryAndCache(
   fileId: string,
   mimeType = 'application/octet-stream'
 ): Promise<string> {
+  const extension = mimeType.split('/').pop() ?? 'bin'
+  const cachePath = await getPersistentCachePath(`drive/${fileId}`, extension)
+  const cached = await FileSystem.getInfoAsync(cachePath)
+  if (cached.exists) return `file://${cachePath}`
+
   const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
   if (!webUrl) throw new Error('The shared web service URL is not configured.')
 
@@ -116,11 +121,6 @@ export async function downloadDriveMemoryAndCache(
     const body = await response.json().catch(() => null) as { error?: string } | null
     throw new Error(body?.error || 'Unable to recover the shared Drive memory.')
   }
-
-  const extension = mimeType.split('/').pop() ?? 'bin'
-  const cachePath = await getPersistentCachePath(`drive/${fileId}`, extension)
-  const cached = await FileSystem.getInfoAsync(cachePath)
-  if (cached.exists) return `file://${cachePath}`
 
   const bytes = new Uint8Array(await response.arrayBuffer())
   await FileSystem.writeAsStringAsync(
