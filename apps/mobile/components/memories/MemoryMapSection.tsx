@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
-import { downloadDecryptAndCache } from '@/lib/mediaEncryption'
+import { downloadDecryptAndCache, downloadDriveMemoryAndCache } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 import { getMemories, type MemoryRecord } from '@/services/memories'
 
@@ -55,6 +55,10 @@ export default function MemoryMapSection() {
     void Promise.all(
       memories.map(async (memory) => {
         const path = memory.storage_path ?? memory.image_url
+        if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
+          const uri = await downloadDriveMemoryAndCache(memory.drive_file_id, memory.mime_type || 'image/jpeg')
+          return [memory.id, uri] as const
+        }
         if (!path || path.startsWith('/') || path.startsWith('http'))
           return path ? ([memory.id, path] as const) : null
         if (isExternalUrl(path)) {
