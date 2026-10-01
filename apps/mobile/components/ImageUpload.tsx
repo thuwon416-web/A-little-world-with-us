@@ -63,9 +63,9 @@ export default function ImageUpload({
       setIsUploading(true)
       setError('')
 
+      if (!user?.id) throw new Error('Please wait for sign-in to finish.')
       const response = await fetch(preview)
       const blob = await response.blob()
-      if (!user?.id) throw new Error('Please wait for sign-in to finish.')
       const mimeType = 'image/jpeg'
       const fileName = `${Date.now()}-${Crypto.randomUUID()}.jpg`
       const useSharedDrive = await getSharedDriveStatus()
