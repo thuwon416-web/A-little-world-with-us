@@ -77,7 +77,12 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
           .map(async (memory): Promise<UnifiedMemory> => {
             const path = memory.storage_path ?? memory.image_url
             let imageUrl: string | undefined
-            if (path?.startsWith('/')) imageUrl = path
+            const driveFileId = (memory as Memory & { storage_provider?: string; drive_file_id?: string | null }).storage_provider === 'google_drive'
+              ? (memory as Memory & { drive_file_id?: string | null }).drive_file_id
+              : null
+            if (driveFileId) {
+              imageUrl = `/api/drive/file?fileId=${encodeURIComponent(driveFileId)}&download=1`
+            } else if (path?.startsWith('/')) imageUrl = path
             else if (path) {
               if (isExternalUrl(path)) {
                 const { data } = await supabase.storage.from('memories').createSignedUrl(path, 3600)
