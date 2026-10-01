@@ -15,8 +15,8 @@ export type MemoryRecord = Pick<
   | 'location_label'
   | 'created_at'
   | 'mime_type'
-  | 'metadata'
 > & {
+  metadata?: { mood_tag?: string; ai_reflection?: string; voice_url?: string } | null
   storage_provider?: 'supabase' | 'google_drive'
   drive_file_id?: string | null
   description?: string | null
