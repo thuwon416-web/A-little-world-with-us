@@ -1,6 +1,7 @@
 import * as Device from 'expo-device'
 import * as Notifications from 'expo-notifications'
 import { Platform } from 'react-native'
+import Constants from 'expo-constants'
 
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 
@@ -56,7 +57,16 @@ export async function registerForPushNotifications() {
     return null
   }
 
-  const token = (await Notifications.getExpoPushTokenAsync()).data
+  if (Platform.OS === 'android') {
+    await Notifications.setNotificationChannelAsync('reminders', {
+      name: 'Reminders',
+      importance: Notifications.AndroidImportance.DEFAULT,
+      sound: 'default',
+    })
+  }
+
+  const projectId = Constants.expoConfig?.extra?.eas?.projectId as string | undefined
+  const token = (await Notifications.getExpoPushTokenAsync(projectId ? { projectId } : undefined)).data
   const {
     data: { user },
   } = await supabase.auth.getUser()
