@@ -12,7 +12,6 @@ import {
   getGoogleDriveClientIdForPlatform,
   createGoogleDriveAuthorizationUrl,
   exchangeGoogleDriveCode,
-  getGoogleDriveRedirectUri,
   hasGoogleDriveConnection,
 } from '@/lib/googleDrive'
 
@@ -41,7 +40,6 @@ export default function GoogleDriveSection() {
     [colors]
   )
   const clientId = getGoogleDriveClientIdForPlatform(Platform.OS === 'android' ? 'android' : 'ios')
-  const redirectUri = getGoogleDriveRedirectUri()
   const [connected, setConnected] = useState(false)
   const [busy, setBusy] = useState(false)
 
