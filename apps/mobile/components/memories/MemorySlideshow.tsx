@@ -31,7 +31,10 @@ export default function MemorySlideshow({
   const [playing, setPlaying] = useState(true)
   const [urls, setUrls] = useState<Record<string, string>>({})
   const listRef = useRef<FlatList<MemoryRecord>>(null)
-  const photos = useMemo(() => memories.filter((memory) => memory.image_url), [memories])
+  const photos = useMemo(
+    () => memories.filter((memory) => memory.image_url || (memory.storage_provider === 'google_drive' && memory.drive_file_id)),
+    [memories]
+  )
 
   useEffect(() => {
     let mounted = true
