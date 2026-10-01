@@ -62,7 +62,6 @@ export async function POST(request: Request) {
             ? String(form.get('date'))
             : new Date().toISOString().slice(0, 10),
         category: typeof form.get('category') === 'string' ? String(form.get('category')) : 'favorite',
-        visibility: 'shared',
       })
       .select('id,created_at')
       .single()
