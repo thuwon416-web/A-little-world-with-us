@@ -211,7 +211,7 @@ export default function SettingsScreen() {
   useEffect(() => {
     const key = notificationStorageKey(user?.id)
     if (!loading && key) void AsyncStorage.setItem(key, JSON.stringify(notifications))
-  }, [loading, notifications])
+  }, [loading, notifications, user?.id])
   const toggleSafetyNotification = async (key: SafetyNotificationPreference, value: boolean) => {
     setSafetyNotifications((current) => ({ ...current, [key]: value }))
     try {
