@@ -11,7 +11,13 @@ export async function GET(request: Request) {
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(new URL('/login?error=drive_auth', url.origin))
-  if (!code || !state || storedState !== state || !verifyOAuthState(state, user.id)) return NextResponse.redirect(new URL('/settings?drive=error', url.origin))
+  if (!code || !state || storedState !== state) return NextResponse.redirect(new URL('/settings?drive=error', url.origin))
+  try {
+    if (!verifyOAuthState(state, user.id)) return NextResponse.redirect(new URL('/settings?drive=error', url.origin))
+  } catch (error) {
+    console.error('[drive] callback state verification failed', error instanceof Error ? error.message : 'unknown')
+    return NextResponse.redirect(new URL('/settings?drive=error', url.origin))
+  }
   try {
     await saveConnection(user.id, await exchangeCode(code))
     const response = NextResponse.redirect(new URL('/settings?drive=connected', url.origin))
