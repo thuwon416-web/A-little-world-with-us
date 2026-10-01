@@ -77,12 +77,6 @@ function toPlan(plan: PlanRecord, items: PlanItemRecord[]): Plan {
   }
 }
 
-const bucketList = [
-  'Watch the sunrise together in a new city',
-  'Take a road trip with no itinerary',
-  'Create a mini home gallery wall',
-]
-
 function PlanCard({ plan, onToggleItem }: { readonly plan: Plan; readonly onToggleItem: (planId: string, itemId: string) => void }) {
   const doneCount = plan.items.filter((item) => item.done).length
   const planProgress = plan.items.length ? Math.round((doneCount / plan.items.length) * 100) : 0
@@ -200,6 +194,8 @@ function PlanCreationModal({
 export default function PlansPage() {
   const fieldId = useId()
   const [plans, setPlans] = useState<Plan[]>([])
+  const [bucketList, setBucketList] = useState<{ id: string; item: string; completed: boolean }[]>([])
+  const [newBucketItem, setNewBucketItem] = useState('')
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [coupleId, setCoupleId] = useState<string | null>(null)
@@ -243,6 +239,13 @@ export default function PlansPage() {
         }
         if (active) setCoupleId(coupleData.couple_id)
 
+        const { data: bucketData, error: bucketError } = await supabase
+          .from('bucket_list')
+          .select('id,item,completed')
+          .eq('couple_id', coupleData.couple_id)
+          .order('created_at', { ascending: false })
+        if (bucketError) throw bucketError
+
         const { data: plansData, error: plansError } = await supabase
           .from('plans')
           .select('*')
@@ -264,7 +267,10 @@ export default function PlansPage() {
         const plansWithItems = (plansData ?? [])
           .filter(isPlanRecord)
           .map((plan) => toPlan(plan, itemsData))
-        if (active) setPlans(plansWithItems)
+        if (active) {
+          setPlans(plansWithItems)
+          setBucketList((bucketData ?? []) as { id: string; item: string; completed: boolean }[])
+        }
       } catch (error_) {
         if (active) setLoadError(error_ instanceof Error ? error_.message : 'Unable to load shared plans.')
       } finally {
@@ -279,6 +285,7 @@ export default function PlansPage() {
       .channel('plans-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'plans' }, () => void fetchPlans())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'plan_items' }, () => void fetchPlans())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'bucket_list' }, () => void fetchPlans())
       .subscribe()
 
     return () => {
@@ -324,6 +331,45 @@ export default function PlansPage() {
     if (error) {
       console.error('Failed to toggle item:', error)
     }
+  }
+
+  const toggleBucketItem = async (id: string, completed: boolean): Promise<void> => {
+    const previous = bucketList
+    setBucketList((current) => current.map((item) => item.id === id ? { ...item, completed } : item))
+    const { error } = await supabase
+      .from('bucket_list')
+      .update({ completed })
+      .eq('id', id)
+      .eq('couple_id', coupleId)
+    if (error) {
+      setBucketList(previous)
+      setLoadError(error.message)
+    }
+  }
+
+  const addBucketItem = async (): Promise<void> => {
+    const value = newBucketItem.trim()
+    if (!coupleId || !value) return
+    if (value.length > 100) {
+      setLoadError('Bucket list items must be 100 characters or fewer.')
+      return
+    }
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) {
+      setLoadError(userError?.message ?? 'Please sign in to add a bucket list item.')
+      return
+    }
+    const { data, error } = await supabase
+      .from('bucket_list')
+      .insert({ couple_id: coupleId, user_id: user.id, item: value, completed: false })
+      .select('id,item,completed')
+      .single()
+    if (error) {
+      setLoadError(error.message)
+      return
+    }
+    setBucketList((current) => [data as { id: string; item: string; completed: boolean }, ...current])
+    setNewBucketItem('')
   }
 
   const createPlan = async (): Promise<void> => {
@@ -443,13 +489,31 @@ export default function PlansPage() {
                 <Sparkles className="h-5 w-5" />
                 <span className="text-sm font-medium">Bucket list</span>
               </div>
-              <ul className="mt-4 space-y-3 text-sm text-text-1">
-                {bucketList.map((item) => (
-                  <li key={item} className="rounded-btn bg-card px-3 py-2">
-                    {item}
-                  </li>
-                ))}
-              </ul>
+              <form className="mt-4 flex gap-2" onSubmit={(event) => { event.preventDefault(); void addBucketItem() }}>
+                <input
+                  value={newBucketItem}
+                  onChange={(event) => setNewBucketItem(event.target.value)}
+                  maxLength={100}
+                  placeholder="Add a shared dream"
+                  className="min-w-0 flex-1 rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
+                />
+                <button type="submit" disabled={!coupleId || !newBucketItem.trim()} className="rounded-btn bg-accent-1 px-3 py-2 text-sm text-white disabled:opacity-50">Add</button>
+              </form>
+              {bucketList.length ? (
+                <ul className="mt-4 space-y-2 text-sm text-text-1">
+                  {bucketList.map((item) => (
+                    <li key={item.id} className="flex items-center gap-3 rounded-btn bg-card px-3 py-2">
+                      <button
+                        type="button"
+                        onClick={() => void toggleBucketItem(item.id, !item.completed)}
+                        className={item.completed ? 'h-5 w-5 rounded-full border border-success bg-success/20' : 'h-5 w-5 rounded-full border border-text-2'}
+                        aria-label={item.completed ? 'Mark bucket item incomplete' : 'Mark bucket item complete'}
+                      />
+                      <span className={item.completed ? 'text-text-2 line-through' : ''}>{item.item}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p className="mt-4 text-sm text-text-2">No shared bucket list items yet.</p>}
             </div>
           </div>
         </div>
