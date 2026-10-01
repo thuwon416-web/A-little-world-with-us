@@ -157,7 +157,7 @@ export default function PINLockWidget({
                   inputMode="numeric"
                   autoComplete="new-password"
                   value={pin}
-                  onChange={(e) => setPin(e.target.value)}
+                  onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   placeholder="- - - - "
                   maxLength={6}
@@ -172,7 +172,7 @@ export default function PINLockWidget({
                   inputMode="numeric"
                   autoComplete="new-password"
                   value={confirmPin}
-                  onChange={(e) => setConfirmPin(e.target.value)}
+                  onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                   placeholder="- - - - "
                   maxLength={6}
