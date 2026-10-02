@@ -116,9 +116,9 @@ export default function GallerySection() {
         })
       )).filter((item): item is GalleryItem => item !== null)
 
-      const galleryItems = [...legacyItems, ...driveItems].sort((a, b) =>
-        b.created_at.localeCompare(a.created_at)
-      )
+      const galleryItems: GalleryItem[] = [...legacyItems, ...driveItems]
+        .filter((item): item is GalleryItem => item !== null)
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
 
       setItems(galleryItems)
     } catch (error_) {
