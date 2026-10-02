@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useId } from 'react'
+import { createPortal } from 'react-dom'
 import { Bell, X, Calendar } from 'lucide-react'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { insertRow, readUserRows, deleteRow, getCurrentUserId, type Reminder } from '@/lib/supabase'
@@ -88,6 +89,30 @@ export default function RemindersWidget({
     await loadReminders()
   }
 
+  const modal = showAddModal ? (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/50 p-4 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-labelledby="add-reminder-title">
+      <div className="my-8 w-full max-w-md rounded-modal border border-accent-1/20 bg-card/95 p-6 shadow-2xl backdrop-blur-xl">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-text-2">Shared reminders</p>
+            <h3 id="add-reminder-title" className="mt-1 text-lg font-semibold text-text-1">Add Reminder</h3>
+          </div>
+          <button type="button" onClick={closeModal} className="rounded-full p-2 text-text-2 transition hover:bg-soft-tint hover:text-text-1" aria-label="Close add reminder">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        <div className="space-y-3">
+          <div><label htmlFor={`${fieldId}-title`} className="text-sm font-medium text-text-1">Title *</label><input id={`${fieldId}-title`} type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" placeholder="e.g., Anniversary" autoFocus /></div>
+          <div><label htmlFor={`${fieldId}-description`} className="text-sm font-medium text-text-1">Description</label><textarea id={`${fieldId}-description`} value={newDescription} onChange={(e) => setNewDescription(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" placeholder="Additional notes..." rows={2} /></div>
+          <div><label htmlFor={`${fieldId}-date`} className="text-sm font-medium text-text-1">Date *</label><input id={`${fieldId}-date`} type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" /></div>
+          <div><label htmlFor={`${fieldId}-type`} className="text-sm font-medium text-text-1">Type</label><select id={`${fieldId}-type`} value={newType} onChange={(event) => { const value = REMINDER_TYPES.find((type) => type === event.target.value); if (value) setNewType(value) }} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"><option value="custom">Custom</option><option value="anniversary">Anniversary</option><option value="birthday">Birthday</option><option value="cycle">Cycle</option><option value="medication">Medication</option></select></div>
+          <div><label htmlFor={`${fieldId}-repeat`} className="text-sm font-medium text-text-1">Repeat</label><select id={`${fieldId}-repeat`} value={newRepeat} onChange={(event) => { const value = REPEAT_INTERVALS.find((interval) => interval === event.target.value); if (value) setNewRepeat(value) }} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"><option value="once">Once</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></div>
+          <button type="button" onClick={handleAdd} disabled={!newTitle.trim() || !newDate} className="w-full rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50">Add Reminder</button>
+        </div>
+      </div>
+    </div>
+  ) : null
+
   return (
     <div className="glass-card p-5">
       <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
@@ -147,108 +172,8 @@ export default function RemindersWidget({
         Add Reminder
       </button>
 
-      {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="glass-card p-6 max-w-md w-full mx-4">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text-1">
-                Add Reminder
-              </h3>
-              <button onClick={closeModal} className="text-text-2" aria-label="Close add reminder">
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+      {typeof document !== 'undefined' && modal ? createPortal(modal, document.body) : null}
 
-            <div className="space-y-3">
-              <div>
-                <label htmlFor={`${fieldId}-title`} className="text-sm text-text-2">Title *</label>
-                <input
-                  id={`${fieldId}-title`}
-                  type="text"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
-                  placeholder="e.g., Anniversary"
-                />
-              </div>
-
-              <div>
-                <label htmlFor={`${fieldId}-description`} className="text-sm text-text-2">Description</label>
-                <textarea
-                  id={`${fieldId}-description`}
-                  value={newDescription}
-                  onChange={(e) => setNewDescription(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
-                  placeholder="Additional notes..."
-                  rows={2}
-                />
-              </div>
-
-              <div>
-                <label htmlFor={`${fieldId}-date`} className="text-sm text-text-2">Date *</label>
-                <input
-                  id={`${fieldId}-date`}
-                  type="date"
-                  value={newDate}
-                  onChange={(e) => setNewDate(e.target.value)}
-                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
-                />
-              </div>
-
-              <div>
-                <label htmlFor={`${fieldId}-type`} className="text-sm text-text-2">Type</label>
-                <select
-                  id={`${fieldId}-type`}
-                  value={newType}
-                  onChange={(event) => {
-                    const value = REMINDER_TYPES.find((type) => type === event.target.value)
-                    if (value) {
-                      setNewType(value)
-                    }
-                  }}
-                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
-                >
-                  <option value="custom">Custom</option>
-                  <option value="anniversary">Anniversary</option>
-                  <option value="birthday">Birthday</option>
-                  <option value="cycle">Cycle</option>
-                  <option value="medication">Medication</option>
-                </select>
-              </div>
-
-              <div>
-                <label htmlFor={`${fieldId}-repeat`} className="text-sm text-text-2">Repeat</label>
-                <select
-                  id={`${fieldId}-repeat`}
-                  value={newRepeat}
-                  onChange={(event) => {
-                    const value = REPEAT_INTERVALS.find((interval) => interval === event.target.value)
-                    if (value) {
-                      setNewRepeat(value)
-                    }
-                  }}
-                  className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
-                >
-                  <option value="once">Once</option>
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="yearly">Yearly</option>
-                </select>
-              </div>
-
-              <button
-                onClick={handleAdd}
-                disabled={!newTitle.trim() || !newDate}
-                className="w-full rounded-xl bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
-              >
-                Add Reminder
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
