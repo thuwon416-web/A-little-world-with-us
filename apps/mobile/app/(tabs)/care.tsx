@@ -1292,8 +1292,6 @@ export default function CareScreen() {
           setPeriodLength={setPeriodLength}
           lastPeriodStart={lastPeriodStart}
           setLastPeriodStart={setLastPeriodStart}
-          shareCycle={shareCycle}
-          setShareCycle={setShareCycle}
           onSave={() => void saveSettings()}
           onExport={() => void exportData()}
         />
