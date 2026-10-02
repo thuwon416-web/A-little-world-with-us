@@ -135,7 +135,7 @@ export default function PINLockWidget({
               inputMode="numeric"
               autoComplete="new-password"
               value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\\D/g, '').slice(0, 6))}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
               className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-base tracking-[0.35em] text-text-1 outline-none transition focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"
               placeholder="••••"
               maxLength={6}
@@ -151,7 +151,7 @@ export default function PINLockWidget({
               inputMode="numeric"
               autoComplete="new-password"
               value={confirmPin}
-              onChange={(e) => setConfirmPin(e.target.value.replace(/\\D/g, '').slice(0, 6))}
+              onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
               className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-base tracking-[0.35em] text-text-1 outline-none transition focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"
               placeholder="••••"
               maxLength={6}
@@ -165,7 +165,7 @@ export default function PINLockWidget({
           <button
             type="button"
             onClick={handleSetPIN}
-            disabled={!/^\\d{4,6}$/.test(pin) || pin !== confirmPin}
+            disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin}
             className="w-full rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
           >
             Set PIN
