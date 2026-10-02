@@ -35,6 +35,7 @@ import {
   buildNativeCycleHistory,
   calculateNativeCycleSummary,
   dateKey,
+  periodStarts,
   type NativeCycleSummary,
 } from '@/services/cycleCalculator'
 
@@ -766,6 +767,8 @@ function TodayCareTab({
   const daysUntil = summary.nextPeriodStart
     ? Math.ceil((new Date(`${summary.nextPeriodStart}T12:00:00`).getTime() - Date.now()) / 86400000)
     : null
+  const hasMultiplePeriods = periodStarts(logs.map((log) => ({ log_date: log.logDate, period_day: log.periodDay }))).length >= 2
+  const canCallLate = daysUntil !== null && daysUntil < 0 && summary.regular && hasMultiplePeriods
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.eyebrow}>CYCLE CARE · SHARED WITH YOUR PARTNER</Text>
@@ -780,7 +783,7 @@ function TodayCareTab({
               ? `Period in ${daysUntil} days`
               : daysUntil === 0
                 ? 'Period expected today'
-                : `Period late by ${Math.abs(daysUntil)} days`}
+                : canCallLate ? `Period late by ${Math.abs(daysUntil)} days` : 'Period estimate passed'}
         </Text>
         <Text style={styles.heroFertility}>
           {summary.fertilityStatus === 'higher'
@@ -792,9 +795,9 @@ function TodayCareTab({
         <Text style={styles.heroDisclaimer}>Calendar estimate only — not contraception or medical advice.</Text>
         {((daysUntil !== null && daysUntil < 0) || !summary.regular) ? (
           <Text style={styles.heroWarning}>
-            {daysUntil !== null && daysUntil < 0
+            {canCallLate
               ? 'Your period is later than the current estimate; a new logged period will update the next prediction.'
-              : 'Recent cycles vary, so this estimate may be less accurate.'}
+              : 'The calendar estimate has passed or recent cycles vary, so the estimate may move when a new period is logged.'}
           </Text>
         ) : null}
       </View>
