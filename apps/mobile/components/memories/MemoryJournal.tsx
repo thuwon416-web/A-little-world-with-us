@@ -165,10 +165,22 @@ export default function MemoryJournal() {
         onPress: () =>
           void (async () => {
             try {
-              if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
-                await deleteSharedDriveFile(memory.drive_file_id)
-              }
+              // Remove the database record first so a failed Drive request cannot leave
+              // a visible memory pointing at a missing remote file.
               await deleteMemory(memory.id)
+              if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
+                try {
+                  await deleteSharedDriveFile(memory.drive_file_id)
+                } catch (driveError) {
+                  // The memory is already removed locally; report the remote cleanup
+                  // separately instead of restoring a broken memory record.
+                  throw new Error(
+                    driveError instanceof Error
+                      ? `Memory removed, but Google Drive cleanup failed: ${driveError.message}`
+                      : 'Memory removed, but Google Drive cleanup failed.'
+                  )
+                }
+              }
               setMemories((current) => current.filter((item) => item.id !== memory.id))
             } catch (error_) {
               setError(error_ instanceof Error ? error_.message : 'Unable to delete memory.')
