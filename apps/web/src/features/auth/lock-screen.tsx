@@ -117,7 +117,7 @@ export default function LockScreen({ onUnlock }: LockScreenProps) {
           angle: (i / 24) * Math.PI * 2,
           distance: 120 + getRandomFraction() * 100,
           size: 6 + getRandomFraction() * 14,
-          rotate: p.rotate,
+          rotate: getRandomFraction() * 360,
         }))
         setParticles(newParticles)
         setUnlocking(true)
