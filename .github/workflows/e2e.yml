@@ -14,8 +14,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      # Public client-side Supabase values; no privileged/service-role key is used here.
+      NEXT_PUBLIC_SUPABASE_URL: https://mktfnwdvzbdrxfcvnolp.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_1zO9YFTLhyoQGgKY-72JuQ_35kPRj_Y
 
     steps:
       - name: Checkout code
@@ -42,9 +43,11 @@ jobs:
             echo "available=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Warn when E2E secrets are missing
+      - name: Fail when E2E environment is unavailable
         if: steps.e2e_env.outputs.available != 'true'
-        run: echo "::warning::Skipping Playwright tests because Supabase E2E secrets are not configured."
+        run: |
+          echo "::error::E2E environment is unavailable."
+          exit 1
 
       - name: Install Playwright browsers
         if: steps.e2e_env.outputs.available == 'true'
