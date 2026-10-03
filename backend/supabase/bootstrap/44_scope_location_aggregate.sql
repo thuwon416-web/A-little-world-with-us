@@ -14,3 +14,5 @@ join public.couple_links cl
  and ((select auth.uid()) = cl.inviter_id or (select auth.uid()) = cl.accepted_by)
 where lh.captured_at > now() - interval '7 days'
 group by 1,2;
+
+alter view public.location_history_aggregated set (security_invoker = true);
