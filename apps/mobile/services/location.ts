@@ -43,6 +43,20 @@ const MOVING_INTERVAL_MS = 30_000
 const STATIONARY_INTERVAL_MS = 5 * 60_000
 const MOVING_DISTANCE_METERS = 30
 const STATIONARY_SPEED_MPS = 0.8
+const LOW_BATTERY_THRESHOLD = 0.25
+
+async function chooseLocationCadence() {
+  const [batteryLevel, batteryState] = await Promise.all([
+    Battery.getBatteryLevelAsync(),
+    Battery.getBatteryStateAsync(),
+  ])
+  const isCharging =
+    batteryState === Battery.BatteryState.CHARGING || batteryState === Battery.BatteryState.FULL
+  if (batteryLevel >= 0 && batteryLevel < LOW_BATTERY_THRESHOLD && !isCharging) {
+    return { movingInterval: 2 * 60_000, stationaryInterval: 15 * 60_000 }
+  }
+  return { movingInterval: MOVING_INTERVAL_MS, stationaryInterval: STATIONARY_INTERVAL_MS }
+}
 
 let foregroundSubscription: Location.LocationSubscription | null = null
 let lastSharedAt = 0
@@ -223,11 +237,12 @@ export async function startLocationTracking(onUpdate?: (point: LocationPoint) =>
   }
   await AsyncStorage.setItem(SHARING_KEY, 'true')
   await saveStatus({ enabled: true, permission: 'granted' })
+  const { movingInterval, stationaryInterval } = await chooseLocationCadence()
   foregroundSubscription?.remove()
   foregroundSubscription = await Location.watchPositionAsync(
     {
       accuracy: Location.Accuracy.Balanced,
-      timeInterval: MOVING_INTERVAL_MS,
+      timeInterval: movingInterval,
       distanceInterval: MOVING_DISTANCE_METERS,
     },
     (location) => {
@@ -239,14 +254,13 @@ export async function startLocationTracking(onUpdate?: (point: LocationPoint) =>
   if (!(await Location.hasStartedLocationUpdatesAsync(TASK_NAME))) {
     await Location.startLocationUpdatesAsync(TASK_NAME, {
       accuracy: Location.Accuracy.Balanced,
-      timeInterval: MOVING_INTERVAL_MS,
+      timeInterval: movingInterval,
       distanceInterval: MOVING_DISTANCE_METERS,
-      deferredUpdatesInterval: STATIONARY_INTERVAL_MS,
+      deferredUpdatesInterval: stationaryInterval,
       deferredUpdatesDistance: MOVING_DISTANCE_METERS,
       activityType: Location.ActivityType.Other,
-      // Keep updates running even when device is stationary
-      // Required for always-on partner location sharing
-      pausesUpdatesAutomatically: false,
+      // Let iOS/Android pause background updates when stationary to reduce battery drain.
+      pausesUpdatesAutomatically: true,
       showsBackgroundLocationIndicator: true,
       foregroundService: {
         notificationTitle: 'Location sharing is active',
