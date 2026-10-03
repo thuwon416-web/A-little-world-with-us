@@ -16,6 +16,7 @@ import { Alert, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
+import { Card } from '@/components/ui/Card'
 import { IncomingCall } from '@/components/IncomingCall'
 import { Input } from '@/components/Input'
 import { FileUpload } from '@/components/chat/FileUpload'
