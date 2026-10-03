@@ -93,7 +93,8 @@ function dateOnly(value: Date) {
   return new Date(value.getFullYear(), value.getMonth(), value.getDate())
 }
 
-function daysUntil(value: string) {
+function daysUntil(value: string | null) {
+  if (!value) return null
   return Math.ceil(
     (dateOnly(new Date(`${value}T12:00:00`)).getTime() - dateOnly(new Date()).getTime()) / 86400000
   )
