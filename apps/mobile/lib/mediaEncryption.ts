@@ -4,6 +4,7 @@ import * as FileSystem from 'expo-file-system/legacy'
 
 import { deriveChatKey } from './chatEncryption'
 import { supabase } from './supabase'
+import { evictMediaCache } from './cache'
 
 const MEDIA_VERSION = 2
 const IV_LENGTH = 12
@@ -51,7 +52,7 @@ async function getPersistentCachePath(key: string, extension: string) {
     Crypto.CryptoDigestAlgorithm.SHA256,
     key
   )
-  const directory = FileSystem.documentDirectory ?? FileSystem.cacheDirectory
+  const directory = FileSystem.cacheDirectory ?? FileSystem.documentDirectory
   if (!directory) throw new Error('Local media storage is unavailable.')
   const cacheDir = `${directory}media-cache/`
   await FileSystem.makeDirectoryAsync(cacheDir, { intermediates: true })
@@ -93,6 +94,7 @@ export async function downloadDecryptAndCache(
     }
   )
 
+  await evictMediaCache()
   return `file://${cachePath}`
 }
 
@@ -128,6 +130,7 @@ export async function downloadDriveMemoryAndCache(
     arrayBufferToBase64(bytes.buffer),
     { encoding: FileSystem.EncodingType.Base64 }
   )
+  await evictMediaCache()
   return `file://${cachePath}`
 }
 
