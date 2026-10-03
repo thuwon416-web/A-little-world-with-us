@@ -1,4 +1,5 @@
 ﻿import type { Metadata, Viewport } from 'next'
+import dynamic from 'next/dynamic'
 import { Inter, Playfair_Display } from 'next/font/google'
 
 import './globals.css'
@@ -6,8 +7,8 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { Toaster } from '@/components/ui/sonner'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
-import AIChatWidget from '@/components/AIChatWidget'
-import { SpeedInsights } from '@vercel/speed-insights/next'
+const AIChatWidget = dynamic(() => import('@/components/AIChatWidget'), { ssr: false })
+const SpeedInsights = dynamic(() => import('@vercel/speed-insights/next').then((mod) => mod.SpeedInsights), { ssr: false })
 import { QueryProvider } from '@/components/QueryProvider'
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 
