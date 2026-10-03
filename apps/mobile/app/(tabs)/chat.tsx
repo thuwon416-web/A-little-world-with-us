@@ -660,7 +660,10 @@ export default function ChatScreen() {
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
-      <Text style={styles.title}>Chat</Text>
+      <Card style={styles.headerCard}>
+        <Text style={styles.title}>Chat</Text>
+        <Text style={styles.subtitle}>Your private conversation, kept in sync.</Text>
+      </Card>
       <IncomingCall
         visible={callState === 'ringing' && Boolean(incomingSignal)}
         signal={incomingSignal}
@@ -944,7 +947,9 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       paddingHorizontal: 20,
       paddingBottom: 20,
     },
-    title: {
+    headerCard: { marginBottom: 8 },
+  subtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+  title: {
       color: colors.textPrimary,
       fontSize: sizes.text.hLg,
       fontWeight: '700',
