@@ -1,8 +1,9 @@
 import { Q } from '@nozbe/watermelondb'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { randomUUID } from 'expo-crypto'
 
 import { database } from '@/database'
-import { MessageModel, OfflineQueueModel } from '@/database/schema'
+import { MessageModel, OfflineOpModel, OfflineQueueModel } from '@/database/schema'
 import { isSupabaseConfigured, supabase } from '@/lib/supabase'
 import type { ChatMessage } from '@/shared-types'
 
@@ -24,6 +25,7 @@ type MessageFields = {
   edited_at: string | null
   deleted_at: string | null
   transcript: string | null
+  sync_version: number | null
 }
 type LocalMessage = MessageModel & MessageFields & { _get<T>(column: string): T }
 
@@ -111,7 +113,14 @@ export async function pushPendingMessages() {
       transcript: rawMessage._get('transcript') || null,
     }
 
-    const { error } = await supabase.from('messages').upsert(payload).select()
+    const { data: result, error } = await supabase.rpc('apply_offline_op', {
+      p_op_id: rawMessage.id,
+      p_operation: 'CREATE',
+      p_table_name: 'messages',
+      p_row_id: rawMessage.id,
+      p_base_version: 0,
+      p_payload: payload,
+    }).single()
 
     if (error) {
       failures.push(error.message)
@@ -122,6 +131,7 @@ export async function pushPendingMessages() {
       await rawMessage.update((record) => {
         const fields = record as unknown as MessageFields
         fields.synced = true
+        fields.sync_version = result?.current_version ?? 1
       })
     })
   }
@@ -221,6 +231,7 @@ async function performSyncMessages() {
             fields.edited_at = remoteMessage.edited_at ?? null
             fields.deleted_at = remoteMessage.deleted_at ?? null
             fields.transcript = remoteMessage.transcript ?? null
+            fields.sync_version = (remoteMessage as ChatMessage & { sync_version?: number }).sync_version ?? 1
           })
         } else {
           const localSynced = localMessage._get<boolean>('synced')
@@ -251,6 +262,7 @@ async function performSyncMessages() {
               fields.edited_at = remoteMessage.edited_at ?? fields.edited_at
               fields.deleted_at = remoteMessage.deleted_at ?? fields.deleted_at
               fields.transcript = remoteMessage.transcript ?? fields.transcript
+              fields.sync_version = (remoteMessage as ChatMessage & { sync_version?: number }).sync_version ?? fields.sync_version
             })
         }
       }
@@ -281,6 +293,65 @@ export function syncMessages() {
     syncInFlight = null
   })
   return syncInFlight
+}
+
+export async function queueOfflineOperation(input: {
+  operation: 'CREATE' | 'PATCH' | 'DELETE'
+  tableName: 'messages'
+  rowId: string
+  baseVersion: number
+  payload: Record<string, unknown>
+  opId?: string
+}) {
+  const opId = input.opId ?? randomUUID()
+  await database.write(async () => {
+    await database.get<OfflineOpModel>('offline_ops').create((record) => {
+      record.op_id = opId
+      record.operation = input.operation
+      record.table_name = input.tableName
+      record.row_id = input.rowId
+      record.base_version = input.baseVersion
+      record.payload = JSON.stringify(input.payload)
+      record.retry_count = 0
+      record.created_at = Date.now()
+    })
+  })
+  return opId
+}
+
+export async function flushOfflineOperations() {
+  if (!isSupabaseConfigured) return { applied: 0, conflicts: 0 }
+  const queue = await database.get<OfflineOpModel>('offline_ops').query().fetch()
+  let applied = 0
+  let conflicts = 0
+
+  for (const item of queue) {
+    try {
+      const { data, error } = await supabase.rpc('apply_offline_op', {
+        p_op_id: item.op_id,
+        p_operation: item.operation,
+        p_table_name: item.table_name,
+        p_row_id: item.row_id,
+        p_base_version: item.base_version,
+        p_payload: JSON.parse(item.payload),
+      }).single()
+      if (error) throw error
+      if (data?.conflict) {
+        conflicts += 1
+        continue
+      }
+      await database.write(async () => item.markAsDeleted())
+      applied += 1
+    } catch {
+      await database.write(async () => {
+        await item.update((updated) => {
+          updated.retry_count += 1
+        })
+      })
+    }
+  }
+
+  return { applied, conflicts }
 }
 
 export async function flushOfflineQueue() {
