@@ -1,17 +1,17 @@
 export const designTokens = {
   colors: {
-    primary: '#c5a8e8',
-    secondary: '#e0c8f0',
-    accent: '#d4b8e8',
-    background: '#1a1525',
-    surface: '#252033',
-    surfaceAlt: '#3d3450',
-    text: '#f0e8f5',
-    muted: '#c4b8d4',
-    border: '#3d3450',
+    primary: '#7d5ca8',
+    secondary: '#bca0d4',
+    accent: '#dcc8e8',
+    background: '#f3ecfa',
+    surface: '#ffffff',
+    surfaceAlt: '#fbf7fe',
+    text: '#4a3860',
+    muted: '#6b5284',
+    border: '#ddc8ea',
     success: '#a8d4b8',
     warning: '#f0d4a0',
-    danger: '#e8a8a8',
+    danger: '#b65f67',
   },
   typography: {
     xs: { fontSize: 11, lineHeight: 16, fontWeight: '500' },
@@ -148,10 +148,17 @@ export const themes = {
 } as const
 
 export const semantic = {
-  success: '#85c99a',
-  warning: '#e0c078',
-  errorLight: '#d08a8a',
-  errorDark: '#d88888',
+  success: '#5f9f76',
+  warning: '#a87932',
+  errorLight: '#c97b83',
+  errorDark: '#b65f67',
+  surface: '#ffffff',
+  surfaceSoft: '#fbf7fe',
+  surfaceTint: '#f5eefA',
+  text: '#4a3860',
+  textMuted: '#6b5284',
+  border: '#ddc8ea',
+  borderSoft: '#e8ddf3',
 } as const
 
 export const sizes = {
