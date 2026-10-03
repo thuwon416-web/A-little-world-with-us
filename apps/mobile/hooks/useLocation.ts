@@ -89,11 +89,8 @@ export function useLocation() {
     void refreshSharingStatus()
     void refreshCurrentLocation()
 
-    const intervalId = setInterval(() => {
-      void refreshCurrentLocation()
-    }, 30000)
-
-    return () => clearInterval(intervalId)
+    // Location updates are driven by Expo background/foreground subscriptions.
+    // Avoid a fixed 30-second polling loop that keeps the JS runtime awake.
   }, [refreshCurrentLocation, refreshSharingStatus])
 
   useEffect(() => {
