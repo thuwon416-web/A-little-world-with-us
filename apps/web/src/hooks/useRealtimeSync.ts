@@ -24,6 +24,8 @@ export function useRealtimeSync<T extends RowWithTimestamps>({
   onChange,
 }: RealtimeSyncConfig<T>) {
   const lastUpdatedAtRef = useRef<string | null>(null)
+  const pendingChangeRef = useRef<{ row: T; eventType: RealtimeEvent } | null>(null)
+  const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -54,7 +56,14 @@ export function useRealtimeSync<T extends RowWithTimestamps>({
       }
 
       lastUpdatedAtRef.current = nextUpdatedAt
-      onChange(row, payload.eventType ?? event)
+      pendingChangeRef.current = { row, eventType: payload.eventType ?? event }
+      if (flushTimerRef.current) return
+      flushTimerRef.current = setTimeout(() => {
+        flushTimerRef.current = null
+        const pending = pendingChangeRef.current
+        pendingChangeRef.current = null
+        if (pending) onChange(pending.row, pending.eventType)
+      }, 200)
     }
 
     const subscriptionConfig: {
@@ -76,6 +85,9 @@ export function useRealtimeSync<T extends RowWithTimestamps>({
     void channel.subscribe()
 
     return () => {
+      if (flushTimerRef.current) clearTimeout(flushTimerRef.current)
+      flushTimerRef.current = null
+      pendingChangeRef.current = null
       supabase.removeChannel(channel)
     }
   }, [table, filter, event, onChange])
