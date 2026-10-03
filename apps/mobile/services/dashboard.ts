@@ -6,6 +6,8 @@ import type { PlaylistSong } from '@/services/music'
 
 export type DashboardData = {
   coupleId: string
+  coupleName: string
+  anniversary: string | null
   messageCount: number
   memoryCount: number
   vaultCount: number
@@ -58,7 +60,7 @@ function longestConsecutiveDays(values: string[]) {
 
 export async function getDashboardData(): Promise<DashboardData> {
   const coupleId = await getCoupleId()
-  const [
+  const [{ data: couple, error: coupleError },
     { count: messageCount, error: messagesError },
     { count: memoryCount, error: memoriesError },
     { count: vaultCount, error: vaultError },
@@ -66,6 +68,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     { data: memories, error: memoryError },
     { data: playlist, error: playlistError },
   ] = await Promise.all([
+    supabase.from('couples').select('name,anniversary').eq('id', coupleId).maybeSingle(),
     supabase
       .from('messages')
       .select('id', { count: 'exact', head: true })
@@ -97,6 +100,7 @@ export async function getDashboardData(): Promise<DashboardData> {
       .order('created_at')
       .limit(1),
   ])
+  if (coupleError) throw coupleError
   if (messagesError) throw messagesError
   if (memoriesError) throw memoriesError
   if (vaultError) throw vaultError
@@ -109,6 +113,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     : null
   return {
     coupleId,
+    coupleName: couple?.name?.trim() || 'Our World',
+    anniversary: couple?.anniversary ?? null,
     messageCount: messageCount ?? 0,
     memoryCount: memoryCount ?? 0,
     vaultCount: vaultCount ?? 0,
