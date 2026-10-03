@@ -6,6 +6,7 @@ import { z } from 'zod'
 import { AIProviderError, generateAiResponse, isAiProvider } from '@/lib/ai/providers'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { checkAiUsageLimit, checkRateLimit } from '@/lib/rate-limit'
+import { sanitizeAiUserPrompt } from '@/lib/ai/sanitize'
 
 const chatSchema = z.object({
   message: z.string().min(1).max(1000),
@@ -40,6 +41,8 @@ export async function POST(req: NextRequest) {
     }
 
     const validated = chatSchema.parse(await req.json())
+    const sanitizedMessage = sanitizeAiUserPrompt(validated.message)
+    if (!sanitizedMessage) return NextResponse.json({ error: 'Invalid input' }, { status: 400 })
     const usageLimit = await checkAiUsageLimit(user.id, 75)
     if (!usageLimit.allowed) {
       return NextResponse.json(
@@ -62,7 +65,7 @@ export async function POST(req: NextRequest) {
       provider,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: validated.message },
+        { role: 'user', content: sanitizedMessage },
       ],
       maxTokens: 500,
     })
@@ -71,7 +74,7 @@ export async function POST(req: NextRequest) {
       endpoint: 'chat',
       provider: result.provider,
       status: 'success',
-      promptLength: systemPrompt.length + validated.message.length,
+      promptLength: systemPrompt.length + sanitizedMessage.length,
       responseLength: result.content.length,
     })
 
