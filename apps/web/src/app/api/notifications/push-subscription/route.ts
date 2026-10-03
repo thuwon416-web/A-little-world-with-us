@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     const input = subscriptionSchema.parse(await req.json())
     const { error } = await supabase.from('web_push_subscriptions').upsert(
-      { user_id: user.id, endpoint: input.endpoint, subscription: input },
+      { user_id: user.id, endpoint: input.endpoint, subscription: input, last_seen: new Date().toISOString(), invalidated: false },
       { onConflict: 'endpoint' }
     )
     if (error) {
