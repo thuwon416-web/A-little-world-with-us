@@ -57,12 +57,13 @@ export function addDays(value: string, amount: number) {
   return `${String(result.getUTCFullYear()).padStart(4, '0')}-${String(result.getUTCMonth() + 1).padStart(2, '0')}-${String(result.getUTCDate()).padStart(2, '0')}`
 }
 
-function daysBetween(start: string, end: string) {
+export function calendarDaysBetween(start: string, end: string) {
   const startDate = parseDate(start)
   const endDate = parseDate(end)
   if (!startDate || !endDate) throw new RangeError('Valid date-only values are required.')
   return Math.round((endDate.getTime() - startDate.getTime()) / 86400000)
 }
+const daysBetween = calendarDaysBetween
 
 function validPastDate(value: string | null, today: string) {
   return value && parseDate(value) && value <= today ? value : null

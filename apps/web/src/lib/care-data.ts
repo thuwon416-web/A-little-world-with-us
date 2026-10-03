@@ -35,12 +35,13 @@ export const addDays = (value: string, amount: number) => {
   if (!date || !Number.isInteger(amount)) throw new RangeError('A valid date and whole number of days are required.')
   return utcDateKey(new Date(date.getTime() + amount * 86400000))
 }
-const daysBetween = (start: string, end: string) => {
+export const calendarDaysBetween = (start: string, end: string) => {
   const startDate = parseDateOnly(start)
   const endDate = parseDateOnly(end)
   if (!startDate || !endDate) throw new RangeError('Valid date-only values are required.')
   return Math.round((endDate.getTime() - startDate.getTime()) / 86400000)
 }
+const daysBetween = calendarDaysBetween
 const validPastDate = (value: string | null, today: string) =>
   value && parseDateOnly(value) && value <= today ? value : null
 const validCycleLength = (value: number) =>

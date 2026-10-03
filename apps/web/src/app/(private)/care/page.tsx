@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, Bell, CalendarDays, ChevronDown, ChevronUp, Droplet, Heart, Plus, Settings2, Sparkles, X } from 'lucide-react'
-import { addDays, calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, getPeriodForecastLabel, periodStarts, saveCareLog, saveCareReminder, saveCycleSettings, savePeriodDates, type CareDraft, type CareLog, type CareReminder, type CycleHistoryEntry, type CycleSettings } from '@/lib/care-data'
+import { addDays, calendarDaysBetween, calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, getPeriodForecastLabel, periodStarts, saveCareLog, saveCareReminder, saveCycleSettings, savePeriodDates, type CareDraft, type CareLog, type CareReminder, type CycleHistoryEntry, type CycleSettings } from '@/lib/care-data'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { supabase } from '@/lib/supabase'
 
@@ -93,14 +93,10 @@ export default function CarePage() {
   </div>
 }
 
-function cycleDaysBetween(start: string, end: string) {
-  return Math.round((new Date(`${end}T12:00:00`).getTime() - new Date(`${start}T12:00:00`).getTime()) / 86400000)
-}
-
 function getPeriodRunLength(logs: CareLog[], startDate: string, endDate: string, fallback: number) {
   const periodDays = new Set(logs.filter((log) => log.period_day).map((log) => log.log_date))
   let length = 0
-  for (let offset = 0; offset <= cycleDaysBetween(startDate, endDate); offset += 1) {
+  for (let offset = 0; offset <= calendarDaysBetween(startDate, endDate); offset += 1) {
     if (!periodDays.has(addDays(startDate, offset))) break
     length += 1
   }
@@ -112,7 +108,7 @@ function buildAllCycleHistory(logs: CareLog[], summary: ReturnType<typeof calcul
   return starts.map((startDate, index) => {
     const nextStart = starts[index + 1] ?? (startDate === summary.lastPeriodStart ? summary.nextPeriodStart : null)
     const endDate = nextStart ? addDays(nextStart, -1) : startDate
-    const length = nextStart ? cycleDaysBetween(startDate, nextStart) : 0
+    const length = nextStart ? calendarDaysBetween(startDate, nextStart) : 0
     return {
       startDate,
       endDate,
@@ -147,7 +143,7 @@ function Today({ summary, onLogPeriod, onOpen, onInsights, onReminders, logs }: 
     <section className="glass-card relative overflow-hidden p-7 text-center"><div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgb(var(--accent-1)),transparent_55%)] opacity-15" /><div className="relative"><p className="text-xs font-semibold uppercase tracking-[0.22em] text-text-2">Today&apos;s cycle</p><h2 className="mt-3 text-5xl text-accent-2">{getPeriodForecastLabel(summary)}</h2><p className="mt-4 text-sm text-text-2">{getFertilityLabel(summary)} · calendar-based estimate, not contraception or medical advice</p>{(periodEstimatePassed || !summary.regular) && <p className="mt-2 text-xs text-warning">{summary.lateByDays > 0 ? 'This is beyond your recent cycle range; a new logged period will update the estimate.' : 'The estimate has passed or recent cycles vary, so the date may shift when a new period is logged.'}</p>}</div></section>
     <section className="grid grid-cols-3 gap-3">{actions.map(({ Icon, label, action }) => <button key={label} onClick={action} className="flex flex-col items-center gap-2 py-2 text-sm text-text-2"><span className="flex h-16 w-16 items-center justify-center rounded-full border border-accent-1/40 bg-card text-accent-1 shadow-[0_0_22px_color-mix(in_srgb,var(--accent-1)_25%,transparent)]"><Icon className="h-7 w-7" /></span>{label}</button>)}</section>
     <section><div className="mb-3 flex items-center justify-between"><h2 className="text-xl text-text-1">My daily insights</h2><button onClick={onInsights} className="text-sm text-accent-1">See all</button></div><div className="grid gap-3 md:grid-cols-2"><InfoCard title="Cycle day" body={summary.day ? `Day ${summary.day} of an estimated ${summary.cycleLength}-day cycle.` : 'Log your period to begin your estimate.'} /><InfoCard title="Shared check-in" body={logs.length ? `${logs.length} shared Care days recorded together.` : 'Your first shared check-in starts the timeline.'} /></div></section>
-    <section className="glass-card p-6"><div className="flex items-center justify-between"><h2 className="text-xl text-text-1">Cycle history</h2><button onClick={onInsights} className="text-sm text-accent-1">See all</button></div>{buildAllCycleHistory(logs, summary).slice(-3).reverse().map((cycle, index) => <div key={cycle.startDate} className="mt-5 border-b border-border/10 pb-4 last:border-0 last:pb-0"><div className="flex items-center justify-between gap-3"><div><p className="font-semibold text-text-1">{index === 0 ? 'Current cycle' : index === 1 ? 'Previous' : 'Previous 2'}</p><p className="text-sm text-text-2">{cycle.length} days · {formatDate(cycle.startDate)} – {formatDate(cycle.endDate)}</p></div><span className="text-xs text-text-2">Day {index === 0 && summary.day ? summary.day : '—'}</span></div><CycleStrip cycle={cycle} logs={logs} current={index === 0} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={cycle.status === 'actual' || summary.fertilityStatus !== 'uncertain'} /></div>)}<div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-text-2"><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-rose-500" />Period</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-success" />Fertile estimate</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full border border-white/50 bg-white" />Normal</span></div></section>
+    <section className="glass-card p-6"><div className="flex items-center justify-between"><h2 className="text-xl text-text-1">Cycle history</h2><button onClick={onInsights} className="text-sm text-accent-1">See all</button></div>{buildAllCycleHistory(logs, summary).slice(-3).reverse().map((cycle, index) => <div key={cycle.startDate} className="mt-5 border-b border-border/10 pb-4 last:border-0 last:pb-0"><div className="flex items-center justify-between gap-3"><div><p className="font-semibold text-text-1">{index === 0 ? 'Current cycle' : index === 1 ? 'Previous' : 'Previous 2'}</p><p className="text-sm text-text-2">{cycle.length} days · {formatDate(cycle.startDate)} – {formatDate(cycle.endDate)}</p></div><span className="text-xs text-text-2">Day {index === 0 && summary.day ? summary.day : '—'}</span></div><CycleStrip cycle={cycle} logs={logs} current={index === 0} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={summary.estimateReady} /></div>)}<div className="mt-4 flex flex-wrap items-center gap-4 text-xs text-text-2"><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-rose-500" />Period</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-success" />Fertile estimate</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full border border-white/50 bg-white" />Normal</span></div></section>
     <button onClick={onReminders} className="glass-card flex w-full items-center gap-3 p-4 text-left"><Bell className="h-5 w-5 text-accent-1" /><span><strong className="block text-text-1">Smart reminders</strong><small className="text-text-2">Period, fertile, and daily check-in alerts</small></span></button></div>
 }
 function InfoCard({ title, body }: Readonly<{ title: string; body: string }>) { return <div className="glass-card p-4"><p className="font-semibold text-text-1">{title}</p><p className="mt-1 text-sm leading-6 text-text-2">{body}</p></div> }
@@ -188,7 +184,7 @@ function PeriodCalendarModal({ logs, summary, onClose, onSave }: Readonly<{ logs
     setSelected((current) => { const next = new Set(current); next.has(value) ? next.delete(value) : next.add(value); return next })
   }
   const cancelEditing = () => { setSelected(existing); setEditing(false); setSaveError(null) }
-  const selectedCycleDay = summary.lastPeriodStart && cycleDaysBetween(summary.lastPeriodStart, selectedDate) >= 0 ? cycleDaysBetween(summary.lastPeriodStart, selectedDate) + 1 : null
+  const selectedCycleDay = summary.lastPeriodStart && calendarDaysBetween(summary.lastPeriodStart, selectedDate) >= 0 ? calendarDaysBetween(summary.lastPeriodStart, selectedDate) + 1 : null
   const selectedFertile = Boolean(summary.fertileStart && summary.fertileEnd && selectedDate >= summary.fertileStart && selectedDate <= summary.fertileEnd)
   const selectedOvulation = selectedDate === summary.ovulationDate
   const selectedPredictedPeriod = Boolean(summary.nextPeriodStart && selectedDate >= summary.nextPeriodStart && selectedDate < addDays(summary.nextPeriodStart, summary.periodLength))
@@ -233,7 +229,7 @@ function Insights({ logs, summary }: Readonly<{ logs: CareLog[]; summary: Return
     <section className="glass-card p-6">
       <div className="flex items-center justify-between gap-3"><div><h2 className="text-xl text-text-1">Cycle history</h2><p className="mt-1 text-sm text-text-2">From 2024 onward · {allCycles.length} tracked cycles</p></div><span className="text-xs text-text-2">R = period · G = fertile · W = normal</span></div>
       <div className="mt-5 space-y-7">
-        {years.map((year) => <div key={year}><h3 className="text-lg font-semibold text-text-1">{year}</h3><div className="mt-3 space-y-4">{cyclesByYear[year].slice().reverse().map((cycle) => <div key={cycle.startDate} className="rounded-2xl border border-border/10 bg-card/20 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-semibold text-text-1">{cycle.status === 'predicted' ? 'Current cycle' : `${cycle.length} days`}</p><p className="text-sm text-text-2">{formatDate(cycle.startDate)} – {formatDate(cycle.endDate)}</p></div>{cycle.status === 'predicted' && <span className="rounded-full bg-success/10 px-2 py-1 text-xs text-success">Predicted</span>}</div><CycleStrip cycle={cycle} logs={logs} current={cycle.status === 'predicted'} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={cycle.status === 'actual' || summary.fertilityStatus !== 'uncertain'} /></div>)}</div></div>)}
+        {years.map((year) => <div key={year}><h3 className="text-lg font-semibold text-text-1">{year}</h3><div className="mt-3 space-y-4">{cyclesByYear[year].slice().reverse().map((cycle) => <div key={cycle.startDate} className="rounded-2xl border border-border/10 bg-card/20 p-4"><div className="flex flex-wrap items-center justify-between gap-2"><div><p className="font-semibold text-text-1">{cycle.status === 'predicted' ? 'Current cycle' : `${cycle.length} days`}</p><p className="text-sm text-text-2">{formatDate(cycle.startDate)} – {formatDate(cycle.endDate)}</p></div>{cycle.status === 'predicted' && <span className="rounded-full bg-success/10 px-2 py-1 text-xs text-success">Predicted</span>}</div><CycleStrip cycle={cycle} logs={logs} current={cycle.status === 'predicted'} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={summary.estimateReady} /></div>)}</div></div>)}
       </div>
       <div className="mt-5 flex flex-wrap items-center gap-4 text-xs text-text-2"><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-rose-500" />Period</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full bg-success" />Fertile estimate</span><span><i className="mr-1 inline-block h-3 w-3 rounded-full border border-white/50 bg-white" />Normal</span></div>
     </section>

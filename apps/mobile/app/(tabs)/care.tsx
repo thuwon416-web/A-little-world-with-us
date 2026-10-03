@@ -33,6 +33,7 @@ import {
 import {
   addDays,
   buildNativeCycleHistory,
+  calendarDaysBetween,
   calculateNativeCycleSummary,
   dateKey,
   getNativeFertilityLabel,
@@ -327,7 +328,7 @@ function Insights({
                 <View style={{ flex: 1 }}>
                   <Text style={styles.text}>{cycle.status === 'predicted' ? 'Current cycle' : `${cycle.length} days`}</Text>
                   <Text style={styles.muted}>{cycle.startDate} – {cycle.endDate}</Text>
-                  <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={cycle.status === 'actual' || summary.fertilityStatus !== 'uncertain'} />
+                  <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={summary.estimateReady} />
                 </View>
               </View>
             ))}
@@ -449,7 +450,7 @@ function Calendar({
           <Text style={styles.muted}>{selectedDate}</Text>
           <Text style={styles.cycleDayTitle}>
             {summary.lastPeriodStart && selectedDate >= summary.lastPeriodStart
-              ? `Cycle day ${Math.round((new Date(`${selectedDate}T12:00:00`).getTime() - new Date(`${summary.lastPeriodStart}T12:00:00`).getTime()) / 86400000) + 1}`
+              ? `Cycle day ${calendarDaysBetween(summary.lastPeriodStart, selectedDate) + 1}`
               : 'Outside the current cycle'}
           </Text>
           <Text style={styles.accentText}>
@@ -809,7 +810,7 @@ function TodayCareTab({
               <Text style={styles.text}>{index === 0 ? 'Current cycle' : index === 1 ? 'Previous' : 'Previous 2'}</Text>
               <Text style={styles.muted}>{cycle.length} days · {cycle.startDate} – {cycle.endDate}</Text>
             </View>
-            <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={cycle.status === 'actual' || summary.fertilityStatus !== 'uncertain'} />
+            <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={summary.estimateReady} />
           </View>
         ))}
       </Card>

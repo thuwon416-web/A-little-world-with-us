@@ -48,6 +48,22 @@ const vectors: CycleVector[] = [
     },
   },
   {
+    name: 'duplicate period dates are counted once',
+    today: '2025-03-15',
+    dates: ['2025-03-01', '2025-03-01', '2025-01-31', '2025-01-31', '2025-01-03'],
+    expected: {
+      cycleLength: 29,
+      nextPeriodStart: '2025-03-30',
+      daysUntilPeriod: 15,
+      lateByDays: 0,
+      fertilityStatus: 'higher',
+      fertileStart: '2025-03-11',
+      fertileEnd: '2025-03-17',
+      periodLabel: 'Period in 15 days',
+      fertilityLabel: 'Higher estimated chance of pregnancy',
+    },
+  },
+  {
     name: 'shorter historical cycles',
     today: '2025-02-20',
     dates: ['2025-02-04', '2025-01-10', '2024-12-17'],
