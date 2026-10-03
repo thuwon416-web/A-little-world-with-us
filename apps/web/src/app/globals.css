@@ -50,10 +50,28 @@
     --font-xl: 1.25rem;
     --font-2xl: 1.5rem;
     --font-3xl: 1.875rem;
-    --color-success: #10b981;
-    --color-warning: #f59e0b;
-    --color-error: #ef4444;
-    --color-muted: #a8a0b8;
+    /* Semantic UI palette: readable ink + quiet pastel surfaces */
+    --color-success: #5f9f76;
+    --color-warning: #a87932;
+    --color-error: #b65f67;
+    --color-muted: #7f708e;
+    --ui-surface: 255 255 255;
+    --ui-surface-soft: 251 247 254;
+    --ui-surface-tint: 245 238 250;
+    --ui-border: 221 200 234;
+    --ui-border-soft: 232 221 243;
+    --ui-ink: 74 56 96;
+    --ui-ink-muted: 107 82 132;
+    --ui-accent: 125 92 168;
+    --ui-accent-soft: 188 160 212;
+    --ui-success: 95 159 118;
+    --ui-warning: 168 121 50;
+    --ui-error: 182 95 103;
+    --ui-radius-card: 20px;
+    --ui-radius-panel: 24px;
+    --ui-radius-control: 12px;
+    --ui-shadow-card: 0 10px 30px rgba(74, 56, 96, 0.08);
+    --ui-shadow-card-hover: 0 16px 36px rgba(74, 56, 96, 0.12);
     --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
     --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
@@ -64,25 +82,26 @@
     --radius-xl: 24px;
     --transition-fast: 150ms ease;
     --transition-normal: 250ms ease;
-    --background: 270 50% 12%;
-    --foreground: 40 50% 95%;
-    --card: 270 30% 18%;
-    --card-foreground: 40 50% 95%;
-    --popover: 270 30% 18%;
-    --popover-foreground: 40 50% 95%;
-    --primary: 340 100% 72%;
-    --primary-foreground: 270 50% 12%;
-    --secondary: 270 30% 25%;
-    --secondary-foreground: 40 50% 95%;
-    --muted: 270 25% 22%;
-    --muted-foreground: 270 15% 65%;
-    --accent: 47 100% 64%;
-    --accent-foreground: 270 50% 12%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 270 25% 30%;
-    --input: 270 25% 25%;
-    --ring: 340 100% 72%;
+    /* shadcn-compatible semantic aliases; default is light lavender */
+    --background: 243 236 250;
+    --foreground: 74 56 96;
+    --card: 255 255 255;
+    --card-foreground: 74 56 96;
+    --popover: 255 255 255;
+    --popover-foreground: 74 56 96;
+    --primary: 125 92 168;
+    --primary-foreground: 255 255 255;
+    --secondary: 245 238 250;
+    --secondary-foreground: 74 56 96;
+    --muted: 245 238 250;
+    --muted-foreground: 107 82 132;
+    --accent: 188 160 212;
+    --accent-foreground: 74 56 96;
+    --destructive: 182 95 103;
+    --destructive-foreground: 255 255 255;
+    --border: 221 200 234;
+    --input: 221 200 234;
+    --ring: 125 92 168;
     --chart-1: 340 100% 72%;
     --chart-2: 47 100% 64%;
     --chart-3: 270 60% 65%;
@@ -127,6 +146,50 @@
     --icon-card: 28px;
     --icon-hero: 36px;
     --icon-mega: 48px;
+  }
+
+  @layer components {
+    .ui-card {
+      border: 1px solid rgb(var(--ui-border-soft));
+      border-radius: var(--ui-radius-card);
+      background: rgb(var(--ui-surface));
+      box-shadow: var(--ui-shadow-card);
+    }
+
+    .ui-panel {
+      border: 1px solid rgb(var(--ui-border));
+      border-radius: var(--ui-radius-panel);
+      background: rgb(var(--ui-surface-soft));
+    }
+
+    .ui-control {
+      border: 1px solid rgb(var(--ui-border));
+      border-radius: var(--ui-radius-control);
+      background: rgb(var(--ui-surface));
+      color: rgb(var(--ui-ink));
+    }
+
+    .ui-control::placeholder { color: rgb(var(--ui-ink-muted) / 0.72); }
+
+    .ui-control:focus-visible {
+      border-color: rgb(var(--ui-accent) / 0.62);
+      box-shadow: 0 0 0 3px rgb(var(--ui-accent) / 0.12);
+    }
+
+    .ui-button-primary {
+      border: 1px solid rgb(var(--ui-accent) / 0.82);
+      border-radius: 999px;
+      background: rgb(var(--ui-accent));
+      color: #fff;
+      box-shadow: 0 6px 18px rgb(var(--ui-accent) / 0.18);
+    }
+
+    .ui-button-secondary {
+      border: 1px solid rgb(var(--ui-border));
+      border-radius: 999px;
+      background: rgb(var(--ui-surface-soft));
+      color: rgb(var(--ui-ink));
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
