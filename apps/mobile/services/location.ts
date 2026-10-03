@@ -314,31 +314,23 @@ export async function shareLocation(
   const coupleId = await getActiveCoupleId(user.id)
   if (!coupleId) return false
   const status = await getDeviceStatus()
-  const { error } = await supabase.from('user_locations').upsert(
-    {
-      user_id: user.id,
-      couple_id: coupleId,
-      latitude: point.latitude,
-      longitude: point.longitude,
-      accuracy: point.accuracy ?? 0,
-      updated_at: point.timestamp,
-      ...status,
-    },
-    { onConflict: 'user_id' }
-  )
+  const { data: accepted, error } = await supabase.rpc('record_location_point', {
+    p_couple_id: coupleId,
+    p_latitude: point.latitude,
+    p_longitude: point.longitude,
+    p_accuracy: point.accuracy ?? 0,
+    p_updated_at: point.timestamp,
+    p_status: status,
+  })
   if (error) {
     await queuePoint(point)
     return false
   }
-  const { error: historyError } = await supabase.from('location_history').insert({
-    user_id: user.id,
-    couple_id: coupleId,
-    latitude: point.latitude,
-    longitude: point.longitude,
-    accuracy: point.accuracy,
-    captured_at: point.timestamp,
-  })
-  if (historyError) return false
+
+  // Server-side backpressure may intentionally drop an over-frequent or stale point.
+  // Treat that as a successful delivery boundary so it is not requeued indefinitely.
+  if (accepted !== true) return true
+
   await saveStatus({ lastSyncAt: new Date().toISOString(), enabled: true })
   void refreshPlaceLabel(point)
   return true
