@@ -1,0 +1,1 @@
+alter table public.account_deletion_requests drop constraint if exists account_deletion_requests_user_id_fkey;
