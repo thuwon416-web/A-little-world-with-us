@@ -79,6 +79,8 @@ export async function registerForPushNotifications() {
         platform: Platform.OS,
         device_id: Device.modelId ?? Device.deviceName ?? null,
         updated_at: new Date().toISOString(),
+        last_seen: new Date().toISOString(),
+        invalidated: false,
       },
       { onConflict: 'expo_push_token' }
     )
