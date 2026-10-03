@@ -388,6 +388,19 @@ export function subscribeToChanges(
     return { unsubscribe: () => undefined }
   }
 
+  let timer: ReturnType<typeof setTimeout> | null = null
+  let pending = false
+  const scheduleChange = () => {
+    pending = true
+    if (timer) return
+    timer = setTimeout(() => {
+      timer = null
+      if (!pending) return
+      pending = false
+      onChange()
+    }, 200)
+  }
+
   const channel = supabase
     .channel(`mobile-chat-sync-${coupleId ?? 'unknown'}`)
     .on(
@@ -398,9 +411,7 @@ export function subscribeToChanges(
         table: 'messages',
         ...(coupleId ? { filter: `couple_id=eq.${coupleId}` } : {}),
       },
-      () => {
-        onChange()
-      }
+      scheduleChange
     )
     .subscribe((status) => {
       onStatus?.(status)
@@ -408,6 +419,9 @@ export function subscribeToChanges(
 
   return {
     unsubscribe: () => {
+      if (timer) clearTimeout(timer)
+      timer = null
+      pending = false
       void supabase.removeChannel(channel)
     },
   }
