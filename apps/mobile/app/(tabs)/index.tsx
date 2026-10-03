@@ -99,11 +99,13 @@ function daysUntil(value: string) {
   )
 }
 
-function nextAnniversary() {
+function nextAnniversary(value: string | null) {
+  if (!value) return null
   const today = new Date()
-  const year =
-    today.getFullYear() + (today >= new Date(`${today.getFullYear()}-02-02T12:00:00`) ? 1 : 0)
-  return `${year}-02-02`
+  const source = new Date(`${value}T12:00:00`)
+  const next = new Date(today.getFullYear(), source.getMonth(), source.getDate(), 12)
+  if (next < dateOnly(today)) next.setFullYear(today.getFullYear() + 1)
+  return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}-${String(next.getDate()).padStart(2, '0')}`
 }
 
 function StatCard({ title, value }: { readonly title: string; readonly value: number }) {
@@ -195,7 +197,7 @@ export default function DashboardScreen() {
         : null,
     [care]
   )
-  const anniversary = nextAnniversary()
+  const anniversary = nextAnniversary(dashboard?.anniversary ?? null)
   const anniversaryDays = daysUntil(anniversary)
   const nextPeriodDays = summary?.nextPeriodStart ? daysUntil(summary.nextPeriodStart) : null
   const nextPeriodText =
@@ -366,7 +368,7 @@ export default function DashboardScreen() {
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top }]}>
       <Text style={styles.eyebrow}>Love dashboard</Text>
-      <Text style={styles.title}>Good evening, KoKo × Pu Tuu</Text>
+      <Text style={styles.title}>{dashboard.coupleName}</Text>
       <Text style={styles.subtitle}>Today is a good day to notice the little things.</Text>
       <TouchableOpacity
         style={[styles.customizeButton, { backgroundColor: colors.cardBg }]}
@@ -428,7 +430,7 @@ export default function DashboardScreen() {
         <Text style={styles.cardTitle}>Anniversary</Text>
         <Text style={styles.anniversary}>{yearsTogether} years together</Text>
         <Text style={styles.muted}>
-          Every February 2 · {anniversaryDays} days until the next one
+          {dashboard.anniversary ? `Every ${dashboard.anniversary.slice(5)} · ${anniversaryDays} days until the next one` : 'Set your anniversary in couple settings to see the countdown.'}
         </Text>
         <TouchableOpacity
           accessibilityRole="button"
@@ -437,7 +439,7 @@ export default function DashboardScreen() {
           style={styles.secondaryButton}
           onPress={() =>
             void Share.share({
-              message: `Celebrating ${yearsTogether} years together on February 2.`,
+              message: `Celebrating ${yearsTogether} years together with ${dashboard.coupleName}.`,
             })
           }
         >
