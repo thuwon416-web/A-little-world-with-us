@@ -154,7 +154,7 @@ export const semantic = {
   errorDark: '#b65f67',
   surface: '#ffffff',
   surfaceSoft: '#fbf7fe',
-  surfaceTint: '#f5eefA',
+  surfaceTint: '#f5eefa',
   text: '#4a3860',
   textMuted: '#6b5284',
   border: '#ddc8ea',
