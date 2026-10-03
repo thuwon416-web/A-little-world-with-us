@@ -37,7 +37,7 @@ import { supabase } from '@/lib/supabase'
 import { getCareData, type CareLog, type CareSettings } from '@/services/care'
 import { calculateNativeCycleSummary } from '@/services/cycleCalculator'
 import { getDashboardData, type DashboardData } from '@/services/dashboard'
-import { calculateDaysTogether, relationshipAnniversary } from '@/services/relationshipDays'
+import { calculateDaysTogether } from '@/services/relationshipDays'
 import {
   DEFAULT_DASHBOARD_WIDGETS,
   loadDashboardLayout,
@@ -209,15 +209,14 @@ export default function DashboardScreen() {
           ? `Period overdue by ${Math.abs(nextPeriodDays)} days`
           : `Next period in ${nextPeriodDays} days`
   const countdown =
-    nextPeriodText && nextPeriodDays !== null && nextPeriodDays < anniversaryDays
+    nextPeriodText && nextPeriodDays !== null && anniversaryDays !== null && nextPeriodDays < anniversaryDays
       ? nextPeriodText
-      : `${anniversaryDays} days until Anniversary`
-  const yearsTogether = Math.max(
-    0,
-    Math.floor(
-      (Date.now() - new Date(`${relationshipAnniversary}T12:00:00`).getTime()) / 31536000000
-    )
-  )
+      : anniversaryDays !== null
+        ? `${anniversaryDays} days until Anniversary`
+        : 'Add your anniversary to start a countdown'
+  const yearsTogether = dashboard.anniversary
+    ? Math.max(0, new Date().getFullYear() - new Date(`${dashboard.anniversary}T12:00:00`).getFullYear())
+    : 0
   const todaysFocus = getDailyFocus()
   const littleRitual = getLittleRitual()
   const updateLayout = (next: DashboardLayout) => {
