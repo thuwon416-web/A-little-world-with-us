@@ -16,6 +16,7 @@ import AIPrivacySettings from '@/features/settings/AIPrivacySettings'
 import ChatHistoryExport from '@/features/chat/ChatHistoryExport'
 import FinanceExport from '@/features/settings/FinanceExport'
 import PhotoExportSettings from '@/features/settings/PhotoExportSettings'
+import { Button, Card } from '@/components/shared/UI'
 
 const CoupleSettings = dynamic(() => import('@/features/settings/CoupleSettings'), {
   ssr: false,
@@ -84,10 +85,10 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6 animate-fade-in">
-      <section className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
+      <Card className="rounded-[32px] p-6 shadow-[0_18px_42px_rgba(74,56,96,0.10)]">
         <p className="text-xs uppercase tracking-[0.22em] text-text-2">Settings</p>
         <h1 className="mt-3 text-3xl font-serif text-text-1">Your little world</h1>
-      </section>
+      </Card>
 
       <NotificationPermission />
 
@@ -156,8 +157,8 @@ export default function SettingsPage() {
         <p className="mt-2 text-sm text-text-2">Connect your Drive for future photo storage. The app keeps only the Drive file reference so saved photos can remain readable later.</p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="text-sm text-text-2">{driveLoading ? 'Checking…' : driveConnected ? 'Connected' : 'Not connected'}</span>
-          {!driveLoading && !driveConnected ? <a href="/api/drive/start" className="rounded-full bg-accent-1 px-4 py-2 text-sm font-semibold text-white">Connect Google Drive</a> : null}
-          {!driveLoading && driveConnected ? <button type="button" onClick={() => void disconnectDrive()} disabled={driveDisconnecting} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-text-1 disabled:opacity-50">{driveDisconnecting ? 'Disconnecting…' : 'Disconnect'}</button> : null}
+          {!driveLoading && !driveConnected ? <Button type="button" onClick={() => { window.location.href = '/api/drive/start' }}>Connect Google Drive</Button> : null}
+          {!driveLoading && driveConnected ? <Button type="button" variant="secondary" onClick={() => void disconnectDrive()} disabled={driveDisconnecting}>{driveDisconnecting ? 'Disconnecting…' : 'Disconnect'}</Button> : null}
         </div>
       </section>
 
