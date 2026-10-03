@@ -9,10 +9,10 @@ export type CareReminder = { id: string; couple_id: string; reminder_type: 'pms'
 export type CareDraft = Omit<Partial<CareLog>, 'id' | 'user_id' | 'couple_id' | 'updated_at' | 'updated_by'> & { log_date: string }
 export type CycleHistoryEntry = { startDate: string; endDate: string; length: number; status: 'actual' | 'predicted'; variationMin: number; variationMax: number }
 export type FertilityStatus = 'higher' | 'lower' | 'uncertain'
-export type CycleSummary = { cycleLength: number; periodLength: number; lastPeriodStart: string | null; nextPeriodStart: string | null; fertileStart: string | null; fertileEnd: string | null; ovulationDate: string | null; day: number | null; regular: boolean; estimateReady: boolean; variationMin: number; variationMax: number; fertilityStatus: FertilityStatus; cycleHistory: CycleHistoryEntry[] }
+export type CycleSummary = { cycleLength: number; periodLength: number; lastPeriodStart: string | null; nextPeriodStart: string | null; daysUntilPeriod: number | null; lateByDays: number; fertileStart: string | null; fertileEnd: string | null; ovulationDate: string | null; day: number | null; regular: boolean; estimateReady: boolean; variationMin: number; variationMax: number; fertilityStatus: FertilityStatus; cycleHistory: CycleHistoryEntry[] }
 
-// Parse date-only values at local noon. This avoids UTC rollover and DST midnight
-// surprises while keeping cycle calculations independent from the user's timezone.
+// Keep persisted calendar dates separate from timestamps so timezone offsets and DST
+// cannot change the day used by cycle calculations.
 export const dateKey = (value: Date) => {
   const year = value.getFullYear()
   const month = String(value.getMonth() + 1).padStart(2, '0')
@@ -20,11 +20,31 @@ export const dateKey = (value: Date) => {
   return `${year}-${month}-${day}`
 }
 const parseDateOnly = (value: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
   const [year, month, day] = value.split('-').map(Number)
-  return new Date(year, month - 1, day, 12)
+  if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31) return null
+  const date = new Date(0)
+  date.setUTCHours(0, 0, 0, 0)
+  date.setUTCFullYear(year, month - 1, day)
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null
+  return date
 }
-export const addDays = (date: string, amount: number) => { const result = parseDateOnly(date); result.setDate(result.getDate() + amount); return dateKey(result) }
-const daysBetween = (start: string, end: string) => Math.round((parseDateOnly(end).getTime() - parseDateOnly(start).getTime()) / 86400000)
+const utcDateKey = (date: Date) => `${String(date.getUTCFullYear()).padStart(4, '0')}-${String(date.getUTCMonth() + 1).padStart(2, '0')}-${String(date.getUTCDate()).padStart(2, '0')}`
+export const addDays = (value: string, amount: number) => {
+  const date = parseDateOnly(value)
+  if (!date || !Number.isInteger(amount)) throw new RangeError('A valid date and whole number of days are required.')
+  return utcDateKey(new Date(date.getTime() + amount * 86400000))
+}
+const daysBetween = (start: string, end: string) => {
+  const startDate = parseDateOnly(start)
+  const endDate = parseDateOnly(end)
+  if (!startDate || !endDate) throw new RangeError('Valid date-only values are required.')
+  return Math.round((endDate.getTime() - startDate.getTime()) / 86400000)
+}
+const validPastDate = (value: string | null, today: string) =>
+  value && parseDateOnly(value) && value <= today ? value : null
+const validCycleLength = (value: number) =>
+  Number.isInteger(value) && value >= 15 && value <= 60 ? value : 28
 const medianCycleLength = (values: number[]) => {
   const ordered = [...values].sort((a, b) => a - b)
   const middle = Math.floor(ordered.length / 2)
@@ -97,47 +117,66 @@ export async function savePeriodDates(coupleId: string, selectedDates: string[])
   if (error) throw error
 }
 
-export function periodStarts(logs: CareLog[]) {
-  const days = logs.filter((log) => log.period_day).map((log) => log.log_date).sort((a, b) => a.localeCompare(b))
+export function periodStarts(logs: CareLog[], today = dateKey(new Date())) {
+  const days = [...new Set(logs
+    .filter((log) => log.period_day && validPastDate(log.log_date, today))
+    .map((log) => log.log_date))]
+    .sort((a, b) => a.localeCompare(b))
   return days.filter((day, index) => index === 0 || daysBetween(days[index - 1], day) > 1).reverse()
 }
 
-export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings): CycleSummary {
-  const starts = periodStarts(logs)
+export function calculateCycleSummary(logs: CareLog[], settings: CycleSettings, today = dateKey(new Date())): CycleSummary {
+  const starts = periodStarts(logs, today)
   const historicalLengths = starts.slice(0, 6).flatMap((start, index) => { const older = starts[index + 1]; const length = older ? daysBetween(older, start) : 0; return length >= 15 && length <= 60 ? [length] : [] })
   // Use the median cycle length; when the middle falls between two whole days,
   // round to the nearest day so Web and Mobile share the same calendar estimate.
-  const cycleLength = historicalLengths.length ? medianCycleLength(historicalLengths) : settings.cycle_length
+  const cycleLength = historicalLengths.length ? medianCycleLength(historicalLengths) : validCycleLength(settings.cycle_length)
   // Logged period starts are the source of truth; the manual setting is only a fallback.
-  const lastPeriodStart = starts[0] ?? settings.last_period_start ?? null
+  const lastPeriodStart = starts[0] ?? validPastDate(settings.last_period_start, today)
   const variationMin = historicalLengths.length ? Math.min(...historicalLengths) : cycleLength
   const variationMax = historicalLengths.length ? Math.max(...historicalLengths) : cycleLength
   const variation = variationMax - variationMin
+  const regular = variation <= 7
+  const estimateReady = historicalLengths.length >= 2 && regular
   const actualHistory: CycleHistoryEntry[] = starts.slice(0, 6).flatMap((start, index) => {
     const older = starts[index + 1]
     const length = older ? daysBetween(older, start) : 0
     return older && length >= 15 && length <= 60 ? [{ startDate: older, endDate: addDays(start, -1), length, status: 'actual' as const, variationMin, variationMax }] : []
   }).reverse()
-  if (!lastPeriodStart) return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular: variation <= 7, estimateReady: false, variationMin, variationMax, fertilityStatus: 'uncertain', cycleHistory: actualHistory }
+  if (!lastPeriodStart) return { cycleLength, periodLength: settings.period_length, lastPeriodStart: null, nextPeriodStart: null, daysUntilPeriod: null, lateByDays: 0, fertileStart: null, fertileEnd: null, ovulationDate: null, day: null, regular, estimateReady: false, variationMin, variationMax, fertilityStatus: 'uncertain', cycleHistory: actualHistory }
   const nextPeriodStart = addDays(lastPeriodStart, cycleLength)
   // Keep the primary fertile estimate tied to the current predicted cycle,
   // rather than stretching it from the historical min/max cycle lengths.
   // This gives a stable seven-day window (5 days before ovulation through
   // the day after) while cycle variability is surfaced separately as a warning.
-  const ovulationDate = addDays(nextPeriodStart, -14)
-  const fertileStart = addDays(ovulationDate, -5)
-  const fertileEnd = addDays(ovulationDate, 1)
-  const today = dateKey(new Date())
-  const estimateReady = starts.length >= 2 || settings.last_period_start !== null
-  const fertilityStatus: FertilityStatus = !estimateReady ? 'uncertain' : today >= fertileStart && today <= fertileEnd ? 'higher' : 'lower'
+  const daysUntilPeriod = daysBetween(today, nextPeriodStart)
+  const cycleDay = daysBetween(lastPeriodStart, today)
+  const lateByDays = estimateReady && cycleDay > variationMax ? cycleDay - variationMax : 0
+  const hasCurrentFertilityEstimate = estimateReady && today < nextPeriodStart
+  const ovulationDate = hasCurrentFertilityEstimate ? addDays(nextPeriodStart, -14) : null
+  const fertileStart = ovulationDate ? addDays(ovulationDate, -5) : null
+  const fertileEnd = ovulationDate ? addDays(ovulationDate, 1) : null
+  const fertilityStatus: FertilityStatus = !hasCurrentFertilityEstimate
+    ? 'uncertain'
+    : today >= fertileStart! && today <= fertileEnd!
+      ? 'higher'
+      : 'lower'
   const cycleHistory = [...actualHistory, { startDate: lastPeriodStart, endDate: addDays(nextPeriodStart, -1), length: cycleLength, status: 'predicted' as const, variationMin, variationMax }]
-  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, fertileStart, fertileEnd, ovulationDate, day: Math.max(1, daysBetween(lastPeriodStart, today) + 1), regular: variation <= 7, estimateReady, variationMin, variationMax, fertilityStatus, cycleHistory }
+  return { cycleLength, periodLength: settings.period_length, lastPeriodStart, nextPeriodStart, daysUntilPeriod, lateByDays, fertileStart, fertileEnd, ovulationDate, day: Math.max(1, cycleDay + 1), regular, estimateReady, variationMin, variationMax, fertilityStatus, cycleHistory }
 }
 
 export function getFertilityLabel(summary: CycleSummary) {
   if (summary.fertilityStatus === 'higher') return 'Higher estimated chance of pregnancy'
   if (summary.fertilityStatus === 'lower') return 'Lower estimated chance of pregnancy'
   return 'Pregnancy chance estimate unavailable'
+}
+
+export function getPeriodForecastLabel(summary: CycleSummary) {
+  if (summary.daysUntilPeriod === null) return 'Log a period to begin forecasting.'
+  if (summary.daysUntilPeriod > 0) return `Period in ${summary.daysUntilPeriod} day${summary.daysUntilPeriod === 1 ? '' : 's'}`
+  if (summary.daysUntilPeriod === 0) return 'Period expected today'
+  if (summary.lateByDays > 0) return `Period later than your usual range by ${summary.lateByDays} day${summary.lateByDays === 1 ? '' : 's'}`
+  return 'Period estimate passed'
 }
 
 // Backward-compatible exports retained while older Care widgets are retired.

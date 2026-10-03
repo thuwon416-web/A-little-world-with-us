@@ -35,7 +35,8 @@ import {
   buildNativeCycleHistory,
   calculateNativeCycleSummary,
   dateKey,
-  periodStarts,
+  getNativeFertilityLabel,
+  getNativePeriodForecastLabel,
   type NativeCycleSummary,
 } from '@/services/cycleCalculator'
 
@@ -251,7 +252,7 @@ function getNativePeriodRunLength(logs: CareLog[], startDate: string, endDate: s
   return length || fallback
 }
 
-function NativeCycleStrip({ cycle, logs, fallbackPeriodLength }: Readonly<{ cycle: NativeCycleSummary['cycleHistory'][number]; logs: CareLog[]; fallbackPeriodLength: number }>) {
+function NativeCycleStrip({ cycle, logs, fallbackPeriodLength, allowFertileEstimate }: Readonly<{ cycle: NativeCycleSummary['cycleHistory'][number]; logs: CareLog[]; fallbackPeriodLength: number; allowFertileEstimate: boolean }>) {
   const periodLength = getNativePeriodRunLength(logs, cycle.startDate, cycle.endDate, fallbackPeriodLength)
   const ovulation = addDays(cycle.startDate, cycle.length - 14)
   const fertileStart = addDays(ovulation, -5)
@@ -261,7 +262,7 @@ function NativeCycleStrip({ cycle, logs, fallbackPeriodLength }: Readonly<{ cycl
       {Array.from({ length: cycle.length }, (_, index) => {
         const date = addDays(cycle.startDate, index)
         const period = index < periodLength
-        const fertile = date >= fertileStart && date <= fertileEnd
+        const fertile = allowFertileEstimate && date >= fertileStart && date <= fertileEnd
         return <View key={date} style={[nativeStripStyles.dot, period ? nativeStripStyles.period : fertile ? nativeStripStyles.fertile : nativeStripStyles.normal]} />
       })}
     </View>
@@ -326,7 +327,7 @@ function Insights({
                 <View style={{ flex: 1 }}>
                   <Text style={styles.text}>{cycle.status === 'predicted' ? 'Current cycle' : `${cycle.length} days`}</Text>
                   <Text style={styles.muted}>{cycle.startDate} – {cycle.endDate}</Text>
-                  <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} />
+                  <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={cycle.status === 'actual' || summary.fertilityStatus !== 'uncertain'} />
                 </View>
               </View>
             ))}
@@ -370,6 +371,11 @@ function Calendar({
   const days = new Date(year, monthIndex + 1, 0).getDate()
   const firstDay = new Date(year, monthIndex, 1).getDay()
   const periodDays = selected
+  const selectedWithinCurrentCycle = Boolean(summary.lastPeriodStart && summary.nextPeriodStart && selectedDate >= summary.lastPeriodStart && selectedDate < summary.nextPeriodStart)
+  const canEstimateSelectedDate = Boolean(summary.fertileStart && summary.fertileEnd && selectedWithinCurrentCycle)
+  const selectedOvulation = selectedDate === summary.ovulationDate
+  const selectedFertile = Boolean(summary.fertileStart && summary.fertileEnd && selectedDate >= summary.fertileStart && selectedDate <= summary.fertileEnd)
+  const selectedPredictedPeriod = Boolean(summary.nextPeriodStart && selectedDate >= summary.nextPeriodStart && selectedDate < addDays(summary.nextPeriodStart, summary.periodLength))
   const monthName = month.toLocaleDateString([], { month: 'long', year: 'numeric' })
   return (
     <ScrollView contentContainerStyle={styles.content}>
@@ -449,11 +455,13 @@ function Calendar({
           <Text style={styles.accentText}>
             {periodDays.has(selectedDate)
               ? 'Period'
-              : selectedDate === summary.ovulationDate
-                ? 'Higher estimated chance of pregnancy · predicted ovulation'
-                : summary.fertileStart && summary.fertileEnd && selectedDate >= summary.fertileStart && selectedDate <= summary.fertileEnd
-                  ? 'Estimated chance of pregnancy · fertile estimate'
-                  : 'Lower estimated chance of pregnancy'}
+              : selectedPredictedPeriod
+                ? 'Predicted period'
+                : canEstimateSelectedDate
+                  ? selectedOvulation || selectedFertile
+                    ? 'Higher estimated chance of pregnancy · calendar fertile-window estimate'
+                    : 'Lower estimated chance of pregnancy · calendar-based estimate'
+                  : 'Pregnancy chance estimate unavailable'}
           </Text>
         </View>
         <Text style={styles.muted}>
@@ -764,11 +772,7 @@ function TodayCareTab({
 }: TodayCareProps) {
   const { colors } = useTheme()
   const styles = createStyles(colors, sizes)
-  const daysUntil = summary.nextPeriodStart
-    ? Math.ceil((new Date(`${summary.nextPeriodStart}T12:00:00`).getTime() - Date.now()) / 86400000)
-    : null
-  const hasMultiplePeriods = periodStarts(logs.map((log) => ({ log_date: log.logDate, period_day: log.periodDay }))).length >= 2
-  const canCallLate = daysUntil !== null && daysUntil < 0 && summary.regular && hasMultiplePeriods
+  const periodEstimatePassed = summary.daysUntilPeriod !== null && summary.daysUntilPeriod < 0
   return (
     <ScrollView contentContainerStyle={styles.content}>
       <Text style={styles.eyebrow}>CYCLE CARE · SHARED WITH YOUR PARTNER</Text>
@@ -777,27 +781,15 @@ function TodayCareTab({
         <Text style={styles.heroLabel}>CYCLE DAY</Text>
         <Text style={styles.days}>{summary.day ?? '—'}</Text>
         <Text style={styles.heroNote}>
-          {daysUntil === null
-            ? 'Log a period to begin forecasting.'
-            : daysUntil > 0
-              ? `Period in ${daysUntil} days`
-              : daysUntil === 0
-                ? 'Period expected today'
-                : canCallLate ? `Period late by ${Math.abs(daysUntil)} days` : 'Period estimate passed'}
+          {getNativePeriodForecastLabel(summary)}
         </Text>
-        <Text style={styles.heroFertility}>
-          {summary.fertilityStatus === 'higher'
-            ? 'Higher estimated chance of pregnancy'
-            : summary.fertilityStatus === 'lower'
-              ? 'Lower estimated chance of pregnancy'
-              : 'Pregnancy chance estimate unavailable'}
-        </Text>
+        <Text style={styles.heroFertility}>{getNativeFertilityLabel(summary)}</Text>
         <Text style={styles.heroDisclaimer}>Calendar estimate only — not contraception or medical advice.</Text>
-        {((daysUntil !== null && daysUntil < 0) || !summary.regular) ? (
+        {(periodEstimatePassed || !summary.regular) ? (
           <Text style={styles.heroWarning}>
-            {canCallLate
-              ? 'Your period is later than the current estimate; a new logged period will update the next prediction.'
-              : 'The calendar estimate has passed or recent cycles vary, so the estimate may move when a new period is logged.'}
+            {summary.lateByDays > 0
+              ? 'This is beyond your recent cycle range; a new logged period will update the estimate.'
+              : 'The estimate has passed or recent cycles vary, so the date may shift when a new period is logged.'}
           </Text>
         ) : null}
       </View>
@@ -817,7 +809,7 @@ function TodayCareTab({
               <Text style={styles.text}>{index === 0 ? 'Current cycle' : index === 1 ? 'Previous' : 'Previous 2'}</Text>
               <Text style={styles.muted}>{cycle.length} days · {cycle.startDate} – {cycle.endDate}</Text>
             </View>
-            <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} />
+            <NativeCycleStrip cycle={cycle} logs={logs} fallbackPeriodLength={summary.periodLength} allowFertileEstimate={cycle.status === 'actual' || summary.fertilityStatus !== 'uncertain'} />
           </View>
         ))}
       </Card>

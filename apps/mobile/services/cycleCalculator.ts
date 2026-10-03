@@ -16,6 +16,8 @@ export type NativeCycleSummary = {
   periodLength: number
   lastPeriodStart: string | null
   nextPeriodStart: string | null
+  daysUntilPeriod: number | null
+  lateByDays: number
   fertileStart: string | null
   fertileEnd: string | null
   ovulationDate: string | null
@@ -34,8 +36,14 @@ export type NativeCycleSummary = {
 }
 
 function parseDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return null
   const [year, month, day] = value.split('-').map(Number)
-  return new Date(year, month - 1, day, 12)
+  if (year < 1 || year > 9999 || month < 1 || month > 12 || day < 1 || day > 31) return null
+  const date = new Date(0)
+  date.setUTCHours(0, 0, 0, 0)
+  date.setUTCFullYear(year, month - 1, day)
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return null
+  return date
 }
 
 export function dateKey(value: Date) {
@@ -44,18 +52,31 @@ export function dateKey(value: Date) {
 
 export function addDays(value: string, amount: number) {
   const date = parseDate(value)
-  date.setDate(date.getDate() + amount)
-  return dateKey(date)
+  if (!date || !Number.isInteger(amount)) throw new RangeError('A valid date and whole number of days are required.')
+  const result = new Date(date.getTime() + amount * 86400000)
+  return `${String(result.getUTCFullYear()).padStart(4, '0')}-${String(result.getUTCMonth() + 1).padStart(2, '0')}-${String(result.getUTCDate()).padStart(2, '0')}`
 }
 
 function daysBetween(start: string, end: string) {
-  return Math.round((parseDate(end).getTime() - parseDate(start).getTime()) / 86400000)
+  const startDate = parseDate(start)
+  const endDate = parseDate(end)
+  if (!startDate || !endDate) throw new RangeError('Valid date-only values are required.')
+  return Math.round((endDate.getTime() - startDate.getTime()) / 86400000)
 }
 
-export function periodStarts(logs: NativeCareLog[]) {
-  const days = logs
+function validPastDate(value: string | null, today: string) {
+  return value && parseDate(value) && value <= today ? value : null
+}
+
+function validCycleLength(value: number) {
+  return Number.isInteger(value) && value >= 15 && value <= 60 ? value : 28
+}
+
+export function periodStarts(logs: NativeCareLog[], today = dateKey(new Date())) {
+  const days = [...new Set(logs
     .filter((log) => log.period_day)
     .map((log) => log.log_date)
+    .filter((day) => validPastDate(day, today)))]
     .sort((a, b) => a.localeCompare(b))
   return days.filter((day, index) => index === 0 || daysBetween(days[index - 1], day) > 1).reverse()
 }
@@ -80,9 +101,10 @@ export function buildNativeCycleHistory(
 
 export function calculateNativeCycleSummary(
   logs: NativeCareLog[],
-  settings: NativeCycleSettings
+  settings: NativeCycleSettings,
+  today = dateKey(new Date())
 ): NativeCycleSummary {
-  const starts = periodStarts(logs)
+  const starts = periodStarts(logs, today)
   const historicalLengths = starts.slice(0, 6).flatMap((start, index) => {
     const older = starts[index + 1]
     const length = older ? daysBetween(older, start) : 0
@@ -92,12 +114,14 @@ export function calculateNativeCycleSummary(
   const middle = Math.floor(ordered.length / 2)
   const median = ordered.length
     ? (ordered.length % 2 ? ordered[middle] : (ordered[middle - 1] + ordered[middle]) / 2)
-    : settings.cycle_length
+    : validCycleLength(settings.cycle_length)
   const cycleLength = Math.round(median)
   // Logged period history is the source of truth; the saved setting is only a fallback.
-  const lastPeriodStart = starts[0] ?? settings.last_period_start ?? null
+  const lastPeriodStart = starts[0] ?? validPastDate(settings.last_period_start, today)
   const variationMin = historicalLengths.length ? Math.min(...historicalLengths) : cycleLength
   const variationMax = historicalLengths.length ? Math.max(...historicalLengths) : cycleLength
+  const regular = variationMax - variationMin <= 7
+  const estimateReady = historicalLengths.length >= 2 && regular
   const actualHistory = starts
     .slice(0, 6)
     .flatMap((start, index) => {
@@ -114,11 +138,13 @@ export function calculateNativeCycleSummary(
       periodLength: settings.period_length,
       lastPeriodStart: null,
       nextPeriodStart: null,
+      daysUntilPeriod: null,
+      lateByDays: 0,
       fertileStart: null,
       fertileEnd: null,
       ovulationDate: null,
       day: null,
-      regular: variationMax - variationMin <= 7,
+      regular,
       estimateReady: false,
       fertilityStatus: 'uncertain',
       variationMin,
@@ -126,17 +152,18 @@ export function calculateNativeCycleSummary(
       cycleHistory: actualHistory,
     }
   }
+
   const nextPeriodStart = addDays(lastPeriodStart, cycleLength)
-  // Keep the primary fertile estimate tied to the current predicted cycle,
-  // rather than stretching it from historical min/max cycle lengths.
-  const ovulationDate = addDays(nextPeriodStart, -14)
-  const fertileStart = addDays(ovulationDate, -5)
-  const fertileEnd = addDays(ovulationDate, 1)
-  const today = dateKey(new Date())
-  const estimateReady = starts.length >= 2 || settings.last_period_start !== null
-  const fertilityStatus: 'higher' | 'lower' | 'uncertain' = !estimateReady
+  const daysUntilPeriod = daysBetween(today, nextPeriodStart)
+  const cycleDay = daysBetween(lastPeriodStart, today)
+  const lateByDays = estimateReady && cycleDay > variationMax ? cycleDay - variationMax : 0
+  const hasCurrentFertilityEstimate = estimateReady && today < nextPeriodStart
+  const ovulationDate = hasCurrentFertilityEstimate ? addDays(nextPeriodStart, -14) : null
+  const fertileStart = ovulationDate ? addDays(ovulationDate, -5) : null
+  const fertileEnd = ovulationDate ? addDays(ovulationDate, 1) : null
+  const fertilityStatus: 'higher' | 'lower' | 'uncertain' = !hasCurrentFertilityEstimate
     ? 'uncertain'
-    : today >= fertileStart && today <= fertileEnd
+    : today >= fertileStart! && today <= fertileEnd!
       ? 'higher'
       : 'lower'
   return {
@@ -144,11 +171,13 @@ export function calculateNativeCycleSummary(
     periodLength: settings.period_length,
     lastPeriodStart,
     nextPeriodStart,
+    daysUntilPeriod,
+    lateByDays,
     fertileStart,
     fertileEnd,
     ovulationDate,
-    day: Math.max(1, daysBetween(lastPeriodStart, today) + 1),
-    regular: variationMax - variationMin <= 7,
+    day: Math.max(1, cycleDay + 1),
+    regular,
     estimateReady,
     fertilityStatus,
     variationMin,
@@ -163,4 +192,18 @@ export function calculateNativeCycleSummary(
       },
     ],
   }
+}
+
+export function getNativePeriodForecastLabel(summary: NativeCycleSummary) {
+  if (summary.daysUntilPeriod === null) return 'Log a period to begin forecasting.'
+  if (summary.daysUntilPeriod > 0) return `Period in ${summary.daysUntilPeriod} day${summary.daysUntilPeriod === 1 ? '' : 's'}`
+  if (summary.daysUntilPeriod === 0) return 'Period expected today'
+  if (summary.lateByDays > 0) return `Period later than your usual range by ${summary.lateByDays} day${summary.lateByDays === 1 ? '' : 's'}`
+  return 'Period estimate passed'
+}
+
+export function getNativeFertilityLabel(summary: NativeCycleSummary) {
+  if (summary.fertilityStatus === 'higher') return 'Higher estimated chance of pregnancy'
+  if (summary.fertilityStatus === 'lower') return 'Lower estimated chance of pregnancy'
+  return 'Pregnancy chance estimate unavailable'
 }
