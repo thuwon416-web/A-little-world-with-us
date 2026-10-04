@@ -21,6 +21,7 @@ Run this sequence only for a **fresh or disposable** database. `00_core.sql` is 
 | 34 | FK covering indexes | Indexes for currently unindexed foreign keys; location-sharing scope is handled separately |
 | 35 | RLS performance | Optimize `auth.uid()` evaluation without changing authorization semantics |
 | 37 | Retention cleanup | 7-day location history and 30-day temporary AI-context cleanup |
+| 46 | Location cache hardening | Enforce deny-by-default RLS and server-role-only access for `location_address_cache` |
 
 ## Existing databases
 
