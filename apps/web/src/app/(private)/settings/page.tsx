@@ -16,6 +16,7 @@ import AIPrivacySettings from '@/features/settings/AIPrivacySettings'
 import ChatHistoryExport from '@/features/chat/ChatHistoryExport'
 import FinanceExport from '@/features/settings/FinanceExport'
 import PhotoExportSettings from '@/features/settings/PhotoExportSettings'
+import AccountDeletion from '@/features/settings/AccountDeletion'
 import { Button, Card } from '@/components/shared/UI'
 
 const CoupleSettings = dynamic(() => import('@/features/settings/CoupleSettings'), {
@@ -148,6 +149,7 @@ export default function SettingsPage() {
           <SecuritySettings />
           <LanguageSwitcher />
           <TwoFactorAuthWidget />
+          <AccountDeletion />
         </div>
       </section>
 
