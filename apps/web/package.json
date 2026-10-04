@@ -104,7 +104,7 @@
   },
   "devDependencies": {
     "@axe-core/react": "^4.13.0",
-    "@next/bundle-analyzer": "^16.3.4",
+    "@next/bundle-analyzer": "^16.3.8",
     "@playwright/test": "^1.63.0",
     "@testing-library/react": "^16.3.3",
     "@types/canvas-confetti": "^1.6.4",
