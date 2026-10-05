@@ -84,13 +84,10 @@ export async function POST(request: Request) {
         storage_provider: 'google_drive',
         drive_file_id: driveFile.id,
         mime_type: driveFile.mimeType || file.type || 'application/octet-stream',
-        title: typeof form.get('title') === 'string' ? String(form.get('title')) : 'A memory together',
-        caption: typeof form.get('caption') === 'string' ? String(form.get('caption')) : 'A memory together',
-        date:
-          typeof form.get('date') === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(String(form.get('date')))
-            ? String(form.get('date'))
-            : new Date().toISOString().slice(0, 10),
-        category: typeof form.get('category') === 'string' ? String(form.get('category')) : 'favorite',
+        title,
+        caption,
+        date,
+        category,
       })
       .select('id,created_at')
       .single()
