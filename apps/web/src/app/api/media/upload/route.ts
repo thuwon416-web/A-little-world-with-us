@@ -111,8 +111,8 @@ export async function POST(request: Request) {
       // storage cleanup job using the returned asset metadata.
       console.error('Cloudinary memory metadata insert failed')
       if (uploaded) await deleteCloudinaryAsset(uploaded.asset_id).catch(() => undefined)
-      return NextResponse.json({ error: 'Memory metadata could not be saved.' }, { status: 500 })
       void logEvent('media_upload_failed', { provider: 'cloudinary', status: 500 })
+      return NextResponse.json({ error: 'Memory metadata could not be saved.' }, { status: 500 })
     }
 
     return NextResponse.json({
