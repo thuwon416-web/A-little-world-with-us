@@ -5,9 +5,19 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      web-production:
+        dependency-type: production
+      web-development:
+        dependency-type: development
 
   - package-ecosystem: npm
     directory: /apps/mobile
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
+    groups:
+      mobile-production:
+        dependency-type: production
+      mobile-development:
+        dependency-type: development
