@@ -14,9 +14,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      # Public client-side Supabase values; no privileged/service-role key is used here.
-      NEXT_PUBLIC_SUPABASE_URL: https://mktfnwdvzbdrxfcvnolp.supabase.co
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_1zO9YFTLhyoQGgKY-72JuQ_35kPRj_Y
+      # E2E must use a dedicated non-production Supabase project.
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
 
     steps:
       - name: Checkout code
