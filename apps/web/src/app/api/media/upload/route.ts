@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
+import { logEvent } from '@/lib/observability'
 import { deleteCloudinaryAsset, isCloudinaryConfigured, uploadMemoryToCloudinary } from '@/lib/cloudinary'
 
 export const runtime = 'nodejs'
@@ -111,6 +112,7 @@ export async function POST(request: Request) {
       console.error('Cloudinary memory metadata insert failed')
       if (uploaded) await deleteCloudinaryAsset(uploaded.asset_id).catch(() => undefined)
       return NextResponse.json({ error: 'Memory metadata could not be saved.' }, { status: 500 })
+      void logEvent('media_upload_failed', { provider: 'cloudinary', status: 500 })
     }
 
     return NextResponse.json({
