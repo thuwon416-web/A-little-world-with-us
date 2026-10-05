@@ -215,7 +215,7 @@ export default function DashboardScreen() {
       : anniversaryDays !== null
         ? `${anniversaryDays} days until Anniversary`
         : 'Add your anniversary to start a countdown'
-  const yearsTogether = dashboard.anniversary
+  const yearsTogether = dashboard?.anniversary
     ? Math.max(0, new Date().getFullYear() - new Date(`${dashboard.anniversary}T12:00:00`).getFullYear())
     : 0
   const todaysFocus = getDailyFocus()
