@@ -307,55 +307,48 @@ function MemoriesPageContent() {
       const uploadErrors: string[] = []
       for (const file of selectedFiles) {
         try {
-          let memoryCreatedByDriveApi = false
+          let memoryCreatedByMediaApi = false
           const compressedImage = await compressImage(file)
-          const driveStatusResponse = await fetch('/api/drive/status')
-          const driveStatus = driveStatusResponse.ok
-            ? (await driveStatusResponse.json()) as { connected?: boolean }
-            : { connected: false }
-
-          let storageProvider: 'supabase' | 'google_drive' = 'supabase'
+          let storageProvider: 'supabase' | 'cloudinary' = 'supabase'
           let storedPath: string | null = null
           let mimeType = 'image/webp'
-          let driveFileId: string | null = null
 
-          if (driveStatus.connected) {
-            const formData = new FormData()
-            formData.append('file', new File([compressedImage], `${crypto.randomUUID()}.webp`, { type: 'image/webp' }))
-            formData.append('coupleId', coupleLinkId)
-            formData.append('title', caption.trim() || 'A memory together')
-            formData.append('caption', caption.trim() || 'A memory together')
-            formData.append('date', memoryDate)
-            formData.append('category', memoryCategory)
-            if (location) {
-              formData.append('latitude', String(location.latitude))
-              formData.append('longitude', String(location.longitude))
-            }
-            if (locationLabel.trim()) formData.append('locationLabel', locationLabel.trim())
-            const driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
-            const driveBody = (await driveResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
-            if (!driveResponse.ok || !driveBody.file?.id) {
-              throw new Error(driveBody.error || 'Google Drive upload failed.')
-            }
-            storageProvider = 'google_drive'
-            driveFileId = driveBody.file.id
-            mimeType = driveBody.file.mimeType || mimeType
-            memoryCreatedByDriveApi = true
-          } else {
+          const formData = new FormData()
+          formData.append('file', new File([compressedImage], `${crypto.randomUUID()}.webp`, { type: 'image/webp' }))
+          formData.append('coupleId', coupleLinkId)
+          formData.append('title', caption.trim() || 'A memory together')
+          formData.append('caption', caption.trim() || 'A memory together')
+          formData.append('date', memoryDate)
+          formData.append('category', memoryCategory)
+          if (location) {
+            formData.append('latitude', String(location.latitude))
+            formData.append('longitude', String(location.longitude))
+          }
+          if (locationLabel.trim()) formData.append('locationLabel', locationLabel.trim())
+
+          const mediaResponse = await fetch('/api/media/upload', { method: 'POST', body: formData })
+          const mediaBody = (await mediaResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
+          if (mediaResponse.ok && mediaBody.file?.id) {
+            storageProvider = 'cloudinary'
+            mimeType = mediaBody.file.mimeType || mimeType
+            memoryCreatedByMediaApi = true
+          } else if (mediaResponse.status !== 503) {
+            throw new Error(mediaBody.error || 'Memory upload failed.')
+          }
+
+          if (!memoryCreatedByMediaApi) {
             const path = `${userData.user.id}/${crypto.randomUUID()}.webp`
             const result = await encryptAndUpload(compressedImage, coupleLinkId, 'memories', path)
             storedPath = result.path
             mimeType = result.mimeType
-          }
 
-          if (!memoryCreatedByDriveApi) {
             const { error: insertError } = await supabase.from('memories').insert({
               user_id: userData.user.id,
               couple_id: coupleLinkId,
               image_url: storedPath,
               storage_path: storedPath,
               storage_provider: storageProvider,
-              drive_file_id: driveFileId,
+              drive_file_id: null,
               mime_type: mimeType,
               title: caption.trim() || 'A memory together',
               caption: caption.trim() || 'A memory together',
