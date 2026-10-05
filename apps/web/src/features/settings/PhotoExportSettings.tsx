@@ -22,6 +22,11 @@ export default function PhotoExportSettings() {
       const { data } = await supabase.from('memories').select('id,image_url,storage_path,title,caption,created_at,mime_type,storage_provider,drive_file_id').order('created_at', { ascending: false })
       const resolved = await Promise.all((data ?? []).map(async (memory) => {
         const path = memory.storage_path ?? memory.image_url ?? ''
+        if (memory.storage_provider === 'cloudinary') {
+          const response = await fetch(`/api/media/url?memoryId=${encodeURIComponent(memory.id)}`)
+          const body = (await response.json().catch(() => ({}))) as { url?: string }
+          return { id: memory.id, url: body.url ?? '', filename: memory.title ?? memory.caption ?? 'memory', created_at: memory.created_at }
+        }
         if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
           return { id: memory.id, url: `/api/drive/file?fileId=${encodeURIComponent(memory.drive_file_id)}&download=1`, filename: memory.title ?? memory.caption ?? 'memory', created_at: memory.created_at }
         }
