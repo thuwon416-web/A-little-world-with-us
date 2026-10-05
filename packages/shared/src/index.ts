@@ -20,7 +20,7 @@ export interface Couple {
 export interface Memory {
   id: string
   couple_id: string
-  user_id: string
+  user_id: string | null
   title: string
   description: string | null
   caption: string | null
