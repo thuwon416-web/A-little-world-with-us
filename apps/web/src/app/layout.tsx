@@ -1,5 +1,6 @@
 ﻿import type { Metadata, Viewport } from 'next'
 import dynamic from 'next/dynamic'
+import Script from 'next/script'
 import { Inter, Playfair_Display } from 'next/font/google'
 
 import './globals.css'
@@ -91,6 +92,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen font-sans antialiased">
+        {process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL ? (
+          <Script
+            src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL}
+            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+            strategy="afterInteractive"
+          />
+        ) : null}
         <QueryProvider>
           <LanguageProvider>
             <ThemeProvider>
