@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
-import { createServerClient }
+import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
 
