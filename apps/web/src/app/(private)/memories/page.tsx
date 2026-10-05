@@ -192,6 +192,12 @@ function MemoriesPageContent() {
         (data as Memory[]).map(async (memory) => {
           const provider = (memory as Memory & { storage_provider?: string }).storage_provider ?? 'supabase'
           const driveFileId = (memory as Memory & { drive_file_id?: string | null }).drive_file_id
+          const cloudinaryProvider = (memory as Memory & { storage_provider?: string }).storage_provider === 'cloudinary'
+          if (cloudinaryProvider) {
+            const mediaResponse = await fetch(`/api/media/url?memoryId=${encodeURIComponent(memory.id)}`)
+            const mediaBody = (await mediaResponse.json().catch(() => ({}))) as { url?: string }
+            return { ...memory, displayUrl: mediaResponse.ok ? (mediaBody.url ?? '') : '', mime_type: memory.mime_type }
+          }
           const path = memory.storage_path ?? memory.image_url ?? ''
           if (provider === 'google_drive' && driveFileId) {
             return { ...memory, displayUrl: `/api/drive/file?fileId=${encodeURIComponent(driveFileId)}&download=1`, mime_type: memory.mime_type }
