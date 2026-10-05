@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
-import { isCloudinaryConfigured, uploadMemoryToCloudinary } from '@/lib/cloudinary'
+import { deleteCloudinaryAsset, isCloudinaryConfigured, uploadMemoryToCloudinary } from '@/lib/cloudinary'
 
 export const runtime = 'nodejs'
 
@@ -109,6 +109,7 @@ export async function POST(request: Request) {
       // Do not expose provider internals. The orphaned asset can be reconciled by the
       // storage cleanup job using the returned asset metadata.
       console.error('Cloudinary memory metadata insert failed')
+      if (uploaded) await deleteCloudinaryAsset(uploaded.asset_id).catch(() => undefined)
       return NextResponse.json({ error: 'Memory metadata could not be saved.' }, { status: 500 })
     }
 
