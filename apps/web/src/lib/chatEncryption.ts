@@ -1,9 +1,11 @@
 /**
- * End-to-End Encryption for Chat Messages
- * Uses AES-GCM with couple-specific key
- * 
+ * Application-level AES-GCM encryption for chat messages.
+ * This is NOT end-to-end encryption: the client-visible key can be recovered
+ * by an authorized application client. It protects stored ciphertext, not
+ * against a compromised/authorized client or an authorized partner.
+ *
  * DUAL-KEY SUPPORT:
- * - New messages use NEXT_PUBLIC_CHAT_ENCRYPTION_KEY (env var)
+ * - New messages use NEXT_PUBLIC_CHAT_ENCRYPTION_KEY (client-visible env var)
  * - Old messages use legacy hardcoded prefix (fallback)
  * - Both keys coexist forever (no re-encryption needed)
  */
