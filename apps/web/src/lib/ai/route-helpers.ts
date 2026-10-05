@@ -14,6 +14,7 @@ export const AI_ROUTE_RATE_LIMIT = {
   windowMs: 60_000,
 } as const
 
+// Keep the server-side AI request budget bounded for production routes.
 export const AI_COMPLETION_BUDGET = 800
 
 export function withAiRouteAuth(
