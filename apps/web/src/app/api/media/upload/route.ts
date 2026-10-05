@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
+import { MAX_MEMORY_IMAGE_SIZE, validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
 import { logEvent } from '@/lib/observability'
 import { deleteCloudinaryAsset, isCloudinaryConfigured, uploadMemoryToCloudinary } from '@/lib/cloudinary'
 
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
   if (coupleLinkError) return NextResponse.json({ error: 'Unable to verify couple access.' }, { status: 500 })
   if (!coupleLink) return NextResponse.json({ error: 'You are not a member of this couple.' }, { status: 403 })
 
-  const validation = await validateUploadContent(file, { imagesOnly: true })
+  const validation = await validateUploadContent(file, { imagesOnly: true, maxBytes: MAX_MEMORY_IMAGE_SIZE })
   if (!validation.valid) return NextResponse.json({ error: validation.error ?? 'Invalid upload.' }, { status: 400 })
 
   const title = typeof form.get('title') === 'string' ? String(form.get('title')).trim() : 'A memory together'
