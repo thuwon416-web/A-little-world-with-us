@@ -81,9 +81,23 @@ The maintained database scripts are in [backend/supabase/bootstrap](backend/supa
 
 **Important:** `backend/supabase/bootstrap/00_core.sql` is a destructive reset and must only be used for a fresh or disposable database. Never use it to repair an existing production database.
 
+## Storage architecture
+
+Supabase PostgreSQL is the metadata/source of truth. Media is routed by size and purpose:
+
+- **Cloudinary:** memory images, profile pictures, and thumbnails under 10 MB.
+- **Supabase Storage:** shared documents and chat attachments up to 50 MB.
+- **Backblaze B2:** large shared media and memory backups over 50 MB, up to the application's 5 GB upload limit.
+- **Google Drive:** optional memory export/archive and connected Drive-backed memories.
+- Provider IDs/paths are stored in Supabase so media can be resolved later; uploads are not treated as write-only artifacts.
+
+See [storage architecture](docs/ops/storage-architecture.md) for routing, access, deletion, and provider setup.
+
 ## Storage and security
 
-Supabase remains the application data source of record. When Google Drive is connected, memory image binaries can be stored in Drive while memory metadata and the Drive file reference remain in Supabase.
+Supabase remains the application data source of record. Shared media remains available to the remaining partner when an account is erased; private identity/security data is removed or revoked according to the deletion model.
+
+Chat/media encryption is application-level encryption, not end-to-end encryption. Never commit OAuth client secrets, refresh tokens, encryption keys, cron secrets, or provider API keys.
 
 Never commit OAuth client secrets, refresh tokens, encryption keys, cron secrets, or provider API keys.
 
