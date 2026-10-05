@@ -9,6 +9,7 @@ const SALT_ROUNDS = 10
 const pinRequestSchema = z.object({
   action: z.enum(['hash', 'verify', 'remove', 'status']),
   pin: z.string().regex(/^\d{4,6}$/, 'PIN must be 4 to 6 digits').optional(),
+  currentPin: z.string().regex(/^\d{4,6}$/, 'Current PIN must be 4 to 6 digits').optional(),
 })
 
 export async function POST(req: NextRequest) {
@@ -44,17 +45,49 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ hasPIN: Boolean(data?.lock_pin_hash) })
     }
 
-    if (action === 'remove') {
-      const { error } = await supabase
-        .from('user_settings')
-        .update({ lock_pin_hash: null })
-        .eq('user_id', user.id)
-
-      if (error) {
-        return NextResponse.json({ error: 'Failed to remove PIN' }, { status: 500 })
+    if (action === 'remove' || action === 'hash') {
+      const rateLimitResult = await checkRateLimit(`pin-change:${user.id}`, 5, 60000)
+      if (!rateLimitResult.allowed) {
+        return NextResponse.json(
+          { error: 'Too many PIN changes. Try again later.' },
+          { status: 429 }
+        )
       }
 
-      return NextResponse.json({ success: true })
+      const { data: currentSettings, error: currentSettingsError } = await supabase
+        .from('user_settings')
+        .select('lock_pin_hash')
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      if (currentSettingsError) {
+        return NextResponse.json({ error: 'Failed to load current PIN.' }, { status: 500 })
+      }
+
+      if (currentSettings?.lock_pin_hash) {
+        if (!currentPin) {
+          return NextResponse.json({ error: 'Current PIN is required.' }, { status: 400 })
+        }
+        const currentValid = await bcrypt.compare(currentPin, currentSettings.lock_pin_hash)
+        if (!currentValid) {
+          return NextResponse.json({ error: 'Current PIN is incorrect.' }, { status: 403 })
+        }
+      } else if (action === 'remove') {
+        return NextResponse.json({ error: 'No PIN is currently set.' }, { status: 400 })
+      }
+
+      if (action === 'remove') {
+        const { error } = await supabase
+          .from('user_settings')
+          .update({ lock_pin_hash: null })
+          .eq('user_id', user.id)
+
+        if (error) {
+          return NextResponse.json({ error: 'Failed to remove PIN' }, { status: 500 })
+        }
+
+        return NextResponse.json({ success: true })
+      }
     }
 
     if (action === 'hash') {
