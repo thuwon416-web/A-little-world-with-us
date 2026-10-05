@@ -14,8 +14,6 @@ export async function assertAdmin(serviceClient: SupabaseClient, accessToken: st
   return user
 }
 
-export const createServiceClient = createAdminClient
-
 export async function writeAdminAudit(
   serviceClient: SupabaseClient,
   adminId: string,
@@ -40,3 +38,5 @@ export function createAdminClient() {
     { auth: { autoRefreshToken: false, persistSession: false } }
   )
 }
+
+export const createServiceClient = createAdminClient
