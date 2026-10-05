@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-05 — final code-side integration pass
+
+- Finalized the tiered media storage model: Cloudinary for small memory/profile imagery, Supabase Storage for shared documents/chat attachments, Backblaze B2 for large shared media, and Google Drive for export/archive.
+- Added B2 private upload/download authorization and provider metadata for large chat/media objects.
+- Added Google Drive memory export support for provider-backed memories.
+- Hardened live Supabase policies for location-address cache access, partner message deletion, and vault credential ownership, then verified the live state.
+- Added Bearer-token support to the shared AI route auth wrapper so Mobile AI calls use the same server authorization boundary as Web.
+- Hardened Google Drive upload rate limiting and removed raw provider errors from API responses.
+- Corrected chat encryption wording so it no longer claims end-to-end encryption.
+- Updated README and storage/operations documentation with the final architecture and verification boundary.
+
 ## 2026-10-01 — final UI parity pass
 
 - Memory hub reordered to Photo Memories → Memory Map → Time Capsule → Add to Our Memories → Our Story, with the AI companion kept at the bottom.
