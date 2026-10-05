@@ -109,7 +109,7 @@ export async function POST(request: Request) {
 
     if (memoryError) {
       await deleteDriveFile(user.id, driveFile.id).catch(() => undefined)
-      return NextResponse.json({ error: memoryError.message }, { status: 400 })
+      return NextResponse.json({ error: 'Memory metadata could not be saved.' }, { status: 400 })
     }
 
     return NextResponse.json({ file: driveFile, memory })
