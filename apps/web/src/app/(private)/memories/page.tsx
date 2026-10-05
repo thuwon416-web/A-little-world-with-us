@@ -327,6 +327,11 @@ function MemoriesPageContent() {
             formData.append('caption', caption.trim() || 'A memory together')
             formData.append('date', memoryDate)
             formData.append('category', memoryCategory)
+            if (location) {
+              formData.append('latitude', String(location.latitude))
+              formData.append('longitude', String(location.longitude))
+            }
+            if (locationLabel.trim()) formData.append('locationLabel', locationLabel.trim())
             const driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
             const driveBody = (await driveResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
             if (!driveResponse.ok || !driveBody.file?.id) {
