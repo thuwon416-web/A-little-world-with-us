@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient, writeAdminAudit } from '@/lib/admin'
+import { logEvent } from '@/lib/observability'
 import { disconnectDrive } from '@/lib/google-drive'
 
 export const runtime = 'nodejs'
