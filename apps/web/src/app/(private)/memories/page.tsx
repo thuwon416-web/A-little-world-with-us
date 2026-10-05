@@ -307,6 +307,7 @@ function MemoriesPageContent() {
       const uploadErrors: string[] = []
       for (const file of selectedFiles) {
         try {
+          let memoryCreatedByDriveApi = false
           const compressedImage = await compressImage(file)
           const driveStatusResponse = await fetch('/api/drive/status')
           const driveStatus = driveStatusResponse.ok
@@ -322,6 +323,10 @@ function MemoriesPageContent() {
             const formData = new FormData()
             formData.append('file', new File([compressedImage], `${crypto.randomUUID()}.webp`, { type: 'image/webp' }))
             formData.append('coupleId', coupleLinkId)
+            formData.append('title', caption.trim() || 'A memory together')
+            formData.append('caption', caption.trim() || 'A memory together')
+            formData.append('date', memoryDate)
+            formData.append('category', memoryCategory)
             const driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
             const driveBody = (await driveResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
             if (!driveResponse.ok || !driveBody.file?.id) {
@@ -330,6 +335,7 @@ function MemoriesPageContent() {
             storageProvider = 'google_drive'
             driveFileId = driveBody.file.id
             mimeType = driveBody.file.mimeType || mimeType
+            memoryCreatedByDriveApi = true
           } else {
             const path = `${userData.user.id}/${crypto.randomUUID()}.webp`
             const result = await encryptAndUpload(compressedImage, coupleLinkId, 'memories', path)
@@ -337,34 +343,28 @@ function MemoriesPageContent() {
             mimeType = result.mimeType
           }
 
-          const { error: insertError } = await supabase.from('memories').insert({
-            user_id: userData.user.id,
-            couple_id: coupleLinkId,
-            image_url: storedPath,
-            storage_path: storedPath,
-            storage_provider: storageProvider,
-            drive_file_id: driveFileId,
-            mime_type: mimeType,
-            title: caption.trim() || 'A memory together',
-            caption: caption.trim() || 'A memory together',
-            date: memoryDate,
-            category: memoryCategory,
-            visibility: 'shared',
-            latitude: location?.latitude ?? null,
-            longitude: location?.longitude ?? null,
-            location_label: locationLabel.trim() || null,
-          })
-          if (insertError) {
-            if (storageProvider === 'google_drive' && driveFileId) {
-              await fetch('/api/drive/delete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ fileId: driveFileId }),
-              })
-            } else if (storedPath) {
-              await supabase.storage.from('memories').remove([storedPath])
+          if (!memoryCreatedByDriveApi) {
+            const { error: insertError } = await supabase.from('memories').insert({
+              user_id: userData.user.id,
+              couple_id: coupleLinkId,
+              image_url: storedPath,
+              storage_path: storedPath,
+              storage_provider: storageProvider,
+              drive_file_id: driveFileId,
+              mime_type: mimeType,
+              title: caption.trim() || 'A memory together',
+              caption: caption.trim() || 'A memory together',
+              date: memoryDate,
+              category: memoryCategory,
+              visibility: 'shared',
+              latitude: location?.latitude ?? null,
+              longitude: location?.longitude ?? null,
+              location_label: locationLabel.trim() || null,
+            })
+            if (insertError) {
+              if (storedPath) await supabase.storage.from('memories').remove([storedPath])
+              throw insertError
             }
-            throw insertError
           }
           uploadedCount += 1
         } catch (fileError) {
