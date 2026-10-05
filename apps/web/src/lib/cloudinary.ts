@@ -71,6 +71,7 @@ export async function uploadMemoryToCloudinary(
     folder,
     public_id: publicId,
     timestamp,
+    type: 'private',
   }
 
   const body = new FormData()
@@ -79,6 +80,7 @@ export async function uploadMemoryToCloudinary(
   body.append('folder', folder)
   body.append('public_id', publicId)
   body.append('timestamp', timestamp)
+  body.append('type', 'private')
   body.append('signature', signParams(signedParams))
 
   const response = await fetch(
