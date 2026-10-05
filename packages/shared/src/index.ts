@@ -34,12 +34,15 @@ export interface Memory {
   mime_type: string | null
   created_at: string
   updated_at: string
-  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary'
+  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary' | 'backblaze_b2'
   drive_file_id?: string | null
   cloudinary_asset_id?: string | null
   cloudinary_public_id?: string | null
   storage_url?: string | null
   thumbnail_url?: string | null
+  b2_file_id?: string | null
+  b2_file_name?: string | null
+  b2_bucket_name?: string | null
 }
 
 export interface RelationshipMemory {
@@ -70,6 +73,10 @@ export interface ChatMessage {
   message_type: MessageType
   media_url: string | null
   media_mime_type: string | null
+  media_storage_provider: 'supabase' | 'backblaze_b2' | 'cloudinary' | 'google_drive' | null
+  media_storage_path: string | null
+  media_storage_file_id: string | null
+  media_size_bytes: number | null
   media_duration: number | null
   reply_to: string | null
   transcript: string | null
