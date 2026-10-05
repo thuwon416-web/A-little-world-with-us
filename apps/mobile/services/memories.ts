@@ -17,7 +17,10 @@ export type MemoryRecord = Pick<
   | 'mime_type'
 > & {
   metadata?: { mood_tag?: string; ai_reflection?: string; voice_url?: string; voice_path?: string } | null
-  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary'
+  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary' | 'backblaze_b2'
+  b2_file_id?: string | null
+  b2_file_name?: string | null
+  b2_bucket_name?: string | null
   drive_file_id?: string | null
   cloudinary_asset_id?: string | null
   cloudinary_public_id?: string | null
