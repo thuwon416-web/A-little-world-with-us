@@ -1,4 +1,7 @@
 export const MAX_UPLOAD_SIZE = 5 * 1024 * 1024
+export const MAX_MEMORY_IMAGE_SIZE = 10 * 1024 * 1024
+export const MAX_SHARED_DOCUMENT_SIZE = 50 * 1024 * 1024
+export const MAX_LARGE_MEDIA_SIZE = 5 * 1024 * 1024 * 1024
 
 export const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
@@ -11,16 +14,18 @@ export const ALLOWED_FILE_TYPES = [...ALLOWED_IMAGE_TYPES, 'application/pdf'] as
 
 type UploadValidationOptions = {
   imagesOnly?: boolean
+  maxBytes?: number
 }
 
 export function validateUpload(
   file: Pick<File, 'name' | 'size' | 'type'>,
   options: UploadValidationOptions = {}
 ): { valid: boolean; error?: string } {
-  if (file.size > MAX_UPLOAD_SIZE) {
+  const maxBytes = options.maxBytes ?? MAX_UPLOAD_SIZE
+  if (file.size > maxBytes) {
     return {
       valid: false,
-      error: `${file.name}: files must be 5 MB or smaller.`,
+      error: `${file.name}: files must be ${Math.floor(maxBytes / (1024 * 1024))} MB or smaller.`,
     }
   }
 
