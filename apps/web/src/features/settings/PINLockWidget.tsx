@@ -15,6 +15,7 @@ export default function PINLockWidget({
 }>) {
   const [hasPin, setHasPin] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [currentPin, setCurrentPin] = useState('')
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [error, setError] = useState('')
@@ -23,6 +24,9 @@ export default function PINLockWidget({
 
   const closeModal = () => {
     setShowModal(false)
+    setCurrentPin('')
+    setPin('')
+    setConfirmPin('')
     onModalClose()
   }
 
@@ -59,7 +63,7 @@ export default function PINLockWidget({
       const response = await fetch('/api/auth/pin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'hash', pin }),
+        body: JSON.stringify({ action: 'hash', pin, currentPin: hasPin ? currentPin : undefined }),
       })
       const result = await response.json() as { error?: string }
       if (!response.ok) {
@@ -68,6 +72,7 @@ export default function PINLockWidget({
       }
       setHasPin(true)
       closeModal()
+      setCurrentPin('')
       setPin('')
       setConfirmPin('')
       setError('')
@@ -79,11 +84,14 @@ export default function PINLockWidget({
   const handleRemovePIN = async () => {
     if (!confirm('Are you sure you want to remove PIN lock?')) return
 
+    const currentPin = window.prompt('Enter your current PIN to remove PIN lock.') ?? ''
+    if (!/^\d{4,6}$/.test(currentPin)) return
+
     try {
       const response = await fetch('/api/auth/pin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'remove' }),
+        body: JSON.stringify({ action: 'remove', currentPin }),
       })
       const result = await response.json() as { error?: string }
       if (!response.ok) {
@@ -118,7 +126,7 @@ export default function PINLockWidget({
           <div>
             <p className="text-xs uppercase tracking-[0.18em] text-text-2">Private protection</p>
             <h3 id="pin-lock-title" className="mt-1 text-lg font-semibold text-text-1">
-              Set PIN
+              {hasPin ? 'Change PIN' : 'Set PIN'}
             </h3>
           </div>
           <button type="button" onClick={closeModal} className="rounded-full p-2 text-text-2 transition hover:bg-soft-tint hover:text-text-1" aria-label="Close PIN setup">
@@ -127,8 +135,13 @@ export default function PINLockWidget({
         </div>
 
         <div className="space-y-4">
+          {hasPin ? <div>
+            <label htmlFor="current-pin" className="text-sm font-medium text-text-1">Current PIN *</label>
+            <input id="current-pin" type="password" inputMode="numeric" autoComplete="current-password" value={currentPin} onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, '').slice(0, 6))} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-base tracking-[0.35em] text-text-1 outline-none" placeholder="••••" maxLength={6} autoFocus />
+          </div> : null}
+
           <div>
-            <label htmlFor={pinInputId} className="text-sm font-medium text-text-1">PIN (4-6 digits) *</label>
+            <label htmlFor={pinInputId} className="text-sm font-medium text-text-1">New PIN (4-6 digits) *</label>
             <input
               id={pinInputId}
               type="password"
@@ -165,10 +178,10 @@ export default function PINLockWidget({
           <button
             type="button"
             onClick={handleSetPIN}
-            disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin}
+            disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin || (hasPin && !/^\d{4,6}$/.test(currentPin))}
             className="w-full rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            Set PIN
+            {hasPin ? 'Change PIN' : 'Set PIN'}
           </button>
         </div>
       </div>
@@ -187,15 +200,17 @@ export default function PINLockWidget({
           <p className="text-sm text-text-2">
             PIN lock is enabled. You&apos;ll be asked for your PIN when opening the app.
           </p>
+          <div className="flex gap-2">
           <button
             type="button"
-            onClick={handleRemovePIN}
+            onClick={() => { setShowModal(true); onModalOpen() }}
             className="w-full rounded-xl border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
           >
             Remove PIN
-          </button>
-        </div>
-      ) : (
+          >Change PIN</button>
+          <button
+            type="button"
+            onClick={handleRemovePIN}
         <div className="space-y-3">
           <p className="text-sm text-text-2">
             Set a PIN to protect your app and private vault.
