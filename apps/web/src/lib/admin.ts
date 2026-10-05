@@ -1,37 +1,23 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-export function createAdminClient(): SupabaseClient {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
-  if (!url || !key) throw new Error('Server database credentials are not configured.')
-  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
+export async function assertAdmin(serviceClient: SupabaseClient, accessToken: string) {
+  const { data: { user }, error: userError } = await serviceClient.auth.getUser(accessToken)
+  if (userError || !user) throw new Error('Unauthorized')
+
+  const { data: profile, error: profileError } = await serviceClient
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .maybeSingle()
+
+  if (profileError || profile?.role !== 'admin') throw new Error('Forbidden')
+  return user
 }
 
-export async function assertAdmin(userId: string, client = createAdminClient()) {
-  const { data, error } = await client.from('profiles').select('role').eq('id', userId).maybeSingle()
-  if (error) throw error
-  if (data?.role !== 'admin') {
-    const error = new Error('Forbidden')
-    ;(error as Error & { status?: number }).status = 403
-    throw error
-  }
-  return true
-}
-
-export async function writeAdminAudit(
-  client: SupabaseClient,
-  actorId: string,
-  action: string,
-  resourceType?: string,
-  resourceId?: string,
-  details: Record<string, unknown> = {}
-) {
-  const { error } = await client.from('admin_audit_logs').insert({
-    actor_id: actorId,
-    action,
-    resource_type: resourceType ?? null,
-    resource_id: resourceId ?? null,
-    details,
-  })
-  if (error) throw error
+export function createServiceClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
 }
