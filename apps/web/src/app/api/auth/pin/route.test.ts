@@ -61,6 +61,7 @@ import { POST } from './route'
 function makeRequest(): NextRequest {
   return new Request('http://localhost/api/auth/pin', {
     method: 'POST',
+    headers: { Origin: 'http://localhost' },
     body: JSON.stringify({ action: 'status' }),
   }) as NextRequest
 }
