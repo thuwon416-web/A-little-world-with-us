@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
-import { createAdminClient, writeAdminAudit } from '@/lib/admin'
+import { createAdminClient } from '@/lib/admin'
 import { isSameOriginRequest } from '@/lib/csrf'
 
 export async function GET() {
@@ -41,17 +41,11 @@ export async function POST(request: Request) {
 
   const admin = createAdminClient()
   const scheduledFor = new Date(Date.now() + graceDays * 86_400_000).toISOString()
-  const { error } = await admin.from('account_deletion_requests').upsert({
-    user_id: user.id,
-    scheduled_for: scheduledFor,
-    requested_at: new Date().toISOString(),
-    cancelled_at: null,
-    completed_at: null,
+  const { data, error } = await admin.rpc('request_account_deletion', {
+    p_user_id: user.id,
+    p_scheduled_for: scheduledFor,
   })
   if (error) return NextResponse.json({ error: 'Unable to request account deletion.' }, { status: 500 })
 
-  await admin.from('profiles').update({ deleted_at: new Date().toISOString() }).eq('id', user.id)
-  await writeAdminAudit(admin, user.id, 'request_account_deletion', 'profile', user.id, { graceDays, scheduledFor })
-
-  return NextResponse.json({ status: 'scheduled', scheduledFor })
+  return NextResponse.json({ status: 'scheduled', scheduledFor: data })
 }
