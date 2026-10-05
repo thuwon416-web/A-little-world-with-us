@@ -44,7 +44,7 @@ export function withAiRouteAuth(
     }
 
     const rateLimitResult = await checkRateLimit(
-      user.id,
+      `ai:${user.id}`,
       AI_ROUTE_RATE_LIMIT.limit,
       AI_ROUTE_RATE_LIMIT.windowMs
     )
