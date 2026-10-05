@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { createServerClient } from '@/lib/supabase-server'
+import { isSameOriginRequest } from '@/lib/csrf'
 
 const SALT_ROUNDS = 10
 const pinRequestSchema = z.object({
@@ -14,6 +15,9 @@ const pinRequestSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    if (!isSameOriginRequest(req)) {
+      return NextResponse.json({ error: 'Cross-origin request blocked.' }, { status: 403 })
+    }
     const supabase = await createServerClient()
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -25,7 +29,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { action, pin } = pinRequestSchema.parse(await req.json())
+    const { action, pin, currentPin } = pinRequestSchema.parse(await req.json())
 
     if ((action === 'hash' || action === 'verify') && !pin) {
       return NextResponse.json({ error: 'PIN is required' }, { status: 400 })
@@ -91,14 +95,6 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'hash') {
-      const rateLimitResult = await checkRateLimit(`pin-hash:${user.id}`, 5, 60000)
-      if (!rateLimitResult.allowed) {
-        return NextResponse.json(
-          { error: 'Too many PIN changes. Try again later.' },
-          { status: 429 }
-        )
-      }
-
       const hashedPin = await bcrypt.hash(pin!, SALT_ROUNDS)
 
       // Store the hashed PIN in user_settings
