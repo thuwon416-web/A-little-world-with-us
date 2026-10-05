@@ -58,3 +58,15 @@ export async function resolveChatMediaUrl(
 
   return data.signedUrl
 }
+
+export async function resolveB2ChatMediaUrl(coupleId: string, fileName: string | null): Promise<string | null> {
+  if (!fileName) return null
+  const response = await fetch('/api/media/b2-url', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ coupleId, fileName }),
+  })
+  if (!response.ok) return null
+  const data = await response.json() as { url?: string }
+  return data.url ?? null
+}
