@@ -83,7 +83,7 @@ The maintained Supabase bootstrap run order is documented in `backend/supabase/b
 
 ## Google Drive
 
-For shared memories, **Web and Mobile use the server-backed Drive connection as the canonical connection**. The `memories` row remains the app's metadata/source of truth and stores `storage_provider` plus `drive_file_id`; the server keeps the owner's Drive refresh token encrypted and authorizes couple members before reading a shared file. This avoids splitting access between separate native and web OAuth tokens.
+For shared memories, **Cloudinary is the primary media store** and Supabase stores the metadata/source of truth. Google Drive is an export/archive destination. Legacy Drive-backed memories remain supported through the server-backed connection. The `memories` row remains the app's metadata/source of truth and stores provider-specific asset identifiers. Cloudinary assets are couple-scoped; the server keeps Google Drive refresh tokens encrypted and uses the authenticated Drive route for legacy/export-backed files. This avoids splitting access between separate native and web OAuth tokens.
 
 Mobile also contains a native PKCE Drive integration for device-local Drive tools. It must not be treated as the shared-memory storage authority. Google documents `drive.file` as narrow per-file access, so directly uploading a shared-memory file from a separate native OAuth connection would not automatically make that file readable through the server-side connection. See the official Google Drive scope guidance: https://developers.google.com/workspace/drive/api/guides/api-specific-auth
 
