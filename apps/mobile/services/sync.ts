@@ -120,7 +120,7 @@ export async function pushPendingMessages() {
       p_row_id: rawMessage.id,
       p_base_version: 0,
       p_payload: payload,
-    }).returns<{ current_version?: number }>().single()
+    }).returns<unknown>().single()
 
     if (error) {
       failures.push(error.message)
@@ -131,7 +131,7 @@ export async function pushPendingMessages() {
       await rawMessage.update((record) => {
         const fields = record as unknown as MessageFields
         fields.synced = true
-        fields.sync_version = result?.current_version ?? 1
+        const syncResult = result as { current_version?: number } | null\n        fields.sync_version = syncResult?.current_version ?? 1
       })
     })
   }
@@ -334,9 +334,9 @@ export async function flushOfflineOperations() {
         p_row_id: item.row_id,
         p_base_version: item.base_version,
         p_payload: JSON.parse(item.payload),
-      }).returns<{ conflict?: boolean }>().single()
+      }).returns<unknown>().single()
       if (error) throw error
-      if (data?.conflict) {
+      const syncResult = data as { conflict?: boolean } | null\n      if (syncResult?.conflict) {
         conflicts += 1
         continue
       }
