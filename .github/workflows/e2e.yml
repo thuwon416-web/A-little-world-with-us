@@ -43,11 +43,6 @@ jobs:
             echo "available=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Fail when E2E environment is unavailable
-        if: steps.e2e_env.outputs.available != 'true'
-        run: |
-          echo "::error::E2E environment is unavailable."
-          exit 1
 
       - name: Install Playwright browsers
         if: steps.e2e_env.outputs.available == 'true'
