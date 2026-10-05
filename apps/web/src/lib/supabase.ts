@@ -134,10 +134,13 @@ export type Memory = {
   location_label?: string | null
   reveal_at?: string | null
   mime_type?: string | null
-  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary'
+  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary' | 'backblaze_b2'
   drive_file_id?: string | null
   cloudinary_asset_id?: string | null
   cloudinary_public_id?: string | null
+  b2_file_id?: string | null
+  b2_file_name?: string | null
+  b2_bucket_name?: string | null
   storage_url?: string | null
   thumbnail_url?: string | null
 }
