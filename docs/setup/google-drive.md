@@ -48,7 +48,7 @@ OAuth state is bound to a short-lived HTTP-only browser cookie and verified befo
 
 ## Memory behavior
 
-- Drive connected: compressed memory image is uploaded to Drive and the database stores `storage_provider=google_drive` plus `drive_file_id`.
+- Cloudinary is the primary shared-memory storage; Google Drive is reserved for export/archive. Legacy Drive-backed memories remain readable through the authenticated Drive route.
 - Drive not connected: the existing Supabase storage path remains the fallback.
 - Reading a Drive-backed memory goes through the authenticated application route; the raw Drive file is not exposed as a public URL.
 - Deleting a Drive-backed memory also removes the associated Drive file before the database record is removed.
