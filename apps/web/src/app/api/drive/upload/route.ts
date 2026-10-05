@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const rateLimit = await checkRateLimit(user.id, 5, 60_000)
+  const rateLimit = await checkRateLimit(`drive-upload:${user.id}`, 5, 60_000)
   if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: 'Too many uploads. Please try again shortly.', resetAt: rateLimit.resetTime },
@@ -113,10 +113,10 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ file: driveFile, memory })
-  } catch (error) {
+  } catch {
     if (driveFile) await deleteDriveFile(user.id, driveFile.id).catch(() => undefined)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Google Drive memory upload failed.' },
+      { error: 'Google Drive memory upload failed.' },
       { status: 502 }
     )
   }
