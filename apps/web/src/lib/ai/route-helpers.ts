@@ -1,11 +1,12 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createServerClient }
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 type AiRouteAuthContext = {
   userId: string
-  supabase: ReturnType<typeof createServerClient>
+  supabase: SupabaseClient
 }
 
 export const AI_ROUTE_RATE_LIMIT = {
@@ -19,7 +20,17 @@ export function withAiRouteAuth(
   handler: (request: NextRequest, context: AiRouteAuthContext) => Promise<NextResponse>
 ) {
   return async function handleAiRoute(request: NextRequest): Promise<NextResponse> {
-    const supabase = createServerClient(
+    const authorization = request.headers.get('authorization')
+    const supabase = authorization
+      ? createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          {
+            global: { headers: { Authorization: authorization } },
+            auth: { autoRefreshToken: false, persistSession: false },
+          }
+        )
+      : createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
