@@ -42,7 +42,7 @@ export async function getMemories(): Promise<MemoryRecord[]> {
   const { data, error } = await supabase
     .from('memories')
     .select(
-      'id,title,caption,description,date,category,image_url,storage_path,latitude,longitude,location_label,created_at,mime_type,metadata,storage_provider,drive_file_id'
+      'id,title,caption,description,date,category,image_url,storage_path,latitude,longitude,location_label,created_at,mime_type,metadata,storage_provider,drive_file_id,cloudinary_asset_id,cloudinary_public_id,storage_url,thumbnail_url'
     )
     .eq('couple_id', id)
     .order('date', { ascending: false })
