@@ -70,6 +70,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: metadataValidation.error ?? 'Invalid memory metadata.' }, { status: 400 })
   }
 
+  const latitudeValue = typeof form.get('latitude') === 'string' ? Number(form.get('latitude')) : null
+  const longitudeValue = typeof form.get('longitude') === 'string' ? Number(form.get('longitude')) : null
+  const locationLabel = typeof form.get('locationLabel') === 'string' ? String(form.get('locationLabel')).trim() : ''
+  const hasLatitude = latitudeValue !== null && Number.isFinite(latitudeValue)
+  const hasLongitude = longitudeValue !== null && Number.isFinite(longitudeValue)
+  if (hasLatitude !== hasLongitude || (hasLatitude && (latitudeValue! < -90 || latitudeValue! > 90 || longitudeValue! < -180 || longitudeValue! > 180))) {
+    return NextResponse.json({ error: 'Invalid memory location.' }, { status: 400 })
+  }
+  if (locationLabel.length > 120) {
+    return NextResponse.json({ error: 'Memory location label must be 120 characters or fewer.' }, { status: 400 })
+  }
+
   let driveFile: Awaited<ReturnType<typeof uploadDriveFile>> | null = null
   try {
     driveFile = await uploadDriveFile(user.id, file)
@@ -88,6 +100,9 @@ export async function POST(request: Request) {
         caption,
         date,
         category,
+        latitude: hasLatitude ? latitudeValue : null,
+        longitude: hasLongitude ? longitudeValue : null,
+        location_label: locationLabel || null,
       })
       .select('id,created_at')
       .single()
