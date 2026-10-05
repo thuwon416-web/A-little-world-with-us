@@ -558,14 +558,14 @@ export default function RealtimeChat() {
     setShowGIFPicker(false)
   }
 
-  const handleFileUpload = async (fileInfo: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string }) => {
+  const handleFileUpload = async (fileInfo: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string; storageProvider?: 'supabase' | 'backblaze_b2'; storageFileId?: string }) => {
     try {
       if (!coupleId || !currentUserId) return
       let messageType: 'photo' | 'video' | 'audio' | 'file' = 'file'
       if (fileInfo.type.startsWith('image/')) messageType = 'photo'
       else if (fileInfo.type.startsWith('video/')) messageType = 'video'
       else if (fileInfo.type.startsWith('audio/')) messageType = 'audio'
-      const { error } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: currentUserId, content: fileInfo.name, media_url: fileInfo.url, message_type: messageType, media_mime_type: fileInfo.mimeType, encrypted: false })
+      const { error } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: currentUserId, content: fileInfo.name, media_url: fileInfo.url, message_type: messageType, media_mime_type: fileInfo.mimeType, media_storage_provider: fileInfo.storageProvider ?? 'supabase', media_storage_path: fileInfo.path ?? null, media_storage_file_id: fileInfo.storageFileId ?? null, media_size_bytes: fileInfo.size, encrypted: true })
       if (error) throw error
       setShowFileUpload(false)
     } catch (error) {
