@@ -389,38 +389,19 @@ function MemoriesPageContent() {
 
   const handleDelete = async (memory: DisplayMemory) => {
     if (!memory.user_id) {
-      setError('This legacy memory cannot be deleted from Storage.')
+      setError('This legacy memory cannot be deleted.')
       return
     }
 
     setError('')
-    const provider = (memory as Memory & { storage_provider?: string }).storage_provider ?? 'supabase'
-    const driveFileId = (memory as Memory & { drive_file_id?: string | null }).drive_file_id
-
-    if (provider === 'google_drive' && driveFileId) {
-      const response = await fetch('/api/drive/delete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileId: driveFileId }),
-      })
-      if (!response.ok) {
-        const body = (await response.json().catch(() => ({}))) as { error?: string }
-        setError(body.error || 'Google Drive file deletion failed.')
-        return
-      }
-    } else if (memory.image_url && !memory.image_url.startsWith('/')) {
-      const { error: storageError } = await supabase.storage
-        .from('memories')
-        .remove([memory.storage_path ?? memory.image_url])
-      if (storageError) {
-        setError(storageError.message)
-        return
-      }
-    }
-
-    const { error: deleteError } = await supabase.from('memories').delete().eq('id', memory.id)
-    if (deleteError) {
-      setError(deleteError.message)
+    const response = await fetch('/api/media/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ memoryId: memory.id }),
+    })
+    if (!response.ok) {
+      const body = (await response.json().catch(() => ({}))) as { error?: string }
+      setError(body.error || 'Memory deletion failed.')
       return
     }
 
