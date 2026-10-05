@@ -116,4 +116,4 @@ Production/device verification is still required for external services and nativ
 
 ## Final verification boundary
 
-Code-side work is maintained directly on `main`. Vercel deployment work is intentionally paused. Remaining operator/device verification covers provider credentials and configuration (Backblaze B2 bucket/CORS, Google OAuth, Axiom, Umami, uptime monitoring), E2E staging secrets, and native capabilities such as notifications, background location, maps, media permissions, and WebRTC.
+Code-side work is maintained directly on `main`. Vercel is enabled for the current production verification pass; avoid unnecessary redeploys. Project-level build/install/dev/output overrides are cleared so the Next.js app uses the repository defaults. Remaining operator/device verification covers provider credentials and configuration (Backblaze B2 bucket/CORS, Google OAuth, Axiom, Umami, uptime monitoring), E2E staging secrets, and native capabilities such as notifications, background location, maps, media permissions, and WebRTC.
