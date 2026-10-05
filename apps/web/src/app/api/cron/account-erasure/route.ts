@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createAdminClient, writeAdminAudit } from '@/lib/admin'
-import { disconnectDrive, deleteDriveFile } from '@/lib/google-drive'
+import { disconnectDrive } from '@/lib/google-drive'
 
 export const runtime = 'nodejs'
 export const maxDuration = 60
