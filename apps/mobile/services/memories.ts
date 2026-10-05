@@ -19,6 +19,10 @@ export type MemoryRecord = Pick<
   metadata?: { mood_tag?: string; ai_reflection?: string; voice_url?: string; voice_path?: string } | null
   storage_provider?: 'supabase' | 'google_drive' | 'cloudinary'
   drive_file_id?: string | null
+  cloudinary_asset_id?: string | null
+  cloudinary_public_id?: string | null
+  storage_url?: string | null
+  thumbnail_url?: string | null
   description?: string | null
 }
 
@@ -47,7 +51,24 @@ export async function getMemories(): Promise<MemoryRecord[]> {
     .eq('couple_id', id)
     .order('date', { ascending: false })
   if (error) throw new Error(error.message)
-  return (data ?? []) as MemoryRecord[]
+
+  const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
+  const records = (data ?? []) as MemoryRecord[]
+  if (!webUrl || !session?.access_token) return records
+
+  return Promise.all(records.map(async (memory) => {
+    if (memory.storage_provider !== 'cloudinary') return memory
+    const response = await fetch(`${webUrl}/api/media/url?memoryId=${encodeURIComponent(memory.id)}`, {
+      headers: { Authorization: `Bearer ${session.access_token}` },
+    })
+    if (!response.ok) return memory
+    const body = (await response.json().catch(() => ({}))) as { url?: string }
+    return body.url ? { ...memory, image_url: body.url } : memory
+  }))
 }
 
 export async function deleteMemory(id: string) {
