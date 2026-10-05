@@ -20,6 +20,7 @@ export async function POST(request: Request) {
     await deleteDriveFile(access.ownerId, fileId)
     return NextResponse.json({ deleted: true })
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Google Drive file deletion failed.' }, { status: 502 })
+    console.error('[drive] file delete failed:', error instanceof Error ? error.message : 'unknown error')
+    return NextResponse.json({ error: 'Google Drive file deletion failed.' }, { status: 502 })
   }
 }
