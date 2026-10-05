@@ -334,7 +334,7 @@ export async function flushOfflineOperations() {
         p_row_id: item.row_id,
         p_base_version: item.base_version,
         p_payload: JSON.parse(item.payload),
-      }).single()
+      }).returns<{ conflict?: boolean }>().single()
       if (error) throw error
       if (data?.conflict) {
         conflicts += 1
