@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerClient } from '@/lib/supabase-server'
 import { createAdminClient, writeAdminAudit } from '@/lib/admin'
+import { isSameOriginRequest } from '@/lib/csrf'
 
 export async function GET() {
   const supabase = await createServerClient()
@@ -24,6 +25,10 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: 'Cross-origin request blocked.' }, { status: 403 })
+  }
+
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
