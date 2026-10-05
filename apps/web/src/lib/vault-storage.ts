@@ -7,6 +7,9 @@ export type WrappedKeyStorage = {
   iv: string
   salt: string
   version: number
+  recoveryCiphertext?: string
+  recoveryIv?: string
+  recoverySalt?: string
 }
 
 function openDatabase(): Promise<IDBDatabase> {
