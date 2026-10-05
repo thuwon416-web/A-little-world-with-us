@@ -24,5 +24,5 @@ export async function GET(request: Request) {
     }
     return NextResponse.json({ file: await listDriveFile(access.ownerId, fileId) })
   }
-  catch (error) { return NextResponse.json({ error: error instanceof Error ? error.message : 'Google Drive lookup failed.' }, { status: 502 }) }
+  catch (error) { console.error('[drive] file lookup failed:', error instanceof Error ? error.message : 'unknown error'); return NextResponse.json({ error: 'Google Drive lookup failed.' }, { status: 502 }) }
 }
