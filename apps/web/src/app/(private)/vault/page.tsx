@@ -313,7 +313,7 @@ export default function VaultPage() {
 
 function VaultPageContent() {
   const fieldId = useId()
-  const { masterKey, isUnlocked: isPasswordVaultUnlocked, unlockWithPassphrase, unlockWithBiometric } = useVaultKey()
+  const { masterKey, isUnlocked: isPasswordVaultUnlocked, unlockWithPassphrase, unlockWithBackupPhrase, unlockWithBiometric } = useVaultKey()
   const [isUnlocked, setIsUnlocked] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [letters, setLetters] = useState<VaultItem[]>([])
@@ -332,6 +332,8 @@ function VaultPageContent() {
   const [passphrase, setPassphrase] = useState('')
   const [passwordVaultError, setPasswordVaultError] = useState('')
   const [authError, setAuthError] = useState<string | null>(null)
+  const [showRecovery, setShowRecovery] = useState(false)
+  const [recoveryPhrase, setRecoveryPhrase] = useState('')
   const prefersReduced = usePrefersReducedMotion()
   const [showVaultSetup, setShowVaultSetup] = useState(false)
   const isPinValid = /^\d{4,6}$/.test(pin)
@@ -640,6 +642,21 @@ function VaultPageContent() {
               <div className="mt-4 flex flex-wrap gap-2">
                 <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))} disabled={passphrase.length < 8} className="rounded-btn bg-accent-1 px-4 py-2 text-sm text-text-1 disabled:opacity-50">Unlock</button>
                 <button type="button" onClick={() => void unlockWithBiometric().catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))} className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1"><Fingerprint className="h-4 w-4" />Biometric</button>
+                <button type="button" onClick={() => { setShowRecovery((value) => !value); setPasswordVaultError('') }} className="rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1">Use recovery phrase</button>
+                {showRecovery ? (
+                  <div className="mt-3 space-y-2">
+                    <label htmlFor="vault-recovery-phrase" className="text-xs text-text-2">Enter all 12 recovery words in order</label>
+                    <textarea id="vault-recovery-phrase" value={recoveryPhrase} onChange={(event) => setRecoveryPhrase(event.target.value)} rows={3} className="w-full rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" placeholder="word1 word2 word3 ..." />
+                    <button
+                      type="button"
+                      onClick={() => void unlockWithBackupPhrase(recoveryPhrase.trim().split(/\\s+/)).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to recover the vault.'))}
+                      disabled={recoveryPhrase.trim().split(/\\s+/).length !== 12}
+                      className="rounded-btn bg-accent-1 px-4 py-2 text-sm text-text-1 disabled:opacity-50"
+                    >
+                      Recover vault
+                    </button>
+                  </div>
+                ) : null}
               </div>
             </div>
           ) : (
