@@ -120,7 +120,7 @@ export async function pushPendingMessages() {
       p_row_id: rawMessage.id,
       p_base_version: 0,
       p_payload: payload,
-    }).single()
+    }).returns<{ current_version?: number }>().single()
 
     if (error) {
       failures.push(error.message)
