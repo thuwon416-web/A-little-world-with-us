@@ -7,6 +7,12 @@ export interface Profile {
   role: 'user' | 'admin'
   created_at: string
   updated_at: string
+  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary'
+  drive_file_id?: string | null
+  cloudinary_asset_id?: string | null
+  cloudinary_public_id?: string | null
+  storage_url?: string | null
+  thumbnail_url?: string | null
 }
 
 export interface Couple {
