@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { deleteDriveFile, uploadDriveFile } from '@/lib/google-drive'
-import { validateUpload } from '@/lib/upload-validation'
+import { checkRateLimit } from '@/lib/rate-limit'
+import { validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
 
 export const runtime = 'nodejs'
 
@@ -22,6 +23,14 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
+  const rateLimit = await checkRateLimit(user.id, 5, 60_000)
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: 'Too many uploads. Please try again shortly.', resetAt: rateLimit.resetTime },
+      { status: 429 }
+    )
+  }
+
   const form = await request.formData()
   const file = form.get('file')
   if (!(file instanceof File)) {
@@ -32,13 +41,33 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'coupleId is required.' }, { status: 400 })
   }
 
-  try {
-    validateUpload(file)
-  } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Invalid upload.' },
-      { status: 400 }
-    )
+  const { data: coupleLink, error: coupleLinkError } = await supabase
+    .from('couple_links')
+    .select('id')
+    .eq('couple_id', coupleId)
+    .eq('status', 'accepted')
+    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+    .maybeSingle()
+
+  if (coupleLinkError) {
+    return NextResponse.json({ error: 'Unable to verify couple access.' }, { status: 500 })
+  }
+  if (!coupleLink) {
+    return NextResponse.json({ error: 'You are not a member of this couple.' }, { status: 403 })
+  }
+
+  const validation = await validateUploadContent(file, { imagesOnly: true })
+  if (!validation.valid) {
+    return NextResponse.json({ error: validation.error ?? 'Invalid upload.' }, { status: 400 })
+  }
+
+  const title = typeof form.get('title') === 'string' ? String(form.get('title')).trim() : 'A memory together'
+  const caption = typeof form.get('caption') === 'string' ? String(form.get('caption')).trim() : 'A memory together'
+  const category = typeof form.get('category') === 'string' ? String(form.get('category')).trim() : 'favorite'
+  const date = typeof form.get('date') === 'string' ? String(form.get('date')).trim() : new Date().toISOString().slice(0, 10)
+  const metadataValidation = validateMemoryMetadata({ title, caption, category, date })
+  if (!metadataValidation.valid) {
+    return NextResponse.json({ error: metadataValidation.error ?? 'Invalid memory metadata.' }, { status: 400 })
   }
 
   let driveFile: Awaited<ReturnType<typeof uploadDriveFile>> | null = null
