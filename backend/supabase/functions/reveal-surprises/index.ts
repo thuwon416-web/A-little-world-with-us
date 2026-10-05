@@ -11,7 +11,7 @@ Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
   if (!jobSecret || request.headers.get('x-job-secret') !== jobSecret) return new Response('Unauthorized', { status: 401 })
   const { data: due, error } = await supabase.from('time_capsules').select('id,recipient_id,title').eq('status', 'scheduled').lte('unlock_at', new Date().toISOString())
-  if (error) return Response.json({ error: error.message }, { status: 500 })
+  if (error) return Response.json({ error: 'Unable to load scheduled surprises.' }, { status: 500 })
   let revealed = 0
   for (const capsule of due ?? []) {
     const { data: updated } = await supabase.from('time_capsules').update({ status: 'revealed', revealed_at: new Date().toISOString() }).eq('id', capsule.id).eq('status', 'scheduled').select('id').maybeSingle()
