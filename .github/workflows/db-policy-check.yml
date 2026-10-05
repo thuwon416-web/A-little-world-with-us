@@ -7,23 +7,41 @@ on:
       - 'sql/**'
       - '.github/workflows/db-policy-check.yml'
 
+permissions:
+  contents: read
+
 jobs:
   db-policy-check:
-    if: ${{ secrets.STAGING_DATABASE_URL != '' }}
     runs-on: ubuntu-latest
+    env:
+      STAGING_DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
     steps:
       - uses: actions/checkout@v4
+      - name: Check staging database configuration
+        id: staging
+        shell: bash
+        run: |
+          if [ -z "${STAGING_DATABASE_URL:-}" ]; then
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::RLS regression check skipped: STAGING_DATABASE_URL is not configured."
+          else
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Install PostgreSQL client
+        if: steps.staging.outputs.available == 'true'
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
       - name: Check RLS coverage and permissive policies
-        env:
-          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+        if: steps.staging.outputs.available == 'true'
         run: |
           set -euo pipefail
-          psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -At -f sql/rules_coverage_check.sql | tee rls-findings.txt
+          psql "$STAGING_DATABASE_URL" -v ON_ERROR_STOP=1 -At -f sql/rules_coverage_check.sql | tee rls-findings.txt
           if [ -s rls-findings.txt ]; then
             echo "RLS policy regression detected:"
             cat rls-findings.txt
             exit 1
           fi
           echo "RLS policy regression check passed."
+      - name: Report skipped check
+        if: steps.staging.outputs.available != 'true'
+        run: |
+          echo "RLS regression check: NOT RUN / STAGING_DATABASE_URL unavailable." >> "$GITHUB_STEP_SUMMARY"
