@@ -1,3 +1,10 @@
+## 2026-10-05 — final production hardening pass
+
+- Aligned Mobile memory storage contracts with the Backblaze B2 metadata fields used by the shared backend.
+- Optimized the final `messages` and `vault_credentials` RLS policies to evaluate `auth.uid()` once per statement without changing authorization semantics; the corresponding live Supabase performance advisor warnings are cleared.
+- Confirmed the remaining Supabase security advisor warnings are the nine intentional authenticated SECURITY DEFINER RPCs plus the account-plan-dependent leaked-password warning.
+- Reconnected the existing Vercel Git project to `main` with `apps/web` as the root and triggered a fresh deployment from the latest Web commit.
+
 # Changelog
 
 ## 2026-10-05 — final code-side integration pass
