@@ -112,6 +112,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'AI providers are temporarily unavailable. Please try again shortly.' }, { status: 503 })
     }
     console.error('Journal reflection API error:', error)
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'AI reflection is unavailable.' }, { status: 500 })
+    return NextResponse.json({ error: 'AI reflection is unavailable.' }, { status: 500 })
   }
 }
