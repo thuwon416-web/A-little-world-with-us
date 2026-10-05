@@ -5,15 +5,15 @@ import { useId, useState, useRef } from 'react'
 import Image from 'next/image'
 import { X, Upload, File as FileIcon, Image as ImageIcon, Film, Music, FileText, AlertCircle } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
-import { encryptAndUpload } from '@/lib/mediaEncryption'
+import { encryptAndUpload, encryptMedia } from '@/lib/mediaEncryption'
 
 interface FileUploadProps {
-  onFileUpload: (fileData: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string }) => void
+  onFileUpload: (fileData: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string; storageProvider?: 'supabase' | 'backblaze_b2'; storageFileId?: string }) => void
   onClose: () => void
   coupleId: string
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024 // Supabase Storage tier
 
 export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -72,7 +72,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
     }
 
     // Validate file size (5MB max)
-    const maxSize = 5 * 1024 * 1024 // 5MB
+    const maxSize = 5 * 1024 * 1024 * 1024 // B2 ceiling
     if (selectedFile.size > maxSize) {
       alert('File size must be less than 5MB')
       return
@@ -104,38 +104,74 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
         return
       }
 
-      // Generate unique filename
       const fileExt = selectedFile.name.split('.').pop()
-      const fileName = `${Date.now()}_${crypto.randomUUID()}.${fileExt}`
-      const filePath = `${user.id}/${fileName}`
+      const fileName = \`1791192980778_${crypto.randomUUID()}.${fileExt}\`
+      const filePath = \`${user.id}/${fileName}\`
 
-      // Upload to Supabase storage (encrypted)
-      const { path: storedPath, mimeType } = await encryptAndUpload(
-        selectedFile,
-        coupleId,
-        'chat_files',
-        filePath,
-        { cacheControl: '3600', upsert: false }
-      )
-
-      // Get signed URL (1 hour expiry)
-      const { data: signedUrlData } = await supabase.storage
-        .from('chat_files')
-        .createSignedUrl(storedPath, 3600)
-      
-      if (!signedUrlData?.signedUrl) {
-        throw new Error('Failed to generate signed URL for chat file')
+      if (selectedFile.size <= MAX_FILE_SIZE) {
+        const { path: storedPath, mimeType } = await encryptAndUpload(
+          selectedFile,
+          coupleId,
+          'chat_files',
+          filePath,
+          { cacheControl: '3600', upsert: false }
+        )
+        const { data: signedUrlData } = await supabase.storage
+          .from('chat_files')
+          .createSignedUrl(storedPath, 3600)
+        if (!signedUrlData?.signedUrl) throw new Error('Failed to generate signed URL for chat file')
+        onFileUpload({
+          url: signedUrlData.signedUrl,
+          type: selectedFile.type,
+          name: selectedFile.name,
+          size: selectedFile.size,
+          path: storedPath,
+          mimeType,
+          storageProvider: 'supabase',
+        })
+      } else {
+        const encrypted = await encryptMedia(selectedFile, coupleId)
+        const bytes = new Uint8Array(await encrypted.arrayBuffer())
+        const digest = await crypto.subtle.digest('SHA-1', bytes)
+        const sha1 = Array.from(new Uint8Array(digest)).map((value) => value.toString(16).padStart(2, '0')).join('')
+        const targetResponse = await fetch('/api/media/b2-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            coupleId,
+            fileName,
+            contentType: 'application/octet-stream',
+            contentLength: bytes.byteLength,
+            sha1,
+          }),
+        })
+        if (!targetResponse.ok) throw new Error('Unable to prepare large-media storage')
+        const target = await targetResponse.json() as { uploadUrl: string; authorizationToken: string; objectName: string }
+        const uploadResponse = await fetch(target.uploadUrl, {
+          method: 'POST',
+          headers: {
+            Authorization: target.authorizationToken,
+            'X-Bz-File-Name': encodeURIComponent(target.objectName),
+            'Content-Type': 'application/octet-stream',
+            'Content-Length': String(bytes.byteLength),
+            'X-Bz-Content-Sha1': sha1,
+          },
+          body: bytes,
+        })
+        if (!uploadResponse.ok) throw new Error('Large-media upload failed')
+        const uploaded = await uploadResponse.json() as { fileId?: string; fileName?: string }
+        if (!uploaded.fileId || !uploaded.fileName) throw new Error('Large-media storage returned an invalid response')
+        onFileUpload({
+          url: uploaded.fileName,
+          type: selectedFile.type,
+          name: selectedFile.name,
+          size: selectedFile.size,
+          path: uploaded.fileName,
+          mimeType: selectedFile.type,
+          storageProvider: 'backblaze_b2',
+          storageFileId: uploaded.fileId,
+        })
       }
-
-      // Call parent callback with file info
-      onFileUpload({
-        url: signedUrlData.signedUrl,
-        type: selectedFile.type,
-        name: selectedFile.name,
-        size: selectedFile.size,
-        path: storedPath,
-        mimeType,
-      })
 
       // Reset state
       setSelectedFile(null)
@@ -185,7 +221,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
               className="w-full rounded-input border-2 border-dashed border-accent-1/30 bg-card px-4 py-8 text-sm text-text-2 hover:border-accent-1/50 transition cursor-pointer"
             />
             <p className="text-xs text-text-2 mt-2">
-              Max file size: 5MB • Images, PDF, TXT
+              Up to 50MB in secure app storage • larger shared media uses B2
             </p>
           </div>
 
