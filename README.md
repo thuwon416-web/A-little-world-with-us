@@ -99,8 +99,6 @@ Supabase remains the application data source of record. Shared media remains ava
 
 Chat/media encryption is application-level encryption, not end-to-end encryption. Never commit OAuth client secrets, refresh tokens, encryption keys, cron secrets, or provider API keys.
 
-Never commit OAuth client secrets, refresh tokens, encryption keys, cron secrets, or provider API keys.
-
 ## Project principles
 
 - Keep deployable applications self-contained under `apps/`.
@@ -115,3 +113,7 @@ Never commit OAuth client secrets, refresh tokens, encryption keys, cron secrets
 GitHub Actions runs Web and Mobile lint/typecheck/tests, Web accessibility tests, and the Web production build. Playwright E2E requires the repository's Supabase E2E secrets; when they are unavailable, the workflow reports the environment as unavailable instead of treating E2E as passed.
 
 Production/device verification is still required for external services and native capabilities such as Google Drive OAuth, background location, notifications, maps, media permissions, and WebRTC calling.
+
+## Final verification boundary
+
+Code-side work is maintained directly on `main`. Vercel deployment work is intentionally paused. Remaining operator/device verification covers provider credentials and configuration (Backblaze B2 bucket/CORS, Google OAuth, Axiom, Umami, uptime monitoring), E2E staging secrets, and native capabilities such as notifications, background location, maps, media permissions, and WebRTC.
