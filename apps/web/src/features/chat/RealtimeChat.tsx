@@ -8,7 +8,7 @@ import { Heart, Paperclip, Reply as ReplyIcon, MapPin, Captions, Sparkles, X } f
 import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
-import { resolveChatMediaUrl } from '@/lib/chatMedia'
+import { resolveB2ChatMediaUrl, resolveChatMediaUrl } from '@/lib/chatMedia'
 import { getCachedDecryptedUrl } from '@/lib/mediaEncryption'
 import { detectContextKeywords } from '@/features/ai-guardian/context/detector'
 import { enqueueMessage, processQueue, getQueueCount } from '@/lib/offline-queue'
@@ -221,15 +221,17 @@ export default function RealtimeChat() {
         initialMessages.map(async (msg) => {
           let mediaUrl = msg.media_url
           try {
-            if (isExternalUrl(msg.media_url)) {
+            if (msg.media_storage_provider === 'backblaze_b2' && msg.media_storage_path) {
+              mediaUrl = await resolveB2ChatMediaUrl(couple.id, msg.media_storage_path)
+            } else if (isExternalUrl(msg.media_url)) {
               if (msg.message_type === 'voice') {
                 mediaUrl = await resolveChatMediaUrl(msg.media_url, 'voice')
               } else if (msg.message_type === 'photo') {
                 mediaUrl = await resolveChatMediaUrl(msg.media_url, 'photo')
               }
             } else if (msg.media_url) {
-              const mimeType = msg.media_mime_type || (msg.message_type === 'voice' ? 'audio/m4a' : 'image/jpeg')
-              const bucket = msg.message_type === 'voice' ? 'voice_messages' : 'chat_photos'
+              const mimeType = msg.media_mime_type || (msg.message_type === 'voice' ? 'audio/m4a' : msg.message_type === 'file' ? 'application/pdf' : 'image/jpeg')
+              const bucket = msg.message_type === 'voice' ? 'voice_messages' : msg.message_type === 'file' ? 'chat_files' : 'chat_photos'
               mediaUrl = await getCachedDecryptedUrl(couple.id, bucket, msg.media_url, mimeType)
             }
           } catch {
