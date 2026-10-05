@@ -14,7 +14,26 @@ export async function assertAdmin(serviceClient: SupabaseClient, accessToken: st
   return user
 }
 
-export function createServiceClient() {
+export const createServiceClient = createAdminClient
+
+export async function writeAdminAudit(
+  serviceClient: SupabaseClient,
+  adminId: string,
+  action: string,
+  resourceType: string,
+  resourceId: string,
+  details: Record<string, unknown> = {}
+) {
+  await serviceClient.from('admin_audit_logs').insert({
+    actor_id: adminId,
+    action,
+    resource_type: resourceType,
+    resource_id: resourceId,
+    details,
+  })
+}
+
+export function createAdminClient() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
