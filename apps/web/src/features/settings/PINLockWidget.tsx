@@ -27,6 +27,7 @@ export default function PINLockWidget({
     setCurrentPin('')
     setPin('')
     setConfirmPin('')
+    setError('')
     onModalClose()
   }
 
@@ -48,12 +49,17 @@ export default function PINLockWidget({
     void loadStatus()
   }, [])
 
+  const openModal = () => {
+    setError('')
+    setShowModal(true)
+    onModalOpen()
+  }
+
   const handleSetPIN = async () => {
     if (!/^\d{4,6}$/.test(pin)) {
       setError('PIN must be 4 to 6 digits')
       return
     }
-
     if (pin !== confirmPin) {
       setError('PINs do not match')
       return
@@ -67,31 +73,26 @@ export default function PINLockWidget({
       })
       const result = await response.json() as { error?: string }
       if (!response.ok) {
-        setError(result.error || 'Failed to set PIN')
+        setError(result.error || 'Failed to save PIN')
         return
       }
       setHasPin(true)
       closeModal()
-      setCurrentPin('')
-      setPin('')
-      setConfirmPin('')
-      setError('')
     } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Failed to set PIN')
+      setError(error_ instanceof Error ? error_.message : 'Failed to save PIN')
     }
   }
 
   const handleRemovePIN = async () => {
-    if (!confirm('Are you sure you want to remove PIN lock?')) return
-
-    const currentPin = window.prompt('Enter your current PIN to remove PIN lock.') ?? ''
-    if (!/^\d{4,6}$/.test(currentPin)) return
+    if (!window.confirm('Are you sure you want to remove PIN lock?')) return
+    const current = window.prompt('Enter your current PIN to remove PIN lock.') ?? ''
+    if (!/^\d{4,6}$/.test(current)) return
 
     try {
       const response = await fetch('/api/auth/pin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'remove', currentPin }),
+        body: JSON.stringify({ action: 'remove', currentPin: current }),
       })
       const result = await response.json() as { error?: string }
       if (!response.ok) {
@@ -135,24 +136,38 @@ export default function PINLockWidget({
         </div>
 
         <div className="space-y-4">
-          {hasPin ? <div>
-            <label htmlFor="current-pin" className="text-sm font-medium text-text-1">Current PIN *</label>
-            <input id="current-pin" type="password" inputMode="numeric" autoComplete="current-password" value={currentPin} onChange={(e) => setCurrentPin(e.target.value.replace(/\D/g, '').slice(0, 6))} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-base tracking-[0.35em] text-text-1 outline-none" placeholder="••••" maxLength={6} autoFocus />
-          </div> : null}
+          {hasPin ? (
+            <div>
+              <label htmlFor="current-pin" className="text-sm font-medium text-text-1">Current PIN *</label>
+              <input
+                id="current-pin"
+                type="password"
+                inputMode="numeric"
+                autoComplete="current-password"
+                value={currentPin}
+                onChange={(event) => setCurrentPin(event.target.value.replace(/\D/g, '').slice(0, 6))}
+                className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-base tracking-[0.35em] text-text-1 outline-none"
+                placeholder="••••"
+                maxLength={6}
+              />
+            </div>
+          ) : null}
 
           <div>
-            <label htmlFor={pinInputId} className="text-sm font-medium text-text-1">New PIN (4-6 digits) *</label>
+            <label htmlFor={pinInputId} className="text-sm font-medium text-text-1">
+              {hasPin ? 'New PIN' : 'PIN'} (4-6 digits) *
+            </label>
             <input
               id={pinInputId}
               type="password"
               inputMode="numeric"
               autoComplete="new-password"
               value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={(event) => setPin(event.target.value.replace(/\D/g, '').slice(0, 6))}
               className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-base tracking-[0.35em] text-text-1 outline-none transition focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"
               placeholder="••••"
               maxLength={6}
-              autoFocus
+              autoFocus={!hasPin}
             />
           </div>
 
@@ -164,20 +179,22 @@ export default function PINLockWidget({
               inputMode="numeric"
               autoComplete="new-password"
               value={confirmPin}
-              onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={(event) => setConfirmPin(event.target.value.replace(/\D/g, '').slice(0, 6))}
               className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-base tracking-[0.35em] text-text-1 outline-none transition focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"
               placeholder="••••"
               maxLength={6}
             />
           </div>
 
-          {error && (
-            <p className="rounded-xl border border-error/20 bg-error/10 px-3 py-2 text-sm text-error" role="alert">{error}</p>
-          )}
+          {error ? (
+            <p className="rounded-xl border border-error/20 bg-error/10 px-3 py-2 text-sm text-error" role="alert">
+              {error}
+            </p>
+          ) : null}
 
           <button
             type="button"
-            onClick={handleSetPIN}
+            onClick={() => void handleSetPIN()}
             disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin || (hasPin && !/^\d{4,6}$/.test(currentPin))}
             className="w-full rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -190,7 +207,7 @@ export default function PINLockWidget({
 
   return (
     <section className="glass-card min-h-[180px] rounded-panel border border-accent-1/15 p-5">
-      <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
+      <h3 className="mb-4 flex items-center gap-2 text-lg font-semibold text-text-1">
         <Lock className="h-5 w-5 text-accent-1" />
         PIN Lock
       </h3>
@@ -198,29 +215,34 @@ export default function PINLockWidget({
       {hasPin ? (
         <div className="space-y-3">
           <p className="text-sm text-text-2">
-            PIN lock is enabled. You&apos;ll be asked for your PIN when opening the app.
+            PIN lock is enabled. Your current PIN is required before changing or removing it.
           </p>
-          <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => { setShowModal(true); onModalOpen() }}
-            className="w-full rounded-xl border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
-          >
-            Remove PIN
-          >Change PIN</button>
-          <button
-            type="button"
-            onClick={handleRemovePIN}
+          <div className="grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={openModal}
+              disabled={modalBlocked}
+              className="w-full rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Change PIN
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleRemovePIN()}
+              className="w-full rounded-xl border border-error/30 bg-error/10 px-3 py-2 text-sm text-error"
+            >
+              Remove PIN
+            </button>
+          </div>
+        </div>
+      ) : (
         <div className="space-y-3">
           <p className="text-sm text-text-2">
             Set a PIN to protect your app and private vault.
           </p>
           <button
             type="button"
-            onClick={() => {
-              setShowModal(true)
-              onModalOpen()
-            }}
+            onClick={openModal}
             disabled={modalBlocked}
             className="w-full rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -230,7 +252,6 @@ export default function PINLockWidget({
       )}
 
       {typeof document !== 'undefined' && modal ? createPortal(modal, document.body) : null}
-
     </section>
   )
 }
