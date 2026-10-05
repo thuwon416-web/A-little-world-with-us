@@ -38,6 +38,25 @@ export function isCloudinaryConfigured(): boolean {
   )
 }
 
+export async function deleteCloudinaryAsset(assetId: string, resourceType = 'image'): Promise<void> {
+  const cloudName = requiredEnv('CLOUDINARY_CLOUD_NAME')
+  const apiKey = requiredEnv('CLOUDINARY_API_KEY')
+  const timestamp = Math.floor(Date.now() / 1000).toString()
+  const signature = signParams({ asset_id: assetId, timestamp })
+
+  const body = new URLSearchParams({
+    asset_id: assetId,
+    api_key: apiKey,
+    timestamp,
+    signature,
+  })
+  const response = await fetch(
+    `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/${resourceType}/destroy`,
+    { method: 'POST', body }
+  )
+  if (!response.ok) throw new Error(`Cloudinary delete failed with status ${response.status}`)
+}
+
 export async function uploadMemoryToCloudinary(
   file: File,
   coupleId: string
