@@ -321,6 +321,7 @@ function MemoriesPageContent() {
           if (driveStatus.connected) {
             const formData = new FormData()
             formData.append('file', new File([compressedImage], `${crypto.randomUUID()}.webp`, { type: 'image/webp' }))
+            formData.append('coupleId', coupleLinkId)
             const driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
             const driveBody = (await driveResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
             if (!driveResponse.ok || !driveBody.file?.id) {
