@@ -222,7 +222,7 @@ export default function RealtimeChat() {
           let mediaUrl = msg.media_url
           try {
             if (msg.media_storage_provider === 'backblaze_b2' && msg.media_storage_path) {
-              mediaUrl = await resolveB2ChatMediaUrl(couple.id, msg.media_storage_path)
+              mediaUrl = await resolveB2ChatMediaUrl(couple.id, msg.media_storage_path, msg.media_mime_type || 'application/octet-stream')
             } else if (isExternalUrl(msg.media_url)) {
               if (msg.message_type === 'voice') {
                 mediaUrl = await resolveChatMediaUrl(msg.media_url, 'voice')
