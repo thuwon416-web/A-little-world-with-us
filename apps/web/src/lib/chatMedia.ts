@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase'
+import { decryptMediaSafe } from '@/lib/mediaEncryption'
 
 type PrivateChatMediaType = 'voice' | 'photo'
 
@@ -59,7 +60,7 @@ export async function resolveChatMediaUrl(
   return data.signedUrl
 }
 
-export async function resolveB2ChatMediaUrl(coupleId: string, fileName: string | null): Promise<string | null> {
+export async function resolveB2ChatMediaUrl(coupleId: string, fileName: string | null, mimeType = 'application/octet-stream'): Promise<string | null> {
   if (!fileName) return null
   const response = await fetch('/api/media/b2-url', {
     method: 'POST',
@@ -68,5 +69,9 @@ export async function resolveB2ChatMediaUrl(coupleId: string, fileName: string |
   })
   if (!response.ok) return null
   const data = await response.json() as { url?: string }
-  return data.url ?? null
+  if (!data.url) return null
+  const mediaResponse = await fetch(data.url)
+  if (!mediaResponse.ok) return null
+  const decrypted = await decryptMediaSafe(await mediaResponse.blob(), coupleId, mimeType)
+  return URL.createObjectURL(decrypted)
 }
