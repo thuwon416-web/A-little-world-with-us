@@ -17,7 +17,7 @@ export type MemoryRecord = Pick<
   | 'mime_type'
 > & {
   metadata?: { mood_tag?: string; ai_reflection?: string; voice_url?: string; voice_path?: string } | null
-  storage_provider?: 'supabase' | 'google_drive'
+  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary'
   drive_file_id?: string | null
   description?: string | null
 }
@@ -51,11 +51,20 @@ export async function getMemories(): Promise<MemoryRecord[]> {
 }
 
 export async function deleteMemory(id: string) {
-  const activeCoupleId = await getCoupleId()
-  const { error } = await supabase
-    .from('memories')
-    .delete()
-    .eq('id', id)
-    .eq('couple_id', activeCoupleId)
-  if (error) throw new Error(error.message)
+  const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+  if (!webUrl || !session?.access_token) throw new Error('Please sign in again.')
+
+  const response = await fetch(`${webUrl}/api/media/delete`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${session.access_token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ memoryId: id }),
+  })
+  const body = (await response.json().catch(() => ({}))) as { error?: string }
+  if (!response.ok) throw new Error(body.error || 'Memory deletion failed.')
 }
