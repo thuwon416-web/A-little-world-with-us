@@ -1449,20 +1449,20 @@ input[type='range']::-webkit-slider-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #ffd700;
-  border: 2px solid #fff8f0;
+  background: rgb(var(--accent-1));
+  border: 2px solid rgb(var(--card));
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 12px rgb(var(--accent-1) / 0.5);
 }
 
 input[type='range']::-moz-range-thumb {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #ffd700;
-  border: 2px solid #fff8f0;
+  background: rgb(var(--accent-1));
+  border: 2px solid rgb(var(--card));
   cursor: pointer;
-  box-shadow: 0 0 12px rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 12px rgb(var(--accent-1) / 0.5);
 }
 
 @keyframes shimmer-border {
