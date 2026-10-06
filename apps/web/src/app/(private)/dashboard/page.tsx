@@ -40,7 +40,7 @@ const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.El
   },
   countdown: {
     label: 'Countdown',
-    render: () => <Countdown targetDate="2000-09-10" label="Her Birthday" />,
+    render: () => <Countdown targetDate={new Date().toISOString()} label="Next occasion" />,
   },
   'memory-of-the-day': {
     label: 'Memory of the day',
