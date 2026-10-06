@@ -132,3 +132,17 @@ Manual-only provider/device actions should be kept separate from code-side work 
 - Supabase performance advisor still reports 121 unused-index candidates; no indexes were dropped without workload evidence.
 - Native Android/iOS, full Supabase-backed E2E, and physical-device verification remain release-boundary checks and cannot be truthfully marked complete from the current hosted tool access.
 - Korean Learning already defines levels 1–7 in Web/Mobile types/UI, but the current bundled lesson/vocabulary seed data only covers Levels 1–3. Levels 4–6 require new curriculum lessons, vocabulary/examples, quizzes, translations/audio, and corresponding seed/migration data on both Web and Mobile before those levels are genuinely complete.
+
+
+## 2026-10-07 — Korean curriculum architecture locked for future implementation
+
+- Added docs/KOREAN_CURRICULUM.md as the canonical Korean-learning roadmap.
+- Planned Our Korean Levels 1–10.
+- Structured Korean is planned as Beginner = Our Korean Levels 1–5 and Intermediate = Our Korean Levels 6–10.
+- Each level is planned as two terms/sub-levels, x-1 and x-2, giving a clear 1-1 → 1-2 → 2-1 → 2-2 style progression.
+- Added four future curriculum layers: Our Korean, Structured Korean, Korea Life, and Couple Korean.
+- Levels 1–5 are the Beginner progression, with Level 5 as the bridge toward Intermediate. Levels 6–10 are the Intermediate progression, with Level 10 as the bridge toward future Upper-Intermediate/Advanced content.
+- Captured grammar, vocabulary, skills, exercise, AI, data-model, Web/Mobile parity, and definition-of-done requirements in the Korean curriculum document.
+- Yonsei is treated only as structural inspiration/reference; all lessons, dialogues, examples, exercises, images, and audio must be original.
+- Korean expansion remains a post-stabilization implementation phase and does not take priority over core app release-readiness.
+- Future Korean ideas captured in the roadmap include Korea Life, Couple Korean, adaptive review, speaking practice, richer audio, and AI tutoring.
