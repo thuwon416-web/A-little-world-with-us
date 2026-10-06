@@ -1,5 +1,4 @@
 ﻿import type { Metadata, Viewport } from 'next'
-import dynamic from 'next/dynamic'
 import Script from 'next/script'
 import { Inter, Playfair_Display } from 'next/font/google'
 
@@ -8,10 +7,10 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { LanguageProvider } from '@/contexts/LanguageContext'
 import { Toaster } from '@/components/ui/sonner'
 import PWAInstallPrompt from '@/components/PWAInstallPrompt'
-const AIChatWidget = dynamic(() => import('@/components/AIChatWidget'), { ssr: false })
-const SpeedInsights = dynamic(() => import('@vercel/speed-insights/next').then((mod) => mod.SpeedInsights), { ssr: false })
 import { QueryProvider } from '@/components/QueryProvider'
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
+import AIChatWidget from '@/components/AIChatWidget'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display' })
