@@ -1,5 +1,6 @@
 ﻿import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
+import { randomInt } from 'node:crypto'
 import { Inter, Playfair_Display } from 'next/font/google'
 
 import './globals.css'
@@ -23,8 +24,7 @@ const descriptions = [
   'Just us, our world, and all the little things that make it ours',
 ]
 
-const randomValue = crypto.getRandomValues(new Uint32Array(1))[0] / 2 ** 32
-const randomDescription = descriptions[Math.floor(randomValue * descriptions.length)]
+const randomDescription = descriptions[randomInt(descriptions.length)]
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export const metadata: Metadata = {
