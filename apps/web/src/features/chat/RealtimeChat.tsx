@@ -28,6 +28,10 @@ interface Message {
   message_type: 'text' | 'voice' | 'photo' | 'sticker' | 'gif' | 'file' | 'video' | 'audio' | 'location' | 'sos'
   media_url: string | null
   media_mime_type?: string | null
+  media_storage_provider?: 'supabase' | 'backblaze_b2' | 'cloudinary' | 'google_drive' | null
+  media_storage_path?: string | null
+  media_storage_file_id?: string | null
+  media_size_bytes?: number | null
   media_duration: number | null
   encrypted: boolean
   reply_to: string | null
@@ -92,6 +96,22 @@ function isChatMessage(value: unknown): value is Message {
     !('media_mime_type' in value) ||
     typeof value.media_mime_type === 'string' ||
     value.media_mime_type === null
+  const hasValidStorageMetadata =
+    (!('media_storage_provider' in value) ||
+      value.media_storage_provider === null ||
+      value.media_storage_provider === 'supabase' ||
+      value.media_storage_provider === 'backblaze_b2' ||
+      value.media_storage_provider === 'cloudinary' ||
+      value.media_storage_provider === 'google_drive') &&
+    (!('media_storage_path' in value) ||
+      typeof value.media_storage_path === 'string' ||
+      value.media_storage_path === null) &&
+    (!('media_storage_file_id' in value) ||
+      typeof value.media_storage_file_id === 'string' ||
+      value.media_storage_file_id === null) &&
+    (!('media_size_bytes' in value) ||
+      typeof value.media_size_bytes === 'number' ||
+      value.media_size_bytes === null)
   const hasValidTranscript =
     !('transcript' in value) ||
     typeof value.transcript === 'string' ||
@@ -110,7 +130,7 @@ function isChatMessage(value: unknown): value is Message {
       (!('label' in value.location_payload) ||
         typeof value.location_payload.label === 'string'))
 
-  return hasValidMediaMimeType && hasValidTranscript && hasValidLocation
+  return hasValidMediaMimeType && hasValidStorageMetadata && hasValidTranscript && hasValidLocation
 }
 
 function isAIContext(value: unknown): value is AIContext {
