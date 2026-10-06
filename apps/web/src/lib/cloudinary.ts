@@ -27,7 +27,7 @@ function signParams(params: Record<string, string>): string {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => `${key}=${value}`)
     .join('&')
-  return createHash('sha1').update(serialized + apiSecret).digest('hex')
+  return createHash('sha256').update(serialized + apiSecret).digest('hex')
 }
 
 export function isCloudinaryConfigured(): boolean {
