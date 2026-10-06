@@ -4,28 +4,30 @@
 
 A Little World With Us will eventually have a serious, long-term Korean learning system rather than a small vocabulary feature. It should combine structured progression with Korean that is useful for real life in Korea and for couple communication.
 
-This curriculum uses the useful organizational idea of paired course units such as 1-1, 1-2, 2-1, 2-2. It is an original curriculum for this app. It must not copy Yonsei or any other school's textbook lessons, dialogues, exercises, images, audio, answer keys, or other protected course content.
+Yonsei is used as a **level/difficulty benchmark**, not as content to copy. The reference is the Yonsei Korean progression such as 1-1, 1-2, 2-1, 2-2, through the higher numbered books. The app should build an original course at a comparable learner level, with its own lessons, grammar sequencing, vocabulary, dialogues, exercises, examples, audio, and Korea/couple situations.
 
 ## Curriculum architecture
 
 ### Track 1 — Our Korean
 
-Our Korean is the learner-facing progression.
+Our Korean is the learner-facing course, but its levels are **mapped against external proficiency benchmarks**. The Yonsei book names are reference points; they are not our lesson names unless we explicitly choose to display an equivalence label.
 
-| Our Korean | Structured band | Terms | Focus |
+| Yonsei benchmark | Our Korean target | Structured band | Direction |
 |---|---|---|---|
-| Level 1 | Beginner | 1-1 / 1-2 | Hangul, pronunciation, greetings, identity, survival phrases |
-| Level 2 | Beginner | 2-1 / 2-2 | Daily routines, locations, particles, basic sentence patterns |
-| Level 3 | Beginner | 3-1 / 3-2 | Tense, descriptions, requests, plans, everyday conversation |
-| Level 4 | Beginner | 4-1 / 4-2 | Connectors, reasons, comparisons, practical situations |
-| Level 5 | Beginner → Intermediate bridge | 5-1 / 5-2 | Longer conversations, wider grammar, appointments, work/life basics |
-| Level 6 | Intermediate | 6-1 / 6-2 | Natural daily conversation, honorific control, nuance |
-| Level 7 | Intermediate | 7-1 / 7-2 | Work, housing, banking, services, social situations |
-| Level 8 | Intermediate | 8-1 / 8-2 | Indirect speech, opinions, explanations, longer listening |
-| Level 9 | Intermediate | 9-1 / 9-2 | Natural expression, register switching, idioms, cultural nuance |
-| Level 10 | Intermediate → Advanced bridge | 10-1 / 10-2 | Sustained conversation, discussion, storytelling, advanced practical communication |
+| Yonsei 1-1 | Our Korean — equivalent to 1-1 | Beginner | Match core beginner ability, but write original content |
+| Yonsei 1-2 | Our Korean — equivalent to 1-2 | Beginner | Match core beginner ability, but write original content |
+| Yonsei 2-1 | Our Korean — equivalent to 2-1 | Beginner | Match the corresponding difficulty/progression |
+| Yonsei 2-2 | Our Korean — equivalent to 2-2 | Beginner | Match the corresponding difficulty/progression |
+| Yonsei 3-1 | Our Korean — equivalent to 3-1 | Beginner / Intermediate bridge | Validate exact proficiency before locking |
+| Yonsei 3-2 | Our Korean — equivalent to 3-2 | Intermediate | Validate exact proficiency before locking |
+| Yonsei 4-1 | Our Korean — equivalent to 4-1 | Intermediate | Validate exact proficiency before locking |
+| Yonsei 4-2 | Our Korean — equivalent to 4-2 | Intermediate | Validate exact proficiency before locking |
+| Yonsei 5-1 | Our Korean — equivalent to 5-1 | Upper-intermediate direction | Validate exact proficiency before locking |
+| Yonsei 5-2 | Our Korean — equivalent to 5-2 | Upper-intermediate direction | Validate exact proficiency before locking |
+| Yonsei 6-1 | Our Korean — equivalent to 6-1 | Advanced direction | Validate exact proficiency before locking |
+| Yonsei 6-2 | Our Korean — equivalent to 6-2 | Advanced direction | Validate exact proficiency before locking |
 
-The 1-1 / 1-2 style is an app curriculum convention inspired by common Korean-course organization. It is not a copy of any institution's curriculum.
+**Important:** the table defines a benchmarking target, not a claim that the app has already implemented these levels. The exact proficiency mapping above 2-2 must be validated during curriculum research/content design.
 
 ### Track 2 — Structured Korean
 
@@ -187,15 +189,19 @@ Korean expansion remains behind core app stabilization.
 
 ## Relationship to Yonsei
 
-Yonsei-style sub-level organization is useful as a structural reference, especially paired terms such as 1-1 and 1-2. The project must not reproduce Yonsei's proprietary/copyrighted course material.
+Yonsei's current official Korean Language Institute page confirms that Level 1 uses 1-1 and 1-2 materials and Level 2 uses 2-1 and 2-2 materials, across vocabulary/grammar, speaking/writing, and listening/reading components. citeturn0search0
 
-The intended result is an original curriculum with comparable structural clarity but with:
-- couple-centered examples;
-- Korea-life situations;
-- Burmese-friendly explanations;
-- Web/Mobile synchronization;
-- app-specific memory/review systems;
-- AI-assisted practice.
+For this project, the important idea is **equivalence of learner level**, not copying lessons. We will use Yonsei levels as one external benchmark when deciding whether Our Korean is appropriately difficult. We will create original curriculum content tailored to this app.
+
+The app should eventually be able to communicate an equivalence such as:
+
+- Our Korean ≈ Yonsei 1-1
+- Our Korean ≈ Yonsei 1-2
+- Our Korean ≈ Yonsei 2-1
+- Our Korean ≈ Yonsei 2-2
+- and so on after the higher-level benchmarks are researched and validated.
+
+This is especially useful because the user should be able to understand approximately **what level of Korean they can handle**, while the app remains independent in content and pedagogy.
 
 ## Definition of done
 
