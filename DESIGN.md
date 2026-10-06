@@ -52,6 +52,18 @@ Every reusable control should have clear:
 
 Web and Mobile use the same semantic visual vocabulary. Platform-specific implementation may differ, but the meaning of surface, text, border, accent, and semantic colors must remain consistent.
 
+## Phase A–D status
+
+The current `main` line contains the implemented security/data-integrity, mobile reliability, Web ↔ Mobile UI parity, and privacy/data-lifecycle foundations from the Phase A–D plan.
+
+- [x] Phase A — Security / data integrity foundation
+- [x] Phase B — Mobile reliability / offline foundation
+- [x] Phase C — Web ↔ Mobile UI/UX parity foundation
+- [x] Phase D — Privacy / compliance / data lifecycle foundation
+- [ ] Final screen-by-screen visual, accessibility, and responsive regression audit
+
+The unchecked item is intentionally kept open until the final evidence-based Web + Mobile screen audit is completed.
+
 ## Phase 1 status
 
 - [x] Audited existing Web and Mobile token systems.
