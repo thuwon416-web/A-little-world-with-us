@@ -21,8 +21,10 @@ export function parseYouTubeId(value: string): string | null {
 
   try {
     const url = new URL(input)
+    if (url.protocol !== 'https:') return null
     if (url.hostname === 'youtu.be') return /^[A-Za-z0-9_-]{11}$/.exec(url.pathname.slice(1))?.[0] ?? null
-    if (url.hostname.endsWith('youtube.com')) {
+    const allowedHosts = new Set(['youtube.com', 'www.youtube.com', 'm.youtube.com', 'music.youtube.com'])
+    if (allowedHosts.has(url.hostname)) {
       const queryId = url.searchParams.get('v')
       if (queryId && /^[A-Za-z0-9_-]{11}$/.test(queryId)) return queryId
       const pathId = /\/(?:embed|shorts|live)\/([A-Za-z0-9_-]{11})/.exec(url.pathname)
