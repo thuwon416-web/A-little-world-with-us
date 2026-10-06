@@ -77,6 +77,7 @@ GitHub Actions also runs a **Production Smoke E2E** workflow against the live pr
 - [Deployment](docs/deployment/DEPLOYMENT.md)
 - [Google Drive setup](docs/setup/google-drive.md)
 - [Data retention and storage](docs/security/data-retention.md)
+- [Korean curriculum roadmap](docs/KOREAN_CURRICULUM.md)
 
 ## Database
 
