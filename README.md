@@ -66,6 +66,8 @@ npm run mobile:lint
 npm run mobile:test
 ```
 
+GitHub Actions also runs a **Production Smoke E2E** workflow against the live production alias. This verifies the public homepage and unauthenticated private-route redirects with a real Chromium browser. The separate Supabase-backed E2E workflow remains gated on dedicated non-production Supabase secrets.
+
 ## Documentation
 
 - [Project status & maintenance checklist](docs/PROJECT_STATUS.md)
@@ -115,9 +117,9 @@ Code-side work is currently maintained directly on `main` to keep the repository
 
 ## CI and release verification
 
-GitHub Actions runs Web and Mobile lint/typecheck/tests, Web accessibility tests, and the Web production build. Playwright E2E requires the repository's Supabase E2E secrets; when they are unavailable, the workflow reports the environment as unavailable instead of treating E2E as passed.
+GitHub Actions runs Web and Mobile lint/typecheck/tests, Web accessibility tests, and the Web production build. The separate Supabase-backed Playwright E2E suite requires dedicated non-production Supabase secrets; when they are unavailable, that workflow reports the environment as unavailable instead of treating E2E as passed.
 
-Production/device verification is still required for external services and native capabilities such as Google Drive OAuth, background location, notifications, maps, media permissions, and WebRTC calling.
+The production smoke workflow runs Playwright against the live Vercel alias without requiring database secrets. Production/device verification is still required for external services and native capabilities such as Google Drive OAuth, background location, notifications, maps, media permissions, and WebRTC calling.
 
 ## Provider / API configuration
 
