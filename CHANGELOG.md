@@ -1,3 +1,12 @@
+## 2026-10-06 — production smoke verification / database audit
+
+- Added environment-aware Playwright configuration so the same suite can target either the local Next.js server or an external deployment.
+- Added a Production Smoke E2E workflow that runs Chromium tests against the live Vercel production alias without requiring Supabase credentials.
+- Verified the latest `main` commit with passing Test, CodeQL, Secret scan, Production Smoke E2E, and Dependabot update workflows.
+- Verified the latest production Vercel deployment is READY and found no runtime error clusters in the verification window.
+- Audited the live Supabase advisors: 121 unused-index findings remain intentionally deferred, and the nine authenticated SECURITY DEFINER RPC findings were reviewed as intentional functions with explicit `auth.uid()` checks and an empty search path.
+- Updated the persistent project status and README to distinguish production smoke E2E from the still-pending dedicated non-production Supabase E2E environment.
+
 ## 2026-10-06 — public release-readiness / CI stabilization
 
 - Fixed the Web Sentry Next.js configuration entrypoint so the production Vercel build succeeds.
@@ -70,4 +79,3 @@ The current `main` line contains the completed Web ↔ Mobile feature-parity, Ca
 ### Verification
 
 Before production release, run the repository CI checks and complete real-device smoke tests for authentication, couple linking, Memories, Care/Period, Calendar, Finance, Reminders, chat, and location permissions.
-
