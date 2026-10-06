@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 
 const CACHE_DIR = `${FileSystem.cacheDirectory}media/`
 const MAX_BYTES = 50 * 1024 * 1024
@@ -7,7 +7,7 @@ export async function ensureMediaCache() {
   await FileSystem.makeDirectoryAsync(CACHE_DIR, { intermediates: true }).catch(() => undefined)
 }
 
-export async function evictMediaCacheIfNeeded() {
+export async function evictMediaCache() {
   await ensureMediaCache()
   const names = await FileSystem.readDirectoryAsync(CACHE_DIR)
   const entries = await Promise.all(names.map(async (name) => {
@@ -25,3 +25,5 @@ export async function evictMediaCacheIfNeeded() {
 export function mediaCachePath(name: string) {
   return `${CACHE_DIR}${encodeURIComponent(name)}`
 }
+
+export const evictMediaCacheIfNeeded = evictMediaCache
