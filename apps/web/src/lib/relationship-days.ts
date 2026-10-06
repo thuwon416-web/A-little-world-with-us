@@ -1,4 +1,4 @@
-const DEFAULT_ANNIVERSARY = '2023-02-02'
+const DEFAULT_ANNIVERSARY = '2000-01-01'
 const DAY_MS = 86_400_000
 
 export function getRelationshipStartDate() {
@@ -11,7 +11,7 @@ function dateKeyInTimeZone(date: Date, timeZone: string) {
 
 export function calculateDaysTogether(now = new Date(), startDate = getRelationshipStartDate()) {
   const today = dateKeyInTimeZone(now, 'Asia/Yangon')
-  const start = new Date(`${startDate}T00:00:00Z`)
-  const current = new Date(`${today}T00:00:00Z`)
+  const start = new Date(startDate + 'T00:00:00Z')
+  const current = new Date(today + 'T00:00:00Z')
   return Math.max(0, Math.floor((current.getTime() - start.getTime()) / DAY_MS))
 }
