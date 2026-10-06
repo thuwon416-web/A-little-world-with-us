@@ -4,6 +4,17 @@
 
 ### Korean curriculum roadmap
 - Added the canonical Korean curriculum architecture in docs/KOREAN_CURRICULUM.md.
+- Corrected the Yonsei relationship: Yonsei 1-1 / 1-2 / 2-1 / 2-2 etc. are external proficiency benchmarks for equivalent Our Korean levels, not copied lesson structure or app-created terms.
+- Planned an original Our Korean progression benchmarked against Yonsei's numbered levels.
+- Added Korea Life and Couple Korean as dedicated future learning tracks.
+- Kept Korean expansion behind core app stabilization and release verification.
+
+# Changelog
+
+## Unreleased
+
+### Korean curriculum roadmap
+- Added the canonical Korean curriculum architecture in docs/KOREAN_CURRICULUM.md.
 - Planned Our Korean Levels 1–10, with Structured Korean mapped to Beginner Levels 1–5 and Intermediate Levels 6–10.
 - Planned paired sub-levels from 1-1 / 1-2 through 10-1 / 10-2.
 - Added Korea Life and Couple Korean as dedicated future learning tracks.
