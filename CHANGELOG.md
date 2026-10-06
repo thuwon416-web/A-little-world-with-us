@@ -86,3 +86,10 @@ The current `main` line contains the completed Web ↔ Mobile feature-parity, Ca
 ### Verification
 
 Before production release, run the repository CI checks and complete real-device smoke tests for authentication, couple linking, Memories, Care/Period, Calendar, Finance, Reminders, chat, and location permissions.
+
+## 2026-10-06 — Security & quality alert remediation
+
+- Fixed all five reported CodeQL findings on `main`: YouTube URL/origin validation, Cloudinary SHA-256 signing, and unbiased cryptographic random selection.
+- Updated TanStack React Query devtools and pinned `seroval` to 1.6.8 to address the two critical Seroval advisories.
+- Updated Mobile `sprintf-js` to 1.1.3 for the reported development-time DoS advisory.
+- Documented the two remaining upstream/toolchain vulnerability cases (`braces` and `postcss-selector-parser`) as items to review individually rather than applying risky major dependency overrides.
