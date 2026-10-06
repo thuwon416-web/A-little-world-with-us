@@ -1,3 +1,10 @@
+## 2026-10-06 — E2E environment / Actions queue optimization
+
+- Documented the two dedicated non-production Supabase secrets required to run the full GitHub Playwright E2E suite.
+- Added workflow concurrency cancellation so stale runs are canceled when newer runs arrive for the same branch/PR.
+- Added docs-only path filters so routine README/docs/changelog edits do not trigger the full Test, CodeQL, E2E, or Production Smoke workflows; secret scanning remains enabled.
+- Documented Mobile runtime environment keys used by server-backed features and relationship-day configuration.
+
 ## 2026-10-06 — production smoke verification / database audit
 
 - Added environment-aware Playwright configuration so the same suite can target either the local Next.js server or an external deployment.
