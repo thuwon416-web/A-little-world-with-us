@@ -96,3 +96,13 @@ Before making a new change:
 6. Only then mark the item complete.
 
 Manual-only provider/device actions should be kept separate from code-side work and listed explicitly when they remain.
+
+## 2026-10-06 — E2E secrets / Actions queue optimization
+
+- Dedicated Supabase-backed E2E remains gated on two GitHub repository secrets: `E2E_SUPABASE_URL` and `E2E_SUPABASE_ANON_KEY`. These must point to a non-production Supabase project; do not use production credentials for E2E.
+- The DB RLS regression workflow also accepts the separate `STAGING_DATABASE_URL` secret for its staging database check.
+- Added workflow-level concurrency with `cancel-in-progress: true` so a newer run for the same branch/PR cancels stale queued/in-progress work.
+- Docs-only changes now skip the main Test, CodeQL, full E2E, and Production Smoke workflows; Secret scan still runs, while database policy checks already run only for database-related paths.
+- Added missing Mobile environment documentation for `EXPO_PUBLIC_WEB_URL` and `EXPO_PUBLIC_COUPLE_START`. Native Google Drive client IDs remain device/EAS setup values, not Vercel variables.
+- Current Vercel production environment has the core application variables configured. Server-side `SENTRY_DSN`, `AXIOM_TOKEN`, `AXIOM_DATASET`, and `NEXT_PUBLIC_GA_ID` are not configured; these are observability/analytics features rather than blockers for the core production app.
+- GitHub Security and quality currently reports additional alerts, but the current connector cannot retrieve the repository's private alert-detail endpoints. No alert was dismissed blindly; exact alert titles/details must be reviewed before fixing or dismissing.
