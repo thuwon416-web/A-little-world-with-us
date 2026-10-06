@@ -105,7 +105,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
       }
 
       const fileExt = selectedFile.name.split('.').pop()
-      const fileName = \`1791192980778_${crypto.randomUUID()}.${fileExt}\`
+      const fileName = `1791192980778_${crypto.randomUUID()}.${fileExt}`
       const filePath = `${user.id}/${fileName}`
 
       if (selectedFile.size <= MAX_FILE_SIZE) {
