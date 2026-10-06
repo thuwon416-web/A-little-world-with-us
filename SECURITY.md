@@ -31,6 +31,18 @@ Google Drive integration uses server-side OAuth handling and encrypted connectio
 
 Media encryption used by the application is **not end-to-end encryption**; client applications can access the key needed to decrypt media available to the account.
 
+## Provider / API configuration
+
+Production provider credentials belong in the provider's secret manager or Vercel environment variables, never in Git. The operator checklist is maintained in [docs/setup/provider-api-configuration.md](docs/setup/provider-api-configuration.md).
+
+### Vercel override policy
+
+The repository intentionally has no root `vercel.json` build configuration. Keep Vercel Project Settings with `apps/web` as Root Directory and leave build/install/dev/output command overrides empty so Next.js uses repository defaults. Do **not** add `buildCommand`, `devCommand`, `installCommand`, `framework`, or `outputDirectory` just because the Vercel project is re-enabled after being disabled. The existing `apps/web/vercel.json` contains cron definitions only.
+
+### Public repository policy
+
+The repository may be public or private. Before switching it to public, run the repository secret scan and verify that no real provider credentials, private keys, refresh tokens, service-role keys, production logs, or personal/couple data are present. Example environment files must contain placeholders only. Runtime secrets must remain in provider secret stores. If the repository is switched back to private later, do not weaken these rules; the same source tree must remain safe in either visibility mode.
+
 ## Production Safety
 
 - Never commit credentials or tokens.
