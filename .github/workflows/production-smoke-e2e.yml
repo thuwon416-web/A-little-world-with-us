@@ -3,6 +3,10 @@ name: Production Smoke E2E
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - 'README.md'
+      - 'CHANGELOG.md'
   workflow_dispatch:
 
 # Keep only the newest run for the same branch/PR to avoid stale queued work.
