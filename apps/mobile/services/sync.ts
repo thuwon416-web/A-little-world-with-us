@@ -131,7 +131,8 @@ export async function pushPendingMessages() {
       await rawMessage.update((record) => {
         const fields = record as unknown as MessageFields
         fields.synced = true
-        const syncResult = result as { current_version?: number } | null\n        fields.sync_version = syncResult?.current_version ?? 1
+        const syncResult = result as { current_version?: number } | null
+        fields.sync_version = syncResult?.current_version ?? 1
       })
     })
   }
@@ -336,7 +337,8 @@ export async function flushOfflineOperations() {
         p_payload: JSON.parse(item.payload),
       }).returns<unknown>().single()
       if (error) throw error
-      const syncResult = data as { conflict?: boolean } | null\n      if (syncResult?.conflict) {
+      const syncResult = data as { conflict?: boolean } | null
+      if (syncResult?.conflict) {
         conflicts += 1
         continue
       }
