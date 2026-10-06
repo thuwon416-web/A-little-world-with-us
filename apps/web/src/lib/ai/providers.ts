@@ -157,7 +157,7 @@ async function callCohere(messages: AiMessage[], maxTokens: number): Promise<str
 }
 
 async function callCloudflare(messages: AiMessage[], maxTokens: number): Promise<string> {
-  const key = process.env.CLOUDFLARE_API_KEY
+  const key = process.env.CLOUDFLARE_API_TOKEN ?? process.env.CLOUDFLARE_API_KEY
   const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
   if (!key || !accountId) throw new Error('cloudflare is not configured')
   const model = getModel('cloudflare', '@cf/meta/llama-3.1-8b-instruct')
