@@ -93,3 +93,15 @@ Before production release, run the repository CI checks and complete real-device
 - Updated TanStack React Query devtools and pinned `seroval` to 1.6.8 to address the two critical Seroval advisories.
 - Updated Mobile `sprintf-js` to 1.1.3 for the reported development-time DoS advisory.
 - Documented the two remaining upstream/toolchain vulnerability cases (`braces` and `postcss-selector-parser`) as items to review individually rather than applying risky major dependency overrides.
+
+
+## 2026-10-06 — final audit continuation
+
+- Removed remaining hardcoded private relationship/birthday dates from Web source.
+- Normalized shared Card padding to prevent nested CardHeader/CardContent spacing from becoming oversized.
+- Made range controls theme-aware and improved Memories badge/delete contrast.
+- Aligned Cloudflare Workers AI configuration with `CLOUDFLARE_API_TOKEN` while retaining `CLOUDFLARE_API_KEY` compatibility.
+- Reverified Web clean install, lint, typecheck, unit tests, and production build after UI changes.
+- Reverified production Vercel deployment and runtime-error window.
+- Documented the remaining `sprintf-js` advisory as upstream/no-fixed-version and development-only, rather than forcing a breaking dependency change.
+- Documented Korean Learning Levels 4–6 as content/data work still required; the current bundled curriculum is complete through Level 3.
