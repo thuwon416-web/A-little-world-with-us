@@ -1,4 +1,4 @@
-const ANNIVERSARY = '2023-02-02'
+const ANNIVERSARY = process.env.EXPO_PUBLIC_COUPLE_START?.trim() || '2000-01-01'
 const DAY_MS = 86_400_000
 
 function dateInMyanmar(date: Date) {
@@ -11,8 +11,8 @@ function dateInMyanmar(date: Date) {
 }
 
 export function calculateDaysTogether(now = new Date(), startDate = ANNIVERSARY) {
-  const today = new Date(`${dateInMyanmar(now)}T00:00:00Z`)
-  const anniversary = new Date(`${startDate}T00:00:00Z`)
+  const today = new Date(dateInMyanmar(now) + 'T00:00:00Z')
+  const anniversary = new Date(startDate + 'T00:00:00Z')
   return Math.max(0, Math.floor((today.getTime() - anniversary.getTime()) / DAY_MS))
 }
 
