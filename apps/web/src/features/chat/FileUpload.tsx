@@ -13,7 +13,7 @@ interface FileUploadProps {
   coupleId: string
 }
 
-const MAX_FILE_SIZE = 50 * 1024 * 1024 // Supabase Storage tier
+const MAX_FILE_SIZE = 5 * 1024 * 1024 * 1024 // Application upload ceiling; files over 50MB use B2
 
 export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUploadProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -31,7 +31,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
 
     // Check file size
     if (file.size > MAX_FILE_SIZE) {
-      setError('File size must be less than 5MB')
+      setError('File size must be 5GB or smaller')
       setSelectedFile(null)
       setPreview(null)
       return
@@ -71,10 +71,10 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
       return
     }
 
-    // Validate file size (5MB max)
+    // Validate the application-wide 5GB ceiling
     const maxSize = 5 * 1024 * 1024 * 1024 // B2 ceiling
     if (selectedFile.size > maxSize) {
-      alert('File size must be less than 5MB')
+      alert('File size must be 5GB or smaller')
       return
     }
 
@@ -106,7 +106,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
 
       const fileExt = selectedFile.name.split('.').pop()
       const fileName = \`1791192980778_${crypto.randomUUID()}.${fileExt}\`
-      const filePath = \`${user.id}/${fileName}\`
+      const filePath = `${user.id}/${fileName}`
 
       if (selectedFile.size <= MAX_FILE_SIZE) {
         const { path: storedPath, mimeType } = await encryptAndUpload(
