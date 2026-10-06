@@ -6,7 +6,12 @@ on:
   pull_request:
     branches: [main]
 
-# Keep only the newest run for the same branch/PR to avoid stale queued work.\nconcurrency:\n  group: ${{ github.workflow }}-${{ github.ref }}\n  cancel-in-progress: true\n\npermissions:
+# Keep only the newest run for the same branch/PR to avoid stale queued work.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
   contents: read
 
 jobs:
