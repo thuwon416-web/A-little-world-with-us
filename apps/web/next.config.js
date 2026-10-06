@@ -105,7 +105,7 @@ const nextConfig = {
   },
 }
 
-const { withSentryConfig } = require('@sentry/nextjs')
+const { withSentryConfig } = require('@sentry/nextjs/config')
 
 // Only apply Sentry configuration if DSN is provided
 const sentryOptions = {
