@@ -114,6 +114,10 @@ GitHub Actions runs Web and Mobile lint/typecheck/tests, Web accessibility tests
 
 Production/device verification is still required for external services and native capabilities such as Google Drive OAuth, background location, notifications, maps, media permissions, and WebRTC calling.
 
+## Provider / API configuration
+
+External provider setup is intentionally kept out of source control. Use [Provider / API Configuration](docs/setup/provider-api-configuration.md) for the production checklist covering Supabase, Cloudinary, Backblaze B2, Google Drive, Upstash, AI/observability providers, and Vercel configuration.
+
 ## Final verification boundary
 
 Code-side work is maintained directly on `main`. Vercel is enabled for the current production verification pass; avoid unnecessary redeploys. Project-level build/install/dev/output overrides are cleared so the Next.js app uses the repository defaults. Remaining operator/device verification covers provider credentials and configuration (Backblaze B2 bucket/CORS, Google OAuth, Axiom, Umami, uptime monitoring), E2E staging secrets, and native capabilities such as notifications, background location, maps, media permissions, and WebRTC.
