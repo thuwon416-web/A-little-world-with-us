@@ -116,3 +116,19 @@ Manual-only provider/device actions should be kept separate from code-side work 
 - The remaining `braces` alert is not currently fixable without a major upstream/toolchain change: the project already uses the latest 3.0.3 release available for the affected dependency path. It should be individually reviewed/dismissed as a development-only, no-fixed-version risk rather than forcing a breaking Expo/Tailwind upgrade.
 - The remaining `postcss-selector-parser` alert is a moderate development/build-tool finding. The current Tailwind 3.4.17 toolchain constrains the dependency to the 6.x line; upgrading it to the fixed 7.x line would require a broader Tailwind/PostCSS compatibility change. Do not force that change during release hardening; review/dismiss individually if GitHub still reports it after refresh.
 - No security alert was mass-dismissed.
+
+
+## 2026-10-06 — final audit continuation
+
+- Removed the remaining hardcoded private relationship/birthday dates found in the Web constants/dashboard; current values must come from configured/runtime data.
+- Normalized the shared Web Card primitive so CardHeader/CardContent do not inherit a second outer padding layer.
+- Updated range-control styling to use the active theme accent instead of a hardcoded gold color.
+- Improved Memories category/delete badge contrast, including Monochrome-safe foreground behavior.
+- Verified the latest Web tree with clean install, lint, TypeScript, unit tests, and production build in a clean Vercel sandbox after the UI changes.
+- Latest production Vercel deployment for `main` is READY and the runtime-error window reports no runtime errors.
+- Vercel environment audit: all core Supabase, Drive OAuth, encryption, Redis, storage, push, and AI provider variables used by the current production code are present except Cloudflare's account ID. The existing `CLOUDFLARE_API_TOKEN` is now accepted by the code; `CLOUDFLARE_ACCOUNT_ID` still needs to be supplied if Cloudflare Workers AI is intended to be an active fallback.
+- Optional observability/analytics variables remain absent: server `SENTRY_DSN`/Sentry release-upload credentials, Axiom, and Google Analytics. These do not block core app operation.
+- Dependabot `sprintf-js` advisory #21 remains open because the GitHub advisory currently lists no patched version; the vulnerable package is development-only through `argparse`. Do not force a breaking toolchain upgrade just to make the alert count zero.
+- Supabase performance advisor still reports 121 unused-index candidates; no indexes were dropped without workload evidence.
+- Native Android/iOS, full Supabase-backed E2E, and physical-device verification remain release-boundary checks and cannot be truthfully marked complete from the current hosted tool access.
+- Korean Learning already defines levels 1–7 in Web/Mobile types/UI, but the current bundled lesson/vocabulary seed data only covers Levels 1–3. Levels 4–6 require new curriculum lessons, vocabulary/examples, quizzes, translations/audio, and corresponding seed/migration data on both Web and Mobile before those levels are genuinely complete.
