@@ -68,6 +68,7 @@ npm run mobile:test
 
 ## Documentation
 
+- [Project status & maintenance checklist](docs/PROJECT_STATUS.md)
 - [Documentation hub](docs/README.md)
 - [Architecture overview](docs/architecture/overview.md)
 - [Local setup](docs/SETUP.md)
@@ -108,6 +109,10 @@ Chat/media encryption is application-level encryption, not end-to-end encryption
 - Preserve Web ↔ Mobile behavior parity.
 - Treat Supabase RLS and authorization checks as security boundaries.
 - Run automated checks after structural changes.
+## Development workflow
+
+Code-side work is currently maintained directly on `main` to keep the repository state simple and avoid unnecessary branches. Changes should still be small, verified by the relevant CI checks, and documented in the same work session. See [Project status & maintenance checklist](docs/PROJECT_STATUS.md) for the persistent release checklist and documentation-update rules.
+
 ## CI and release verification
 
 GitHub Actions runs Web and Mobile lint/typecheck/tests, Web accessibility tests, and the Web production build. Playwright E2E requires the repository's Supabase E2E secrets; when they are unavailable, the workflow reports the environment as unavailable instead of treating E2E as passed.
