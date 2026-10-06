@@ -20,7 +20,7 @@ export function createPrivateCloudinaryUrl(publicId: string, format: string = 'w
     `public_id=${publicId}`,
     `timestamp=${timestamp}`,
   ].sort().join('&')
-  const signature = createHash('sha1').update(stringToSign + secret).digest('hex')
+  const signature = createHash('sha256').update(stringToSign + secret).digest('hex')
   const params = new URLSearchParams({
     timestamp: String(timestamp),
     public_id: publicId,
