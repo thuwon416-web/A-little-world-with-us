@@ -39,6 +39,7 @@ Do not leave documentation updates as a forgotten final step. Treat them as part
 - [x] Web accessibility tests pass.
 - [x] Web production build passes.
 - [x] Basic unauthenticated production smoke checks pass.
+- [x] Production Playwright smoke E2E passes against the live production alias.
 - [ ] Full production Google Drive OAuth flow still needs real-user/device verification.
 
 ### GitHub Actions / security
@@ -48,7 +49,7 @@ Do not leave documentation updates as a forgotten final step. Treat them as part
 - [x] Mobile typecheck passes.
 - [x] Mobile lint passes.
 - [x] Mobile tests pass.
-- [ ] Real Supabase-backed E2E environment still needs its dedicated GitHub secrets before Playwright can run as a real E2E test.
+- [ ] Real Supabase-backed E2E environment still needs its dedicated GitHub secrets before the full staging E2E suite can run.
 
 ### Dependabot
 - [x] Web `source-map-js` updated to 1.2.2 and PR #59 merged after all PR checks passed.
@@ -58,9 +59,10 @@ Do not leave documentation updates as a forgotten final step. Treat them as part
 - [ ] Investigate any remaining alerts individually; do not delete/suppress an alert merely to make the count zero.
 
 ### Database
-- [ ] Classify unused indexes before dropping anything.
-- [ ] Review foreign-key index recommendations against real query paths.
-- [ ] Keep intentional SECURITY DEFINER RPCs and verify their authorization/search_path boundaries.
+- [ ] 121 unused-index findings remain in the live advisor; no indexes were dropped blindly.
+- [ ] Review foreign-key index recommendations against real query paths before adding/removing indexes.
+- [x] Reviewed the nine SECURITY DEFINER RPC findings: they are intentional authenticated RPCs with `SECURITY DEFINER`, explicit `auth.uid()` authorization checks, and `SET search_path TO ''`.
+- [ ] Keep leaked-password protection deferred per the current project constraint/plan.
 - [ ] Revisit database optimization after Web ↔ Mobile parity and end-to-end flows are stable.
 
 ### Device / native verification
@@ -80,7 +82,7 @@ Do not leave documentation updates as a forgotten final step. Treat them as part
 - [ ] Notifications / offline recovery.
 - [ ] Memories UI final pass, including card alignment, pin interaction, theme contrast, and requested page ordering.
 - [ ] Period/fertility calculation and wording final verification.
-- [ ] Final production smoke test after the last code changes.
+- [x] Final production smoke test after the latest code changes: live Playwright smoke E2E passed and Vercel reported no runtime errors in the verification window.
 
 ## Working rule for future sessions
 
