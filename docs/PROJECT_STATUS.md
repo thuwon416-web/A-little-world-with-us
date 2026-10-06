@@ -49,7 +49,7 @@ Do not leave documentation updates as a forgotten final step. Treat them as part
 - [x] Mobile typecheck passes.
 - [x] Mobile lint passes.
 - [x] Mobile tests pass.
-- [ ] Real Supabase-backed E2E environment still needs its dedicated GitHub secrets before the full staging E2E suite can run.
+- [ ] Verify the full Supabase-backed E2E run now that the dedicated GitHub secrets have been supplied; the current docs-only curriculum commit did not trigger the E2E workflow.
 
 ### Dependabot
 - [x] Web `source-map-js` updated to 1.2.2 and PR #59 merged after all PR checks passed.
@@ -146,3 +146,11 @@ Manual-only provider/device actions should be kept separate from code-side work 
 - Yonsei is treated only as structural inspiration/reference; all lessons, dialogues, examples, exercises, images, and audio must be original.
 - Korean expansion remains a post-stabilization implementation phase and does not take priority over core app release-readiness.
 - Future Korean ideas captured in the roadmap include Korea Life, Couple Korean, adaptive review, speaking practice, richer audio, and AI tutoring.
+
+
+## 2026-10-07 — corrected Yonsei benchmark model
+
+- Corrected the Korean roadmap so Yonsei 1-1 / 1-2 / 2-1 / 2-2 etc. are treated as **external level/difficulty benchmarks**, not as the app's own term naming convention.
+- The intended model is: create an original Our Korean course that is approximately equivalent in learner ability to each referenced Yonsei level.
+- The curriculum must not copy Yonsei textbook lessons, dialogues, exercises, images, audio, or answer keys.
+- Current official Yonsei KLI information confirms Level 1 uses 1-1/1-2 materials and Level 2 uses 2-1/2-2 materials across vocabulary/grammar, speaking/writing, and listening/reading; higher-level equivalence will be researched and validated before being locked.
