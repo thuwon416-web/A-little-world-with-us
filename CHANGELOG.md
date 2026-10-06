@@ -1,3 +1,12 @@
+## 2026-10-06 — public release-readiness / CI stabilization
+
+- Fixed the Web Sentry Next.js configuration entrypoint so the production Vercel build succeeds.
+- Fixed Mobile Expo FileSystem/cache compatibility and sync-service TypeScript issues; Web and Mobile CI checks now pass.
+- Updated `source-map-js` to 1.2.2 in both Web and Mobile lockfiles to address the current security advisory.
+- Merged the verified Web Dependabot update and superseded the Mobile Dependabot PR after applying the targeted lockfile update directly to `main`.
+- Added `docs/PROJECT_STATUS.md` as the persistent release-readiness and documentation-maintenance checklist.
+- Updated README guidance to keep code-side work on `main` and require documentation updates alongside material changes.
+
 ## 2026-10-06 — Phase A–D / provider configuration hardening
 
 - Added the production Provider / API Configuration operator checklist for Supabase, Cloudinary, Backblaze B2, Google Drive, Upstash, AI, observability, web push, and Sentry.
