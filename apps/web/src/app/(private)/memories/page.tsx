@@ -931,7 +931,7 @@ function MemoryGrid({
               <button type="button" onClick={() => onOpenMemory(memory)} className="glass-card w-full bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20 p-6 text-left"><p className="font-serif text-xl text-text-1">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-text-2">{new Date(memory.date).toLocaleDateString()}</p></button>
             )}
             {memory.category && (
-              <span className="absolute left-3 top-3 rounded-full bg-black/50 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-text-1">
+              <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-white">
                 {memory.category}
               </span>
             )}
@@ -939,7 +939,7 @@ function MemoryGrid({
               <button
                 type="button"
                 onClick={() => onDeleteMemory(memory)}
-                className="absolute right-3 top-3 rounded-full bg-error/80 px-3 py-1 text-xs text-text-1 hover:bg-error"
+                className="absolute right-3 top-3 rounded-full bg-error/80 px-3 py-1 text-xs text-accent-foreground hover:bg-error"
               >
                 Delete
               </button>
