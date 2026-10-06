@@ -38,7 +38,8 @@ export function YouTubePlayer({
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent<string>) => {
-      if (!event.origin.includes('youtube.com')) return
+      if (event.origin !== 'https://www.youtube.com') return
+      if (event.source !== frameRef.current?.contentWindow) return
       try {
         const message = JSON.parse(event.data) as { event?: string; info?: { duration?: number; currentTime?: number; playerState?: number } }
         if (message.event !== 'infoDelivery' || !message.info) return
