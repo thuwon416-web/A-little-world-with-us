@@ -1,0 +1,58 @@
+name: Production Smoke E2E
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_BASE_URL: https://a-little-world-with-us.vercel.app
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: ./apps/web
+        run: npm ci --ignore-scripts
+
+      - name: Wait for production
+        run: |
+          for attempt in {1..30}; do
+            status="$(curl -L -s -o /dev/null -w '%{http_code}' "$PLAYWRIGHT_BASE_URL/")"
+            if [ "$status" = "200" ]; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "Production site did not become ready in time."
+          exit 1
+
+      - name: Install Playwright browsers
+        working-directory: ./apps/web
+        run: ./node_modules/.bin/playwright install --with-deps chromium
+
+      - name: Run production smoke E2E
+        working-directory: ./apps/web
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7
+          if-no-files-found: ignore
