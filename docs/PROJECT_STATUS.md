@@ -106,3 +106,13 @@ Manual-only provider/device actions should be kept separate from code-side work 
 - Added missing Mobile environment documentation for `EXPO_PUBLIC_WEB_URL` and `EXPO_PUBLIC_COUPLE_START`. Native Google Drive client IDs remain device/EAS setup values, not Vercel variables.
 - Current Vercel production environment has the core application variables configured. Server-side `SENTRY_DSN`, `AXIOM_TOKEN`, `AXIOM_DATASET`, and `NEXT_PUBLIC_GA_ID` are not configured; these are observability/analytics features rather than blockers for the core production app.
 - GitHub Security and quality currently reports additional alerts, but the current connector cannot retrieve the repository's private alert-detail endpoints. No alert was dismissed blindly; exact alert titles/details must be reviewed before fixing or dismissing.
+
+## 2026-10-06 — Security & quality alert remediation
+
+- Reviewed the GitHub Security & quality screenshots: 5 CodeQL code-scanning alerts and 5 Dependabot vulnerability alerts were confirmed.
+- Fixed the 5 CodeQL findings in source: strict YouTube host/protocol validation, strict YouTube `postMessage` origin/source validation, SHA-256 Cloudinary request signing, and unbiased `crypto.randomInt()` description selection.
+- Updated the Web TanStack React Query devtools stack and pinned the transitive `seroval` package to 1.6.8; the two critical Seroval advisories are no longer present in local `npm audit` results.
+- Updated Mobile `sprintf-js` from 1.0.3 to 1.1.3 for the reported development-tool DoS advisory.
+- The remaining `braces` alert is not currently fixable without a major upstream/toolchain change: the project already uses the latest 3.0.3 release available for the affected dependency path. It should be individually reviewed/dismissed as a development-only, no-fixed-version risk rather than forcing a breaking Expo/Tailwind upgrade.
+- The remaining `postcss-selector-parser` alert is a moderate development/build-tool finding. The current Tailwind 3.4.17 toolchain constrains the dependency to the 6.x line; upgrading it to the fixed 7.x line would require a broader Tailwind/PostCSS compatibility change. Do not force that change during release hardening; review/dismiss individually if GitHub still reports it after refresh.
+- No security alert was mass-dismissed.
