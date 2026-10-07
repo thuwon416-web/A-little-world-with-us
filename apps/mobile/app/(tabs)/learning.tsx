@@ -13,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useTheme, type ThemeColors } from '@/context/ThemeContext'
 import { KOREAN_LESSONS } from '@/data/korean-lessons'
+import { KOREAN_ADVANCED_LESSONS, KOREAN_ADVANCED_VOCAB } from '@/data/korean-advanced'
 import { KOREAN_VOCAB } from '@/data/korean-vocab'
 import { sizes, type Sizes } from '@/design-tokens'
 import { useTranslation } from '@/i18n/useTranslation'
@@ -75,11 +76,11 @@ export default function LearningScreen() {
   }, [user])
 
   const lessons = useMemo(
-    () => KOREAN_LESSONS.filter((lesson) => lesson.level === selectedLevel),
+    () => [...KOREAN_LESSONS, ...KOREAN_ADVANCED_LESSONS].filter((lesson) => lesson.level === selectedLevel),
     [selectedLevel]
   )
   const levelVocab = useMemo(
-    () => KOREAN_VOCAB.filter((vocab) => vocab.level === selectedLevel),
+    () => [...KOREAN_VOCAB, ...KOREAN_ADVANCED_VOCAB].filter((vocab) => vocab.level === selectedLevel),
     [selectedLevel]
   )
   const masteredIds = useMemo(
