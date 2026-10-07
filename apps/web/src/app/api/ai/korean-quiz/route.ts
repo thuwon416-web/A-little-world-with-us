@@ -11,7 +11,7 @@ import { checkAiUsageLimit, checkRateLimit } from '@/lib/rate-limit'
 
 const quizTypes = ['multiple_choice', 'fill_blank', 'matching', 'listening', 'typing'] as const
 const requestSchema = z.object({
-  level: z.number().int().min(1).max(7),
+  level: z.number().int().min(1).max(6),
   topic: z.string().trim().min(1).max(80).optional(),
   questionCount: z.number().int().min(1).max(20),
   questionTypes: z.array(z.enum(quizTypes)).min(1).max(5).default([...quizTypes]),
