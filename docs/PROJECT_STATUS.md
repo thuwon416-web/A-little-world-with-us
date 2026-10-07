@@ -199,3 +199,18 @@ Manual-only provider/device actions should be kept separate from code-side work 
 ### Privacy cleanup
 - Removed the remaining hardcoded private birthday reveal from the Memories page. Private occasion data must come from runtime/configured data rather than source literals.
 - Latest production deployment for the cleanup commit is still building; it must reach READY before that deployment is treated as verified.
+
+
+## 2026-10-07 — Phase 7–8 implementation
+
+### Phase 7 — Korean curriculum foundation
+- Locked the app to **6 learner-facing Korean levels**: Beginner Levels 1–2, Intermediate Levels 3–4, Advanced Levels 5–6.
+- Each app level now carries an explicit Yonsei benchmark pair: 1-1+1-2 through 6-1+6-2.
+- Web and Mobile Korean level types/UI no longer expose the old Level 7 model.
+- AI Korean quiz validation now accepts levels 1–6 only.
+- Supabase Korean learning bootstrap constraints now target levels 1–6; the live Korean lesson/vocabulary tables were checked and currently contain no rows, so no existing Level 7 production data was altered.
+- Existing bundled lesson/vocabulary content remains Levels 1–3 only; Levels 4–6 still require original authored curriculum content and QA before being marked complete.
+
+### Phase 8 — Release gate
+- Final release gate is now documented as: latest `main` build/CI green → production READY → authenticated smoke/E2E → Web/Mobile parity → device/offline verification → manual acceptance.
+- No claim of full device or authenticated cross-device verification is made until those environments are actually exercised.
