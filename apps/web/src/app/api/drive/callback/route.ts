@@ -25,23 +25,17 @@ export async function GET(request: Request) {
   const parsedState = state ? parseOAuthState(state) : null
   const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
-  const stateUserId = parsedState?.userId
-
-  if (!user && !stateUserId) return NextResponse.redirect(new URL('/login?error=drive_auth', url.origin))
+  if (!user) return NextResponse.redirect(new URL('/login?error=drive_auth', url.origin))
   if (!code || !state || !parsedState) return NextResponse.redirect(new URL('/settings?drive=error', url.origin))
 
-  // Normal same-origin production flow keeps the HttpOnly cookie binding.
-  // Preview deployments use the canonical production callback, so their cookie
-  // cannot cross hosts. The HMAC-signed, 10-minute state then supplies the
-  // already-authenticated user id and signed return origin.
-  if (storedState) {
-    if (storedState !== state || !user || !verifyOAuthState(state, user.id)) {
-      return NextResponse.redirect(new URL('/settings?drive=error', url.origin))
-    }
+  // Bind the OAuth response to the same authenticated browser that started the flow.
+  // The signed state identifies the user, while the HttpOnly cookie prevents a
+  // leaked/replayed state value from linking an attacker's Google account to another user.
+  if (!storedState || storedState !== state || !verifyOAuthState(state, user.id)) {
+    return NextResponse.redirect(new URL('/settings?drive=error', url.origin))
   }
 
-  const userId = user?.id ?? stateUserId
-  if (!userId) return NextResponse.redirect(new URL('/login?error=drive_auth', url.origin))
+  const userId = user.id
 
   try {
     await saveConnection(userId, await exchangeCode(code))
