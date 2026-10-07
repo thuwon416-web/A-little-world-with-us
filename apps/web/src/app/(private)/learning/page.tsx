@@ -11,7 +11,7 @@ import { useTheme } from '@/features/auth/ThemeProvider'
 import { QuizEngine } from '@/features/learning/QuizEngine'
 import { isTTSSupported, speakKorean, stopSpeaking } from '@/lib/tts'
 
-const levels: KoreanLevel[] = [1, 2, 3, 4, 5, 6, 7]
+const levels: KoreanLevel[] = [1, 2, 3, 4, 5, 6]
 
 const curriculumCodeByLessonId: Record<string, string> = {
   'kr-l1-consonants': '1-1',
