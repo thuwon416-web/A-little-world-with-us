@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
     ].join(' ')
 
     const result = await generateAiResponse({
-      allowedProviders: ['groq', 'gemini', 'cerebras'],
+      allowedProviders: ['cerebras', 'gemini', 'groq'],
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: input.message },
