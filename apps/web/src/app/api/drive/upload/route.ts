@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { deleteDriveFile, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { MAX_MEMORY_IMAGE_SIZE } from '@/lib/upload-validation'
 import { validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
 
 export const runtime = 'nodejs'
@@ -56,7 +57,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'You are not a member of this couple.' }, { status: 403 })
   }
 
-  const validation = await validateUploadContent(file, { imagesOnly: true })
+  const validation = await validateUploadContent(file, { imagesOnly: true, maxBytes: MAX_MEMORY_IMAGE_SIZE })
   if (!validation.valid) {
     return NextResponse.json({ error: validation.error ?? 'Invalid upload.' }, { status: 400 })
   }
