@@ -160,6 +160,7 @@ export async function POST(req: NextRequest) {
     promptLength = prompt.length
     try {
       const result = await generateAiResponse({
+        allowedProviders: ['gemini', 'groq', 'cerebras'],
         messages: [
           { role: 'system', content: 'You create accurate, encouraging Korean language exercises. Return JSON only.' },
           { role: 'user', content: prompt },
