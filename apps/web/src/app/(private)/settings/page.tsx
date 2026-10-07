@@ -61,11 +61,13 @@ const settingCards = [
 
 export default function SettingsPage() {
   const [driveConnected, setDriveConnected] = useState(false)
+  const [driveCanConnect, setDriveCanConnect] = useState(false)
   const searchParams = useSearchParams()
   const driveResult = searchParams.get('drive')
   const [driveLoading, setDriveLoading] = useState(true)
   const [driveDisconnecting, setDriveDisconnecting] = useState(false)
   useEffect(() => {
+    setDriveCanConnect(window.location.origin === 'https://a-little-world-with-us.vercel.app' || window.location.origin === 'http://localhost:3000')
     void fetch('/api/drive/status', { cache: 'no-store' }).then(async (response) => {
       const body = await response.json() as { connected?: boolean }
       setDriveConnected(Boolean(body.connected))
@@ -164,7 +166,8 @@ export default function SettingsPage() {
         {driveResult === 'error' ? <p className="mt-3 rounded-btn border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">Google Drive could not be connected. Check the Google OAuth callback configuration and try again.</p> : null}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="text-sm text-text-2">{driveLoading ? 'Checking…' : driveConnected ? 'Connected' : 'Not connected'}</span>
-          {!driveLoading && !driveConnected ? <Button type="button" onClick={() => { window.location.href = '/api/drive/start' }}>Connect Google Drive</Button> : null}
+          {!driveLoading && !driveConnected && driveCanConnect ? <Button type="button" onClick={() => { window.location.href = '/api/drive/start' }}>Connect Google Drive</Button> : null}
+          {!driveLoading && !driveConnected && !driveCanConnect ? <span className="text-sm text-text-2">Connect from the production web app to finish Google Drive authorization.</span> : null}
           {!driveLoading && driveConnected ? <Button type="button" variant="secondary" onClick={() => void disconnectDrive()} disabled={driveDisconnecting}>{driveDisconnecting ? 'Disconnecting…' : 'Disconnect'}</Button> : null}
         </div>
       </section>
