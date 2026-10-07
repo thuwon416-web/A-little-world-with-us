@@ -300,6 +300,10 @@ function MemoriesPageContent() {
       if (!coupleLinkId) throw new Error('Link with your partner before adding a shared memory.')
       let uploadedCount = 0
       const uploadErrors: string[] = []
+      const driveStatusResponse = await fetch('/api/drive/status')
+      const driveStatus = (await driveStatusResponse.json().catch(() => ({}))) as { connected?: boolean }
+      const driveConnected = driveStatusResponse.ok && driveStatus.connected === true
+
       for (const file of selectedFiles) {
         try {
           let memoryCreatedByMediaApi = false
@@ -321,14 +325,23 @@ function MemoriesPageContent() {
           }
           if (locationLabel.trim()) formData.append('locationLabel', locationLabel.trim())
 
-          const mediaResponse = await fetch('/api/media/upload', { method: 'POST', body: formData })
-          const mediaBody = (await mediaResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
-          if (mediaResponse.ok && mediaBody.file?.id) {
-            storageProvider = 'cloudinary'
-            mimeType = mediaBody.file.mimeType || mimeType
+          if (driveConnected) {
+            const driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
+            const driveBody = (await driveResponse.json().catch(() => ({}))) as { file?: { id?: string }; error?: string }
+            if (!driveResponse.ok || !driveBody.file?.id) {
+              throw new Error(driveBody.error || 'Google Drive memory upload failed.')
+            }
             memoryCreatedByMediaApi = true
-          } else if (mediaResponse.status !== 503) {
-            throw new Error(mediaBody.error || 'Memory upload failed.')
+          } else {
+            const mediaResponse = await fetch('/api/media/upload', { method: 'POST', body: formData })
+            const mediaBody = (await mediaResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
+            if (mediaResponse.ok && mediaBody.file?.id) {
+              storageProvider = 'cloudinary'
+              mimeType = mediaBody.file.mimeType || mimeType
+              memoryCreatedByMediaApi = true
+            } else if (mediaResponse.status !== 503) {
+              throw new Error(mediaBody.error || 'Memory upload failed.')
+            }
           }
 
           if (!memoryCreatedByMediaApi) {
