@@ -4,7 +4,7 @@ import {
   AI_COMPLETION_BUDGET,
   withAiRouteAuth,
 } from '@/lib/ai/route-helpers'
-import { generateAiResponse } from '@/lib/ai/providers'
+import { AI_PROVIDER_PROFILES, generateAiResponse } from '@/lib/ai/providers'
 
 // Validation schema
 const recommendPartnersSchema = z.object({
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
 
     // Use AI API for relationship activity recommendations
     const generated = await generateAiResponse({
-      allowedProviders: ['groq', 'gemini', 'mistral'],
+      allowedProviders: AI_PROVIDER_PROFILES.relationshipWriting,
       maxTokens: AI_COMPLETION_BUDGET,
       messages: [
         { role: 'system', content: 'You are a relationship activity recommender for couples. Recommend 3-5 couple activities based on preferences. Return JSON array with category, name, description, reason. Keep it romantic and practical. Return JSON only.' },
