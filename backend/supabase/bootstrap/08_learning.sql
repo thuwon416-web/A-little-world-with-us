@@ -15,7 +15,7 @@ begin;
 
 create table if not exists public.korean_lessons (
   id uuid primary key default gen_random_uuid(),
-  level smallint not null check (level between 1 and 7),
+  level smallint not null check (level between 1 and 6),
   title text not null,
   title_my text not null,
   description text not null,
