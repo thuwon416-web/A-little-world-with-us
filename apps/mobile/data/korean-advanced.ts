@@ -1,5 +1,8 @@
+  { id: 'kr-l4-health-learning', level: 4, title: 'Health, Learning, and Problems', titleMy: 'ကျန်းမာရေး၊ သင်ယူမှုနှင့် ပြဿနာများ', description: 'Talk about habits, learning goals, everyday problems, and practical solutions.', order: 23, createdAt: CREATED_AT, updatedAt: CREATED_AT },
+  { id: 'kr-l5-work-technology', level: 5, title: 'Work, Technology, and Society', titleMy: 'အလုပ်၊ နည်းပညာနှင့် လူမှုအဖွဲ့အစည်း', description: 'Discuss professional life, technology, information, and changes in society.', order: 24, createdAt: CREATED_AT, updatedAt: CREATED_AT },
+  { id: 'kr-l6-society-and-choice', level: 6, title: 'Society, Values, and Choices', titleMy: 'လူမှုအဖွဲ့အစည်း၊ တန်ဖိုးများနှင့် ရွေးချယ်မှုများ', description: 'Express viewpoints about society, values, choices, impact, and shared life.', order: 25, createdAt: CREATED_AT, updatedAt: CREATED_AT },
 // Keep synchronized with src/data/korean-advanced.ts.
-import type { KoreanLesson, KoreanVocab } from '@/types/korean'
+// Keep synchronized with src/data/korean-advanced.ts.\nimport type { KoreanLesson, KoreanVocab } from '@/types/korean'
 
 const CREATED_AT = '2026-10-07T00:00:00Z'
 
@@ -60,7 +63,33 @@ const SEEDS: Seed[] = [
   ['kr-l6-according','kr-l6-discussion','에 따르면','e ttareumyeon','according to','အရ / အတိုင်း','조사에 따르면 사람들이 더 일찍 자요.','စစ်တမ်းအရ လူတွေ စောစောအိပ်လာကြတယ်။',['discussion','source']],
   ['kr-l6-opinion','kr-l6-discussion','개인적으로','gaeinjeogeuro','personally','ကိုယ်ပိုင်အမြင်အရ','개인적으로 이 방법이 더 좋아요.','ကိုယ်ပိုင်အမြင်အရ ဒီနည်းလမ်းက ပိုကောင်းတယ်။',['discussion','opinion']],
   ['kr-l6-evidence','kr-l6-discussion','근거','geungeo','evidence / basis','အထောက်အထား / အခြေခံအကြောင်းပြချက်','그 주장을 뒷받침할 근거가 필요해요.','အဲဒီအဆိုကို ထောက်ခံပေးမယ့် အထောက်အထားလိုတယ်။',['discussion','academic']],
-  ['kr-l6-compare','kr-l6-discussion','반면에','banmyeone','on the other hand','တစ်ဖက်မှာတော့','가격은 싸지만 반면에 품질이 달라요.','ဈေးကသက်သာပေမယ့် တစ်ဖက်မှာ အရည်အသွေးကကွာတယ်။',['discussion','contrast']],
+  ['kr-l6-compare','kr-l6-discussion','반면에','banmyeone','on the other hand','တစ်ဖက်မှာတော့','이 제품은 가격이 저렴한 반면에 품질이 좋아요.','ဒီပစ္စည်းက ဈေးသက်သာတဲ့အပြင် အရည်အသွေးလည်းကောင်းတယ်။',['discussion','contrast']],
+  ['kr-l4-health','kr-l4-health-learning','건강','geongang','health','ကျန်းမာရေး','건강을 위해 매일 운동해요.','ကျန်းမာရေးအတွက် နေ့တိုင်း လေ့ကျင့်ခန်းလုပ်တယ်။',['health','daily-life']],
+  ['kr-l4-habit','kr-l4-health-learning','습관','seupgwan','habit','အလေ့အကျင့်','좋은 습관을 만들고 싶어요.','ကောင်းတဲ့အလေ့အကျင့်တစ်ခု ဖန်တီးချင်တယ်။',['health','habit']],
+  ['kr-l4-familiar','kr-l4-health-learning','익숙하다','iksukhada','to be familiar / accustomed','အကျွမ်းဝင်သည်','이제 한국 생활에 익숙해졌어요.','အခု ကိုရီးယားမှာ နေထိုင်ရတာ အကျွမ်းဝင်လာပြီ။',['adaptation','daily-life']],
+  ['kr-l4-goal','kr-l4-health-learning','목표','mokpyo','goal','ရည်မှန်းချက်','이번 달 목표를 정했어요.','ဒီလအတွက် ရည်မှန်းချက် သတ်မှတ်လိုက်တယ်။',['learning','goal']],
+  ['kr-l4-practice','kr-l4-health-learning','연습하다','yeonseuphada','to practice','လေ့ကျင့်သည်','매일 한국어를 연습해요.','နေ့တိုင်း ကိုရီးယားစကား လေ့ကျင့်တယ်။',['learning','practice']],
+  ['kr-l4-explain','kr-l4-health-learning','설명하다','seolmyeonghada','to explain','ရှင်းပြသည်','문제를 쉽게 설명해 주세요.','ပြဿနာကို လွယ်လွယ်ရှင်းပြပေးပါ။',['communication','problem-solving']],
+  ['kr-l4-problem','kr-l4-health-learning','문제','munje','problem','ပြဿနာ','문제가 생기면 바로 알려 주세요.','ပြဿနာဖြစ်ရင် ချက်ချင်းပြောပေးပါ။',['problem-solving','daily-life']],
+  ['kr-l4-solution','kr-l4-health-learning','해결하다','haegyeolhada','to solve / resolve','ဖြေရှင်းသည်','같이 문제를 해결해 봐요.','အတူတူ ပြဿနာကို ဖြေရှင်းကြည့်ရအောင်။',['problem-solving','communication']],
+
+  ['kr-l5-job','kr-l5-work-technology','직업','jigeop','occupation / profession','အလုပ်အကိုင်','어떤 직업을 선택하고 싶어요?','ဘယ်လိုအလုပ်အကိုင်မျိုးကို ရွေးချင်လဲ။',['work','career']],
+  ['kr-l5-workplace','kr-l5-work-technology','직장','jikjang','workplace','အလုပ်ခွင်','직장에서 새로운 일을 맡았어요.','အလုပ်ခွင်မှာ အလုပ်အသစ်တစ်ခု တာဝန်ယူလိုက်တယ်။',['work','professional']],
+  ['kr-l5-meeting','kr-l5-work-technology','회의','hoeui','meeting','အစည်းအဝေး','오후에 중요한 회의가 있어요.','နေ့လယ်ပိုင်းမှာ အရေးကြီးတဲ့ အစည်းအဝေးရှိတယ်။',['work','professional']],
+  ['kr-l5-task','kr-l5-work-technology','업무','eopmu','work duties / tasks','အလုပ်တာဝန်','오늘 업무가 많아요.','ဒီနေ့ အလုပ်တာဝန်တွေ များတယ်။',['work','professional']],
+  ['kr-l5-technology','kr-l5-work-technology','기술','gisul','technology / skill','နည်းပညာ / ကျွမ်းကျင်မှု','새로운 기술을 배우고 있어요.','နည်းပညာအသစ်တစ်ခု သင်ယူနေတယ်။',['technology','learning']],
+  ['kr-l5-information','kr-l5-work-technology','정보','jeongbo','information','သတင်းအချက်အလက်','정확한 정보가 필요해요.','တိကျတဲ့ သတင်းအချက်အလက် လိုတယ်။',['information','society']],
+  ['kr-l5-economy','kr-l5-work-technology','경제','gyeongje','economy','စီးပွားရေး','경제에 관심이 많아요.','စီးပွားရေးကို စိတ်ဝင်စားတယ်။',['society','economy']],
+  ['kr-l5-consumption','kr-l5-work-technology','소비','sobi','consumption','သုံးစွဲမှု','필요한 만큼만 소비하려고 해요.','လိုအပ်သလောက်ပဲ သုံးစွဲဖို့ ကြိုးစားတယ်။',['economy','daily-life']],
+
+  ['kr-l6-society','kr-l6-society-and-choice','사회','sahoe','society','လူမှုအဖွဲ့အစည်း','우리 사회에는 다양한 사람들이 살아요.','ကျွန်တော်တို့ လူမှုအဖွဲ့အစည်းမှာ လူအမျိုးမျိုး နေထိုင်ကြတယ်။',['society','discussion']],
+  ['kr-l6-value','kr-l6-society-and-choice','가치','gachi','value','တန်ဖိုး','서로 다른 가치를 존중해야 해요.','တစ်ယောက်နဲ့တစ်ယောက် မတူညီတဲ့ တန်ဖိုးတွေကို လေးစားရမယ်။',['society','values']],
+  ['kr-l6-coexist','kr-l6-society-and-choice','공존','gongjon','coexistence','အတူယှဉ်တွဲနေထိုင်မှု','서로 이해하며 공존하는 방법을 생각해 봐요.','တစ်ယောက်နဲ့တစ်ယောက် နားလည်ပြီး အတူယှဉ်တွဲနေထိုင်ဖို့ နည်းလမ်းစဉ်းစားကြည့်ရအောင်။',['society','values']],
+  ['kr-l6-choice','kr-l6-society-and-choice','선택','seontaek','choice / selection','ရွေးချယ်မှု','중요한 선택일수록 신중해야 해요.','အရေးကြီးတဲ့ ရွေးချယ်မှုဆို ပိုပြီး သေချာစဉ်းစားရမယ်။',['discussion','choice']],
+  ['kr-l6-impact','kr-l6-society-and-choice','영향','yeonghyang','influence / impact','သက်ရောက်မှု','그 결정은 많은 사람에게 영향을 줬어요.','အဲဒီဆုံးဖြတ်ချက်က လူအများအပေါ် သက်ရောက်မှုရှိခဲ့တယ်။',['discussion','impact']],
+  ['kr-l6-perspective','kr-l6-society-and-choice','관점','gwanjeom','perspective / point of view','ရှုမြင်ချက်','다른 관점에서 생각해 볼 필요가 있어요.','အခြားရှုမြင်ချက်ကနေ စဉ်းစားကြည့်ဖို့ လိုတယ်။',['discussion','opinion']],
+  ['kr-l6-success','kr-l6-society-and-choice','성공','seonggong','success','အောင်မြင်မှု','성공의 기준은 사람마다 달라요.','အောင်မြင်မှုရဲ့ သတ်မှတ်ချက်က လူတစ်ယောက်နဲ့တစ်ယောက် မတူဘူး။',['society','values']],
+  ['kr-l6-exercise','kr-l6-society-and-choice','운동','undong','exercise / sport','လေ့ကျင့်ခန်း / အားကစား','건강을 위해 꾸준히 운동하고 있어요.','ကျန်းမာရေးအတွက် ပုံမှန်လေ့ကျင့်ခန်းလုပ်နေတယ်။',['health','lifestyle']],
   ['kr-l6-notice','kr-l6-real-world-korean','주의','jui','caution / attention','သတိ','안전사고에 주의하세요.','လုံခြုံရေးမတော်တဆမှုကို သတိထားပါ။',['real-world','notice']],
   ['kr-l6-prohibited','kr-l6-real-world-korean','금지','geumji','prohibited / prohibition','တားမြစ်ချက်','주차 금지입니다.','ကားရပ်နားခြင်း တားမြစ်ထားပါတယ်။',['real-world','notice']],
   ['kr-l6-available','kr-l6-real-world-korean','이용 가능','iyong ganeung','available for use','အသုံးပြုနိုင်သည်','이 시설은 누구나 이용 가능해요.','ဒီအဆောက်အအုံကို ဘယ်သူမဆို အသုံးပြုနိုင်တယ်။',['real-world','notice']],
