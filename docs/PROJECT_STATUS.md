@@ -24,6 +24,16 @@ Do not leave documentation updates as a forgotten final step. Treat them as part
 
 ## Release-readiness checklist
 
+### Korean Levels 4–6
+- [x] Our Korean Level 4 maps to the 4-1 + 4-2 benchmark band.
+- [x] Our Korean Level 5 maps to the 5-1 + 5-2 benchmark band.
+- [x] Our Korean Level 6 maps to the 6-1 + 6-2 benchmark band.
+- [x] Web and Mobile contain the same Level 4–6 lesson/vocabulary dataset.
+- [x] Level 4–6 lessons are visible through the shared Learning UI and existing quiz flow.
+- [x] Advanced vocabulary is included in lesson counts and overall mastery totals.
+- [x] Content is original and uses Yonsei only as a proficiency/difficulty benchmark.
+- [ ] Runtime CI/build verification for these newest commits remains part of the next automated repository check; no new feature work is being added here.
+
 ### Repository / public readiness
 - [x] Repository is public.
 - [x] No real credentials found in the current source tree during the public-readiness audit.
