@@ -154,3 +154,48 @@ Manual-only provider/device actions should be kept separate from code-side work 
 - The intended model is: create an original Our Korean course that is approximately equivalent in learner ability to each referenced Yonsei level.
 - The curriculum must not copy Yonsei textbook lessons, dialogues, exercises, images, audio, or answer keys.
 - Current official Yonsei KLI information confirms Level 1 uses 1-1/1-2 materials and Level 2 uses 2-1/2-2 materials across vocabulary/grammar, speaking/writing, and listening/reading; higher-level equivalence will be researched and validated before being locked.
+
+
+## 2026-10-07 — Phase 1–6 release audit continuation
+
+### Phase 1 — Core app / parity
+- Targeted source audit confirms Web and Mobile implementations exist for Memories/media, Finance, Calendar/Plans, Care/Cycle, Location/Safety, Notifications, and shared realtime/offline sync.
+- Memories uses shared Supabase metadata and supports Google Drive media retrieval paths on both platforms.
+- Full end-to-end parity remains a release verification item because real authenticated cross-device testing is not available through the repository tools.
+
+### Phase 2 — CI / security
+- Clean Web install: PASS.
+- Web lint: PASS with existing warnings only.
+- Web TypeScript: PASS.
+- Web unit/accessibility suite: 13 files / 52 tests PASS.
+- Web production build: PASS with audit-only placeholder Supabase environment values in the sandbox; no source secrets were used.
+- Mobile clean install: PASS.
+- Mobile TypeScript: PASS.
+- Mobile ESLint: PASS with existing formatting warnings.
+- Mobile Jest: 5 suites / 17 tests PASS.
+- Mobile npm audit still reports Expo/toolchain ecosystem findings with major-version remediation paths; no breaking upgrade was forced during release hardening.
+
+### Phase 3 — Database / backend
+- No destructive index changes were made.
+- Existing RLS, realtime, offline-sync, and FK-index hardening migrations remain in place.
+- Unused-index and FK-advisor findings remain deferred until real workload evidence is available.
+
+### Phase 4 — UI
+- Existing Card/theme/contrast fixes remain intact.
+- Source-level audit found no new compile/type blockers.
+- Final visual/device verification remains separate because it requires an actual browser/device session.
+
+### Phase 5 — Period / fertility
+- Web and Mobile share the uncertainty-aware cycle model and matching higher/lower pregnancy-chance wording.
+- Web cycle parity tests and Mobile cycle calculator tests pass.
+- The UI includes the calendar-based estimate disclaimer.
+- Real-user cycle-history scenarios still require final authenticated verification.
+
+### Phase 6 — Reliability / recovery
+- Mobile offline queue, network-state sync, media cache, and shared realtime infrastructure are present in source.
+- Real device offline/reconnect/media-recovery verification remains pending.
+- Missed-check-in push notification path exists; emergency-contact email delivery remains provider-dependent and is intentionally not faked.
+
+### Privacy cleanup
+- Removed the remaining hardcoded private birthday reveal from the Memories page. Private occasion data must come from runtime/configured data rather than source literals.
+- Latest production deployment for the cleanup commit is still building; it must reach READY before that deployment is treated as verified.
