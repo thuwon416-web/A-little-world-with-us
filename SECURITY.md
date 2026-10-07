@@ -1,51 +1,54 @@
 # Security Policy
 
-## Supported Versions
+Owner: Security / Engineering
+Update when: security boundaries, threat model, provider handling, or incident procedures change
+Last Updated: 2026-10-08
 
-The `main` branch is the actively maintained development line.
+## Supported versions
 
-| Version / branch | Security support |
-| --- | --- |
-| `main` | :white_check_mark: |
-| Older releases | :x: |
+The main branch is the actively maintained development line.
 
-## Reporting a Vulnerability
+## Reporting
 
-Please do not disclose a suspected security vulnerability in a public GitHub issue.
+Do not disclose suspected vulnerabilities in a public issue. Use the repository's available private/security reporting channel. Remove credentials and personal data from evidence.
 
-Instead, use the repository's available private/security reporting channel. Include:
+## Threat model and boundaries
 
-- A clear description of the vulnerability.
-- The affected component or file, if known.
-- Reproduction steps or a minimal proof of concept.
-- The potential security impact.
-- Any relevant logs or screenshots, with secrets and personal data removed.
+Supabase Row Level Security, server-side authorization, authenticated couple/ownership checks, and server-only environment variables are security boundaries. Client-prefixed variables are public to the client and must never contain private credentials.
 
-Do not include passwords, OAuth client secrets, refresh tokens, encryption keys, service-role keys, or other credentials in a report.
+Google Drive OAuth is handled server-side. The Drive flow uses authenticated, host-bound OAuth state and authenticated application routes for Drive-backed memory retrieval. The production callback is /api/drive/callback.
 
-## Security Boundaries
+Media encryption is application-level encryption, not end-to-end encryption. Do not describe it as E2E encryption.
 
-This project treats Supabase Row Level Security (RLS), server-side authorization, and server-only environment variables as security boundaries. Client-prefixed environment variables are bundled into the client and must not contain private credentials.
+## Secrets
 
-Google Drive integration uses server-side OAuth handling and encrypted connection state. Drive-backed memory files are accessed through authenticated application routes rather than exposed as public file URLs.
+Never commit OAuth secrets, refresh tokens, encryption keys, service-role keys, cron secrets, VAPID private keys, or provider API credentials. Store them in the appropriate deployment/provider secret store.
 
-Media encryption used by the application is **not end-to-end encryption**; client applications can access the key needed to decrypt media available to the account.
+## Database safety
 
-## Provider / API configuration
+Review RLS and authorization changes before deployment. Never run backend/supabase/bootstrap/00_core.sql against an existing production database containing real data. Use additive reviewed migrations for existing environments.
 
-Production provider credentials belong in the provider's secret manager or Vercel environment variables, never in Git. The operator checklist is maintained in [docs/setup/provider-api-configuration.md](docs/setup/provider-api-configuration.md).
+## Storage and privacy
 
-### Vercel override policy
+Supabase remains the metadata/source-of-truth layer. Provider-specific media paths must retain authorization and ownership checks. Retention is provider-aware; non-critical data may have shorter retention only where explicitly configured.
 
-The repository intentionally has no root `vercel.json` build configuration. Keep Vercel Project Settings with `apps/web` as Root Directory and leave build/install/dev/output command overrides empty so Next.js uses repository defaults. Do **not** add `buildCommand`, `devCommand`, `installCommand`, `framework`, or `outputDirectory` just because the Vercel project is re-enabled after being disabled. The existing `apps/web/vercel.json` contains cron definitions only.
+## Vercel
 
-### Public repository policy
+Vercel Root Directory is apps/web. There is no root vercel.json; apps/web/vercel.json contains application configuration such as cron definitions. Do not introduce unnecessary build/install/output overrides.
 
-The repository may be public or private. Before switching it to public, run the repository secret scan and verify that no real provider credentials, private keys, refresh tokens, service-role keys, production logs, or personal/couple data are present. Example environment files must contain placeholders only. Runtime secrets must remain in provider secret stores. If the repository is switched back to private later, do not weaken these rules; the same source tree must remain safe in either visibility mode.
+## Incident handling
 
-## Production Safety
+Contain the affected credential/session/data path, rotate compromised secrets, preserve sanitized evidence, review authorization boundaries, and document the verified remediation. Never hide a security issue by suppressing an alert without understanding its impact.
 
-- Never commit credentials or tokens.
-- Review database/RLS changes before production deployment.
-- Do not run the destructive `backend/supabase/bootstrap/00_core.sql` against a database containing real data.
-- Keep VAPID private keys, cron secrets, OAuth secrets, and provider API keys server-side.
+## Deferred
+
+Platform-tier leaked-password protection remains deferred per the current project constraint. Dependency findings that require breaking framework upgrades remain individually assessed rather than force-upgraded.
+
+## Verification checklist
+
+- Secret scan passes for the release revision.
+- CodeQL/security checks pass or have individually reviewed exceptions.
+- RLS/authz paths are tested.
+- OAuth state and callback are verified.
+- Media retrieval enforces authenticated ownership/couple access.
+- Release claims distinguish configured from actually verified behavior.
