@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { CheckCircle2, Trophy } from 'lucide-react'
 import { KOREAN_VOCAB } from '@/data/korean-vocab'
+import { KOREAN_ADVANCED_VOCAB } from '@/data/korean-advanced'
 import { upsertProgress } from '@/services/korean'
 import { supabase } from '@/lib/supabase'
 import type { KoreanLevel, KoreanProgress, KoreanVocab, QuizType } from '@/types/korean'
@@ -59,7 +60,7 @@ export function QuizEngine({
   onComplete: (score: number) => void
 }) {
   const questions = useMemo(
-    () => shuffle(KOREAN_VOCAB.filter((item) => item.level === level)).slice(0, questionCount).map((item) => makePrompt(item, quizType, KOREAN_VOCAB.filter((vocab) => vocab.level === level))),
+    () => shuffle([...KOREAN_VOCAB, ...KOREAN_ADVANCED_VOCAB].filter((item) => item.level === level)).slice(0, questionCount).map((item) => makePrompt(item, quizType, KOREAN_VOCAB.filter((vocab) => vocab.level === level))),
     [level, quizType, questionCount]
   )
   const [index, setIndex] = useState(0)
