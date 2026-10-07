@@ -12,7 +12,7 @@ export default function QuizScreen() {
   const styles = createStyles(colors, sizes)
   const params = useLocalSearchParams<{ level?: string; quizType?: string }>()
   const parsedLevel = Number(params.level ?? 1)
-  const level = ([1, 2, 3, 4, 5, 6, 7] as number[]).includes(parsedLevel)
+  const level = ([1, 2, 3, 4, 5, 6] as number[]).includes(parsedLevel)
     ? (parsedLevel as KoreanLevel)
     : 1
   const requestedType = params.quizType
