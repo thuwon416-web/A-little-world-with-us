@@ -1,7 +1,7 @@
 // Korean Learning Feature — Shared Types
 // Keep synchronized with src/types/korean.ts until a shared package is introduced.
 
-export type KoreanLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7
+export type KoreanLevel = 1 | 2 | 3 | 4 | 5 | 6
 
 export const KOREAN_LEVELS: Record<
   KoreanLevel,
@@ -10,6 +10,8 @@ export const KOREAN_LEVELS: Record<
     titleMy: string
     description: string
     estimatedHours: number
+    band: 'Beginner' | 'Intermediate' | 'Advanced'
+    yonseiBenchmark: string
   }
 > = {
   1: {
@@ -17,42 +19,48 @@ export const KOREAN_LEVELS: Record<
     titleMy: 'ဟန်ဂူးလ် အခြေခံများ',
     description: 'Learn the Korean alphabet, sounds, and simple syllables.',
     estimatedHours: 8,
+    band: 'Beginner',
+    yonseiBenchmark: '1-1 + 1-2',
   },
   2: {
     title: 'Everyday Greetings',
     titleMy: 'နေ့စဉ်နှုတ်ဆက်စကားများ',
     description: 'Use common greetings, introductions, and polite expressions.',
     estimatedHours: 10,
+    band: 'Beginner',
+    yonseiBenchmark: '2-1 + 2-2',
   },
   3: {
     title: 'Daily Life',
     titleMy: 'နေ့စဉ်ဘဝ',
     description: 'Talk about routines, people, places, and simple activities.',
     estimatedHours: 14,
+    band: 'Intermediate',
+    yonseiBenchmark: '3-1 + 3-2',
   },
   4: {
     title: 'Conversation Builder',
     titleMy: 'စကားပြောစွမ်းရည် တိုးတက်ခြင်း',
     description: 'Build longer sentences and respond in everyday conversations.',
     estimatedHours: 18,
+    band: 'Intermediate',
+    yonseiBenchmark: '4-1 + 4-2',
   },
   5: {
     title: 'Practical Korean',
     titleMy: 'လက်တွေ့ကိုရီးယားစကား',
     description: 'Handle travel, shopping, plans, and practical situations.',
     estimatedHours: 22,
+    band: 'Advanced',
+    yonseiBenchmark: '5-1 + 5-2',
   },
   6: {
     title: 'Natural Expression',
     titleMy: 'သဘာဝကျသော ပြောဆိုပုံများ',
     description: 'Understand nuance, informal speech, and natural expressions.',
     estimatedHours: 28,
-  },
-  7: {
-    title: 'Confident Fluency',
-    titleMy: 'ယုံကြည်မှုရှိသော ကျွမ်းကျင်မှု',
-    description: 'Express ideas comfortably across familiar Korean topics.',
-    estimatedHours: 36,
+    band: 'Advanced',
+    yonseiBenchmark: '6-1 + 6-2',
   },
 }
 
