@@ -149,3 +149,7 @@ Before production release, run the repository CI checks and complete real-device
 - Reverified production Vercel deployment and runtime-error window.
 - Documented the remaining `sprintf-js` advisory as upstream/no-fixed-version and development-only, rather than forcing a breaking dependency change.
 - Documented Korean Learning Levels 4–6 as content/data work still required; the current bundled curriculum is complete through Level 3.
+
+
+- **2026-10-07 — Web/Supabase audit:** corrected the RLS helper privilege configuration that was blocking authenticated private-page data access.
+- **2026-10-07 — Korean Levels 4–6:** added original intermediate/advanced lesson and vocabulary content and wired it into Web/Mobile learning and quiz flows.
