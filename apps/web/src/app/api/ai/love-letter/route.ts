@@ -1,10 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { logAiUsage } from '@/lib/ai/usage-log'
-import { generateAiResponse } from '@/lib/ai/providers'
+import { AI_PROVIDER_PROFILES, generateAiResponse } from '@/lib/ai/providers'
 import {
   AI_COMPLETION_BUDGET,
-  getAiResponseText,
   optionalString,
   withAiRouteAuth,
 } from '@/lib/ai/route-helpers'
@@ -27,7 +26,7 @@ export async function POST(req: NextRequest) {
     // The user supplied these details directly; privacy scopes govern stored context, not explicit prompts.
 
     const generated = await generateAiResponse({
-      allowedProviders: ['groq', 'gemini', 'mistral'],
+      allowedProviders: AI_PROVIDER_PROFILES.relationshipWriting,
       maxTokens: AI_COMPLETION_BUDGET,
       messages: [
         { role: 'system', content: 'Write a heartfelt love letter. Return as plain text. Be romantic, sincere, and personal.' },
