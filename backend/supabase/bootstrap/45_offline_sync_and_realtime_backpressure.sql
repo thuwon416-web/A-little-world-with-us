@@ -126,8 +126,6 @@ begin
 end;
 $$;
 
-revoke all on function offline.apply_op(uuid,text,text,uuid,bigint,jsonb) from public,anon,authenticated;
-
 create or replace function public.apply_offline_op(
   p_op_id uuid, p_operation text, p_table_name text, p_row_id uuid,
   p_base_version bigint, p_payload jsonb
@@ -140,6 +138,9 @@ $$;
 
 revoke all on function public.apply_offline_op(uuid,text,text,uuid,bigint,jsonb) from public,anon;
 grant execute on function public.apply_offline_op(uuid,text,text,uuid,bigint,jsonb) to authenticated;
+
+-- Keep the security-definer entrypoint restricted to authenticated callers only.
+revoke all on function offline.apply_op(uuid,text,text,uuid,bigint,jsonb) from public,anon,authenticated;
 
 create or replace function public.record_location_point(
   p_couple_id uuid,p_latitude double precision,p_longitude double precision,
