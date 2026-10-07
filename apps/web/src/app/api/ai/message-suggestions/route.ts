@@ -5,7 +5,7 @@ import {
   optionalString,
   withAiRouteAuth,
 } from '@/lib/ai/route-helpers'
-import { generateAiResponse } from '@/lib/ai/providers'
+import { AI_PROVIDER_PROFILES, generateAiResponse } from '@/lib/ai/providers'
 
 // Validation schema
 const messageSuggestionsSchema = z.object({
@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     const validated = messageSuggestionsSchema.parse(body)
 
     const generated = await generateAiResponse({
-      allowedProviders: ['groq', 'gemini', 'mistral'],
+      allowedProviders: AI_PROVIDER_PROFILES.relationshipWriting,
       maxTokens: AI_COMPLETION_BUDGET,
       messages: [
         { role: 'system', content: 'Generate 5 romantic message suggestions. Return JSON array of strings. Be sweet, thoughtful, and appropriate for the context. Return JSON only.' },
