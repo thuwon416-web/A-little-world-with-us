@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { BookOpen, Check, ChevronDown, ChevronUp, Languages, Volume2, X } from 'lucide-react'
 import { KOREAN_LESSONS } from '@/data/korean-lessons'
+import { KOREAN_ADVANCED_LESSONS } from '@/data/korean-advanced'
 import { KOREAN_VOCAB } from '@/data/korean-vocab'
+import { KOREAN_ADVANCED_VOCAB } from '@/data/korean-advanced'
 import type { KoreanLevel, KoreanLesson, KoreanProgress, KoreanVocab } from '@/types/korean'
 import { getProgress } from '@/services/korean'
 import { supabase } from '@/lib/supabase'
@@ -66,11 +68,11 @@ export default function LearningPage() {
   }, [])
 
   const lessons = useMemo(
-    () => KOREAN_LESSONS.filter((lesson) => lesson.level === selectedLevel),
+    () => [...KOREAN_LESSONS, ...KOREAN_ADVANCED_LESSONS].filter((lesson) => lesson.level === selectedLevel),
     [selectedLevel]
   )
   const levelVocab = useMemo(
-    () => KOREAN_VOCAB.filter((vocab) => vocab.level === selectedLevel),
+    () => [...KOREAN_VOCAB, ...KOREAN_ADVANCED_VOCAB].filter((vocab) => vocab.level === selectedLevel),
     [selectedLevel]
   )
   const masteredIds = useMemo(
