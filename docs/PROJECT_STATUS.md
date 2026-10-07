@@ -251,3 +251,27 @@ Manual-only provider/device actions should be kept separate from code-side work 
 - Found a Preview-specific security limitation: Vercel preview hosts cannot safely share the production host's HttpOnly OAuth state cookie. The Drive connect flow is therefore intentionally production-only; this prevents a leaked/replayed OAuth state from linking an attacker's Google account to another user's account. Preview builds can still render the Drive UI, but the actual connection must be started from production.
 - Hardened the callback to require the same authenticated browser's HttpOnly state cookie and documented the exact Google Cloud redirect URI requirement.
 - Google Cloud Console still needs the exact Drive callback URI registered on the Web OAuth client before an end-to-end Google consent test can succeed.
+
+
+## 2026-10-07 — Phase 2–5.5 code-side gate
+
+- Phase 2 data-flow: Web/Mobile shared memories now prefer the server-backed Google Drive path when connected; Supabase keeps memory metadata and Drive file references. Existing storage providers remain readable as fallbacks.
+- Phase 3 integrations: AI routes use feature-specific provider profiles; Google Drive OAuth is production-bound, browser-state protected, and Drive media uploads use resumable upload sessions.
+- Phase 4 security/dependencies: offline implementation RPC is non-executable directly; mobile shell-quote is pinned to 1.12.0 and the lockfile is synchronized. No critical npm-audit findings remain in the current mobile tree; remaining high findings are largely framework/transitive upgrade paths that would require incompatible major upgrades or have no upstream fixed release.
+- Phase 5 parity/UX: Web and Mobile typecheck, lint, and tests pass. Settings now explains that Drive authorization must start from production because preview hosts cannot safely share the production OAuth state cookie.
+- Phase 5.5 release hardening: Next.js generated TypeScript config changes are persisted; production deployment for main is READY; no recent Vercel runtime errors were observed during the audit.
+
+### Remaining Phase 6 manual gate
+
+1. Google Cloud OAuth Web client: register the exact production callback https://a-little-world-with-us.vercel.app/api/drive/callback.
+2. From the production site, complete Google Drive Connect → consent → callback → Settings shows Connected.
+3. Upload one shared memory photo and verify the Drive file and Supabase memories.drive_file_id metadata both exist and the photo can be rendered again.
+4. On Mobile, add the native Android/iOS Google OAuth client IDs if native Drive tools are needed, then verify native connect/disconnect.
+5. Run the final Web ↔ Mobile smoke flow: Auth → Couple → Chat → Period → Memories/Media → Calendar/Plans/Finance → Location/Safety → Notifications/Offline → AI → Drive.
+6. Confirm production GitHub E2E/CodeQL/Secret Scan checks are green for the final release commit.
+
+### Deferred maintenance after release
+
+- Supabase unused-index / unindexed-FK cleanup remains intentionally deferred until mobile parity and production verification are complete.
+- Supabase leaked-password protection remains a platform-tier setting and is not treated as a code-side blocker.
+- Tailwind 3 and the current Expo/Jest stack still have npm-audit upgrade paths that require major framework changes; they should be handled in a dedicated dependency-upgrade phase rather than with unsafe force upgrades.
