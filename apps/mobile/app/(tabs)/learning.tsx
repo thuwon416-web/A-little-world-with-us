@@ -97,8 +97,9 @@ export default function LearningScreen() {
     [progress]
   )
 
+  const allVocab = useMemo(() => [...KOREAN_VOCAB, ...KOREAN_ADVANCED_VOCAB], [])
   const getLessonVocab = (lessonId: string): KoreanVocab[] =>
-    KOREAN_VOCAB.filter((vocab) => vocab.lessonId === lessonId)
+    allVocab.filter((vocab) => vocab.lessonId === lessonId)
 
   return (
     <ScrollView
@@ -133,7 +134,7 @@ export default function LearningScreen() {
             {loadingProgress ? 'Loading progress' : 'Your progress'}
           </Text>
           <Text style={[styles.progressValue, { color: colors.textPrimary }]}>
-            {masteredIds.size} / {KOREAN_VOCAB.length} words mastered
+            {masteredIds.size} / {allVocab.length} words mastered
           </Text>
         </View>
         {loadingProgress ? (
