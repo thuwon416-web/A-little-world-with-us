@@ -52,4 +52,4 @@ Web release → authenticated E2E → Drive E2E → Web/Mobile parity → device
 Major verification activity recorded 2026-10-07. Exact current GitHub/Vercel/Supabase state requires fresh verification.
 
 ## 12. NEXT ACTION
-Finish canonical documentation migration, then run final release-commit and external Drive/device verification.
+Canonical documentation migration is complete. Next: run final release-commit verification and external Google Drive/device gates.
