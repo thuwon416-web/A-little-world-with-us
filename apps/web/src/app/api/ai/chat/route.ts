@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
-import { AIProviderError, generateAiResponse, isAiProvider } from '@/lib/ai/providers'
+import { AI_PROVIDER_PROFILES, AIProviderError, generateAiResponse, isAiProvider } from '@/lib/ai/providers'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { checkAiUsageLimit, checkRateLimit } from '@/lib/rate-limit'
 import { sanitizeAiUserPrompt } from '@/lib/ai/sanitize'
@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
         { role: 'user', content: sanitizedMessage },
       ],
       maxTokens: 500,
+      allowedProviders: provider ? undefined : AI_PROVIDER_PROFILES.chat,
     })
     void logAiUsage({
       userId: user.id,
