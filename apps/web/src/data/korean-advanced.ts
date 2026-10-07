@@ -16,7 +16,6 @@ export const KOREAN_ADVANCED_LESSONS: KoreanLesson[] = [
   { id: 'kr-l5-work-technology', level: 5, title: 'Work, Technology, and Society', titleMy: 'အလုပ်၊ နည်းပညာနှင့် လူမှုအဖွဲ့အစည်း', description: 'Discuss professional life, technology, information, and changes in society.', order: 24, createdAt: CREATED_AT, updatedAt: CREATED_AT },
   { id: 'kr-l6-society-and-choice', level: 6, title: 'Society, Values, and Choices', titleMy: 'လူမှုအဖွဲ့အစည်း၊ တန်ဖိုးများနှင့် ရွေးချယ်မှုများ', description: 'Express viewpoints about society, values, choices, impact, and shared life.', order: 25, createdAt: CREATED_AT, updatedAt: CREATED_AT },
 ]
-]
 
 const makeVocab = (
   id: string, lessonId: string, korean: string, romanization: string, english: string, myanmar: string,
