@@ -89,11 +89,12 @@ export default function LearningPage() {
     [progress]
   )
 
+  const allVocab = useMemo(() => [...KOREAN_VOCAB, ...KOREAN_ADVANCED_VOCAB], [])
   const getLessonVocab = (lesson: KoreanLesson) =>
-    KOREAN_VOCAB.filter((vocab) => vocab.lessonId === lesson.id)
+    allVocab.filter((vocab) => vocab.lessonId === lesson.id)
   let vocabularyMasteryPercentage = 0
-  if (KOREAN_VOCAB.length > 0) {
-    vocabularyMasteryPercentage = (masteredIds.size / KOREAN_VOCAB.length) * 100
+  if (allVocab.length > 0) {
+    vocabularyMasteryPercentage = (masteredIds.size / allVocab.length) * 100
   }
 
   return (
@@ -121,14 +122,14 @@ export default function LearningPage() {
         <div className="rounded-btn border border-accent-1/20 bg-card px-4 py-3 text-right">
           <p className="text-xs text-text-2">Your progress</p>
           <p className="mt-1 text-lg font-semibold text-text-1">
-            {masteredIds.size} / {KOREAN_VOCAB.length} words mastered
+            {masteredIds.size} / {allVocab.length} words mastered
           </p>
           <div
             className="mt-2 h-2 overflow-hidden rounded-full bg-soft-tint"
             role="progressbar"
             aria-label="Korean vocabulary mastered"
             aria-valuemin={0}
-            aria-valuemax={KOREAN_VOCAB.length}
+            aria-valuemax={allVocab.length}
             aria-valuenow={masteredIds.size}
           >
             <div
