@@ -155,3 +155,5 @@ Before production release, run the repository CI checks and complete real-device
 - **2026-10-07 — Korean Levels 4–6:** added original intermediate/advanced lesson and vocabulary content and wired it into Web/Mobile learning and quiz flows.
 
 - **2026-10-07 — Final Web gate:** Supabase RLS error verification cleared, GitHub Secret scan/CodeQL/Test/Production Smoke E2E/full E2E passed on the final code state, and Vercel production remained READY.
+
+- **2026-10-07 — Google Drive OAuth:** corrected the Drive callback configuration to `/api/drive/callback`, added signed preview return handling, and documented the exact Google Cloud redirect URI.
