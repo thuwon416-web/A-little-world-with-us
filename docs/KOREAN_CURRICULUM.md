@@ -10,36 +10,60 @@ Yonsei is used as a **level/difficulty benchmark**, not as content to copy. The 
 
 ### Track 1 — Our Korean
 
-Our Korean is the learner-facing course, but its levels are **mapped against external proficiency benchmarks**. The Yonsei book names are reference points; they are not our lesson names unless we explicitly choose to display an equivalence label.
+**Our Korean has 6 learner-facing levels. Each Our Korean level covers two Yonsei benchmark terms.** The Yonsei numbers are used to define the approximate difficulty/progression, while all lessons and content are original.
 
-| Yonsei benchmark | Our Korean target | Structured band | Direction |
+| Our Korean | Band | Yonsei benchmark reference | Main goal |
 |---|---|---|---|
-| Yonsei 1-1 | Our Korean — equivalent to 1-1 | Beginner | Match core beginner ability, but write original content |
-| Yonsei 1-2 | Our Korean — equivalent to 1-2 | Beginner | Match core beginner ability, but write original content |
-| Yonsei 2-1 | Our Korean — equivalent to 2-1 | Beginner | Match the corresponding difficulty/progression |
-| Yonsei 2-2 | Our Korean — equivalent to 2-2 | Beginner | Match the corresponding difficulty/progression |
-| Yonsei 3-1 | Our Korean — equivalent to 3-1 | Beginner / Intermediate bridge | Validate exact proficiency before locking |
-| Yonsei 3-2 | Our Korean — equivalent to 3-2 | Intermediate | Validate exact proficiency before locking |
-| Yonsei 4-1 | Our Korean — equivalent to 4-1 | Intermediate | Validate exact proficiency before locking |
-| Yonsei 4-2 | Our Korean — equivalent to 4-2 | Intermediate | Validate exact proficiency before locking |
-| Yonsei 5-1 | Our Korean — equivalent to 5-1 | Upper-intermediate direction | Validate exact proficiency before locking |
-| Yonsei 5-2 | Our Korean — equivalent to 5-2 | Upper-intermediate direction | Validate exact proficiency before locking |
-| Yonsei 6-1 | Our Korean — equivalent to 6-1 | Advanced direction | Validate exact proficiency before locking |
-| Yonsei 6-2 | Our Korean — equivalent to 6-2 | Advanced direction | Validate exact proficiency before locking |
+| **Level 1** | Beginner | **1-1 + 1-2** | Hangul, pronunciation, introductions, basic sentence patterns, essential daily communication |
+| **Level 2** | Beginner | **2-1 + 2-2** | Daily life, routines, locations, requests, basic tense, practical conversation |
+| **Level 3** | Intermediate | **3-1 + 3-2** | Longer conversations, connected sentences, experiences, reasons, plans, wider grammar |
+| **Level 4** | Intermediate | **4-1 + 4-2** | More natural conversation, explanations, opinions, social/work situations, stronger listening |
+| **Level 5** | Advanced | **5-1 + 5-2** | Nuance, register control, complex explanations, formal/social communication, extended reading/listening |
+| **Level 6** | Advanced | **6-1 + 6-2** | Sustained conversation, discussion, abstract topics, storytelling, advanced practical Korean |
 
-**Important:** the table defines a benchmarking target, not a claim that the app has already implemented these levels. The exact proficiency mapping above 2-2 must be validated during curriculum research/content design.
+### How the mapping works
+
+The relationship is:
+
+**Our Korean Level 1**
+→ benchmarked against **Yonsei 1-1 + 1-2**
+
+**Our Korean Level 2**
+→ benchmarked against **Yonsei 2-1 + 2-2**
+
+**Our Korean Level 3**
+→ benchmarked against **Yonsei 3-1 + 3-2**
+
+**Our Korean Level 4**
+→ benchmarked against **Yonsei 4-1 + 4-2**
+
+**Our Korean Level 5**
+→ benchmarked against **Yonsei 5-1 + 5-2**
+
+**Our Korean Level 6**
+→ benchmarked against **Yonsei 6-1 + 6-2**
+
+This does **not** mean Our Korean copies the Yonsei books. It means that when designing a level, we ask: *"After completing this Our Korean level, is the learner operating at approximately the intended benchmark?"*
+
+The exact grammar, vocabulary, skill targets, and assessment for each benchmark must be researched and quality-checked before that level is marked complete.
 
 ### Track 2 — Structured Korean
 
-- Beginner = Our Korean Levels 1–5
-- Intermediate = Our Korean Levels 6–10
-- Future Upper Intermediate and Advanced can be added later without changing existing learner history.
+The main structured course is therefore:
 
-Every level has two terms:
-- x-1: foundation and acquisition
-- x-2: consolidation, expansion, and practical output
+**Beginner**
+- Level 1 → 1-1 + 1-2
+- Level 2 → 2-1 + 2-2
 
-This gives the app a clear 1-1 → 1-2 → 2-1 → 2-2 progression while keeping the main learner-facing level number simple.
+**Intermediate**
+- Level 3 → 3-1 + 3-2
+- Level 4 → 4-1 + 4-2
+
+**Advanced**
+- Level 5 → 5-1 + 5-2
+- Level 6 → 6-1 + 6-2
+
+Each level contains two internal course stages corresponding to the two benchmark terms, but the learner primarily sees **Level 1–6**. The benchmark labels can be shown as a small equivalence/reference label rather than becoming the app's own curriculum names.
 
 ### Track 3 — Korea Life
 
@@ -93,31 +117,61 @@ Multiple choice, sentence ordering, fill-in-the-blank, listening recognition, tr
 
 ## Level scope
 
-### Beginner — Levels 1–5
+### Beginner — Levels 1–2
 
-Level 1: Hangul, sound rules, greetings, introductions, numbers, time, basic objects, basic copula patterns, and core particles.
+**Level 1 — Yonsei benchmark 1-1 + 1-2**
+- Hangul and pronunciation foundations
+- greetings, introductions, identity
+- numbers, dates, time, basic objects
+- core particles and copula patterns
+- essential questions and answers
+- simple everyday requests and responses
 
-Level 2: Daily routines, locations, existence, likes/dislikes, requests, present/past/future foundations, and common counters.
+**Level 2 — Yonsei benchmark 2-1 + 2-2**
+- daily routines and schedules
+- locations and directions
+- existence, possession, likes/dislikes
+- present/past/future foundations
+- counters and practical quantities
+- invitations, requests, basic problem solving
 
-Level 3: Descriptions, comparisons, plans, invitations, reasons, ability, permission, and everyday problem solving.
+### Intermediate — Levels 3–4
 
-Level 4: Connected sentences, sequencing, causes/results, experiences, requests and suggestions, shopping, restaurant, and transport dialogues.
+**Level 3 — Yonsei benchmark 3-1 + 3-2**
+- descriptions and comparisons
+- experiences and plans
+- reasons, ability, permission
+- connected sentences
+- everyday problem solving
+- longer listening and speaking tasks
 
-Level 5: Longer everyday conversations, wider connector use, practical indirect communication, appointments, work/life basics, and a bridge toward intermediate listening.
+**Level 4 — Yonsei benchmark 4-1 + 4-2**
+- more complex connectors and sequencing
+- explanations and opinions
+- practical social/work situations
+- natural conversational patterns
+- stronger reading/listening comprehension
+- polite/formal/casual register control
 
-### Intermediate — Levels 6–10
+### Advanced — Levels 5–6
 
-Level 6: Natural daily conversation, speech-level switching, honorific foundations, emotional expression, and longer dialogues.
+**Level 5 — Yonsei benchmark 5-1 + 5-2**
+- nuanced expression
+- formal and social communication
+- complex explanations and argument structure
+- broader vocabulary and collocations
+- longer authentic-style reading/listening
+- cultural and register-sensitive communication
 
-Level 7: Work, housing, banking, appointments, services, social situations, explanations, and problem solving.
+**Level 6 — Yonsei benchmark 6-1 + 6-2**
+- sustained conversation and discussion
+- abstract topics
+- storytelling and persuasion
+- advanced grammar and discourse
+- high-level register switching
+- cumulative real-life communication
 
-Level 8: Indirect speech, reported information, opinions, reasons/evidence, and longer listening/reading.
-
-Level 9: Natural collocations, contractions, discourse markers, nuance, idioms, cultural context, and formal/casual switching.
-
-Level 10: Sustained conversation, discussion, storytelling, persuasion, abstract topics, advanced practical communication, and cumulative review.
-
-The exact grammar and vocabulary sequence must be validated during content authoring. This document defines the architecture, not a claim that all future lessons already exist.
+The exact grammar and vocabulary sequence must be validated during content authoring. This document defines the architecture and benchmark target, not a claim that all future lessons already exist.
 
 ## Curriculum quality rules
 
@@ -179,10 +233,9 @@ Korean expansion remains behind core app stabilization.
 1. Stabilize Web/Mobile parity and core data flows.
 2. Finish production, device, and recovery verification.
 3. Finalize the shared Korean curriculum data model.
-4. Complete and quality-check Levels 1–3.
-5. Build Levels 4–5.
-6. Build Levels 6–7.
-7. Expand Levels 8–10.
+4. Complete and quality-check Levels 1–2 (Beginner).
+5. Build and quality-check Levels 3–4 (Intermediate).
+6. Build and quality-check Levels 5–6 (Advanced).
 8. Add Korea Life modules.
 9. Add Couple Korean modules.
 10. Add adaptive review, richer audio, speaking practice, and AI tutoring.
