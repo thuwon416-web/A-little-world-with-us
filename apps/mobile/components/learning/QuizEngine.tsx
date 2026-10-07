@@ -7,6 +7,7 @@ import { QuizQuestion, type MobileQuizPrompt } from './QuizQuestion'
 
 import { useTheme } from '@/context/ThemeContext'
 import { KOREAN_VOCAB } from '@/data/korean-vocab'
+import { KOREAN_ADVANCED_VOCAB } from '@/data/korean-advanced'
 import { useAuth } from '@/lib/auth'
 import { getProgress, upsertProgress } from '@/services/korean'
 import type { KoreanLevel, KoreanProgress, KoreanVocab, QuizType } from '@/types/korean'
@@ -52,7 +53,7 @@ export function QuizEngine({
 }) {
   const { colors } = useTheme()
   const { user } = useAuth()
-  const pool = useMemo(() => KOREAN_VOCAB.filter((item) => item.level === level), [level])
+  const pool = useMemo(() => [...KOREAN_VOCAB, ...KOREAN_ADVANCED_VOCAB].filter((item) => item.level === level), [level])
   const questions = useMemo(
     () =>
       shuffle(pool)
