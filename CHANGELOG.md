@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Korean Levels 4–6 implementation
+- Completed the original Our Korean Level 4–6 learning seed for Intermediate/Advanced progression: 12 lessons and 60 vocabulary/example items.
+- Added benchmark-aligned coverage for longer explanations, health/learning, work, technology, society, nuance, reasoning, values, and advanced real-world communication without copying Yonsei lesson content.
+- Fixed Web and Mobile lesson rendering so Levels 4–6 use the same advanced vocabulary dataset and progress totals.
+- Kept Web/Mobile advanced curriculum data synchronized and wired the same Level 4–6 content into the existing quiz path.
+
 ### Phase 7–8 Korean/release alignment
 - Standardized Korean Learning to six learner-facing levels: Beginner 1–2, Intermediate 3–4, Advanced 5–6.
 - Added explicit Yonsei benchmark pairs from 1-1+1-2 through 6-1+6-2 to Web/Mobile level metadata.
