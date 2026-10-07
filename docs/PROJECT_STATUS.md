@@ -224,3 +224,11 @@ Manual-only provider/device actions should be kept separate from code-side work 
 - The RLS helper grant was corrected so authenticated sessions can evaluate the existing policies while anonymous access remains restricted.
 - Original Korean Level 4–6 bundled lesson/vocabulary content was added and wired into Web/Mobile learning and quiz flows.
 - Web verification remains the gate before native-device work and API/provider key entry.
+
+
+## Final web gate verification — 2026-10-07
+
+- Supabase logs after the RLS grant fix show **0** occurrences of `permission denied for function is_linked_user` and no Postgres `ERROR` records in the verification window.
+- GitHub final code commit verification: Secret scan **PASS**, CodeQL **PASS**, Web/Mobile Test workflow **PASS**, Production Smoke E2E **PASS**, and full Supabase-backed E2E **PASS**.
+- Vercel production deployment for the final docs state is **READY**; production runtime errors in the latest verification window are **0**.
+- No native-device or native Google OAuth claim is made yet; those remain the next stage only after the Web gate is accepted.
