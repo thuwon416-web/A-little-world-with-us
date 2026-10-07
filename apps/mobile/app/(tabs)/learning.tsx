@@ -21,7 +21,7 @@ import { isTTSSupported, speakKorean, stopSpeaking } from '@/lib/tts'
 import { getProgress } from '@/services/korean'
 import type { KoreanLevel, KoreanProgress, KoreanVocab } from '@/types/korean'
 
-const levels: KoreanLevel[] = [1, 2, 3, 4, 5, 6, 7]
+const levels: KoreanLevel[] = [1, 2, 3, 4, 5, 6]
 
 const curriculumCodeByLessonId: Record<string, string> = {
   'kr-l1-consonants': '1-1',
