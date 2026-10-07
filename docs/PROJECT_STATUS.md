@@ -214,3 +214,4 @@ Manual-only provider/device actions should be kept separate from code-side work 
 ### Phase 8 — Release gate
 - Final release gate is now documented as: latest `main` build/CI green → production READY → authenticated smoke/E2E → Web/Mobile parity → device/offline verification → manual acceptance.
 - No claim of full device or authenticated cross-device verification is made until those environments are actually exercised.
+
