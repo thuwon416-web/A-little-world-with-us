@@ -153,3 +153,5 @@ Before production release, run the repository CI checks and complete real-device
 
 - **2026-10-07 — Web/Supabase audit:** corrected the RLS helper privilege configuration that was blocking authenticated private-page data access.
 - **2026-10-07 — Korean Levels 4–6:** added original intermediate/advanced lesson and vocabulary content and wired it into Web/Mobile learning and quiz flows.
+
+- **2026-10-07 — Final Web gate:** Supabase RLS error verification cleared, GitHub Secret scan/CodeQL/Test/Production Smoke E2E/full E2E passed on the final code state, and Vercel production remained READY.
