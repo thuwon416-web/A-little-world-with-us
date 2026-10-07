@@ -4,45 +4,65 @@ Owner: Project maintainers
 Update when: phase scope or release gates change
 Last Updated: 2026-10-08
 
-## Completed
+## Completed phases
 Core architecture/parity foundations; CI/security hardening; Korean curriculum architecture and Levels 4–6 foundation; Google Drive Web OAuth hardening.
 
-## Active: Final Production Audit + User Verification
-Acceptance: release-commit CI green, production READY, authenticated E2E, Drive connect/upload/retrieve, Web↔Mobile parity, device/offline verification, manual acceptance.
+## Active phase — Final Production Audit + User Verification
+Acceptance: release-commit CI green; production READY; authenticated E2E; Drive connect/upload/retrieve; Web↔Mobile parity; device/offline verification; manual acceptance.
 
-## Release gate backlog
-1. Korean 4–6 runtime CI/build.
-2. Real Google Drive OAuth.
-3. Register exact production Drive callback.
-4. Verify Drive connect/consent/callback/Connected.
-5. Verify Drive memory upload, drive_file_id, and re-render.
-6. Native Android/iOS Google OAuth.
-7. Native Drive connect/disconnect.
-8. Final Web↔Mobile smoke.
-9. Final GitHub E2E/CodeQL/Secret Scan.
-10. Dependabot refresh.
-11. Individual Dependabot assessment.
-12. Android/iOS builds.
-13. Camera/media permissions.
-14. Notifications.
-15. Background location/maps.
-16. WebRTC.
-17. Real-device offline/media recovery.
-18. Full feature parity.
-19. Memories/media retrieval.
-20. Calendar/Plans/Finance.
-21. Location/Safety.
-22. Notifications/offline recovery.
-23. Final Memories UI.
-24. Period/fertility verification.
-25. Korean Levels 4–6 content QA.
-26. B2 upload/download/authorization where active.
+## Ledger B — complete plan register
+1. Runtime CI/build verification for Korean 4–6 commits — PENDING.
+2. Real Google Drive OAuth flow — PENDING.
+3. Register production Drive callback in Google Cloud — PENDING.
+4. Verify Drive connect → consent → callback → Connected — PENDING.
+5. Drive-backed memory upload + Supabase drive_file_id + re-render — PENDING.
+6. Native Android/iOS Google OAuth setup — FUTURE.
+7. Native Drive connect/disconnect — FUTURE.
+8. Final Web↔Mobile smoke — PENDING.
+9. GitHub E2E/CodeQL/Secret Scan final state — PENDING.
+10. Dependabot alert refresh — PENDING.
+11. Individual Dependabot assessment — PENDING.
+12. 121 unused-index findings — DEFERRED.
+13. FK-index recommendations — DEFERRED.
+14. Database optimization revisit — DEFERRED.
+15. Leaked-password protection — DEFERRED.
+16. Android/iOS build verification — PENDING.
+17. Camera/media permission verification — PENDING.
+18. Notification verification — PENDING.
+19. Background-location/maps verification — PENDING.
+20. WebRTC verification — PENDING.
+21. Real-device offline/media recovery — PENDING.
+22. Full feature-parity audit — PENDING.
+23. Memories/media retrieval — PENDING.
+24. Calendar / Plans / Finance — PENDING.
+25. Location / Safety — PENDING.
+26. Notifications / offline recovery — PENDING.
+27. Final Memories UI pass — PENDING.
+28. Period/fertility final verification — PENDING.
+29. Korean Levels 4–6 QA gate — PENDING.
+30. Korean curriculum grammar sequencing — FUTURE.
+31. Korean curriculum vocabulary sequencing — FUTURE.
+32. Korea Life curriculum layer — FUTURE.
+33. Couple Korean curriculum layer — FUTURE.
+34. Adaptive review — FUTURE.
+35. Speaking practice — FUTURE.
+36. Richer audio — FUTURE.
+37. AI Korean tutoring — FUTURE.
+38. Accessibility placeholder/disabled/link/status checks — PENDING evidence work.
+39. Real Backblaze B2 upload/download/authorization verification — PENDING if B2 is active.
+40. Wellness theme-awareness option — FUTURE.
 
-## Future Korean
-Grammar/vocabulary sequencing, Korea Life, Couple Korean, adaptive review, speaking, richer audio, and AI tutoring are subordinate to this master roadmap and live in docs/features/korean-curriculum.md.
+## Deferred modernization
+Tailwind/Expo/Jest dependency modernization remains deferred where remediation requires breaking framework/toolchain upgrades.
 
-## Deferred
-Supabase unused-index/FK optimization; leaked-password protection; breaking Tailwind/Expo/Jest modernization.
+## Future Korean domain roadmap
+The detailed Korean curriculum lives in docs/features/korean-curriculum.md and is subordinate to this master roadmap.
 
-## VERIFY
-Live Supabase migration head; duplicate bootstrap numbering intent; exact Google Cloud Drive callback registration; live storage-provider precedence.
+## VERIFY / blocked-by-evidence
+- Live Supabase migration head.
+- Intent behind duplicate bootstrap numbering 33/51/52.
+- Exact Google Cloud production Drive callback registration.
+- Live storage precedence/configuration.
+
+## Evidence rule
+DONE means implementation exists. VERIFIED requires evidence appropriate to the item. Never infer live state from repository scripts or configuration alone.
