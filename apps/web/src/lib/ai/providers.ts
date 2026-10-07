@@ -87,6 +87,16 @@ const openAiCompatibleProviders: Partial<Record<AiProvider, { key: string; endpo
 
 const resilienceOrder: AiProvider[] = ['groq', 'gemini', 'cerebras']
 
+// Feature profiles keep providers purpose-specific instead of treating every API key as a generic pool.
+export const AI_PROVIDER_PROFILES = {
+  chat: ['groq', 'gemini', 'openrouter'] as AiProvider[],
+  korean: ['gemini', 'groq', 'cerebras'] as AiProvider[],
+  relationshipWriting: ['groq', 'gemini', 'mistral'] as AiProvider[],
+  planning: ['mistral', 'gemini', 'groq'] as AiProvider[],
+  safetyReflection: ['cerebras', 'gemini', 'groq'] as AiProvider[],
+  embeddingsOrReranking: ['cohere'] as AiProvider[],
+} as const
+
 function getModel(provider: AiProvider, defaultModel: string) {
   return process.env[`AI_${provider.toUpperCase()}_MODEL`] || defaultModel
 }
