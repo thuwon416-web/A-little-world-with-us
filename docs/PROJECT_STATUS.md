@@ -215,3 +215,12 @@ Manual-only provider/device actions should be kept separate from code-side work 
 - Final release gate is now documented as: latest `main` build/CI green → production READY → authenticated smoke/E2E → Web/Mobile parity → device/offline verification → manual acceptance.
 - No claim of full device or authenticated cross-device verification is made until those environments are actually exercised.
 
+
+
+## 2026-10-07 — Web audit follow-up
+
+- Production investigation traced the Location/private-page failures to an RLS helper privilege mismatch in Supabase.
+- The live database already contains the required application tables and an accepted couple link for the two test accounts.
+- The RLS helper grant was corrected so authenticated sessions can evaluate the existing policies while anonymous access remains restricted.
+- Original Korean Level 4–6 bundled lesson/vocabulary content was added and wired into Web/Mobile learning and quiz flows.
+- Web verification remains the gate before native-device work and API/provider key entry.
