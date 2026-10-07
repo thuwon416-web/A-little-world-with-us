@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
-import { generateAiResponse } from '@/lib/ai/providers'
+import { AI_PROVIDER_PROFILES, generateAiResponse } from '@/lib/ai/providers'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { logAiUsage } from '@/lib/ai/usage-log'
 
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     // The user supplied these details directly; privacy scopes govern stored context, not explicit prompts.
     const generated = await generateAiResponse({
       maxTokens: 550,
+      allowedProviders: AI_PROVIDER_PROFILES.planning,
       messages: [
         { role: 'system', content: 'Suggest thoughtful, realistic surprise ideas for a couple. Use only the details supplied by the user. Return five concise options with a title, why it fits, approximate cost in MMK, and one first step. Never claim to know private facts. Reply in the same language as the user; use Myanmar language by default.' },
         { role: 'user', content: `Occasion: ${input.occasion}\nInterests: ${input.interests}\nBudget: ${input.budget || 'not specified'}\nOptional notes: ${input.notes || 'none'}` },
