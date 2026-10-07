@@ -1,10 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { filterByPrivacy, PrivacySettingsUnavailableError } from '@/lib/ai/privacy-guard'
-import { generateAiResponse } from '@/lib/ai/providers'
+import { AI_PROVIDER_PROFILES, generateAiResponse } from '@/lib/ai/providers'
 import {
   AI_COMPLETION_BUDGET,
-  getAiResponseText,
   optionalString,
   withAiRouteAuth,
 } from '@/lib/ai/route-helpers'
@@ -49,7 +48,7 @@ export async function POST(req: NextRequest) {
     const budget = permitted.finance
 
     const generated = await generateAiResponse({
-      allowedProviders: ['mistral', 'gemini', 'groq'],
+      allowedProviders: AI_PROVIDER_PROFILES.planning,
       maxTokens: AI_COMPLETION_BUDGET,
       messages: [
         { role: 'system', content: 'Generate 5 creative date ideas. Return JSON array with title, description, estimatedCost, duration. Be romantic and practical. Return JSON only.' },
