@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Phase 7–8 Korean/release alignment
+- Standardized Korean Learning to six learner-facing levels: Beginner 1–2, Intermediate 3–4, Advanced 5–6.
+- Added explicit Yonsei benchmark pairs from 1-1+1-2 through 6-1+6-2 to Web/Mobile level metadata.
+- Removed the legacy Level 7 from Web/Mobile Korean type/UI validation and AI quiz input validation.
+- Updated the Supabase Korean learning bootstrap constraint to levels 1–6; live Korean lesson/vocabulary tables currently have no rows, so no production Level 7 data was removed.
+- Recorded the final Phase 8 release gate in `docs/PROJECT_STATUS.md`.
+
+# Changelog
+
+## Unreleased
+
 ### Phase 1–6 release audit
 - Completed a targeted Web/Mobile source audit for shared core features, sync, media, safety, notifications, and cycle/fertility behavior.
 - Re-verified clean Web and Mobile installs plus Web lint/typecheck/tests/build and Mobile typecheck/lint/tests.
