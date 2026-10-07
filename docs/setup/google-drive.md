@@ -57,3 +57,18 @@ OAuth state is bound to a short-lived HTTP-only browser cookie and verified befo
 ## Important
 
 Android/mobile Drive OAuth is a separate native credential/setup step and is intentionally not represented as complete by this web setup guide.
+
+
+### Preview deployments
+
+Google OAuth redirect URIs must be exact; Google does not accept a wildcard redirect URI. The app therefore uses the canonical production callback:
+
+`https://a-little-world-with-us.vercel.app/api/drive/callback`
+
+for Production and Preview Vercel environments. The callback validates a short-lived HMAC-signed state and returns the user to the originating Vercel preview after saving the Drive connection.
+
+In Google Cloud, make sure the Web OAuth client has this exact Authorized redirect URI:
+
+`https://a-little-world-with-us.vercel.app/api/drive/callback`
+
+The older `/api/auth/callback/google` path is not the Drive callback used by this app.
