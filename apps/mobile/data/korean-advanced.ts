@@ -1,8 +1,8 @@
+// Keep synchronized with src/data/korean-advanced.ts.
   { id: 'kr-l4-health-learning', level: 4, title: 'Health, Learning, and Problems', titleMy: 'ကျန်းမာရေး၊ သင်ယူမှုနှင့် ပြဿနာများ', description: 'Talk about habits, learning goals, everyday problems, and practical solutions.', order: 23, createdAt: CREATED_AT, updatedAt: CREATED_AT },
   { id: 'kr-l5-work-technology', level: 5, title: 'Work, Technology, and Society', titleMy: 'အလုပ်၊ နည်းပညာနှင့် လူမှုအဖွဲ့အစည်း', description: 'Discuss professional life, technology, information, and changes in society.', order: 24, createdAt: CREATED_AT, updatedAt: CREATED_AT },
   { id: 'kr-l6-society-and-choice', level: 6, title: 'Society, Values, and Choices', titleMy: 'လူမှုအဖွဲ့အစည်း၊ တန်ဖိုးများနှင့် ရွေးချယ်မှုများ', description: 'Express viewpoints about society, values, choices, impact, and shared life.', order: 25, createdAt: CREATED_AT, updatedAt: CREATED_AT },
-// Keep synchronized with src/data/korean-advanced.ts.
-// Keep synchronized with src/data/korean-advanced.ts.\nimport type { KoreanLesson, KoreanVocab } from '@/types/korean'
+import type { KoreanLesson, KoreanVocab } from '@/types/korean'
 
 const CREATED_AT = '2026-10-07T00:00:00Z'
 
