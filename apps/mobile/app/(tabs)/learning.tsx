@@ -38,6 +38,15 @@ const curriculumCodeByLessonId: Record<string, string> = {
   'kr-l3-food': '3-2',
   'kr-l3-verbs': '3-2',
   'kr-l3-places': '3-2',
+  'kr-l4-sentence-links': '4-1',
+  'kr-l4-experience-plans': '4-1',
+  'kr-l4-polite-conversation': '4-2',
+  'kr-l5-honorifics': '5-1',
+  'kr-l5-conditions': '5-1',
+  'kr-l5-indirect-speech': '5-2',
+  'kr-l6-nuance': '6-1',
+  'kr-l6-discussion': '6-1',
+  'kr-l6-real-world-korean': '6-2',
 }
 
 export default function LearningScreen() {
