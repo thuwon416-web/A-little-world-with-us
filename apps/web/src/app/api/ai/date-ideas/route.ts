@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { filterByPrivacy, PrivacySettingsUnavailableError } from '@/lib/ai/privacy-guard'
+import { generateAiResponse } from '@/lib/ai/providers'
 import {
   AI_COMPLETION_BUDGET,
   getAiResponseText,
@@ -47,104 +48,20 @@ export async function POST(req: NextRequest) {
     const location = permitted.location
     const budget = permitted.finance
 
-    const apiKey = process.env.GROQ_API_KEY || process.env.GEMINI_API_KEY
-    
-    if (!apiKey) {
-      return NextResponse.json({ 
-        dateIdeas: [
-          {
-            title: 'Picnic in the Park',
-            description: 'Pack a romantic picnic with your favorite foods and enjoy it in a local park',
-            estimatedCost: '$20-50',
-            duration: '2-3 hours'
-          },
-          {
-            title: 'Home Movie Marathon',
-            description: 'Create a cozy movie night at home with snacks and your favorite films',
-            estimatedCost: '$10-20',
-            duration: '3-4 hours'
-          },
-          {
-            title: 'Cooking Adventure',
-            description: 'Try cooking a new recipe together at home',
-            estimatedCost: '$30-60',
-            duration: '1-2 hours'
-          },
-          {
-            title: 'Stargazing',
-            description: 'Find a spot away from city lights and enjoy the night sky together',
-            estimatedCost: 'Free',
-            duration: '1-2 hours'
-          },
-          {
-            title: 'Art and Wine',
-            description: 'Visit a local art gallery or museum together',
-            estimatedCost: '$15-40',
-            duration: '2-3 hours'
-          }
-        ]
-      })
-    }
-
-    let response: Response
-    
-    if (process.env.GROQ_API_KEY) {
-      response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'openai/gpt-oss-20b',
-          messages: [
-            {
-              role: 'system',
-              content: 'Generate 5 creative date ideas. Return JSON array with: title, description, estimatedCost, duration. Be romantic and practical.',
-            },
-            {
-              role: 'user',
-              content: `Budget: ${budget}, Location: ${location}, Interests: ${validated.interests}`,
-            },
-          ],
-          // nosemgrep
-          max_tokens: AI_COMPLETION_BUDGET,
-        }),
-      })
-    } else {
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ 
-            parts: [{ 
-              text: `Generate 5 creative date ideas. Return JSON array with: title, description, estimatedCost, duration. Be romantic and practical. Budget: ${budget}, Location: ${location}, Interests: ${validated.interests}`
-            }] 
-          }],
-        }),
-      })
-    }
-
-    if (!response.ok) {
-      return NextResponse.json(
-        { error: 'AI service unavailable' },
-        { status: 503 }
-      )
-    }
-
-    const data = await response.json()
-    
-    const provider = process.env.GROQ_API_KEY ? 'groq' : 'gemini'
+    const generated = await generateAiResponse({
+      allowedProviders: ['mistral', 'gemini', 'groq'],
+      maxTokens: AI_COMPLETION_BUDGET,
+      messages: [
+        { role: 'system', content: 'Generate 5 creative date ideas. Return JSON array with title, description, estimatedCost, duration. Be romantic and practical. Return JSON only.' },
+        { role: 'user', content: `Budget: ${budget || 'not specified'}\\nLocation: ${location || 'not specified'}\\nInterests: ${validated.interests || 'not specified'}` },
+      ],
+    })
     let dateIdeas: z.infer<typeof generatedDateIdeasSchema>
     try {
-      const text = getAiResponseText(data, provider, '')
-      dateIdeas = generatedDateIdeasSchema.parse(JSON.parse(text))
+      dateIdeas = generatedDateIdeasSchema.parse(JSON.parse(generated.content))
     } catch (error) {
       console.error('Date ideas AI response parsing failed:', error)
-      return NextResponse.json(
-        { error: 'AI service returned an invalid response.' },
-        { status: 502 }
-      )
+      return NextResponse.json({ error: 'AI service returned an invalid response.' }, { status: 502 })
     }
 
     return NextResponse.json({ dateIdeas })
