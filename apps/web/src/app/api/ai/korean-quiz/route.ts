@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
 
 import { KOREAN_VOCAB } from '@/data/korean-vocab'
+import { KOREAN_ADVANCED_VOCAB } from '@/data/korean-advanced'
 import { AIProviderError, generateAiResponse } from '@/lib/ai/providers'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { checkAiUsageLimit, checkRateLimit } from '@/lib/rate-limit'
@@ -91,7 +92,7 @@ function shuffle<T>(items: T[]) {
 }
 
 function fallbackQuestions(input: QuizRequest) {
-  const vocab = KOREAN_VOCAB.filter((item) => item.level === input.level)
+  const vocab = [...KOREAN_VOCAB, ...KOREAN_ADVANCED_VOCAB].filter((item) => item.level === input.level)
   const selected = shuffle(vocab).slice(0, input.questionCount)
   return selected.map((item, index) => {
     const questionType = input.questionTypes[index % input.questionTypes.length]
