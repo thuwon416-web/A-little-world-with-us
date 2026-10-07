@@ -141,17 +141,6 @@ function MemoriesPageContent() {
     [sortedMemories, visibleCount]
   )
 
-  const birthdayReveal = useMemo(() => {
-    const today = new Date()
-    const isBirthday = today.getMonth() === 8 && today.getDate() === 10
-    return isBirthday
-      ? {
-          title: 'Birthday reveal',
-          text: 'September 10 is a little love day. Save a sweet surprise for KoKo and Pu Tuu.',
-        }
-      : null
-  }, [])
-
   const loadMemories = async () => {
     setIsLoading(true)
     setError('')
@@ -586,17 +575,7 @@ function MemoriesPageContent() {
 
       </section>
 
-      {birthdayReveal && (
-        <section className="glass-card rounded-modal border border-error/30 bg-gradient-to-r from-error/10 via-accent-1/10 to-warning/10 p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">
-            {birthdayReveal.title}
-          </p>
-          <h2 className="mt-2 text-xl font-semibold text-text-1">
-            Celebrate the everyday magic of us.
-          </h2>
-          <p className="mt-2 max-w-2xl text-sm text-text-2">{birthdayReveal.text}</p>
-        </section>
-      )}
+
 
       <section className="glass-card p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
