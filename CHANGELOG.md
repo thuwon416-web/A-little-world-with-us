@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Phase 1–6 release audit
+- Completed a targeted Web/Mobile source audit for shared core features, sync, media, safety, notifications, and cycle/fertility behavior.
+- Re-verified clean Web and Mobile installs plus Web lint/typecheck/tests/build and Mobile typecheck/lint/tests.
+- Removed a remaining hardcoded private birthday reveal from the Memories page.
+- Recorded the remaining device, authenticated E2E, database workload, and provider-dependent boundaries in docs/PROJECT_STATUS.md.
+
+# Changelog
+
+## Unreleased
+
 ### Korean curriculum roadmap
 - Added the canonical Korean curriculum architecture in docs/KOREAN_CURRICULUM.md.
 - Corrected the Yonsei relationship: Yonsei 1-1 / 1-2 / 2-1 / 2-2 etc. are external proficiency benchmarks for equivalent Our Korean levels, not copied lesson structure or app-created terms.
