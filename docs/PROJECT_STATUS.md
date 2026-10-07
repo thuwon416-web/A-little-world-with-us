@@ -248,6 +248,6 @@ Manual-only provider/device actions should be kept separate from code-side work 
 
 - Found a second Drive-specific issue: the app's Drive flow uses `/api/drive/callback`, while the previously documented/entered Google OAuth callback was `/api/auth/callback/google`. These are different endpoints, and Google requires the redirect URI to exactly match an authorized URI. The correct Drive callback is `https://a-little-world-with-us.vercel.app/api/drive/callback`.
 - Corrected the Vercel Production/Preview/Development `GOOGLE_DRIVE_REDIRECT_URI` configuration targets without exposing secret values.
-- Found a Preview-specific flow issue: Vercel preview hosts cannot use the production host's cookies during the canonical Google callback. The OAuth state is now HMAC-signed with the originating return origin, and the production callback can safely complete the connection and return to the originating approved Vercel preview host.
-- Added the preview callback handling and documented the exact Google Cloud redirect URI requirement.
+- Found a Preview-specific security limitation: Vercel preview hosts cannot safely share the production host's HttpOnly OAuth state cookie. The Drive connect flow is therefore intentionally production-only; this prevents a leaked/replayed OAuth state from linking an attacker's Google account to another user's account. Preview builds can still render the Drive UI, but the actual connection must be started from production.
+- Hardened the callback to require the same authenticated browser's HttpOnly state cookie and documented the exact Google Cloud redirect URI requirement.
 - Google Cloud Console still needs the exact Drive callback URI registered on the Web OAuth client before an end-to-end Google consent test can succeed.
