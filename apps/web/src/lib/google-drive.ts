@@ -52,25 +52,32 @@ function stateSecret(): Buffer {
   return Buffer.from(required('GOOGLE_OAUTH_STATE_SECRET'), 'utf8')
 }
 
-export function createOAuthState(userId: string): string {
-  const payload = Buffer.from(JSON.stringify({ userId, exp: Date.now() + 10 * 60 * 1000 })).toString('base64url')
+export type OAuthState = { userId: string; exp: number; returnOrigin?: string }
+
+export function createOAuthState(userId: string, returnOrigin?: string): string {
+  const payload = Buffer.from(JSON.stringify({ userId, exp: Date.now() + 10 * 60 * 1000, returnOrigin })).toString('base64url')
   const signature = createHmac('sha256', stateSecret()).update(payload).digest('base64url')
   return `${payload}.${signature}`
 }
 
-export function verifyOAuthState(state: string, userId: string): boolean {
+export function parseOAuthState(state: string): OAuthState | null {
   const [payload, signature] = state.split('.')
-  if (!payload || !signature) return false
+  if (!payload || !signature) return null
   const expected = createHmac('sha256', stateSecret()).update(payload).digest('base64url')
-  if (signature.length !== expected.length) return false
-  const valid = timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
-  if (!valid) return false
+  if (signature.length !== expected.length) return null
+  if (!timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return null
   try {
-    const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as { userId?: string; exp?: number }
-    return parsed.userId === userId && typeof parsed.exp === 'number' && parsed.exp > Date.now()
+    const parsed = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')) as Partial<OAuthState>
+    if (typeof parsed.userId !== 'string' || typeof parsed.exp !== 'number' || parsed.exp <= Date.now()) return null
+    if (parsed.returnOrigin !== undefined && typeof parsed.returnOrigin !== 'string') return null
+    return { userId: parsed.userId, exp: parsed.exp, returnOrigin: parsed.returnOrigin }
   } catch {
-    return false
+    return null
   }
+}
+
+export function verifyOAuthState(state: string, userId: string): boolean {
+  return parseOAuthState(state)?.userId === userId
 }
 
 export async function exchangeCode(code: string): Promise<{
