@@ -12,8 +12,12 @@ create policy "service_role_only" on public.location_address_cache
 create policy "service_role_only" on offline.applied_ops
   for all to anon, authenticated using (false) with check (false);
 
--- Internal authorization helpers are invoked by RLS/SECURITY DEFINER functions,
--- not directly by clients.
-revoke execute on function public.has_accepted_couple() from public, authenticated;
-revoke execute on function public.is_couple_member(uuid) from public, authenticated;
-revoke execute on function public.is_linked_user(uuid) from public, authenticated;
+-- These SECURITY DEFINER helpers are invoked by RLS policies. PostgreSQL checks
+-- EXECUTE privilege while evaluating an RLS expression, so authenticated
+-- sessions must be allowed to execute them. Anonymous/public access stays revoked.
+revoke execute on function public.has_accepted_couple() from public, anon;
+revoke execute on function public.is_couple_member(uuid) from public, anon;
+revoke execute on function public.is_linked_user(uuid) from public, anon;
+grant execute on function public.has_accepted_couple() to authenticated;
+grant execute on function public.is_couple_member(uuid) to authenticated;
+grant execute on function public.is_linked_user(uuid) to authenticated;
