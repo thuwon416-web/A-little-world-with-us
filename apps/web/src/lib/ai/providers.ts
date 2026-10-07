@@ -20,7 +20,7 @@ interface GenerateOptions {
   messages: AiMessage[]
   maxTokens?: number
   provider?: AiProvider
-  allowedProviders?: string[]
+  allowedProviders?: AiProvider[]
 }
 
 export interface AiGeneration {
