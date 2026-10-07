@@ -175,25 +175,45 @@ export async function getDriveAccessToken(userId: string): Promise<string> {
 
 export async function uploadDriveFile(userId: string, file: File, folderId?: string) {
   const accessToken = await getDriveAccessToken(userId)
-  const metadata: Record<string, unknown> = { name: file.name, mimeType: file.type || 'application/octet-stream' }
+  const mimeType = file.type || 'application/octet-stream'
+  const metadata: Record<string, unknown> = { name: file.name, mimeType }
   if (folderId) metadata.parents = [folderId]
-  const boundary = `drive-${randomBytes(12).toString('hex')}`
-  const bytes = new Uint8Array(await file.arrayBuffer())
-  const encoder = new TextEncoder()
-  const prefix = encoder.encode(`--${boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n${JSON.stringify(metadata)}\r\n--${boundary}\r\nContent-Type: ${file.type || 'application/octet-stream'}\r\n\r\n`)
-  const suffix = encoder.encode(`\r\n--${boundary}--`)
-  const body = new Uint8Array(prefix.length + bytes.length + suffix.length)
-  body.set(prefix, 0); body.set(bytes, prefix.length); body.set(suffix, prefix.length + bytes.length)
-  const response = await fetch(DRIVE_UPLOAD_API + '?uploadType=multipart&fields=id,name,mimeType,webViewLink,webContentLink', {
+
+  // Drive recommends resumable uploads for files above 5 MB and for
+  // network-sensitive clients. This also avoids multipart's small-file limit.
+  const initResponse = await fetch(DRIVE_UPLOAD_API + '?uploadType=resumable', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': `multipart/related; boundary=${boundary}` },
-    body,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json; charset=UTF-8',
+      'X-Upload-Content-Type': mimeType,
+      'X-Upload-Content-Length': String(file.size),
+    },
+    body: JSON.stringify(metadata),
   })
-  const data = await response.json()
-  if (!response.ok) throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive upload failed.')
+  if (!initResponse.ok) {
+    const data = await initResponse.json().catch(() => null)
+    throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive upload initialization failed.')
+  }
+
+  const sessionUrl = initResponse.headers.get('location')
+  if (!sessionUrl) throw new Error('Google Drive did not return an upload session.')
+
+  const response = await fetch(sessionUrl, {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': mimeType,
+      'Content-Length': String(file.size),
+    },
+    body: await file.arrayBuffer(),
+  })
+  const data = await response.json().catch(() => null)
+  if (!response.ok) {
+    throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive upload failed.')
+  }
   return data as { id: string; name: string; mimeType?: string; webViewLink?: string; webContentLink?: string }
 }
-
 export async function listDriveFile(userId: string, fileId: string) {
   const accessToken = await getDriveAccessToken(userId)
   const response = await fetch(`${DRIVE_API}/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size,webViewLink,webContentLink,thumbnailLink`, { headers: { Authorization: `Bearer ${accessToken}` } })
