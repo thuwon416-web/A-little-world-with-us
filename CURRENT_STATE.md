@@ -14,7 +14,7 @@ Phases 7–10 — Parallel final close-out; Phase 10 manual verification intenti
 PENDING RELEASE VERIFICATION.
 
 ## 4. COMPLETED
-Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening; native Drive validation/upload-limit hardening; deeper Drive route security/rollback tests; consolidated Phase 10 verification pack.
+Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening; native Drive validation/upload-limit hardening; deeper Drive route security/rollback tests; Drive token-refresh/provider-error hardening; memory-delete CSRF/rate-limit hardening; consolidated Phase 10 verification pack.
 
 ## 5. VERIFIED
 - Live Supabase migration head: 20261007121841 — restore_rls_helper_execute, checked directly on 2026-10-08.
@@ -71,13 +71,13 @@ Do not stop repository-side preparation while waiting for a manual gate. Continu
 | Period/fertility logic/UI change | Controlled/authenticated scenario with observed result | Do not infer real-user correctness from unit tests alone |
 
 ## 13. LAST VERIFIED
-2026-10-08 — Supabase head, bootstrap numbering, storage precedence/configuration, Korean runtime build, Korean structural parity, current release blockers, Drive API coverage, and Drive request-rate hardening re-audited. Automated workflow execution for the newest commits was not yet exposed by the GitHub connector.
+2026-10-08 — Supabase head, bootstrap numbering, storage precedence/configuration, Korean runtime build, Korean structural parity, current release blockers, Drive API coverage, Drive token-refresh/provider-error hardening, and memory-delete CSRF/rate-limit hardening re-audited. Automated workflow execution for the newest commits was not yet exposed by the GitHub connector.
 
 ## 14. NEXT CODE-SIDE WORK
 Continue the prepared close-out phases in parallel:
-- Phase 7: continue Drive storage consistency/token-refresh coverage after the new route test layer.
+- Phase 7: Drive storage consistency/token-refresh coverage is hardened; remaining work is authenticated production E2E evidence.
 - Phase 8: re-audit native OAuth/deep links, permissions, notifications, location, WebRTC, and offline recovery configuration; prepare current-main EAS verification inputs.
-- Phase 9: expand highest-risk API/mobile tests and prepare provider-neutral emergency email integration until credentials are supplied.
+- Phase 9: memory deletion CSRF/rate-limit coverage is hardened; continue the highest-risk authenticated-route matrix and provider-neutral emergency email preparation.
 - Phase 10: use `docs/FINAL_VERIFICATION.md` once Phases 7–9 are complete; perform the manual checks once, at the end.
 These phases overlap intentionally; an external blocker on one track does not pause repository-side work on the others.
 Owner-side manual verification remains last.
