@@ -20,6 +20,35 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 - **Track C — Reliability/testing:** Web API coverage, mobile coverage growth, safety notification provider integration, CI/security refresh.
 - **Track D — Product QA:** Web↔Mobile feature parity, Memories UI, Period/Fertility, Korean 4–6 content QA, accessibility.
 
+## Prepared next phases
+
+### Phase 7 — Drive/Memory Reliability Close-out
+**Goal:** finish repository-side Drive robustness before the final authenticated pass.
+- Route-level coverage for Drive OAuth start/callback is now in place.
+- Next: cover status/upload/file/delete failure and authorization paths where practical.
+- Re-audit token refresh, disconnect/revocation, upload rollback, metadata consistency, and shared-memory retrieval.
+- Manual gate remains one final production connect → upload → render → delete scenario.
+
+### Phase 8 — Mobile Native + Cross-platform Readiness
+**Goal:** make current-main native configuration and shared-memory behavior release-ready without waiting for a device.
+- Re-audit native Google Drive PKCE, deep-link handling, SecureStore token lifecycle, and platform client-ID configuration.
+- Re-audit camera/media, notifications, background location, maps, WebRTC, and offline/media recovery configuration.
+- Prepare the exact EAS current-main build inputs and device smoke sequence; do not count historical artifacts as current evidence.
+
+### Phase 9 — Reliability / Safety Delivery
+**Goal:** close automated reliability gaps and prepare safety notification delivery.
+- Expand Web API coverage to the highest-risk authenticated routes.
+- Expand mobile coverage where existing behavior can be exercised without a device.
+- Keep emergency-contact email delivery provider-neutral until the owner supplies the chosen provider/API credentials; then wire and test the provider.
+- Recheck CI/security workflows on the final release revision.
+
+### Phase 10 — Product QA + Final Verification Pack
+**Goal:** turn remaining evidence gates into one owner-side verification pass.
+- Web ↔ Mobile smoke: Auth → Couple → Chat → Period → Memories/Media → Calendar/Plans/Finance → Location/Safety → Notifications/Offline → AI → Drive.
+- Memories visual pass, Period/Fertility controlled scenario, Korean 4–6 human QA, accessibility checks.
+- Google Cloud callback registration, Drive E2E, native builds/device checks, Dependabot refresh, and B2 verification where active.
+- Produce one final evidence-backed release checklist; no manual gate is requested before repository-side work is complete.
+
 ## Ledger B — release gate register
 1. Runtime CI/build verification for Korean 4–6 — VERIFIED (2026-10-08 production deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi).
 2. Real Google Drive OAuth flow — IN PROGRESS.
@@ -67,7 +96,7 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 
 ## Non-release technical backlog discovered during final audit
 These are repository follow-ups, not current release blockers:
-- Web Vitest excludes API routes from coverage until route-level coverage is added.
+- Web Vitest now includes API routes in coverage; Drive OAuth start/callback route tests were added. Continue expanding coverage for higher-risk authenticated routes.
 - check-missed-checkin currently has push notification delivery but emergency-contact email delivery remains provider-dependent; no email provider is hard-coded or faked. A provider/API key can be wired when the owner supplies the chosen provider credentials.
 - No other FIXME/HACK markers were found in the searched repository scope.
 
