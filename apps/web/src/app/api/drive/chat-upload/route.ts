@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { getOrCreateDriveFolder, getOrCreateDriveRootFolder, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
-import { MAX_MEMORY_IMAGE_SIZE, validateUploadContent } from '@/lib/upload-validation'
+import { validateUploadContent } from '@/lib/upload-validation'
 
 export const runtime = 'nodejs'
 
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   if (coupleLinkError) return NextResponse.json({ error: 'Unable to verify couple access.' }, { status: 500 })
   if (!coupleLink) return NextResponse.json({ error: 'You are not a member of this couple.' }, { status: 403 })
 
-  const validation = await validateUploadContent(file, { imagesOnly: true, maxBytes: Math.min(MAX_MEMORY_IMAGE_SIZE, MAX_DRIVE_CHAT_IMAGE_SIZE) })
+  const validation = await validateUploadContent(file, { imagesOnly: true, maxBytes: MAX_DRIVE_CHAT_IMAGE_SIZE })
   if (!validation.valid) return NextResponse.json({ error: validation.error ?? 'Invalid image upload.' }, { status: 400 })
 
   try {
