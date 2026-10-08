@@ -509,6 +509,25 @@ export async function assertDriveFileAccessible(userId: string, fileId: string) 
   return Boolean(await getDriveFileAccess(userId, fileId))
 }
 
+export async function moveDriveFileToFolder(userId: string, fileId: string, targetFolderId: string) {
+  const metadataResponse = await driveFetch(
+    userId,
+    DRIVE_API + '/' + encodeURIComponent(fileId) + '?fields=id,parents',
+  )
+  const metadata = await metadataResponse.json().catch(() => null)
+  if (!metadataResponse.ok || typeof metadata?.id !== 'string') {
+    throw new Error('Google Drive file metadata could not be loaded.')
+  }
+  const oldParents = Array.isArray(metadata.parents) ? metadata.parents.filter((id: unknown): id is string => typeof id === 'string') : []
+  const params = new URLSearchParams({ addParents: targetFolderId, removeParents: oldParents.join(','), fields: 'id,name,mimeType,parents' })
+  const response = await driveFetch(userId, DRIVE_API + '/' + encodeURIComponent(fileId) + '?' + params.toString(), { method: 'PATCH' })
+  const data = await response.json().catch(() => null)
+  if (!response.ok || typeof data?.id !== 'string') {
+    throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive file move failed.')
+  }
+  return data as { id: string; name?: string; mimeType?: string; parents?: string[] }
+}
+
 export async function deleteDriveFolder(userId: string, folderId: string) {
   return deleteDriveFile(userId, folderId)
 }
