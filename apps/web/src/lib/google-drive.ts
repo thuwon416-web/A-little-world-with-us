@@ -519,9 +519,9 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
     if (linkError) throw linkError
     if (!link) return null
     return {
-      ownerId: archived.owner_id as string,
-      accessUserId: await resolveDriveAccessUser(archived.couple_id as string, archived.owner_id as string),
-      canDelete: archived.owner_id === userId,
+      ownerId: archived.owner_id as string | null,
+      accessUserId: await resolveDriveAccessUser(archived.couple_id as string, archived.owner_id as string | null),
+      canDelete: archived.owner_id ? archived.owner_id === userId : true,
       recordType: 'archived_media' as const,
       recordId: archived.id,
     }
