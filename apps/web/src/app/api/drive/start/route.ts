@@ -16,7 +16,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Google Drive connection must be started from the production web app.' }, { status: 400 })
     }
     const state = createOAuthState(user.id, requestOrigin)
-    const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', access_type: 'offline', prompt: 'consent', scope: 'https://www.googleapis.com/auth/drive.file', state })
+    const params = new URLSearchParams({ client_id: clientId, redirect_uri: redirectUri, response_type: 'code', access_type: 'offline', prompt: 'consent', scope: 'https://www.googleapis.com/auth/drive', state })
     const response = NextResponse.redirect('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString())
     response.cookies.set('drive_oauth_state', state, {
       httpOnly: true,
