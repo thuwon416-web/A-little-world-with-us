@@ -593,9 +593,37 @@ export default function RealtimeChat() {
     const compressed = await compressImage(file)
     const { data: message, error } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: currentUserId, message_type: 'photo', encrypted: false }).select().single()
     if (error || !message) return
-    const { uploadChatPhoto } = await import('@/lib/imageCompressor')
-    const mediaUrl = await uploadChatPhoto(compressed.blob, coupleId, message.id)
-    await supabase.from('messages').update({ media_url: mediaUrl }).eq('id', message.id)
+    const statusResponse = await fetch('/api/drive/status')
+    const statusBody = (await statusResponse.json().catch(() => ({}))) as { connected?: boolean }
+    if (statusResponse.ok && statusBody.connected) {
+      const form = new FormData()
+      form.append('coupleId', coupleId)
+      form.append('file', new File([compressed.blob], message.id + '.webp', { type: 'image/webp' }))
+      const driveResponse = await fetch('/api/drive/chat-upload', { method: 'POST', body: form })
+      const driveBody = await driveResponse.json().catch(() => ({})) as {
+        storageFileId?: string
+        storagePath?: string
+        url?: string
+        file?: { mimeType?: string }
+        error?: string
+      }
+      if (!driveResponse.ok || !driveBody.storageFileId) {
+        await supabase.from('messages').delete().eq('id', message.id).eq('sender_id', currentUserId)
+        throw new Error(driveBody.error || 'Google Drive chat image upload failed.')
+      }
+      await supabase.from('messages').update({
+        media_url: driveBody.url ?? null,
+        media_mime_type: driveBody.file?.mimeType ?? 'image/webp',
+        media_storage_provider: 'google_drive',
+        media_storage_path: driveBody.storagePath ?? null,
+        media_storage_file_id: driveBody.storageFileId,
+        media_size_bytes: compressed.blob.size,
+      }).eq('id', message.id)
+    } else {
+      const { uploadChatPhoto } = await import('@/lib/imageCompressor')
+      const mediaUrl = await uploadChatPhoto(compressed.blob, coupleId, message.id)
+      await supabase.from('messages').update({ media_url: mediaUrl }).eq('id', message.id)
+    }
   }
 
   const handleStickerSelect = async (sticker: StickerSelection) => {
@@ -613,7 +641,7 @@ export default function RealtimeChat() {
     setShowGIFPicker(false)
   }
 
-  const handleFileUpload = async (fileInfo: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string; storageProvider?: 'supabase' | 'backblaze_b2'; storageFileId?: string }) => {
+  const handleFileUpload = async (fileInfo: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string; storageProvider?: 'supabase' | 'backblaze_b2' | 'google_drive'; storageFileId?: string }) => {
     try {
       if (!coupleId || !currentUserId) return
       let messageType: 'photo' | 'video' | 'audio' | 'file' = 'file'
