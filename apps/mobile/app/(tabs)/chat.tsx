@@ -39,7 +39,7 @@ import { useCall } from '@/hooks/useCall'
 import { useSync } from '@/hooks/useSync'
 import { useAuth } from '@/lib/auth'
 import { deriveChatKey, decryptMessage, encryptMessage } from '@/lib/chatEncryption'
-import { downloadDecryptAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
+import { downloadDecryptAndCache, downloadDriveMemoryAndCache, guessMimeTypeFromPath } from '@/lib/mediaEncryption'
 import { supabase } from '@/lib/supabase'
 import {
   deleteChatMedia,
@@ -117,8 +117,18 @@ function getMediaBucket(type: ChatMessageType): MediaBucket | null {
 async function resolveMessageMediaUrl(
   mediaUrl: unknown,
   bucket: MediaBucket | null,
-  coupleId: string | null
+  coupleId: string | null,
+  storageProvider?: unknown,
+  storageFileId?: unknown,
+  mimeType?: unknown
 ): Promise<string | null> {
+  if (storageProvider === 'google_drive' && typeof storageFileId === 'string' && storageFileId) {
+    try {
+      return await downloadDriveMemoryAndCache(storageFileId, typeof mimeType === 'string' ? mimeType : 'application/octet-stream')
+    } catch {
+      return null
+    }
+  }
   if (bucket && typeof mediaUrl === 'string') {
     if (isExternalUrl(mediaUrl)) return getChatMediaUrl(bucket, mediaUrl)
     if (coupleId) {
@@ -159,7 +169,10 @@ async function deserializeChatMessage(
   const resolvedMediaUrl = await resolveMessageMediaUrl(
     mediaUrl,
     getMediaBucket(normalizedType),
-    coupleId
+    coupleId,
+    record._get('media_storage_provider'),
+    record._get('media_storage_file_id'),
+    record._get('media_mime_type')
   )
   return {
     id: record.id,
