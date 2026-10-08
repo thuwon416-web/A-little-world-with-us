@@ -362,28 +362,66 @@ export async function disconnectDrive(userId: string) {
 }
 
 export async function getDriveFileAccess(userId: string, fileId: string) {
-  const { data: memory, error: memoryError } = await adminClient()
+  const client = adminClient()
+
+  const { data: memory, error: memoryError } = await client
     .from('memories')
     .select('couple_id,user_id')
     .eq('drive_file_id', fileId)
     .maybeSingle()
   if (memoryError) throw memoryError
-  if (!memory?.couple_id || !memory.user_id) return null
-
-  const { data: link, error: linkError } = await adminClient()
-    .from('couple_links')
-    .select('id')
-    .eq('couple_id', memory.couple_id)
-    .eq('status', 'accepted')
-    .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
-    .maybeSingle()
-  if (linkError) throw linkError
-  if (!link) return null
-
-  return {
-    ownerId: memory.user_id as string,
-    canDelete: memory.user_id === userId,
+  if (memory?.couple_id && memory.user_id) {
+    const { data: link, error: linkError } = await client
+      .from('couple_links')
+      .select('id')
+      .eq('couple_id', memory.couple_id)
+      .eq('status', 'accepted')
+      .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+      .maybeSingle()
+    if (linkError) throw linkError
+    if (!link) return null
+    return { ownerId: memory.user_id as string, canDelete: memory.user_id === userId }
   }
+
+  const { data: message, error: messageError } = await client
+    .from('messages')
+    .select('couple_id,sender_id')
+    .eq('media_storage_file_id', fileId)
+    .maybeSingle()
+  if (messageError) throw messageError
+  if (message?.couple_id && message.sender_id) {
+    const { data: link, error: linkError } = await client
+      .from('couple_links')
+      .select('id')
+      .eq('couple_id', message.couple_id)
+      .eq('status', 'accepted')
+      .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+      .maybeSingle()
+    if (linkError) throw linkError
+    if (!link) return null
+    return { ownerId: message.sender_id as string, canDelete: message.sender_id === userId }
+  }
+
+  const { data: archive, error: archiveError } = await client
+    .from('chat_archive_days')
+    .select('couple_id,owner_id')
+    .eq('drive_file_id', fileId)
+    .maybeSingle()
+  if (archiveError) throw archiveError
+  if (archive?.couple_id && archive.owner_id) {
+    const { data: link, error: linkError } = await client
+      .from('couple_links')
+      .select('id')
+      .eq('couple_id', archive.couple_id)
+      .eq('status', 'accepted')
+      .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+      .maybeSingle()
+    if (linkError) throw linkError
+    if (!link) return null
+    return { ownerId: archive.owner_id as string, canDelete: false }
+  }
+
+  return null
 }
 
 export async function assertDriveFileAccessible(userId: string, fileId: string) {
