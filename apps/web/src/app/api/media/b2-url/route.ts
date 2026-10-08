@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { getB2DownloadUrl, isB2Configured } from '@/lib/backblaze-b2'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 function getAuthenticatedClient(request: Request) {
@@ -16,6 +17,8 @@ function getAuthenticatedClient(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const supabase = await getAuthenticatedClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
