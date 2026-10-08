@@ -1,18 +1,19 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-const { getUser, getDriveFileAccess, deleteDriveFile, checkRateLimit } = vi.hoisted(() => ({
+const { getUser, getDriveFileAccess, deleteDriveFile, checkRateLimit, from } = vi.hoisted(() => ({
   getUser: vi.fn(),
   getDriveFileAccess: vi.fn(),
   deleteDriveFile: vi.fn(),
   checkRateLimit: vi.fn(),
+  from: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase-server', () => ({
-  createServerClient: async () => ({ auth: { getUser } }),
+  createServerClient: async () => ({ auth: { getUser }, from }),
 }))
 
 vi.mock('@supabase/supabase-js', () => ({
-  createClient: vi.fn(() => ({ auth: { getUser } })),
+  createClient: vi.fn(() => ({ auth: { getUser }, from })),
 }))
 
 vi.mock('@/lib/google-drive', () => ({
@@ -31,6 +32,7 @@ describe('POST /api/drive/delete', () => {
     vi.clearAllMocks()
     getUser.mockResolvedValue({ data: { user: null } })
     checkRateLimit.mockResolvedValue({ allowed: true, remaining: 9, resetTime: Date.now() + 60000 })
+    from.mockImplementation(() => ({ update: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })) }))
   })
 
   it('requires authentication', async () => {
@@ -66,7 +68,7 @@ describe('POST /api/drive/delete', () => {
 
   it('deletes an authorized file', async () => {
     getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
-    getDriveFileAccess.mockResolvedValue({ ownerId: 'user-1', canDelete: true })
+    getDriveFileAccess.mockResolvedValue({ ownerId: 'user-1', canDelete: true, recordType: 'memory', recordId: 'memory-1' })
     deleteDriveFile.mockResolvedValue(undefined)
     const response = await POST(new Request('https://a-little-world-with-us.vercel.app/api/drive/delete', {
       method: 'POST',
@@ -74,7 +76,7 @@ describe('POST /api/drive/delete', () => {
       headers: { 'content-type': 'application/json' },
     }))
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ deleted: true })
+    expect(await response.json()).toEqual({ deleted: true, recordType: 'memory' })
     expect(deleteDriveFile).toHaveBeenCalledWith('user-1', 'file-1')
   })
 })
