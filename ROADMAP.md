@@ -25,7 +25,8 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 ### Phase 7 — Drive/Memory Reliability Close-out
 **Goal:** finish repository-side Drive robustness before the final authenticated pass.
 - Route-level coverage for Drive OAuth start/callback is now in place.
-- Next: cover status/upload/file/delete failure and authorization paths where practical.
+- Deep route coverage now includes status/upload/file/delete/disconnect authentication, authorization, CSRF, rate-limit, and rollback paths.
+- Mobile/native Drive audit continues in parallel; manual OAuth/device evidence remains deferred to Phase 10.
 - Re-audit token refresh, disconnect/revocation, upload rollback, metadata consistency, and shared-memory retrieval.
 - Manual gate remains one final production connect → upload → render → delete scenario.
 
@@ -37,13 +38,15 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 
 ### Phase 9 — Reliability / Safety Delivery
 **Goal:** close automated reliability gaps and prepare safety notification delivery.
-- Expand Web API coverage to the highest-risk authenticated routes.
+- Expand Web API coverage to the highest-risk authenticated routes; Drive status/upload/file/delete/disconnect coverage is now present.
+- Vercel is auto-building the latest main commits; current production deployment state is monitored separately and is not treated as READY until the final revision is complete.
 - Expand mobile coverage where existing behavior can be exercised without a device.
 - Keep emergency-contact email delivery provider-neutral until the owner supplies the chosen provider/API credentials; then wire and test the provider.
 - Recheck CI/security workflows on the final release revision.
 - Native Drive client validation and a 25 MB mobile upload guard are now in code; this is repository-side hardening, not device evidence.
 
 ### Phase 10 — Product QA + Final Verification Pack
+A single combined checklist is prepared in `docs/FINAL_VERIFICATION.md`; it is intentionally not a request to perform manual checks yet.
 **Goal:** turn remaining evidence gates into one owner-side verification pass.
 - Web ↔ Mobile smoke: Auth → Couple → Chat → Period → Memories/Media → Calendar/Plans/Finance → Location/Safety → Notifications/Offline → AI → Drive.
 - Memories visual pass, Period/Fertility controlled scenario, Korean 4–6 human QA, accessibility checks.
