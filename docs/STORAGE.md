@@ -6,22 +6,17 @@ Last Updated: 2026-10-08
 
 Supabase stores application metadata/source-of-truth references.
 
-## Verified shared-memory precedence
+## Verified Drive-first shared-memory behavior
 
 For Web shared-memory photo uploads, the current code path is:
 
 1. **Google Drive first** when the authenticated user's Drive connection reports connected.
-2. **Cloudinary second** when Drive is not connected and Cloudinary is configured.
-3. **Encrypted Supabase Storage fallback** when the Cloudinary media API is unavailable.
+2. App-created uploads are organized under `A Little World With Us/Couples/{couple-id}/Memories/{year}/{memory-id}/`.
+3. Supabase stores the memory metadata and Drive IDs; it does not hold the canonical image binary.
+4. External image folders under the app Drive root can be indexed with `POST /api/drive/sync-memories`.
+5. Existing Cloudinary/encrypted Supabase paths remain readable fallbacks for older/non-Drive records.
 
-This is the behavior implemented by `apps/web/src/app/(private)/memories/page.tsx`, `apps/web/src/app/api/drive/upload/route.ts`, and `apps/web/src/app/api/media/upload/route.ts`.
-
-Live Vercel configuration was checked on 2026-10-08. Production/preview/development entries exist for the required Google Drive OAuth variables, Cloudinary variables, and Backblaze B2 variables. Secret values were not exposed. The live `public.memories` table currently has zero rows, so actual provider-use distribution cannot be inferred from live data.
-
-Evidence:
-- [Memory upload selection code](https://github.com/thuwon416-web/A-little-world-with-us/blob/1c3f78fa8fe34c518cb21b5834fbafa055892b82/apps/web/src/app/(private)/memories/page.tsx)
-- [Cloudinary memory upload API](https://github.com/thuwon416-web/A-little-world-with-us/blob/1c3f78fa8fe34c518cb21b5834fbafa055892b82/apps/web/src/app/api/media/upload/route.ts)
-- [Vercel project](https://vercel.com/thuwon416-web/a-little-world-with-us)
+Chat image attachments also prefer Drive when connected. Daily chat text archives are stored as `Chat/{year}/{month}/{date}.json`.
 
 ## Other storage paths
 
@@ -42,3 +37,6 @@ Code-level behavior is verified, but live Drive behavior is not yet verified. Th
 5. retrieval through `/api/drive/file`,
 6. image renders again,
 7. cleanup/delete behavior succeeds.
+
+
+See [docs/DRIVE_ARCHITECTURE.md](./DRIVE_ARCHITECTURE.md) for the canonical folder, import, chat archive and deletion rules.
