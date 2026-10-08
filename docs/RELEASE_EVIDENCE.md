@@ -130,3 +130,7 @@ After release stability:
 ### Latest Drive implementation build evidence
 - A production Vercel build of commit `8c42ae5` reached the TypeScript stage but failed on four source errors in the new Drive archive implementation. Those errors were corrected afterward.
 - The latest corrected `main` revision has not yet produced a successful Vercel build because the Hobby deployment API reached its daily deployment limit. Therefore current production deployment evidence must remain unchecked until a successful corrected build is observed.
+
+- [ ] Delete a Drive-backed Memory from the app and confirm the original is moved to `Archive/Deleted Memories` and remains in Drive while the Memory disappears from the active app view.
+- [ ] Reconnect/use the partner Drive connection and confirm retained shared media remains readable; do not delete shared media during account-erasure verification.
+- [ ] Use the explicit permanent Drive-delete action on one test archive only and confirm the Drive object and archive index entry are removed.
