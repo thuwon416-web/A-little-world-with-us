@@ -20,6 +20,10 @@ export class MessageModel extends Model {
         { name: 'encrypted', type: 'boolean', isOptional: true },
         { name: 'encryption_version', type: 'number', isOptional: true },
         { name: 'media_mime_type', type: 'string', isOptional: true },
+        { name: 'media_storage_provider', type: 'string', isOptional: true },
+        { name: 'media_storage_path', type: 'string', isOptional: true },
+        { name: 'media_storage_file_id', type: 'string', isOptional: true },
+        { name: 'media_size_bytes', type: 'number', isOptional: true },
         { name: 'edited_at', type: 'string', isOptional: true },
         { name: 'deleted_at', type: 'string', isOptional: true },
         { name: 'transcript', type: 'string', isOptional: true },
@@ -94,7 +98,7 @@ export class OfflineQueueModel extends Model {
 }
 
 export default appSchema({
-  version: 8,
+  version: 9,
   tables: [
     MessageModel.createTableSchema(),
     UserModel.createTableSchema(),
