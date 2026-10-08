@@ -107,6 +107,12 @@ These are repository follow-ups, not current release blockers:
 - check-missed-checkin currently has push notification delivery but emergency-contact email delivery remains provider-dependent; no email provider is hard-coded or faked. A provider/API key can be wired when the owner supplies the chosen provider credentials.
 - No other FIXME/HACK markers were found in the searched repository scope.
 
+## Close-out continuation rule
+
+Phases 7–9 continue in parallel until their code-side gates are exhausted. Phase 10 remains a single owner/manual verification pass and is not performed incrementally. Phases 11–15 are pre-staged so defects, release freeze, monitoring, and post-release product work can continue without reopening the roadmap structure.
+
+Detailed ledger: `docs/RELEASE_CLOSEOUT.md`.
+
 ## Evidence notes
 - Korean 4–6 structural parity: Web and Mobile runtime-baseline advanced curriculum each contain 12 advanced lesson entries, 4 per Level 4–6. This does not close human content QA.
 - Android EAS history contains older FINISHED internal artifacts, but no current-main build evidence. iOS build history is empty.
