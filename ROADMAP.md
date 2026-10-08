@@ -96,7 +96,7 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 
 ## Non-release technical backlog discovered during final audit
 These are repository follow-ups, not current release blockers:
-- Web Vitest now includes API routes in coverage; Drive OAuth start/callback route tests were added. Continue expanding coverage for higher-risk authenticated routes.
+- Web Vitest now includes API routes in coverage; Drive OAuth start/callback route tests were added, and Drive file access/delete endpoints now have request-rate limits. Continue expanding coverage for higher-risk authenticated routes.
 - check-missed-checkin currently has push notification delivery but emergency-contact email delivery remains provider-dependent; no email provider is hard-coded or faked. A provider/API key can be wired when the owner supplies the chosen provider credentials.
 - No other FIXME/HACK markers were found in the searched repository scope.
 
@@ -104,4 +104,5 @@ These are repository follow-ups, not current release blockers:
 - Korean 4–6 structural parity: Web and Mobile runtime-baseline advanced curriculum each contain 12 advanced lesson entries, 4 per Level 4–6. This does not close human content QA.
 - Android EAS history contains older FINISHED internal artifacts, but no current-main build evidence. iOS build history is empty.
 - Mobile Jest coverage config now has an explicit conservative baseline rather than stale Sprint 2/Sprint 4 TODO wording.
+- Drive file read/delete routes now have per-user request-rate limits; this is code-side hardening, not live abuse-test evidence.
 - Never infer live OAuth, device, or security-alert state from code/config alone.
