@@ -519,6 +519,21 @@ export default function RealtimeChat() {
       await supabase.from('ai_context_memory').insert(detected.map((item) => ({ user_id: currentUserId, couple_id: coupleId, source_message_id: savedMessage.id, category: item.category, sender_role: 'her', context_text: encryptedContent, matched_keywords: item.matchedKeywords })))
       setContextCount((count) => count + detected.length)
     }
+    void archiveChatDay([{
+      id: savedMessage.id,
+      sender_id: currentUserId,
+      content: messageText,
+      message_type: 'text',
+      media_url: null,
+      media_duration: null,
+      encrypted: false,
+      reply_to: null,
+      created_at: createdAt,
+      edited_at: null,
+      deleted_at: null,
+      delivered_at: null,
+      seen_at: null,
+    }])
     setInput('')
   }
 
@@ -624,6 +639,19 @@ export default function RealtimeChat() {
       const mediaUrl = await uploadChatPhoto(compressed.blob, coupleId, message.id)
       await supabase.from('messages').update({ media_url: mediaUrl }).eq('id', message.id)
     }
+    void archiveChatDay([{
+      id: message.id,
+      sender_id: currentUserId,
+      content: null,
+      message_type: 'photo',
+      media_url: null,
+      media_duration: null,
+      media_storage_provider: 'google_drive',
+      media_storage_file_id: null,
+      media_mime_type: 'image/webp',
+      created_at: new Date().toISOString(),
+      deleted_at: null,
+    }])
   }
 
   const handleStickerSelect = async (sticker: StickerSelection) => {
@@ -650,6 +678,18 @@ export default function RealtimeChat() {
       else if (fileInfo.type.startsWith('audio/')) messageType = 'audio'
       const { error } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: currentUserId, content: fileInfo.name, media_url: fileInfo.url, message_type: messageType, media_mime_type: fileInfo.mimeType, media_storage_provider: fileInfo.storageProvider ?? 'supabase', media_storage_path: fileInfo.path ?? null, media_storage_file_id: fileInfo.storageFileId ?? null, media_size_bytes: fileInfo.size, encrypted: true })
       if (error) throw error
+      void archiveChatDay([{
+        id: crypto.randomUUID(),
+        sender_id: currentUserId,
+        content: fileInfo.name,
+        message_type: messageType,
+        media_url: fileInfo.url,
+        media_storage_provider: fileInfo.storageProvider ?? 'supabase',
+        media_storage_file_id: fileInfo.storageFileId ?? null,
+        media_mime_type: fileInfo.mimeType ?? null,
+        created_at: new Date().toISOString(),
+        deleted_at: null,
+      }])
       setShowFileUpload(false)
     } catch (error) {
       console.error('Error sending file message:', error)
@@ -663,6 +703,18 @@ export default function RealtimeChat() {
     const encryptedContent = await encryptMessage(replyData.text, chatKey)
     const { error } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: currentUserId, content: encryptedContent, message_type: 'text', reply_to: replyData.replyTo, encrypted: true })
     if (error) console.error('Error sending reply:', error)
+    else void archiveChatDay([{
+      id: crypto.randomUUID(),
+      sender_id: currentUserId,
+      content: replyData.text,
+      message_type: 'text',
+      media_url: null,
+      media_duration: null,
+      encrypted: false,
+      reply_to: replyData.replyTo,
+      created_at: new Date().toISOString(),
+      deleted_at: null,
+    }])
   }
 
   const handleMessageLongPress = (message: Message) => {
