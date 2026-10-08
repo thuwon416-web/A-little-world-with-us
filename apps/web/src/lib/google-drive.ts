@@ -372,6 +372,10 @@ export async function assertDriveFileAccessible(userId: string, fileId: string) 
   return Boolean(await getDriveFileAccess(userId, fileId))
 }
 
+export async function deleteDriveFolder(userId: string, folderId: string) {
+  return deleteDriveFile(userId, folderId)
+}
+
 export async function deleteDriveFile(userId: string, fileId: string) {
   const response = await driveFetch(userId, `${DRIVE_API}/${encodeURIComponent(fileId)}`, {
     method: 'DELETE',
