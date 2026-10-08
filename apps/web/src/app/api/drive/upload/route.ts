@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { deleteDriveFile, deleteDriveFolder, getOrCreateDriveFolder, getOrCreateDriveRootFolder, uploadDriveFile } from '@/lib/google-drive'
+import { deleteDriveFile, deleteDriveFolder, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { MAX_MEMORY_IMAGE_SIZE } from '@/lib/upload-validation'
 import { validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
@@ -86,9 +86,7 @@ export async function POST(request: Request) {
   let driveFile: Awaited<ReturnType<typeof uploadDriveFile>> | null = null
   let driveMemoryFolderId: string | null = null
   try {
-    const root = await getOrCreateDriveRootFolder(user.id)
-    const couplesFolder = await getOrCreateDriveFolder(user.id, 'Couples', root.id)
-    const coupleFolder = await getOrCreateDriveFolder(user.id, coupleId, couplesFolder.id)
+    const coupleFolder = await getOrCreateDriveCoupleFolder(user.id, coupleId)
     const memoriesFolder = await getOrCreateDriveFolder(user.id, 'Memories', coupleFolder.id)
     const yearFolder = await getOrCreateDriveFolder(user.id, date.slice(0, 4), memoriesFolder.id)
     driveMemoryFolderId = (await getOrCreateDriveFolder(user.id, crypto.randomUUID(), yearFolder.id)).id
