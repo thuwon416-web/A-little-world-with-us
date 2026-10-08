@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { deleteDriveFile } from '@/lib/google-drive'
 import { deleteCloudinaryAsset } from '@/lib/cloudinary'
+import { isSameOriginRequest } from '@/lib/csrf'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 
@@ -18,9 +20,14 @@ function getAuthenticatedClient(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const supabase = await getAuthenticatedClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const rateLimit = await checkRateLimit(`memory-delete:${user.id}`, 10, 60_000)
+  if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many memory deletion requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
 
   const body = (await request.json().catch(() => ({}))) as { memoryId?: string }
   if (!body.memoryId) return NextResponse.json({ error: 'memoryId is required.' }, { status: 400 })
