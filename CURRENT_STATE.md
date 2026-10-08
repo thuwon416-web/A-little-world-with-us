@@ -8,13 +8,13 @@ Last Updated: 2026-10-08
 Final production close-out audit.
 
 ## 2. Current Phase
-Phase 6 — Final Production Audit + User Verification.
+Phases 7–10 — Parallel final close-out; Phase 10 manual verification intentionally deferred.
 
 ## 3. Overall Status
 PENDING RELEASE VERIFICATION.
 
 ## 4. COMPLETED
-Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening; native Drive validation/upload-limit hardening.
+Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening; native Drive validation/upload-limit hardening; deeper Drive route security/rollback tests; consolidated Phase 10 verification pack.
 
 ## 5. VERIFIED
 - Live Supabase migration head: 20261007121841 — restore_rls_helper_execute, checked directly on 2026-10-08.
@@ -75,14 +75,14 @@ Do not stop repository-side preparation while waiting for a manual gate. Continu
 
 ## 14. NEXT CODE-SIDE WORK
 Continue the prepared close-out phases in parallel:
-- Phase 7: expand Drive/status/upload/file/delete route coverage and harden storage consistency.
+- Phase 7: continue Drive storage consistency/token-refresh coverage after the new route test layer.
 - Phase 8: re-audit native OAuth/deep links, permissions, notifications, location, WebRTC, and offline recovery configuration; prepare current-main EAS verification inputs.
 - Phase 9: expand highest-risk API/mobile tests and prepare provider-neutral emergency email integration until credentials are supplied.
-- Phase 10: consolidate the final owner-side verification pack across Drive, Web↔Mobile, UI, Period/Fertility, Korean QA, native builds, security alerts, and B2.
+- Phase 10: use `docs/FINAL_VERIFICATION.md` once Phases 7–9 are complete; perform the manual checks once, at the end.
 These phases overlap intentionally; an external blocker on one track does not pause repository-side work on the others.
 Owner-side manual verification remains last.
 
 ## 15. NON-RELEASE TECHNICAL BACKLOG FOUND IN FINAL AUDIT
-- Web Vitest now includes API routes in coverage; Drive OAuth start/callback route tests are present, and Drive file access/delete endpoints now have request-rate limits.
+- Web Vitest now includes API routes in coverage; Drive OAuth start/callback plus Drive status/upload/file/delete/disconnect route tests are present, covering auth, authorization, CSRF, rate limiting, and upload rollback.
 - check-missed-checkin has push notification delivery, while emergency-contact email delivery remains provider-dependent. No fake email delivery is claimed; provider/API key wiring is the next code-side integration once the provider credentials are supplied.
 - No FIXME/HACK markers were found in the searched repository scope.
