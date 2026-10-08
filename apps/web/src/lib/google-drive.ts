@@ -209,10 +209,9 @@ export async function uploadDriveFile(userId: string, file: File, folderId?: str
 
   // Drive recommends resumable uploads for files above 5 MB and for
   // network-sensitive clients. This also avoids multipart's small-file limit.
-  const initResponse = await fetch(DRIVE_UPLOAD_API + '?uploadType=resumable', {
+  const initResponse = await driveFetch(userId, DRIVE_UPLOAD_API + '?uploadType=resumable', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${accessToken}`,
       'Content-Type': 'application/json; charset=UTF-8',
       'X-Upload-Content-Type': mimeType,
       'X-Upload-Content-Length': String(file.size),
