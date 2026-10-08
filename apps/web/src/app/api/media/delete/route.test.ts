@@ -30,6 +30,7 @@ function memoryQuery(memory: any) {
     eq: vi.fn(() => query),
     maybeSingle: vi.fn().mockResolvedValue({ data: memory, error: null }),
     delete: vi.fn(() => query),
+    insert: vi.fn(() => ({ error: null })),
   }
   return query
 }
@@ -100,6 +101,7 @@ describe('POST /api/media/delete', () => {
       user_id: 'user-1',
       storage_provider: 'google_drive',
       drive_file_id: 'drive-1',
+      couple_id: 'couple-1',
     })
     from.mockReturnValue(query)
     const response = await POST(new Request('https://a-little-world-with-us.vercel.app/api/media/delete', {
