@@ -4,20 +4,30 @@ Owner: Project maintainers
 Update when: phase scope or release gates change
 Last Updated: 2026-10-08
 
+## Working rule for close-out
+Code-side work is completed and prepared as far as repository access allows before owner-side/manual verification. External credentials, API keys, Google Cloud/Vercel/Supabase console values, authenticated user flows, and physical-device evidence are collected at the end as one verification pass.
+
 ## Completed phases
-Core architecture/parity foundations; CI/security hardening; Korean curriculum architecture and Levels 4–6 implementation foundation; Google Drive Web OAuth hardening; canonical documentation migration.
+Core architecture/parity foundations; CI/security hardening; Korean curriculum architecture and Levels 4–6 implementation foundation; Google Drive Web OAuth hardening; canonical documentation migration; mobile test-config cleanup.
 
 ## Active phase — Final Production Audit + User Verification
 Acceptance: production READY; authenticated E2E; Drive connect/upload/retrieve; Web↔Mobile parity; native/device verification; real-user period/fertility scenario; Korean content QA; dependency alert refresh; manual acceptance.
 
+## Parallel close-out tracks
+These tracks can be worked continuously in parallel. A manual gate does not stop repository-side preparation for the next track.
+- **Track A — Drive/Memory:** OAuth callback, Drive E2E, memory upload/retrieve/delete.
+- **Track B — Mobile/native:** native OAuth structure, build configuration, permissions, notifications, location, WebRTC, offline recovery.
+- **Track C — Reliability/testing:** Web API coverage, mobile coverage growth, safety notification provider integration, CI/security refresh.
+- **Track D — Product QA:** Web↔Mobile feature parity, Memories UI, Period/Fertility, Korean 4–6 content QA, accessibility.
+
 ## Ledger B — release gate register
-1. Runtime CI/build verification for Korean 4–6 — VERIFIED (2026-10-08 production deployment `dpl_6CnQ1obMNiPZ2oweVqethGQix2bi`).
+1. Runtime CI/build verification for Korean 4–6 — VERIFIED (2026-10-08 production deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi).
 2. Real Google Drive OAuth flow — IN PROGRESS.
 3. Register production Drive callback in Google Cloud — VERIFY.
 4. Drive connect → consent → callback → Connected — IN PROGRESS.
-5. Drive-backed memory upload + Supabase `drive_file_id` + re-render — IN PROGRESS.
-6. Native Android/iOS Google OAuth setup — FUTURE.
-7. Native Drive connect/disconnect — FUTURE.
+5. Drive-backed memory upload + Supabase drive_file_id + re-render — IN PROGRESS.
+6. Native Android/iOS Google OAuth setup — FUTURE / repository preparation can proceed now.
+7. Native Drive connect/disconnect — FUTURE / repository preparation can proceed now.
 8. Final Web↔Mobile smoke — IN PROGRESS.
 9. GitHub E2E/CodeQL/Secret Scan final state — PENDING current-release recheck.
 10. Dependabot alert refresh — BLOCKED by unavailable Security/Dependabot alert API.
@@ -53,16 +63,16 @@ Acceptance: production READY; authenticated E2E; Drive connect/upload/retrieve; 
 40. Wellness theme-awareness option — FUTURE.
 
 ## VERIFY / blocked-by-evidence
-- Google Cloud production Drive callback registration: **VERIFY**. Required URI `https://a-little-world-with-us.vercel.app/api/drive/callback`; external Google Cloud OAuth client state is not readable through available tools.
+- Google Cloud production Drive callback registration: VERIFY. Required URI https://a-little-world-with-us.vercel.app/api/drive/callback; external Google Cloud OAuth client state is not readable through available tools.
 
 ## Non-release technical backlog discovered during final audit
-These items are not currently counted as release gates, but they are real repository follow-ups and should not be mistaken for completed work:
-- Mobile Jest coverage thresholds still carry an old Sprint 4/Sprint 2 TODO; either raise coverage thresholds after adding tests or replace the stale planning comment with a current target.
-- Web Vitest excludes API routes from coverage until route-level API coverage is added.
-- `check-missed-checkin` currently logs that it would email emergency contacts; the email-provider integration remains unimplemented. This should be resolved before claiming external emergency-email notification as a supported safety capability.
-- No other `FIXME`/HACK markers were found in the searched repository scope.
+These are repository follow-ups, not current release blockers:
+- Web Vitest excludes API routes from coverage until route-level coverage is added.
+- check-missed-checkin currently has push notification delivery but emergency-contact email delivery remains provider-dependent; no email provider is hard-coded or faked. A provider/API key can be wired when the owner supplies the chosen provider credentials.
+- No other FIXME/HACK markers were found in the searched repository scope.
 
 ## Evidence notes
 - Korean 4–6 structural parity: Web and Mobile runtime-baseline advanced curriculum each contain 12 advanced lesson entries, 4 per Level 4–6. This does not close human content QA.
 - Android EAS history contains older FINISHED internal artifacts, but no current-main build evidence. iOS build history is empty.
+- Mobile Jest coverage config now has an explicit conservative baseline rather than stale Sprint 2/Sprint 4 TODO wording.
 - Never infer live OAuth, device, or security-alert state from code/config alone.
