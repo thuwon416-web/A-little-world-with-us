@@ -1,85 +1,70 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import type { NextRequest } from 'next/server'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-const { cookieSet, setSessionCookies } = vi.hoisted(() => {
-  process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://example.supabase.co'
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
-
-  return {
-    cookieSet: vi.fn(),
-    setSessionCookies: vi.fn(),
-  }
-})
-
-vi.mock('next/headers', () => ({
-  cookies: async () => ({
-    getAll: () => [],
-    set: cookieSet,
-  }),
+const { getUser, checkRateLimit, isSameOriginRequest } = vi.hoisted(() => ({
+  getUser: vi.fn(),
+  checkRateLimit: vi.fn(),
+  isSameOriginRequest: vi.fn(),
 }))
 
-vi.mock('server-only', () => ({}))
+vi.mock('@/lib/supabase-server', () => ({
+  createServerClient: async () => ({ auth: { getUser } }),
+}))
 
-vi.mock('@supabase/ssr', () => ({
-  createServerClient: (
-    _url: string,
-    _anonKey: string,
-    options: {
-      cookies: {
-        getAll: () => unknown[]
-        setAll: (cookies: Array<{
-          name: string
-          value: string
-          options: { path: string; httpOnly: boolean }
-        }>) => void
-      }
-    }
-  ) => {
-    setSessionCookies.mockImplementation(() => {
-      options.cookies.setAll([
-        {
-          name: 'sb-access-token',
-          value: 'refreshed-session',
-          options: { path: '/', httpOnly: true },
-        },
-      ])
-    })
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit,
+}))
 
-    return {
-      auth: {
-        getUser: async () => {
-          setSessionCookies()
-          return { data: { user: null } }
-        },
-      },
-    }
+vi.mock('@/lib/csrf', () => ({
+  isSameOriginRequest,
+}))
+
+vi.mock('bcrypt', () => ({
+  default: {
+    compare: vi.fn(),
+    hash: vi.fn(),
   },
 }))
 
 import { POST } from './route'
 
-function makeRequest(): NextRequest {
-  return new Request('http://localhost/api/auth/pin', {
+function request(body: unknown) {
+  return new Request('https://a-little-world-with-us.vercel.app/api/auth/pin', {
     method: 'POST',
-    headers: { Origin: 'http://localhost' },
-    body: JSON.stringify({ action: 'status' }),
-  }) as NextRequest
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  }) as unknown as import('next/server').NextRequest
 }
 
-describe('POST /api/auth/pin session cookies', () => {
+describe('POST /api/auth/pin', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    isSameOriginRequest.mockReturnValue(true)
+    getUser.mockResolvedValue({ data: { user: null } })
+    checkRateLimit.mockResolvedValue({ allowed: true, remaining: 4, resetTime: Date.now() + 60000 })
   })
 
-  it('persists refreshed Supabase cookies and preserves unauthorized response', async () => {
-    const response = await POST(makeRequest())
+  it('blocks cross-origin requests', async () => {
+    isSameOriginRequest.mockReturnValue(false)
+    const response = await POST(request({ action: 'verify', pin: '1234' }))
+    expect(response.status).toBe(403)
+    expect(getUser).not.toHaveBeenCalled()
+  })
 
+  it('requires authentication', async () => {
+    const response = await POST(request({ action: 'verify', pin: '1234' }))
     expect(response.status).toBe(401)
-    expect(await response.json()).toEqual({ error: 'Unauthorized' })
-    expect(cookieSet).toHaveBeenCalledWith(
-      'sb-access-token',
-      'refreshed-session',
-      { path: '/', httpOnly: true }
-    )
+  })
+
+  it('rate-limits PIN verification before reading stored credentials', async () => {
+    getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    checkRateLimit.mockResolvedValue({ allowed: false, remaining: 0, resetTime: 123 })
+    const response = await POST(request({ action: 'verify', pin: '1234' }))
+    expect(response.status).toBe(429)
+  })
+
+  it('rejects invalid PIN input before database access', async () => {
+    getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
+    const response = await POST(request({ action: 'verify', pin: '12' }))
+    expect(response.status).toBe(400)
   })
 })
