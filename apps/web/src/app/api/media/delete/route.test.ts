@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { getUser, from, deleteDriveFile, deleteCloudinaryAsset, isSameOriginRequest, checkRateLimit } = vi.hoisted(() => ({
+const { getUser, from, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, moveDriveFileToFolder, deleteCloudinaryAsset, isSameOriginRequest, checkRateLimit } = vi.hoisted(() => ({
   getUser: vi.fn(),
   from: vi.fn(),
-  deleteDriveFile: vi.fn(),
+  getOrCreateDriveCoupleFolder: vi.fn(),
+  getOrCreateDriveFolder: vi.fn(),
+  moveDriveFileToFolder: vi.fn(),
   deleteCloudinaryAsset: vi.fn(),
   isSameOriginRequest: vi.fn(),
   checkRateLimit: vi.fn(),
@@ -15,7 +17,7 @@ vi.mock('@/lib/supabase-server', () => ({
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({ auth: { getUser }, from })),
 }))
-vi.mock('@/lib/google-drive', () => ({ deleteDriveFile }))
+vi.mock('@/lib/google-drive', () => ({ getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, moveDriveFileToFolder }))
 vi.mock('@/lib/cloudinary', () => ({ deleteCloudinaryAsset }))
 vi.mock('@/lib/csrf', () => ({ isSameOriginRequest }))
 vi.mock('@/lib/rate-limit', () => ({ checkRateLimit }))
@@ -38,7 +40,9 @@ describe('POST /api/media/delete', () => {
     isSameOriginRequest.mockReturnValue(true)
     getUser.mockResolvedValue({ data: { user: null } })
     checkRateLimit.mockResolvedValue({ allowed: true, remaining: 9, resetTime: Date.now() + 60000 })
-    deleteDriveFile.mockResolvedValue(undefined)
+    getOrCreateDriveCoupleFolder.mockResolvedValue({ id: 'couple-folder' })
+    getOrCreateDriveFolder.mockResolvedValue({ id: 'archive-folder' })
+    moveDriveFileToFolder.mockResolvedValue({ id: 'drive-1' })
     deleteCloudinaryAsset.mockResolvedValue(undefined)
     from.mockReturnValue(memoryQuery(null))
   })
@@ -78,6 +82,7 @@ describe('POST /api/media/delete', () => {
       user_id: 'owner-1',
       storage_provider: 'google_drive',
       drive_file_id: 'drive-1',
+      couple_id: 'couple-1',
     }))
     const response = await POST(new Request('https://a-little-world-with-us.vercel.app/api/media/delete', {
       method: 'POST',
@@ -85,7 +90,7 @@ describe('POST /api/media/delete', () => {
       headers: { 'content-type': 'application/json' },
     }))
     expect(response.status).toBe(403)
-    expect(deleteDriveFile).not.toHaveBeenCalled()
+    expect(moveDriveFileToFolder).not.toHaveBeenCalled()
   })
 
   it('deletes an owned Drive-backed memory asset', async () => {
@@ -103,6 +108,6 @@ describe('POST /api/media/delete', () => {
       headers: { 'content-type': 'application/json' },
     }))
     expect(response.status).toBe(200)
-    expect(deleteDriveFile).toHaveBeenCalledWith('user-1', 'drive-1')
+    expect(moveDriveFileToFolder).toHaveBeenCalledWith('user-1', 'drive-1', 'archive-folder')
   })
 })
