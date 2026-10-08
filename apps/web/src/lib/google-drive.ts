@@ -170,7 +170,35 @@ export async function getDriveAccessToken(userId: string): Promise<string> {
   if (expiresAt > Date.now() + 60_000) return decrypt(connection.access_token_enc, connection.access_token_iv)
   const refreshed = await refreshAccessToken(userId, connection)
   if (refreshed) return refreshed
-  return decrypt(connection.access_token_enc, connection.access_token_iv)
+  throw new Error('Google Drive connection needs to be reconnected.')
+}
+
+async function driveFetch(userId: string, input: string, init: RequestInit = {}) {
+  let accessToken = await getDriveAccessToken(userId)
+  let response = await fetch(input, {
+    ...init,
+    headers: { ...(init.headers ?? {}), Authorization: `Bearer ${accessToken}` },
+  })
+  if (response.status !== 401) return response
+
+  const connection = await getConnection(userId)
+  const refreshed = connection ? await refreshAccessToken(userId, connection) : null
+  if (!refreshed) return response
+  accessToken = refreshed
+  response = await fetch(input, {
+    ...init,
+    headers: { ...(init.headers ?? {}), Authorization: `Bearer ${accessToken}` },
+  })
+  return response
+}
+
+function isTrustedDriveUploadSessionUrl(value: string): boolean {
+  try {
+    const url = new URL(value)
+    return url.protocol === 'https:' && (url.hostname === 'www.googleapis.com' || url.hostname.endsWith('.googleapis.com'))
+  } catch {
+    return false
+  }
 }
 
 export async function uploadDriveFile(userId: string, file: File, folderId?: string) {
@@ -197,9 +225,11 @@ export async function uploadDriveFile(userId: string, file: File, folderId?: str
   }
 
   const sessionUrl = initResponse.headers.get('location')
-  if (!sessionUrl) throw new Error('Google Drive did not return an upload session.')
+  if (!sessionUrl || !isTrustedDriveUploadSessionUrl(sessionUrl)) {
+    throw new Error('Google Drive returned an invalid upload session.')
+  }
 
-  const response = await fetch(sessionUrl, {
+  let response = await fetch(sessionUrl, {
     method: 'PUT',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -208,6 +238,21 @@ export async function uploadDriveFile(userId: string, file: File, folderId?: str
     },
     body: await file.arrayBuffer(),
   })
+  if (response.status === 401) {
+    const connection = await getConnection(userId)
+    const refreshed = connection ? await refreshAccessToken(userId, connection) : null
+    if (refreshed) {
+      response = await fetch(sessionUrl, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${refreshed}`,
+          'Content-Type': mimeType,
+          'Content-Length': String(file.size),
+        },
+        body: await file.arrayBuffer(),
+      })
+    }
+  }
   const data = await response.json().catch(() => null)
   if (!response.ok) {
     throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive upload failed.')
@@ -215,8 +260,7 @@ export async function uploadDriveFile(userId: string, file: File, folderId?: str
   return data as { id: string; name: string; mimeType?: string; webViewLink?: string; webContentLink?: string }
 }
 export async function listDriveFile(userId: string, fileId: string) {
-  const accessToken = await getDriveAccessToken(userId)
-  const response = await fetch(`${DRIVE_API}/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size,webViewLink,webContentLink,thumbnailLink`, { headers: { Authorization: `Bearer ${accessToken}` } })
+  const response = await driveFetch(userId, `${DRIVE_API}/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size,webViewLink,webContentLink,thumbnailLink`)
   const data = await response.json()
   if (!response.ok) throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive file lookup failed.')
   return data
@@ -224,10 +268,7 @@ export async function listDriveFile(userId: string, fileId: string) {
 
 
 export async function downloadDriveFile(userId: string, fileId: string) {
-  const accessToken = await getDriveAccessToken(userId)
-  const response = await fetch(`${DRIVE_API}/${encodeURIComponent(fileId)}?alt=media`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  })
+  const response = await driveFetch(userId, `${DRIVE_API}/${encodeURIComponent(fileId)}?alt=media`)
   if (!response.ok) throw new Error('Google Drive file download failed.')
   return response
 }
@@ -279,10 +320,8 @@ export async function assertDriveFileAccessible(userId: string, fileId: string) 
 }
 
 export async function deleteDriveFile(userId: string, fileId: string) {
-  const accessToken = await getDriveAccessToken(userId)
-  const response = await fetch(`${DRIVE_API}/${encodeURIComponent(fileId)}`, {
+  const response = await driveFetch(userId, `${DRIVE_API}/${encodeURIComponent(fileId)}`, {
     method: 'DELETE',
-    headers: { Authorization: `Bearer ${accessToken}` },
   })
   if (!response.ok && response.status !== 404) throw new Error('Google Drive file deletion failed.')
 }
