@@ -67,6 +67,15 @@ const migrations = schemaMigrations({
         ] }),
       ],
     },
+    {
+      toVersion: 9,
+      steps: [addColumns({ table: 'messages', columns: [
+        { name: 'media_storage_provider', type: 'string', isOptional: true },
+        { name: 'media_storage_path', type: 'string', isOptional: true },
+        { name: 'media_storage_file_id', type: 'string', isOptional: true },
+        { name: 'media_size_bytes', type: 'number', isOptional: true },
+      ] })],
+    },
   ],
 })
 
