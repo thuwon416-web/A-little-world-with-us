@@ -41,6 +41,7 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 - Expand mobile coverage where existing behavior can be exercised without a device.
 - Keep emergency-contact email delivery provider-neutral until the owner supplies the chosen provider/API credentials; then wire and test the provider.
 - Recheck CI/security workflows on the final release revision.
+- Native Drive client validation and a 25 MB mobile upload guard are now in code; this is repository-side hardening, not device evidence.
 
 ### Phase 10 — Product QA + Final Verification Pack
 **Goal:** turn remaining evidence gates into one owner-side verification pass.
@@ -48,6 +49,9 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 - Memories visual pass, Period/Fertility controlled scenario, Korean 4–6 human QA, accessibility checks.
 - Google Cloud callback registration, Drive E2E, native builds/device checks, Dependabot refresh, and B2 verification where active.
 - Produce one final evidence-backed release checklist; no manual gate is requested before repository-side work is complete.
+
+## Continue rule
+Phase 7, Phase 8, Phase 9, and Phase 10 preparation are intentionally overlapping. When one track hits an external/manual blocker, continue the other repository-side tracks rather than pausing the close-out.
 
 ## Ledger B — release gate register
 1. Runtime CI/build verification for Korean 4–6 — VERIFIED (2026-10-08 production deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi).
