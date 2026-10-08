@@ -155,11 +155,12 @@ async function refreshAccessToken(userId: string, connection: Record<string, unk
   const data = (await response.json()) as Record<string, unknown>
   if (!response.ok || typeof data.access_token !== 'string') throw new Error('Google Drive access token refresh failed.')
   const access = encrypt(data.access_token)
-  await adminClient().from('google_drive_connections').update({
+  const { error: updateError } = await adminClient().from('google_drive_connections').update({
     access_token_enc: access.ciphertext,
     access_token_iv: access.iv,
     expires_at: typeof data.expires_in === 'number' ? new Date(Date.now() + data.expires_in * 1000).toISOString() : null,
   }).eq('user_id', userId)
+  if (updateError) throw updateError
   return data.access_token
 }
 
