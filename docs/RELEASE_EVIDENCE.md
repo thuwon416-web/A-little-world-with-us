@@ -125,3 +125,8 @@ After release stability:
 - [ ] Send a chat image and confirm it is stored in the Drive Chat year/month folder.
 - [ ] Delete the chat message and confirm the Drive image remains.
 - [ ] Confirm a daily chat archive file is created/updated under `Chat/{year}/{month}/` and is indexed by `chat_archive_days`.
+
+
+### Latest Drive implementation build evidence
+- A production Vercel build of commit `8c42ae5` reached the TypeScript stage but failed on four source errors in the new Drive archive implementation. Those errors were corrected afterward.
+- The latest corrected `main` revision has not yet produced a successful Vercel build because the Hobby deployment API reached its daily deployment limit. Therefore current production deployment evidence must remain unchecked until a successful corrected build is observed.
