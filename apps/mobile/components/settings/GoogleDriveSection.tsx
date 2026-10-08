@@ -45,8 +45,11 @@ export default function GoogleDriveSection() {
 
   useEffect(() => {
     let active = true
+    const handledUrls = new Set<string>()
 
     const handleUrl = async (url: string) => {
+      if (handledUrls.has(url)) return
+      handledUrls.add(url)
       const parsed = Linking.parse(url)
       if (parsed.scheme !== 'com.alittleworldwithus.app' || parsed.path !== 'oauth2redirect') return
       const state = typeof parsed.queryParams?.state === 'string' ? parsed.queryParams.state : ''
@@ -55,6 +58,7 @@ export default function GoogleDriveSection() {
       const verifierKey = 'a-little-world-with-us-google-drive-pkce'
       const stateKey = `${verifierKey}-state`
       try {
+        if (!clientId) throw new Error('Native Google Drive OAuth client ID is not configured.')
         const verifier = await SecureStore.getItemAsync(verifierKey)
         const expectedState = await SecureStore.getItemAsync(stateKey)
         await SecureStore.deleteItemAsync(verifierKey)
