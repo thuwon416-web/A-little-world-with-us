@@ -33,7 +33,7 @@ Status: CODE-SIDE HARDENED
 
 ## Phase 10 — Single manual verification
 Status: PREPARED / DEFERRED
-Source of truth: `docs/FINAL_VERIFICATION.md`
+Source of truth: `docs/FINAL_VERIFICATION.md`\nEvidence record: `docs/RELEASE_EVIDENCE.md`
 Run once after Phases 7–9 code-side work settles.
 
 ## Phase 11 — Evidence-driven fixes
@@ -52,7 +52,7 @@ Process:
 5. Perform final critical-path smoke.
 6. Record release evidence.
 
-## Phase 13 — Post-release monitoring
+## Phase 13 — Post-release monitoring\nEvidence record: `docs/RELEASE_EVIDENCE.md`
 Monitor:
 - Drive OAuth/upload/download/delete failures
 - Vercel runtime errors
