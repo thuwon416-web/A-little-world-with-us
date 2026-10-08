@@ -274,7 +274,7 @@ export async function updateDriveFileContent(userId: string, fileId: string, con
   const response = await driveFetch(userId, DRIVE_UPLOAD_API + '/' + encodeURIComponent(fileId) + '?uploadType=media', {
     method: 'PATCH',
     headers: { 'Content-Type': mimeType, 'Content-Length': String(content.byteLength) },
-    body: content,
+    body: Buffer.from(content),
   })
   const data = await response.json().catch(() => null)
   if (!response.ok || typeof data?.id !== 'string') {
