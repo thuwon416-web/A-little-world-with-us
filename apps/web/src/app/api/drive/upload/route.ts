@@ -124,7 +124,8 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ file: driveFile, memory })
-  } catch {
+  } catch (error) {
+    console.error('[drive] memory upload failed:', error instanceof Error ? error.message : 'unknown error')
     if (driveFile) await deleteDriveFile(user.id, driveFile.id).catch(() => undefined)
     if (driveMemoryFolderId) await deleteDriveFolder(user.id, driveMemoryFolderId).catch(() => undefined)
     return NextResponse.json(
