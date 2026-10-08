@@ -3,7 +3,7 @@ import 'server-only'
 import { createCipheriv, createDecipheriv, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.file'
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive'
 const TOKEN_URL = 'https://oauth2.googleapis.com/token'
 const DRIVE_API = 'https://www.googleapis.com/drive/v3/files'
 const DRIVE_UPLOAD_API = 'https://www.googleapis.com/upload/drive/v3/files'
@@ -258,6 +258,59 @@ export async function uploadDriveFile(userId: string, file: File, folderId?: str
     throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive upload failed.')
   }
   return data as { id: string; name: string; mimeType?: string; webViewLink?: string; webContentLink?: string }
+}
+export async function createDriveFolder(userId: string, name: string, parentId?: string) {
+  const trimmedName = name.trim()
+  if (!trimmedName || trimmedName.length > 120) throw new Error('Invalid Google Drive folder name.')
+  const metadata: Record<string, unknown> = { name: trimmedName, mimeType: 'application/vnd.google-apps.folder' }
+  if (parentId) metadata.parents = [parentId]
+  const response = await driveFetch(userId, DRIVE_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(metadata),
+  })
+  const data = await response.json().catch(() => null)
+  if (!response.ok || typeof data?.id !== 'string') {
+    throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive folder creation failed.')
+  }
+  return data as { id: string; name: string; mimeType: string; webViewLink?: string }
+}
+
+export async function listDriveChildren(userId: string, parentId?: string) {
+  const query = parentId ? "'" + parentId.replace(/'/g, "\\'") + "' in parents and trashed = false" : 'trashed = false'
+  const params = new URLSearchParams({
+    q: query, pageSize: '100', orderBy: 'folder,name',
+    fields: 'files(id,name,mimeType,size,modifiedTime,webViewLink,parents),nextPageToken',
+  })
+  const response = await driveFetch(userId, DRIVE_API + '?' + params.toString())
+  const data = await response.json().catch(() => null)
+  if (!response.ok || !Array.isArray(data?.files)) {
+    throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive folder listing failed.')
+  }
+  return data as { files: Array<{ id: string; name: string; mimeType: string; size?: string; modifiedTime?: string; webViewLink?: string; parents?: string[] }>; nextPageToken?: string }
+}
+
+export async function findDriveFolder(userId: string, name: string, parentId?: string) {
+  const children = await listDriveChildren(userId, parentId)
+  return children.files.find((file) => file.mimeType === 'application/vnd.google-apps.folder' && file.name === name) ?? null
+}
+
+export async function getOrCreateDriveFolder(userId: string, name: string, parentId?: string) {
+  const existing = await findDriveFolder(userId, name, parentId)
+  if (existing) return existing
+  return createDriveFolder(userId, name, parentId)
+}
+
+export async function getOrCreateDriveRootFolder(userId: string) {
+  const connection = await getConnection(userId)
+  if (!connection) throw new Error('Google Drive is not connected.')
+  if (typeof connection.root_folder_id === 'string' && connection.root_folder_id) {
+    return { id: connection.root_folder_id, name: 'A Little World With Us', mimeType: 'application/vnd.google-apps.folder' }
+  }
+  const root = await getOrCreateDriveFolder(userId, 'A Little World With Us')
+  const { error } = await adminClient().from('google_drive_connections').update({ root_folder_id: root.id }).eq('user_id', userId)
+  if (error) throw error
+  return root
 }
 export async function listDriveFile(userId: string, fileId: string) {
   const response = await driveFetch(userId, `${DRIVE_API}/${encodeURIComponent(fileId)}?fields=id,name,mimeType,size,webViewLink,webContentLink,thumbnailLink`)
