@@ -145,7 +145,7 @@ export async function unregisterForPushNotifications() {
 }
 
 export async function scheduleReminder(
-  reminder: Omit<Reminder, 'id' | 'user_id'> & { user_id?: string }
+  reminder: Omit<Reminder, 'id' | 'user_id'>
 ) {
   if (!isSupabaseConfigured) {
     return null
@@ -162,8 +162,8 @@ export async function scheduleReminder(
 
   const payload = {
     id: crypto.randomUUID(),
-    user_id: reminder.user_id ?? user.id,
-    couple_id: await getAcceptedCoupleId(reminder.user_id ?? user.id),
+    user_id: user.id,
+    couple_id: await getAcceptedCoupleId(user.id),
     title: reminder.title,
     message: reminder.message,
     scheduled_at: reminder.scheduled_at,
