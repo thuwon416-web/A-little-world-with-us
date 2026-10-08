@@ -16,11 +16,17 @@ Work on main by default. Avoid unnecessary feature/cleanup branches. Preserve wo
 ## Documentation protocol
 Behavior/architecture → domain doc. Release status → CURRENT_STATE. Future work → ROADMAP. UI rule → UI_DESIGN_SYSTEM. Security boundary → SECURITY. Work procedure → TOOL/runbook. Historical fact → changelog/archive. Do not duplicate authoritative facts.
 
-## Tools
-GitHub for source/checks; Supabase for live database/auth/RLS; Vercel for deployment/runtime; Expo/EAS for native builds; local test/build tools for implementation verification.
-
 ## Definition of Done
 DONE means implementation exists and relevant automated checks pass. VERIFIED requires environment evidence. External-console/device work stays PENDING until exercised.
+
+## Verification trigger table
+| Trigger | Re-check |
+| --- | --- |
+| Live migration/schema change | Supabase live migration list and relevant catalog/advisor evidence |
+| Bootstrap filename/content change | Reconcile filename intent against live migration history |
+| Storage provider/config change | Code precedence, Vercel env inventory, and live provider metadata |
+| OAuth client/redirect change | Vercel env + external OAuth client registration + authenticated callback |
+| Korean 4–6 source change | Exact-commit build and runtime/content smoke evidence |
 
 ## Evidence
 Separate repository head from live head and configured values from verified behavior. If evidence is unavailable, use VERIFY.
