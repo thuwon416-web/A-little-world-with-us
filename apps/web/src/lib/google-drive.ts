@@ -415,12 +415,12 @@ export async function disconnectDrive(userId: string) {
   if (error) throw error
 }
 
-async function resolveDriveAccessUser(coupleId: string, ownerId: string) {
+async function resolveDriveAccessUser(coupleId: string, ownerId?: string | null) {
   const client = adminClient()
   const { data: ownerConnection, error: ownerError } = await client
     .from('google_drive_connections')
     .select('user_id')
-    .eq('user_id', ownerId)
+    .eq('user_id', ownerId ?? '')
     .maybeSingle()
   if (ownerError) throw ownerError
   if (ownerConnection?.user_id) return ownerConnection.user_id as string
