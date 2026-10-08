@@ -204,6 +204,36 @@ export default function RealtimeChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
+  const archiveChatDay = async (messagesToArchive: Message[], targetDate?: string) => {
+    if (!coupleId || !messagesToArchive.length) return
+    const day = targetDate || new Date().toISOString().slice(0, 10)
+    const dayMessages = messagesToArchive.filter((message) => message.created_at.slice(0, 10) === day)
+    if (!dayMessages.length) return
+    const response = await fetch('/api/drive/chat-archive', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        coupleId,
+        date: day,
+        messages: dayMessages.map((message) => ({
+          id: message.id,
+          sender_id: message.sender_id,
+          content: message.content,
+          message_type: message.message_type,
+          media_storage_provider: message.media_storage_provider,
+          media_storage_file_id: message.media_storage_file_id,
+          media_mime_type: message.media_mime_type,
+          created_at: message.created_at,
+          deleted_at: message.deleted_at,
+        })),
+      }),
+    })
+    if (!response.ok) {
+      // Archive failure must not block normal chat delivery.
+      console.warn('Drive chat archive failed.')
+    }
+  }
+
   // Main Chat Initialization & Realtime Subscription
   useEffect(() => {
     let isMounted = true
@@ -241,7 +271,9 @@ export default function RealtimeChat() {
         initialMessages.map(async (msg) => {
           let mediaUrl = msg.media_url
           try {
-            if (msg.media_storage_provider === 'backblaze_b2' && msg.media_storage_path) {
+            if (msg.media_storage_provider === 'google_drive' && msg.media_storage_file_id) {
+              mediaUrl = '/api/drive/file?fileId=' + encodeURIComponent(msg.media_storage_file_id) + '&download=1'
+            } else if (msg.media_storage_provider === 'backblaze_b2' && msg.media_storage_path) {
               mediaUrl = await resolveB2ChatMediaUrl(couple.id, msg.media_storage_path, msg.media_mime_type || 'application/octet-stream')
             } else if (isExternalUrl(msg.media_url)) {
               if (msg.message_type === 'voice') {
@@ -274,6 +306,7 @@ export default function RealtimeChat() {
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       )
       setMessages(sortedMessages)
+      void archiveChatDay(sortedMessages)
 
       // Mark messages as seen
       const partnerMessages = activeMessages.filter(
