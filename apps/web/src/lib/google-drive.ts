@@ -164,6 +164,17 @@ async function refreshAccessToken(userId: string, connection: Record<string, unk
   return data.access_token
 }
 
+export async function getDriveConnectionInfo(userId: string) {
+  const connection = await getConnection(userId)
+  if (!connection) return null
+  await getDriveAccessToken(userId)
+  return {
+    connected: true,
+    scope: typeof connection.scope === 'string' ? connection.scope : DRIVE_SCOPE,
+    rootFolderId: typeof connection.root_folder_id === 'string' ? connection.root_folder_id : null,
+  }
+}
+
 export async function getDriveAccessToken(userId: string): Promise<string> {
   const connection = await getConnection(userId)
   if (!connection) throw new Error('Google Drive is not connected.')
