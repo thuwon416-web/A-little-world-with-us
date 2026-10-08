@@ -10,4 +10,8 @@ Mobile is built and released through Expo/EAS. Android/iOS build verification is
 
 Google Drive Web OAuth uses /api/drive/callback. The production flow is intentionally host-bound because OAuth state is stored in an HttpOnly host-bound cookie. Preview hosts are not equivalent production OAuth origins.
 
+On 2026-10-08, a fresh production deployment was explicitly started from current main commit `1c3f78fa8fe34c518cb21b5834fbafa055892b82` as `dpl_6CnQ1obMNiPZ2oweVqethGQix2bi`. At the time of this documentation update its state is BUILDING, so it is not yet release evidence.
+
+The immediately preceding production deployment that was READY was for an older documentation-only commit, not current main. Do not treat that deployment as proof that current main is live.
+
 Release evidence must include exact commit, deployment, CI checks, and runtime/device evidence. Configuration presence is not proof of successful end-to-end behavior.
