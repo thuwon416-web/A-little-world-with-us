@@ -217,7 +217,7 @@ export async function listGoogleDriveFiles(clientId: string, pageSize = MAX_DRIV
   validateClientId(clientId)
   const params = new URLSearchParams({
     q: 'trashed = false',
-    pageSize: String(Math.min(Math.max(pageSize, 1), 1000)),
+    pageSize: String(Math.min(Math.max(pageSize, 1), MAX_DRIVE_PAGE_SIZE)),
     orderBy: 'modifiedTime desc',
     fields: 'files(id,name,mimeType,size,webViewLink,thumbnailLink,createdTime,modifiedTime)',
   })
