@@ -71,3 +71,9 @@ Google Cloud callback → authenticated Drive E2E → Drive memory upload/re-ren
 
 ## 13. NEXT
 Owner-side Google Cloud callback verification and authenticated Drive E2E are the first concrete external gates. After those, run the current mobile/device and real-user acceptance gates.
+
+## 14. NON-RELEASE TECHNICAL BACKLOG FOUND IN FINAL AUDIT
+- Mobile Jest coverage config still contains stale Sprint 4/Sprint 2 TODO wording; update the planning comment or raise thresholds after coverage work.
+- Web Vitest excludes API routes until route-level API coverage is added.
+- `check-missed-checkin` logs a would-email action rather than sending an email; an email provider integration is not implemented. Do not claim external emergency-email notification as complete until this is implemented and tested.
+- No FIXME/HACK markers were found in the searched repository scope.
