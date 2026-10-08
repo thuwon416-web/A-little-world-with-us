@@ -1,3 +1,4 @@
+import { createCipheriv, randomBytes } from 'node:crypto'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { createClient } = vi.hoisted(() => ({ createClient: vi.fn() }))
