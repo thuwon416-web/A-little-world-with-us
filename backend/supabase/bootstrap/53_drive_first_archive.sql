@@ -68,7 +68,8 @@ create policy "chat_archive_days_members_update"
   for update
   to authenticated
   using (
-    exists (
+    owner_id = auth.uid()
+    and exists (
       select 1
       from public.couple_links cl
       where cl.couple_id = chat_archive_days.couple_id
@@ -77,7 +78,8 @@ create policy "chat_archive_days_members_update"
     )
   )
   with check (
-    exists (
+    owner_id = auth.uid()
+    and exists (
       select 1
       from public.couple_links cl
       where cl.couple_id = chat_archive_days.couple_id
