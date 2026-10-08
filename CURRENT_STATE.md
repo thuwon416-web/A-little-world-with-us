@@ -14,7 +14,7 @@ Phase 6 — Final Production Audit + User Verification.
 PENDING RELEASE VERIFICATION.
 
 ## 4. COMPLETED
-Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening.
+Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening; native Drive validation/upload-limit hardening.
 
 ## 5. VERIFIED
 - Live Supabase migration head: 20261007121841 — restore_rls_helper_execute, checked directly on 2026-10-08.
@@ -79,6 +79,7 @@ Continue the prepared close-out phases in parallel:
 - Phase 8: re-audit native OAuth/deep links, permissions, notifications, location, WebRTC, and offline recovery configuration; prepare current-main EAS verification inputs.
 - Phase 9: expand highest-risk API/mobile tests and prepare provider-neutral emergency email integration until credentials are supplied.
 - Phase 10: consolidate the final owner-side verification pack across Drive, Web↔Mobile, UI, Period/Fertility, Korean QA, native builds, security alerts, and B2.
+These phases overlap intentionally; an external blocker on one track does not pause repository-side work on the others.
 Owner-side manual verification remains last.
 
 ## 15. NON-RELEASE TECHNICAL BACKLOG FOUND IN FINAL AUDIT
