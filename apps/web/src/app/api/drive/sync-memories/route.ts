@@ -36,8 +36,9 @@ export async function POST(request: Request) {
   const supabase = await getAuthenticatedClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const userId = userId
 
-  const rateLimit = await checkRateLimit('drive-memory-sync:' + user.id, 3, 60_000)
+  const rateLimit = await checkRateLimit('drive-memory-sync:' + userId, 3, 60_000)
   if (!rateLimit.allowed) {
     return NextResponse.json({ error: 'Drive memory sync is temporarily rate limited.', resetAt: rateLimit.resetTime }, { status: 429 })
   }
@@ -51,21 +52,21 @@ export async function POST(request: Request) {
     .select('id')
     .eq('couple_id', coupleId)
     .eq('status', 'accepted')
-    .or('inviter_id.eq.' + user.id + ',accepted_by.eq.' + user.id)
+    .or('inviter_id.eq.' + userId + ',accepted_by.eq.' + userId)
     .maybeSingle()
 
   if (coupleLinkError) return NextResponse.json({ error: 'Unable to verify couple access.' }, { status: 500 })
   if (!coupleLink) return NextResponse.json({ error: 'You are not a member of this couple.' }, { status: 403 })
 
   try {
-    const root = await getOrCreateDriveRootFolder(user.id)
+    const root = await getOrCreateDriveRootFolder(userId)
     const visited = new Set<string>()
     const imageFiles: Array<{ id: string; name: string; mimeType: string; modifiedTime?: string; parentId: string; groupName: string }> = []
 
     async function walk(folderId: string, groupName: string, depth: number) {
       if (depth > MAX_DEPTH || visited.has(folderId) || imageFiles.length >= MAX_FILES) return
       visited.add(folderId)
-      const children = await listDriveChildren(user.id, folderId)
+      const children = await listDriveChildren(userId, folderId)
       for (const file of children.files) {
         if (imageFiles.length >= MAX_FILES) break
         if (file.mimeType === DRIVE_FOLDER_MIME) {
@@ -108,7 +109,7 @@ export async function POST(request: Request) {
       } else {
         const { error } = await supabase.from('memories').insert({
           id: crypto.randomUUID(),
-          user_id: user.id,
+          user_id: userId,
           couple_id: coupleId,
           image_url: null,
           storage_path: null,
