@@ -17,16 +17,20 @@ Work on main by default. Avoid unnecessary feature/cleanup branches. Preserve wo
 Behavior/architecture → domain doc. Release status → CURRENT_STATE. Future work → ROADMAP. UI rule → UI_DESIGN_SYSTEM. Security boundary → SECURITY. Work procedure → TOOL/runbook. Historical fact → changelog/archive. Do not duplicate authoritative facts.
 
 ## Definition of Done
-DONE means implementation exists and relevant automated checks pass. VERIFIED requires environment evidence. External-console/device work stays PENDING until exercised.
+DONE means implementation exists and relevant automated checks pass. VERIFIED requires environment evidence. External-console/device/security-alert work stays PENDING or VERIFY until exercised.
 
-## Verification trigger table
+## Verification Trigger Table
 | Trigger | Re-check |
 | --- | --- |
 | Live migration/schema change | Supabase live migration list and relevant catalog/advisor evidence |
 | Bootstrap filename/content change | Reconcile filename intent against live migration history |
 | Storage provider/config change | Code precedence, Vercel env inventory, and live provider metadata |
 | OAuth client/redirect change | Vercel env + external OAuth client registration + authenticated callback |
-| Korean 4–6 source change | Exact-commit build and runtime/content smoke evidence |
+| Korean 4–6 source/data change | Exact-commit build + Web/Mobile content QA artifact |
+| Mobile native configuration/build change | EAS build tied to current commit + device smoke |
+| Dependabot/security-alert state change | Live GitHub Security/Dependabot alert list |
+| Memories UI/component change | Current visual/device evidence |
+| Period/fertility logic/UI change | Controlled authenticated scenario with observed result |
 
 ## Evidence
-Separate repository head from live head and configured values from verified behavior. If evidence is unavailable, use VERIFY.
+Separate repository head from live head and configured values from verified behavior. If evidence is unavailable, use VERIFY. Do not convert a source-code inspection into live verification.
