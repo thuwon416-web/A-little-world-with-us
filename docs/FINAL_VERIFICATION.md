@@ -28,7 +28,7 @@ Do not run owner-side manual checks one-by-one while Phases 7–9 are still chan
 - [ ] Confirm the Supabase memory row contains `storage_provider=google_drive` and a `drive_file_id`.
 - [ ] Reload/re-enter Memories and confirm the image renders from the stored metadata.
 - [ ] Open/download the memory through the app.
-- [ ] Delete the memory/file and confirm the UI and Drive state are consistent.
+- [ ] Delete the memory/message and confirm the UI hides it while the Drive original remains; test permanent Drive deletion separately only when explicitly requested.
 - [ ] Confirm an invalid image type/oversized upload is rejected without leaving an orphaned Drive object.
 
 ### C. Web ↔ Mobile smoke
@@ -119,3 +119,11 @@ Watch runtime errors, Drive failures, notification/location failures, and user-v
 
 ### Phase 14 — Product evolution
 Only after release stability: curriculum grammar/vocabulary sequencing, Korea Life/Couple Korean layers, adaptive review, speaking practice, richer audio, AI Korean tutoring, and wellness enhancements.
+
+
+### Drive-first archive additions
+- [ ] Reconnect the Google OAuth grant with the broader Drive scope before testing external folder sync.
+- [ ] Create `Kalaw 2026` under the app Drive root, add an image, run/trigger Drive sync, and confirm the image appears in Memories with `drive_file_id` and `drive_folder_id` metadata.
+- [ ] Send a chat image and confirm it is stored in the Drive Chat year/month folder.
+- [ ] Delete the chat message and confirm the Drive image remains.
+- [ ] Confirm a daily chat archive file is created/updated under `Chat/{year}/{month}/` and is indexed by `chat_archive_days`.
