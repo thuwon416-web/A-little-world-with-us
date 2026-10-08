@@ -34,6 +34,9 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 
 ### Phase 8 — Mobile Native + Cross-platform Readiness
 **Goal:** make current-main native configuration and shared-memory behavior release-ready without waiting for a device.
+- [x] Hardened native Drive OAuth callback handling against duplicate initial/deep-link delivery.
+- [x] Removed the mobile reminder API's caller-supplied user identity; reminders now bind to the authenticated user.
+- [x] Enforced the native Drive list page-size ceiling consistently with the documented 100-item limit.
 - Re-audit native Google Drive PKCE, deep-link handling, SecureStore token lifecycle, and platform client-ID configuration.
 - Re-audit camera/media, notifications, background location, maps, WebRTC, and offline/media recovery configuration.
 - Prepare the exact EAS current-main build inputs and device smoke sequence; do not count historical artifacts as current evidence.
