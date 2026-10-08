@@ -19,9 +19,33 @@ export async function POST(request: Request) {
   try {
     const access = await getDriveFileAccess(user.id, fileId)
     if (!access) return NextResponse.json({ error: 'File not found.' }, { status: 404 })
-    if (!access.canDelete) return NextResponse.json({ error: 'Only the memory owner can delete this file.' }, { status: 403 })
+    if (!access.canDelete) return NextResponse.json({ error: 'Only the original media owner can permanently delete this Drive file.' }, { status: 403 })
     await deleteDriveFile(access.ownerId, fileId)
-    return NextResponse.json({ deleted: true })
+    if (access.recordType === 'memory') {
+      const { error } = await supabase.from('memories').update({
+        drive_file_id: null,
+        drive_folder_id: null,
+        storage_provider: 'supabase',
+        storage_path: null,
+        image_url: null,
+      }).eq('id', access.recordId)
+      if (error) throw error
+    } else if (access.recordType === 'message') {
+      const { error } = await supabase.from('messages').update({
+        media_url: null,
+        media_storage_provider: null,
+        media_storage_path: null,
+        media_storage_file_id: null,
+        media_size_bytes: null,
+      }).eq('id', access.recordId)
+      if (error) throw error
+    } else if (access.recordType === 'chat_archive') {
+      const { error } = await supabase.from('chat_archive_days').update({
+        drive_file_id: null,
+      }).eq('id', access.recordId)
+      if (error) throw error
+    }
+    return NextResponse.json({ deleted: true, recordType: access.recordType })
   } catch (error) {
     console.error('[drive] file delete failed:', error instanceof Error ? error.message : 'unknown error')
     return NextResponse.json({ error: 'Google Drive file deletion failed.' }, { status: 502 })
