@@ -447,7 +447,7 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
 
   const { data: memory, error: memoryError } = await client
     .from('memories')
-    .select('couple_id,user_id')
+    .select('id,couple_id,user_id')
     .eq('drive_file_id', fileId)
     .maybeSingle()
   if (memoryError) throw memoryError
