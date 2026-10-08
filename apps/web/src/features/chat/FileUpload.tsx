@@ -109,7 +109,14 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
       const filePath = `${user.id}/${fileName}`
 
       const DRIVE_IMAGE_LIMIT = 25 * 1024 * 1024
+      let driveConnected = false
       if (selectedFile.type.startsWith('image/') && selectedFile.size <= DRIVE_IMAGE_LIMIT) {
+        const statusResponse = await fetch('/api/drive/status')
+        const statusBody = (await statusResponse.json().catch(() => ({}))) as { connected?: boolean }
+        driveConnected = statusResponse.ok && statusBody.connected === true
+      }
+
+      if (driveConnected) {
         const form = new FormData()
         form.append('file', selectedFile)
         form.append('coupleId', coupleId)
