@@ -606,8 +606,16 @@ export default function RealtimeChat() {
     if (!coupleId || !currentUserId) return
     const { compressImage } = await import('@/lib/imageCompressor')
     const compressed = await compressImage(file)
-    const { data: message, error } = await supabase.from('messages').insert({ couple_id: coupleId, sender_id: currentUserId, message_type: 'photo', encrypted: false }).select().single()
+    const { data: message, error } = await supabase.from('messages').insert({
+      couple_id: coupleId,
+      sender_id: currentUserId,
+      message_type: 'photo',
+      encrypted: false,
+    }).select().single()
     if (error || !message) return
+
+    let archiveProvider: 'google_drive' | 'supabase' = 'supabase'
+    let archiveFileId: string | null = null
     const statusResponse = await fetch('/api/drive/status')
     const statusBody = (await statusResponse.json().catch(() => ({}))) as { connected?: boolean }
     if (statusResponse.ok && statusBody.connected) {
@@ -626,6 +634,8 @@ export default function RealtimeChat() {
         await supabase.from('messages').delete().eq('id', message.id).eq('sender_id', currentUserId)
         throw new Error(driveBody.error || 'Google Drive chat image upload failed.')
       }
+      archiveProvider = 'google_drive'
+      archiveFileId = driveBody.storageFileId
       await supabase.from('messages').update({
         media_url: driveBody.url ?? null,
         media_mime_type: driveBody.file?.mimeType ?? 'image/webp',
@@ -639,6 +649,7 @@ export default function RealtimeChat() {
       const mediaUrl = await uploadChatPhoto(compressed.blob, coupleId, message.id)
       await supabase.from('messages').update({ media_url: mediaUrl }).eq('id', message.id)
     }
+
     void archiveChatDay([{
       id: message.id,
       sender_id: currentUserId,
@@ -646,8 +657,8 @@ export default function RealtimeChat() {
       message_type: 'photo',
       media_url: null,
       media_duration: null,
-      media_storage_provider: 'google_drive',
-      media_storage_file_id: null,
+      media_storage_provider: archiveProvider,
+      media_storage_file_id: archiveFileId,
       media_mime_type: 'image/webp',
       created_at: new Date().toISOString(),
       deleted_at: null,
