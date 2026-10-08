@@ -28,6 +28,8 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 - Deep route coverage now includes status/upload/file/delete/disconnect authentication, authorization, CSRF, rate-limit, and rollback paths.
 - Mobile/native Drive audit continues in parallel; manual OAuth/device evidence remains deferred to Phase 10.
 - Re-audit token refresh, disconnect/revocation, upload rollback, metadata consistency, and shared-memory retrieval.
+- [x] Added fail-closed expired-token behavior, provider-401 retry, refresh persistence error handling, and trusted resumable-upload session URL validation.
+- [x] Added Drive helper regression coverage for signed state, malformed token exchange, refresh failure, and provider-401 retry.
 - Manual gate remains one final production connect → upload → render → delete scenario.
 
 ### Phase 8 — Mobile Native + Cross-platform Readiness
@@ -39,6 +41,7 @@ These tracks can be worked continuously in parallel. A manual gate does not stop
 ### Phase 9 — Reliability / Safety Delivery
 **Goal:** close automated reliability gaps and prepare safety notification delivery.
 - Expand Web API coverage to the highest-risk authenticated routes; Drive status/upload/file/delete/disconnect coverage is now present.
+- [x] Hardened memory deletion with same-origin enforcement, per-user rate limiting, and owner-only regression tests.
 - Vercel is auto-building the latest main commits; current production deployment state is monitored separately and is not treated as READY until the final revision is complete.
 - Expand mobile coverage where existing behavior can be exercised without a device.
 - Keep emergency-contact email delivery provider-neutral until the owner supplies the chosen provider/API credentials; then wire and test the provider.
