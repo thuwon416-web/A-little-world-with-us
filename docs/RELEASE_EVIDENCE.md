@@ -19,7 +19,7 @@ Repository-side Phase 8 hardening is complete; native/device checks below remain
 - [ ] Upload one real image from Web.
 - [ ] Confirm Supabase memory row contains `storage_provider=google_drive` and `drive_file_id`.
 - [ ] Reload/re-render the memory successfully.
-- [ ] Delete the memory and confirm the Drive object is removed.
+- [ ] Delete the memory/message and confirm the Drive object remains. Test explicit permanent Drive deletion separately.
 
 ### Web ↔ Mobile
 - [ ] Auth
@@ -117,3 +117,11 @@ After release stability:
 3. A missing provider credential is not a successful provider integration.
 4. A READY deployment only proves that deployment is READY; it does not prove authenticated feature flows.
 5. Keep this file synchronized with `docs/FINAL_VERIFICATION.md` and `docs/RELEASE_CLOSEOUT.md`.
+
+
+### Drive-first archive additions
+- [ ] Reconnect the Google OAuth grant with the broader Drive scope before testing external folder sync.
+- [ ] Create `Kalaw 2026` under the app Drive root, add an image, run/trigger Drive sync, and confirm the image appears in Memories with `drive_file_id` and `drive_folder_id` metadata.
+- [ ] Send a chat image and confirm it is stored in the Drive Chat year/month folder.
+- [ ] Delete the chat message and confirm the Drive image remains.
+- [ ] Confirm a daily chat archive file is created/updated under `Chat/{year}/{month}/` and is indexed by `chat_archive_days`.
