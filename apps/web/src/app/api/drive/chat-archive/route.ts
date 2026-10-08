@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { findDriveChildFile, getOrCreateDriveFolder, getOrCreateDriveRootFolder, listDriveChildren, updateDriveFileContent, uploadDriveFile } from '@/lib/google-drive'
+import { findDriveChildFile, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, listDriveChildren, updateDriveFileContent, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
@@ -66,9 +66,7 @@ export async function POST(request: Request) {
 
   try {
     const [year, month] = archiveDate.split('-')
-    const root = await getOrCreateDriveRootFolder(user.id)
-    const couples = await getOrCreateDriveFolder(user.id, 'Couples', root.id)
-    const coupleFolder = await getOrCreateDriveFolder(user.id, coupleId, couples.id)
+    const coupleFolder = await getOrCreateDriveCoupleFolder(user.id, coupleId)
     const chatFolder = await getOrCreateDriveFolder(user.id, 'Chat', coupleFolder.id)
     const yearFolder = await getOrCreateDriveFolder(user.id, year, chatFolder.id)
     const monthFolder = await getOrCreateDriveFolder(user.id, month, yearFolder.id)
