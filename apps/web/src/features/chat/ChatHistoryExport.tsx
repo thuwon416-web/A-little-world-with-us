@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
@@ -10,6 +10,8 @@ type ExportedMessage = { created_at: string }
 export default function ChatHistoryExport() {
   const [loading, setLoading] = useState(false)
   const [dateRange, setDateRange] = useState<'7d' | '30d' | 'all'>('all')
+  const [archiveMonth, setArchiveMonth] = useState(() => new Date().toISOString().slice(0, 7))
+  const [archives, setArchives] = useState<Array<{ archive_date: string; drive_file_id: string | null; message_count: number }>>([])
 
   const handleExport = async () => {
     setLoading(true)
@@ -104,6 +106,34 @@ export default function ChatHistoryExport() {
           {loading ? 'Exporting...' : 'Export as JSON'}
         </button>
       </div>
+        <div className="mt-6 border-t border-border/20 pt-5">
+          <h4 className="text-sm font-semibold text-text-1">Drive chat archive</h4>
+          <p className="mt-1 text-xs text-text-2">Daily chat archives are stored in Drive by year/month and indexed here for quick browsing.</p>
+          <input
+            type="month"
+            value={archiveMonth}
+            onChange={(event) => setArchiveMonth(event.target.value)}
+            className="mt-3 w-full rounded-input border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
+          />
+          <div className="mt-3 space-y-2">
+            {archives.length ? archives.map((archive) => (
+              <div key={archive.archive_date} className="flex items-center justify-between gap-3 rounded-input border border-border/20 bg-soft-tint px-3 py-2">
+                <span className="text-sm text-text-1">{archive.archive_date} · {archive.message_count} messages</span>
+                {archive.drive_file_id ? (
+                  <a
+                    href={'/api/drive/file?fileId=' + encodeURIComponent(archive.drive_file_id) + '&download=1'}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-accent-2 underline"
+                  >
+                    Open
+                  </a>
+                ) : <span className="text-xs text-text-2">Archive removed</span>}
+              </div>
+            )) : <p className="text-xs text-text-2">No Drive archive days indexed for this month yet.</p>}
+          </div>
+        </div>
+
     </div>
   )
 }
