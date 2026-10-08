@@ -5,7 +5,7 @@ Update when: phase scope or release gates change
 Last Updated: 2026-10-08
 
 ## Completed phases
-Core architecture/parity foundations; CI/security hardening; Korean curriculum architecture and Levels 4–6 foundation; Google Drive Web OAuth hardening.
+Core architecture/parity foundations; CI/security hardening; Korean curriculum architecture and Levels 4–6 foundation; Google Drive Web OAuth hardening; canonical documentation migration.
 
 ## Active phase — Final Production Audit + User Verification
 Acceptance: release-commit CI green; production READY; authenticated E2E; Drive connect/upload/retrieve; Web↔Mobile parity; device/offline verification; manual acceptance.
@@ -13,7 +13,7 @@ Acceptance: release-commit CI green; production READY; authenticated E2E; Drive 
 ## Ledger B — complete plan register
 1. Runtime CI/build verification for Korean 4–6 commits — PENDING.
 2. Real Google Drive OAuth flow — PENDING.
-3. Register production Drive callback in Google Cloud — PENDING.
+3. Register production Drive callback in Google Cloud — PENDING / VERIFY.
 4. Verify Drive connect → consent → callback → Connected — PENDING.
 5. Drive-backed memory upload + Supabase drive_file_id + re-render — PENDING.
 6. Native Android/iOS Google OAuth setup — FUTURE.
@@ -59,10 +59,13 @@ Tailwind/Expo/Jest dependency modernization remains deferred where remediation r
 The detailed Korean curriculum lives in docs/features/korean-curriculum.md and is subordinate to this master roadmap.
 
 ## VERIFY / blocked-by-evidence
-- Live Supabase migration head.
-- Intent behind duplicate bootstrap numbering 33/51/52.
-- Exact Google Cloud production Drive callback registration.
-- Live storage precedence/configuration.
+- **Korean 4–6 current build:** VERIFY until the production deployment from `1c3f78fa8fe34c518cb21b5834fbafa055892b82` reaches READY.
+- **Google Cloud production Drive callback registration:** VERIFY because Google Cloud OAuth client configuration cannot be read through the available live tools.
+
+Resolved on 2026-10-08:
+- Live Supabase migration head: VERIFIED at `20261007121841 — restore_rls_helper_execute`.
+- Bootstrap numbering intent for 33/51/52: VERIFIED by distinct SQL content and matching live migration history.
+- Live storage precedence/configuration: VERIFIED at code/config level; live memory table currently has zero rows, so actual provider-use distribution is not asserted.
 
 ## Evidence rule
 DONE means implementation exists. VERIFIED requires evidence appropriate to the item. Never infer live state from repository scripts or configuration alone.
