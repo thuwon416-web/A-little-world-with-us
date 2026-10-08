@@ -22,9 +22,9 @@ Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI featur
 - Storage precedence/configuration was reconciled on 2026-10-08. Web shared-memory upload is Drive-first when the authenticated Drive connection is active; otherwise the media API uses Cloudinary; if Cloudinary is unavailable the page falls back to encrypted Supabase Storage. Live Vercel environment configuration contains the required Drive, Cloudinary, and B2 variable entries for production/preview/development. Current live `memories` table has zero rows, so no provider-usage distribution can be claimed.
 - Runtime verification baseline `1c3f78fa8fe34c518cb21b5834fbafa055892b82` was deployed explicitly on 2026-10-08 as `dpl_6CnQ1obMNiPZ2oweVqethGQix2bi` and reached READY. Current main is documentation-only ahead of that runtime baseline; GitHub compare confirms the intervening commits changed only canonical documentation files.
 
-## 6. VERIFY / BLOCKED-BY-EVIDENCE
-1. **Korean 4–6 runtime CI/build verification — VERIFY.** The latest earlier Vercel build for commit `74882b37e931c3d5b2879f0f9cf3b03fd4568584` failed at `apps/web/src/data/korean-advanced.ts:19` with `Expression expected`. The current main revision contains the syntax correction (the duplicate closing bracket is gone), but the fresh production deployment from current main is still BUILDING, so a successful current build is not yet evidenced.
-2. **Exact Google Cloud production Drive callback registration — VERIFY.** Vercel production contains the required Drive OAuth environment entries, but the Google Cloud OAuth client configuration is outside the available live tools. The exact authorized redirect URI therefore cannot be independently proven yet. Required URI: `https://a-little-world-with-us.vercel.app/api/drive/callback`.
+## 6. VERIFIED / VERIFY
+- **Korean 4–6 runtime CI/build — VERIFIED.** Production deployment `dpl_6CnQ1obMNiPZ2oweVqethGQix2bi` reached READY from runtime baseline commit `1c3f78fa8fe34c518cb21b5834fbafa055892b82` on 2026-10-08. The prior failure at `apps/web/src/data/korean-advanced.ts:19` was caused by the duplicate closing bracket; the current runtime source contains the correction. GitHub compare confirms the commits after that runtime baseline changed documentation only.
+- **Exact Google Cloud production Drive callback registration — VERIFY.** Vercel production contains the required Drive OAuth environment entries, but the Google Cloud OAuth client configuration is outside the available live tools. The exact authorized redirect URI therefore cannot be independently proven yet. Required URI: `https://a-little-world-with-us.vercel.app/api/drive/callback`.
 
 ## 7. PENDING
 Production Drive E2E, authenticated Supabase E2E, native/device/store gates, Web↔Mobile parity, real-device offline/media recovery, Memories/media retrieval, period/fertility scenarios, Korean content QA, and remaining release acceptance.
@@ -51,4 +51,4 @@ Web release → authenticated E2E → Drive E2E → Web/Mobile parity → device
 2026-10-08 — live Supabase migration head, bootstrap numbering intent, storage precedence/configuration, Korean 4–6 production build, and documentation-trigger evidence were re-audited.
 
 ## 13. NEXT ACTION
-Finish the current production deployment build verification, then perform Google Drive OAuth callback/E2E verification and the remaining authenticated/device release gates.
+Verify the Google Cloud production callback registration, then perform Drive connect/callback E2E and the remaining authenticated/device release gates.
