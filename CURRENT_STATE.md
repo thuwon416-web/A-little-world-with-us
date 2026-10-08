@@ -86,3 +86,9 @@ Owner-side manual verification remains last.
 - Web Vitest now includes API routes in coverage; Drive OAuth start/callback plus Drive status/upload/file/delete/disconnect route tests are present, covering auth, authorization, CSRF, rate limiting, and upload rollback.
 - check-missed-checkin has push notification delivery, while emergency-contact email delivery remains provider-dependent. No fake email delivery is claimed; provider/API key wiring is the next code-side integration once the provider credentials are supplied.
 - No FIXME/HACK markers were found in the searched repository scope.
+
+
+## Close-out ledger
+- Phase 7–9 remain parallel code-side tracks.
+- Phase 10 manual verification is consolidated into `docs/FINAL_VERIFICATION.md` and remains last.
+- Phases 11–15 are pre-staged in `docs/RELEASE_CLOSEOUT.md` for evidence-driven fixes, release freeze, monitoring, product evolution, and long-term hardening.
