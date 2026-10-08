@@ -422,10 +422,17 @@ export default function ChatScreen() {
     if (insertError || !message)
       throw new Error(insertError?.message || 'Unable to create media message.')
     try {
-      const { path, mimeType } = await uploadChatMedia(user.id, coupleId, message.id, attachment)
+      const { path, mimeType, storageProvider, storageFileId, storagePath } = await uploadChatMedia(user.id, coupleId, message.id, attachment)
       const { error: updateError } = await supabase
         .from('messages')
-        .update({ media_url: path, media_mime_type: mimeType })
+        .update({
+          media_url: path,
+          media_mime_type: mimeType,
+          media_storage_provider: storageProvider,
+          media_storage_file_id: storageFileId,
+          media_storage_path: storagePath,
+          media_size_bytes: attachment.size ?? null,
+        })
         .eq('id', message.id)
       if (updateError) throw new Error(updateError.message)
       await refresh()
