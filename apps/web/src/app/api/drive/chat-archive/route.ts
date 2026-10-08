@@ -110,6 +110,7 @@ export async function POST(request: Request) {
       .from('chat_archive_days')
       .upsert({
         couple_id: coupleId,
+        owner_id: user.id,
         archive_date: archiveDate,
         drive_file_id: driveFile.id,
         drive_folder_id: monthFolder.id,
