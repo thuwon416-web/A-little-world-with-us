@@ -17,6 +17,7 @@ create index if not exists memories_drive_folder_id_idx
 create table if not exists public.chat_archive_days (
   id uuid primary key default gen_random_uuid(),
   couple_id uuid not null references public.couples(id) on delete cascade,
+  owner_id uuid not null references public.profiles(id) on delete cascade,
   archive_date date not null,
   drive_file_id text,
   drive_folder_id text,
