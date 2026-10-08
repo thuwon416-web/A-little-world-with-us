@@ -391,12 +391,12 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: memory.user_id as string, canDelete: memory.user_id === userId }
+    return { ownerId: memory.user_id as string, canDelete: memory.user_id === userId, recordType: 'memory' as const, recordId: memory.id }
   }
 
   const { data: message, error: messageError } = await client
     .from('messages')
-    .select('couple_id,sender_id')
+    .select('id,couple_id,sender_id')
     .eq('media_storage_file_id', fileId)
     .maybeSingle()
   if (messageError) throw messageError
@@ -410,12 +410,12 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: message.sender_id as string, canDelete: message.sender_id === userId }
+    return { ownerId: message.sender_id as string, canDelete: message.sender_id === userId, recordType: 'message' as const, recordId: message.id }
   }
 
   const { data: archive, error: archiveError } = await client
     .from('chat_archive_days')
-    .select('couple_id,owner_id')
+    .select('id,couple_id,owner_id')
     .eq('drive_file_id', fileId)
     .maybeSingle()
   if (archiveError) throw archiveError
@@ -429,7 +429,7 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: archive.owner_id as string, canDelete: false }
+    return { ownerId: archive.owner_id as string, canDelete: false, recordType: 'chat_archive' as const, recordId: archive.id }
   }
 
   return null
