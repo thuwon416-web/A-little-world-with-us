@@ -93,7 +93,7 @@ create policy "chat_archive_days_members_update"
 create table if not exists public.drive_media_archive (
   id uuid primary key default gen_random_uuid(),
   drive_file_id text not null unique,
-  owner_id uuid not null references public.profiles(id) on delete cascade,
+  owner_id uuid references public.profiles(id) on delete set null,
   couple_id uuid not null references public.couples(id) on delete cascade,
   source_type text not null check (source_type in ('memory','message','chat_archive')),
   source_id uuid,
