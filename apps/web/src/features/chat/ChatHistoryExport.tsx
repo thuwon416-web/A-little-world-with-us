@@ -13,6 +13,27 @@ export default function ChatHistoryExport() {
   const [archiveMonth, setArchiveMonth] = useState(() => new Date().toISOString().slice(0, 7))
   const [archives, setArchives] = useState<Array<{ archive_date: string; drive_file_id: string | null; message_count: number }>>([])
 
+  useEffect(() => {
+    let active = true
+    void getCoupleStatus().then(async ({ couple }) => {
+      if (!couple) return
+      const [year, month] = archiveMonth.split('-').map(Number)
+      const start = new Date(Date.UTC(year, month - 1, 1)).toISOString().slice(0, 10)
+      const end = new Date(Date.UTC(year, month, 1)).toISOString().slice(0, 10)
+      const { data } = await supabase
+        .from('chat_archive_days')
+        .select('archive_date,drive_file_id,message_count')
+        .eq('couple_id', couple.id)
+        .gte('archive_date', start)
+        .lt('archive_date', end)
+        .order('archive_date', { ascending: false })
+      if (active) {
+        setArchives((data ?? []) as Array<{ archive_date: string; drive_file_id: string | null; message_count: number }>)
+      }
+    })
+    return () => { active = false }
+  }, [archiveMonth])
+
   const handleExport = async () => {
     setLoading(true)
 
