@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { getDriveAccessToken } from '@/lib/google-drive'
+import { getDriveConnectionInfo } from '@/lib/google-drive'
 
 export async function GET(request: Request) {
   const authorization = request?.headers.get('authorization')
@@ -11,8 +11,9 @@ export async function GET(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   try {
-    await getDriveAccessToken(user.id)
-    return NextResponse.json({ connected: true })
+    const info = await getDriveConnectionInfo(user.id)
+    if (!info) return NextResponse.json({ connected: false })
+    return NextResponse.json({ connected: true, scope: info.scope, rootFolderId: info.rootFolderId, requiresReauthorization: info.scope !== 'https://www.googleapis.com/auth/drive' })
   } catch {
     return NextResponse.json({ connected: false })
   }
