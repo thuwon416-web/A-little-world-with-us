@@ -415,6 +415,33 @@ export async function disconnectDrive(userId: string) {
   if (error) throw error
 }
 
+async function resolveDriveAccessUser(coupleId: string, ownerId: string) {
+  const client = adminClient()
+  const { data: ownerConnection, error: ownerError } = await client
+    .from('google_drive_connections')
+    .select('user_id')
+    .eq('user_id', ownerId)
+    .maybeSingle()
+  if (ownerError) throw ownerError
+  if (ownerConnection?.user_id) return ownerConnection.user_id as string
+
+  const { data: link, error: linkError } = await client
+    .from('couple_links')
+    .select('inviter_id,accepted_by')
+    .eq('couple_id', coupleId)
+    .eq('status', 'accepted')
+    .maybeSingle()
+  if (linkError) throw linkError
+  const candidates = [link?.inviter_id, link?.accepted_by].filter((id): id is string => typeof id === 'string' && id !== ownerId)
+  if (!candidates.length) return null
+  const { data: connections, error: connectionError } = await client
+    .from('google_drive_connections')
+    .select('user_id')
+    .in('user_id', candidates)
+  if (connectionError) throw connectionError
+  return connections?.[0]?.user_id ? connections[0].user_id as string : null
+}
+
 export async function getDriveFileAccess(userId: string, fileId: string) {
   const client = adminClient()
 
@@ -434,7 +461,7 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: memory.user_id as string, canDelete: memory.user_id === userId, recordType: 'memory' as const, recordId: memory.id }
+    return { ownerId: memory.user_id as string, accessUserId: await resolveDriveAccessUser(memory.couple_id as string, memory.user_id as string), canDelete: memory.user_id === userId, recordType: 'memory' as const, recordId: memory.id }
   }
 
   const { data: message, error: messageError } = await client
@@ -453,7 +480,7 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: message.sender_id as string, canDelete: message.sender_id === userId, recordType: 'message' as const, recordId: message.id }
+    return { ownerId: message.sender_id as string, accessUserId: await resolveDriveAccessUser(message.couple_id as string, message.sender_id as string), canDelete: message.sender_id === userId, recordType: 'message' as const, recordId: message.id }
   }
 
   const { data: archive, error: archiveError } = await client
@@ -472,7 +499,7 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: archive.owner_id as string, canDelete: false, recordType: 'chat_archive' as const, recordId: archive.id }
+    return { ownerId: archive.owner_id as string, accessUserId: await resolveDriveAccessUser(archive.couple_id as string, archive.owner_id as string), canDelete: false, recordType: 'chat_archive' as const, recordId: archive.id }
   }
 
   return null
