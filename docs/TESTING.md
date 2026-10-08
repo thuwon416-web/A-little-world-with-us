@@ -10,9 +10,10 @@ Automated PASS is evidence for the tested revision only. Full authenticated cros
 
 ## Current close-out evidence
 - Korean 4–6 Web/Mobile structural parity: runtime-baseline advanced curriculum contains 12 advanced lessons on each platform, 4 each for Levels 4, 5, and 6. Human content QA is still pending.
-- Korean runtime production build: Vercel deployment `dpl_6CnQ1obMNiPZ2oweVqethGQix2bi` reached READY on 2026-10-08.
+- Korean runtime production build: Vercel deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi reached READY on 2026-10-08.
 - Period/fertility: cycle logic and parity tests exist, but no authenticated real-user scenario is available.
-- Memories: source inspection confirms Drive upload writes `drive_file_id` and retrieval reads it; no live memory row exists for E2E evidence.
+- Memories: source inspection confirms Drive upload writes drive_file_id and retrieval reads it; no live memory row exists for E2E evidence.
+- Mobile Jest: stale Sprint 2/Sprint 4 planning comments were removed; the current configuration uses an explicit conservative 5% global line baseline until the suite is expanded.
 
 ## Verification Trigger Table
 | Change trigger | Required evidence refresh |
