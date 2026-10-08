@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { getB2DownloadUrl, isB2Configured } from '@/lib/backblaze-b2'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function getAuthenticatedClient(request: Request) {
   const authorization = request.headers.get('authorization')
@@ -20,8 +21,13 @@ export async function POST(request: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   if (!isB2Configured()) return NextResponse.json({ error: 'Large-media storage is not configured.' }, { status: 503 })
 
+  const rateLimit = await checkRateLimit(`b2-url:${user.id}`, 30, 60_000)
+  if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many media URL requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
+
   const body = (await request.json().catch(() => ({}))) as { coupleId?: string; fileName?: string }
-  if (!body.coupleId || !body.fileName) return NextResponse.json({ error: 'Invalid media request.' }, { status: 400 })
+  if (!body.coupleId || !body.fileName || body.fileName.length > 512 || body.fileName.includes('\\0')) {
+    return NextResponse.json({ error: 'Invalid media request.' }, { status: 400 })
+  }
 
   const { data: link } = await supabase
     .from('couple_links')
