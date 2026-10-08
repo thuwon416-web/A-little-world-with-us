@@ -204,7 +204,7 @@ export default function RealtimeChat() {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
-  type ArchiveMessage = Pick<Message, 'id' | 'sender_id' | 'content' | 'message_type' | 'created_at'> & Partial<Pick<Message, 'media_storage_provider' | 'media_storage_file_id' | 'media_mime_type' | 'deleted_at'>>
+  type ArchiveMessage = Pick<Message, 'id' | 'sender_id' | 'content' | 'message_type' | 'created_at'> & Partial<Pick<Message, 'media_url' | 'media_storage_provider' | 'media_storage_file_id' | 'media_mime_type' | 'deleted_at'>>
 
   const archiveChatDay = async (messagesToArchive: ArchiveMessage[], targetDate?: string) => {
     if (!coupleId || !messagesToArchive.length) return
