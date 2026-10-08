@@ -22,6 +22,10 @@ type MessageFields = {
   encrypted: boolean
   encryption_version: number | null
   media_mime_type: string | null
+  media_storage_provider: string | null
+  media_storage_path: string | null
+  media_storage_file_id: string | null
+  media_size_bytes: number | null
   edited_at: string | null
   deleted_at: string | null
   transcript: string | null
@@ -108,6 +112,10 @@ export async function pushPendingMessages() {
       encrypted: rawMessage._get('encrypted') || false,
       encryption_version: rawMessage._get('encryption_version') || null,
       media_mime_type: rawMessage._get('media_mime_type') || null,
+      media_storage_provider: rawMessage._get('media_storage_provider') || null,
+      media_storage_path: rawMessage._get('media_storage_path') || null,
+      media_storage_file_id: rawMessage._get('media_storage_file_id') || null,
+      media_size_bytes: rawMessage._get('media_size_bytes') || null,
       edited_at: rawMessage._get('edited_at') || null,
       deleted_at: rawMessage._get('deleted_at') || null,
       transcript: rawMessage._get('transcript') || null,
@@ -229,6 +237,10 @@ async function performSyncMessages() {
             fields.encrypted = remoteMessage.encrypted ?? false
             fields.encryption_version = remoteMessage.encryption_version ?? null
             fields.media_mime_type = remoteMessage.media_mime_type ?? null
+            fields.media_storage_provider = remoteMessage.media_storage_provider ?? null
+            fields.media_storage_path = remoteMessage.media_storage_path ?? null
+            fields.media_storage_file_id = remoteMessage.media_storage_file_id ?? null
+            fields.media_size_bytes = remoteMessage.media_size_bytes ?? null
             fields.edited_at = remoteMessage.edited_at ?? null
             fields.deleted_at = remoteMessage.deleted_at ?? null
             fields.transcript = remoteMessage.transcript ?? null
@@ -260,6 +272,10 @@ async function performSyncMessages() {
               fields.encryption_version =
                 remoteMessage.encryption_version ?? fields.encryption_version
               fields.media_mime_type = remoteMessage.media_mime_type ?? fields.media_mime_type
+              fields.media_storage_provider = remoteMessage.media_storage_provider ?? fields.media_storage_provider
+              fields.media_storage_path = remoteMessage.media_storage_path ?? fields.media_storage_path
+              fields.media_storage_file_id = remoteMessage.media_storage_file_id ?? fields.media_storage_file_id
+              fields.media_size_bytes = remoteMessage.media_size_bytes ?? fields.media_size_bytes
               fields.edited_at = remoteMessage.edited_at ?? fields.edited_at
               fields.deleted_at = remoteMessage.deleted_at ?? fields.deleted_at
               fields.transcript = remoteMessage.transcript ?? fields.transcript
