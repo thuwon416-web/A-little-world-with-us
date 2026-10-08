@@ -127,3 +127,7 @@ Only after release stability: curriculum grammar/vocabulary sequencing, Korea Li
 - [ ] Send a chat image and confirm it is stored in the Drive Chat year/month folder.
 - [ ] Delete the chat message and confirm the Drive image remains.
 - [ ] Confirm a daily chat archive file is created/updated under `Chat/{year}/{month}/` and is indexed by `chat_archive_days`.
+
+- [ ] Delete a Drive-backed Memory from the app and confirm the original is moved to `Archive/Deleted Memories` and remains in Drive while the Memory disappears from the active app view.
+- [ ] Reconnect/use the partner Drive connection and confirm retained shared media remains readable; do not delete shared media during account-erasure verification.
+- [ ] Use the explicit permanent Drive-delete action on one test archive only and confirm the Drive object and archive index entry are removed.
