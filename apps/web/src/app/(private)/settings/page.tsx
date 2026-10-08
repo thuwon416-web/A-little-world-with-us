@@ -62,6 +62,7 @@ const settingCards = [
 export default function SettingsPage() {
   const [driveConnected, setDriveConnected] = useState(false)
   const [driveCanConnect, setDriveCanConnect] = useState(false)
+  const [driveRequiresReauthorization, setDriveRequiresReauthorization] = useState(false)
   const searchParams = useSearchParams()
   const driveResult = searchParams.get('drive')
   const [driveLoading, setDriveLoading] = useState(true)
@@ -69,8 +70,9 @@ export default function SettingsPage() {
   useEffect(() => {
     setDriveCanConnect(window.location.origin === 'https://a-little-world-with-us.vercel.app' || window.location.origin === 'http://localhost:3000')
     void fetch('/api/drive/status', { cache: 'no-store' }).then(async (response) => {
-      const body = await response.json() as { connected?: boolean }
+      const body = await response.json() as { connected?: boolean; requiresReauthorization?: boolean }
       setDriveConnected(Boolean(body.connected))
+      setDriveRequiresReauthorization(Boolean(body.requiresReauthorization))
     }).catch(() => setDriveConnected(false)).finally(() => setDriveLoading(false))
   }, [])
   const [activeSettingsModal, setActiveSettingsModal] = useState<'reminder' | 'pin' | null>(null)
