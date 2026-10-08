@@ -6,6 +6,8 @@ This file is the single evidence template for the final release sequence. It rec
 
 ## Phase 10 — Owner verification
 
+Repository-side Phase 8 hardening is complete; native/device checks below remain evidence gates because they require a current native build and runtime observation.
+
 ### Google Drive / Web
 - [ ] Google Cloud OAuth client contains production callback:
   - `https://a-little-world-with-us.vercel.app/api/drive/callback`
