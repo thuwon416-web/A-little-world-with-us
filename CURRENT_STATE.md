@@ -92,3 +92,10 @@ Owner-side manual verification remains last.
 - Phase 7–9 remain parallel code-side tracks.
 - Phase 10 manual verification is consolidated into `docs/FINAL_VERIFICATION.md` and remains last.
 - Phases 11–15 are pre-staged in `docs/RELEASE_CLOSEOUT.md` for evidence-driven fixes, release freeze, monitoring, product evolution, and long-term hardening.
+
+
+## Drive-first archive track (2026-10-08)
+- Repository-side implementation now treats Google Drive as persistent original media/archive, with Supabase as metadata/index and local storage as cache/offline only.
+- Added organized Drive folders for app-created Memories and Chat archives, external memory-folder sync, Drive-backed Web/Mobile chat images, daily chat archive indexing, and safe message deletion that preserves Drive originals.
+- Added Supabase archive/index migration and updated release evidence rules.
+- Remaining gates are authenticated production E2E, OAuth reauthorization under the broader Drive scope, current-main native/device verification, and regression/CI evidence. These are not marked complete by source changes alone.
