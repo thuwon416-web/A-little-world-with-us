@@ -11,7 +11,7 @@ Core architecture/parity foundations; CI/security hardening; Korean curriculum a
 Acceptance: release-commit CI green; production READY; authenticated E2E; Drive connect/upload/retrieve; Web↔Mobile parity; device/offline verification; manual acceptance.
 
 ## Ledger B — complete plan register
-1. Runtime CI/build verification for Korean 4–6 commits — PENDING.
+1. Runtime CI/build verification for Korean 4–6 commits — VERIFIED (2026-10-08 production build).
 2. Real Google Drive OAuth flow — PENDING.
 3. Register production Drive callback in Google Cloud — PENDING / VERIFY.
 4. Verify Drive connect → consent → callback → Connected — PENDING.
@@ -59,10 +59,10 @@ Tailwind/Expo/Jest dependency modernization remains deferred where remediation r
 The detailed Korean curriculum lives in docs/features/korean-curriculum.md and is subordinate to this master roadmap.
 
 ## VERIFY / blocked-by-evidence
-- **Korean 4–6 current build:** VERIFY until the production deployment from `1c3f78fa8fe34c518cb21b5834fbafa055892b82` reaches READY.
 - **Google Cloud production Drive callback registration:** VERIFY because Google Cloud OAuth client configuration cannot be read through the available live tools.
 
 Resolved on 2026-10-08:
+- Korean 4–6 runtime build: VERIFIED by production deployment `dpl_6CnQ1obMNiPZ2oweVqethGQix2bi` reaching READY from runtime baseline `1c3f78fa8fe34c518cb21b5834fbafa055892b82`; GitHub compare to current main shows documentation-only changes afterward.
 - Live Supabase migration head: VERIFIED at `20261007121841 — restore_rls_helper_execute`.
 - Bootstrap numbering intent for 33/51/52: VERIFIED by distinct SQL content and matching live migration history.
 - Live storage precedence/configuration: VERIFIED at code/config level; live memory table currently has zero rows, so actual provider-use distribution is not asserted.
