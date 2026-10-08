@@ -13,7 +13,7 @@ Status: CODE-SIDE HARDENED
 - [ ] Final production OAuth/manual lifecycle evidence.
 
 ## Phase 8 — Mobile native / recovery
-Status: CODE-SIDE AUDIT CONTINUES
+Status: CODE-SIDE AUDIT CONTINUES — final evidence still required
 - [x] Native Drive PKCE/state cleanup path reviewed.
 - [x] SecureStore token lifecycle reviewed.
 - [x] Offline message queue/retry/conflict path reviewed.
@@ -33,8 +33,9 @@ Status: CODE-SIDE HARDENED
 
 ## Phase 10 — Single manual verification
 Status: PREPARED / DEFERRED
-Source of truth: `docs/FINAL_VERIFICATION.md`\nEvidence record: `docs/RELEASE_EVIDENCE.md`
-Run once after Phases 7–9 code-side work settles.
+Source of truth: `docs/FINAL_VERIFICATION.md`
+Evidence record: `docs/RELEASE_EVIDENCE.md`
+Run once after Phases 7–9 code-side work settles. No owner-side step is repeated.
 
 ## Phase 11 — Evidence-driven fixes
 Trigger: only defects recorded in Phase 10.
@@ -45,14 +46,15 @@ Process:
 4. Re-check only the affected evidence plus critical smoke.
 
 ## Phase 12 — Release Candidate freeze
-1. Freeze final commit SHA.
+1. Freeze final commit SHA only after Phase 10 evidence and any Phase 11 fixes.
 2. Confirm GitHub checks for that SHA.
 3. Confirm Android/iOS current-main build artifacts.
 4. Confirm Vercel production deployment points to the frozen SHA and is READY.
 5. Perform final critical-path smoke.
 6. Record release evidence.
 
-## Phase 13 — Post-release monitoring\nEvidence record: `docs/RELEASE_EVIDENCE.md`
+## Phase 13 — Post-release monitoring
+Evidence record: `docs/RELEASE_EVIDENCE.md`
 Monitor:
 - Drive OAuth/upload/download/delete failures
 - Vercel runtime errors
@@ -76,6 +78,9 @@ After release stability only:
 9. Wellness enhancements
 
 These are deliberately not release-blocking until the core product is stable.
+
+## Phase 14/15 preparation rule
+Product and hardening backlog is pre-staged now, but completion is recorded only against observed work/evidence. Do not mark these phases complete merely because the backlog exists.
 
 ## Phase 15 — Long-term hardening
 - Dependency/Dependabot remediation after current-main alert snapshot.
