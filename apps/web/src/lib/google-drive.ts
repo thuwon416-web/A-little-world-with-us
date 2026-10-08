@@ -508,7 +508,7 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
     .eq('drive_file_id', fileId)
     .maybeSingle()
   if (archivedError) throw archivedError
-  if (archived?.couple_id && archived.owner_id) {
+  if (archived?.couple_id) {
     const { data: link, error: linkError } = await client
       .from('couple_links')
       .select('id')
