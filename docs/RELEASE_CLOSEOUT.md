@@ -18,6 +18,9 @@ Status: CODE-SIDE AUDIT CONTINUES — final evidence still required
 - [x] SecureStore token lifecycle reviewed.
 - [x] Offline message queue/retry/conflict path reviewed.
 - [x] Notification scheduling/device registration path reviewed.
+- [x] Native Drive callback duplicate-delivery guard added.
+- [x] Mobile reminder writes now bind to the authenticated user.
+- [x] Native Drive list pagination is capped at 100 items.
 - [ ] Current-main Android build evidence.
 - [ ] Current-main iOS build evidence.
 - [ ] Device verification for location, notifications, WebRTC and offline recovery.
