@@ -53,6 +53,17 @@ export function getGoogleDriveRedirectUri() {
   return 'com.alittleworldwithus.app://oauth2redirect'
 }
 
+const MAX_DRIVE_PAGE_SIZE = 100
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024
+
+function validateClientId(clientId: string) {
+  if (!clientId.trim()) throw new Error('Google Drive OAuth client ID is not configured.')
+}
+
+function validateFileId(fileId: string) {
+  if (!/^[A-Za-z0-9_-]+$/.test(fileId)) throw new Error('Invalid Google Drive file ID.')
+}
+
 function randomUrlSafeValue() {
   return `${Crypto.randomUUID().replace(/-/g, '')}${Crypto.randomUUID().replace(/-/g, '')}`
 }
@@ -67,6 +78,7 @@ async function createPkceChallenge(verifier: string) {
 }
 
 export async function createGoogleDriveAuthorizationUrl(clientId: string) {
+  validateClientId(clientId)
   const codeVerifier = randomUrlSafeValue()
   const codeChallenge = await createPkceChallenge(codeVerifier)
   const state = randomUrlSafeValue()
@@ -201,7 +213,8 @@ async function driveRequest(url: string, clientId: string, init?: RequestInit) {
   })
 }
 
-export async function listGoogleDriveFiles(clientId: string, pageSize = 100) {
+export async function listGoogleDriveFiles(clientId: string, pageSize = MAX_DRIVE_PAGE_SIZE) {
+  validateClientId(clientId)
   const params = new URLSearchParams({
     q: 'trashed = false',
     pageSize: String(Math.min(Math.max(pageSize, 1), 1000)),
@@ -215,6 +228,9 @@ export async function listGoogleDriveFiles(clientId: string, pageSize = 100) {
 }
 
 export async function createGoogleDriveFolder(clientId: string, name: string) {
+  validateClientId(clientId)
+  const safeName = name.trim()
+  if (!safeName) throw new Error('Google Drive folder name is required.')
   const response = await driveRequest(DRIVE_FILES_ENDPOINT, clientId, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -234,6 +250,7 @@ export async function uploadGoogleDriveFile(
   const fileResponse = await fetch(uri)
   if (!fileResponse.ok) throw new Error('Unable to read the selected media file.')
   const blob = await fileResponse.blob()
+  if (blob.size > MAX_UPLOAD_BYTES) throw new Error('Selected media is larger than the 25 MB mobile Drive limit.')
   const metadata = { name, mimeType, ...(parentId ? { parents: [parentId] } : {}) }
   const boundary = `awlu_${Date.now().toString(36)}`
   const body = new Blob([
@@ -263,6 +280,8 @@ export async function downloadGoogleDriveFile(
   fileId: string,
   mimeType = 'application/octet-stream'
 ) {
+  validateClientId(clientId)
+  validateFileId(fileId)
   const response = await driveRequest(
     `${DRIVE_FILES_ENDPOINT}/${encodeURIComponent(fileId)}?alt=media`,
     clientId
@@ -297,6 +316,7 @@ export async function getSharedDriveStatus() {
 }
 
 export async function deleteSharedDriveFile(fileId: string) {
+  validateFileId(fileId)
   const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
   if (!webUrl) throw new Error('The shared web service URL is not configured.')
   const { data: { session } } = await supabase.auth.getSession()
