@@ -502,6 +502,31 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
     return { ownerId: archive.owner_id as string, accessUserId: await resolveDriveAccessUser(archive.couple_id as string, archive.owner_id as string), canDelete: false, recordType: 'chat_archive' as const, recordId: archive.id }
   }
 
+  const { data: archived, error: archivedError } = await client
+    .from('drive_media_archive')
+    .select('id,couple_id,owner_id')
+    .eq('drive_file_id', fileId)
+    .maybeSingle()
+  if (archivedError) throw archivedError
+  if (archived?.couple_id && archived.owner_id) {
+    const { data: link, error: linkError } = await client
+      .from('couple_links')
+      .select('id')
+      .eq('couple_id', archived.couple_id)
+      .eq('status', 'accepted')
+      .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
+      .maybeSingle()
+    if (linkError) throw linkError
+    if (!link) return null
+    return {
+      ownerId: archived.owner_id as string,
+      accessUserId: await resolveDriveAccessUser(archived.couple_id as string, archived.owner_id as string),
+      canDelete: archived.owner_id === userId,
+      recordType: 'archived_media' as const,
+      recordId: archived.id,
+    }
+  }
+
   return null
 }
 
