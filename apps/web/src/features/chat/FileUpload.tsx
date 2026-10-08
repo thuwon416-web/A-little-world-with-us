@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
 import { encryptAndUpload, encryptMedia } from '@/lib/mediaEncryption'
 
 interface FileUploadProps {
-  onFileUpload: (fileData: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string; storageProvider?: 'supabase' | 'backblaze_b2'; storageFileId?: string }) => void
+  onFileUpload: (fileData: { url: string; type: string; name: string; size: number; path?: string; mimeType?: string; storageProvider?: 'supabase' | 'backblaze_b2' | 'google_drive'; storageFileId?: string }) => void
   onClose: () => void
   coupleId: string
 }
@@ -108,7 +108,34 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
       const fileName = `1791192980778_${crypto.randomUUID()}.${fileExt}`
       const filePath = `${user.id}/${fileName}`
 
-      if (selectedFile.size <= MAX_FILE_SIZE) {
+      const DRIVE_IMAGE_LIMIT = 25 * 1024 * 1024
+      if (selectedFile.type.startsWith('image/') && selectedFile.size <= DRIVE_IMAGE_LIMIT) {
+        const form = new FormData()
+        form.append('file', selectedFile)
+        form.append('coupleId', coupleId)
+        const driveResponse = await fetch('/api/drive/chat-upload', { method: 'POST', body: form })
+        const driveBody = (await driveResponse.json().catch(() => ({}))) as {
+          file?: { id?: string; mimeType?: string }
+          storageProvider?: 'google_drive'
+          storageFileId?: string
+          storagePath?: string
+          url?: string
+          error?: string
+        }
+        if (!driveResponse.ok || !driveBody.file?.id || !driveBody.storageFileId) {
+          throw new Error(driveBody.error || 'Google Drive chat image upload failed.')
+        }
+        onFileUpload({
+          url: driveBody.url || '/api/drive/file?fileId=' + encodeURIComponent(driveBody.file.id) + '&download=1',
+          type: selectedFile.type,
+          name: selectedFile.name,
+          size: selectedFile.size,
+          path: driveBody.storagePath,
+          mimeType: driveBody.file.mimeType || selectedFile.type,
+          storageProvider: 'google_drive',
+          storageFileId: driveBody.storageFileId,
+        })
+      } else if (selectedFile.size <= 50 * 1024 * 1024) {
         const { path: storedPath, mimeType } = await encryptAndUpload(
           selectedFile,
           coupleId,
