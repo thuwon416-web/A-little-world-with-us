@@ -44,6 +44,9 @@ export async function POST(request: Request) {
         drive_file_id: null,
       }).eq('id', access.recordId)
       if (error) throw error
+    } else if (access.recordType === 'archived_media') {
+      const { error } = await supabase.from('drive_media_archive').delete().eq('id', access.recordId).eq('owner_id', user.id)
+      if (error) throw error
     }
     return NextResponse.json({ deleted: true, recordType: access.recordType })
   } catch (error) {
