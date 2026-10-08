@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { deleteDriveFile, uploadDriveFile } from '@/lib/google-drive'
+import { deleteDriveFile, deleteDriveFolder, getOrCreateDriveFolder, getOrCreateDriveRootFolder, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { MAX_MEMORY_IMAGE_SIZE } from '@/lib/upload-validation'
 import { validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
@@ -84,18 +84,29 @@ export async function POST(request: Request) {
   }
 
   let driveFile: Awaited<ReturnType<typeof uploadDriveFile>> | null = null
+  let driveMemoryFolderId: string | null = null
   try {
-    driveFile = await uploadDriveFile(user.id, file)
+    const root = await getOrCreateDriveRootFolder(user.id)
+    const couplesFolder = await getOrCreateDriveFolder(user.id, 'Couples', root.id)
+    const coupleFolder = await getOrCreateDriveFolder(user.id, coupleId, couplesFolder.id)
+    const memoriesFolder = await getOrCreateDriveFolder(user.id, 'Memories', coupleFolder.id)
+    const yearFolder = await getOrCreateDriveFolder(user.id, date.slice(0, 4), memoriesFolder.id)
+    driveMemoryFolderId = (await getOrCreateDriveFolder(user.id, crypto.randomUUID(), yearFolder.id)).id
 
+    driveFile = await uploadDriveFile(user.id, file, driveMemoryFolderId)
+
+    const memoryId = crypto.randomUUID()
     const { data: memory, error: memoryError } = await supabase
       .from('memories')
       .insert({
+        id: memoryId,
         user_id: user.id,
         couple_id: coupleId,
         image_url: null,
         storage_path: null,
         storage_provider: 'google_drive',
         drive_file_id: driveFile.id,
+        drive_folder_id: driveMemoryFolderId,
         mime_type: driveFile.mimeType || file.type || 'application/octet-stream',
         title,
         caption,
@@ -110,12 +121,14 @@ export async function POST(request: Request) {
 
     if (memoryError) {
       await deleteDriveFile(user.id, driveFile.id).catch(() => undefined)
+      await deleteDriveFolder(user.id, driveMemoryFolderId).catch(() => undefined)
       return NextResponse.json({ error: 'Memory metadata could not be saved.' }, { status: 400 })
     }
 
     return NextResponse.json({ file: driveFile, memory })
   } catch {
     if (driveFile) await deleteDriveFile(user.id, driveFile.id).catch(() => undefined)
+    if (driveMemoryFolderId) await deleteDriveFolder(user.id, driveMemoryFolderId).catch(() => undefined)
     return NextResponse.json(
       { error: 'Google Drive memory upload failed.' },
       { status: 502 }
