@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { deleteDriveFile } from '@/lib/google-drive'
+import { getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, moveDriveFileToFolder } from '@/lib/google-drive'
 import { deleteCloudinaryAsset } from '@/lib/cloudinary'
 import { isSameOriginRequest } from '@/lib/csrf'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -44,7 +44,20 @@ export async function POST(request: Request) {
 
   try {
     if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
-      await deleteDriveFile(user.id, memory.drive_file_id)
+      const coupleFolder = await getOrCreateDriveCoupleFolder(user.id, memory.couple_id)
+      const archiveFolder = await getOrCreateDriveFolder(user.id, 'Archive', coupleFolder.id)
+      const deletedMemoriesFolder = await getOrCreateDriveFolder(user.id, 'Deleted Memories', archiveFolder.id)
+      await moveDriveFileToFolder(user.id, memory.drive_file_id, deletedMemoriesFolder.id)
+      const { error: archiveError } = await supabase.from('drive_media_archive').insert({
+        drive_file_id: memory.drive_file_id,
+        owner_id: user.id,
+        couple_id: memory.couple_id,
+        source_type: 'memory',
+        source_id: memory.id,
+        original_folder_id: null,
+        archive_folder_id: deletedMemoriesFolder.id,
+      })
+      if (archiveError) throw archiveError
     } else if (memory.storage_provider === 'cloudinary' && memory.cloudinary_asset_id) {
       await deleteCloudinaryAsset(memory.cloudinary_asset_id)
     } else if (memory.storage_provider === 'supabase' && memory.storage_path) {
