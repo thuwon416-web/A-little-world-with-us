@@ -35,7 +35,7 @@ A Little World With Us/
                     └── chat-image files
 ```
 
-The Drive root ID is stored on the user's `google_drive_connections.root_folder_id`. Couple folders are shared with the partner's profile email when app-created content is first stored, so the partner can retain access through their own Drive connection.
+The Drive root ID is stored on the user's `google_drive_connections.root_folder_id`. Couple folders are shared with the partner's profile email when app-created content is first stored, so the partner can retain access through their own Drive connection. Normal memory deletion moves the Drive original to `Archive/Deleted Memories` and records it in `drive_media_archive`; sync skips the Archive branch so the deleted memory is not resurrected.
 
 ## External Drive memory import
 
@@ -103,6 +103,6 @@ A follow-up migration adds `chat_archive_days.owner_id` for authenticated Drive 
 2. Never delete a Drive original as a side effect of normal chat deletion.
 3. Do not index Drive files outside the connected app root unless an explicit import flow is added.
 4. Keep Supabase IDs and ownership checks for every Drive retrieval.
-5. Shared couple media must survive account deletion. Erasure revokes only the deleting user's private Drive OAuth connection; Drive files are not deleted as a side effect. If the original owner connection is gone, reads may use the remaining partner's connected Drive account.
-6. Permanent Drive deletion is explicit and owner-only.
+5. Shared couple media must survive account deletion. Erasure revokes only the deleting user's private Drive OAuth connection; Drive files are not deleted as a side effect. Retained archive ownership can become ownerless while the remaining partner's connected Drive account provides access.
+6. Permanent Drive deletion is explicit; an owner or, after owner erasure, an accepted couple member can purge a retained archive file.
 5. Do not claim Drive upload/import/archive E2E is complete until authenticated production evidence exists.
