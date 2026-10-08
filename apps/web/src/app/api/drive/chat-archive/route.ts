@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { findDriveChildFile, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, listDriveChildren, updateDriveFileContent, uploadDriveFile } from '@/lib/google-drive'
+import { downloadDriveFile, findDriveChildFile, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, listDriveChildren, updateDriveFileContent, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
@@ -94,8 +94,22 @@ export async function POST(request: Request) {
           deleted_at: message.deleted_at ?? null,
         })),
     }
-    const bytes = new TextEncoder().encode(JSON.stringify(archive, null, 2))
     const existing = await findDriveChildFile(user.id, monthFolder.id, filename)
+    let mergedMessages = archive.messages
+    if (existing) {
+      try {
+        const existingResponse = await downloadDriveFile(user.id, existing.id)
+        const existingArchive = await existingResponse.json().catch(() => null) as { messages?: typeof archive.messages } | null
+        const byId = new Map<string, (typeof archive.messages)[number]>()
+        for (const message of existingArchive?.messages ?? []) byId.set(message.id, message)
+        for (const message of archive.messages) byId.set(message.id, message)
+        mergedMessages = [...byId.values()].sort((a, b) => a.created_at.localeCompare(b.created_at))
+      } catch (error) {
+        console.warn('[drive] existing chat archive could not be read; rebuilding from current payload:', error instanceof Error ? error.message : 'unknown error')
+      }
+    }
+    const mergedArchive = { ...archive, messages: mergedMessages }
+    const bytes = new TextEncoder().encode(JSON.stringify(mergedArchive, null, 2))
     const driveFile = existing
       ? await updateDriveFileContent(user.id, existing.id, bytes, 'application/json')
       : await uploadDriveFile(
@@ -112,12 +126,12 @@ export async function POST(request: Request) {
         archive_date: archiveDate,
         drive_file_id: driveFile.id,
         drive_folder_id: monthFolder.id,
-        message_count: archive.messages.length,
+        message_count: mergedMessages.length,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'couple_id,archive_date' })
     if (upsertError) throw upsertError
 
-    return NextResponse.json({ file: driveFile, messageCount: archive.messages.length })
+    return NextResponse.json({ file: driveFile, messageCount: mergedMessages.length })
   } catch (error) {
     console.error('[drive] chat archive failed:', error instanceof Error ? error.message : 'unknown error')
     return NextResponse.json({ error: 'Google Drive chat archive failed.' }, { status: 502 })
