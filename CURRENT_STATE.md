@@ -14,7 +14,7 @@ Phases 7–10 — Parallel final close-out; Phase 10 manual verification intenti
 PENDING RELEASE VERIFICATION.
 
 ## 4. COMPLETED
-Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening; native Drive validation/upload-limit hardening; deeper Drive route security/rollback tests; Drive token-refresh/provider-error hardening; memory-delete CSRF/rate-limit hardening; consolidated Phase 10 verification pack.
+Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening; native Drive validation/upload-limit hardening; deeper Drive route security/rollback tests; Drive token-refresh/provider-error hardening; memory-delete CSRF/rate-limit hardening; native Drive callback deduplication; authenticated-user binding for mobile reminders; native Drive page-size ceiling; consolidated Phase 10 verification pack.
 
 ## 5. VERIFIED
 - Live Supabase migration head: 20261007121841 — restore_rls_helper_execute, checked directly on 2026-10-08.
