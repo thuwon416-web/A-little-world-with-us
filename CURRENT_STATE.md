@@ -14,7 +14,7 @@ Phase 6 — Final Production Audit + User Verification.
 PENDING RELEASE VERIFICATION.
 
 ## 4. COMPLETED
-Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; initial Web Drive API route coverage.
+Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening.
 
 ## 5. VERIFIED
 - Live Supabase migration head: 20261007121841 — restore_rls_helper_execute, checked directly on 2026-10-08.
@@ -71,7 +71,7 @@ Do not stop repository-side preparation while waiting for a manual gate. Continu
 | Period/fertility logic/UI change | Controlled/authenticated scenario with observed result | Do not infer real-user correctness from unit tests alone |
 
 ## 13. LAST VERIFIED
-2026-10-08 — Supabase head, bootstrap numbering, storage precedence/configuration, Korean runtime build, Korean structural parity, and current release blockers re-audited. Mobile coverage configuration was cleaned afterward.
+2026-10-08 — Supabase head, bootstrap numbering, storage precedence/configuration, Korean runtime build, Korean structural parity, current release blockers, Drive API coverage, and Drive request-rate hardening re-audited. Automated workflow execution for the newest commits was not yet exposed by the GitHub connector.
 
 ## 14. NEXT CODE-SIDE WORK
 Continue the prepared close-out phases in parallel:
@@ -82,6 +82,6 @@ Continue the prepared close-out phases in parallel:
 Owner-side manual verification remains last.
 
 ## 15. NON-RELEASE TECHNICAL BACKLOG FOUND IN FINAL AUDIT
-- Web Vitest now includes API routes in coverage; Drive OAuth start/callback route tests are present. Higher-risk Drive/storage routes remain the next coverage target.
+- Web Vitest now includes API routes in coverage; Drive OAuth start/callback route tests are present, and Drive file access/delete endpoints now have request-rate limits.
 - check-missed-checkin has push notification delivery, while emergency-contact email delivery remains provider-dependent. No fake email delivery is claimed; provider/API key wiring is the next code-side integration once the provider credentials are supplied.
 - No FIXME/HACK markers were found in the searched repository scope.
