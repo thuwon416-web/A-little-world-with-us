@@ -20,7 +20,7 @@ Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI featur
 - Live Supabase migration history was checked directly on 2026-10-08. Live head is `20261007121841 — restore_rls_helper_execute`.
 - Bootstrap numbering intent was reconciled on 2026-10-08. The repository's 33/51/52 prefixes represent distinct SQL changes; duplicate prefixes are not evidence of a collision by themselves.
 - Storage precedence/configuration was reconciled on 2026-10-08. Web shared-memory upload is Drive-first when the authenticated Drive connection is active; otherwise the media API uses Cloudinary; if Cloudinary is unavailable the page falls back to encrypted Supabase Storage. Live Vercel environment configuration contains the required Drive, Cloudinary, and B2 variable entries for production/preview/development. Current live `memories` table has zero rows, so no provider-usage distribution can be claimed.
-- Current repository head is `67d9bc8bdf39b124c4eb71534973537e64f849e4`. The runtime-bearing parent `1c3f78fa8fe34c518cb21b5834fbafa055892b82` was deployed explicitly on 2026-10-08 as `dpl_6CnQ1obMNiPZ2oweVqethGQix2bi`; the 7 commits from that runtime head to current main modify documentation only. The deployment is still BUILDING.
+- Runtime verification baseline `1c3f78fa8fe34c518cb21b5834fbafa055892b82` was deployed explicitly on 2026-10-08 as `dpl_6CnQ1obMNiPZ2oweVqethGQix2bi` and reached READY. Current main is documentation-only ahead of that runtime baseline; GitHub compare confirms the intervening commits changed only canonical documentation files.
 
 ## 6. VERIFY / BLOCKED-BY-EVIDENCE
 1. **Korean 4–6 runtime CI/build verification — VERIFY.** The latest earlier Vercel build for commit `74882b37e931c3d5b2879f0f9cf3b03fd4568584` failed at `apps/web/src/data/korean-advanced.ts:19` with `Expression expected`. The current main revision contains the syntax correction (the duplicate closing bracket is gone), but the fresh production deployment from current main is still BUILDING, so a successful current build is not yet evidenced.
@@ -30,7 +30,6 @@ Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI featur
 Production Drive E2E, authenticated Supabase E2E, native/device/store gates, Web↔Mobile parity, real-device offline/media recovery, Memories/media retrieval, period/fertility scenarios, Korean content QA, and remaining release acceptance.
 
 ## 8. BLOCKED
-- Korean 4–6: current production deployment build is still in progress; prior failed build evidence is superseded only after the new deployment reaches READY.
 - Google Drive callback registration: Google Cloud Console state is not exposed through the available tools.
 
 ## 9. DEFERRED
@@ -49,7 +48,7 @@ Web release → authenticated E2E → Drive E2E → Web/Mobile parity → device
 | Korean 4–6 code/build changes | Exact commit + Vercel build logs | Require a current successful build before VERIFIED |
 
 ## 12. LAST VERIFIED
-2026-10-08 — live Supabase migration head, bootstrap numbering intent, storage precedence/configuration, runtime build target, and documentation-trigger evidence were re-audited.
+2026-10-08 — live Supabase migration head, bootstrap numbering intent, storage precedence/configuration, Korean 4–6 production build, and documentation-trigger evidence were re-audited.
 
 ## 13. NEXT ACTION
 Finish the current production deployment build verification, then perform Google Drive OAuth callback/E2E verification and the remaining authenticated/device release gates.
