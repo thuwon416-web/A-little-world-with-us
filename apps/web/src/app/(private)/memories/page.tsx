@@ -105,6 +105,8 @@ function MemoriesPageContent() {
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE)
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
+  const [isDriveSyncing, setIsDriveSyncing] = useState(false)
+  const [driveSyncSummary, setDriveSyncSummary] = useState('')
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadSummary, setUploadSummary] = useState('')
   const [error, setError] = useState('')
@@ -234,6 +236,36 @@ function MemoriesPageContent() {
   useEffect(() => {
     loadMemories()
   }, [])
+
+  useEffect(() => {
+    if (!coupleLinkId) return
+    let cancelled = false
+    setIsDriveSyncing(true)
+    void fetch('/api/drive/sync-memories', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coupleId: coupleLinkId }),
+    })
+      .then(async (response) => {
+        const body = (await response.json().catch(() => ({}))) as { imported?: number; updated?: number; error?: string }
+        if (!response.ok) throw new Error(body.error || 'Drive memory sync failed.')
+        if (!cancelled) {
+          setDriveSyncSummary(
+            body.imported || body.updated
+              ? `Drive synced: ${body.imported ?? 0} new, ${body.updated ?? 0} updated.`
+              : 'Drive is already in sync.'
+          )
+          await loadMemories()
+        }
+      })
+      .catch((syncError) => {
+        if (!cancelled) setDriveSyncSummary(syncError instanceof Error ? syncError.message : 'Drive memory sync failed.')
+      })
+      .finally(() => {
+        if (!cancelled) setIsDriveSyncing(false)
+      })
+    return () => { cancelled = true }
+  }, [coupleLinkId])
 
   useEffect(() => {
     if (!coupleLinkId) return
@@ -560,9 +592,37 @@ function MemoriesPageContent() {
       </section>
 
       <section aria-labelledby="add-memory-heading" className="space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Add to our memories</p>
-          <h2 id="add-memory-heading" className="mt-1 text-2xl font-serif text-text-1">Save another moment</h2>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Add to our memories</p>
+            <h2 id="add-memory-heading" className="mt-1 text-2xl font-serif text-text-1">Save another moment</h2>
+            {driveSyncSummary ? <p className="mt-1 text-xs text-text-2">{driveSyncSummary}</p> : null}
+          </div>
+          <button
+            type="button"
+            disabled={isDriveSyncing || !coupleLinkId}
+            onClick={() => {
+              if (!coupleLinkId) return
+              setIsDriveSyncing(true)
+              setDriveSyncSummary('')
+              void fetch('/api/drive/sync-memories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ coupleId: coupleLinkId }),
+              })
+                .then(async (response) => {
+                  const body = (await response.json().catch(() => ({}))) as { imported?: number; updated?: number; error?: string }
+                  if (!response.ok) throw new Error(body.error || 'Drive memory sync failed.')
+                  setDriveSyncSummary(`Drive synced: ${body.imported ?? 0} new, ${body.updated ?? 0} updated.`)
+                  await loadMemories()
+                })
+                .catch((syncError) => setDriveSyncSummary(syncError instanceof Error ? syncError.message : 'Drive memory sync failed.'))
+                .finally(() => setIsDriveSyncing(false))
+            }}
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 disabled:opacity-50"
+          >
+            {isDriveSyncing ? 'Syncing Drive…' : 'Sync Drive memories'}
+          </button>
         </div>
       <MemoryUploadPanel
         caption={caption}
