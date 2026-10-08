@@ -20,7 +20,9 @@ export async function POST(request: Request) {
     const access = await getDriveFileAccess(user.id, fileId)
     if (!access) return NextResponse.json({ error: 'File not found.' }, { status: 404 })
     if (!access.canDelete) return NextResponse.json({ error: 'Only the original media owner can permanently delete this Drive file.' }, { status: 403 })
-    await deleteDriveFile(access.ownerId, fileId)
+    const driveActor = access.recordType === 'archived_media' ? access.accessUserId : access.ownerId
+    if (!driveActor) return NextResponse.json({ error: 'No connected Drive account can access this file.' }, { status: 409 })
+    await deleteDriveFile(driveActor, fileId)
     if (access.recordType === 'memory') {
       const { error } = await supabase.from('memories').update({
         drive_file_id: null,
