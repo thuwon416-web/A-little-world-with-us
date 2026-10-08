@@ -17,7 +17,7 @@ create index if not exists memories_drive_folder_id_idx
 create table if not exists public.chat_archive_days (
   id uuid primary key default gen_random_uuid(),
   couple_id uuid not null references public.couples(id) on delete cascade,
-  owner_id uuid not null references public.profiles(id) on delete cascade,
+  owner_id uuid references public.profiles(id) on delete set null,
   archive_date date not null,
   drive_file_id text,
   drive_folder_id text,
@@ -112,12 +112,13 @@ create policy "drive_media_archive_members_read"
   on public.drive_media_archive for select to authenticated
   using (
     owner_id = auth.uid()
-    or exists (
+    or (owner_id is null and exists (
       select 1 from public.couple_links cl
       where cl.couple_id = drive_media_archive.couple_id
         and cl.status = 'accepted'
         and (cl.inviter_id = auth.uid() or cl.accepted_by = auth.uid())
     )
+  )
   );
 
 drop policy if exists "drive_media_archive_owner_insert" on public.drive_media_archive;
@@ -136,4 +137,12 @@ create policy "drive_media_archive_owner_insert"
 drop policy if exists "drive_media_archive_owner_delete" on public.drive_media_archive;
 create policy "drive_media_archive_owner_delete"
   on public.drive_media_archive for delete to authenticated
-  using (owner_id = auth.uid());
+  using (
+    owner_id = auth.uid()
+    or (owner_id is null and exists (
+      select 1 from public.couple_links cl
+      where cl.couple_id = drive_media_archive.couple_id
+        and cl.status = 'accepted'
+        and (cl.inviter_id = auth.uid() or cl.accepted_by = auth.uid())
+    ))
+  );
