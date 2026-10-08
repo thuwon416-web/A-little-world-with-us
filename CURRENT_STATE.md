@@ -99,3 +99,9 @@ Owner-side manual verification remains last.
 - Added organized Drive folders for app-created Memories and Chat archives, external memory-folder sync, Drive-backed Web/Mobile chat images, daily chat archive indexing, and safe message deletion that preserves Drive originals.
 - Added Supabase archive/index migration and updated release evidence rules.
 - Remaining gates are authenticated production E2E, OAuth reauthorization under the broader Drive scope, current-main native/device verification, and regression/CI evidence. These are not marked complete by source changes alone.
+
+
+## 2026-10-08 Drive-first implementation checkpoint
+- Latest repository-side Drive-first archive work is on `main`; the Supabase live project now has the Drive archive/index migrations applied and verified.
+- A Vercel build from commit `8c42ae5` exposed four TypeScript errors in the new Drive archive work; those source errors were fixed on subsequent commits. No successful Vercel rebuild of the corrected latest SHA is available yet because the Vercel Hobby deployment API hit its daily deployment limit. Do not treat the latest code as production-verified until a new build succeeds.
+- The corrected architecture includes Drive-first Memory uploads, organized couple/year folders, external Drive-memory sync, Drive-backed chat images, daily chat archives, explicit permanent Drive deletion, partner Drive-folder sharing, and partner-connection fallback for reads after owner connection loss.
