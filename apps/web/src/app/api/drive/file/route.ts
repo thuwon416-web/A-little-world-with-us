@@ -22,10 +22,10 @@ export async function GET(request: Request) {
     const access = await getDriveFileAccess(user.id, fileId)
     if (!access) return NextResponse.json({ error: 'File not found.' }, { status: 404 })
     if (new URL(request.url).searchParams.get('download') === '1') {
-      const response = await downloadDriveFile(access.ownerId, fileId)
+      const response = await downloadDriveFile(access.accessUserId ?? access.ownerId, fileId)
       return new NextResponse(response.body, { status: 200, headers: { 'Content-Type': response.headers.get('content-type') ?? 'application/octet-stream', 'Cache-Control': 'private, max-age=300' } })
     }
-    return NextResponse.json({ file: await listDriveFile(access.ownerId, fileId) })
+    return NextResponse.json({ file: await listDriveFile(access.accessUserId ?? access.ownerId, fileId) })
   }
   catch (error) { console.error('[drive] file lookup failed:', error instanceof Error ? error.message : 'unknown error'); return NextResponse.json({ error: 'Google Drive lookup failed.' }, { status: 502 }) }
 }
