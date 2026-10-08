@@ -55,6 +55,13 @@ Acceptance: production READY; authenticated E2E; Drive connect/upload/retrieve; 
 ## VERIFY / blocked-by-evidence
 - Google Cloud production Drive callback registration: **VERIFY**. Required URI `https://a-little-world-with-us.vercel.app/api/drive/callback`; external Google Cloud OAuth client state is not readable through available tools.
 
+## Non-release technical backlog discovered during final audit
+These items are not currently counted as release gates, but they are real repository follow-ups and should not be mistaken for completed work:
+- Mobile Jest coverage thresholds still carry an old Sprint 4/Sprint 2 TODO; either raise coverage thresholds after adding tests or replace the stale planning comment with a current target.
+- Web Vitest excludes API routes from coverage until route-level API coverage is added.
+- `check-missed-checkin` currently logs that it would email emergency contacts; the email-provider integration remains unimplemented. This should be resolved before claiming external emergency-email notification as a supported safety capability.
+- No other `FIXME`/HACK markers were found in the searched repository scope.
+
 ## Evidence notes
 - Korean 4–6 structural parity: Web and Mobile runtime-baseline advanced curriculum each contain 12 advanced lesson entries, 4 per Level 4–6. This does not close human content QA.
 - Android EAS history contains older FINISHED internal artifacts, but no current-main build evidence. iOS build history is empty.
