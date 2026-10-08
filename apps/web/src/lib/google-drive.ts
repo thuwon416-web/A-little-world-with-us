@@ -259,6 +259,24 @@ export async function uploadDriveFile(userId: string, file: File, folderId?: str
   }
   return data as { id: string; name: string; mimeType?: string; webViewLink?: string; webContentLink?: string }
 }
+export async function updateDriveFileContent(userId: string, fileId: string, content: Uint8Array, mimeType: string) {
+  const response = await driveFetch(userId, DRIVE_UPLOAD_API + '/' + encodeURIComponent(fileId) + '?uploadType=media', {
+    method: 'PATCH',
+    headers: { 'Content-Type': mimeType, 'Content-Length': String(content.byteLength) },
+    body: content,
+  })
+  const data = await response.json().catch(() => null)
+  if (!response.ok || typeof data?.id !== 'string') {
+    throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive file update failed.')
+  }
+  return data as { id: string; name: string; mimeType?: string; modifiedTime?: string }
+}
+
+export async function findDriveChildFile(userId: string, parentId: string, name: string) {
+  const children = await listDriveChildren(userId, parentId)
+  return children.files.find((file) => file.name === name && file.mimeType !== 'application/vnd.google-apps.folder') ?? null
+}
+
 export async function createDriveFolder(userId: string, name: string, parentId?: string) {
   const trimmedName = name.trim()
   if (!trimmedName || trimmedName.length > 120) throw new Error('Invalid Google Drive folder name.')
