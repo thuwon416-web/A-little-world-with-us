@@ -87,3 +87,53 @@ create policy "chat_archive_days_members_update"
         and (cl.inviter_id = auth.uid() or cl.accepted_by = auth.uid())
     )
   );
+
+-- Retained Drive originals for normal app deletion. The mapping prevents
+-- Drive sync from resurrecting deleted memories and enables explicit purge.
+create table if not exists public.drive_media_archive (
+  id uuid primary key default gen_random_uuid(),
+  drive_file_id text not null unique,
+  owner_id uuid not null references public.profiles(id) on delete cascade,
+  couple_id uuid not null references public.couples(id) on delete cascade,
+  source_type text not null check (source_type in ('memory','message','chat_archive')),
+  source_id uuid,
+  original_folder_id text,
+  archive_folder_id text,
+  archived_at timestamptz not null default now()
+);
+
+create index if not exists drive_media_archive_couple_idx
+  on public.drive_media_archive (couple_id, archived_at desc);
+
+alter table public.drive_media_archive enable row level security;
+
+drop policy if exists "drive_media_archive_members_read" on public.drive_media_archive;
+create policy "drive_media_archive_members_read"
+  on public.drive_media_archive for select to authenticated
+  using (
+    owner_id = auth.uid()
+    or exists (
+      select 1 from public.couple_links cl
+      where cl.couple_id = drive_media_archive.couple_id
+        and cl.status = 'accepted'
+        and (cl.inviter_id = auth.uid() or cl.accepted_by = auth.uid())
+    )
+  );
+
+drop policy if exists "drive_media_archive_owner_insert" on public.drive_media_archive;
+create policy "drive_media_archive_owner_insert"
+  on public.drive_media_archive for insert to authenticated
+  with check (
+    owner_id = auth.uid()
+    and exists (
+      select 1 from public.couple_links cl
+      where cl.couple_id = drive_media_archive.couple_id
+        and cl.status = 'accepted'
+        and (cl.inviter_id = auth.uid() or cl.accepted_by = auth.uid())
+    )
+  );
+
+drop policy if exists "drive_media_archive_owner_delete" on public.drive_media_archive;
+create policy "drive_media_archive_owner_delete"
+  on public.drive_media_archive for delete to authenticated
+  using (owner_id = auth.uid());
