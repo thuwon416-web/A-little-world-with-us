@@ -270,6 +270,49 @@ export async function uploadDriveFile(userId: string, file: File, folderId?: str
   }
   return data as { id: string; name: string; mimeType?: string; webViewLink?: string; webContentLink?: string }
 }
+export async function shareDriveFolderWithUser(userId: string, folderId: string, email: string) {
+  const normalizedEmail = email.trim().toLowerCase()
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalizedEmail)) return
+  const response = await driveFetch(
+    userId,
+    DRIVE_API + '/' + encodeURIComponent(folderId) + '/permissions?sendNotificationEmail=false',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'user', role: 'writer', emailAddress: normalizedEmail }),
+    },
+  )
+  if (!response.ok && response.status !== 409) {
+    const data = await response.json().catch(() => null)
+    throw new Error(typeof data?.error?.message === 'string' ? data.error.message : 'Google Drive folder sharing failed.')
+  }
+}
+
+export async function getOrCreateDriveCoupleFolder(userId: string, coupleId: string) {
+  const root = await getOrCreateDriveRootFolder(userId)
+  const couples = await getOrCreateDriveFolder(userId, 'Couples', root.id)
+  const coupleFolder = await getOrCreateDriveFolder(userId, coupleId, couples.id)
+  const { data: link, error: linkError } = await adminClient()
+    .from('couple_links')
+    .select('inviter_id,accepted_by')
+    .eq('couple_id', coupleId)
+    .eq('status', 'accepted')
+    .maybeSingle()
+  if (linkError) throw linkError
+  const partnerIds = [link?.inviter_id, link?.accepted_by].filter((id): id is string => typeof id === 'string' && id !== userId)
+  if (partnerIds.length) {
+    const { data: partners, error: partnerError } = await adminClient()
+      .from('profiles')
+      .select('id,email')
+      .in('id', partnerIds)
+    if (partnerError) throw partnerError
+    for (const partner of partners ?? []) {
+      if (typeof partner.email === 'string') await shareDriveFolderWithUser(userId, coupleFolder.id, partner.email)
+    }
+  }
+  return coupleFolder
+}
+
 export async function updateDriveFileContent(userId: string, fileId: string, content: Uint8Array, mimeType: string) {
   const response = await driveFetch(userId, DRIVE_UPLOAD_API + '/' + encodeURIComponent(fileId) + '?uploadType=media', {
     method: 'PATCH',
