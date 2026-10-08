@@ -114,7 +114,7 @@ These are repository follow-ups, not current release blockers:
 
 Phases 7–9 continue in parallel until their code-side gates are exhausted. Phase 10 remains a single owner/manual verification pass and is not performed incrementally. Phases 11–15 are pre-staged so defects, release freeze, monitoring, and post-release product work can continue without reopening the roadmap structure.
 
-Detailed ledger: `docs/RELEASE_CLOSEOUT.md`.
+Detailed ledger: `docs/RELEASE_CLOSEOUT.md`.\nEvidence template: `docs/RELEASE_EVIDENCE.md`.
 
 ## Evidence notes
 - Korean 4–6 structural parity: Web and Mobile runtime-baseline advanced curriculum each contain 12 advanced lesson entries, 4 per Level 4–6. This does not close human content QA.
