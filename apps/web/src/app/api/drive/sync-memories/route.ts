@@ -69,6 +69,7 @@ export async function POST(request: Request) {
       for (const file of children.files) {
         if (imageFiles.length >= MAX_FILES) break
         if (file.mimeType === DRIVE_FOLDER_MIME) {
+          if (file.name === 'Chat' || file.name === 'System') continue
           const nextGroup = file.name === 'Couples' || file.name === 'Memories' || /^\d{4}$/.test(file.name) ? groupName : file.name
           await walk(file.id, nextGroup, depth + 1)
         } else if (isImportableImage(file)) {
