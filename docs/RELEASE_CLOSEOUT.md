@@ -5,11 +5,11 @@ Updated: 2026-10-08
 This ledger keeps the close-out work continuous without pretending that owner/device evidence exists before it is collected.
 
 ## Phase 7 — Drive / Memory reliability
-Status: CODE-SIDE CONTINUE
+Status: CODE-SIDE HARDENED
 - [x] Drive status/upload/file/delete/disconnect route security tests.
 - [x] Auth, authorization, CSRF, rate-limit and upload rollback coverage.
 - [x] Native Drive client-ID/file-ID/upload-size validation.
-- [ ] Token-refresh and provider-error matrix coverage.
+- [x] Token-refresh, provider-401 retry, refresh persistence failure, and malformed token-response regression coverage.
 - [ ] Final production OAuth/manual lifecycle evidence.
 
 ## Phase 8 — Mobile native / recovery
@@ -23,10 +23,11 @@ Status: CODE-SIDE AUDIT CONTINUES
 - [ ] Device verification for location, notifications, WebRTC and offline recovery.
 
 ## Phase 9 — Highest-risk API security
-Status: CODE-SIDE CONTINUE
+Status: CODE-SIDE HARDENED
 - [x] Drive authenticated route coverage.
 - [x] PIN auth/CSRF/rate-limit coverage.
-- [ ] Complete highest-risk authenticated-route matrix.
+- [x] Highest-risk memory deletion route now has CSRF + rate-limit + ownership regression coverage.
+- [ ] Continue matrix across remaining authenticated data-mutating routes.
 - [ ] Provider-backed emergency-contact email integration only after provider credentials are supplied.
 - [ ] Final GitHub security/Dependabot snapshot.
 
