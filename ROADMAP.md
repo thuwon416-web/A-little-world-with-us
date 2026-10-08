@@ -125,3 +125,10 @@ Detailed ledger: `docs/RELEASE_CLOSEOUT.md`.\nEvidence template: `docs/RELEASE_E
 - Mobile Jest coverage config now has an explicit conservative baseline rather than stale Sprint 2/Sprint 4 TODO wording.
 - Drive file read/delete routes now have per-user request-rate limits; this is code-side hardening, not live abuse-test evidence.
 - Never infer live OAuth, device, or security-alert state from code/config alone.
+
+
+## Drive-first archive track (2026-10-08)
+- Repository-side implementation now treats Google Drive as persistent original media/archive, with Supabase as metadata/index and local storage as cache/offline only.
+- Added organized Drive folders for app-created Memories and Chat archives, external memory-folder sync, Drive-backed Web/Mobile chat images, daily chat archive indexing, and safe message deletion that preserves Drive originals.
+- Added Supabase archive/index migration and updated release evidence rules.
+- Remaining gates are authenticated production E2E, OAuth reauthorization under the broader Drive scope, current-main native/device verification, and regression/CI evidence. These are not marked complete by source changes alone.
