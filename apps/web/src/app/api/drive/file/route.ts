@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { downloadDriveFile, getDriveFileAccess, listDriveFile } from '@/lib/google-drive'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function GET(request: Request) {
   const authorization = request.headers.get('authorization')
@@ -15,6 +16,8 @@ export async function GET(request: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const fileId = new URL(request.url).searchParams.get('fileId')
   if (!fileId || !/^[A-Za-z0-9_-]+$/.test(fileId)) return NextResponse.json({ error: 'Invalid fileId.' }, { status: 400 })
+  const rateLimit = await checkRateLimit(`drive-file:${user.id}:${fileId}`, 30, 60_000)
+  if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many Drive file requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
   try {
     const access = await getDriveFileAccess(user.id, fileId)
     if (!access) return NextResponse.json({ error: 'File not found.' }, { status: 404 })
