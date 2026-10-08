@@ -234,7 +234,7 @@ export async function createGoogleDriveFolder(clientId: string, name: string) {
   const response = await driveRequest(DRIVE_FILES_ENDPOINT, clientId, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, mimeType: 'application/vnd.google-apps.folder' }),
+    body: JSON.stringify({ name: safeName, mimeType: 'application/vnd.google-apps.folder' }),
   })
   if (!response.ok) throw new Error(await readDriveError(response))
   return (await response.json()) as DriveFile
