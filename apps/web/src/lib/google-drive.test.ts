@@ -9,6 +9,7 @@ import {
   createOAuthState,
   exchangeCode,
   getDriveAccessToken,
+  listDriveFile,
   parseOAuthState,
 } from './google-drive'
 
@@ -60,6 +61,49 @@ describe('google-drive helpers', () => {
     await expect(getDriveAccessToken('user-1')).rejects.toThrow('Google Drive connection needs to be reconnected.')
   })
 
+
+
+  it('refreshes once and retries a Drive request after provider 401', async () => {
+    const key = Buffer.from(process.env.GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY!, 'hex')
+    const encryptToken = (value: string) => {
+      const iv = randomBytes(12)
+      const cipher = createCipheriv('aes-256-gcm', key, iv)
+      return {
+        ciphertext: Buffer.concat([cipher.update(value, 'utf8'), cipher.final(), cipher.getAuthTag()]).toString('base64'),
+        iv: iv.toString('base64'),
+      }
+    }
+    const access = encryptToken('expired-access')
+    const refresh = encryptToken('refresh-token')
+    const query = {
+      select: vi.fn(() => query),
+      eq: vi.fn(() => query),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          user_id: 'user-1',
+          access_token_enc: access.ciphertext,
+          access_token_iv: access.iv,
+          refresh_token_enc: refresh.ciphertext,
+          refresh_token_iv: refresh.iv,
+          expires_at: new Date(Date.now() + 5 * 60_000).toISOString(),
+        },
+        error: null,
+      }),
+      update: vi.fn(() => query),
+    }
+    createClient.mockReturnValue({ from: vi.fn(() => query) })
+
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ error: { message: 'Unauthorized' } }), { status: 401 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ access_token: 'fresh-access', expires_in: 3600 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ id: 'file-1', name: 'memory.jpg' }), { status: 200 }))
+
+    vi.stubGlobal('fetch', fetchMock)
+    await expect(listDriveFile('user-1', 'file-1')).resolves.toMatchObject({ id: 'file-1', name: 'memory.jpg' })
+    expect(fetchMock).toHaveBeenCalledTimes(3)
+    expect(query.update).toHaveBeenCalled()
+    expect(fetchMock.mock.calls[2][1]?.headers).toMatchObject({ Authorization: 'Bearer fresh-access' })
+  })
   it('does not accept a provider error as a successful refresh', async () => {
     const query = {
       select: vi.fn(() => query),
