@@ -46,6 +46,46 @@ export async function uploadChatMedia(
 ) {
   validateAttachment(attachment)
   const bucket = getBucketForMimeType(attachment.mimeType)
+
+  if (attachment.mimeType.toLowerCase().startsWith('image/')) {
+    const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (webUrl && sessionData.session?.access_token) {
+      const statusResponse = await fetch(webUrl + '/api/drive/status', {
+        headers: { Authorization: 'Bearer ' + sessionData.session.access_token },
+      })
+      const driveStatus = statusResponse.ok ? await statusResponse.json().catch(() => ({})) as { connected?: boolean } : { connected: false }
+      if (driveStatus.connected) {
+        const form = new FormData()
+        form.append('coupleId', coupleId)
+        form.append('file', { uri: attachment.uri, name: attachment.name, type: attachment.mimeType } as unknown as Blob)
+        const driveResponse = await fetch(webUrl + '/api/drive/chat-upload', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + sessionData.session.access_token },
+          body: form,
+        })
+        const driveBody = await driveResponse.json().catch(() => ({})) as {
+          storageProvider?: 'google_drive'
+          storageFileId?: string
+          storagePath?: string
+          url?: string
+          file?: { mimeType?: string }
+          error?: string
+        }
+        if (!driveResponse.ok || !driveBody.storageFileId) {
+          throw new Error(driveBody.error || 'Google Drive chat image upload failed.')
+        }
+        return {
+          path: driveBody.url ?? null,
+          mimeType: driveBody.file?.mimeType ?? attachment.mimeType,
+          storageProvider: 'google_drive' as const,
+          storageFileId: driveBody.storageFileId,
+          storagePath: driveBody.storagePath ?? null,
+        }
+      }
+    }
+  }
+
   const response = await fetch(attachment.uri)
   if (!response.ok) throw new Error('Unable to read the selected attachment.')
   const body = await response.arrayBuffer()
@@ -53,7 +93,6 @@ export async function uploadChatMedia(
     throw new Error('File too large. Files must be 5 MB or smaller.')
   }
   const path = `${userId}/${messageId}.${extensionFor(attachment.name, attachment.mimeType)}`
-
   // Encrypt before upload
   const encrypted = await encryptMedia(new Uint8Array(body), coupleId)
 
@@ -62,7 +101,7 @@ export async function uploadChatMedia(
     upsert: false,
   })
   if (error) throw new Error(error.message)
-  return { path, mimeType: attachment.mimeType }
+  return { path, mimeType: attachment.mimeType, storageProvider: 'supabase' as const, storageFileId: null, storagePath: path }
 }
 
 export async function getChatMediaUrl(bucket: ChatMediaBucket, path: string | null) {
