@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
   const { data: memory, error: memoryError } = await supabase
     .from('memories')
-    .select('id,user_id,couple_id,storage_provider,storage_path,image_url,drive_file_id,cloudinary_asset_id')
+    .select('id,user_id,couple_id,storage_provider,storage_path,image_url,drive_file_id,drive_folder_id,cloudinary_asset_id')
     .eq('id', body.memoryId)
     .maybeSingle()
 
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
         couple_id: memory.couple_id,
         source_type: 'memory',
         source_id: memory.id,
-        original_folder_id: null,
+        original_folder_id: memory.drive_folder_id ?? null,
         archive_folder_id: deletedMemoriesFolder.id,
       })
       if (archiveError) throw archiveError
