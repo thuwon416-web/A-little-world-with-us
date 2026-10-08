@@ -36,7 +36,7 @@ export async function POST(request: Request) {
   const supabase = await getAuthenticatedClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  const userId = userId
+  const userId = user.id
 
   const rateLimit = await checkRateLimit('drive-memory-sync:' + userId, 3, 60_000)
   if (!rateLimit.allowed) {
