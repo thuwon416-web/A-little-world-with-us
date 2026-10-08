@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { getOrCreateDriveFolder, getOrCreateDriveRootFolder, uploadDriveFile } from '@/lib/google-drive'
+import { getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { validateUploadContent } from '@/lib/upload-validation'
 
@@ -49,9 +49,7 @@ export async function POST(request: Request) {
   if (!validation.valid) return NextResponse.json({ error: validation.error ?? 'Invalid image upload.' }, { status: 400 })
 
   try {
-    const root = await getOrCreateDriveRootFolder(user.id)
-    const couples = await getOrCreateDriveFolder(user.id, 'Couples', root.id)
-    const coupleFolder = await getOrCreateDriveFolder(user.id, coupleId, couples.id)
+    const coupleFolder = await getOrCreateDriveCoupleFolder(user.id, coupleId)
     const chatFolder = await getOrCreateDriveFolder(user.id, 'Chat', coupleFolder.id)
     const now = new Date()
     const yearFolder = await getOrCreateDriveFolder(user.id, String(now.getUTCFullYear()), chatFolder.id)
