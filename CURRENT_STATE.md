@@ -210,3 +210,9 @@ Owner-side manual verification remains last.
 - Applied additive live Supabase migration `20261009073304 — restore_memory_location_and_journal_columns`; post-migration inspection confirms all four columns exist and the location/journal indexes exist. No rows were changed; the table contained 0 memory rows at verification time.
 - Added the idempotent equivalent to `backend/supabase/bootstrap/55_restore_memory_location_and_journal_columns.sql` and documented the live migration in `docs/DATABASE.md`.
 - Remaining: run authenticated Memory Map and journal UI checks once production can be deployed and real test memories are available. Vercel remains paused by owner request; this schema repair does not prove production UI is fixed.
+
+
+## 2026-10-09 uncertain memory-upload response hardening
+- Web Memories upload no longer automatically advances to Cloudinary or encrypted Supabase if a Drive/media upload POST throws a network error after dispatch. The server may have completed the upload despite a lost response; automatic fallback could create duplicate media/memory rows.
+- The UI now reports an interrupted/uncertain upload and tells the user to check Memories before retrying. This favors duplicate prevention over unsafe blind retries; provider HTTP 5xx responses still use the configured fallback path.
+- Source commit: `c62c4b09d0ca1069cefad7a679677105b713571a`. Automated checks for this source change are still pending; production behavior remains unverified while Vercel is paused by owner request.
