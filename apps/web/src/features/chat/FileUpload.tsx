@@ -112,15 +112,23 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
       const driveSupportedFile = selectedFile.type.startsWith('image/') || selectedFile.type === 'application/pdf'
       let driveConnected = false
       if (driveSupportedFile && selectedFile.size <= DRIVE_FILE_LIMIT) {
-        const statusResponse = await fetch('/api/drive/status')
-        const statusBody = (await statusResponse.json().catch(() => ({}))) as { connected?: boolean }
-        driveConnected = statusResponse.ok && statusBody.connected === true
+        try {
+          const statusResponse = await fetch('/api/drive/status')
+          const statusBody = (await statusResponse.json().catch(() => ({}))) as { connected?: boolean }
+          driveConnected = statusResponse.ok && statusBody.connected === true
+        } catch {
+          // A status lookup failure is safe to fall back from because no upload began.
+          driveConnected = false
+        }
       }
 
+      let uploadedToDrive = false
       if (driveConnected) {
         const form = new FormData()
         form.append('file', selectedFile)
         form.append('coupleId', coupleId)
+        // If the POST itself loses its response, its commit state is unknown; don't
+        // blindly duplicate the attachment in another provider.
         const driveResponse = await fetch('/api/drive/chat-upload', { method: 'POST', body: form })
         const driveBody = (await driveResponse.json().catch(() => ({}))) as {
           file?: { id?: string; mimeType?: string }
@@ -130,20 +138,24 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
           url?: string
           error?: string
         }
-        if (!driveResponse.ok || !driveBody.file?.id || !driveBody.storageFileId) {
+        if (driveResponse.ok && driveBody.file?.id && driveBody.storageFileId) {
+          onFileUpload({
+            url: driveBody.url || '/api/drive/file?fileId=' + encodeURIComponent(driveBody.file.id) + '&download=1',
+            type: selectedFile.type,
+            name: selectedFile.name,
+            size: selectedFile.size,
+            path: driveBody.storagePath,
+            mimeType: driveBody.file.mimeType || selectedFile.type,
+            storageProvider: 'google_drive',
+            storageFileId: driveBody.storageFileId,
+          })
+          uploadedToDrive = true
+        } else if (driveResponse.status < 500) {
           throw new Error(driveBody.error || 'Google Drive chat attachment upload failed.')
         }
-        onFileUpload({
-          url: driveBody.url || '/api/drive/file?fileId=' + encodeURIComponent(driveBody.file.id) + '&download=1',
-          type: selectedFile.type,
-          name: selectedFile.name,
-          size: selectedFile.size,
-          path: driveBody.storagePath,
-          mimeType: driveBody.file.mimeType || selectedFile.type,
-          storageProvider: 'google_drive',
-          storageFileId: driveBody.storageFileId,
-        })
-      } else if (selectedFile.size <= 50 * 1024 * 1024) {
+      }
+
+      if (!uploadedToDrive && selectedFile.size <= 50 * 1024 * 1024) {
         const { path: storedPath, mimeType } = await encryptAndUpload(
           selectedFile,
           coupleId,
@@ -164,7 +176,9 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
           mimeType,
           storageProvider: 'supabase',
         })
-      } else {
+      }
+
+      if (!uploadedToDrive && selectedFile.size > 50 * 1024 * 1024) {
         const encrypted = await encryptMedia(selectedFile, coupleId)
         const bytes = new Uint8Array(await encrypted.arrayBuffer())
         const digest = await crypto.subtle.digest('SHA-1', bytes)

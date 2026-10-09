@@ -136,3 +136,5 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 - Fallback hardening also handles Drive-status fetch failures and Cloudinary 5xx responses; the Cloudinary route attempts cleanup if an exception occurs after provider upload. Verify the next exact SHA in CI.
 
 - Upload fallback now also handles network failures between the browser and the Drive/Cloudinary API routes, while preserving hard failure for non-5xx validation/auth/authorization/rate-limit responses.
+
+- Chat attachment upload on Web/Mobile now falls back to encrypted Supabase when Drive status cannot be checked or the Drive upload endpoint returns 5xx; non-5xx errors remain hard failures.

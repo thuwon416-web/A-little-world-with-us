@@ -29,3 +29,5 @@ All API route handlers that expose `POST`, `PUT`, `PATCH`, or `DELETE` now inclu
 Memories upload uses Drive first. If the Drive endpoint fails at the provider/server layer (HTTP 5xx), the client attempts Cloudinary and then encrypted Supabase fallback when Cloudinary is unconfigured. It does not bypass authentication, authorization, validation, or rate-limit failures.
 
 Network-level failures in the browser-to-API Drive or Cloudinary upload request also advance to the next provider. Non-5xx validation/auth/authorization/rate-limit responses do not.
+
+Chat attachment upload follows Drive-first storage for supported images/PDFs, then encrypted Supabase fallback when the Drive status lookup fails or the Drive upload endpoint returns HTTP 5xx. Non-5xx upload errors remain hard failures.

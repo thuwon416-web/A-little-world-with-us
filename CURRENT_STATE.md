@@ -191,3 +191,8 @@ Owner-side manual verification remains last.
 - The Cloudinary route now attempts to delete an uploaded asset if an unexpected error occurs after provider upload, reducing orphaned media before fallback. Fresh CI is required for this follow-up revision.
 
 - Follow-up: Drive upload request network failures and Cloudinary upload request network failures also fall through to the next configured provider; non-5xx API validation/auth/authorization/rate-limit responses still stop the chain.
+
+
+## 2026-10-09 Chat attachment fallback recovery
+- Web and Mobile chat now treat Drive status lookup failure as a reason to use the existing fallback storage path. If the Drive chat-upload endpoint returns HTTP 5xx, they fall back to encrypted Supabase storage. Validation/auth/authorization/rate-limit responses remain hard failures. If the POST request itself loses its response, Web does not duplicate the attachment blindly because server commit state is unknown.
+- New source revision needs its own CI run; production authenticated Drive upload/retrieval remains a Phase 10 evidence gate.

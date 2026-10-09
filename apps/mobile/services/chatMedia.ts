@@ -52,11 +52,18 @@ export async function uploadChatMedia(
     const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
     const { data: sessionData } = await supabase.auth.getSession()
     if (webUrl && sessionData.session?.access_token) {
-      const statusResponse = await fetch(webUrl + '/api/drive/status', {
-        headers: { Authorization: 'Bearer ' + sessionData.session.access_token },
-      })
-      const driveStatus = statusResponse.ok ? await statusResponse.json().catch(() => ({})) as { connected?: boolean } : { connected: false }
-      if (driveStatus.connected) {
+      let driveConnected = false
+      try {
+        const statusResponse = await fetch(webUrl + '/api/drive/status', {
+          headers: { Authorization: 'Bearer ' + sessionData.session.access_token },
+        })
+        const driveStatus = statusResponse.ok ? await statusResponse.json().catch(() => ({})) as { connected?: boolean } : { connected: false }
+        driveConnected = driveStatus.connected === true
+      } catch {
+        // No upload has started yet, so an unavailable status endpoint can use fallback storage.
+        driveConnected = false
+      }
+      if (driveConnected) {
         const form = new FormData()
         form.append('coupleId', coupleId)
         form.append('file', { uri: attachment.uri, name: attachment.name, type: attachment.mimeType } as unknown as Blob)
@@ -73,16 +80,19 @@ export async function uploadChatMedia(
           file?: { mimeType?: string }
           error?: string
         }
-        if (!driveResponse.ok || !driveBody.storageFileId) {
+        if (driveResponse.ok && driveBody.storageFileId) {
+          return {
+            path: driveBody.url ?? null,
+            mimeType: driveBody.file?.mimeType ?? attachment.mimeType,
+            storageProvider: 'google_drive' as const,
+            storageFileId: driveBody.storageFileId,
+            storagePath: driveBody.storagePath ?? null,
+          }
+        }
+        if (driveResponse.status < 500) {
           throw new Error(driveBody.error || 'Google Drive chat attachment upload failed.')
         }
-        return {
-          path: driveBody.url ?? null,
-          mimeType: driveBody.file?.mimeType ?? attachment.mimeType,
-          storageProvider: 'google_drive' as const,
-          storageFileId: driveBody.storageFileId,
-          storagePath: driveBody.storagePath ?? null,
-        }
+        // The server returns 5xx only after its upload handler failed; use the encrypted fallback.
       }
     }
   }
