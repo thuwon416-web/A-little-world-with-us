@@ -216,3 +216,9 @@ Owner-side manual verification remains last.
 - Web Memories upload no longer automatically advances to Cloudinary or encrypted Supabase if a Drive/media upload POST throws a network error after dispatch. The server may have completed the upload despite a lost response; automatic fallback could create duplicate media/memory rows.
 - The UI now reports an interrupted/uncertain upload and tells the user to check Memories before retrying. This favors duplicate prevention over unsafe blind retries; provider HTTP 5xx responses still use the configured fallback path.
 - Source commit: `c62c4b09d0ca1069cefad7a679677105b713571a`. Automated checks for this source change are still pending; production behavior remains unverified while Vercel is paused by owner request.
+
+
+## 2026-10-09 Drive folder import schema parity fix
+- Live `information_schema.columns` inspection confirmed `public.memories.visibility` does not exist. `/api/drive/sync-memories` attempted to insert `visibility='shared'`, which would make Drive-folder imports fail at the metadata insert stage.
+- Removed the unsupported column from the import insert and added a regression assertion in `apps/web/src/app/api/drive/sync-memories/route.test.ts` that imported metadata does not include `visibility`.
+- Updated `docs/DRIVE_ARCHITECTURE.md`. Source commit `85d19fd613074c98f65051b71419100c76bd8964`; regression test commit `214b72c0ad8bdfa569319f9195005e47d5ad4118`. Automated workflow evidence for these source changes is still pending.
