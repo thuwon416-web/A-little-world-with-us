@@ -1,10 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-const { getUser, uploadDriveFile, deleteDriveFile, getOrCreateDriveRootFolder, getOrCreateDriveFolder, checkRateLimit, from } = vi.hoisted(() => ({
+const { getUser, uploadDriveFile, deleteDriveFile, deleteDriveFolder, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, checkRateLimit, from } = vi.hoisted(() => ({
   getUser: vi.fn(),
   uploadDriveFile: vi.fn(),
   deleteDriveFile: vi.fn(),
-  getOrCreateDriveRootFolder: vi.fn(),
+  deleteDriveFolder: vi.fn(),
+  getOrCreateDriveCoupleFolder: vi.fn(),
   getOrCreateDriveFolder: vi.fn(),
   checkRateLimit: vi.fn(),
   from: vi.fn(),
@@ -21,6 +22,9 @@ vi.mock('@supabase/supabase-js', () => ({
 vi.mock('@/lib/google-drive', () => ({
   uploadDriveFile,
   deleteDriveFile,
+  deleteDriveFolder,
+  getOrCreateDriveCoupleFolder,
+  getOrCreateDriveFolder,
 }))
 
 vi.mock('@/lib/rate-limit', () => ({
@@ -57,7 +61,8 @@ describe('POST /api/drive/upload', () => {
     checkRateLimit.mockResolvedValue({ allowed: true, remaining: 4, resetTime: Date.now() + 60000 })
     uploadDriveFile.mockResolvedValue({ id: 'drive-1', mimeType: 'image/jpeg' })
     deleteDriveFile.mockResolvedValue(undefined)
-    getOrCreateDriveRootFolder.mockResolvedValue({ id: 'root-1' })
+    deleteDriveFolder.mockResolvedValue(undefined)
+    getOrCreateDriveCoupleFolder.mockResolvedValue({ id: 'couple-folder-1' })
     getOrCreateDriveFolder.mockImplementation(async (_userId: string, name: string) => ({ id: 'folder-' + name }))
     makeSupabase()
   })
