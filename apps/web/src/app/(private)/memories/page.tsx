@@ -332,6 +332,7 @@ function MemoriesPageContent() {
       if (!coupleLinkId) throw new Error('Link with your partner before adding a shared memory.')
       let uploadedCount = 0
       const uploadErrors: string[] = []
+      const failedFiles: File[] = []
       let driveConnected = false
       try {
         const driveStatusResponse = await fetch('/api/drive/status')
@@ -436,17 +437,22 @@ function MemoriesPageContent() {
           }
           uploadedCount += 1
         } catch (fileError) {
+          failedFiles.push(file)
           uploadErrors.push(`${file.name}: ${fileError instanceof Error ? fileError.message : 'upload failed'}`)
         } finally {
           setUploadProgress(Math.round(((uploadedCount + uploadErrors.length) / selectedFiles.length) * 100))
         }
       }
-      setCaption('')
-      setMemoryDate(localDateKey(new Date()))
-      setSelectedFiles([])
-      setMemoryCategory('favorite')
-      setLocation(null)
-      setLocationLabel('')
+      // Keep failed selections and their metadata so the user can inspect/retry them.
+      // Successful files are removed from the pending list to avoid accidental re-upload.
+      setSelectedFiles(failedFiles)
+      if (uploadErrors.length === 0) {
+        setCaption('')
+        setMemoryDate(localDateKey(new Date()))
+        setMemoryCategory('favorite')
+        setLocation(null)
+        setLocationLabel('')
+      }
       setUploadSummary(`${uploadedCount} ${uploadedCount === 1 ? 'photo' : 'photos'} uploaded${uploadErrors.length ? `; ${uploadErrors.length} failed` : ''}.`)
       if (uploadErrors.length) setError(uploadErrors.join(' '))
       await loadMemories()
