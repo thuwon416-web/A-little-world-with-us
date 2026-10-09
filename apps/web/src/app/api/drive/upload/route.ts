@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { deleteDriveFile, deleteDriveFolder, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { MAX_MEMORY_IMAGE_SIZE } from '@/lib/upload-validation'
 import { validateMemoryMetadata, validateUploadContent } from '@/lib/upload-validation'
 
@@ -20,6 +21,8 @@ function getAuthenticatedClient(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const supabase = await getAuthenticatedClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
