@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { z } from 'zod'
 import { generateAiResponse } from '@/lib/ai/providers'
 import { createRequestServerClient } from '@/lib/ai/request-client'
@@ -18,6 +19,8 @@ const requestSchema = z.object({
 const privacyColumns = 'allow_ai_read_chat,allow_ai_read_cycle'
 
 export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     const supabase = createRequestServerClient(request)
     const { data: { user } } = await supabase.auth.getUser()

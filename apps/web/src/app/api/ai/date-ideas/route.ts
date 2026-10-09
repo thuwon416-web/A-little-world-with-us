@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { z } from 'zod'
 import { filterByPrivacy, PrivacySettingsUnavailableError } from '@/lib/ai/privacy-guard'
 import { AI_PROVIDER_PROFILES, generateAiResponse } from '@/lib/ai/providers'
@@ -23,6 +24,8 @@ const generatedDateIdeasSchema = z.array(z.object({
 }))
 
 export async function POST(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     return await withAiRouteAuth(async (req, { userId }) => {
 

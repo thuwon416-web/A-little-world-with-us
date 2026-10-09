@@ -164,3 +164,8 @@ Owner-side manual verification remains last.
 - Current code revision `1fcf9036a4cc03bfe26dee6b9a51928699c8e46f` passed Test, E2E Tests, Production Smoke E2E, Secret scan, and CodeQL.
 - Drive memory sync now limits managed `Couples/` traversal to the accepted couple and skips any Drive file ID already indexed to another couple, reporting `skippedConflicts`.
 - These CI results do not prove a real Google account upload/retrieval, Vercel production deployment of this SHA, or current-main native device builds. Those gates remain open.
+
+
+## 2026-10-09 Cookie-authenticated API CSRF audit
+- Added same-origin enforcement before session lookup to the nine AI generation routes, couple-data export, feedback submission, and browser push-subscription create/delete routes. Requests using an explicit Authorization header remain supported for authenticated native/API clients.
+- Added regression tests for AI Guardian, couple export, feedback, and both push-subscription mutation methods. Full CI is required to verify this revision; no production deployment was triggered.

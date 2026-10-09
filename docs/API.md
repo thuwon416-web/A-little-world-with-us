@@ -14,3 +14,8 @@ Before changing a route, inspect callers, authorization, validation, provider in
 ## Drive memory sync ownership behavior
 
 `POST /api/drive/sync-memories` imports images from user-created folders and only traverses the requested accepted couple's folder under the managed `Couples/` tree. It excludes Chat/System/Archive folders and reports `skippedConflicts` when a Drive file ID is already indexed to a different couple, rather than rewriting metadata across couple boundaries.
+
+
+## Cookie-authenticated mutation protection
+
+Cookie-authenticated AI generation, couple export, feedback submission, and browser push-subscription create/delete endpoints reject cross-origin requests before session lookup. Requests carrying an explicit `Authorization` header continue to be supported for authenticated native/API clients. Route tests cover early rejection for AI Guardian, export, feedback, and push subscription mutations.

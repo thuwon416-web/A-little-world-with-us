@@ -1,12 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { NextRequest } from 'next/server'
 
-const { authGetUser, from, generateAiResponse, checkDailyRateLimit, checkAiUsageLimit } = vi.hoisted(() => ({
+const { authGetUser, from, generateAiResponse, checkDailyRateLimit, checkAiUsageLimit, isSameOriginRequest } = vi.hoisted(() => ({
   authGetUser: vi.fn(),
   from: vi.fn(),
   generateAiResponse: vi.fn(),
   checkDailyRateLimit: vi.fn(),
   checkAiUsageLimit: vi.fn(),
+  isSameOriginRequest: vi.fn(),
 }))
 
 vi.mock('@supabase/ssr', () => ({
@@ -24,6 +25,8 @@ vi.mock('@/lib/ai/providers', () => ({
 vi.mock('@/lib/ai/usage-log', () => ({
   logAiUsage: vi.fn(),
 }))
+
+vi.mock('@/lib/csrf', () => ({ isSameOriginRequest }))
 
 vi.mock('@/lib/rate-limit', () => ({
   checkDailyRateLimit,
@@ -83,8 +86,16 @@ function makeRequest(): NextRequest {
 }
 
 describe('POST /api/ai/guardian authentication', () => {
+  it('blocks cross-origin requests before authentication', async () => {
+    isSameOriginRequest.mockReturnValue(false)
+    const response = await POST(makeRequest())
+    expect(response.status).toBe(403)
+    expect(authGetUser).not.toHaveBeenCalled()
+  })
+
   beforeEach(() => {
     vi.clearAllMocks()
+    isSameOriginRequest.mockReturnValue(true)
     authGetUser.mockResolvedValue({ data: { user: null } })
     checkDailyRateLimit.mockResolvedValue({ allowed: true, remaining: 74, resetTime: Date.now() })
     checkAiUsageLimit.mockResolvedValue({ allowed: true, currentUsage: 0, resetTime: new Date() })

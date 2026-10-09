@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { z } from 'zod'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { AI_PROVIDER_PROFILES, generateAiResponse } from '@/lib/ai/providers'
@@ -17,6 +18,8 @@ const loveLetterSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     return await withAiRouteAuth(async (req, { userId }) => {
 

@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { AIProviderError, generateAiResponse } from '@/lib/ai/providers'
@@ -19,6 +20,8 @@ const guardianSchema = z.object({
 const privacyColumns = 'allow_ai_read_mood,allow_ai_read_cycle,allow_ai_read_chat,allow_ai_read_location,allow_ai_read_finance'
 
 export async function POST(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   let authenticatedUserId: string | undefined
   try {
     const supabase = createServerClient(

@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
 import { checkRateLimit } from '@/lib/rate-limit'
@@ -9,6 +10,8 @@ const feedbackSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     // 1. Session verification
     const supabase = createServerClient(

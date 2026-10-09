@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { z } from 'zod'
 import {
   AI_COMPLETION_BUDGET,
@@ -19,6 +20,8 @@ const generatedRecommendationsSchema = z.array(z.object({
 }))
 
 export async function POST(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     return await withAiRouteAuth(async (req) => {
 

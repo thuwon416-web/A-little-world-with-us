@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { NextResponse, type NextRequest } from 'next/server'
 import { z } from 'zod'
 
@@ -44,6 +45,8 @@ function getSessionClient(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     const supabase = getSessionClient(req)
     const { data: { user } } = await supabase.auth.getUser()
@@ -69,6 +72,8 @@ export async function POST(req: NextRequest) {
 }
 
 export async function DELETE(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     const supabase = getSessionClient(req)
     const { data: { user } } = await supabase.auth.getUser()

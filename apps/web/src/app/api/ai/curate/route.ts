@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { z } from 'zod'
@@ -13,6 +14,8 @@ import {
 const schema = z.object({ memoryIds: z.array(z.string().uuid()).min(1).max(20), theme: z.string().min(1).max(80), context: z.string().max(500).optional() })
 
 export async function POST(request: NextRequest) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   try {
     const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { cookies: { getAll: () => request.cookies.getAll(), setAll: () => {} } })
     const { data: { user } } = await supabase.auth.getUser()

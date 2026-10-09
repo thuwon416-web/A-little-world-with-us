@@ -35,3 +35,5 @@ Automated PASS is evidence for the tested revision only. Full authenticated cros
 DONE means implementation exists and relevant automated checks pass. VERIFIED requires environment evidence appropriate to the claim. Configuration is not live behavior.
 
 - Drive memory sync ownership coverage: same-origin protection, selected-couple-only traversal, and skipping a Drive file ID already indexed to another couple.
+
+- Cookie-authenticated mutation CSRF audit: AI generation routes, couple export, feedback, and browser push-subscription POST/DELETE now enforce same-origin checks; focused regression tests cover AI Guardian, export, feedback, and push-subscription rejection before session lookup.
