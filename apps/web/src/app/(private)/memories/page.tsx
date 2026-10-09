@@ -332,9 +332,15 @@ function MemoriesPageContent() {
       if (!coupleLinkId) throw new Error('Link with your partner before adding a shared memory.')
       let uploadedCount = 0
       const uploadErrors: string[] = []
-      const driveStatusResponse = await fetch('/api/drive/status')
-      const driveStatus = (await driveStatusResponse.json().catch(() => ({}))) as { connected?: boolean }
-      const driveConnected = driveStatusResponse.ok && driveStatus.connected === true
+      let driveConnected = false
+      try {
+        const driveStatusResponse = await fetch('/api/drive/status')
+        const driveStatus = (await driveStatusResponse.json().catch(() => ({}))) as { connected?: boolean }
+        driveConnected = driveStatusResponse.ok && driveStatus.connected === true
+      } catch {
+        // A status endpoint/network hiccup should not block the configured fallback chain.
+        driveConnected = false
+      }
 
       for (const file of selectedFiles) {
         try {
@@ -379,7 +385,7 @@ function MemoriesPageContent() {
               storageProvider = 'cloudinary'
               mimeType = mediaBody.file.mimeType || mimeType
               memoryCreatedByMediaApi = true
-            } else if (mediaResponse.status !== 503) {
+            } else if (mediaResponse.status < 500) {
               throw new Error(mediaBody.error || 'Memory upload failed.')
             }
           }

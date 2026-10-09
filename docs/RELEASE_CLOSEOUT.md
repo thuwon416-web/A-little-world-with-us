@@ -132,3 +132,5 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 - Repository scan found zero `POST`/`PUT`/`PATCH`/`DELETE` route handlers without an explicit `isSameOriginRequest` guard. This is a source-level coverage check, not a substitute for endpoint-specific authorization testing.
 
 - Memories UI upload now follows Drive → Cloudinary → encrypted Supabase fallback when the Drive endpoint has a provider/server failure; auth, validation, authorization, and rate-limit errors remain hard failures. Verify current code revision in CI and production E2E before closing this item.
+
+- Fallback hardening also handles Drive-status fetch failures and Cloudinary 5xx responses; the Cloudinary route attempts cleanup if an exception occurs after provider upload. Verify the next exact SHA in CI.

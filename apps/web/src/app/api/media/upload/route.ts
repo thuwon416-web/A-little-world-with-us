@@ -129,6 +129,7 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('Cloudinary memory upload failed', error instanceof Error ? error.message : 'unknown error')
+    if (uploaded) await deleteCloudinaryAsset(uploaded.asset_id).catch(() => undefined)
     return NextResponse.json({ error: 'Memory upload failed.' }, { status: 502 })
   }
 }

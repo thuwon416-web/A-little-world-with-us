@@ -184,3 +184,8 @@ Owner-side manual verification remains last.
 ## 2026-10-09 Drive memory upload fallback recovery
 - Memories upload still tries Google Drive first. If the Drive upload route returns a server/provider failure (5xx), it now falls back to Cloudinary and then to encrypted Supabase storage if Cloudinary is unconfigured (503), instead of failing the entire upload when the saved Drive-connected state is stale. Authentication, authorization, validation, and rate-limit responses do not fall back.
 - The Drive upload route already rolls back partial Drive objects on failure. Current code revision requires a fresh CI pass; production Drive behavior still needs the consolidated authenticated E2E.
+
+
+## 2026-10-09 Memory upload fallback hardening follow-up
+- A failure while checking Drive connection status no longer aborts the whole Memories upload batch; it proceeds to the configured fallback chain. Cloudinary provider/server failures (5xx) now allow encrypted Supabase fallback, while client/auth/authorization/rate-limit errors remain hard failures.
+- The Cloudinary route now attempts to delete an uploaded asset if an unexpected error occurs after provider upload, reducing orphaned media before fallback. Fresh CI is required for this follow-up revision.
