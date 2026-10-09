@@ -21,3 +21,7 @@ Before changing a route, inspect callers, authorization, validation, provider in
 Cookie-authenticated AI generation, couple export, feedback submission, and browser push-subscription create/delete endpoints reject cross-origin requests before session lookup. Requests carrying an explicit `Authorization` header continue to be supported for authenticated native/API clients. Route tests cover early rejection for AI Guardian, export, feedback, and push subscription mutations.
 
 The same-origin guard also covers AI chat, journal reflection, Korean quiz generation, voice transcription, Drive memory export, and media upload.
+
+
+## Mutation-route security inventory (2026-10-09)
+All API route handlers that expose `POST`, `PUT`, `PATCH`, or `DELETE` now include an explicit same-origin check, while authenticated native clients using an `Authorization` header remain supported. High-risk storage and export endpoints have focused early-rejection tests.
