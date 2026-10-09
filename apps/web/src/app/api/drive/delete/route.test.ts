@@ -1,10 +1,11 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-const { getUser, getDriveFileAccess, deleteDriveFile, checkRateLimit, from } = vi.hoisted(() => ({
+const { getUser, getDriveFileAccess, deleteDriveFile, checkRateLimit, isSameOriginRequest, from } = vi.hoisted(() => ({
   getUser: vi.fn(),
   getDriveFileAccess: vi.fn(),
   deleteDriveFile: vi.fn(),
   checkRateLimit: vi.fn(),
+  isSameOriginRequest: vi.fn(),
   from: vi.fn(),
 }))
 
@@ -24,15 +25,17 @@ vi.mock('@/lib/google-drive', () => ({
 vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit,
 }))
+vi.mock('@/lib/csrf', () => ({ isSameOriginRequest }))
 
 import { POST } from './route'
 
 describe('POST /api/drive/delete', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    isSameOriginRequest.mockReturnValue(true)
     getUser.mockResolvedValue({ data: { user: null } })
     checkRateLimit.mockResolvedValue({ allowed: true, remaining: 9, resetTime: Date.now() + 60000 })
-    from.mockImplementation(() => ({ update: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })) }))
+    from.mockImplementation(() => ({\n      update: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })),\n      delete: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })),\n    }))
   })
 
   it('requires authentication', async () => {
