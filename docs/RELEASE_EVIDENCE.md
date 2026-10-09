@@ -1,6 +1,6 @@
 # Release Evidence Pack
 
-Updated: 2026-10-08
+Updated: 2026-10-09
 
 This file is the single evidence template for the final release sequence. It records facts only; an unchecked item must not be described as verified.
 
@@ -183,3 +183,11 @@ After release stability:
 - A source scan covered 31 mutating API handlers (`POST`/`PUT`/`PATCH`/`DELETE`) and found zero route files missing explicit `isSameOriginRequest` enforcement.
 - Drive and chat uploads now advance to configured fallback storage for provider/server failures; uncertain browser POST network failures do not automatically duplicate a file.
 - Vercel remains paused at the owner’s request. No deployment was triggered; authenticated real-Drive E2E, current-main native builds, and manual release gates remain open.
+
+
+## 2026-10-09 follow-up code/database checks
+- [x] Live Supabase schema repaired additively: `public.memories` now has `latitude`, `longitude`, `location_label`, and `metadata`; verified columns and `memories_location_idx` / `memories_journal_recent_idx` exist. Live table had 0 memory rows at verification time.
+- [x] Added bootstrap SQL `backend/supabase/bootstrap/55_restore_memory_location_and_journal_columns.sql` and recorded live migration `20261009073304` in `docs/DATABASE.md` and `CURRENT_STATE.md`.
+- [x] Web Memories now stops and reports an uncertain upload response instead of blindly trying another provider after a network exception. This avoids possible duplicate uploads if the server completed the first request but the response was lost.
+- [ ] Run GitHub Actions for the latest source/docs commits and inspect the results; do not treat the prior green workflows as evidence for later commits.
+- [ ] After Vercel is explicitly unpaused and a corrected deployment is available, verify authenticated Memory Map, journal create/edit/reflection, Drive upload/readback and partner fallback in production.
