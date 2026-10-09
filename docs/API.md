@@ -31,3 +31,6 @@ Memories upload uses Drive first. If the Drive endpoint fails at the provider/se
 Network-level failures in the browser-to-API Drive or Cloudinary upload request also advance to the next provider. Non-5xx validation/auth/authorization/rate-limit responses do not.
 
 Chat attachment upload follows Drive-first storage for supported images/PDFs, then encrypted Supabase fallback when the Drive status lookup fails or the Drive upload endpoint returns HTTP 5xx. Non-5xx upload errors remain hard failures.
+
+
+Latest source verification: `48d35db6f32aecf4f5c41abd430582caa8cf8117` passed all five GitHub Actions workflows. Production Drive OAuth/upload/retrieval is still a separate authenticated E2E gate.
