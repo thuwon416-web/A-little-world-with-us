@@ -369,7 +369,9 @@ function MemoriesPageContent() {
             try {
               driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
             } catch {
-              tryFallbackStorage = true
+              // The server may have stored the file even if the browser lost the response.
+              // Do not trigger another provider and create a duplicate memory on an uncertain outcome.
+              throw new Error('Google Drive upload response was interrupted. Check Memories before retrying to avoid a duplicate upload.')
             }
             if (driveResponse) {
               const driveBody = (await driveResponse.json().catch(() => ({}))) as { file?: { id?: string }; error?: string }
@@ -392,7 +394,9 @@ function MemoriesPageContent() {
               mediaResponse = await fetch('/api/media/upload', { method: 'POST', body: formData })
               mediaBody = (await mediaResponse.json().catch(() => ({}))) as typeof mediaBody
             } catch {
-              // A failed provider request can still fall through to encrypted Supabase storage.
+              // A lost response does not prove the server failed to store the file.
+              // Stop this file rather than automatically creating a duplicate in another provider.
+              throw new Error('Media upload response was interrupted. Check Memories before retrying to avoid a duplicate upload.')
             }
             if (mediaResponse?.ok && mediaBody.file?.id) {
               storageProvider = 'cloudinary'
