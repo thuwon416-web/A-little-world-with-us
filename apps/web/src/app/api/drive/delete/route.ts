@@ -3,8 +3,11 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { deleteDriveFile, getDriveFileAccess } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { isSameOriginRequest } from '@/lib/csrf'
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const authorization = request.headers.get('authorization')
   const supabase = authorization
     ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, { global: { headers: { Authorization: authorization } }, auth: { autoRefreshToken: false, persistSession: false } })
@@ -47,7 +50,7 @@ export async function POST(request: Request) {
       }).eq('id', access.recordId)
       if (error) throw error
     } else if (access.recordType === 'archived_media') {
-      const { error } = await supabase.from('drive_media_archive').delete().eq('id', access.recordId).eq('owner_id', user.id)
+      const { error } = await supabase.from('drive_media_archive').delete().eq('id', access.recordId)
       if (error) throw error
     }
     return NextResponse.json({ deleted: true, recordType: access.recordType })
