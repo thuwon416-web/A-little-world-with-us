@@ -1,12 +1,15 @@
+// @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-const { createServerClient, isSameOriginRequest } = vi.hoisted(() => ({
+const { createServerClient, isSameOriginRequest, checkRateLimit } = vi.hoisted(() => ({
   createServerClient: vi.fn(),
   isSameOriginRequest: vi.fn(),
+  checkRateLimit: vi.fn(),
 }))
 
 vi.mock('@supabase/ssr', () => ({ createServerClient }))
 vi.mock('@/lib/csrf', () => ({ isSameOriginRequest }))
+vi.mock('@/lib/rate-limit', () => ({ checkRateLimit }))
 
 import { POST } from './route'
 
