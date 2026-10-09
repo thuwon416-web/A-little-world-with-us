@@ -120,4 +120,4 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 
 - Additional permanent-delete audit fix: `/api/drive/delete` now applies same-origin protection and removes ownerless retained archive index rows by archive ID after the shared-couple authorization helper has approved the purge. Added a regression case for this account-erasure edge case; the Drive delete route suite passed 4/4 locally.
 
-- Drive memory import now skips file IDs already indexed under another couple and reports `skippedConflicts`; verify the exact revision through CI before marking the ownership guard complete.
+- Drive memory import now skips file IDs already indexed under another couple and reports `skippedConflicts`; verified by all five GitHub Actions workflows on code revision `1fcf9036a4cc03bfe26dee6b9a51928699c8e46f`; production authenticated Drive E2E and Vercel/native evidence remain separate gates.

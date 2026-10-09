@@ -157,4 +157,10 @@ Owner-side manual verification remains last.
 
 ## 2026-10-09 Drive import ownership guard
 - Added a second ownership guard during Drive memory sync: when a Drive file ID is already indexed to a different couple, sync skips it and increments `skippedConflicts` instead of updating or re-inserting metadata across couple boundaries.
-- Added a regression test for a Drive file already indexed under another couple. GitHub Actions must verify this exact revision before the ownership guard is marked complete.
+- Added a regression test for a Drive file already indexed under another couple. GitHub Actions for code revision `1fcf9036a4cc03bfe26dee6b9a51928699c8e46f` passed all five workflows: [Test](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37893944834), [E2E Tests](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37893944790), [Production Smoke E2E](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37893944869), [Secret scan](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37893944876), and [CodeQL](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37893944849). Production authenticated Drive E2E and current-main Vercel/native evidence remain separate gates.
+
+
+## 2026-10-09 Drive import cross-couple guard — verified
+- Current code revision `1fcf9036a4cc03bfe26dee6b9a51928699c8e46f` passed Test, E2E Tests, Production Smoke E2E, Secret scan, and CodeQL.
+- Drive memory sync now limits managed `Couples/` traversal to the accepted couple and skips any Drive file ID already indexed to another couple, reporting `skippedConflicts`.
+- These CI results do not prove a real Google account upload/retrieval, Vercel production deployment of this SHA, or current-main native device builds. Those gates remain open.
