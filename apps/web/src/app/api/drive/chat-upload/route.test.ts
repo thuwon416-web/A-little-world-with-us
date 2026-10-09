@@ -57,6 +57,18 @@ describe('POST /api/drive/chat-upload', () => {
     expect(response.status).toBe(400)
   })
 
+  it('uploads an authorized PDF attachment into the Drive chat path', async () => {
+    const form = new FormData()
+    form.set('coupleId', 'couple-1')
+    form.set('file', new File([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31])], 'plan.pdf', { type: 'application/pdf' }))
+    const response = await POST(new Request('https://a-little-world-with-us.vercel.app/api/drive/chat-upload', {
+      method: 'POST',
+      body: form,
+    }))
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({ storageProvider: 'google_drive', storageFileId: 'drive-chat-1' })
+  })
+
   it('uploads an authorized image into the Drive chat path', async () => {
     const form = new FormData()
     form.set('coupleId', 'couple-1')

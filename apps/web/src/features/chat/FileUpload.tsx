@@ -108,9 +108,10 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
       const fileName = `1791192980778_${crypto.randomUUID()}.${fileExt}`
       const filePath = `${user.id}/${fileName}`
 
-      const DRIVE_IMAGE_LIMIT = 25 * 1024 * 1024
+      const DRIVE_FILE_LIMIT = 25 * 1024 * 1024
+      const driveSupportedFile = selectedFile.type.startsWith('image/') || selectedFile.type === 'application/pdf'
       let driveConnected = false
-      if (selectedFile.type.startsWith('image/') && selectedFile.size <= DRIVE_IMAGE_LIMIT) {
+      if (driveSupportedFile && selectedFile.size <= DRIVE_FILE_LIMIT) {
         const statusResponse = await fetch('/api/drive/status')
         const statusBody = (await statusResponse.json().catch(() => ({}))) as { connected?: boolean }
         driveConnected = statusResponse.ok && statusBody.connected === true
@@ -130,7 +131,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
           error?: string
         }
         if (!driveResponse.ok || !driveBody.file?.id || !driveBody.storageFileId) {
-          throw new Error(driveBody.error || 'Google Drive chat image upload failed.')
+          throw new Error(driveBody.error || 'Google Drive chat attachment upload failed.')
         }
         onFileUpload({
           url: driveBody.url || '/api/drive/file?fileId=' + encodeURIComponent(driveBody.file.id) + '&download=1',

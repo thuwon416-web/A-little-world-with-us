@@ -147,3 +147,9 @@ Owner-side manual verification remains last.
 - `/api/drive/sync-memories` now rejects cross-origin cookie-authenticated requests before reading the session, and the year-folder check no longer relies on the over-escaped regex literal.
 - Regression coverage checks same-origin blocking, impossible chat archive dates, chat archive writes, and Drive import scoping against a second managed couple. Web Vitest now passes 26 files / 101 tests; Web TypeScript passes.
 - GitHub Actions for code revision `bbebed9005c11d67449a6f5346e5910afacdf7a6` all passed: Test, E2E Tests, Production Smoke E2E, Secret scan, and CodeQL. Production authenticated Drive E2E and current-main Vercel/native evidence remain separate gates.
+
+
+## 2026-10-09 Chat attachment storage alignment
+- Web and Mobile chat attachment upload now route supported images and PDFs through Google Drive when the user's Drive connection is available. The Drive chat endpoint accepts the repository's allowlisted image/PDF types up to 25 MiB, validates file signatures, and keeps the organized `Chat/{year}/{month}/` path. Existing encrypted Supabase fallback remains when Drive is not connected; Mobile's existing 5 MiB picker/service limit still applies.
+- Added PDF upload regression coverage. Local checks after this batch: Web Vitest PASS (26 files / 102 tests), Web TypeScript PASS, Mobile TypeScript PASS, Mobile Jest PASS (5 suites / 17 tests), and `git diff --check` PASS.
+- CI status must always be checked against the exact commit SHA in GitHub Actions; prior SHA results do not automatically verify a new revision. Vercel remains paused by request.

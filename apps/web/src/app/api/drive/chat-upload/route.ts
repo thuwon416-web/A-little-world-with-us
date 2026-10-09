@@ -8,7 +8,7 @@ import { validateUploadContent } from '@/lib/upload-validation'
 
 export const runtime = 'nodejs'
 
-const MAX_DRIVE_CHAT_IMAGE_SIZE = 25 * 1024 * 1024
+const MAX_DRIVE_CHAT_FILE_SIZE = 25 * 1024 * 1024
 
 function getAuthenticatedClient(request: Request) {
   const authorization = request.headers.get('authorization')
@@ -35,8 +35,7 @@ export async function POST(request: Request) {
   const file = form.get('file')
   const coupleId = typeof form.get('coupleId') === 'string' ? String(form.get('coupleId')).trim() : ''
   if (!(file instanceof File) || !coupleId) return NextResponse.json({ error: 'A file and coupleId are required.' }, { status: 400 })
-  if (!file.type.startsWith('image/')) return NextResponse.json({ error: 'Drive chat media currently supports image attachments.' }, { status: 400 })
-  if (file.size > MAX_DRIVE_CHAT_IMAGE_SIZE) return NextResponse.json({ error: 'Chat images over 25 MB use the large-media path instead.' }, { status: 413 })
+  if (file.size > MAX_DRIVE_CHAT_FILE_SIZE) return NextResponse.json({ error: 'Chat attachments must be 25 MB or smaller.' }, { status: 413 })
 
   const { data: coupleLink, error: coupleLinkError } = await supabase
     .from('couple_links')
@@ -48,7 +47,7 @@ export async function POST(request: Request) {
   if (coupleLinkError) return NextResponse.json({ error: 'Unable to verify couple access.' }, { status: 500 })
   if (!coupleLink) return NextResponse.json({ error: 'You are not a member of this couple.' }, { status: 403 })
 
-  const validation = await validateUploadContent(file, { imagesOnly: true, maxBytes: MAX_DRIVE_CHAT_IMAGE_SIZE })
+  const validation = await validateUploadContent(file, { maxBytes: MAX_DRIVE_CHAT_FILE_SIZE })
   if (!validation.valid) return NextResponse.json({ error: validation.error ?? 'Invalid image upload.' }, { status: 400 })
 
   try {
@@ -76,6 +75,6 @@ export async function POST(request: Request) {
     })
   } catch (error) {
     console.error('[drive] chat image upload failed:', error instanceof Error ? error.message : 'unknown error')
-    return NextResponse.json({ error: 'Google Drive chat image upload failed.' }, { status: 502 })
+    return NextResponse.json({ error: 'Google Drive chat attachment upload failed.' }, { status: 502 })
   }
 }

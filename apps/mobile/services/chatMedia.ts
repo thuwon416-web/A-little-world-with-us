@@ -47,7 +47,8 @@ export async function uploadChatMedia(
   validateAttachment(attachment)
   const bucket = getBucketForMimeType(attachment.mimeType)
 
-  if (attachment.mimeType.toLowerCase().startsWith('image/')) {
+  const driveSupportedFile = attachment.mimeType.toLowerCase().startsWith('image/') || attachment.mimeType.toLowerCase() === 'application/pdf'
+  if (driveSupportedFile) {
     const webUrl = process.env.EXPO_PUBLIC_WEB_URL?.replace(/\/$/, '')
     const { data: sessionData } = await supabase.auth.getSession()
     if (webUrl && sessionData.session?.access_token) {
@@ -73,7 +74,7 @@ export async function uploadChatMedia(
           error?: string
         }
         if (!driveResponse.ok || !driveBody.storageFileId) {
-          throw new Error(driveBody.error || 'Google Drive chat image upload failed.')
+          throw new Error(driveBody.error || 'Google Drive chat attachment upload failed.')
         }
         return {
           path: driveBody.url ?? null,
