@@ -17,7 +17,7 @@ PENDING RELEASE VERIFICATION.
 Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provider profiles; Google Drive Web OAuth state hardening; Supabase memory metadata; prior CI/security hardening; canonical documentation migration; mobile test-config cleanup; Web Drive API route coverage and request-rate hardening; native Drive validation/upload-limit hardening; deeper Drive route security/rollback tests; Drive token-refresh/provider-error hardening; memory-delete CSRF/rate-limit hardening; native Drive callback deduplication; authenticated-user binding for mobile reminders; native Drive page-size ceiling; consolidated Phase 10 verification pack.
 
 ## 5. VERIFIED
-- Live Supabase migration head: 20261007121841 — restore_rls_helper_execute, checked directly on 2026-10-08.
+- Live Supabase migration head: 20261009073304 — restore_memory_location_and_journal_columns, checked directly on 2026-10-09.
 - Bootstrap prefixes 33/51/52: distinct SQL changes reconciled against live timestamped migration history on 2026-10-08.
 - Web shared-memory storage precedence: Drive first when the authenticated Drive connection is active, then Cloudinary, then encrypted Supabase fallback; code and Vercel environment inventory checked 2026-10-08. Live public.memories currently has zero rows, so actual provider-use distribution is not claimed.
 - Korean 4–6 runtime build: production deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi reached READY from runtime baseline 1c3f78fa8fe34c518cb21b5834fbafa055892b82 on 2026-10-08.
@@ -203,3 +203,10 @@ Owner-side manual verification remains last.
 - A source scan covered 31 mutating API handlers (`POST`/`PUT`/`PATCH`/`DELETE`) and found zero route files missing explicit `isSameOriginRequest` enforcement.
 - Drive and chat uploads now advance to configured fallback storage for provider/server failures; uncertain browser POST network failures do not automatically duplicate a file.
 - Vercel remains paused at the owner’s request. No deployment was triggered; authenticated real-Drive E2E, current-main native builds, and manual release gates remain open.
+
+
+## 2026-10-09 live Memory Map / Journal schema repair
+- Direct live-schema inspection confirmed `public.memories` was missing `latitude`, `longitude`, `location_label`, and `metadata`, although Web Memory Map and journal code depend on those fields.
+- Applied additive live Supabase migration `20261009073304 — restore_memory_location_and_journal_columns`; post-migration inspection confirms all four columns exist and the location/journal indexes exist. No rows were changed; the table contained 0 memory rows at verification time.
+- Added the idempotent equivalent to `backend/supabase/bootstrap/55_restore_memory_location_and_journal_columns.sql` and documented the live migration in `docs/DATABASE.md`.
+- Remaining: run authenticated Memory Map and journal UI checks once production can be deployed and real test memories are available. Vercel remains paused by owner request; this schema repair does not prove production UI is fixed.
