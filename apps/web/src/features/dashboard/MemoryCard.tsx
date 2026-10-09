@@ -1,4 +1,5 @@
 'use client'
+/* eslint-disable @next/next/no-img-element -- Authenticated same-origin Drive image endpoint must bypass Next image optimization. */
 
 import React from 'react'
 import { motion } from 'framer-motion'
