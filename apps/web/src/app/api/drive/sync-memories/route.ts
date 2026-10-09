@@ -142,7 +142,6 @@ export async function POST(request: Request) {
           caption: file.name,
           date,
           category: 'favorite',
-          visibility: 'shared',
         })
         if (error) throw error
         imported += 1
