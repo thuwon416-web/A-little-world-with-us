@@ -3,7 +3,6 @@
 
 import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
-import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Frown, Heart, Meh, Pencil, Smile, Sparkles, Square, Trash2, TriangleAlert, Volume2, X } from 'lucide-react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
