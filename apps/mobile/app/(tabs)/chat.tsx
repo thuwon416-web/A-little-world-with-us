@@ -620,7 +620,7 @@ export default function ChatScreen() {
     }
 
     try {
-      const localRecord = await database.get('messages').find(message.id)
+      const localRecord = await database.get('messages').find(message.id) as unknown as RawChatRecord
       const storedProvider = localRecord._get('media_storage_provider')
       if (
         message.mediaPath &&
