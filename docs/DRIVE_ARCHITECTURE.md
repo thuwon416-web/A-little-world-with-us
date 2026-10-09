@@ -2,7 +2,7 @@
 
 Owner: Backend / Storage
 Status: repository-side implementation in progress; authenticated/device E2E remains a release gate.
-Last Updated: 2026-10-08
+Last Updated: 2026-10-09
 
 ## Canonical model
 
@@ -48,7 +48,7 @@ The Memories page calls `POST /api/drive/sync-memories` and indexes previously u
 - the external folder name as the memory title/group label
 - Drive modified date as the memory date
 
-The sync is duplicate-safe by `drive_file_id` and skips the Chat/System archive branches.
+The sync is duplicate-safe by `drive_file_id` and skips the Chat/System archive branches. It inserts only columns present in the live `public.memories` schema; the obsolete `visibility` field was removed after live schema inspection confirmed that column does not exist.
 
 ## Chat media
 
