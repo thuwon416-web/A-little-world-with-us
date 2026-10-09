@@ -14,7 +14,7 @@ vi.mock('@supabase/supabase-js', () => ({
 }))
 
 vi.mock('@/lib/google-drive', () => ({
-  getDriveAccessToken,
+  getDriveConnectionInfo,
 }))
 
 import { GET } from './route'

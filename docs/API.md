@@ -2,12 +2,12 @@
 
 Owner: Engineering
 Update when: route surface, authentication, or external contracts change
-Last Updated: 2026-10-08
+Last Updated: 2026-10-09
 
-The current Web Drive surface includes /api/drive/start, /api/drive/callback, /api/drive/status, /api/drive/upload, /api/drive/file, /api/drive/delete, and /api/drive/disconnect.
+The current Web Drive surface includes `/api/drive/start`, `/api/drive/callback`, `/api/drive/status`, `/api/drive/upload`, `/api/drive/file`, `/api/drive/delete`, `/api/drive/disconnect`, `/api/drive/sync-memories`, `/api/drive/chat-upload`, and `/api/drive/chat-archive`.
 
 Memory records retain Supabase metadata and provider references such as Drive file identifiers where applicable. Retrieval is part of the contract; upload-only behavior is insufficient.
 
-Protected routes must derive authorization from the authenticated session and enforce couple/ownership rules. Drive OAuth state is authenticated and host-bound.
+Protected routes must derive authorization from the authenticated session and enforce couple/ownership rules. Mutating Drive upload, chat upload/archive, B2 URL, and delete endpoints apply same-origin protection. Drive OAuth state is authenticated and host-bound. Daily chat archive writes validate a real calendar date, merge messages by ID, and preserve reply/edit/delivery/seen/media-duration metadata while keeping Drive file IDs as media references.
 
 Before changing a route, inspect callers, authorization, validation, provider interaction, response shape, and tests.

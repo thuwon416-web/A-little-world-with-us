@@ -115,7 +115,7 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 - B2 upload route now applies same-origin protection and filename length/NUL validation before requesting an upload target.
 - Drive memory upload now creates the Drive memory folder using the same UUID written as the Supabase memory row ID, matching the documented `Memories/{year}/{memory-id}/` convention.
 - Drive upload route now applies same-origin protection; upload tests were repaired to mock the actual folder-helper dependencies and CSRF helper.
-- Automated test files were added/updated in GitHub, but test execution is still unverified in this environment; do not mark these as passed until CI/local test output is available.
+- Local verification on the working tree: Web TypeScript passes; Web Vitest passes 26 files / 100 tests, including the new chat-archive regression suite; Mobile TypeScript passes; Mobile Jest passes 5 suites / 17 tests. A fresh GitHub Actions run for the eventual commit is still required.
 - Vercel work is intentionally paused per owner request. No new deployment attempted as part of this continuation.
 
-- Additional permanent-delete audit fix: `/api/drive/delete` now applies same-origin protection and removes ownerless retained archive index rows by archive ID after the shared-couple authorization helper has approved the purge. Added a regression case for this account-erasure edge case; test execution is still pending CI evidence.
+- Additional permanent-delete audit fix: `/api/drive/delete` now applies same-origin protection and removes ownerless retained archive index rows by archive ID after the shared-couple authorization helper has approved the purge. Added a regression case for this account-erasure edge case; the Drive delete route suite passed 4/4 locally.

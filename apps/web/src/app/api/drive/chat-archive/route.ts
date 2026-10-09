@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { downloadDriveFile, findDriveChildFile, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, listDriveChildren, updateDriveFileContent, uploadDriveFile } from '@/lib/google-drive'
+import { downloadDriveFile, findDriveChildFile, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, updateDriveFileContent, uploadDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { isSameOriginRequest } from '@/lib/csrf'
 
 export const runtime = 'nodejs'
 
@@ -14,7 +15,13 @@ type ArchiveMessage = {
   media_storage_provider?: string | null
   media_storage_file_id?: string | null
   media_mime_type?: string | null
+  media_duration?: number | null
+  reply_to?: string | null
+  encrypted?: boolean
+  edited_at?: string | null
   created_at: string
+  delivered_at?: string | null
+  seen_at?: string | null
   deleted_at?: string | null
 }
 
@@ -36,6 +43,8 @@ function dateKey(value: string) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const supabase = await getAuthenticatedClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -50,6 +59,11 @@ export async function POST(request: Request) {
   const archiveDate = typeof body.date === 'string' ? body.date.trim() : ''
   const messages = Array.isArray(body.messages) ? body.messages : []
   if (!coupleId || !/^\d{4}-\d{2}-\d{2}$/.test(archiveDate)) {
+    return NextResponse.json({ error: 'coupleId and a valid archive date are required.' }, { status: 400 })
+  }
+  try {
+    if (dateKey(archiveDate) !== archiveDate) throw new Error('Invalid archive date.')
+  } catch {
     return NextResponse.json({ error: 'coupleId and a valid archive date are required.' }, { status: 400 })
   }
   if (messages.length > 500) return NextResponse.json({ error: 'Too many chat messages in one archive.' }, { status: 400 })
@@ -83,6 +97,12 @@ export async function POST(request: Request) {
           sender_id: message.sender_id,
           content: message.content,
           message_type: message.message_type,
+          reply_to: message.reply_to ?? null,
+          encrypted: message.encrypted ?? false,
+          edited_at: message.edited_at ?? null,
+          delivered_at: message.delivered_at ?? null,
+          seen_at: message.seen_at ?? null,
+          media_duration: message.media_duration ?? null,
           media: message.media_storage_file_id
             ? {
                 provider: message.media_storage_provider ?? 'google_drive',

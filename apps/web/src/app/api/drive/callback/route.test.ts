@@ -52,6 +52,6 @@ describe('GET /api/drive/callback', () => {
     expect(response.headers.get('location')).toBe('https://a-little-world-with-us.vercel.app/settings?drive=connected')
     expect(exchangeCode).toHaveBeenCalledWith('code')
     expect(saveConnection).toHaveBeenCalledWith('user-1', expect.objectContaining({ access_token: 'access' }))
-    expect(cookieDelete).toHaveBeenCalledWith('drive_oauth_state')
+    expect(response.headers.get('set-cookie')).toContain('drive_oauth_state=')
   })
 })

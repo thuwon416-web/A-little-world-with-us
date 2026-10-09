@@ -1,12 +1,14 @@
+// @vitest-environment node
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-const { getUser, from, getOrCreateDriveRootFolder, getOrCreateDriveFolder, uploadDriveFile, checkRateLimit } = vi.hoisted(() => ({
+const { getUser, from, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, uploadDriveFile, checkRateLimit, isSameOriginRequest } = vi.hoisted(() => ({
   getUser: vi.fn(),
   from: vi.fn(),
-  getOrCreateDriveRootFolder: vi.fn(),
+  getOrCreateDriveCoupleFolder: vi.fn(),
   getOrCreateDriveFolder: vi.fn(),
   uploadDriveFile: vi.fn(),
   checkRateLimit: vi.fn(),
+  isSameOriginRequest: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase-server', () => ({
@@ -15,8 +17,9 @@ vi.mock('@/lib/supabase-server', () => ({
 vi.mock('@supabase/supabase-js', () => ({
   createClient: vi.fn(() => ({ auth: { getUser }, from })),
 }))
-vi.mock('@/lib/google-drive', () => ({ getOrCreateDriveRootFolder, getOrCreateDriveFolder, uploadDriveFile }))
+vi.mock('@/lib/google-drive', () => ({ getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, uploadDriveFile }))
 vi.mock('@/lib/rate-limit', () => ({ checkRateLimit }))
+vi.mock('@/lib/csrf', () => ({ isSameOriginRequest }))
 
 import { POST } from './route'
 
@@ -31,9 +34,10 @@ function imageFile() {
 describe('POST /api/drive/chat-upload', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    isSameOriginRequest.mockReturnValue(true)
     getUser.mockResolvedValue({ data: { user: { id: 'user-1' } } })
     checkRateLimit.mockResolvedValue({ allowed: true, resetTime: Date.now() + 60000 })
-    getOrCreateDriveRootFolder.mockResolvedValue({ id: 'root-1' })
+    getOrCreateDriveCoupleFolder.mockResolvedValue({ id: 'couple-folder-1' })
     getOrCreateDriveFolder.mockImplementation(async (_userId: string, name: string) => ({ id: 'folder-' + name }))
     uploadDriveFile.mockResolvedValue({ id: 'drive-chat-1', name: 'chat.webp', mimeType: 'image/webp' })
     const coupleQuery = {

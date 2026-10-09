@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
 const { getUser, uploadDriveFile, deleteDriveFile, deleteDriveFolder, getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, checkRateLimit, isSameOriginRequest, from } = vi.hoisted(() => ({

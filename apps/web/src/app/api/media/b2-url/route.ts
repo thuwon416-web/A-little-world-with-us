@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many media URL requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
 
   const body = (await request.json().catch(() => ({}))) as { coupleId?: string; fileName?: string }
-  if (!body.coupleId || !body.fileName || body.fileName.length > 512 || body.fileName.includes('\0')) {
+  if (!body.coupleId || !body.fileName || body.fileName.length > 512 || body.fileName.includes(String.fromCharCode(0))) {
     return NextResponse.json({ error: 'Invalid media request.' }, { status: 400 })
   }
 

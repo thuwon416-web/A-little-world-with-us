@@ -166,10 +166,12 @@ export default function SettingsPage() {
         <p className="mt-2 text-sm text-text-2">Connect your Drive for future photo storage. The app keeps only the Drive file reference so saved photos can remain readable later.</p>
         {driveResult === 'connected' ? <p className="mt-3 rounded-btn border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Google Drive connected successfully.</p> : null}
         {driveResult === 'error' ? <p className="mt-3 rounded-btn border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">Google Drive could not be connected. Check the Google OAuth callback configuration and try again.</p> : null}
+        {driveConnected && driveRequiresReauthorization ? <p role="status" className="mt-3 rounded-btn border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">Google Drive is connected, but needs updated permissions for full-folder sync. Reconnect Drive to continue.</p> : null}
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <span className="text-sm text-text-2">{driveLoading ? 'Checking…' : driveConnected ? 'Connected' : 'Not connected'}</span>
+          <span className="text-sm text-text-2">{driveLoading ? 'Checking…' : driveConnected ? (driveRequiresReauthorization ? 'Reconnect required' : 'Connected') : 'Not connected'}</span>
           {!driveLoading && !driveConnected && driveCanConnect ? <Button type="button" onClick={() => { window.location.href = '/api/drive/start' }}>Connect Google Drive</Button> : null}
           {!driveLoading && !driveConnected && !driveCanConnect ? <span className="text-sm text-text-2">Connect from the production web app to finish Google Drive authorization.</span> : null}
+          {!driveLoading && driveConnected && driveRequiresReauthorization && driveCanConnect ? <Button type="button" onClick={() => { window.location.href = '/api/drive/start' }}>Reconnect Google Drive</Button> : null}
           {!driveLoading && driveConnected ? <Button type="button" variant="secondary" onClick={() => void disconnectDrive()} disabled={driveDisconnecting}>{driveDisconnecting ? 'Disconnecting…' : 'Disconnect'}</Button> : null}
         </div>
       </section>

@@ -2,13 +2,16 @@
 
 Owner: Engineering / QA
 Update when: tests or acceptance criteria change
-Last Updated: 2026-10-08
+Last Updated: 2026-10-09
 
 Test layers: Web lint/TypeScript/unit/accessibility/build; Mobile TypeScript/lint/Jest; GitHub Secret Scan/CodeQL; production smoke/E2E; Supabase-backed authenticated E2E; native/device/offline verification.
 
 Automated PASS is evidence for the tested revision only. Full authenticated cross-device flows, Drive E2E, native permissions, offline/media recovery, visual UI regression, and real-user period/fertility scenarios remain release-boundary checks until exercised.
 
 ## Current close-out evidence
+- Local Web checks on the current working tree: `npm --prefix apps/web test` PASS (26 files / 100 tests); `npm --prefix apps/web run typecheck` PASS; `npm --prefix apps/web run lint` PASS with 0 errors and 33 warnings.
+- Local Mobile checks: `npm --prefix apps/mobile run typecheck` PASS; `npm --prefix apps/mobile test -- --runInBand` PASS (5 suites / 17 tests).
+- These results apply to the tested working tree; GitHub Actions must be rerun after the resulting commit, and no production authenticated Drive E2E is implied.
 - Korean 4–6 Web/Mobile structural parity: runtime-baseline advanced curriculum contains 12 advanced lessons on each platform, 4 each for Levels 4, 5, and 6. Human content QA is still pending.
 - Korean runtime production build: Vercel deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi reached READY on 2026-10-08.
 - Period/fertility: cycle logic and parity tests exist, but no authenticated real-user scenario is available.
@@ -21,6 +24,7 @@ Automated PASS is evidence for the tested revision only. Full authenticated cros
 | Korean 4–6 source/data changes | Current Vercel production/preview build log + Web/Mobile content QA artifact |
 | Google Drive OAuth env or Google Cloud client changes | Exact redirect URI registration + authenticated connect/callback E2E |
 | Storage provider code/env changes | Provider configuration inventory + upload/retrieve/delete evidence |
+| Drive chat archive/upload changes | Web route tests + valid/invalid date, same-origin, couple authorization, archive merge, and media reference checks |
 | Supabase bootstrap/migration changes | Live migration list + schema/RLS/advisor checks |
 | UI token/component changes | Web/Mobile lint/typecheck/tests + current visual/device evidence |
 | Mobile native config/build changes | EAS build for current commit + device smoke |

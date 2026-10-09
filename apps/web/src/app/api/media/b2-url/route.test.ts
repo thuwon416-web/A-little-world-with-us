@@ -57,7 +57,7 @@ describe('POST /api/media/b2-url', () => {
   })
 
   it('rejects NUL bytes in object names', async () => {
-    const response = await POST(request({ coupleId: 'couple-1', fileName: 'couples/couple-1/large-media/a\\u0000.jpg' }))
+    const response = await POST(request({ coupleId: 'couple-1', fileName: 'couples/couple-1/large-media/a' + String.fromCharCode(0) + '.jpg' }))
     expect(response.status).toBe(400)
   })
 

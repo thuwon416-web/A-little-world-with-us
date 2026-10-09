@@ -71,7 +71,7 @@ Do not stop repository-side preparation while waiting for a manual gate. Continu
 | Period/fertility logic/UI change | Controlled/authenticated scenario with observed result | Do not infer real-user correctness from unit tests alone |
 
 ## 13. LAST VERIFIED
-2026-10-08 — Supabase head, bootstrap numbering, storage precedence/configuration, Korean runtime build, Korean structural parity, current release blockers, Drive API coverage, Drive token-refresh/provider-error hardening, and memory-delete CSRF/rate-limit hardening re-audited. Automated workflow execution for the newest commits was not yet exposed by the GitHub connector.
+2026-10-08 — Supabase head, bootstrap numbering, storage precedence/configuration, Korean runtime build, Korean structural parity, current release blockers, Drive API coverage, Drive token-refresh/provider-error hardening, and memory-delete CSRF/rate-limit hardening re-audited. GitHub Actions for SHA `e0a4ebc0` reported Secret scan, CodeQL, E2E Tests, and Production Smoke E2E successful; the Test workflow failed Web TypeScript before the follow-up source fixes below. Local verification was then run after those fixes.
 
 ## 14. NEXT CODE-SIDE WORK
 Continue the prepared close-out phases in parallel:
@@ -126,7 +126,17 @@ Owner-side manual verification remains last.
 - B2 upload route now applies same-origin protection and filename length/NUL validation before requesting an upload target.
 - Drive memory upload now creates the Drive memory folder using the same UUID written as the Supabase memory row ID, matching the documented `Memories/{year}/{memory-id}/` convention.
 - Drive upload route now applies same-origin protection; upload tests were repaired to mock the actual folder-helper dependencies and CSRF helper.
-- Automated test files were added/updated in GitHub, but test execution is still unverified in this environment; do not mark these as passed until CI/local test output is available.
+- Local verification on the working tree: Web TypeScript passes; Web Vitest passes 26 files / 100 tests, including the new chat-archive regression suite; Mobile TypeScript passes; Mobile Jest passes 5 suites / 17 tests. A fresh GitHub Actions run for the eventual commit is still required.
 - Vercel work is intentionally paused per owner request. No new deployment attempted as part of this continuation.
 
-- Additional permanent-delete audit fix: `/api/drive/delete` now applies same-origin protection and removes ownerless retained archive index rows by archive ID after the shared-couple authorization helper has approved the purge. Added a regression case for this account-erasure edge case; test execution is still pending CI evidence.
+- Additional permanent-delete audit fix: `/api/drive/delete` now applies same-origin protection and removes ownerless retained archive index rows by archive ID after the shared-couple authorization helper has approved the purge. Added a regression case for this account-erasure edge case; the Drive delete route suite passed 4/4 locally.
+
+
+## 2026-10-09 grouped audit continuation
+- Fixed the Web TypeScript failure in the archive message type by aligning its optional fields with the message objects passed by chat; Web typecheck now passes.
+- Fixed route-test infrastructure/root causes in one group: the server-only Drive helper now has an explicit test mock; the Drive status test mocks `getDriveConnectionInfo`; the OAuth callback test checks the response cookie deletion; and multipart upload tests use the Node runtime to avoid jsdom cross-realm `File`/`FormData` failures.
+- Fixed B2 NUL validation to reject an actual NUL byte (not a literal backslash-zero sequence). Added coverage proving cross-couple object names are denied.
+- Added same-origin protection to Drive chat image upload and daily archive write routes. Fixed archive date validation, including impossible calendar dates, and expanded daily JSON records to preserve reply, encryption, edit/delivery/seen metadata and media duration.
+- Settings now exposes the Drive full-folder reauthorization state and a reconnect action when the connected grant needs broader scope.
+- Verification evidence from this working tree: Web typecheck PASS; Web Vitest PASS (25 files / 97 tests, plus the newly added chat-archive suite PASS 3/3); Mobile typecheck PASS; Mobile Jest PASS (5 suites / 17 tests). Web ESLint completes with 0 errors and 33 existing warnings. These are local working-tree results; the post-commit GitHub Actions run and production authenticated E2E remain pending.
+- Vercel remains intentionally paused; no deployment was triggered.

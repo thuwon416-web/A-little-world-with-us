@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { createClient } = vi.hoisted(() => ({ createClient: vi.fn() }))
 
+vi.mock('server-only', () => ({}))
 vi.mock('@supabase/supabase-js', () => ({ createClient }))
 
 import {
@@ -16,6 +17,8 @@ import {
 describe('google-drive helpers', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
+    process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
     process.env.GOOGLE_OAUTH_STATE_SECRET = 'test-state-secret'
     process.env.GOOGLE_CLIENT_ID = 'client-id'
     process.env.GOOGLE_CLIENT_SECRET = 'client-secret'
