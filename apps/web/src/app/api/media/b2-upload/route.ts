@@ -4,6 +4,7 @@ import { createServerClient } from '@/lib/supabase-server'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { MAX_LARGE_MEDIA_SIZE, MAX_SHARED_DOCUMENT_SIZE } from '@/lib/upload-validation'
 import { getB2UploadTarget, isB2Configured } from '@/lib/backblaze-b2'
+import { isSameOriginRequest } from '@/lib/csrf'
 
 function getAuthenticatedClient(request: Request) {
   const authorization = request.headers.get('authorization')
@@ -17,6 +18,8 @@ function getAuthenticatedClient(request: Request) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const supabase = await getAuthenticatedClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
   const contentLength = Number(body.contentLength)
   const sha1 = body.sha1?.trim() || ''
 
-  if (!coupleId || !fileName || !Number.isSafeInteger(contentLength) || contentLength <= MAX_SHARED_DOCUMENT_SIZE || contentLength > MAX_LARGE_MEDIA_SIZE || !/^[a-f0-9]{40}$/i.test(sha1)) {
+  if (!coupleId || !fileName || fileName.length > 512 || fileName.includes('\0') || !Number.isSafeInteger(contentLength) || contentLength <= MAX_SHARED_DOCUMENT_SIZE || contentLength > MAX_LARGE_MEDIA_SIZE || !/^[a-f0-9]{40}$/i.test(sha1)) {
     return NextResponse.json({ error: 'Invalid large-media upload request.' }, { status: 400 })
   }
 
