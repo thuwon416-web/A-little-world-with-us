@@ -28,7 +28,7 @@ export async function POST(request: Request) {
   if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many media URL requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
 
   const body = (await request.json().catch(() => ({}))) as { coupleId?: string; fileName?: string }
-  if (!body.coupleId || !body.fileName || body.fileName.length > 512 || body.fileName.includes('\\0')) {
+  if (!body.coupleId || !body.fileName || body.fileName.length > 512 || body.fileName.includes('\0')) {
     return NextResponse.json({ error: 'Invalid media request.' }, { status: 400 })
   }
 
@@ -40,6 +40,12 @@ export async function POST(request: Request) {
     .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
     .maybeSingle()
   if (!link) return NextResponse.json({ error: 'You are not a member of this couple.' }, { status: 403 })
+
+  // B2 object names are scoped by couple at upload time. Never issue a download
+  // authorization for an arbitrary key supplied by the client.
+  if (!body.fileName.startsWith(`couples/${body.coupleId}/large-media/`)) {
+    return NextResponse.json({ error: 'Media file does not belong to this couple.' }, { status: 403 })
+  }
 
   try {
     return NextResponse.json({ url: await getB2DownloadUrl(body.fileName, 900) })
