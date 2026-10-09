@@ -123,7 +123,7 @@ export async function POST(request: Request) {
       if (existing?.id) {
         const { error } = await supabase
           .from('memories')
-          .update({ title: existing.title || file.groupName, date, drive_folder_id: file.parentId, mime_type: file.mimeType, storage_provider: 'google_drive' })
+          .update({ title: existing.title || file.groupName, caption: null, date, drive_folder_id: file.parentId, mime_type: file.mimeType, storage_provider: 'google_drive' })
           .eq('id', existing.id)
         if (error) throw error
         updated += 1
@@ -139,7 +139,7 @@ export async function POST(request: Request) {
           drive_folder_id: file.parentId,
           mime_type: file.mimeType,
           title: file.groupName,
-          caption: file.name,
+          caption: null,
           date,
           category: 'favorite',
         })
