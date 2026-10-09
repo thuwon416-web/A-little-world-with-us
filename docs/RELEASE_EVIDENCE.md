@@ -148,3 +148,12 @@ After release stability:
 ### 2026-10-09 Vercel build boundary update
 - Deployment `dpl_BAGGkwDaVFwK4chiJsid5j9paKm2` built commit `e62316ef`, compiled successfully, then failed TypeScript on five remaining source issues: Drive file nullable actor handling, chat archive message `media_url` typing, and Drive memory access query missing `id`. Those issues were corrected on subsequent `main` commits, latest code SHA now `d2af93d9c8c34b20e17a370cdefb95cce914e122`.
 - A fresh deployment of that corrected SHA was attempted and Vercel returned HTTP 402 `api-deployments-free-per-day`: more than 100 deployments, retry after 24 hours. Therefore no production verification is possible for the corrected SHA until Vercel permits another deployment.
+
+
+## 2026-10-09 continued non-Vercel close-out
+- B2 download authorization now rejects client-supplied object names outside `couples/{requested-couple}/large-media/`, validates actual NUL bytes, and has route regression tests for cross-origin blocking, NUL rejection, cross-couple object denial, and successful scoped authorization.
+- B2 upload route now applies same-origin protection and filename length/NUL validation before requesting an upload target.
+- Drive memory upload now creates the Drive memory folder using the same UUID written as the Supabase memory row ID, matching the documented `Memories/{year}/{memory-id}/` convention.
+- Drive upload route now applies same-origin protection; upload tests were repaired to mock the actual folder-helper dependencies and CSRF helper.
+- Automated test files were added/updated in GitHub, but test execution is still unverified in this environment; do not mark these as passed until CI/local test output is available.
+- Vercel work is intentionally paused per owner request. No new deployment attempted as part of this continuation.
