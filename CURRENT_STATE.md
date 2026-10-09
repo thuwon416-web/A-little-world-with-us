@@ -189,3 +189,5 @@ Owner-side manual verification remains last.
 ## 2026-10-09 Memory upload fallback hardening follow-up
 - A failure while checking Drive connection status no longer aborts the whole Memories upload batch; it proceeds to the configured fallback chain. Cloudinary provider/server failures (5xx) now allow encrypted Supabase fallback, while client/auth/authorization/rate-limit errors remain hard failures.
 - The Cloudinary route now attempts to delete an uploaded asset if an unexpected error occurs after provider upload, reducing orphaned media before fallback. Fresh CI is required for this follow-up revision.
+
+- Follow-up: Drive upload request network failures and Cloudinary upload request network failures also fall through to the next configured provider; non-5xx API validation/auth/authorization/rate-limit responses still stop the chain.

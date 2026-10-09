@@ -365,27 +365,40 @@ function MemoriesPageContent() {
 
           let tryFallbackStorage = !driveConnected
           if (driveConnected) {
-            const driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
-            const driveBody = (await driveResponse.json().catch(() => ({}))) as { file?: { id?: string }; error?: string }
-            if (driveResponse.ok && driveBody.file?.id) {
-              memoryCreatedByMediaApi = true
-            } else if (driveResponse.status >= 500) {
-              // A connected flag can outlive a revoked/expired Drive grant. The Drive
-              // route rolls back partial uploads; only provider/server failures fall back.
+            let driveResponse: Response | null = null
+            try {
+              driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
+            } catch {
               tryFallbackStorage = true
-            } else {
-              throw new Error(driveBody.error || 'Google Drive memory upload failed.')
+            }
+            if (driveResponse) {
+              const driveBody = (await driveResponse.json().catch(() => ({}))) as { file?: { id?: string }; error?: string }
+              if (driveResponse.ok && driveBody.file?.id) {
+                memoryCreatedByMediaApi = true
+              } else if (driveResponse.status >= 500) {
+                // A connected flag can outlive a revoked/expired Drive grant. The Drive
+                // route rolls back partial uploads; only provider/server failures fall back.
+                tryFallbackStorage = true
+              } else {
+                throw new Error(driveBody.error || 'Google Drive memory upload failed.')
+              }
             }
           }
 
           if (!memoryCreatedByMediaApi && tryFallbackStorage) {
-            const mediaResponse = await fetch('/api/media/upload', { method: 'POST', body: formData })
-            const mediaBody = (await mediaResponse.json().catch(() => ({}))) as { file?: { id?: string; mimeType?: string }; error?: string }
-            if (mediaResponse.ok && mediaBody.file?.id) {
+            let mediaResponse: Response | null = null
+            let mediaBody: { file?: { id?: string; mimeType?: string }; error?: string } = {}
+            try {
+              mediaResponse = await fetch('/api/media/upload', { method: 'POST', body: formData })
+              mediaBody = (await mediaResponse.json().catch(() => ({}))) as typeof mediaBody
+            } catch {
+              // A failed provider request can still fall through to encrypted Supabase storage.
+            }
+            if (mediaResponse?.ok && mediaBody.file?.id) {
               storageProvider = 'cloudinary'
               mimeType = mediaBody.file.mimeType || mimeType
               memoryCreatedByMediaApi = true
-            } else if (mediaResponse.status < 500) {
+            } else if (mediaResponse && mediaResponse.status < 500) {
               throw new Error(mediaBody.error || 'Memory upload failed.')
             }
           }
