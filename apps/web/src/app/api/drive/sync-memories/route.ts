@@ -104,15 +104,22 @@ export async function POST(request: Request) {
 
     let imported = 0
     let updated = 0
+    let skippedConflicts = 0
     for (const file of imageFiles) {
       const { data: existing, error: existingError } = await supabase
         .from('memories')
-        .select('id,title,date,drive_folder_id')
+        .select('id,title,date,drive_folder_id,couple_id')
         .eq('drive_file_id', file.id)
         .maybeSingle()
       if (existingError) throw existingError
 
       const date = safeDate(file.modifiedTime)
+      if (existing?.id && existing.couple_id && existing.couple_id !== coupleId) {
+        // A Drive file can only be indexed into the couple that already owns its metadata.
+        // Do not rewrite another couple's memory when importing shared/external folders.
+        skippedConflicts += 1
+        continue
+      }
       if (existing?.id) {
         const { error } = await supabase
           .from('memories')
@@ -142,7 +149,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json({ rootFolderId: root.id, scanned: imageFiles.length, imported, updated })
+    return NextResponse.json({ rootFolderId: root.id, scanned: imageFiles.length, imported, updated, skippedConflicts })
   } catch (error) {
     console.error('[drive] memory sync failed:', error instanceof Error ? error.message : 'unknown error')
     return NextResponse.json({ error: 'Google Drive memory sync failed.' }, { status: 502 })

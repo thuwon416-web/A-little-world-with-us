@@ -33,3 +33,5 @@ Automated PASS is evidence for the tested revision only. Full authenticated cros
 
 ## Evidence rule
 DONE means implementation exists and relevant automated checks pass. VERIFIED requires environment evidence appropriate to the claim. Configuration is not live behavior.
+
+- Drive memory sync ownership coverage: same-origin protection, selected-couple-only traversal, and skipping a Drive file ID already indexed to another couple.

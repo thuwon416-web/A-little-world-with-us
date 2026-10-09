@@ -153,3 +153,8 @@ Owner-side manual verification remains last.
 - Web and Mobile chat attachment upload now route supported images and PDFs through Google Drive when the user's Drive connection is available. The Drive chat endpoint accepts the repository's allowlisted image/PDF types up to 25 MiB, validates file signatures, and keeps the organized `Chat/{year}/{month}/` path. Existing encrypted Supabase fallback remains when Drive is not connected; Mobile's existing 5 MiB picker/service limit still applies.
 - Added PDF upload regression coverage. Local checks after this batch: Web Vitest PASS (26 files / 102 tests), Web TypeScript PASS, Mobile TypeScript PASS, Mobile Jest PASS (5 suites / 17 tests), and `git diff --check` PASS.
 - CI status must always be checked against the exact commit SHA in GitHub Actions; prior SHA results do not automatically verify a new revision. Vercel remains paused by request.
+
+
+## 2026-10-09 Drive import ownership guard
+- Added a second ownership guard during Drive memory sync: when a Drive file ID is already indexed to a different couple, sync skips it and increments `skippedConflicts` instead of updating or re-inserting metadata across couple boundaries.
+- Added a regression test for a Drive file already indexed under another couple. GitHub Actions must verify this exact revision before the ownership guard is marked complete.

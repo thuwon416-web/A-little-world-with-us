@@ -98,4 +98,26 @@ describe('POST /api/drive/sync-memories', () => {
     expect(await response.json()).toMatchObject({ scanned: 2, imported: 2 })
     expect(listDriveChildren).not.toHaveBeenCalledWith('user-1', 'couple-2-folder')
   })
+
+  it('never rewrites a memory indexed to another couple', async () => {
+    const { memoryQuery } = setup()
+    listDriveChildren.mockResolvedValueOnce({ files: [
+      { id: 'photo-other-couple', name: 'private.jpg', mimeType: 'image/jpeg', modifiedTime: '2026-10-08T12:00:00Z' },
+    ] })
+    memoryQuery.maybeSingle.mockResolvedValueOnce({
+      data: { id: 'memory-other-couple', title: 'Private memory', date: '2026-10-01', drive_folder_id: 'folder-1', couple_id: 'couple-2' },
+      error: null,
+    })
+
+    const response = await POST(new Request('https://a-little-world-with-us.vercel.app/api/drive/sync-memories', {
+      method: 'POST',
+      body: JSON.stringify({ coupleId: 'couple-1' }),
+      headers: { 'Content-Type': 'application/json' },
+    }))
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({ scanned: 1, imported: 0, updated: 0, skippedConflicts: 1 })
+    expect(memoryQuery.update).not.toHaveBeenCalled()
+    expect(memoryQuery.insert).not.toHaveBeenCalled()
+  })
+
 })
