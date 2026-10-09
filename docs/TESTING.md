@@ -9,7 +9,7 @@ Test layers: Web lint/TypeScript/unit/accessibility/build; Mobile TypeScript/lin
 Automated PASS is evidence for the tested revision only. Full authenticated cross-device flows, Drive E2E, native permissions, offline/media recovery, visual UI regression, and real-user period/fertility scenarios remain release-boundary checks until exercised.
 
 ## Current close-out evidence
-- Local Web checks on the current working tree: `npm --prefix apps/web test` PASS (26 files / 100 tests); `npm --prefix apps/web run typecheck` PASS; `npm --prefix apps/web run lint` PASS with 0 errors and 33 warnings.
+- Local Web checks on the current working tree: `npm --prefix apps/web test` PASS (26 files / 101 tests); `npm --prefix apps/web run typecheck` PASS; `npm --prefix apps/web run lint` PASS with 0 errors and 33 warnings.
 - Local Mobile checks: `npm --prefix apps/mobile run typecheck` PASS; `npm --prefix apps/mobile test -- --runInBand` PASS (5 suites / 17 tests).
 - These results apply to the tested working tree; GitHub Actions must be rerun after the resulting commit, and no production authenticated Drive E2E is implied.
 - Korean 4–6 Web/Mobile structural parity: runtime-baseline advanced curriculum contains 12 advanced lessons on each platform, 4 each for Levels 4, 5, and 6. Human content QA is still pending.

@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { getOrCreateDriveRootFolder, listDriveChildren } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { isSameOriginRequest } from '@/lib/csrf'
 
 export const runtime = 'nodejs'
 
@@ -33,6 +34,8 @@ function isImportableImage(file: { mimeType: string; name: string }) {
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const supabase = await getAuthenticatedClient(request)
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -71,7 +74,18 @@ export async function POST(request: Request) {
         if (imageFiles.length >= MAX_FILES) break
         if (file.mimeType === DRIVE_FOLDER_MIME) {
           if (file.name === 'Chat' || file.name === 'System' || file.name === 'Archive') continue
-          const nextGroup = file.name === 'Couples' || file.name === 'Memories' || /^\d{4}$/.test(file.name) ? groupName : file.name
+          if (file.name === 'Couples') {
+            // The app-managed Couples tree can contain other relationships. Never
+            // import another couple's media into the couple ID supplied by the caller.
+            const managedCouples = await listDriveChildren(userId, file.id)
+            const requestedCouple = managedCouples.files.find((child) =>
+              child.mimeType === DRIVE_FOLDER_MIME && child.name === coupleId
+            )
+            if (requestedCouple) await walk(requestedCouple.id, groupName, depth + 2)
+            continue
+          }
+          const isYearFolder = file.name.length === 4 && [...file.name].every((char) => char >= '0' && char <= '9')
+          const nextGroup = file.name === 'Memories' || isYearFolder ? groupName : file.name
           await walk(file.id, nextGroup, depth + 1)
         } else if (isImportableImage(file)) {
           imageFiles.push({
