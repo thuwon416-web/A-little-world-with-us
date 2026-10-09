@@ -35,7 +35,10 @@ describe('POST /api/drive/delete', () => {
     isSameOriginRequest.mockReturnValue(true)
     getUser.mockResolvedValue({ data: { user: null } })
     checkRateLimit.mockResolvedValue({ allowed: true, remaining: 9, resetTime: Date.now() + 60000 })
-    from.mockImplementation(() => ({\n      update: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })),\n      delete: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })),\n    }))
+    from.mockImplementation(() => ({
+      update: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })),
+      delete: vi.fn(() => ({ eq: vi.fn(async () => ({ error: null })) })),
+    }))
   })
 
   it('requires authentication', async () => {
