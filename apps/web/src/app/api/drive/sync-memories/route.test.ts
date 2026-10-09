@@ -68,6 +68,7 @@ describe('POST /api/drive/sync-memories', () => {
   })
 
   it('imports external folders but never scans a different managed couple', async () => {
+    const { memoryQuery } = setup()
     listDriveChildren
       .mockResolvedValueOnce({ files: [
         { id: 'chat-1', name: 'Chat', mimeType: 'application/vnd.google-apps.folder' },
@@ -97,6 +98,8 @@ describe('POST /api/drive/sync-memories', () => {
     expect(response.status).toBe(200)
     expect(await response.json()).toMatchObject({ scanned: 2, imported: 2 })
     expect(listDriveChildren).not.toHaveBeenCalledWith('user-1', 'couple-2-folder')
+    // The live public.memories schema intentionally has no legacy visibility column.
+    expect(memoryQuery.insert).toHaveBeenCalledWith(expect.not.objectContaining({ visibility: 'shared' }))
   })
 
   it('never rewrites a memory indexed to another couple', async () => {
