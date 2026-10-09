@@ -108,3 +108,12 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 - Vercel: latest deployment attempts are failing at the build step because the connected Vercel Hobby build-rate limit is exhausted. The last observed build reached successful compilation but failed TypeScript on commit `8c42ae5`; the identified source errors were subsequently corrected, including the Drive sync authenticated-user bug fixed on `e62316ef`. A successful build of the corrected latest main has not yet been observed, so production-ready status remains unchecked.
 - Vercel environment audit: production/preview/development contain the required server-side Drive OAuth, encryption, Supabase, cron, AI-provider and notification variables; values were not read or exposed. Mobile env search found no Supabase service-role or Google client-secret usage.
 - Important security architecture note: chat encryption currently uses a `NEXT_PUBLIC_CHAT_ENCRYPTION_KEY` on Web and `EXPO_PUBLIC_CHAT_ENCRYPTION_KEY` on Mobile, so it is client-visible and must not be described as a secret/E2EE boundary. Changing it now would risk breaking existing message decryption; a future per-couple key-exchange hardening remains a separate post-stability security task.
+
+
+## 2026-10-09 continued non-Vercel close-out
+- B2 download authorization now rejects client-supplied object names outside `couples/{requested-couple}/large-media/`, validates actual NUL bytes, and has route regression tests for cross-origin blocking, NUL rejection, cross-couple object denial, and successful scoped authorization.
+- B2 upload route now applies same-origin protection and filename length/NUL validation before requesting an upload target.
+- Drive memory upload now creates the Drive memory folder using the same UUID written as the Supabase memory row ID, matching the documented `Memories/{year}/{memory-id}/` convention.
+- Drive upload route now applies same-origin protection; upload tests were repaired to mock the actual folder-helper dependencies and CSRF helper.
+- Automated test files were added/updated in GitHub, but test execution is still unverified in this environment; do not mark these as passed until CI/local test output is available.
+- Vercel work is intentionally paused per owner request. No new deployment attempted as part of this continuation.
