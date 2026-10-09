@@ -357,16 +357,24 @@ function MemoriesPageContent() {
           }
           if (locationLabel.trim()) formData.append('locationLabel', locationLabel.trim())
 
+          let tryFallbackStorage = !driveConnected
           if (driveConnected) {
             const driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
             const driveBody = (await driveResponse.json().catch(() => ({}))) as { file?: { id?: string }; error?: string }
-            if (!driveResponse.ok || !driveBody.file?.id) {
+            if (driveResponse.ok && driveBody.file?.id) {
+              memoryCreatedByMediaApi = true
+            } else if (driveResponse.status >= 500) {
+              // A connected flag can outlive a revoked/expired Drive grant. The Drive
+              // route rolls back partial uploads; only provider/server failures fall back.
+              tryFallbackStorage = true
+            } else {
               throw new Error(driveBody.error || 'Google Drive memory upload failed.')
             }
-            memoryCreatedByMediaApi = true
-          } else {
+          }
+
+          if (!memoryCreatedByMediaApi && tryFallbackStorage) {
             const mediaResponse = await fetch('/api/media/upload', { method: 'POST', body: formData })
-            const mediaBody = (await mediaResponse.json()) as { file?: { id?: string; mimeType?: string }; error?: string }
+            const mediaBody = (await mediaResponse.json().catch(() => ({}))) as { file?: { id?: string; mimeType?: string }; error?: string }
             if (mediaResponse.ok && mediaBody.file?.id) {
               storageProvider = 'cloudinary'
               mimeType = mediaBody.file.mimeType || mimeType

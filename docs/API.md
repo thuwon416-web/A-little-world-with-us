@@ -25,3 +25,5 @@ The same-origin guard also covers AI chat, journal reflection, Korean quiz gener
 
 ## Mutation-route security inventory (2026-10-09)
 All API route handlers that expose `POST`, `PUT`, `PATCH`, or `DELETE` now include an explicit same-origin check, while authenticated native clients using an `Authorization` header remain supported. High-risk storage and export endpoints have focused early-rejection tests.
+
+Memories upload uses Drive first. If the Drive endpoint fails at the provider/server layer (HTTP 5xx), the client attempts Cloudinary and then encrypted Supabase fallback when Cloudinary is unconfigured. It does not bypass authentication, authorization, validation, or rate-limit failures.

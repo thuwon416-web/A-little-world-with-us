@@ -179,3 +179,8 @@ Owner-side manual verification remains last.
 ## 2026-10-09 full mutation-route CSRF sweep — verified
 - GitHub Actions for code revision `8485837835d74a181746a1693f6e7b7341703d21` passed all five workflows: [Test](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37895950920), [E2E Tests](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37895950970), [Production Smoke E2E](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37895950919), [Secret scan](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37895950914), and [CodeQL](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/37895950892). Web coverage run passed 31 files / 110 tests; Mobile tests passed 1 suite / 3 tests. This does not substitute for authenticated production Drive E2E or current-main Vercel/native evidence.
 - Repository scan found zero `POST`/`PUT`/`PATCH`/`DELETE` route handlers without an explicit `isSameOriginRequest` guard. This is a source-level coverage check, not a substitute for endpoint-specific authorization testing.
+
+
+## 2026-10-09 Drive memory upload fallback recovery
+- Memories upload still tries Google Drive first. If the Drive upload route returns a server/provider failure (5xx), it now falls back to Cloudinary and then to encrypted Supabase storage if Cloudinary is unconfigured (503), instead of failing the entire upload when the saved Drive-connected state is stale. Authentication, authorization, validation, and rate-limit responses do not fall back.
+- The Drive upload route already rolls back partial Drive objects on failure. Current code revision requires a fresh CI pass; production Drive behavior still needs the consolidated authenticated E2E.

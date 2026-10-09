@@ -41,3 +41,5 @@ DONE means implementation exists and relevant automated checks pass. VERIFIED re
 - Additional mutation-route CSRF tests cover Drive memory export and media upload, alongside the earlier AI Guardian, export, feedback, and push-subscription cases.
 
 - Verified exact revision `8485837835d74a181746a1693f6e7b7341703d21`: all five GitHub Actions workflows passed; Web coverage suite passed 31 files / 110 tests and Mobile tests passed 1 suite / 3 tests. Mutation-route source scan found zero API `POST`/`PUT`/`PATCH`/`DELETE` handlers without an explicit same-origin guard.
+
+- Memories UI upload now follows Drive → Cloudinary → encrypted Supabase fallback when the Drive endpoint has a provider/server failure; auth, validation, authorization, and rate-limit errors remain hard failures. Verify current code revision in CI and production E2E before closing this item.
