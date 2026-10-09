@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { z } from 'zod'
@@ -11,6 +12,8 @@ const journalReflectSchema = z.object({
 })
 
 export async function POST(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   let authenticatedUserId: string | undefined
   try {
     const supabase = createServerClient(

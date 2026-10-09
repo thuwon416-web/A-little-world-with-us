@@ -37,3 +37,5 @@ DONE means implementation exists and relevant automated checks pass. VERIFIED re
 - Drive memory sync ownership coverage: same-origin protection, selected-couple-only traversal, and skipping a Drive file ID already indexed to another couple.
 
 - Cookie-authenticated mutation CSRF audit: AI generation routes, couple export, feedback, and browser push-subscription POST/DELETE now enforce same-origin checks; focused regression tests cover AI Guardian, export, feedback, and push-subscription rejection before session lookup.
+
+- Additional mutation-route CSRF tests cover Drive memory export and media upload, alongside the earlier AI Guardian, export, feedback, and push-subscription cases.

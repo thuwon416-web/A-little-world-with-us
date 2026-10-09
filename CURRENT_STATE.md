@@ -169,3 +169,8 @@ Owner-side manual verification remains last.
 ## 2026-10-09 Cookie-authenticated API CSRF audit
 - Added same-origin enforcement before session lookup to the nine AI generation routes, couple-data export, feedback submission, and browser push-subscription create/delete routes. Requests using an explicit Authorization header remain supported for authenticated native/API clients.
 - Added regression tests for AI Guardian, couple export, feedback, and both push-subscription mutation methods. Full CI is required to verify this revision; no production deployment was triggered.
+
+
+## 2026-10-09 Remaining cookie-authenticated mutation sweep
+- Extended same-origin checks to AI chat, journal reflection, Korean quiz generation, voice transcription, Drive memory export, and media upload. Added focused early-rejection tests for the Drive memory export and media upload routes.
+- The earlier CSRF batch on revision `2a816bfeb0261584db42f5e8fb7a0069a5040917` passed all five workflows, including 29 Web test files / 108 tests plus 3 E2E tests. This new sweep still needs its own exact-SHA CI result.

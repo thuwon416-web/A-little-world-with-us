@@ -161,3 +161,5 @@ After release stability:
 - Drive memory import now skips file IDs already indexed under another couple and reports `skippedConflicts`; verified by all five GitHub Actions workflows on code revision `1fcf9036a4cc03bfe26dee6b9a51928699c8e46f`; production authenticated Drive E2E and Vercel/native evidence remain separate gates.
 
 - Expanded same-origin protection across cookie-authenticated AI generation, couple export, feedback, and browser push-subscription mutations; focused tests assert early rejection before session lookup. Verify all workflow results against the exact commit before marking this security batch complete.
+
+- Follow-up mutation sweep extends same-origin enforcement to AI chat, journal reflection, Korean quiz generation, voice transcription, Drive memory export, and media upload; focused tests assert early rejection on the two storage routes. Exact-SHA CI evidence is pending for this follow-up revision.

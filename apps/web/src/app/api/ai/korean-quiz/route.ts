@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
@@ -126,6 +127,8 @@ function fallbackQuestions(input: QuizRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   let promptLength = 0
   try {
     const supabase = createServerClient(

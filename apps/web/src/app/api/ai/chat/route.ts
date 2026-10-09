@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { isSameOriginRequest } from '@/lib/csrf'
 import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
@@ -16,6 +17,8 @@ const chatSchema = z.object({
 const systemPrompt = 'You are a helpful relationship assistant for "A Little World With Us". Help with love advice, date ideas, and relationship tips. Be warm, supportive, romantic, and never judgmental. Reply in the same language as the user; use Myanmar language by default when the user does not clearly specify a language. Use MMK for monetary amounts.'
 
 export async function POST(req: NextRequest) {
+  if (!isSameOriginRequest(req)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   let authenticatedUserId: string | undefined
   try {
     const supabase = createServerClient(
