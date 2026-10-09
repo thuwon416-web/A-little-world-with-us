@@ -425,7 +425,6 @@ function MemoriesPageContent() {
               caption: caption.trim() || 'A memory together',
               date: memoryDate,
               category: memoryCategory,
-              visibility: 'shared',
               latitude: location?.latitude ?? null,
               longitude: location?.longitude ?? null,
               location_label: locationLabel.trim() || null,
