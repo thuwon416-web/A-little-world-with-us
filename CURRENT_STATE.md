@@ -224,3 +224,8 @@ Owner-side manual verification remains last.
 - Updated `docs/DRIVE_ARCHITECTURE.md`. Source commit `85d19fd613074c98f65051b71419100c76bd8964`; regression test commit `214b72c0ad8bdfa569319f9195005e47d5ad4118`. Automated workflow evidence for these source changes is still pending.
 
 - Follow-up live-schema sweep found the same unsupported `visibility` field in the Web encrypted-Supabase fallback insert. Removed it from `apps/web/src/app/(private)/memories/page.tsx` in source commit `cc97794066b98293289dbdd112a5cf97338c4509`. Live `public.memories` column inspection after the repair confirms `visibility` is absent while location/journal fields exist. The feature uses couple-scoped RLS for shared access; no new visibility column was introduced because there is no verified application/schema contract requiring one.
+
+
+## 2026-10-09 partial-failure upload UX hardening
+- Web Memories now retains only failed file selections after a mixed-success batch, while clearing successful files from the pending list to reduce accidental duplicate uploads. It preserves caption/date/category/location inputs when any file failed, so the user can correct the issue and retry without re-entering metadata.
+- Source commit: `bf9236391dead6903bce6e30a0fdc5f6bbd99db8`. Tests for this newest source commit have not yet been observed; current Vercel check is pending and no production UI claim is made.
