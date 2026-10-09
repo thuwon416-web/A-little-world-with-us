@@ -83,17 +83,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Memory location label must be 120 characters or fewer.' }, { status: 400 })
   }
 
+  const memoryId = crypto.randomUUID()
   let driveFile: Awaited<ReturnType<typeof uploadDriveFile>> | null = null
   let driveMemoryFolderId: string | null = null
   try {
     const coupleFolder = await getOrCreateDriveCoupleFolder(user.id, coupleId)
     const memoriesFolder = await getOrCreateDriveFolder(user.id, 'Memories', coupleFolder.id)
     const yearFolder = await getOrCreateDriveFolder(user.id, date.slice(0, 4), memoriesFolder.id)
-    driveMemoryFolderId = (await getOrCreateDriveFolder(user.id, crypto.randomUUID(), yearFolder.id)).id
+    driveMemoryFolderId = (await getOrCreateDriveFolder(user.id, memoryId, yearFolder.id)).id
 
     driveFile = await uploadDriveFile(user.id, file, driveMemoryFolderId)
 
-    const memoryId = crypto.randomUUID()
     const { data: memory, error: memoryError } = await supabase
       .from('memories')
       .insert({
