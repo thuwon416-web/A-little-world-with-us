@@ -128,3 +128,5 @@ Owner-side manual verification remains last.
 - Drive upload route now applies same-origin protection; upload tests were repaired to mock the actual folder-helper dependencies and CSRF helper.
 - Automated test files were added/updated in GitHub, but test execution is still unverified in this environment; do not mark these as passed until CI/local test output is available.
 - Vercel work is intentionally paused per owner request. No new deployment attempted as part of this continuation.
+
+- Additional permanent-delete audit fix: `/api/drive/delete` now applies same-origin protection and removes ownerless retained archive index rows by archive ID after the shared-couple authorization helper has approved the purge. Added a regression case for this account-erasure edge case; test execution is still pending CI evidence.
