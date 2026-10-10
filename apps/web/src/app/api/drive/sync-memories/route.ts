@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     for (const file of imageFiles) {
       const { data: existing, error: existingError } = await supabase
         .from('memories')
-        .select('id,title,date,drive_folder_id,couple_id')
+        .select('id,title,date,drive_folder_id,couple_id,location_label')
         .eq('drive_file_id', file.id)
         .maybeSingle()
       if (existingError) throw existingError
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
       if (existing?.id) {
         const { error } = await supabase
           .from('memories')
-          .update({ title: existing.title || file.groupName, caption: null, date, drive_folder_id: file.parentId, mime_type: file.mimeType, storage_provider: 'google_drive' })
+          .update({ title: existing.title || file.groupName, date, drive_folder_id: file.parentId, mime_type: file.mimeType, storage_provider: 'google_drive', location_label: existing.location_label || (file.groupName !== 'Imported memories' ? file.groupName : null) })
           .eq('id', existing.id)
         if (error) throw error
         updated += 1
@@ -142,6 +142,7 @@ export async function POST(request: Request) {
           caption: null,
           date,
           category: 'favorite',
+          location_label: file.groupName !== 'Imported memories' ? file.groupName : null,
         })
         if (error) throw error
         imported += 1
