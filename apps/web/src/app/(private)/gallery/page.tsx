@@ -98,10 +98,10 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
   )
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className={showUpload ? "space-y-6 p-4 md:p-6" : "space-y-4"}>
       <div className="rounded-modal border border-accent-1/20 bg-card p-6">
-        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Gallery</p>
-        <h1 className="mt-3 text-3xl font-serif text-text-1">Shared memories</h1>
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Our Gallery</p>
+        <h1 className="mt-2 text-xl font-serif text-text-1">Photos we keep close</h1>
       </div>
 
       {showUpload && coupleId && <ImageUpload onUpload={handleUpload} coupleId={coupleId} />}
