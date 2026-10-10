@@ -737,6 +737,18 @@ function MemoriesPageContent() {
         onDeleteMemory={handleDelete}
       />
 
+      {visibleCount < sortedMemories.length && (
+        <div className="flex justify-center">
+          <button
+            type="button"
+            onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
+            className="rounded-full border border-accent-1/20 bg-soft-tint px-5 py-2 text-sm text-text-1"
+          >
+            Load more memories
+          </button>
+        </div>
+      )}
+      {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-accent-1" /><p className="mt-4 text-lg text-text-1">No memories yet. Start creating your little world together!</p></section>}
       <section aria-labelledby="memory-map-heading" className="space-y-4">
         <div className="flex items-end justify-between gap-3">
           <div>
@@ -750,18 +762,6 @@ function MemoriesPageContent() {
         </div>
       </section>
 
-      {visibleCount < sortedMemories.length && (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
-            className="rounded-full border border-accent-1/20 bg-soft-tint px-5 py-2 text-sm text-text-1"
-          >
-            Load more memories
-          </button>
-        </div>
-      )}
-      {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-accent-1" /><p className="mt-4 text-lg text-text-1">No memories yet. Start creating your little world together!</p></section>}
       <section aria-labelledby="our-story-heading" className="space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-text-2">Our Story</p>
