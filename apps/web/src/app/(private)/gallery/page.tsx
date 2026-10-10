@@ -12,7 +12,7 @@ import { deleteGalleryImage, listGalleryImages, type GalleryImage } from '@/lib/
 import { supabase } from '@/lib/supabase'
 import { getDecryptedObjectUrl, revokeDecryptedUrl } from '@/lib/mediaEncryption'
 
-export default function GalleryContent() {
+export default function GalleryContent({ showUpload = true }: { showUpload?: boolean }) {
   const [images, setImages] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -104,7 +104,7 @@ export default function GalleryContent() {
         <h1 className="mt-3 text-3xl font-serif text-text-1">Shared memories</h1>
       </div>
 
-      {coupleId && <ImageUpload onUpload={handleUpload} coupleId={coupleId} />}
+      {showUpload && coupleId && <ImageUpload onUpload={handleUpload} coupleId={coupleId} />}
 
       {error && <div className="rounded-btn border border-error/20 bg-error/10 p-4 text-sm text-error">{error}</div>}
 
@@ -140,10 +140,10 @@ export default function GalleryContent() {
           {visibleImages.length === 0 ? (
             <p className="rounded-btn border border-dashed border-border bg-card p-6 text-center text-text-2">No photos from this year.</p>
           ) : null}
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
           {visibleImages.map((image) => (
             <div key={image.id} className="overflow-hidden rounded-btn border border-border bg-card shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
-              <Image src={image.url} alt={`Shared photo from ${new Date(image.created_at).toLocaleDateString()}`} width={256} height={256} unoptimized className="h-64 w-full object-cover" />
+              <Image src={image.url} alt={`Shared photo from ${new Date(image.created_at).toLocaleDateString()}`} width={256} height={256} unoptimized className="h-36 w-full object-cover sm:h-40 lg:h-44" />
               <div className="flex items-center justify-between gap-3 p-4">
                 <span className="text-xs uppercase tracking-[0.16em] text-text-2">
                   {new Date(image.created_at).toLocaleDateString()}
