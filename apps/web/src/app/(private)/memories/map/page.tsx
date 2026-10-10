@@ -9,7 +9,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 
 const MemoryMapView = dynamic(() => import('@/features/memories/MemoryMap'), { ssr: false, loading: () => <div className="h-[70vh] animate-pulse rounded-panel bg-soft-tint" /> })
 
-export default function MemoryMapContent() {
+export default function MemoryMapContent({ embedded = false }: { embedded?: boolean }) {
   const router = useRouter()
   const [memories, setMemories] = useState<Memory[]>([])
   const [coupleId, setCoupleId] = useState<string | null>(null)
@@ -48,8 +48,8 @@ export default function MemoryMapContent() {
     return () => { active = false }
   }, [])
   return (
-    <div className="mx-auto max-w-6xl space-y-5 px-4 py-8">
-      <h1 className="text-3xl font-serif text-text-1">Memory Map</h1>
+    <div className={embedded ? "space-y-4" : "mx-auto max-w-6xl space-y-5 px-4 py-8"}>
+      {!embedded ? <h1 className="text-3xl font-serif text-text-1">Memory Map</h1> : null}
       {error ? <p className="rounded-btn border border-error/20 bg-error/10 p-4 text-sm text-error" role="alert">{error}</p> : null}
       {loading ? <div className="h-96 animate-pulse rounded-panel bg-card" aria-label="Loading memory map" /> : !coupleId ? (
         <EmptyState icon={MapPin} title="Link your partner to see your shared map" description="Your located memories will appear here after you connect your accounts." action={{ label: 'Link your partner', onClick: () => router.push('/couple-linking') }} />
