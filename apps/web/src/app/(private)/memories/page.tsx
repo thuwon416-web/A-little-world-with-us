@@ -589,22 +589,34 @@ function MemoriesPageContent() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
-      <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-serif text-text-1">Our Memories</h1>
-        <p className="mt-2 text-sm text-text-2">
-          Keep the moments that feel like home.
-        </p>
+      <header className="relative overflow-hidden rounded-modal border border-accent-1/15 bg-gradient-to-br from-card via-soft-tint to-accent-2/10 p-5 sm:p-7">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div className="max-w-2xl">
+            <p className="text-xs uppercase tracking-[0.22em] text-accent-1">A little world, just for us</p>
+            <h1 className="mt-2 font-serif text-3xl text-text-1 sm:text-4xl">Our Memories</h1>
+            <p className="mt-2 max-w-xl text-sm leading-6 text-text-2">
+              Photos, places, little traditions, and words we want to keep close.
+            </p>
+          </div>
+          <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
         </div>
-        <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
+        <div className="mt-5 flex flex-wrap gap-2 text-xs text-text-2">
+          <span className="rounded-full border border-accent-1/15 bg-card/70 px-3 py-1.5">{memories.length} saved moments</span>
+          <span className="rounded-full border border-accent-1/15 bg-card/70 px-3 py-1.5">Shared with your partner</span>
+        </div>
       </header>
 
       <section aria-labelledby="memory-map-heading" className="space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Memory Map</p>
-          <h2 id="memory-map-heading" className="mt-1 text-2xl font-serif text-text-1">Places we remember</h2>
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-accent-1">Explore together</p>
+            <h2 id="memory-map-heading" className="mt-1 font-serif text-2xl text-text-1 sm:text-3xl">Places we remember</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-text-2">Your map pins and saved place names live together here, including place names found in synced Drive folders.</p>
+          </div>
         </div>
-        <MemoryMapContent />
+        <div className="overflow-hidden rounded-modal border border-accent-1/15 bg-card p-2 sm:p-3">
+          <MemoryMapContent />
+        </div>
       </section>
 
       <section aria-labelledby="time-capsule-heading" className="space-y-4">
@@ -679,11 +691,11 @@ function MemoriesPageContent() {
 
 
 
-      <section aria-labelledby="photo-memories-heading" className="space-y-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Our Gallery</p>
-          <h2 id="photo-memories-heading" className="mt-1 text-2xl font-serif text-text-1">Our photos & moments</h2>
-          <p className="text-sm text-text-2">Photos uploaded here and memories synced from Google Drive appear together below.</p>
+      <section aria-labelledby="photo-memories-heading" className="space-y-2">
+        <div className="rounded-modal border border-accent-1/15 bg-card p-4 sm:p-5">
+          <p className="text-xs uppercase tracking-[0.2em] text-accent-1">The moments we keep</p>
+          <h2 id="photo-memories-heading" className="mt-1 font-serif text-2xl text-text-1">Our photos & memories</h2>
+          <p className="mt-1 text-sm leading-6 text-text-2">Browse saved photos and moments below. Use the filters to find favorites, trips, rituals, and journal entries.</p>
         </div>
       </section>
 
