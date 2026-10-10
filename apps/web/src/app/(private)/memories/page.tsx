@@ -615,7 +615,7 @@ function MemoriesPageContent() {
           </div>
         </div>
         <div className="overflow-hidden rounded-modal border border-accent-1/15 bg-card p-2 sm:p-3">
-          <MemoryMapContent />
+          <MemoryMapContent embedded />
         </div>
       </section>
 
