@@ -29,10 +29,6 @@ const OurStoryContent = dynamic(
   () => import('@/app/(private)/our-story/page'),
   { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-panel bg-card" /> }
 )
-const GalleryContent = dynamic(
-  () => import('@/app/(private)/gallery/page'),
-  { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-panel bg-card" /> }
-)
 const TimeCapsulesContent = dynamic(
   () => import('@/app/(private)/time-capsules/page'),
   { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-panel bg-card" /> }
@@ -602,12 +598,12 @@ function MemoriesPageContent() {
         <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
       </header>
 
-      <section aria-labelledby="photo-memories-heading" className="space-y-4">
+      <section aria-labelledby="photo-memories-heading" className="space-y-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Photo memories</p>
-          <h2 id="photo-memories-heading" className="mt-1 text-2xl font-serif text-text-1">Photos we keep close</h2>
+          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Our Gallery</p>
+          <h2 id="photo-memories-heading" className="mt-1 text-2xl font-serif text-text-1">Our photos & moments</h2>
+          <p className="text-sm text-text-2">One shared collection for photos, saved moments, and places we remember.</p>
         </div>
-        <GalleryContent />
       </section>
 
       <section aria-labelledby="memory-map-heading" className="space-y-4">
@@ -630,7 +626,7 @@ function MemoriesPageContent() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-text-2">Add to our memories</p>
-            <h2 id="add-memory-heading" className="mt-1 text-2xl font-serif text-text-1">Save another moment</h2>
+            <h2 id="add-memory-heading" className="mt-1 text-2xl font-serif text-text-1">Add a memory</h2>
             {driveSyncSummary ? <p className="mt-1 text-xs text-text-2">{driveSyncSummary}</p> : null}
           </div>
           <button
@@ -952,7 +948,7 @@ function MemoryGrid({
   readonly onDeleteMemory: (memory: DisplayMemory) => void
 }) {
   return (
-    <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
       {memories.map((memory, index) => (
         memory.category === 'journal' ? (
           <article key={memory.id} className="glass-card relative space-y-3 p-5">
