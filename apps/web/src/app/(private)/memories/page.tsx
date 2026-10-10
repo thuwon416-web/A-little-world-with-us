@@ -13,7 +13,6 @@ import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { validateUpload } from '@/lib/upload-validation'
 import { encryptAndUpload, getCachedDecryptedUrl } from '@/lib/mediaEncryption'
-const GalleryContent = dynamic(() => import('@/app/(private)/gallery/page'), { ssr: false })
 
 const MemoryCurationAI = dynamic(
   () => import('@/features/memories/MemoryCurationAI'),
@@ -600,15 +599,6 @@ function MemoriesPageContent() {
         <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
       </header>
 
-      <section aria-labelledby="photo-memories-heading" className="space-y-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Our Gallery</p>
-          <h2 id="photo-memories-heading" className="mt-1 text-2xl font-serif text-text-1">Our photos & moments</h2>
-          <p className="text-sm text-text-2">One shared collection for photos, saved moments, and places we remember.</p>
-        </div>
-        <GalleryContent showUpload={false} />
-      </section>
-
       <section aria-labelledby="memory-map-heading" className="space-y-4">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-text-2">Memory Map</p>
@@ -688,6 +678,14 @@ function MemoriesPageContent() {
       </section>
 
 
+
+      <section aria-labelledby="photo-memories-heading" className="space-y-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Our Gallery</p>
+          <h2 id="photo-memories-heading" className="mt-1 text-2xl font-serif text-text-1">Our photos & moments</h2>
+          <p className="text-sm text-text-2">Photos uploaded here and memories synced from Google Drive appear together below.</p>
+        </div>
+      </section>
 
       <section className="glass-card p-5">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
