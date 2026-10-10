@@ -606,14 +606,6 @@ function MemoriesPageContent() {
         </div>
       </header>
 
-      <section aria-labelledby="time-capsule-heading" className="space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Time Capsule</p>
-          <h2 id="time-capsule-heading" className="mt-1 text-2xl font-serif text-text-1">Keep something for later</h2>
-        </div>
-        <TimeCapsulesContent />
-      </section>
-
       <section aria-labelledby="add-memory-heading" className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -760,6 +752,14 @@ function MemoriesPageContent() {
         <div className="overflow-hidden rounded-modal border border-accent-1/15 bg-card p-2 sm:p-3">
           <MemoryMapContent embedded />
         </div>
+      </section>
+
+      <section aria-labelledby="time-capsule-heading" className="space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Time Capsule</p>
+          <h2 id="time-capsule-heading" className="mt-1 text-2xl font-serif text-text-1">Keep something for later</h2>
+        </div>
+        <TimeCapsulesContent />
       </section>
 
       <section aria-labelledby="our-story-heading" className="space-y-4">
