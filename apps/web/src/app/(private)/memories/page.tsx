@@ -13,6 +13,7 @@ import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { validateUpload } from '@/lib/upload-validation'
 import { encryptAndUpload, getCachedDecryptedUrl } from '@/lib/mediaEncryption'
+const GalleryContent = dynamic(() => import('@/app/(private)/gallery/page'), { ssr: false })
 
 const MemoryCurationAI = dynamic(
   () => import('@/features/memories/MemoryCurationAI'),
@@ -101,6 +102,7 @@ function MemoriesPageContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [isDriveSyncing, setIsDriveSyncing] = useState(false)
+  const [isAddMemoryOpen, setIsAddMemoryOpen] = useState(false)
   const [driveSyncSummary, setDriveSyncSummary] = useState('')
   const [uploadProgress, setUploadProgress] = useState(0)
   const [uploadSummary, setUploadSummary] = useState('')
@@ -604,6 +606,7 @@ function MemoriesPageContent() {
           <h2 id="photo-memories-heading" className="mt-1 text-2xl font-serif text-text-1">Our photos & moments</h2>
           <p className="text-sm text-text-2">One shared collection for photos, saved moments, and places we remember.</p>
         </div>
+        <GalleryContent showUpload={false} />
       </section>
 
       <section aria-labelledby="memory-map-heading" className="space-y-4">
@@ -655,7 +658,11 @@ function MemoriesPageContent() {
             {isDriveSyncing ? 'Syncing Drive…' : 'Sync Drive memories'}
           </button>
         </div>
-      <MemoryUploadPanel
+      <div className="space-y-3">
+        <button type="button" onClick={() => setIsAddMemoryOpen((open) => !open)} className="rounded-full bg-accent-1 px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90">
+          {isAddMemoryOpen ? 'Cancel' : '+ Add a memory'}
+        </button>
+        {isAddMemoryOpen ? <MemoryUploadPanel
         caption={caption}
         memoryDate={memoryDate}
         memoryCategory={memoryCategory}
@@ -675,7 +682,8 @@ function MemoriesPageContent() {
         onErrorChange={setError}
         onFileChange={handleFileChange}
         onUpload={handleUpload}
-      />
+      /> : null}
+      </div>
 
       </section>
 
