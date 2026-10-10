@@ -588,14 +588,14 @@ function MemoriesPageContent() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 px-4 py-8">
+    <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8">
       <header className="relative overflow-hidden rounded-modal border border-accent-1/15 bg-gradient-to-br from-card via-soft-tint to-accent-2/10 p-5 sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs uppercase tracking-[0.22em] text-accent-1">A little world, just for us</p>
-            <h1 className="mt-2 font-serif text-3xl text-text-1 sm:text-4xl">Our Memories</h1>
+            <h1 className="mt-2 font-serif text-3xl text-text-1 sm:text-4xl">Our Gallery</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-text-2">
-              Photos, places, little traditions, and words we want to keep close.
+              Our shared photos, favorite places, and little moments worth keeping.
             </p>
           </div>
           <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
@@ -605,19 +605,6 @@ function MemoriesPageContent() {
           <span className="rounded-full border border-accent-1/15 bg-card/70 px-3 py-1.5">Shared with your partner</span>
         </div>
       </header>
-
-      <section aria-labelledby="memory-map-heading" className="space-y-4">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-accent-1">Explore together</p>
-            <h2 id="memory-map-heading" className="mt-1 font-serif text-2xl text-text-1 sm:text-3xl">Places we remember</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-text-2">Your map pins and saved place names live together here, including place names found in synced Drive folders.</p>
-          </div>
-        </div>
-        <div className="overflow-hidden rounded-modal border border-accent-1/15 bg-card p-2 sm:p-3">
-          <MemoryMapContent embedded />
-        </div>
-      </section>
 
       <section aria-labelledby="time-capsule-heading" className="space-y-4">
         <div>
@@ -749,6 +736,19 @@ function MemoriesPageContent() {
         onOpenMemory={setSelectedMemory}
         onDeleteMemory={handleDelete}
       />
+
+      <section aria-labelledby="memory-map-heading" className="space-y-4">
+        <div className="flex items-end justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-accent-1">Explore together</p>
+            <h2 id="memory-map-heading" className="mt-1 font-serif text-2xl text-text-1 sm:text-3xl">Places we remember</h2>
+            <p className="mt-1 max-w-2xl text-sm leading-6 text-text-2">Your map pins and saved place names live together here, including place names found in synced Drive folders.</p>
+          </div>
+        </div>
+        <div className="overflow-hidden rounded-modal border border-accent-1/15 bg-card p-2 sm:p-3">
+          <MemoryMapContent embedded />
+        </div>
+      </section>
 
       {visibleCount < sortedMemories.length && (
         <div className="flex justify-center">
@@ -966,7 +966,7 @@ function MemoryGrid({
   readonly onDeleteMemory: (memory: DisplayMemory) => void
 }) {
   return (
-    <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
+    <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
       {memories.map((memory, index) => (
         memory.category === 'journal' ? (
           <article key={memory.id} className="glass-card relative space-y-3 p-5">
