@@ -2,7 +2,7 @@
 
 Owner: Project maintainers
 Update when: release gates or verification evidence change
-Last Updated: 2026-10-09
+Last Updated: 2026-10-11
 
 ## 1. Current Release
 Final production close-out audit.
@@ -19,7 +19,7 @@ Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provid
 ## 5. VERIFIED
 - Live Supabase migration head: 20261009073304 — restore_memory_location_and_journal_columns, checked directly on 2026-10-09.
 - Bootstrap prefixes 33/51/52: distinct SQL changes reconciled against live timestamped migration history on 2026-10-08.
-- Web shared-memory storage precedence: Drive first when the authenticated Drive connection is active, then Cloudinary, then encrypted Supabase fallback; code and Vercel environment inventory checked 2026-10-08. Live public.memories currently has zero rows, so actual provider-use distribution is not claimed.
+- Web shared-memory storage precedence: Drive first when the authenticated Drive connection is active, then Cloudinary, then encrypted Supabase fallback; code and Vercel environment inventory checked 2026-10-08. Live public.memories contains 51 rows on 2026-10-11; provider-use distribution and image rendering still require authenticated per-row/provider E2E verification.
 - Korean 4–6 runtime build: production deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi reached READY from runtime baseline 1c3f78fa8fe34c518cb21b5834fbafa055892b82 on 2026-10-08.
 - Korean 4–6 structural parity: Web and Mobile advanced curriculum files at the verified runtime baseline each contain 12 advanced lesson entries, 4 each for Levels 4, 5, and 6. This is implementation evidence, not a substitute for human content QA.
 - Mobile Jest configuration cleanup: stale Sprint 2/Sprint 4 TODO wording removed and replaced with an explicit conservative baseline.
@@ -29,7 +29,7 @@ Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provid
 
 ## 7. IN PROGRESS
 - Drive OAuth E2E: code path is implemented, but no authenticated real-Google-account connect → consent → callback → Connected result is available in the tool environment.
-- Drive-backed memory E2E: upload route writes storage_provider=google_drive and drive_file_id, and retrieval route reads the file by ID; live memories has zero rows, so upload/re-render has not been live-verified.
+- Drive-backed memory E2E: upload route writes storage_provider=google_drive and drive_file_id, and retrieval route reads the file by ID; live public.memories currently contains 51 rows, but upload/re-render has not been live-verified.
 - Final Web ↔ Mobile smoke: implementation exists on both platforms, but no current authenticated cross-platform/device run is available.
 - Korean 4–6 content QA: structural parity is verified, but no human QA artifact or executed content-review log is available.
 - Final Memories UI pass: code is present; visual/device regression evidence is unavailable in the current tool environment.
@@ -41,7 +41,7 @@ Web/Mobile foundations; Korean Levels 4–6 implementation foundation; AI provid
 | --- | --- | --- |
 | Google Cloud callback registration | VERIFY | Google Cloud Console OAuth client configuration is not readable through available tools. |
 | Drive OAuth E2E | PENDING | Requires authenticated browser + real Google account consent/callback. |
-| Drive memory upload/re-render E2E | PENDING | Requires authenticated couple + Drive connection + actual upload; live memories table is empty. |
+| Drive memory upload/re-render E2E | PENDING | Requires authenticated couple + Drive connection + actual upload and render check; 51 existing metadata rows must be reconciled with their provider files without destructive changes. |
 | Web ↔ Mobile smoke | PENDING | Requires authenticated cross-platform/device execution. |
 | Android/iOS build verification | BLOCKED | Expo/EAS project is accessible, but build trigger returned No repository found for the current appId; current iOS build list is empty. Existing Android FINISHED builds are old and not current-main evidence. |
 | Dependabot refresh | BLOCKED | GitHub connector exposes code/issues/PRs but not the repository Dependabot alert endpoint; web access could not authenticate to the private Security/Dependabot page. |
@@ -229,3 +229,11 @@ Owner-side manual verification remains last.
 ## 2026-10-09 partial-failure upload UX hardening
 - Web Memories now retains only failed file selections after a mixed-success batch, while clearing successful files from the pending list to reduce accidental duplicate uploads. It preserves caption/date/category/location inputs when any file failed, so the user can correct the issue and retry without re-entering metadata.
 - Source commit: `bf9236391dead6903bce6e30a0fdc5f6bbd99db8`. Tests for this newest source commit have not yet been observed; current Vercel check is pending and no production UI claim is made.
+
+
+## 2026-10-11 follow-up audit — live state and documentation reconciliation
+- GitHub `main` at `49d8c4b65f1aabdcb8ae725d65db32b2f2040ed3`; Vercel production deployment `dpl_HsR48sF3nQB2a6JM4mUQr7wwRMNA` is READY for that exact SHA. GitHub combined status was previously reported successful; runtime error query for the last 24 hours returned no errors. This is deployment/runtime evidence only, not authenticated feature E2E.
+- Direct Supabase query on 2026-10-11 reports 78 public tables and 51 rows in `public.memories`. This supersedes earlier notes that the table was empty. Do not bulk-import old Gallery objects or rewrite existing memory rows until provider IDs, object paths, couple ownership, and duplicates are reconciled.
+- Live Supabase advisors on 2026-10-11 report 12 authenticated-callable `SECURITY DEFINER` findings and 120 unused-index notices. Do not revoke RPC access or drop indexes blindly: inspect each function's authorization contract and evaluate indexes against production query plans/workload first. Leaked-password protection remains a platform setting gate.
+- Legacy Gallery and new Memories are still separate storage/display paths: `/gallery` reads the legacy Supabase Storage `gallery` bucket, while `/memories` reads `public.memories` and provider-specific media. The legacy page was restored to prevent hiding old photos; safe unified indexing/migration remains open.
+- Repository-side verification still cannot authenticate a real Google account, inspect Google Cloud OAuth client registration, or run a logged-in cross-device/device flow. Keep those gates PENDING/VERIFY until evidence is captured.
