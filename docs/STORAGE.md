@@ -2,7 +2,7 @@
 
 Owner: Backend / Storage
 Update when: media providers, retention, encryption, or retrieval paths change
-Last Updated: 2026-10-08
+Last Updated: 2026-10-11
 
 Supabase stores application metadata/source-of-truth references.
 
@@ -29,7 +29,7 @@ Existing encryption documentation describes application-level encryption, not en
 
 ## Drive E2E close-out status
 
-Code-level behavior is verified, but live Drive behavior is not yet verified. The available environment cannot authenticate a real Google account or inspect Google Cloud OAuth client registration. A real upload/re-render test must demonstrate:
+Code-level behavior is implemented, but live Drive behavior is not yet verified. A live Supabase query on 2026-10-11 found 51 memory metadata rows; their provider files and rendering have not been individually reconciled. The available environment cannot authenticate a real Google account or inspect Google Cloud OAuth client registration. A real upload/re-render test must demonstrate:
 1. connected Drive account,
 2. upload succeeds,
 3. `memories.storage_provider=google_drive`,
@@ -40,3 +40,8 @@ Code-level behavior is verified, but live Drive behavior is not yet verified. Th
 
 
 See [docs/DRIVE_ARCHITECTURE.md](./DRIVE_ARCHITECTURE.md) for the canonical folder, import, chat archive and deletion rules.
+
+
+## Legacy Gallery migration safety (2026-10-11)
+
+The legacy `/gallery` page still reads objects from the Supabase Storage `gallery` bucket, while `/memories` uses `public.memories` plus provider-specific storage. Keep both visible until a safe, idempotent bridge has been implemented and tested. Do not delete or move legacy objects as part of indexing. Before migration, record per-couple object counts and paths, reconcile metadata/provider IDs, check duplicates and file reachability, and retain a rollback path. The live `public.memories` table contains 51 rows as of 2026-10-11; earlier zero-row statements are stale.
