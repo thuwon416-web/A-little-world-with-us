@@ -237,3 +237,9 @@ Owner-side manual verification remains last.
 - Live Supabase advisors on 2026-10-11 report 12 authenticated-callable `SECURITY DEFINER` findings and 120 unused-index notices. Do not revoke RPC access or drop indexes blindly: inspect each function's authorization contract and evaluate indexes against production query plans/workload first. Leaked-password protection remains a platform setting gate.
 - Legacy Gallery and new Memories are still separate storage/display paths: `/gallery` reads the legacy Supabase Storage `gallery` bucket, while `/memories` reads `public.memories` and provider-specific media. The legacy page was restored to prevent hiding old photos; safe unified indexing/migration remains open.
 - Repository-side verification still cannot authenticate a real Google account, inspect Google Cloud OAuth client registration, or run a logged-in cross-device/device flow. Keep those gates PENDING/VERIFY until evidence is captured.
+
+
+## 2026-10-11 media UI bridge follow-up
+- Added `apps/web/src/features/memories/LegacyGallery.tsx` and embedded it into the Memories page. It reuses the existing legacy gallery listing/decryption path, so old encrypted bucket objects remain in place and become visible from the Memories experience without a destructive move.
+- The embedded legacy section hides its delete action. The standalone legacy `/gallery` route still exists; the old objects have not been migrated into the `public.memories` provider grid. Full unification, idempotent inventory/reconciliation, and end-to-end render testing remain open.
+- Source commits: `780bf35734840141908e1d2f0b4a3bc3f4102b86` (component), `36675a4fed6892284889c3bebae79e9cd7280293` (Memories integration), `8f53ba3797ec57275e678b10d11964af5bf00b22` (disable embedded delete). Current Vercel deployment for the last SHA was QUEUED at the time of check; do not claim production delivery until READY.
