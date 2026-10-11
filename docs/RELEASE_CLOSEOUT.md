@@ -1,6 +1,6 @@
 # Release Close-out Ledger
 
-Updated: 2026-10-08
+Updated: 2026-10-11
 
 This ledger keeps the close-out work continuous without pretending that owner/device evidence exists before it is collected.
 
@@ -145,3 +145,10 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 - A source scan covered 31 mutating API handlers (`POST`/`PUT`/`PATCH`/`DELETE`) and found zero route files missing explicit `isSameOriginRequest` enforcement.
 - Drive and chat uploads now advance to configured fallback storage for provider/server failures; uncertain browser POST network failures do not automatically duplicate a file.
 - Vercel remains paused at the owner’s request. No deployment was triggered; authenticated real-Drive E2E, current-main native builds, and manual release gates remain open.
+
+
+## 2026-10-11 evidence refresh
+- [ ] Reconcile live `public.memories` (51 rows observed on 2026-10-11) with provider files; earlier zero-row statements are stale.
+- [ ] Unify legacy `/gallery` (Supabase Storage `gallery` bucket) with `/memories` only after inventory, duplicate detection, ownership checks, and rollback evidence.
+- [ ] Re-run exact-SHA CI and production build after current documentation/source commits; latest observed production READY deployment at the start of this audit was SHA `49d8c4b65f1aabdcb8ae725d65db32b2f2040ed3`, with no runtime error clusters in the last 24 hours. Docs-only commits may be queued separately and must be checked again.
+- [ ] Refresh Supabase advisor evidence: 12 authenticated-callable SECURITY DEFINER findings; 120 unused-index notices. Review function authorization individually and defer index removal until workload/query-plan review.
