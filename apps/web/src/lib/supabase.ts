@@ -134,7 +134,7 @@ export type Memory = {
   location_label?: string | null
   reveal_at?: string | null
   mime_type?: string | null
-  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary' | 'backblaze_b2'
+  storage_provider?: 'supabase' | 'google_drive' | 'cloudinary'
   drive_file_id?: string | null
   cloudinary_asset_id?: string | null
   cloudinary_public_id?: string | null
