@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { Frown, Heart, Meh, Pencil, Smile, Sparkles, Square, Trash2, TriangleAlert, Volume2, X } from 'lucide-react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
+import LegacyGallery from '@/features/memories/LegacyGallery'
 import MemorySlideshow from '@/features/memories/MemorySlideshow'
 import SlideshowLaunchButton from '@/features/memories/SlideshowLaunchButton'
 const MemoryLocationPicker = dynamic(() => import('@/features/memories/MemoryLocationPicker'), { ssr: false })
@@ -728,6 +729,15 @@ function MemoriesPageContent() {
         onOpenMemory={setSelectedMemory}
         onDeleteMemory={handleDelete}
       />
+
+      <section aria-labelledby="legacy-gallery-heading" className="space-y-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.2em] text-text-2">From your original gallery</p>
+          <h2 id="legacy-gallery-heading" className="mt-1 text-2xl font-serif text-text-1">Previously saved photos</h2>
+          <p className="mt-1 text-sm text-text-2">These photos stay in their original encrypted Gallery storage. Nothing is moved or deleted while the safe migration is prepared.</p>
+        </div>
+        <LegacyGallery showUpload={false} />
+      </section>
 
       {visibleCount < sortedMemories.length && (
         <div className="flex justify-center">
