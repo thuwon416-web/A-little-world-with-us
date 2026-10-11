@@ -2,13 +2,15 @@
 
 Owner: Project maintainers
 Status: PREPARED — manual verification is intentionally deferred until Phase 10 close-out.
-Last Updated: 2026-10-08
+Last Updated: 2026-10-11
 
 ## Rule
 
 Do not run owner-side manual checks one-by-one while Phases 7–9 are still changing code. Collect all manual evidence once, after the final release revision is deployed and stable.
 
 ## Phase 10 single-pass checklist
+
+**Updated 2026-10-11:** Live `public.memories` contains 51 rows; reconcile each row/provider/file before testing upload. Legacy `/gallery` still uses the separate Supabase Storage `gallery` bucket. Keep the old gallery available until a non-destructive, idempotent migration/indexing path is verified.
 
 ### A. Google Drive / Web OAuth
 - [ ] In Google Cloud OAuth client, confirm production redirect URI:
@@ -131,3 +133,10 @@ Only after release stability: curriculum grammar/vocabulary sequencing, Korea Li
 - [ ] Delete a Drive-backed Memory from the app and confirm the original is moved to `Archive/Deleted Memories` and remains in Drive while the Memory disappears from the active app view.
 - [ ] Reconnect/use the partner Drive connection and confirm retained shared media remains readable; do not delete shared media during account-erasure verification.
 - [ ] Use the explicit permanent Drive-delete action on one test archive only and confirm the Drive object and archive index entry are removed.
+
+
+### E. Legacy Gallery preservation and reconciliation
+- [ ] Inventory existing `gallery` bucket objects per accepted couple and record counts/paths.
+- [ ] Compare legacy objects with `public.memories` provider IDs/paths; identify duplicates, missing files, orphan metadata, and ownership conflicts.
+- [ ] Implement an idempotent bridge or migration without moving/deleting original objects; verify decryption/rendering and rollback before changing the legacy page.
+- [ ] Confirm all existing photos remain visible in the unified Memories experience after refresh and across partner accounts.
