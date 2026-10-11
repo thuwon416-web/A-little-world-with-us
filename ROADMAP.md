@@ -2,7 +2,7 @@
 
 Owner: Project maintainers
 Update when: phase scope or release gates change
-Last Updated: 2026-10-08
+Last Updated: 2026-10-11
 
 ## Working rule for close-out
 Code-side work is completed and prepared as far as repository access allows before owner-side/manual verification. External credentials, API keys, Google Cloud/Vercel/Supabase console values, authenticated user flows, and physical-device evidence are collected at the end as one verification pass.
@@ -132,3 +132,22 @@ Detailed ledger: `docs/RELEASE_CLOSEOUT.md`.\nEvidence template: `docs/RELEASE_E
 - Added organized Drive folders for app-created Memories and Chat archives, external memory-folder sync, Drive-backed Web/Mobile chat images, daily chat archive indexing, and safe message deletion that preserves Drive originals.
 - Added Supabase archive/index migration and updated release evidence rules.
 - Remaining gates are authenticated production E2E, OAuth reauthorization under the broader Drive scope, current-main native/device verification, and regression/CI evidence. These are not marked complete by source changes alone.
+
+
+## 2026-10-11 re-audit — confirmed remaining work
+
+This checkpoint supersedes any older note that `public.memories` is empty. Direct live Supabase query returned **51 memory metadata rows** and 78 public tables on 2026-10-11. The latest observed Vercel production deployment is READY for `49d8c4b65f1aabdcb8ae725d65db32b2f2040ed3`; the last-24-hour runtime error query returned no errors. Neither fact proves authenticated Memories/Drive E2E.
+
+### Release gates still open
+- [ ] **Legacy Gallery → Memories unification:** preserve and inventory all objects in the old Supabase Storage `gallery` bucket; design an idempotent, ownership-safe bridge into the Memories UI; keep original objects untouched until row-level/provider/file-count reconciliation and rollback plan exist. The `/gallery` page remains available because the legacy bucket and `public.memories` are not yet one unified source.
+- [ ] **Existing 51 memory rows:** reconcile each row's couple scope, provider, provider ID/path, folder/location, and actual file reachability. Report missing/orphaned/duplicate references before changing metadata; no blind import/delete.
+- [ ] **Google Drive live E2E:** confirm Google Cloud OAuth redirect URI `https://a-little-world-with-us.vercel.app/api/drive/callback`; reauthorize old grants for full Drive scope; run connect → consent → callback → Connected → external-folder sync → upload → reload/render → archive/delete test with a real couple account.
+- [ ] **Places/Memory Map:** create test memories with location labels and coordinates; verify named-place list, pin rendering, duplicate suppression, permission-denied/no-coordinate states, and Web/Mobile parity.
+- [ ] **Supabase security/performance:** review all 12 authenticated-callable SECURITY DEFINER functions against their intended RPC callers and internal auth checks; keep only justified grants. Review 120 unused-index notices against real query workload before any drops. Verify leaked-password protection setting in the Supabase dashboard.
+- [ ] **Current-main CI + production:** run Test, E2E, Production Smoke, Secret Scan, CodeQL on the exact release SHA; run Web build/deployment after deployment limits/pause permit; verify deployed SHA matches source.
+- [ ] **Native/device:** resolve EAS current-main repository/build linkage; produce current-main Android and iOS builds where supported; smoke-test Drive OAuth/deep links, camera/media, notifications, background location/maps, WebRTC, offline recovery.
+- [ ] **Product acceptance:** authenticated Web↔Mobile smoke; Memories visual check; controlled Period/Fertility scenario; Korean Levels 4–6 human content QA; accessibility keyboard/focus/disabled/link/status checks.
+- [ ] **External blockers:** refresh GitHub Dependabot alerts via a credentialed Security view; verify B2 real upload/download/authorization if B2 remains active; select and configure an email provider/API key before emergency-contact email delivery can be tested.
+
+### Do not mark complete from source-only evidence
+Production readiness remains **PENDING RELEASE VERIFICATION** until the applicable authenticated/browser/device/external-console evidence above is captured. A READY deployment and zero recent runtime-error clusters do not close these gates.
