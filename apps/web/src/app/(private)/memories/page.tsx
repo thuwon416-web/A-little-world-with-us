@@ -165,6 +165,18 @@ function MemoriesPageContent() {
         setMemories([])
         return
       }
+      // Idempotently index legacy Gallery metadata before reading the canonical collection.
+      // The endpoint never moves or deletes original Gallery objects.
+      const legacyIndexResponse = await fetch('/api/memories/index-legacy-gallery', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({}),
+      })
+      if (!legacyIndexResponse.ok) {
+        const legacyIndexBody = await legacyIndexResponse.json().catch(() => ({})) as { error?: string }
+        console.warn('Legacy Gallery indexing was not completed:', legacyIndexBody.error ?? legacyIndexResponse.status)
+      }
+
       const { data, error: memoriesError } = await supabase
         .from('memories')
         .select('*,mime_type')
@@ -187,6 +199,12 @@ function MemoriesPageContent() {
             return { ...memory, displayUrl: mediaResponse.ok ? (mediaBody.url ?? '') : '', mime_type: memory.mime_type }
           }
           const path = memory.storage_path ?? memory.image_url ?? ''
+          const memoryMetadata = (memory as Memory & { metadata?: Record<string, unknown> | null }).metadata
+          const legacyGalleryPath = typeof memoryMetadata?.legacy_gallery_path === 'string' ? memoryMetadata.legacy_gallery_path : null
+          if (legacyGalleryPath && memoryMetadata?.legacy_gallery_bucket === 'gallery' && link?.couple_id) {
+            const displayUrl = await getCachedDecryptedUrl(link.couple_id, 'gallery', legacyGalleryPath, memory.mime_type || 'image/jpeg')
+            return { ...memory, displayUrl, mime_type: memory.mime_type }
+          }
           if (provider === 'google_drive' && driveFileId) {
             return { ...memory, displayUrl: `/api/drive/file?fileId=${encodeURIComponent(driveFileId)}&download=1`, mime_type: memory.mime_type }
           }
@@ -1046,7 +1064,7 @@ function MemoryGrid({
                 {memory.category}
               </span>
             )}
-            {memory.user_id && (
+            {memory.user_id && !(memory.metadata && typeof memory.metadata === 'object' && 'legacy_gallery_original' in memory.metadata && memory.metadata.legacy_gallery_original === true) && (
               <button
                 type="button"
                 onClick={() => onDeleteMemory(memory)}
