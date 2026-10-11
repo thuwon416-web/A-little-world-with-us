@@ -2,7 +2,7 @@
 
 Owner: Engineering / QA
 Update when: tests or acceptance criteria change
-Last Updated: 2026-10-09
+Last Updated: 2026-10-11
 
 Test layers: Web lint/TypeScript/unit/accessibility/build; Mobile TypeScript/lint/Jest; GitHub Secret Scan/CodeQL; production smoke/E2E; Supabase-backed authenticated E2E; native/device/offline verification.
 
@@ -15,7 +15,7 @@ Automated PASS is evidence for the tested revision only. Full authenticated cros
 - Korean 4–6 Web/Mobile structural parity: runtime-baseline advanced curriculum contains 12 advanced lessons on each platform, 4 each for Levels 4, 5, and 6. Human content QA is still pending.
 - Korean runtime production build: Vercel deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi reached READY on 2026-10-08.
 - Period/fertility: cycle logic and parity tests exist, but no authenticated real-user scenario is available.
-- Memories: source inspection confirms Drive upload writes drive_file_id and retrieval reads it; no live memory row exists for E2E evidence.
+- Memories: source inspection confirms Drive upload writes drive_file_id and retrieval reads it; 51 live memory rows were observed on 2026-10-11, but none has yet been proven as an end-to-end upload/retrieval/render test record.
 - Mobile Jest: stale Sprint 2/Sprint 4 planning comments were removed; the current configuration uses an explicit conservative 5% global line baseline until the suite is expanded.
 
 ## Verification Trigger Table
@@ -51,3 +51,9 @@ DONE means implementation exists and relevant automated checks pass. VERIFIED re
 - Chat attachment upload on Web/Mobile now falls back to encrypted Supabase when Drive status cannot be checked or the Drive upload endpoint returns 5xx; non-5xx errors remain hard failures.
 
 - Latest source revision `48d35db6f32aecf4f5c41abd430582caa8cf8117` passed all five GitHub Actions workflows; Web coverage passed 31 files / 110 tests and Mobile tests passed 1 suite / 3 tests. Source scan: 31 mutating API handlers, zero missing explicit same-origin guards.
+
+
+## 2026-10-11 verification boundary
+- Production Vercel deployment for source SHA `49d8c4b65f1aabdcb8ae725d65db32b2f2040ed3` was READY and its GitHub combined status was successful; the 24-hour runtime error query returned no error clusters. These checks do not prove login-gated Memories/Drive behavior.
+- The documentation commits made during the 2026-10-11 audit require their own CI/deployment state check. Never transfer prior test evidence to a different SHA.
+- Live memory count is 51; provider reachability, cross-couple access control, and rendered media must be checked with authenticated E2E.
