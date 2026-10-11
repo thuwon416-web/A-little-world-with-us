@@ -45,3 +45,8 @@ See [docs/DRIVE_ARCHITECTURE.md](./DRIVE_ARCHITECTURE.md) for the canonical fold
 ## Legacy Gallery migration safety (2026-10-11)
 
 The legacy `/gallery` page still reads objects from the Supabase Storage `gallery` bucket, while `/memories` uses `public.memories` plus provider-specific storage. Keep both visible until a safe, idempotent bridge has been implemented and tested. Do not delete or move legacy objects as part of indexing. Before migration, record per-couple object counts and paths, reconcile metadata/provider IDs, check duplicates and file reachability, and retain a rollback path. The live `public.memories` table contains 51 rows as of 2026-10-11; earlier zero-row statements are stale.
+
+
+## Interim Legacy Gallery visibility bridge — 2026-10-11
+
+The Memories page now embeds `features/memories/LegacyGallery.tsx`, which uses the existing legacy encrypted `gallery` bucket reader and decryption path. It does not move/copy/delete legacy objects and hides delete controls in the embedded view. This preserves the legacy photos in the Memories experience while full provider-grid unification is developed. The standalone `/gallery` route remains available. This is not a completed migration: metadata indexing, duplicate/reachability reconciliation, and authenticated end-to-end rendering are still pending.
