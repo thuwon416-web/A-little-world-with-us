@@ -23,7 +23,9 @@ export async function POST(request: Request) {
   if (linkError) return NextResponse.json({ error: 'Unable to verify couple access.' }, { status: 500 })
   if (!links || links.length !== 1) return NextResponse.json({ error: 'Exactly one accepted couple link is required.' }, { status: 409 })
   const link = links[0]
-  const owners = [...new Set([link.inviter_id, link.accepted_by].filter((id): id is string => Boolean(id)))]
+  // RLS intentionally permits a user to insert memories only with their own user_id.
+  // Index this signed-in user's folder; the partner's originals are indexed when they visit too.
+  const owners = [user.id]
   let indexed = 0
 
   for (const ownerId of owners) {
