@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { getOrCreateDriveCoupleFolder, getOrCreateDriveFolder, moveDriveFileToFolder } from '@/lib/google-drive'
-import { deleteCloudinaryAsset } from '@/lib/cloudinary'
 import { isSameOriginRequest } from '@/lib/csrf'
 import { checkRateLimit } from '@/lib/rate-limit'
 
@@ -42,28 +41,41 @@ export async function POST(request: Request) {
   if (!memory) return NextResponse.json({ error: 'Memory not found.' }, { status: 404 })
   if (memory.user_id !== user.id) return NextResponse.json({ error: 'You can only delete memories you created.' }, { status: 403 })
 
+  // Do not permanently delete original media until a reversible archive workflow is
+  // available for that provider. This protects users from losing irreplaceable photos.
+  if (memory.storage_provider === 'cloudinary' || memory.storage_provider === 'supabase') {
+    return NextResponse.json({
+      error: 'This photo is protected from permanent deletion. Reversible archive support is required before it can be removed.',
+      code: 'ARCHIVE_REQUIRED',
+    }, { status: 409 })
+  }
+
+  if (memory.storage_provider !== 'google_drive' || !memory.drive_file_id) {
+    return NextResponse.json({
+      error: 'This memory has no supported archive target, so it was left unchanged.',
+      code: 'ARCHIVE_UNAVAILABLE',
+    }, { status: 409 })
+  }
+
   try {
-    if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
-      const coupleFolder = await getOrCreateDriveCoupleFolder(user.id, memory.couple_id)
-      const archiveFolder = await getOrCreateDriveFolder(user.id, 'Archive', coupleFolder.id)
-      const deletedMemoriesFolder = await getOrCreateDriveFolder(user.id, 'Deleted Memories', archiveFolder.id)
-      await moveDriveFileToFolder(user.id, memory.drive_file_id, deletedMemoriesFolder.id)
-      const { error: archiveError } = await supabase.from('drive_media_archive').insert({
-        drive_file_id: memory.drive_file_id,
-        owner_id: user.id,
-        couple_id: memory.couple_id,
-        source_type: 'memory',
-        source_id: memory.id,
-        original_folder_id: memory.drive_folder_id ?? null,
-        archive_folder_id: deletedMemoriesFolder.id,
-      })
-      if (archiveError) throw archiveError
-    } else if (memory.storage_provider === 'cloudinary' && memory.cloudinary_asset_id) {
-      await deleteCloudinaryAsset(memory.cloudinary_asset_id)
-    } else if (memory.storage_provider === 'supabase' && memory.storage_path) {
-      const { error } = await supabase.storage.from('memories').remove([memory.storage_path])
-      if (error) throw error
-    }
+    const coupleFolder = await getOrCreateDriveCoupleFolder(user.id, memory.couple_id)
+    const archiveFolder = await getOrCreateDriveFolder(user.id, 'Archive', coupleFolder.id)
+    const deletedMemoriesFolder = await getOrCreateDriveFolder(user.id, 'Deleted Memories', archiveFolder.id)
+
+    // Record the recovery metadata before moving the original file. If the archive
+    // insert fails, the original remains in its existing Drive location.
+    const { error: archiveError } = await supabase.from('drive_media_archive').insert({
+      drive_file_id: memory.drive_file_id,
+      owner_id: user.id,
+      couple_id: memory.couple_id,
+      source_type: 'memory',
+      source_id: memory.id,
+      original_folder_id: memory.drive_folder_id ?? null,
+      archive_folder_id: deletedMemoriesFolder.id,
+    })
+    if (archiveError) throw archiveError
+
+    await moveDriveFileToFolder(user.id, memory.drive_file_id, deletedMemoriesFolder.id)
 
     const { error: deleteError } = await supabase
       .from('memories')
@@ -72,9 +84,9 @@ export async function POST(request: Request) {
       .eq('user_id', user.id)
 
     if (deleteError) throw deleteError
-    return NextResponse.json({ ok: true })
+    return NextResponse.json({ ok: true, archived: true })
   } catch (error) {
-    console.error('Memory asset deletion failed', error instanceof Error ? error.message : 'unknown error')
-    return NextResponse.json({ error: 'Memory deletion failed.' }, { status: 502 })
+    console.error('Memory archive failed', error instanceof Error ? error.message : 'unknown error')
+    return NextResponse.json({ error: 'Memory archive failed. The original file was not intentionally deleted; check its archive state before retrying.' }, { status: 502 })
   }
 }
