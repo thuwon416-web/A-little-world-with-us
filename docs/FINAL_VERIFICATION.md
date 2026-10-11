@@ -140,3 +140,11 @@ Only after release stability: curriculum grammar/vocabulary sequencing, Korea Li
 - [ ] Compare legacy objects with `public.memories` provider IDs/paths; identify duplicates, missing files, orphan metadata, and ownership conflicts.
 - [ ] Implement an idempotent bridge or migration without moving/deleting original objects; verify decryption/rendering and rollback before changing the legacy page.
 - [ ] Confirm all existing photos remain visible in the unified Memories experience after refresh and across partner accounts.
+
+
+### Latest implementation delta (2026-10-11)
+- [x] Interim visibility bridge: existing encrypted Gallery reader is embedded in Memories without moving original objects; embedded delete controls are hidden.
+- [ ] Verify the deployment for commit `8f53ba3797ec57275e678b10d11964af5bf00b22` reaches READY and CI passes.
+- [ ] Sign in with an accepted couple and verify old Gallery photos render in the embedded section for both partners; confirm no photo count changes.
+- [ ] Finish full provider-grid unification and row/object reconciliation before claiming the migration complete.
+- [ ] Real-account Google Drive OAuth/upload/retrieve/archive E2E remains pending; source/env presence alone is not acceptance evidence.
