@@ -2,7 +2,7 @@
 
 Owner: Backend / Supabase
 Update when: schema, migrations, RLS, indexes, or database procedures change
-Last Updated: 2026-10-09
+Last Updated: 2026-10-11
 
 Supabase is the application data and metadata source of truth.
 
@@ -10,7 +10,7 @@ The historical bootstrap README is stale: repository bootstrap material continue
 
 Live Supabase migration head was checked directly on 2026-10-09: `20261009073304 — restore_memory_location_and_journal_columns`. The repository's highest numeric bootstrap filename is not proof of the live head.
 
-On 2026-10-09, direct live-schema inspection found that `public.memories` was missing `latitude`, `longitude`, `location_label`, and `metadata`, despite current application code depending on those fields. Applied the additive migration `restore_memory_location_and_journal_columns` (version `20261009073304`) and verified all four columns now exist. It also restores the partial location and journal indexes. This was non-destructive; the live `public.memories` table had 0 rows at verification time, so no existing memory data was altered.
+On 2026-10-09, direct live-schema inspection found that `public.memories` was missing `latitude`, `longitude`, `location_label`, and `metadata`, despite current application code depending on those fields. Applied the additive migration `restore_memory_location_and_journal_columns` (version `20261009073304`) and verified all four columns now exist. It also restores the partial location and journal indexes. This was non-destructive; the live `public.memories` table had 0 rows at that verification time, so no existing memory data was altered. A later direct query on 2026-10-11 returned 51 rows; this newer count supersedes the historical zero-row snapshot.
 
 Evidence: [Supabase project migrations](https://supabase.com/dashboard/project/mktfnwdvzbdrxfcvnolp/database/migrations) — live state observed 2026-10-08.
 
@@ -21,3 +21,9 @@ Security-sensitive RPCs must enforce authenticated/couple authorization. Interna
 Unused-index and FK-index advisor findings are deferred until workload evidence and Web↔Mobile parity are stable.
 
 Current product documentation targets Korean Levels 1–6. Any schema constraint claiming 1–7 must be reconciled against the live database before being authoritative.
+
+
+## Live audit refresh — 2026-10-11
+- Direct read-only query returned 78 tables in `public` and 51 rows in `public.memories`.
+- Supabase security advisor: 12 authenticated-callable SECURITY DEFINER function findings; assess each function's intended public RPC contract and internal authorization before changing grants.
+- Supabase performance advisor: 120 unused-index notices. These are candidates for workload review, not an instruction to drop indexes. Do not run bulk destructive index changes without query-plan/traffic evidence.
