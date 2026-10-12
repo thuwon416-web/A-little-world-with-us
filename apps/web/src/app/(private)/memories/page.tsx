@@ -607,7 +607,7 @@ function MemoriesPageContent() {
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8 px-4 py-6 sm:px-6 sm:py-8">
+    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-5 sm:space-y-8 sm:px-6 sm:py-8">
       <header className="relative overflow-hidden rounded-modal border border-accent-1/15 bg-gradient-to-br from-card via-soft-tint to-accent-2/10 p-5 sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
@@ -782,7 +782,7 @@ function MemoriesPageContent() {
         </div>
       </section>
 
-      <section aria-labelledby="time-capsule-heading" className="space-y-4">
+      <section aria-labelledby="time-capsule-heading" className="space-y-4 rounded-modal border border-accent-1/15 bg-card/50 p-4 sm:p-5">
         <div>
           <p className="text-xs uppercase tracking-[0.2em] text-text-2">Time Capsule</p>
           <h2 id="time-capsule-heading" className="mt-1 text-2xl font-serif text-text-1">Keep something for later</h2>
@@ -798,7 +798,7 @@ function MemoriesPageContent() {
         <OurStoryContent />
       </section>
 
-      <section className="glass-card rounded-modal border border-accent-1/15 p-5"><div className="mb-4"><p className="text-xs uppercase tracking-[0.2em] text-text-2">AI companion</p><h2 className="mt-1 text-xl font-serif text-text-1">Make more of a memory</h2><p className="mt-1 text-sm text-text-2">Reflect on a moment, turn it into a story, or talk it through gently.</p></div><MemoryCurationAI memories={memories.map((memory) => ({ id: memory.id, title: memory.title ?? memory.caption ?? 'A memory together', date: memory.date }))} /><div className="mt-4 border-t border-border/30 pt-4"><ExplicitAdviceControl title="Talk through a memory" description="Ask for a gentle, two-sided reflection about a memory." placeholder="What happened, and what would you like help understanding?" /></div></section>
+      <section className="glass-card rounded-modal border border-accent-1/15 p-4 sm:p-5"><div className="mb-4"><p className="text-xs uppercase tracking-[0.2em] text-text-2">AI companion</p><h2 className="mt-1 text-xl font-serif text-text-1">Make more of a memory</h2><p className="mt-1 text-sm text-text-2">Reflect on a moment, turn it into a story, or talk it through gently.</p></div><MemoryCurationAI memories={memories.map((memory) => ({ id: memory.id, title: memory.title ?? memory.caption ?? 'A memory together', date: memory.date }))} /><div className="mt-4 border-t border-border/30 pt-4"><ExplicitAdviceControl title="Talk through a memory" description="Ask for a gentle, two-sided reflection about a memory." placeholder="What happened, and what would you like help understanding?" /></div></section>
 
       {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} coupleId={coupleLinkId ?? ''} /> : null}
       {selectedMemory && <MemoryDetail memory={selectedMemory} onClose={() => setSelectedMemory(null)} onSaved={(updated) => {
@@ -994,7 +994,7 @@ function MemoryGrid({
   readonly onDeleteMemory: (memory: DisplayMemory) => void
 }) {
   return (
-    <section className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+    <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
       {memories.map((memory, index) => (
         memory.category === 'journal' ? (
           <article key={memory.id} className="glass-card relative space-y-3 p-5">
