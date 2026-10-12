@@ -1,4 +1,4 @@
-import { Audio } from 'expo-av'
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
 import { Pause, Play, Volume2 } from 'lucide-react-native'
 import { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -13,29 +13,36 @@ export function VoiceMessageGallery({ messages }: Props) {
   const styles = createStyles(colors)
   const voiceMessages = messages.filter((message) => message.type === 'voice' && message.mediaUrl)
   const [activeId, setActiveId] = useState<string | null>(null)
-  const [sound, setSound] = useState<Audio.Sound | null>(null)
+  const player = useAudioPlayer(null)
+  const status = useAudioPlayerStatus(player)
+
+  useEffect(() => {
+    if (status.didJustFinish) {
+      setActiveId(null)
+    }
+  }, [status.didJustFinish])
 
   useEffect(
     () => () => {
-      if (sound) void sound.unloadAsync()
+      player.remove()
     },
-    [sound]
+    [player]
   )
+
   if (!voiceMessages.length) return null
 
   const toggle = async (message: ChatMessage) => {
     if (!message.mediaUrl) return
-    if (activeId === message.id && sound) {
-      await sound.pauseAsync()
-      setActiveId(null)
+    if (activeId === message.id) {
+      if (status.playing) {
+        player.pause()
+      } else {
+        player.play()
+      }
       return
     }
-    if (sound) await sound.unloadAsync()
-    const result = await Audio.Sound.createAsync({ uri: message.mediaUrl }, { shouldPlay: true })
-    result.sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinish) setActiveId(null)
-    })
-    setSound(result.sound)
+    player.replace({ uri: message.mediaUrl })
+    player.play()
     setActiveId(message.id)
   }
 
@@ -50,23 +57,27 @@ export function VoiceMessageGallery({ messages }: Props) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.list}
       >
-        {voiceMessages.map((message) => (
-          <TouchableOpacity
-            key={message.id}
-            style={styles.item}
-            onPress={() => void toggle(message)}
-          >
-            {activeId === message.id ? (
-              <Pause color={colors.background} size={14} />
-            ) : (
-              <Play color={colors.background} size={14} />
-            )}
-            <Text style={styles.label}>
-              {message.sender === 'me' ? 'You' : 'Partner'}
-              {message.mediaDuration ? ` · ${message.mediaDuration}s` : ''}
-            </Text>
-          </TouchableOpacity>
-        ))}
+        {voiceMessages.map((message) => {
+          const isActive = activeId === message.id
+          const isPlaying = isActive && status.playing
+          return (
+            <TouchableOpacity
+              key={message.id}
+              style={styles.item}
+              onPress={() => void toggle(message)}
+            >
+              {isPlaying ? (
+                <Pause color={colors.background} size={14} />
+              ) : (
+                <Play color={colors.background} size={14} />
+              )}
+              <Text style={styles.label}>
+                {message.sender === 'me' ? 'You' : 'Partner'}
+                {message.mediaDuration ? ` · ${message.mediaDuration}s` : ''}
+              </Text>
+            </TouchableOpacity>
+          )
+        })}
       </ScrollView>
     </View>
   )

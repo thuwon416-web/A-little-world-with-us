@@ -1,6 +1,12 @@
-import { Audio } from 'expo-av'
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from 'expo-audio'
 import { Mic, Square, X } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Alert, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import type { ChatAttachment } from './chat-types'
@@ -16,55 +22,56 @@ type Props = {
 export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
-  const [recording, setRecording] = useState<Audio.Recording | null>(null)
-  const [duration, setDuration] = useState(0)
-  const [saving, setSaving] = useState(false)
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY)
+  const recorderState = useAudioRecorderState(recorder)
+  const duration = Math.floor((recorderState.durationMillis ?? 0) / 1000)
 
   useEffect(
     () => () => {
-      if (recording) void recording.stopAndUnloadAsync()
+      if (recorderState.isRecording) {
+        void recorder.stop().catch(() => undefined)
+      }
     },
-    [recording]
+    [recorder, recorderState.isRecording]
   )
 
   const start = async () => {
-    const permission = await Audio.requestPermissionsAsync()
-    if (!permission.granted) {
-      Alert.alert('Permission needed', 'Allow microphone access to record a voice note.')
-      return
+    try {
+      const permission = await AudioModule.requestRecordingPermissionsAsync()
+      if (!permission.granted) {
+        Alert.alert('Permission needed', 'Allow microphone access to record a voice note.')
+        return
+      }
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
+      await recorder.prepareToRecordAsync()
+      recorder.record()
+    } catch (error) {
+      Alert.alert(
+        'Voice note failed',
+        error instanceof Error ? error.message : 'Unable to start recording.'
+      )
     }
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true })
-    const result = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
-    result.recording.setOnRecordingStatusUpdate((status) => {
-      if (status.isRecording) setDuration(Math.floor(status.durationMillis / 1000))
-    })
-    setRecording(result.recording)
-    setDuration(0)
   }
 
   const stop = async () => {
-    if (!recording) return
-    setSaving(true)
     try {
-      await recording.stopAndUnloadAsync()
-      const uri = recording.getURI()
+      await recorder.stop()
+      const uri = recorder.uri
       if (!uri) throw new Error('The recording was not saved.')
       await onRecord({
         attachment: { uri, name: `voice-${Date.now()}.m4a`, mimeType: 'audio/m4a' },
         duration,
       })
-      setRecording(null)
-      setDuration(0)
       onClose()
     } catch (error) {
       Alert.alert(
         'Voice note failed',
         error instanceof Error ? error.message : 'Unable to send voice note.'
       )
-    } finally {
-      setSaving(false)
     }
   }
+
+  const isRecording = recorderState.isRecording
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
@@ -80,17 +87,16 @@ export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
             {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, '0')}
           </Text>
           <TouchableOpacity
-            style={[styles.record, recording && styles.stop]}
-            onPress={() => void (recording ? stop() : start())}
-            disabled={saving}
+            style={[styles.record, isRecording && styles.stop]}
+            onPress={() => void (isRecording ? stop() : start())}
           >
-            {recording ? (
+            {isRecording ? (
               <Square color={colors.background} size={30} />
             ) : (
               <Mic color={colors.background} size={30} />
             )}
           </TouchableOpacity>
-          <Text style={styles.secondary}>{recording ? 'Tap to stop' : 'Tap to record'}</Text>
+          <Text style={styles.secondary}>{isRecording ? 'Tap to stop' : 'Tap to record'}</Text>
         </View>
       </View>
     </Modal>

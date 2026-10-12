@@ -1,4 +1,12 @@
-import { Audio } from 'expo-av'
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioPlayer,
+  useAudioPlayerStatus,
+  useAudioRecorder,
+  useAudioRecorderState,
+} from 'expo-audio'
 import { useRouter } from 'expo-router'
 import * as Speech from 'expo-speech'
 import {
@@ -18,7 +26,7 @@ import {
   Volume2,
   Wand2,
 } from 'lucide-react-native'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,
   Alert,
@@ -91,14 +99,22 @@ export default function MemoryJournal() {
   const [journalMood, setJournalMood] = useState<JournalMood>('okay')
   const [journalSaving, setJournalSaving] = useState(false)
   const [reflectingId, setReflectingId] = useState<string | null>(null)
-  const [journalRecording, setJournalRecording] = useState<Audio.Recording | null>(null)
   const [journalVoiceUri, setJournalVoiceUri] = useState<string | null>(null)
   const [journalVoiceRemoteUrl, setJournalVoiceRemoteUrl] = useState<string | null>(null)
-  const [journalRecordingTime, setJournalRecordingTime] = useState(0)
-  const [journalPlaying, setJournalPlaying] = useState(false)
-  const [journalSound, setJournalSound] = useState<Audio.Sound | null>(null)
   const [journalUploadingVoice, setJournalUploadingVoice] = useState(false)
   const [speakingJournalId, setSpeakingJournalId] = useState<string | null>(null)
+
+  // ── Audio recorder for journal voice notes ──────────────────────────
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY)
+  const recorderState = useAudioRecorderState(recorder)
+  const journalRecording = recorderState.isRecording
+  const journalRecordingTime = Math.floor((recorderState.durationMillis ?? 0) / 1000)
+
+  // ── Audio player for preview + playback ─────────────────────────────
+  const previewPlayer = useAudioPlayer(null)
+  const previewStatus = useAudioPlayerStatus(previewPlayer)
+  const journalPlaying = previewStatus.playing
+  const loadedUriRef = useRef<string | null>(null)
 
   const loadMemories = async () => {
     const records = await getMemories()
@@ -144,18 +160,23 @@ export default function MemoryJournal() {
         setError(error_ instanceof Error ? error_.message : 'Unable to load memories.')
       )
   }, [])
+
   useEffect(
     () => () => {
-      if (journalRecording) void journalRecording.stopAndUnloadAsync()
-      if (journalSound) void journalSound.unloadAsync()
       void Speech.stop()
+      previewPlayer.remove()
+      if (recorderState.isRecording) {
+        void recorder.stop().catch(() => undefined)
+      }
     },
-    [journalRecording, journalSound]
+    [previewPlayer, recorder, recorderState.isRecording]
   )
+
   const visible = useMemo(
     () => (filter === 'all' ? memories : memories.filter((memory) => memory.category === filter)),
     [filter, memories]
   )
+
   const remove = (memory: MemoryRecord) =>
     Alert.alert('Delete memory?', 'This cannot be undone.', [
       { text: 'Cancel', style: 'cancel' },
@@ -165,16 +186,12 @@ export default function MemoryJournal() {
         onPress: () =>
           void (async () => {
             try {
-              // Remove the database record first so a failed Drive request cannot leave
-              // a visible memory pointing at a missing remote file.
               await deleteMemory(memory.id)
               setMemories((current) => current.filter((item) => item.id !== memory.id))
               if (memory.storage_provider === 'google_drive' && memory.drive_file_id) {
                 try {
                   await deleteSharedDriveFile(memory.drive_file_id)
                 } catch (driveError) {
-                  // The memory is already removed from the app and database; report
-                  // remote cleanup separately so the UI cannot keep a broken record.
                   throw new Error(
                     driveError instanceof Error
                       ? `Memory removed, but Google Drive cleanup failed: ${driveError.message}`
@@ -189,114 +206,109 @@ export default function MemoryJournal() {
           })(),
       },
     ])
+
   const openNewJournal = () => {
-    if (journalSound) void journalSound.unloadAsync()
+    previewPlayer.pause()
     setEditingJournalId(null)
     setJournalTitle('')
     setJournalBody('')
     setJournalMood('okay')
-    setJournalRecording(null)
     setJournalVoiceUri(null)
     setJournalVoiceRemoteUrl(null)
-    setJournalRecordingTime(0)
-    setJournalPlaying(false)
-    setJournalSound(null)
     setJournalModalOpen(true)
   }
+
   const openEditJournal = (memory: JournalMemory) => {
     setEditingJournalId(memory.id)
     setJournalTitle(memory.title)
     setJournalBody(memory.description ?? '')
     setJournalVoiceRemoteUrl(memory.metadata?.voice_path ?? memory.metadata?.voice_url ?? null)
     setJournalVoiceUri(null)
-    setJournalRecording(null)
-    setJournalRecordingTime(0)
-    setJournalPlaying(false)
     const tag = memory.metadata?.mood_tag
     setJournalMood(JOURNAL_MOODS.some((mood) => mood.id === tag) ? (tag as JournalMood) : 'okay')
     setJournalModalOpen(true)
   }
+
   const closeJournalModal = () => {
-    if (journalRecording) void journalRecording.stopAndUnloadAsync()
-    if (journalSound) void journalSound.unloadAsync()
+    if (recorderState.isRecording) {
+      void recorder.stop().catch(() => undefined)
+    }
+    previewPlayer.pause()
     setJournalModalOpen(false)
     setEditingJournalId(null)
     setJournalTitle('')
     setJournalBody('')
     setJournalMood('okay')
-    setJournalRecording(null)
     setJournalVoiceUri(null)
     setJournalVoiceRemoteUrl(null)
-    setJournalRecordingTime(0)
-    setJournalPlaying(false)
-    setJournalSound(null)
   }
+
   const startJournalRecording = async () => {
-    const permission = await Audio.requestPermissionsAsync()
-    if (!permission.granted) {
-      Alert.alert('Permission needed', 'Allow microphone access to record a voice note.')
-      return
+    try {
+      const permission = await AudioModule.requestRecordingPermissionsAsync()
+      if (!permission.granted) {
+        Alert.alert('Permission needed', 'Allow microphone access to record a voice note.')
+        return
+      }
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true })
+      await recorder.prepareToRecordAsync()
+      recorder.record()
+      setJournalVoiceUri(null)
+      setJournalVoiceRemoteUrl(null)
+    } catch (error_) {
+      Alert.alert(
+        'Voice note failed',
+        error_ instanceof Error ? error_.message : 'Unable to start recording.'
+      )
     }
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true })
-    const result = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY)
-    result.recording.setOnRecordingStatusUpdate((status) => {
-      if (status.isRecording) setJournalRecordingTime(Math.floor(status.durationMillis / 1000))
-    })
-    setJournalRecording(result.recording)
-    setJournalRecordingTime(0)
-    setJournalVoiceUri(null)
-    setJournalVoiceRemoteUrl(null)
   }
+
   const stopJournalRecording = async () => {
-    if (!journalRecording) return
-    await journalRecording.stopAndUnloadAsync()
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: false })
-    const uri = journalRecording.getURI()
-    setJournalVoiceUri(uri ?? null)
-    setJournalRecording(null)
+    try {
+      await recorder.stop()
+      const uri = recorder.uri
+      setJournalVoiceUri(uri ?? null)
+    } catch {
+      // ignore
+    }
   }
+
   const discardJournalVoice = async () => {
-    if (journalRecording) {
+    if (recorderState.isRecording) {
       try {
-        await journalRecording.stopAndUnloadAsync()
+        await recorder.stop()
       } catch {
-        // The recording may already be unloaded after stopping.
+        // ignore
       }
     }
-    if (journalSound) await journalSound.unloadAsync()
-    setJournalRecording(null)
+    previewPlayer.pause()
     setJournalVoiceUri(null)
     setJournalVoiceRemoteUrl(null)
-    setJournalRecordingTime(0)
-    setJournalPlaying(false)
-    setJournalSound(null)
   }
+
   const playJournalVoice = async (source?: string) => {
     let uri = source ?? journalVoiceUri ?? journalVoiceRemoteUrl
     if (!uri) return
-    if (journalPlaying && journalSound) {
-      await journalSound.stopAsync()
-      await journalSound.unloadAsync()
-      setJournalSound(null)
-      setJournalPlaying(false)
+    if (journalPlaying) {
+      previewPlayer.pause()
       return
     }
-    if (!uri.startsWith('http://') && !uri.startsWith('https://') && !uri.startsWith('file://') && !uri.startsWith('content://')) {
+    if (
+      !uri.startsWith('http://') &&
+      !uri.startsWith('https://') &&
+      !uri.startsWith('file://') &&
+      !uri.startsWith('content://')
+    ) {
       if (!coupleId) throw new Error('No accepted couple is linked to this account.')
       uri = await downloadDecryptAndCache(coupleId, 'memories', uri, 'audio/m4a')
     }
-    const { sound } = await Audio.Sound.createAsync({ uri })
-    sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinish) {
-        void sound.unloadAsync()
-        setJournalSound(null)
-        setJournalPlaying(false)
-      }
-    })
-    setJournalSound(sound)
-    setJournalPlaying(true)
-    await sound.playAsync()
+    if (loadedUriRef.current !== uri) {
+      previewPlayer.replace({ uri })
+      loadedUriRef.current = uri
+    }
+    previewPlayer.play()
   }
+
   const saveJournal = async () => {
     if (!journalTitle.trim() || journalSaving) return
     setJournalSaving(true)
@@ -378,6 +390,7 @@ export default function MemoryJournal() {
       setJournalSaving(false)
     }
   }
+
   const requestReflection = async (memory: JournalMemory) => {
     if (reflectingId) return
     setReflectingId(memory.id)
@@ -413,6 +426,7 @@ export default function MemoryJournal() {
       setReflectingId(null)
     }
   }
+
   const speakReflection = async (memory: JournalMemory) => {
     const text = memory.metadata?.ai_reflection
     if (!text) return
@@ -434,6 +448,7 @@ export default function MemoryJournal() {
       setSpeakingJournalId(null)
     }
   }
+
   const createCuratedStory = async () => {
     if (!curationSelected.length || curationLoading) {
       if (!curationSelected.length) setCurationError('Choose at least one memory first.')
@@ -508,6 +523,7 @@ export default function MemoryJournal() {
       setMediatorLoading(false)
     }
   }
+
   return (
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.eyebrow, { color: colors.accent2 }]}>Memories</Text>
@@ -609,7 +625,7 @@ export default function MemoryJournal() {
                 )}
               </View>
               <Text style={[styles.meta, { color: colors.accent2 }]}>
-                {memory.category} {memory.date ? `• ${memory.date}` : ''}
+                {memory.category} {memory.date ? `â€¢ ${memory.date}` : ''}
               </Text>
               {memory.caption ? (
                 <Text style={[styles.caption, { color: colors.textSecondary }]}>
@@ -667,10 +683,10 @@ export default function MemoryJournal() {
                   </TouchableOpacity>
                 )
               ) : null}
-              {memory.category === 'journal' && memory.metadata?.voice_url ? (
+              {memory.category === 'journal' && (memory.metadata?.voice_url || memory.metadata?.voice_path) ? (
                 <TouchableOpacity
                   style={[styles.voiceRow, { borderColor: colors.cardBorder }]}
-                  onPress={() => void playJournalVoice(memory.metadata?.voice_url)}
+                  onPress={() => void playJournalVoice(memory.metadata?.voice_path ?? memory.metadata?.voice_url)}
                 >
                   <Play color={colors.accent1} size={16} />
                   <Text style={[styles.reflectButtonText, { color: colors.accent1 }]}>
@@ -851,7 +867,7 @@ export default function MemoryJournal() {
             disabled={!mediatorMessage.trim() || mediatorLoading}
           >
             <Text style={[styles.askButtonText, { color: colors.background }]}>
-              {mediatorLoading ? 'Thinking…' : 'Ask mediator'}
+              {mediatorLoading ? 'Thinkingâ€¦' : 'Ask mediator'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -993,6 +1009,7 @@ export default function MemoryJournal() {
     </ScrollView>
   )
 }
+
 const createStyles = (colors: ThemeColors, sizes: Sizes, paddingTop: number) =>
   StyleSheet.create({
     container: { flexGrow: 1, padding: 20, paddingTop, gap: 14 },

@@ -1,6 +1,6 @@
-import { Audio } from 'expo-av'
+import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
 import { Captions, FileText, MapPin, Play, Reply, Siren, Square, Trash2 } from 'lucide-react-native'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Alert, Image, Linking, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import type { ChatMessageType, NativeChatMessage } from './chat/chat-types'
@@ -38,39 +38,37 @@ export function ChatBubble({
 }: Props) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
-  const [sound, setSound] = useState<Audio.Sound | null>(null)
-  const [playing, setPlaying] = useState(false)
   const isMe = message.sender === 'me'
+
+  const player = useAudioPlayer(message.mediaUrl ? { uri: message.mediaUrl } : null)
+  const status = useAudioPlayerStatus(player)
+  const playing = status.playing
+
   useEffect(
     () => () => {
-      if (sound) void sound.unloadAsync()
+      player.remove()
     },
-    [sound]
+    [player]
   )
+
   const toggleAudio = async () => {
     if (!message.mediaUrl) return
-    if (sound) {
-      if (playing) {
-        await sound.pauseAsync()
-        setPlaying(false)
-      } else {
-        await sound.playAsync()
-        setPlaying(true)
+    if (playing) {
+      player.pause()
+    } else {
+      if (status.didJustFinish) {
+        await player.seekTo(0)
       }
-      return
+      player.play()
     }
-    const result = await Audio.Sound.createAsync({ uri: message.mediaUrl }, { shouldPlay: true })
-    result.sound.setOnPlaybackStatusUpdate((status) => {
-      if (status.isLoaded && status.didJustFinish) setPlaying(false)
-    })
-    setSound(result.sound)
-    setPlaying(true)
   }
+
   const remove = () =>
     Alert.alert('Delete message?', 'This removes the attachment and message for both partners.', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: () => onDelete?.(message) },
     ])
+
   return (
     <View
       style={[
