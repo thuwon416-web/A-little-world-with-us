@@ -192,18 +192,18 @@ export default function DashboardPage() {
 
   return (
     <div
-      className={`dashboard-shell animate-fade-in ${activeOccasion ? `dashboard-shell--${activeOccasion.kind}` : ''}`}
+      className={`dashboard-shell mx-auto w-full max-w-7xl space-y-6 px-3 py-4 animate-fade-in sm:space-y-8 sm:px-6 sm:py-8 ${activeOccasion ? `dashboard-shell--${activeOccasion.kind}` : ''}`}
     >
       <section className="dashboard-hero">
         <div className="dashboard-hero__glow" />
-        <div className="dashboard-hero__content">
+        <div className="dashboard-hero__content min-w-0">
           <div className="dashboard-hero__topline">
             <p className="dashboard-kicker">Home</p>
             <span className="dashboard-pill">{heroCopy.greeting}</span>
           </div>
 
           <div className="dashboard-hero__title-wrap">
-            <h1 className="dashboard-hero__title">A Little World with Us</h1>
+            <h1 className="dashboard-hero__title break-words text-3xl sm:text-4xl lg:text-5xl">A Little World with Us</h1>
             <span className="dashboard-hero__badge">∞</span>
           </div>
 
@@ -226,8 +226,8 @@ export default function DashboardPage() {
             <CoupleLinkStatus />
           </div>
 
-          <div className="dashboard-hero__microcards">
-            <div className="dashboard-mini-card">
+          <div className="dashboard-hero__microcards grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
+            <div className="dashboard-mini-card min-w-0 rounded-panel border border-accent-1/15 bg-card/80 p-4">
               <span className="dashboard-mini-label">Today&apos;s focus</span>
               <p>{heroCopy.focus}</p>
             </div>
@@ -263,7 +263,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <section className="dashboard-grid dashboard-grid--dynamic">
+      <section className="dashboard-grid dashboard-grid--dynamic min-w-0">
         {visibleWidgets.map((widgetId, index) => {
           const widget = widgetMap[widgetId]
 
@@ -284,7 +284,7 @@ export default function DashboardPage() {
                 const fromId = event.dataTransfer.getData('text/plain')
                 handleWidgetDrop(fromId, widgetId)
               }}
-              className="dashboard-panel dashboard-card-interactive"
+              className="dashboard-panel dashboard-card-interactive min-w-0"
             >
               {widgetId === 'countdown' ? (
                 <Countdown
@@ -303,7 +303,7 @@ export default function DashboardPage() {
       </section>
 
       {coupleId ? <OurStats coupleId={coupleId} /> : null}
-      <section className="dashboard-panel rounded-panel border border-accent-1/15 bg-card p-5" aria-label="Couple scoreboard">
+      <section className="dashboard-panel ui-card min-w-0 rounded-panel border border-accent-1/15 bg-card p-4 sm:p-5" aria-label="Couple scoreboard">
         <CoupleScoreboard />
       </section>
       <QuickActions />
