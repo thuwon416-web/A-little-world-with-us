@@ -6,33 +6,6 @@ export interface RelationshipMemoryQueryOptions {
   offset?: number
 }
 
-async function fetchAllBatched<T>(
-  table: string,
-  coupleId: string,
-  columns = '*',
-  orderColumn = 'date_time'
-): Promise<T[]> {
-  const batch = 1000
-  const all: T[] = []
-  let from = 0
-
-  while (true) {
-    const { data, error } = await supabase
-      .from(table)
-      .select(columns)
-      .eq('couple_id', coupleId)
-      .order(orderColumn, { ascending: false })
-      .range(from, from + batch - 1)
-    if (error) throw error
-    if (!data || data.length === 0) break
-    all.push(...(data as T[]))
-    if (data.length < batch) break
-    from += batch
-  }
-
-  return all
-}
-
 const CATEGORY_ALIASES: Record<string, string> = {
   promise: 'promises',
   commitment: 'promises',
@@ -81,7 +54,7 @@ export const relationshipMemoriesService = {
   },
 
   async search(coupleId: string, keyword: string, limit = 50, offset = 0) {
-    const safeKeyword = keyword.replace(/[\\%_]/g, (character) => `\\${character}`).replace(/[(),]/g, ' ').trim()
+    const safeKeyword = keyword.replace(/[\\\\%_]/g, (character) => `\\\\${character}`).replace(/[(),]/g, ' ').trim()
     const { data, error } = await supabase
       .from('relationship_memories')
       .select('*')
