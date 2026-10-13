@@ -2,7 +2,7 @@
 
 Owner: Project maintainers
 Update when: phase scope or release gates change
-Last Updated: 2026-10-11
+Last Updated: 2026-10-13
 
 ## Working rule for close-out
 Code-side work is completed and prepared as far as repository access allows before owner-side/manual verification. External credentials, API keys, Google Cloud/Vercel/Supabase console values, authenticated user flows, and physical-device evidence are collected at the end as one verification pass.
@@ -165,3 +165,16 @@ Production readiness remains **PENDING RELEASE VERIFICATION** until the applicab
 - [ ] Review the PR before merge; production/device checks remain part of the final combined verification pass.
 
 - [x] Made the web chat viewport height adapt to short screens and widened message bubbles on narrow screens without changing message logic.
+
+
+### UI Redesign — Romantic Sunset (active PR #71)
+**Goal:** improve the web app's visual polish and responsive behavior without changing existing feature/data flows or removing any of the five canonical themes.
+- [x] Add theme-aware shared UI foundation styles, hover behavior, small-screen spacing refinements, and reduced-motion handling.
+- [x] Improve chat viewport sizing on short screens and widen mobile message bubbles.
+- [x] Apply responsive surface/card polish to Shared Memories and Korean Learning.
+- [x] Update `UI_DESIGN_SYSTEM.md` with the selected direction and implementation constraints.
+- [x] Update `ROADMAP.md` to track the work.
+- [x] Latest branch-head checks observed: CodeQL, Test, Secret scan, E2E Tests, Snyk, and Vercel status all report success for commit `111cd50032fd82fe803df42c34149107630e9385`.
+- [ ] Run/confirm the final production build and visually review desktop/mobile screenshots across all five themes.
+- [ ] Finish dashboard-specific polish and accessibility/feature regression review.
+- [ ] Keep PR #71 in draft until the remaining visual and regression checks are complete; do not deploy or merge early.
