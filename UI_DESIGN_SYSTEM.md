@@ -27,4 +27,4 @@ Implementation rules:
 - Preserve route behavior, saved dashboard layout, media upload/retrieval, chat, and Korean progress logic while changing presentation.
 - Design scope order: shared theme foundations → Home Dashboard and Shared Memories → Couple Chat and Korean Learning → responsive/accessibility verification.
 
-Status: foundation styles have been added on a review branch. Page-by-page polish, tests, and visual verification are still pending.
+Status (2026-10-13): shared foundation plus first-pass Home Dashboard, Shared Memories, Couple Chat, and Korean Learning presentation changes are on review branch `design/romantic-sunset-ui-foundation` (PR #71). Latest observed CodeQL, Test, E2E Tests, Secret scan, Snyk, and Vercel checks passed for the branch head at the time of review. Desktop/mobile screenshots across all five themes, detailed keyboard/accessibility review, feature-regression review, and reconciliation with the two newer `main` commits remain pending; do not treat source/CI success as visual or production acceptance.
