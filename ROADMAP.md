@@ -152,3 +152,14 @@ This checkpoint supersedes any older note that `public.memories` is empty. Direc
 
 ### Do not mark complete from source-only evidence
 Production readiness remains **PENDING RELEASE VERIFICATION** until the applicable authenticated/browser/device/external-console evidence above is captured. A READY deployment and zero recent runtime-error clusters do not close these gates.
+
+
+### UI Redesign — Romantic Sunset (in progress)
+**Goal:** improve visual quality across web and mobile without removing or renaming existing themes or changing feature behavior.
+- [x] Created isolated branch `design/romantic-sunset-ui-foundation`; do not commit this work directly to `main`.
+- [x] Added theme-token-driven dashboard spacing, restrained card depth/hover feedback, and small-screen heading/padding refinements to the web style foundation.
+- [x] Documented cross-theme, reduced-motion, and behavior-preservation rules in `UI_DESIGN_SYSTEM.md`.
+- [ ] Continue with Dashboard and Shared Memories page-level polish.
+- [ ] Continue with Couple Chat and Korean Learning responsive review.
+- [ ] Run targeted tests, typecheck, and production build; attach evidence to the pull request.
+- [ ] Review the PR before merge; production/device checks remain part of the final combined verification pass.
