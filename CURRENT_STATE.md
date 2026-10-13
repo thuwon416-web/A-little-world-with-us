@@ -243,3 +243,12 @@ Owner-side manual verification remains last.
 - Added `apps/web/src/features/memories/LegacyGallery.tsx` and embedded it into the Memories page. It reuses the existing legacy gallery listing/decryption path, so old encrypted bucket objects remain in place and become visible from the Memories experience without a destructive move.
 - The embedded legacy section hides its delete action. The standalone legacy `/gallery` route still exists; the old objects have not been migrated into the `public.memories` provider grid. Full unification, idempotent inventory/reconciliation, and end-to-end render testing remain open.
 - Source commits: `780bf35734840141908e1d2f0b4a3bc3f4102b86` (component), `36675a4fed6892284889c3bebae79e9cd7280293` (Memories integration), `8f53ba3797ec57275e678b10d11964af5bf00b22` (disable embedded delete). Current Vercel deployment for the last SHA was QUEUED at the time of check; do not claim production delivery until READY.
+
+
+## 2026-10-13 follow-up: Memory Map diagnostics
+
+- A scoped review branch `fix/memory-map-error-diagnostics` now preserves Supabase/PostgREST error objects' `message` field in the Memory Map UI instead of always replacing non-native `Error` objects with the generic message.
+- This is a diagnostic improvement, not proof that the underlying authenticated production query is fixed. Re-run Memory Map while signed in and record the displayed error if it still fails.
+- Read-only live query: 54 total memory records (51 `google_drive`, 3 `supabase`). The 51 Drive records have location labels but no complete coordinate pairs, so the UI should show their place names without map pins. Missing coordinates alone do not explain a database loading error.
+- Read-only live query: one accepted couple-link row exists in the current project, so a duplicate accepted-link result is not supported by current aggregate evidence.
+- No production database changes, file deletion, merge, or deployment were performed in this follow-up.
