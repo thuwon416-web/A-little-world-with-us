@@ -154,17 +154,18 @@ This checkpoint supersedes any older note that `public.memories` is empty. Direc
 Production readiness remains **PENDING RELEASE VERIFICATION** until the applicable authenticated/browser/device/external-console evidence above is captured. A READY deployment and zero recent runtime-error clusters do not close these gates.
 
 
-### UI Redesign — Romantic Sunset (in progress)
-**Goal:** improve visual quality across web and mobile without removing or renaming existing themes or changing feature behavior.
-- [x] Created isolated branch `design/romantic-sunset-ui-foundation`; do not commit this work directly to `main`.
-- [x] Added theme-token-driven dashboard spacing, restrained card depth/hover feedback, and small-screen heading/padding refinements to the web style foundation.
-- [x] Documented cross-theme, reduced-motion, and behavior-preservation rules in `UI_DESIGN_SYSTEM.md`.
-- [ ] Continue with Dashboard and Shared Memories page-level polish.
-- [ ] Continue with Couple Chat and Korean Learning responsive review.
-- [ ] Run targeted tests, typecheck, and production build; attach evidence to the pull request.
-- [ ] Review the PR before merge; production/device checks remain part of the final combined verification pass.
-
-- [x] Made the web chat viewport height adapt to short screens and widened message bubbles on narrow screens without changing message logic.
+### UI Redesign — Romantic Sunset (active PR #71)
+**Goal:** improve the web app's visual polish and responsive behavior without changing existing feature/data flows or removing any of the five canonical themes.
+- [x] Created isolated branch `design/romantic-sunset-ui-foundation`; changes remain off `main`.
+- [x] Added theme-aware shared UI foundation styles, hover behavior, small-screen spacing refinements, and reduced-motion handling.
+- [x] Polished Home Dashboard layout: mobile-first container sizing, responsive hero typography, stacked-to-two-column focus/ritual cards, and safer card overflow.
+- [x] Improved chat viewport sizing on short screens and widened mobile message bubbles.
+- [x] Applied responsive surface/card polish to Shared Memories and Korean Learning.
+- [x] Updated `UI_DESIGN_SYSTEM.md` and this roadmap.
+- [x] Previous code head `111cd50032fd82fe803df42c34149107630e9385` had successful CodeQL, Test, Secret scan, E2E Tests, Snyk, and Vercel checks.
+- [ ] Confirm checks and production build for the latest code head after Dashboard changes.
+- [ ] Review desktop/mobile screenshots across all five themes; complete keyboard/accessibility and feature-regression review.
+- [ ] Keep PR #71 in draft; do not merge or deploy before evidence-based review and authorization.
 
 
 ### UI Redesign — Romantic Sunset (active PR #71)
