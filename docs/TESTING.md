@@ -2,7 +2,7 @@
 
 Owner: Engineering / QA
 Update when: tests or acceptance criteria change
-Last Updated: 2026-10-11
+Last Updated: 2026-10-13
 
 Test layers: Web lint/TypeScript/unit/accessibility/build; Mobile TypeScript/lint/Jest; GitHub Secret Scan/CodeQL; production smoke/E2E; Supabase-backed authenticated E2E; native/device/offline verification.
 
@@ -11,7 +11,10 @@ Automated PASS is evidence for the tested revision only. Full authenticated cros
 ## Current close-out evidence
 - Local Web checks on the current working tree: `npm --prefix apps/web test` PASS (26 files / 102 tests); `npm --prefix apps/web run typecheck` PASS; `npm --prefix apps/web run lint` PASS with 0 errors and 33 warnings.
 - Local Mobile checks: `npm --prefix apps/mobile run typecheck` PASS; `npm --prefix apps/mobile test -- --runInBand` PASS (5 suites / 17 tests).
-- These results apply to the tested working tree; GitHub Actions must be rerun after the resulting commit, and no production authenticated Drive E2E is implied.
+- 2026-10-13 mobile close-out pass: `npm run mobile:typecheck` PASS and `npm run mobile:test -- --runInBand` PASS (5 suites / 17 tests); coverage report shows 88.14% lines for the Jest-included files. The unused `fetchAllBatched` helper was removed from `apps/mobile/services/relationship-memories.ts` in commit `ac182cbcdbf62ddc6c65b537778c4a90e2a55dc2`.
+- The above mobile checks were run against the working tree containing the cleanup before its GitHub API commit. They do not prove that GitHub Actions passed on the new SHA, and no production authenticated Drive E2E is implied.
+- GitHub combined status for `ac182cbcdbf62ddc6c65b537778c4a90e2a55dc2` returned Vercel `pending` at check time; do not mark the commit deployed/READY until the deployment is confirmed.
+- Expo Doctor previously returned 20/21 checks, with the remaining warning concerning native New Architecture metadata/compatibility for WatermelonDB, react-native-webrtc, and simdjson. A current EAS build and device smoke are still required.
 - Korean 4–6 Web/Mobile structural parity: runtime-baseline advanced curriculum contains 12 advanced lessons on each platform, 4 each for Levels 4, 5, and 6. Human content QA is still pending.
 - Korean runtime production build: Vercel deployment dpl_6CnQ1obMNiPZ2oweVqethGQix2bi reached READY on 2026-10-08.
 - Period/fertility: cycle logic and parity tests exist, but no authenticated real-user scenario is available.
@@ -51,7 +54,6 @@ DONE means implementation exists and relevant automated checks pass. VERIFIED re
 - Chat attachment upload on Web/Mobile now falls back to encrypted Supabase when Drive status cannot be checked or the Drive upload endpoint returns 5xx; non-5xx errors remain hard failures.
 
 - Latest source revision `48d35db6f32aecf4f5c41abd430582caa8cf8117` passed all five GitHub Actions workflows; Web coverage passed 31 files / 110 tests and Mobile tests passed 1 suite / 3 tests. Source scan: 31 mutating API handlers, zero missing explicit same-origin guards.
-
 
 ## 2026-10-11 verification boundary
 - Production Vercel deployment for source SHA `49d8c4b65f1aabdcb8ae725d65db32b2f2040ed3` was READY and its GitHub combined status was successful; the 24-hour runtime error query returned no error clusters. These checks do not prove login-gated Memories/Drive behavior.
