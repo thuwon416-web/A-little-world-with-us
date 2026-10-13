@@ -13,7 +13,7 @@ const MemoryLocationPicker = dynamic(() => import('@/features/memories/MemoryLoc
 import { isSupabaseConfigured, type Memory, supabase } from '@/lib/supabase'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { validateUpload } from '@/lib/upload-validation'
-import { encryptAndUpload, getCachedDecryptedUrl } from '@/lib/mediaEncryption'
+import { downloadAndDecrypt, encryptAndUpload, getCachedDecryptedUrl } from '@/lib/mediaEncryption'
 
 const MemoryCurationAI = dynamic(
   () => import('@/features/memories/MemoryCurationAI'),
@@ -102,6 +102,7 @@ function MemoriesPageContent() {
   const [isLoading, setIsLoading] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [isDriveSyncing, setIsDriveSyncing] = useState(false)
+  const [isMigratingToDrive, setIsMigratingToDrive] = useState(false)
   const [isAddMemoryOpen, setIsAddMemoryOpen] = useState(false)
   const [driveSyncSummary, setDriveSyncSummary] = useState('')
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -634,7 +635,53 @@ function MemoriesPageContent() {
           </div>
           <button
             type="button"
-            disabled={isDriveSyncing || !coupleLinkId}
+            disabled={isMigratingToDrive || isUploading || !coupleLinkId}
+            onClick={() => {
+              if (!coupleLinkId) return
+              setIsMigratingToDrive(true)
+              setDriveSyncSummary('Moving existing Supabase memories to Google Drive…')
+              void (async () => {
+                let migrated = 0
+                let failed = 0
+                const candidates = memories.filter((memory) => {
+                  const row = memory as DisplayMemory & { storage_provider?: string; storage_path?: string | null }
+                  return row.storage_provider === 'supabase' && Boolean(row.storage_path)
+                })
+                for (const item of candidates) {
+                  const row = item as DisplayMemory & { storage_provider?: string; storage_path?: string | null }
+                  const path = row.storage_path
+                  if (!path) continue
+                  try {
+                    const blob = await downloadAndDecrypt(coupleLinkId, 'memories', path, row.mime_type || 'image/jpeg')
+                    const file = new File([blob], `memory-${row.id}.${(row.mime_type || 'image/jpeg').split('/')[1] || 'jpg'}`, { type: row.mime_type || 'image/jpeg' })
+                    const form = new FormData()
+                    form.append('memoryId', row.id)
+                    form.append('file', file)
+                    const response = await fetch('/api/drive/migrate-memory', { method: 'POST', body: form })
+                    const body = await response.json().catch(() => ({})) as { migrated?: boolean; alreadyInDrive?: boolean; oldStoragePath?: string; error?: string }
+                    if (!response.ok || (!body.migrated && !body.alreadyInDrive)) throw new Error(body.error || 'Migration failed.')
+                    if (body.migrated && body.oldStoragePath) {
+                      const { error: removeError } = await supabase.storage.from('memories').remove([body.oldStoragePath])
+                      if (removeError) console.warn('Migrated memory has an old storage object that could not be cleaned up:', row.id)
+                    }
+                    migrated += body.migrated ? 1 : 0
+                  } catch (migrationError) {
+                    failed += 1
+                    console.error('Memory migration failed:', row.id, migrationError instanceof Error ? migrationError.message : 'unknown error')
+                  }
+                }
+                setDriveSyncSummary(`Drive migration finished: ${migrated} moved${failed ? `, ${failed} failed (originals kept)` : ''}.`)
+                await loadMemories()
+              })().catch((migrationError) => setDriveSyncSummary(migrationError instanceof Error ? migrationError.message : 'Drive migration failed.'))
+                .finally(() => setIsMigratingToDrive(false))
+            }}
+            className="rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 disabled:opacity-50"
+          >
+            {isMigratingToDrive ? 'Moving memories…' : 'Move existing memories to Drive'}
+          </button>
+          <button
+            type="button"
+            disabled={isDriveSyncing || isMigratingToDrive || !coupleLinkId}
             onClick={() => {
               if (!coupleLinkId) return
               setIsDriveSyncing(true)
