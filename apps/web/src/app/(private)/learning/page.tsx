@@ -98,8 +98,8 @@ export default function LearningPage() {
   }
 
   return (
-    <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 animate-fade-in" data-theme={mode}>
-      <header className="flex flex-wrap items-start justify-between gap-4">
+    <div className="dashboard-shell mx-auto max-w-6xl space-y-6 px-4 py-5 animate-fade-in sm:space-y-8 sm:px-6 sm:py-8" data-theme={mode}>
+      <header className="dashboard-hero relative flex flex-wrap items-start justify-between gap-4 overflow-hidden rounded-modal border border-accent-1/15 bg-gradient-to-br from-card via-soft-tint to-accent-2/10 p-5 sm:p-7">
         <div>
           <div className="flex items-center gap-3">
             <div className="flex h-12 w-12 items-center justify-center rounded-btn bg-accent-1/15 text-accent-1">
@@ -107,7 +107,7 @@ export default function LearningPage() {
             </div>
             <div>
               <h1
-                className="text-4xl text-text-1"
+                className="text-3xl text-text-1 sm:text-4xl"
                 style={{ fontFamily: 'var(--font-display)' }}
               >
                 Korean Tutor
@@ -119,9 +119,9 @@ export default function LearningPage() {
           </div>
         </div>
 
-        <div className="rounded-btn border border-accent-1/20 bg-card px-4 py-3 text-right">
+        <div className="dashboard-mini-card w-full rounded-btn border border-accent-1/20 bg-card/90 px-4 py-3 text-left shadow-sm sm:w-auto sm:min-w-56 sm:text-right">
           <p className="text-xs text-text-2">Your progress</p>
-          <p className="mt-1 text-lg font-semibold text-text-1">
+          <p className="mt-1 text-base font-semibold text-text-1 sm:text-lg">
             {masteredIds.size} / {allVocab.length} words mastered
           </p>
           <div
@@ -192,7 +192,7 @@ export default function LearningPage() {
         </div>
 
         {lessons.length > 0 ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid min-w-0 gap-4 md:grid-cols-2">
             {lessons.map((lesson) => {
               const lessonVocab = getLessonVocab(lesson)
               const isOpen = openLessonId === lesson.id
@@ -201,7 +201,7 @@ export default function LearningPage() {
               return (
                 <article
                   key={lesson.id}
-                  className="overflow-hidden rounded-panel border border-accent-1/20 bg-card shadow-lg backdrop-blur-xl"
+                  className="ui-card overflow-hidden rounded-panel border border-accent-1/20 bg-card shadow-lg backdrop-blur-xl"
                 >
                   <button
                     type="button"
