@@ -231,7 +231,7 @@ export default function DashboardPage() {
               <span className="dashboard-mini-label">Today&apos;s focus</span>
               <p>{heroCopy.focus}</p>
             </div>
-            <div className="dashboard-mini-card">
+            <div className="dashboard-mini-card min-w-0 rounded-panel border border-accent-1/15 bg-card/80 p-4">
               <span className="dashboard-mini-label">Little ritual</span>
               <p>{heroCopy.ritual}</p>
             </div>
