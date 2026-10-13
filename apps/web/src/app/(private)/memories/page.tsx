@@ -608,8 +608,8 @@ function MemoriesPageContent() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-5 sm:space-y-8 sm:px-6 sm:py-8">
-      <header className="relative overflow-hidden rounded-modal border border-accent-1/15 bg-gradient-to-br from-card via-soft-tint to-accent-2/10 p-5 sm:p-7">
+    <div className="dashboard-shell mx-auto w-full max-w-7xl space-y-6 px-4 py-5 sm:space-y-8 sm:px-6 sm:py-8">
+      <header className="dashboard-hero relative overflow-hidden rounded-modal border border-accent-1/15 bg-gradient-to-br from-card via-soft-tint to-accent-2/10 p-5 sm:p-7">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-2xl">
             <p className="text-xs uppercase tracking-[0.22em] text-accent-1">A little world, just for us</p>
@@ -737,7 +737,7 @@ function MemoriesPageContent() {
 
 
       <section aria-labelledby="photo-memories-heading" className="space-y-2">
-        <div className="rounded-modal border border-accent-1/15 bg-card p-4 sm:p-5">
+        <div className="ui-card rounded-modal border border-accent-1/15 bg-card p-4 sm:p-5">
           <p className="text-xs uppercase tracking-[0.2em] text-accent-1">The moments we keep</p>
           <h2 id="photo-memories-heading" className="mt-1 font-serif text-2xl text-text-1">Our photos & memories</h2>
           <p className="mt-1 text-sm leading-6 text-text-2">Browse saved photos and moments below. Use the filters to find favorites, trips, rituals, and journal entries.</p>
@@ -824,7 +824,7 @@ function MemoriesPageContent() {
             <p className="mt-1 max-w-2xl text-sm leading-6 text-text-2">Your map pins and saved place names live together here, including place names found in synced Drive folders.</p>
           </div>
         </div>
-        <div className="overflow-hidden rounded-modal border border-accent-1/15 bg-card p-2 sm:p-3">
+        <div className="ui-card overflow-hidden rounded-modal border border-accent-1/15 bg-card p-2 sm:p-3">
           <MemoryMapContent embedded />
         </div>
       </section>
