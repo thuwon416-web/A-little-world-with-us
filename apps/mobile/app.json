@@ -6,16 +6,9 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": false,
     "scheme": "com.alittleworldwithus.app",
     "description": "A relationship-first companion app for couples to chat, plan, share moments, and stay connected.",
-    "privacy": "public",
     "githubUrl": "https://github.com/thuwon416-web/A-little-world-with-us",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0f0f12"
-    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -82,7 +75,16 @@
       "expo-quick-actions",
       "expo-status-bar",
       "expo-audio",
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#0f0f12"
+        }
+      ]
     ],
     "extra": {
       "router": {
