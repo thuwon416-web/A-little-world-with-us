@@ -163,3 +163,5 @@ Production readiness remains **PENDING RELEASE VERIFICATION** until the applicab
 - [ ] Continue with Couple Chat and Korean Learning responsive review.
 - [ ] Run targeted tests, typecheck, and production build; attach evidence to the pull request.
 - [ ] Review the PR before merge; production/device checks remain part of the final combined verification pass.
+
+- [x] Made the web chat viewport height adapt to short screens and widened message bubbles on narrow screens without changing message logic.
