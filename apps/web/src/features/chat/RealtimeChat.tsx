@@ -771,14 +771,14 @@ export default function RealtimeChat() {
 
   if (!coupleId) {
     return (
-      <div className="flex items-center justify-center h-[600px] glass-card">
+      <div className="flex h-[min(600px,calc(100dvh-10rem))] min-h-[360px] items-center justify-center glass-card">
         <p className="text-text-2">Link with your partner to start chatting</p>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col h-[600px] glass-card">
+    <div className="flex h-[min(600px,calc(100dvh-10rem))] min-h-[360px] flex-col glass-card">
       <div role="status" aria-live="polite" className="sr-only">
         {messages.length > 0 && `Latest message from ${messages[messages.length - 1].sender_id === currentUserId ? 'you' : 'your partner'}`}
       </div>
@@ -813,7 +813,7 @@ export default function RealtimeChat() {
           return (
             <div key={message.id} className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} group`}>
               <div className="flex flex-col gap-1">
-                <div className={`max-w-[70%] rounded-btn px-4 py-2 ${message.sender_id === currentUserId ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-white' : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1'}`} onContextMenu={(e) => { e.preventDefault(); handleMessageLongPress(message) }}>
+                <div className={`max-w-[88%] sm:max-w-[70%] rounded-btn px-4 py-2 ${message.sender_id === currentUserId ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-white' : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1'}`} onContextMenu={(e) => { e.preventDefault(); handleMessageLongPress(message) }}>
                   {replyToMessage && (
                     <div className="mb-2 pb-2 border-b border-accent-1/20">
                       <p className="text-xs text-text-2 mb-1">Replying to {replyToMessage.sender_id === currentUserId ? 'yourself' : 'partner'}</p>
