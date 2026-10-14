@@ -9,6 +9,15 @@ import { EmptyState } from '@/components/ui/empty-state'
 
 const MemoryMapView = dynamic(() => import('@/features/memories/MemoryMap'), { ssr: false, loading: () => <div className="h-[70vh] animate-pulse rounded-panel bg-soft-tint" /> })
 
+function getReadableError(error: unknown): string {
+  if (error instanceof Error && error.message.trim()) return error.message
+  if (error && typeof error === 'object' && 'message' in error) {
+    const message = (error as { message?: unknown }).message
+    if (typeof message === 'string' && message.trim()) return message
+  }
+  return 'Unable to load located memories. Please try again.'
+}
+
 export default function MemoryMapContent({ embedded = false }: { embedded?: boolean }) {
   const router = useRouter()
   const [memories, setMemories] = useState<Memory[]>([])
@@ -39,7 +48,7 @@ export default function MemoryMapContent({ embedded = false }: { embedded?: bool
         if (loadError) throw loadError
         if (active) setMemories((data ?? []) as Memory[])
       } catch (error_) {
-        if (active) setError(error_ instanceof Error ? error_.message : 'Unable to load located memories.')
+        if (active) setError(getReadableError(error_))
       } finally {
         if (active) setLoading(false)
       }
