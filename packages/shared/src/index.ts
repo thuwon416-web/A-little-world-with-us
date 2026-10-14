@@ -238,3 +238,17 @@ export interface WatchHistoryItem {
 
 export type RepeatFrequency = 'daily' | 'weekly' | 'monthly' | 'yearly'
 export type ActivityType = WellnessLog['activity_type']
+
+export interface TelegramInlineButton {
+  text: string
+  callback_data?: string
+  url?: string
+}
+
+export interface TelegramNotificationPayload {
+  title: string
+  details: string
+  status?: 'SUCCESS' | 'INFO' | 'WARNING' | 'ERROR'
+  topicId?: number
+  actions?: Array<{ text: string; callback_data?: string; url?: string }>
+}
