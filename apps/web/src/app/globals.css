@@ -1584,3 +1584,75 @@ button.micro-interaction:active {
 .icon-pulse-soft { animation: icon-pulse-soft 2s ease-in-out infinite; }
 .icon-bounce-once { animation: icon-bounce-once 0.6s ease-out; }
 .icon-wiggle-once { animation: icon-wiggle-once 0.5s ease-in-out; }
+
+
+/* Romantic Sunset UI foundation — theme-aware, shared across existing palettes. */
+@layer components {
+  .dashboard-shell {
+    padding-inline: clamp(0.75rem, 2.2vw, 1.5rem);
+    gap: clamp(1rem, 2.4vw, 1.5rem);
+  }
+
+  .dashboard-hero {
+    box-shadow: 0 18px 44px rgb(var(--accent-1) / 0.10);
+    isolation: isolate;
+  }
+
+  .dashboard-mini-card {
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal),
+      background-color var(--transition-normal), transform var(--transition-normal);
+  }
+
+  .dashboard-kicker {
+    font-weight: 700;
+    letter-spacing: 0.18em;
+  }
+
+  .ui-card {
+    transition: border-color var(--transition-normal), box-shadow var(--transition-normal),
+      transform var(--transition-normal);
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dashboard-mini-card:hover {
+    border-color: rgb(var(--accent-1) / 0.38);
+    box-shadow: 0 10px 28px rgb(var(--accent-1) / 0.09);
+    transform: translateY(-2px);
+  }
+
+  .ui-card:hover {
+    box-shadow: var(--ui-shadow-card-hover);
+  }
+}
+
+@media (max-width: 639px) {
+  .dashboard-shell {
+    padding-top: 0.75rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .dashboard-hero__title {
+    font-size: clamp(2rem, 9vw, 3rem);
+    line-height: 1.04;
+    overflow-wrap: anywhere;
+  }
+
+  .dashboard-hero__badge {
+    flex: 0 0 auto;
+    width: 2.15rem;
+    height: 2.15rem;
+    font-size: 1.2rem;
+  }
+
+  .dashboard-hero__content {
+    padding: 1.25rem 1rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-mini-card,
+  .ui-card {
+    transition: none;
+  }
+}

@@ -2,7 +2,7 @@
 
 Owner: Project maintainers
 Update when: phase scope or release gates change
-Last Updated: 2026-10-11
+Last Updated: 2026-10-13
 
 ## Working rule for close-out
 Code-side work is completed and prepared as far as repository access allows before owner-side/manual verification. External credentials, API keys, Google Cloud/Vercel/Supabase console values, authenticated user flows, and physical-device evidence are collected at the end as one verification pass.
@@ -152,3 +152,17 @@ This checkpoint supersedes any older note that `public.memories` is empty. Direc
 
 ### Do not mark complete from source-only evidence
 Production readiness remains **PENDING RELEASE VERIFICATION** until the applicable authenticated/browser/device/external-console evidence above is captured. A READY deployment and zero recent runtime-error clusters do not close these gates.
+
+
+### UI Redesign — Romantic Sunset (active PR #71)
+**Goal:** improve the web app's visual polish and responsive behavior without changing existing feature/data flows or removing any of the five canonical themes.
+- [x] Created isolated branch `design/romantic-sunset-ui-foundation`; changes remain off `main`.
+- [x] Added theme-aware shared UI foundation styles, hover behavior, small-screen spacing refinements, and reduced-motion handling.
+- [x] Polished Home Dashboard layout: mobile-first container sizing, responsive hero typography, stacked-to-two-column focus/ritual cards, and safer card overflow.
+- [x] Improved chat viewport sizing on short screens and widened mobile message bubbles.
+- [x] Applied responsive surface/card polish to Shared Memories and Korean Learning.
+- [x] Updated `UI_DESIGN_SYSTEM.md` and this roadmap.
+- [x] Previous code head `111cd50032fd82fe803df42c34149107630e9385` had successful CodeQL, Test, Secret scan, E2E Tests, Snyk, and Vercel checks.
+- [ ] Confirm checks and production build for the latest code head after Dashboard changes.
+- [ ] Review desktop/mobile screenshots across all five themes; complete keyboard/accessibility and feature-regression review.
+- [ ] Keep PR #71 in draft; do not merge or deploy before evidence-based review and authorization.
