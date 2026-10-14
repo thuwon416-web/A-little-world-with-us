@@ -58,6 +58,9 @@ export default function LoginPage() {
         )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
+          <label htmlFor="email" className="sr-only">
+            Email address
+          </label>
           <input
             id="email"
             required
@@ -68,6 +71,9 @@ export default function LoginPage() {
             autoComplete="email"
             className="w-full rounded-input border border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 outline-none focus:border-accent-1"
           />
+          <label htmlFor="password" className="sr-only">
+            Password
+          </label>
           <input
             id="password"
             required
