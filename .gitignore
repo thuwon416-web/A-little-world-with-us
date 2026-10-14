@@ -221,3 +221,5 @@ SCRATCH.md
 # OS
 .DS_Store
 Thumbs.db
+apps/web/AGENTS.md
+apps/web/CLAUDE.md
