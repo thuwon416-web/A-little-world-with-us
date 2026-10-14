@@ -252,3 +252,12 @@ Owner-side manual verification remains last.
 - Read-only live query: 54 total memory records (51 `google_drive`, 3 `supabase`). The 51 Drive records have location labels but no complete coordinate pairs, so the UI should show their place names without map pins. Missing coordinates alone do not explain a database loading error.
 - Read-only live query: one accepted couple-link row exists in the current project, so a duplicate accepted-link result is not supported by current aggregate evidence.
 - No production database changes, file deletion, merge, or deployment were performed in this follow-up.
+
+
+### 2026-10-14 follow-up: Drive index integrity snapshot
+- Read-only live aggregate recheck: 51 `google_drive` memory rows and 3 `supabase` rows.
+- All 51 Drive rows have non-null `user_id`, `couple_id`, `drive_file_id`, `drive_folder_id`, `mime_type`, and title. The 3 Supabase rows naturally have no Drive file/folder IDs.
+- Duplicate `drive_file_id` groups: 0 in the current `public.memories` table.
+- `Us` is the `location_label` for 50 Drive-backed rows. This confirms indexed metadata, not successful file retrieval/rendering from Google's API.
+- The Drive image route returns 401 for unauthenticated access, checks a user's couple membership through metadata, and returns 404/409 for inaccessible files or no connected Drive account. Authenticated browser E2E is still needed to identify which branch the affected photos hit.
+- Current preview deployment for the diagnostic branch is READY; GitHub Test/E2E/CodeQL runs were still in progress at last check. Snyk, Secret scan, and Vercel status were successful. No production write or merge was performed.
