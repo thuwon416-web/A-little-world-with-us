@@ -29,7 +29,7 @@ Couples can interact with quizzes and quickly review shared memories via inline 
 
 ## 3. Environment Variables
 
-Configure these variables in `apps/web/.env` or in the Vercel Dashboard under **Environment Variables**:
+Configure these variables in `apps/web-platform/frontend/.env` or in the Vercel Dashboard under **Environment Variables**:
 
 | Key | Type | Default | Description |
 |---|---|---|---|
@@ -42,10 +42,10 @@ Configure these variables in `apps/web/.env` or in the Vercel Dashboard under **
 
 ## 4. Code Architecture
 
-* **Service Module:** `apps/web/src/lib/telegram.ts`
+* **Service Module:** `apps/web-platform/frontend/src/lib/telegram.ts`
 * **Type Contracts:** `packages/shared/src/index.ts` (`TelegramInlineButton`, `TelegramNotificationPayload`)
-* **Import Interface:** `apps/web/src/shared-types.ts`
-* **Template:** `apps/web/.env.example`
+* **Import Interface:** `apps/web-platform/frontend/src/shared-types.ts`
+* **Template:** `apps/web-platform/frontend/.env.example`
 
 ---
 

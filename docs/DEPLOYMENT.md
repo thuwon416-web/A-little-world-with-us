@@ -4,7 +4,7 @@ Owner: Release Engineering
 Update when: deployment targets or release procedures change
 Last Updated: 2026-10-08
 
-Web is deployed on Vercel. Root Directory is apps/web. There is no root vercel.json; apps/web/vercel.json is retained for application configuration such as cron definitions.
+Web is deployed on Vercel. Root Directory is apps/web. There is no root vercel.json; apps/web-platform/frontend/vercel.json is retained for application configuration such as cron definitions.
 
 Mobile is built and released through Expo/EAS. Android/iOS build verification is a release gate.
 

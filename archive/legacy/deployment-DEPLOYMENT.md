@@ -4,16 +4,16 @@
 
 - Web: apps/web
 - Mobile: apps/mobile
-- Supabase: backend/supabase
+- Supabase: apps/web-platform/backend/supabase
 - Shared contracts: packages/shared
 
 The Vercel project should use apps/web as its Root Directory. The web app keeps its own package manifest, lockfile, Next.js configuration, and environment examples.
 
 ## Supabase schema
 
-For an existing production database, do not run backend/supabase/bootstrap/00_core.sql. It is a destructive reset for a fresh or disposable database only.
+For an existing production database, do not run apps/web-platform/backend/supabase/bootstrap/00_core.sql. It is a destructive reset for a fresh or disposable database only.
 
-Apply reviewed additive SQL from backend/supabase/bootstrap for existing production databases.
+Apply reviewed additive SQL from apps/web-platform/backend/supabase/bootstrap for existing production databases.
 
 ## Environment
 

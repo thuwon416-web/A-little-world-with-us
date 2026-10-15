@@ -33,7 +33,7 @@ jobs:
         with:
           node-version: 24.x
           cache: npm
-          cache-dependency-path: apps/web/package-lock.json
+          cache-dependency-path: apps/web-platform/frontend/package-lock.json
       - name: Install web dependencies
         working-directory: ./apps/web
         run: npm ci --ignore-scripts
@@ -60,7 +60,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: web-coverage
-          path: apps/web/coverage/
+          path: apps/web-platform/frontend/coverage/
           retention-days: 7
 
   mobile:

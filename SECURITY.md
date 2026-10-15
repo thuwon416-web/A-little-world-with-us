@@ -26,7 +26,7 @@ Never commit OAuth secrets, refresh tokens, encryption keys, service-role keys, 
 
 ## Database safety
 
-Review RLS and authorization changes before deployment. Never run backend/supabase/bootstrap/00_core.sql against an existing production database containing real data. Use additive reviewed migrations for existing environments.
+Review RLS and authorization changes before deployment. Never run apps/web-platform/backend/supabase/bootstrap/00_core.sql against an existing production database containing real data. Use additive reviewed migrations for existing environments.
 
 ## Storage and privacy
 
@@ -34,7 +34,7 @@ Supabase remains the metadata/source-of-truth layer. Provider-specific media pat
 
 ## Vercel
 
-Vercel Root Directory is apps/web. There is no root vercel.json; apps/web/vercel.json contains application configuration such as cron definitions. Do not introduce unnecessary build/install/output overrides.
+Vercel Root Directory is apps/web. There is no root vercel.json; apps/web-platform/frontend/vercel.json contains application configuration such as cron definitions. Do not introduce unnecessary build/install/output overrides.
 
 ## Incident handling
 

@@ -187,7 +187,7 @@ After release stability:
 
 ## 2026-10-09 follow-up code/database checks
 - [x] Live Supabase schema repaired additively: `public.memories` now has `latitude`, `longitude`, `location_label`, and `metadata`; verified columns and `memories_location_idx` / `memories_journal_recent_idx` exist. Live table had 0 memory rows at verification time.
-- [x] Added bootstrap SQL `backend/supabase/bootstrap/55_restore_memory_location_and_journal_columns.sql` and recorded live migration `20261009073304` in `docs/DATABASE.md` and `CURRENT_STATE.md`.
+- [x] Added bootstrap SQL `apps/web-platform/backend/supabase/bootstrap/55_restore_memory_location_and_journal_columns.sql` and recorded live migration `20261009073304` in `docs/DATABASE.md` and `CURRENT_STATE.md`.
 - [x] Web Memories now stops and reports an uncertain upload response instead of blindly trying another provider after a network exception. This avoids possible duplicate uploads if the server completed the first request but the response was lost.
 - [ ] Run GitHub Actions for the latest source/docs commits and inspect the results; do not treat the prior green workflows as evidence for later commits.
 - [ ] After Vercel is explicitly unpaused and a corrected deployment is available, verify authenticated Memory Map, journal create/edit/reflection, Drive upload/readback and partner fallback in production.

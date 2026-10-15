@@ -19,7 +19,7 @@ Wellness boards intentionally retain their documented dark visual system as a fe
 The active UI refresh uses **Romantic Sunset** as the primary visual direction: warm peach/cream surfaces, restrained rose warmth, gentle depth, generous spacing, and editorial display typography. This is a direction for the presentation layer, not a new theme. Keep all five canonical themes available: `lavender-mist`, `peach-cream`, `mint-whisper`, `ocean-calm`, and `monochrome`.
 
 Implementation rules:
-- Reuse the shared theme tokens in `apps/web/src/lib/theme-tokens.ts` (the documented single source of truth used by web and mobile) and mobile's existing token bridge. Do not hardcode sunset colors into feature pages.
+- Reuse the shared theme tokens in `apps/web-platform/frontend/src/lib/theme-tokens.ts` (the documented single source of truth used by web and mobile) and mobile's existing token bridge. Do not hardcode sunset colors into feature pages.
 - Theme-aware effects must derive from semantic CSS variables such as `--accent-1`, `--border`, and `--card`; monochrome must remain legible.
 - Prefer subtle card depth and hover feedback only on hover-capable pointers. Never make hover the only way to discover or operate a control.
 - At narrow widths, avoid horizontal overflow, keep headings readable, and stack paired dashboard cards when needed.

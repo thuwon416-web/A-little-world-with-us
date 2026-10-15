@@ -208,7 +208,7 @@ Owner-side manual verification remains last.
 ## 2026-10-09 live Memory Map / Journal schema repair
 - Direct live-schema inspection confirmed `public.memories` was missing `latitude`, `longitude`, `location_label`, and `metadata`, although Web Memory Map and journal code depend on those fields.
 - Applied additive live Supabase migration `20261009073304 — restore_memory_location_and_journal_columns`; post-migration inspection confirms all four columns exist and the location/journal indexes exist. No rows were changed; the table contained 0 memory rows at verification time.
-- Added the idempotent equivalent to `backend/supabase/bootstrap/55_restore_memory_location_and_journal_columns.sql` and documented the live migration in `docs/DATABASE.md`.
+- Added the idempotent equivalent to `apps/web-platform/backend/supabase/bootstrap/55_restore_memory_location_and_journal_columns.sql` and documented the live migration in `docs/DATABASE.md`.
 - Remaining: run authenticated Memory Map and journal UI checks once production can be deployed and real test memories are available. Vercel remains paused by owner request; this schema repair does not prove production UI is fixed.
 
 
@@ -220,10 +220,10 @@ Owner-side manual verification remains last.
 
 ## 2026-10-09 Drive folder import schema parity fix
 - Live `information_schema.columns` inspection confirmed `public.memories.visibility` does not exist. `/api/drive/sync-memories` attempted to insert `visibility='shared'`, which would make Drive-folder imports fail at the metadata insert stage.
-- Removed the unsupported column from the import insert and added a regression assertion in `apps/web/src/app/api/drive/sync-memories/route.test.ts` that imported metadata does not include `visibility`.
+- Removed the unsupported column from the import insert and added a regression assertion in `apps/web-platform/frontend/src/app/api/drive/sync-memories/route.test.ts` that imported metadata does not include `visibility`.
 - Updated `docs/DRIVE_ARCHITECTURE.md`. Source commit `85d19fd613074c98f65051b71419100c76bd8964`; regression test commit `214b72c0ad8bdfa569319f9195005e47d5ad4118`. Automated workflow evidence for these source changes is still pending.
 
-- Follow-up live-schema sweep found the same unsupported `visibility` field in the Web encrypted-Supabase fallback insert. Removed it from `apps/web/src/app/(private)/memories/page.tsx` in source commit `cc97794066b98293289dbdd112a5cf97338c4509`. Live `public.memories` column inspection after the repair confirms `visibility` is absent while location/journal fields exist. The feature uses couple-scoped RLS for shared access; no new visibility column was introduced because there is no verified application/schema contract requiring one.
+- Follow-up live-schema sweep found the same unsupported `visibility` field in the Web encrypted-Supabase fallback insert. Removed it from `apps/web-platform/frontend/src/app/(private)/memories/page.tsx` in source commit `cc97794066b98293289dbdd112a5cf97338c4509`. Live `public.memories` column inspection after the repair confirms `visibility` is absent while location/journal fields exist. The feature uses couple-scoped RLS for shared access; no new visibility column was introduced because there is no verified application/schema contract requiring one.
 
 
 ## 2026-10-09 partial-failure upload UX hardening
@@ -240,7 +240,7 @@ Owner-side manual verification remains last.
 
 
 ## 2026-10-11 media UI bridge follow-up
-- Added `apps/web/src/features/memories/LegacyGallery.tsx` and embedded it into the Memories page. It reuses the existing legacy gallery listing/decryption path, so old encrypted bucket objects remain in place and become visible from the Memories experience without a destructive move.
+- Added `apps/web-platform/frontend/src/features/memories/LegacyGallery.tsx` and embedded it into the Memories page. It reuses the existing legacy gallery listing/decryption path, so old encrypted bucket objects remain in place and become visible from the Memories experience without a destructive move.
 - The embedded legacy section hides its delete action. The standalone legacy `/gallery` route still exists; the old objects have not been migrated into the `public.memories` provider grid. Full unification, idempotent inventory/reconciliation, and end-to-end render testing remain open.
 - Source commits: `780bf35734840141908e1d2f0b4a3bc3f4102b86` (component), `36675a4fed6892284889c3bebae79e9cd7280293` (Memories integration), `8f53ba3797ec57275e678b10d11964af5bf00b22` (disable embedded delete). Current Vercel deployment for the last SHA was QUEUED at the time of check; do not claim production delivery until READY.
 

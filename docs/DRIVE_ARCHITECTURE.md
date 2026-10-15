@@ -90,7 +90,7 @@ Existing connections obtained under the old `drive.file` scope must be re-author
 
 ## Migration
 
-`backend/supabase/bootstrap/53_drive_first_archive.sql` adds:
+`apps/web-platform/backend/supabase/bootstrap/53_drive_first_archive.sql` adds:
 - `google_drive_connections.root_folder_id`
 - `memories.drive_folder_id`
 - `chat_archive_days` archive index

@@ -13,12 +13,12 @@
 - Web: `apps/web`
 - Mobile: `apps/mobile`
 - Shared contracts: `packages/shared`
-- Supabase: `backend/supabase`
+- Supabase: `apps/web-platform/backend/supabase`
 - Documentation: `docs`
 
 ## Environment
 
-Web environment files belong in `apps/web/`. Mobile environment files belong in `apps/mobile/`.
+Web environment files belong in `apps/web-platform/frontend/`. Mobile environment files belong in `apps/mobile/`.
 
 Client variables:
 
@@ -77,9 +77,9 @@ npm run mobile:test
 
 ## Database
 
-The maintained Supabase bootstrap run order is documented in `backend/supabase/bootstrap/README.md`.
+The maintained Supabase bootstrap run order is documented in `apps/web-platform/backend/supabase/bootstrap/README.md`.
 
-**Never run `backend/supabase/bootstrap/00_core.sql` against an existing database containing data.** Use reviewed additive migrations for existing environments.
+**Never run `apps/web-platform/backend/supabase/bootstrap/00_core.sql` against an existing database containing data.** Use reviewed additive migrations for existing environments.
 
 ## Google Drive
 

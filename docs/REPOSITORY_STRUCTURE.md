@@ -22,12 +22,12 @@ This document is the repository's full tracked-file tree and a navigation guide.
 | Area | Observed contents |
 |---|---|
 | Root | 16 tracked files directly at repository root |
-| Web application | `apps/web/` — 605 tracked entries below this path; Next.js application |
+| Web application | `apps/web-platform/frontend/` — 605 tracked entries below this path; Next.js application |
 | Mobile application | `apps/mobile/` — 262 tracked entries below this path; Expo Router / React Native application |
 | Documentation | `docs/` — 48 tracked entries below this path, including nested documentation areas |
 | Shared package | `packages/shared/` — shared package with source entry point at `packages/shared/src/index.ts` |
 | Backend | `backend/` — backend-related tracked files (see tree for exact current contents) |
-| Database / SQL | `sql/` — repository SQL verification and policy scripts; app/database migrations may also live elsewhere in the tree |
+| Database / SQL | `apps/web-platform/backend/sql/` — repository SQL verification and policy scripts; app/database migrations may also live elsewhere in the tree |
 | Automation | `.github/workflows/`, `scripts/` — CI workflows and repository scripts |
 | Historical material | `archive/` — archived tracked files; do not assume archived code is part of the active runtime |
 
@@ -49,7 +49,7 @@ This document is the repository's full tracked-file tree and a navigation guide.
 - `.github/workflows/` — automated security, tests, database policy checks, and production smoke E2E workflows.
 - `apps/` — primary app surfaces.
 - `packages/` — reusable package code.
-- `backend/`, `sql/` — backend and SQL-related resources.
+- `backend/`, `apps/web-platform/backend/sql/` — backend and SQL-related resources.
 - `docs/` — detailed architecture, API, deployment, feature, setup, operations, security, mobile, and runbook documentation.
 - `scripts/` — maintenance/verification scripts.
 - `archive/` — historical material.
@@ -65,7 +65,7 @@ See each app's own `package.json` for the current scripts and dependencies.
 
 ## 4. Application layout
 
-### `apps/web/`
+### `apps/web-platform/frontend/`
 
 The web package is named `a-little-world-with-us-web`; it is a Next.js app. The tracked tree includes:
 
@@ -102,7 +102,7 @@ The mobile package is named `a-little-world-with-us-mobile`; its entry is `expo-
 
 Shared package boundary. The tree shows `packages/shared/package.json` and `packages/shared/src/index.ts`. Verify exports and consumer imports before moving shared code between apps.
 
-### `backend/`, `sql/`, and data services
+### `backend/`, `apps/web-platform/backend/sql/`, and data services
 
 These are separate tracked areas. The tree is a path inventory only: it does not prove a SQL script has been applied, a migration is deployed, a service is active, or production credentials are configured. Consult `docs/DATABASE.md`, `docs/API.md`, `docs/ARCHITECTURE.md`, storage/Drive documentation, and current-state evidence before operational changes.
 
@@ -1190,7 +1190,7 @@ The following is the complete recursive tracked tree returned for commit `b235c1
 │   ├── requirements.txt
 │   ├── upload_relationship_memories.py
 │   └── verify_upload.py
-├── sql/
+├── apps/web-platform/backend/sql/
 │   ├── location_address_cache_rls_verification.sql
 │   └── rules_coverage_check.sql
 ├── .editorconfig

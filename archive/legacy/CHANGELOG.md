@@ -77,7 +77,7 @@
 
 - Added the production Provider / API Configuration operator checklist for Supabase, Cloudinary, Backblaze B2, Google Drive, Upstash, AI, observability, web push, and Sentry.
 - Documented the Vercel rule that `apps/web` remains the Root Directory and build/install/dev/output command overrides must remain empty.
-- Documented that `apps/web/vercel.json` is retained only for cron definitions; a root build-config `vercel.json` must not be reintroduced.
+- Documented that `apps/web-platform/frontend/vercel.json` is retained only for cron definitions; a root build-config `vercel.json` must not be reintroduced.
 - Added public-repository readiness rules for secret hygiene, CI secrets, Gitleaks, and provider credential boundaries.
 - Reconciled design documentation with the implemented Phase A–D foundation while keeping final visual/accessibility regression testing open until evidence is collected.
 

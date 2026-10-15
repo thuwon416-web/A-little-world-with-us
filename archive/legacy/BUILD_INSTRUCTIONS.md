@@ -32,7 +32,7 @@ background tracking.
 ## Location release setup
 
 1. Ensure the target Supabase project uses reviewed additive migrations and required
-   Edge Functions. Do not run the destructive `backend/supabase/bootstrap/00_core.sql`
+   Edge Functions. Do not run the destructive `apps/web-platform/backend/supabase/bootstrap/00_core.sql`
    against an existing production database.
 2. Build an Android/iOS development or preview artifact with the native configuration.
 3. Grant the required location permissions on the test device and verify foreground

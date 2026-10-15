@@ -15,7 +15,7 @@ A private couples application for shared memories/media, chat, Care, planning, w
 apps/web — Web application and Route Handlers.
 apps/mobile — Expo / React Native application.
 packages/shared — stable cross-app contracts.
-backend/supabase — database/bootstrap and Edge Functions.
+apps/web-platform/backend/supabase — database/bootstrap and Edge Functions.
 docs — canonical domain documentation.
 scripts — repository tooling.
 .github — CI workflows.

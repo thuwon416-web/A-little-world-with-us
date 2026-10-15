@@ -9,7 +9,7 @@ import {
   calculateNativeCycleSummary,
   getNativeFertilityLabel,
   getNativePeriodForecastLabel,
-} from '../../../mobile/services/cycleCalculator'
+} from '../../../../mobile/services/cycleCalculator'
 
 type CycleVector = {
   name: string

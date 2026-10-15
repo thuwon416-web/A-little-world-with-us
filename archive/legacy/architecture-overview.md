@@ -6,15 +6,15 @@ This repository is an app-oriented monorepo containing the web app, mobile app, 
 
 | Area | Location | Responsibility |
 | --- | --- | --- |
-| Web | `apps/web/` | Next.js UI, App Router pages, and server Route Handlers |
+| Web | `apps/web-platform/frontend/` | Next.js UI, App Router pages, and server Route Handlers |
 | Mobile | `apps/mobile/` | Expo Router / React Native client |
 | Shared | `packages/shared/` | Stable domain contracts used by both apps |
-| Backend | `backend/supabase/` | PostgreSQL bootstrap SQL and Edge Functions |
+| Backend | `apps/web-platform/backend/supabase/` | PostgreSQL bootstrap SQL and Edge Functions |
 | Documentation | `docs/` | Architecture, setup, deployment, and security guidance |
 | CI | `.github/` | Automated web/mobile checks |
 | Tooling | `scripts/` | Repository-level maintenance/import tooling |
 
-The web application is full-stack Next.js, so UI and server Route Handlers intentionally remain together under `apps/web/src/`. The mobile app remains independent under `apps/mobile/`. There is no separate backend runtime to invent: Next.js Route Handlers and Supabase Edge Functions cover the server-side boundaries currently in use.
+The web application is full-stack Next.js, so UI and server Route Handlers intentionally remain together under `apps/web-platform/frontend/src/`. The mobile app remains independent under `apps/mobile/`. There is no separate backend runtime to invent: Next.js Route Handlers and Supabase Edge Functions cover the server-side boundaries currently in use.
 
 ## Runtime flow
 

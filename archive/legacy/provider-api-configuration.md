@@ -88,7 +88,7 @@ Supabase PostgreSQL remains the application's source of truth for metadata and s
 - Client-safe URL/anon key may be public.
 - Service-role key stays server-side.
 - Existing production databases receive reviewed additive migrations only.
-- Never run `backend/supabase/bootstrap/00_core.sql` against live data.
+- Never run `apps/web-platform/backend/supabase/bootstrap/00_core.sql` against live data.
 
 ## Vercel — important override rule
 
@@ -113,7 +113,7 @@ Vercel Project Settings should remain:
 - Development Command: default / empty
 - Output Directory: default / empty
 
-The only repository Vercel JSON currently retained is `apps/web/vercel.json`, which contains cron schedules. It is not a build override.
+The only repository Vercel JSON currently retained is `apps/web-platform/frontend/vercel.json`, which contains cron schedules. It is not a build override.
 
 **This rule applies even if the Vercel project is disabled and later enabled again.** Re-enabling Vercel must not be used as a reason to restore repository or project-level command overrides.
 

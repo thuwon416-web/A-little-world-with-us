@@ -4,7 +4,7 @@
 Designed for automated production pipelines and containerless deployments (systemd / PM2).
 Features:
 - Pre-flight PostgreSQL / Supabase connectivity check with exponential backoff.
-- Executes sequential bootstrap SQL files (00_core.sql through 55_*.sql) from backend/supabase/bootstrap.
+- Executes sequential bootstrap SQL files (00_core.sql through 55_*.sql) from apps/web-platform/backend/supabase/bootstrap.
 - Transactional execution with advisory lock protection to prevent race conditions during deployments.
 - Maintains `alw_schema_migrations` tracking table for idempotent replays.
 - Non-zero exit code on failure to prevent deployment of broken states.

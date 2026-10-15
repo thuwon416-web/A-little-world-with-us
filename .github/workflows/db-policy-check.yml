@@ -3,8 +3,8 @@ name: DB RLS policy regression check
 on:
   pull_request:
     paths:
-      - 'backend/supabase/**'
-      - 'sql/**'
+      - 'apps/web-platform/backend/supabase/**'
+      - 'apps/web-platform/backend/sql/**'
       - '.github/workflows/db-policy-check.yml'
 
 # Keep only the newest run for the same branch/PR to avoid stale queued work.
@@ -39,7 +39,7 @@ jobs:
         if: steps.staging.outputs.available == 'true'
         run: |
           set -euo pipefail
-          psql "$STAGING_DATABASE_URL" -v ON_ERROR_STOP=1 -At -f sql/rules_coverage_check.sql | tee rls-findings.txt
+          psql "$STAGING_DATABASE_URL" -v ON_ERROR_STOP=1 -At -f apps/web-platform/backend/sql/rules_coverage_check.sql | tee rls-findings.txt
           if [ -s rls-findings.txt ]; then
             echo "RLS policy regression detected:"
             cat rls-findings.txt
