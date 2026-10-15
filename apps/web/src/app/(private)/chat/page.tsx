@@ -4,13 +4,11 @@ import RealtimeChat from '@/features/chat/RealtimeChat'
 
 export default function ChatPage() {
   return (
-    <main className="mx-auto w-full max-w-6xl space-y-4 px-4 py-4 sm:px-6 lg:py-6" aria-labelledby="chat-title">
+    <div className="mx-auto flex h-[calc(100dvh-7.5rem)] md:h-[calc(100dvh-6.5rem)] w-full max-w-5xl flex-col overflow-hidden">
       <header className="sr-only">
-        <h1 id="chat-title">Chat</h1>
+        <h1>Chat</h1>
       </header>
-      <section className="ui-panel min-h-[calc(100dvh-8rem)] overflow-hidden p-2 sm:p-4" aria-label="Conversation">
-        <RealtimeChat />
-      </section>
-    </main>
+      <RealtimeChat className="h-full w-full flex-1" />
+    </div>
   )
 }

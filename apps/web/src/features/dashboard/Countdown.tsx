@@ -93,7 +93,7 @@ export default memo(function Countdown({ targetDate, label, icon = <Cake classNa
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.7 }}
-      className="glass-card p-4 text-center relative"
+      className="glass-card rounded-card border border-border/60 p-4 text-center relative shadow-card transition-all duration-200"
     >
       <div className="flex justify-center mb-2 text-accent-2">{icon}</div>
       <h3 className="font-dancing text-lg mb-3 text-accent-2/90">{label}</h3>

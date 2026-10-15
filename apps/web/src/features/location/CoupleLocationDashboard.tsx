@@ -1,7 +1,8 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { AlertTriangle, Battery, Clock3, MapPin, Navigation, Phone, PhoneCall, RefreshCw, Route, ShieldCheck, Smartphone, Video } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { AlertTriangle, Battery, Clock3, Compass, MapPin, Navigation, Phone, PhoneCall, RefreshCw, Route, ShieldCheck, Smartphone, Video } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import EmergencySOS from '@/features/location/EmergencySOS'
 import { resolveSos } from '@/services/safety-sos'
@@ -26,7 +27,8 @@ type GeofenceEvent = {
   notified: boolean
 }
 type CallEvent = { id: string; type: string; status: string; created_at: string; caller_id: string; receiver_id: string }
-type Tab = 'live' | 'timeline' | 'places' | 'device' | 'calls' | 'safety'
+type AggregatedLocation = { grid_lat: number; grid_lon: number; points: number; first_seen: string; last_seen: string; avg_lat: number; avg_lon: number }
+type Tab = 'live' | 'timeline' | 'places' | 'explored' | 'device' | 'calls' | 'safety'
 
 function relativeTime(value: string) {
   const seconds = Math.max(0, Math.round((Date.now() - new Date(value).getTime()) / 1000))
@@ -44,6 +46,8 @@ export default function CoupleLocationDashboard() {
   const [checkins, setCheckins] = useState<SafetyCheckin[]>([])
   const [places, setPlaces] = useState<SavedPlace[]>([])
   const [geofenceEvents, setGeofenceEvents] = useState<GeofenceEvent[]>([])
+  const [aggregated, setAggregated] = useState<AggregatedLocation[]>([])
+  const router = useRouter()
   const [calls, setCalls] = useState<CallEvent[]>([])
   const [placeForm, setPlaceForm] = useState({ name: '', latitude: '', longitude: '', radius: '100' })
   const [editingPlaceId, setEditingPlaceId] = useState<string | null>(null)
@@ -56,14 +60,14 @@ export default function CoupleLocationDashboard() {
     setLoading(true); setError(null)
     const { data: authData } = await supabase.auth.getUser()
     const user = authData.user
-    if (!user) { window.location.assign('/login'); return }
+    if (!user) { router.push('/login'); return }
     setAuthUserId(user.id)
 
     const { data: link, error: linkError } = await supabase.from('couple_links').select('inviter_id, accepted_by, couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').maybeSingle()
     if (linkError || !link?.accepted_by || !link.couple_id) { setError('No accepted linked partner is available yet.'); setLoading(false); return }
-    if (link.inviter_id !== user.id) { window.location.assign('/dashboard'); return }
+    if (link.inviter_id !== user.id) { router.push('/dashboard'); return }
     const userIds = [link.inviter_id, link.accepted_by]
-    const [profilesResult, locationResult, historyResult, alertsResult, placesResult, callsResult, checkinsResult, geofenceEventsResult] = await Promise.all([
+    const [profilesResult, locationResult, historyResult, alertsResult, placesResult, callsResult, checkinsResult, geofenceEventsResult, aggregatedResult] = await Promise.all([
       supabase.from('profiles').select('id,email,full_name,avatar_url').in('id', userIds),
       supabase.from('user_locations').select('*').eq('couple_id', link.couple_id).in('user_id', userIds),
       supabase.from('location_history').select('id,user_id,latitude,longitude,accuracy,captured_at').eq('couple_id', link.couple_id).gte('captured_at', new Date(Date.now() - 7 * 86400000).toISOString()).order('captured_at', { ascending: false }).limit(1500),
@@ -72,6 +76,7 @@ export default function CoupleLocationDashboard() {
       supabase.from('call_signals').select('id,type,status,created_at,caller_id,receiver_id').or(`caller_id.in.(${userIds.join(',')}),receiver_id.in.(${userIds.join(',')})`).order('created_at', { ascending: false }).limit(50),
       supabase.from('safety_checkins').select('*').eq('couple_id', link.couple_id).order('created_at', { ascending: false }).limit(20),
       supabase.from('geofence_events').select('id,saved_place_id,user_id,event_type,latitude,longitude,occurred_at,notified').eq('couple_id', link.couple_id).order('occurred_at', { ascending: false }).limit(50),
+      supabase.from('location_history_aggregated').select('*').order('points', { ascending: false }).limit(30),
     ])
     if (profilesResult.error || locationResult.error || historyResult.error || alertsResult.error || placesResult.error || callsResult.error || checkinsResult.error || geofenceEventsResult.error) { setError(profilesResult.error?.message || locationResult.error?.message || historyResult.error?.message || alertsResult.error?.message || placesResult.error?.message || callsResult.error?.message || checkinsResult.error?.message || geofenceEventsResult.error?.message || 'Unable to load location data.'); setLoading(false); return }
     setProfiles((profilesResult.data ?? []) as Profile[])
@@ -82,9 +87,10 @@ export default function CoupleLocationDashboard() {
     setCalls((callsResult.data ?? []) as CallEvent[])
     setCheckins((checkinsResult.data ?? []) as SafetyCheckin[])
     setGeofenceEvents((geofenceEventsResult.data ?? []) as GeofenceEvent[])
+    if (aggregatedResult.data) setAggregated(aggregatedResult.data as AggregatedLocation[])
     setSelectedUser((current) => current && userIds.includes(current) ? current : user.id)
     setLoading(false)
-  }, [])
+  }, [router])
 
   const savePlace = async () => {
     const latitude = Number(placeForm.latitude)
@@ -133,7 +139,7 @@ export default function CoupleLocationDashboard() {
   const selectedHistory = useMemo(() => history.filter((row) => row.user_id === selectedUser), [history, selectedUser])
   const profileNames = useMemo(() => Object.fromEntries(profiles.map((profile) => [profile.id, profile.full_name || profile.email])), [profiles])
   const tabs: { id: Tab; label: string; icon: typeof MapPin }[] = [
-    { id: 'live', label: 'Live Map', icon: MapPin }, { id: 'timeline', label: 'Timeline', icon: Route }, { id: 'places', label: 'Saved Places', icon: Navigation }, { id: 'device', label: 'Device Status', icon: Smartphone }, { id: 'calls', label: 'App Calls', icon: PhoneCall }, { id: 'safety', label: 'Safety / SOS', icon: ShieldCheck },
+    { id: 'live', label: 'Live Map', icon: MapPin }, { id: 'timeline', label: 'Timeline', icon: Route }, { id: 'places', label: 'Saved Places', icon: Navigation }, { id: 'explored', label: 'Places Explored', icon: Compass }, { id: 'device', label: 'Device Status', icon: Smartphone }, { id: 'calls', label: 'App Calls', icon: PhoneCall }, { id: 'safety', label: 'Safety / SOS', icon: ShieldCheck },
   ]
 
   if (loading) return <div className="flex min-h-[400px] items-center justify-center text-text-2"><RefreshCw className="icon-pulse-soft mr-2 h-5 w-5 animate-spin" /> Loading paired location data…</div>
@@ -148,6 +154,7 @@ export default function CoupleLocationDashboard() {
         {tab === 'timeline' && <Timeline rows={selectedHistory} />}
         {tab === 'places' && <div className="space-y-3 p-2"><h2 className="text-xl text-text-1">Saved places</h2><div className="grid gap-2 rounded-btn bg-soft-tint p-4 sm:grid-cols-2"><input value={placeForm.name} onChange={(event) => setPlaceForm((form) => ({ ...form, name: event.target.value }))} placeholder="Name" className="rounded-xl border border-border bg-card px-3 py-2 text-sm text-text-1" /><input value={placeForm.latitude} disabled={Boolean(editingPlaceId)} onChange={(event) => setPlaceForm((form) => ({ ...form, latitude: event.target.value }))} placeholder="Latitude" className="rounded-xl border border-border bg-card px-3 py-2 text-sm text-text-1" /><input value={placeForm.longitude} disabled={Boolean(editingPlaceId)} onChange={(event) => setPlaceForm((form) => ({ ...form, longitude: event.target.value }))} placeholder="Longitude" className="rounded-xl border border-border bg-card px-3 py-2 text-sm text-text-1" /><input value={placeForm.radius} onChange={(event) => setPlaceForm((form) => ({ ...form, radius: event.target.value }))} placeholder="Radius (25-10000m)" className="rounded-xl border border-border bg-card px-3 py-2 text-sm text-text-1" /><button type="button" onClick={() => void savePlace()} className="glass-button sm:col-span-2">{editingPlaceId ? 'Update place' : 'Add place'}</button>{editingPlaceId ? <button type="button" onClick={cancelEditPlace} className="text-sm text-text-2 sm:col-span-2">Cancel edit</button> : null}</div>{places.map((place) => <div key={place.id} className="flex items-center justify-between rounded-btn bg-soft-tint p-4"><div><p className="font-medium text-text-1">{place.name}</p><p className="mt-1 text-sm text-text-2">{place.latitude.toFixed(5)}, {place.longitude.toFixed(5)} · {place.radius_meters}m radius</p></div><div className="flex gap-3"><button type="button" onClick={() => editPlace(place)} className="text-sm text-accent-1">Edit</button><button type="button" onClick={() => void deletePlace(place.id)} className="text-sm text-error">Delete</button></div></div>)}{!places.length ? <EmptyPanel title="No saved places" text="Add a safe zone above." /> : null}</div>}
         {tab === 'places' && <div className="mt-6 space-y-3"><h2 className="text-xl text-text-1">Geofence events</h2>{geofenceEvents.length === 0 ? <EmptyPanel title="No geofence events" text="Enter/exit history will appear here." /> : geofenceEvents.map((event) => { const place = places.find((savedPlace) => savedPlace.id === event.saved_place_id); const isYou = event.user_id === authUserId; const direction = event.event_type === 'entered' ? 'Arrived at' : 'Left'; const when = new Date(event.occurred_at).toLocaleString(); return <div key={event.id} className="flex items-center justify-between rounded-btn bg-soft-tint p-4"><div><p className="font-medium text-text-1">{isYou ? 'You' : 'Partner'} {direction} {place?.name ?? 'a saved place'}</p><p className="mt-1 text-sm text-text-2">{when}</p>{!event.notified ? <p className="mt-1 text-xs text-text-2">Notified: pending</p> : null}</div></div> })}</div>}
+        {tab === 'explored' && <div className="space-y-4 p-2"><div><h2 className="text-xl font-serif text-text-1">Places We Explored Together</h2><p className="mt-1 text-sm text-text-2">Coordinates and visited clusters aggregated over the last 7 days.</p></div>{aggregated.length > 0 ? <div className="grid gap-3 sm:grid-cols-2">{aggregated.map((item, idx) => <a key={`${item.grid_lat}-${item.grid_lon}-${idx}`} href={`https://www.google.com/maps?q=${item.avg_lat},${item.avg_lon}`} target="_blank" rel="noreferrer" className="flex flex-col justify-between rounded-btn border border-border/30 bg-soft-tint p-4 transition hover:border-accent-1/40 hover:bg-card"><div><div className="flex items-center justify-between gap-2"><span className="font-semibold text-text-1">Explored Spot #{idx + 1}</span><span className="rounded-full bg-accent-1/10 px-2.5 py-0.5 text-xs font-semibold text-accent-1">{item.points} visits</span></div><p className="mt-2 text-sm text-text-2">{item.avg_lat.toFixed(5)}, {item.avg_lon.toFixed(5)}</p></div><div className="mt-3 flex items-center justify-between border-t border-border/30 pt-2 text-xs text-text-2"><span>First: {new Date(item.first_seen).toLocaleDateString()}</span><span className="font-medium text-accent-1">Open Map →</span></div></a>)}</div> : <EmptyPanel title="No travel clusters recorded yet" text="Visit places together while background location is active to see your shared travel map." />}</div>}
         {tab === 'device' && <DevicePanel location={selectedLocation} profile={selectedProfile} />}
         {tab === 'calls' && <div className="space-y-3 p-2"><h2 className="text-xl text-text-1">App call history</h2>{calls.map((call) => <div key={call.id} className="flex items-center gap-3 rounded-btn bg-soft-tint p-4">{call.type === 'video' ? <Video className="h-5 w-5 text-accent-1" /> : <Phone className="h-5 w-5 text-accent-1" />}<div><p className="font-medium text-text-1">{call.type === 'video' ? 'Video call' : 'Audio call'} · {call.status}</p><p className="text-sm text-text-2">{new Date(call.created_at).toLocaleString()}</p></div></div>)}{!calls.length ? <EmptyPanel title="No app calls" text="No in-app call events yet." /> : null}</div>}
         {tab === 'safety' && <SafetyPanel alerts={alerts} profiles={profiles} checkins={checkins} onChanged={load} />}
@@ -188,5 +195,5 @@ function SafetyPanel({ alerts, profiles, checkins, onChanged }: Readonly<{ alert
       onChanged()
     } catch (error) { window.alert(error instanceof Error ? error.message : 'Unable to send check-in.') }
   }
-  return <div className="space-y-4 p-2"><EmergencySOS onSOS={() => onChanged()} /><div className="grid grid-cols-3 gap-3"><button type="button" onClick={() => void startCheckin('safe', 'I am safe')} className="rounded-xl bg-success p-3 text-sm font-medium text-white">I am safe</button><button type="button" onClick={() => void startCheckin('need_help', 'I need help')} className="rounded-xl bg-error p-3 text-sm font-medium text-text-1">I need help</button><button type="button" onClick={() => void startCheckin('home', 'I am home')} className="rounded-xl bg-accent-1 p-3 text-sm font-medium text-white">I am home</button></div>{checkins.slice(0, 5).map((checkin) => <div key={checkin.id} className="rounded-xl bg-soft-tint p-3 text-sm text-text-2"><p className="font-medium text-text-1">{checkin.checkinType.replace('_', ' ')} · {checkin.status}</p><p>{new Date(checkin.createdAt).toLocaleString()}{checkin.expectedUntil ? ` · expected by ${new Date(checkin.expectedUntil).toLocaleString()}` : ''}</p></div>)}<h2 className="text-xl text-text-1">Recent SOS alerts</h2>{alerts.length ? alerts.map((alert) => <div key={alert.id} className="block rounded-btn border border-error/30 bg-error/10 p-4"><a href={alert.latitude !== null && alert.longitude !== null ? `https://www.google.com/maps?q=${alert.latitude},${alert.longitude}` : '#'} target="_blank" rel="noreferrer"><p className="font-medium text-error">🆘 {profiles.find((profile) => profile.id === alert.reporter_id)?.full_name || 'Partner'} sent an SOS</p><p className="mt-1 text-sm text-text-2">{new Date(alert.created_at).toLocaleString()} · {alert.latitude !== null ? 'open map' : 'location unavailable'}</p></a>{alert.resolved_at ? <div className="mt-3 text-sm text-text-2"><p>Resolved by {profiles.find((profile) => profile.id === alert.resolved_by)?.full_name || 'Partner'} on {new Date(alert.resolved_at).toLocaleString()}</p>{alert.resolution_note ? <p className="mt-1">Note: {alert.resolution_note}</p> : null}</div> : <button type="button" onClick={() => void handleResolve(alert)} className="mt-3 rounded-lg bg-success px-3 py-2 text-sm font-medium text-white">Resolve</button>}</div>) : <p className="rounded-btn bg-soft-tint p-4 text-sm text-text-2">No SOS alerts yet.</p>}</div>
+  return <div className="space-y-4 p-2"><EmergencySOS onSOS={() => onChanged()} /><div className="grid grid-cols-3 gap-3"><button type="button" onClick={() => void startCheckin('safe', 'I am safe')} className="rounded-xl bg-success p-3 text-sm font-medium text-[color:var(--accent-foreground)]">I am safe</button><button type="button" onClick={() => void startCheckin('need_help', 'I need help')} className="rounded-xl bg-error p-3 text-sm font-medium text-text-1">I need help</button><button type="button" onClick={() => void startCheckin('home', 'I am home')} className="rounded-xl bg-accent-1 p-3 text-sm font-medium text-[color:var(--accent-foreground)]">I am home</button></div>{checkins.slice(0, 5).map((checkin) => <div key={checkin.id} className="rounded-xl bg-soft-tint p-3 text-sm text-text-2"><p className="font-medium text-text-1">{checkin.checkinType.replace('_', ' ')} · {checkin.status}</p><p>{new Date(checkin.createdAt).toLocaleString()}{checkin.expectedUntil ? ` · expected by ${new Date(checkin.expectedUntil).toLocaleString()}` : ''}</p></div>)}<h2 className="text-xl text-text-1">Recent SOS alerts</h2>{alerts.length ? alerts.map((alert) => <div key={alert.id} className="block rounded-btn border border-error/30 bg-error/10 p-4"><a href={alert.latitude !== null && alert.longitude !== null ? `https://www.google.com/maps?q=${alert.latitude},${alert.longitude}` : '#'} target="_blank" rel="noreferrer"><p className="font-medium text-error">🆘 {profiles.find((profile) => profile.id === alert.reporter_id)?.full_name || 'Partner'} sent an SOS</p><p className="mt-1 text-sm text-text-2">{new Date(alert.created_at).toLocaleString()} · {alert.latitude !== null ? 'open map' : 'location unavailable'}</p></a>{alert.resolved_at ? <div className="mt-3 text-sm text-text-2"><p>Resolved by {profiles.find((profile) => profile.id === alert.resolved_by)?.full_name || 'Partner'} on {new Date(alert.resolved_at).toLocaleString()}</p>{alert.resolution_note ? <p className="mt-1">Note: {alert.resolution_note}</p> : null}</div> : <button type="button" onClick={() => void handleResolve(alert)} className="mt-3 rounded-lg bg-success px-3 py-2 text-sm font-medium text-[color:var(--accent-foreground)]">Resolve</button>}</div>) : <p className="rounded-btn bg-soft-tint p-4 text-sm text-text-2">No SOS alerts yet.</p>}</div>
 }

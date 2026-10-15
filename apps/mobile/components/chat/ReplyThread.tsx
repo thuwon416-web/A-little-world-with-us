@@ -77,7 +77,7 @@ export function ReplyThread({ visible, message, currentUserId, onClose, onReply 
             disabled={!text.trim() || sending}
             onPress={() => void send()}
           >
-            <Send color={colors.background} size={17} />
+            <Send color={colors.accentForeground ?? '#ffffff'} size={17} />
             <Text style={styles.sendText}>{sending ? 'Sending...' : 'Send reply'}</Text>
           </TouchableOpacity>
           <View style={{ height: insets.bottom }} />
@@ -120,12 +120,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
     send: {
       marginTop: 14,
       backgroundColor: colors.accent1,
-      borderRadius: 14,
+      borderRadius: 999,
       padding: 14,
       flexDirection: 'row',
       justifyContent: 'center',
       gap: 8,
     },
-    sendText: { color: colors.background, fontWeight: '700' },
+    sendText: { color: colors.accentForeground ?? '#ffffff', fontWeight: '700' },
     disabled: { opacity: 0.45 },
   })

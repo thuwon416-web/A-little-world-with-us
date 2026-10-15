@@ -169,9 +169,9 @@ export default function SettingsPage() {
         {driveConnected && driveRequiresReauthorization ? <p role="status" className="mt-3 rounded-btn border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">Google Drive is connected, but needs updated permissions for full-folder sync. Reconnect Drive to continue.</p> : null}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="text-sm text-text-2">{driveLoading ? 'Checking…' : driveConnected ? (driveRequiresReauthorization ? 'Reconnect required' : 'Connected') : 'Not connected'}</span>
-          {!driveLoading && !driveConnected && driveCanConnect ? <Button type="button" onClick={() => { window.location.href = '/api/drive/start' }}>Connect Google Drive</Button> : null}
+          {!driveLoading && !driveConnected && driveCanConnect ? <a href="/api/drive/start" className="ui-button-primary inline-flex min-h-10 items-center justify-center gap-2 px-5 py-2 text-sm font-semibold transition hover:opacity-90 active:scale-95">Connect Google Drive</a> : null}
           {!driveLoading && !driveConnected && !driveCanConnect ? <span className="text-sm text-text-2">Connect from the production web app to finish Google Drive authorization.</span> : null}
-          {!driveLoading && driveConnected && driveRequiresReauthorization && driveCanConnect ? <Button type="button" onClick={() => { window.location.href = '/api/drive/start' }}>Reconnect Google Drive</Button> : null}
+          {!driveLoading && driveConnected && driveRequiresReauthorization && driveCanConnect ? <a href="/api/drive/start" className="ui-button-primary inline-flex min-h-10 items-center justify-center gap-2 px-5 py-2 text-sm font-semibold transition hover:opacity-90 active:scale-95">Reconnect Google Drive</a> : null}
           {!driveLoading && driveConnected ? <Button type="button" variant="secondary" onClick={() => void disconnectDrive()} disabled={driveDisconnecting}>{driveDisconnecting ? 'Disconnecting…' : 'Disconnect'}</Button> : null}
         </div>
       </section>

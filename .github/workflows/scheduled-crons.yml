@@ -1,0 +1,40 @@
+name: Background Cron Checks
+
+on:
+  schedule:
+    # Run every 15 minutes (Free-tier compliant alternative to Vercel Hobby 1/day limit)
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: scheduled-crons
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  periodic-crons:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Periodic Background Crons
+        env:
+          APP_URL: ${{ secrets.CRON_APP_URL || 'https://a-little-world-with-us.vercel.app' }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "::warning ::CRON_SECRET is not configured in repository secrets; skipping cron execution."
+            exit 0
+          fi
+
+          endpoints=("check-battery" "check-geofence" "check-missed-checkin")
+
+          for ep in "${endpoints[@]}"; do
+            echo "Triggering /api/cron/$ep..."
+            status=$(curl -s -o /dev/null -w "%{http_code}" -X GET "$APP_URL/api/cron/$ep" \
+              -H "Authorization: Bearer $CRON_SECRET")
+            echo "/api/cron/$ep finished with HTTP status: $status"
+            if [ "$status" -ne 200 ] && [ "$status" -ne 204 ]; then
+              echo "::warning ::Endpoint /api/cron/$ep returned non-200 status: $status"
+            fi
+          done

@@ -2,6 +2,7 @@
 
 import { Suspense } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useId, useMemo, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Fingerprint, KeyRound, Lock, Eye, Plus, X, Save, Sparkles } from 'lucide-react'
@@ -312,6 +313,7 @@ export default function VaultPage() {
 }
 
 function VaultPageContent() {
+  const router = useRouter()
   const fieldId = useId()
   const { masterKey, isUnlocked: isPasswordVaultUnlocked, unlockWithPassphrase, unlockWithBackupPhrase, unlockWithBiometric } = useVaultKey()
   const [isUnlocked, setIsUnlocked] = useState(false)
@@ -359,7 +361,7 @@ function VaultPageContent() {
         const { data: { user } } = await supabase.auth.getUser()
         if (!active) return
         if (!user) {
-          window.location.href = '/login'
+          router.push('/login')
           return
         }
         const [currentUserId, coupleStatus] = await Promise.all([getCurrentUserId(), getCoupleStatus()])
@@ -378,7 +380,7 @@ function VaultPageContent() {
     return () => {
       active = false
     }
-  }, [])
+  }, [router])
 
   useEffect(() => {
     let active = true
@@ -590,7 +592,7 @@ function VaultPageContent() {
           <button
             type="button"
             onClick={() => void fetchLetters()}
-            className="mt-5 rounded-xl bg-accent-1 px-4 py-2 font-semibold text-white"
+            className="mt-5 rounded-xl bg-accent-1 px-4 py-2 font-semibold text-[color:var(--accent-foreground)]"
           >
             Retry
           </button>

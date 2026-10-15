@@ -22,7 +22,7 @@ export default function CategoryFilter({ active, onChange }: CategoryFilterProps
               type="button"
               onClick={() => onChange(value)}
               className={selected
-                ? 'rounded-full bg-accent-1 px-4 py-2 text-sm text-white'
+                ? 'rounded-full bg-accent-1 px-4 py-2 text-sm text-[color:var(--accent-foreground)]'
                 : 'rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm text-text-2'}
             >
               {label}

@@ -91,9 +91,9 @@ export function VoiceMessageRecorder({ visible, onClose, onRecord }: Props) {
             onPress={() => void (isRecording ? stop() : start())}
           >
             {isRecording ? (
-              <Square color={colors.background} size={30} />
+              <Square color="#ffffff" size={30} />
             ) : (
-              <Mic color={colors.background} size={30} />
+              <Mic color={colors.accentForeground ?? '#ffffff'} size={30} />
             )}
           </TouchableOpacity>
           <Text style={styles.secondary}>{isRecording ? 'Tap to stop' : 'Tap to record'}</Text>

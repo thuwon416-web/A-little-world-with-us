@@ -202,7 +202,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
       marginBottom: 14,
     },
     uploadButton: {
-      backgroundColor: colors.accent2,
+      backgroundColor: colors.accent1,
       borderRadius: 999,
       paddingVertical: 12,
       alignItems: 'center',
@@ -212,7 +212,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
       opacity: 0.5,
     },
     uploadButtonText: {
-      color: colors.background,
+      color: colors.accentForeground ?? '#ffffff',
       fontWeight: '700',
       fontSize: 14,
     },

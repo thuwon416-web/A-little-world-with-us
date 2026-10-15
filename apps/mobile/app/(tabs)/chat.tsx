@@ -1,5 +1,6 @@
 import { Q } from '@nozbe/watermelondb'
 import * as Location from 'expo-location'
+import { useRouter } from 'expo-router'
 import {
   FileText,
   Gift,
@@ -7,6 +8,7 @@ import {
   MapPin,
   Mic,
   Paperclip,
+  Pin,
   Send,
   Sticker,
   X,
@@ -16,6 +18,7 @@ import { Alert, FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, 
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { ChatBubble, type ChatMessage } from '@/components/ChatBubble'
+import { ConnectedCoupleAvatars } from '@/components/ConnectedCoupleAvatars'
 import { Card } from '@/components/ui/Card'
 import { IncomingCall } from '@/components/IncomingCall'
 import { Input } from '@/components/Input'
@@ -310,6 +313,7 @@ async function persistLocationMessage(
 }
 
 export default function ChatScreen() {
+  const router = useRouter()
   const { user } = useAuth()
   const { colors } = useTheme()
   const insets = useSafeAreaInsets()
@@ -319,6 +323,9 @@ export default function ChatScreen() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [partnerId, setPartnerId] = useState<string | null>(null)
   const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [userProfile, setUserProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
+  const [partnerProfile, setPartnerProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
+  const [pinnedMessage, setPinnedMessage] = useState<ChatMessage | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [mediaModal, setMediaModal] = useState<
     'photo' | 'voice' | 'file' | 'gif' | 'sticker' | null
@@ -360,7 +367,34 @@ export default function ChatScreen() {
 
         if (data?.couple_id && data.accepted_by) {
           setCoupleId(data.couple_id)
-          setPartnerId(data.inviter_id === user.id ? data.accepted_by : data.inviter_id)
+          const pId = data.inviter_id === user.id ? data.accepted_by : data.inviter_id
+          setPartnerId(pId)
+
+          const { data: profs } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url')
+            .in('id', [user.id, pId])
+          if (profs) {
+            const me = profs.find((p) => p.id === user.id)
+            const partner = profs.find((p) => p.id === pId)
+            if (me) setUserProfile(me)
+            if (partner) setPartnerProfile(partner)
+          }
+
+          // Fetch pinned message
+          try {
+            const { data: pinnedRow } = await supabase
+              .from('chat_pinned_messages')
+              .select('message_id')
+              .eq('couple_id', data.couple_id)
+              .order('pinned_at', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+            if (pinnedRow?.message_id) {
+              const matched = messages.find((m) => m.id === pinnedRow.message_id)
+              if (matched) setPinnedMessage(matched)
+            }
+          } catch {}
         }
       } catch (error) {
         console.error('Error fetching partner ID:', error)
@@ -684,8 +718,55 @@ export default function ChatScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
       <Card style={styles.headerCard}>
-        <Text style={styles.title}>Chat</Text>
-        <Text style={styles.subtitle}>Your private conversation, kept in sync.</Text>
+        <View style={styles.headerRow}>
+          <ConnectedCoupleAvatars
+            size="sm"
+            userAvatarUrl={userProfile?.avatar_url}
+            partnerAvatarUrl={partnerProfile?.avatar_url}
+            userName={userProfile?.full_name ?? 'You'}
+            partnerName={partnerProfile?.full_name ?? 'Your love'}
+          />
+          <View style={styles.headerTitleWrap}>
+            <Text style={[styles.title, { color: colors.textPrimary, marginBottom: 0 }]} numberOfLines={1}>
+              {partnerProfile?.full_name ?? 'Your love'}
+            </Text>
+            <Text style={[styles.subtitle, { color: isOffline ? colors.textSecondary : '#10b981' }]}>
+              {statusLabel}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={[styles.galleryButton, { backgroundColor: colors.accent1 + '20', borderColor: colors.accent1 + '40' }]}
+            onPress={() => router.push('/memories')}
+            accessibilityRole="button"
+            accessibilityLabel="View gallery"
+          >
+            <ImageIcon size={15} color={colors.accent1} />
+            <Text style={[styles.galleryButtonText, { color: colors.textPrimary }]}>Gallery</Text>
+          </TouchableOpacity>
+        </View>
+
+        {pinnedMessage && (
+          <TouchableOpacity
+            style={[styles.pinnedBanner, { backgroundColor: colors.accent1 + '15', borderColor: colors.accent1 + '35' }]}
+            onPress={() => {
+              setHighlightedMessageId(pinnedMessage.id)
+              setTimeout(() => setHighlightedMessageId(null), 2500)
+            }}
+          >
+            <View style={styles.pinnedLeft}>
+              <View style={styles.pinnedTitleRow}>
+                <Pin size={11} color={colors.accent1} fill={colors.accent1} />
+                <Text style={[styles.pinnedKicker, { color: colors.accent1 }]}>PINNED MESSAGE</Text>
+              </View>
+              <Text style={[styles.pinnedPreview, { color: colors.textPrimary }]} numberOfLines={1}>
+                {pinnedMessage.text || 'Photo or attachment'}
+              </Text>
+            </View>
+            <TouchableOpacity onPress={() => setPinnedMessage(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+              <X size={15} color={colors.textSecondary} />
+            </TouchableOpacity>
+          </TouchableOpacity>
+        )}
       </Card>
       <IncomingCall
         visible={callState === 'ringing' && Boolean(incomingSignal)}
@@ -917,9 +998,9 @@ export default function ChatScreen() {
           accessibilityLabel={draft.trim() ? 'Send message' : 'Record voice note'}
         >
           {draft.trim() ? (
-            <Send color={colors.background} size={18} />
+            <Send color={colors.accentForeground ?? '#ffffff'} size={18} />
           ) : (
-            <Mic color={colors.background} size={18} />
+            <Mic color={colors.accentForeground ?? '#ffffff'} size={18} />
           )}
         </TouchableOpacity>
       </View>
@@ -971,8 +1052,59 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       paddingBottom: 20,
     },
     headerCard: { marginBottom: 8 },
-  subtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
-  title: {
+    headerRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: sizes.space.sm,
+    },
+    headerTitleWrap: {
+      flex: 1,
+      marginLeft: sizes.space.xs,
+    },
+    galleryButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 5,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderRadius: sizes.radius.pill,
+      borderWidth: 1,
+    },
+    galleryButtonText: {
+      fontSize: sizes.text.xs,
+      fontWeight: '600',
+    },
+    pinnedBanner: {
+      marginTop: sizes.space.sm,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: sizes.space.sm,
+      paddingVertical: sizes.space.xs,
+      borderRadius: sizes.radius.input,
+      borderWidth: 1,
+    },
+    pinnedLeft: {
+      flex: 1,
+      marginRight: sizes.space.xs,
+    },
+    pinnedTitleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    pinnedKicker: {
+      fontSize: 10,
+      fontWeight: '700',
+      letterSpacing: 0.5,
+    },
+    pinnedPreview: {
+      fontSize: sizes.text.xs,
+      marginTop: 2,
+    },
+    subtitle: { fontSize: 13, color: colors.textSecondary, marginTop: 2 },
+    title: {
       color: colors.textPrimary,
       fontSize: sizes.text.hLg,
       fontWeight: '700',
@@ -1050,14 +1182,14 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     attachmentButton: {
       width: 44,
       height: 44,
-      borderRadius: sizes.radius.btn,
+      borderRadius: 999,
       alignItems: 'center',
       justifyContent: 'center',
     },
     sendButton: {
       width: 44,
       height: 44,
-      borderRadius: sizes.radius.btn,
+      borderRadius: 999,
       alignItems: 'center',
       justifyContent: 'center',
     },

@@ -121,12 +121,12 @@ export function ChatBubble({
           <TouchableOpacity style={styles.mediaRow} onPress={() => void toggleAudio()}>
             <View style={styles.mediaIcon}>
               {playing ? (
-                <Square color={colors.background} size={15} />
+                <Square color={isMe ? (colors.accentForeground ?? '#ffffff') : colors.textPrimary} size={15} />
               ) : (
-                <Play color={colors.background} size={15} />
+                <Play color={isMe ? (colors.accentForeground ?? '#ffffff') : colors.textPrimary} size={15} />
               )}
             </View>
-            <Text style={styles.text}>
+            <Text style={[styles.text, isMe && { color: colors.accentForeground ?? '#ffffff' }]}>
               {playing
                 ? 'Playing voice note'
                 : `Voice note${message.mediaDuration ? ` · ${message.mediaDuration}s` : ''}`}
@@ -147,13 +147,13 @@ export function ChatBubble({
               )
             }
           >
-            <FileText color={colors.background} size={20} />
-            <Text style={styles.text} numberOfLines={1}>
+            <FileText color={isMe ? (colors.accentForeground ?? '#ffffff') : colors.textPrimary} size={20} />
+            <Text style={[styles.text, isMe && { color: colors.accentForeground ?? '#ffffff' }]} numberOfLines={1}>
               {message.content || 'Open attachment'}
             </Text>
           </TouchableOpacity>
         ) : (
-          <Text style={styles.text}>
+          <Text style={[styles.text, isMe && { color: colors.accentForeground ?? '#ffffff' }]}>
             {message.type === 'sticker' ? message.content : message.text}
           </Text>
         )}
@@ -170,8 +170,8 @@ export function ChatBubble({
           </View>
         ) : null}
         <View style={styles.timestampRow}>
-          <Text style={styles.time}>{message.time}</Text>
-          {message.editedAt ? <Text style={styles.edited}>edited</Text> : null}
+          <Text style={[styles.time, { color: isMe ? (colors.accentForeground ?? '#ffffff') : colors.textSecondary }]}>{message.time}</Text>
+          {message.editedAt ? <Text style={[styles.edited, { color: isMe ? (colors.accentForeground ?? '#ffffff') : colors.textSecondary }]}>edited</Text> : null}
           <Text style={styles.statusPlaceholder} accessibilityLabel="Message status" />
         </View>
         <View style={styles.actions}>

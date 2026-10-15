@@ -152,7 +152,7 @@ export default function AddExpenseModal({ currentUserId, partnerId, onClose, onS
         {error && <p className="mt-3 text-sm text-error" role="alert">{error}</p>}
         <div className="mt-6 flex justify-end gap-3">
           <button type="button" onClick={onClose} className="rounded-xl border border-accent-1/20 px-4 py-3 text-sm text-text-1">Cancel</button>
-          <button type="submit" disabled={submitting} className="rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60">{submitting ? 'Saving…' : 'Save'}</button>
+          <button type="submit" disabled={submitting} className="rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-[color:var(--accent-foreground)] disabled:opacity-60">{submitting ? 'Saving…' : 'Save'}</button>
         </div>
       </form>
     </div>

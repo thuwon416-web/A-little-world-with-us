@@ -11,14 +11,14 @@ export function Button({ title, onPress }: ButtonProps) {
   const { colors } = useTheme()
   return (
     <Pressable onPress={onPress} style={[styles.button, { backgroundColor: colors.accent1 }]}>
-      <Text style={[styles.text, { color: colors.background }]}>{title}</Text>
+      <Text style={[styles.text, { color: colors.accentForeground ?? '#ffffff' }]}>{title}</Text>
     </Pressable>
   )
 }
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 12,
+    borderRadius: 999,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },

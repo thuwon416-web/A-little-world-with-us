@@ -50,12 +50,12 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     },
     button: {
       backgroundColor: colors.accent1,
-      borderRadius: sizes.radius.input,
+      borderRadius: sizes.radius.pill,
       paddingHorizontal: 20,
       paddingVertical: 12,
     },
     buttonText: {
-      color: colors.background,
+      color: colors.accentForeground ?? '#ffffff',
       fontWeight: '700',
     },
   })

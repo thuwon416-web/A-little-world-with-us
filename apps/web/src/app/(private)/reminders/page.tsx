@@ -6,6 +6,7 @@ import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { registerBrowserPushSubscription } from '@/lib/notifications'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type Reminder = {
   id: string
@@ -16,6 +17,9 @@ type Reminder = {
 }
 
 export default function RemindersPage() {
+  const { language } = useLanguage()
+  const isMm = language === 'my'
+
   const [reminders, setReminders] = useState<Reminder[]>([])
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
@@ -36,7 +40,11 @@ export default function RemindersPage() {
       .order('scheduled_at', { ascending: true })
     setIsLoading(false)
     if (error) {
-      setErrorMessage('သတိပေးချက်များကို ဖတ်မရပါ။ ခဏနေမှ ထပ်ကြိုးစားပါ။')
+      setErrorMessage(
+        isMm
+          ? 'သတိပေးချက်များကို ဖတ်မရပါ။ ခဏနေမှ ထပ်ကြိုးစားပါ။'
+          : 'Unable to load reminders. Please try again shortly.'
+      )
       return
     }
     setReminders(
@@ -71,7 +79,6 @@ export default function RemindersPage() {
       void supabase.removeChannel(channel)
     }
   // The loader is intentionally kept local to the page; coupleId is the subscription boundary.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [coupleId])
 
   useEffect(() => {
@@ -90,7 +97,11 @@ export default function RemindersPage() {
       .update({ active: !reminder.enabled })
       .eq('id', reminder.id)
     if (error) {
-      setErrorMessage('သတိပေးချက် အခြေအနေကို မပြောင်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။')
+      setErrorMessage(
+        isMm
+          ? 'သတိပေးချက် အခြေအနေကို မပြောင်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။'
+          : 'Could not change reminder status. Please try again.'
+      )
       return
     }
     if (coupleId) await loadReminders(coupleId)
@@ -101,35 +112,49 @@ export default function RemindersPage() {
       const result = await registerBrowserPushSubscription()
       setNotice(
         result === 'enabled'
-          ? 'ဒီဝဘ်ဘရောက်ဇာမှာ သတိပေးချက်ဖွင့်ပြီးပါပြီ။ အချိန်မှန်ပို့ဖို့ အချိန်ဇယားစနစ်နဲ့ လျှို့ဝှက်သော့များကို ဆာဗာမှာ ပြင်ဆင်ထားရပါမယ်။'
+          ? isMm
+            ? 'ဒီဝဘ်ဘရောက်ဇာမှာ သတိပေးချက်ဖွင့်ပြီးပါပြီ။ အချိန်မှန်ပို့ဖို့ အချိန်ဇယားစနစ်နဲ့ လျှို့ဝှက်သော့များကို ဆာဗာမှာ ပြင်ဆင်ထားရပါမယ်။'
+            : 'Web notifications enabled on this browser. Background scheduled delivery requires server cron setup.'
           : result === 'denied'
-            ? 'ဘရောက်ဇာက သတိပေးခွင့်ကို ပိတ်ထားပါတယ်။ ဘရောက်ဇာဆက်တင်မှာ ခွင့်ပြုပါ။'
-            : 'ဒီဘရောက်ဇာမှာ နောက်ခံသတိပေးချက် မပံ့ပိုးပါ။ ဖုန်းအက်ပ်က သတိပေးချက်ကို အသုံးပြုပါ။'
+            ? isMm
+              ? 'ဘရောက်ဇာက သတိပေးခွင့်ကို ပိတ်ထားပါတယ်။ ဘရောက်ဇာဆက်တင်မှာ ခွင့်ပြုပါ။'
+              : 'Notification permission was denied. Please allow notifications in browser settings.'
+            : isMm
+              ? 'ဒီဘရောက်ဇာမှာ နောက်ခံသတိပေးချက် မပံ့ပိုးပါ။ ဖုန်းအက်ပ်က သတိပေးချက်ကို အသုံးပြုပါ။'
+              : 'Background push is not supported in this browser. Please use the mobile app.'
       )
     } catch (error_) {
       setNotice(
         error_ instanceof Error
-          ? `ဝဘ်သတိပေးချက်ကို မဖွင့်နိုင်ပါ။ ${error_.message}`
-          : 'ဝဘ်သတိပေးချက်ကို မဖွင့်နိုင်ပါ။ ဆက်တင်များကို စစ်ဆေးပါ။'
+          ? isMm
+            ? `ဝဘ်သတိပေးချက်ကို မဖွင့်နိုင်ပါ။ ${error_.message}`
+            : `Could not enable web notifications: ${error_.message}`
+          : isMm
+            ? 'ဝဘ်သတိပေးချက်ကို မဖွင့်နိုင်ပါ။ ဆက်တင်များကို စစ်ဆေးပါ။'
+            : 'Could not enable web notifications. Please check settings.'
       )
     }
   }
 
   const addReminder = async () => {
     if (!title.trim()) {
-      setErrorMessage('ခေါင်းစဉ်ကို ဖြည့်ပါ။')
+      setErrorMessage(isMm ? 'ခေါင်းစဉ်ကို ဖြည့်ပါ။' : 'Please enter a title.')
       return
     }
     if (!scheduledAt) {
-      setErrorMessage('သတိပေးမည့်အချိန်ကို ရွေးပါ။')
+      setErrorMessage(isMm ? 'သတိပေးမည့်အချိန်ကို ရွေးပါ။' : 'Please select a date and time.')
       return
     }
     if (!coupleId || !userId) {
-      setErrorMessage('သတိပေးချက်ဖန်တီးရန် အကောင့်နှစ်ခုကို အရင်ချိတ်ဆက်ပါ။')
+      setErrorMessage(
+        isMm
+          ? 'သတိပေးချက်ဖန်တီးရန် အကောင့်နှစ်ခုကို အရင်ချိတ်ဆက်ပါ။'
+          : 'Connect with your partner first to create shared reminders.'
+      )
       return
     }
     if (new Date(scheduledAt).getTime() <= Date.now()) {
-      setErrorMessage('အနာဂတ်အချိန်ကို ရွေးပါ။')
+      setErrorMessage(isMm ? 'အနာဂတ်အချိန်ကို ရွေးပါ။' : 'Please select a future time.')
       return
     }
     setErrorMessage(null)
@@ -144,7 +169,9 @@ export default function RemindersPage() {
         active: true,
       })
     if (error) {
-      setErrorMessage('သတိပေးချက်ကို မသိမ်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။')
+      setErrorMessage(
+        isMm ? 'သတိပေးချက်ကို မသိမ်းနိုင်ပါ။ ထပ်ကြိုးစားပါ။' : 'Could not save reminder. Please try again.'
+      )
       return
     }
     setTitle('')
@@ -161,22 +188,28 @@ export default function RemindersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-text-2">သတိပေးချက်များ</p>
-          <h1 className="mt-2 text-3xl font-serif text-text-1">အချိန်မှန် သတိပေးရန်</h1>
+          <p className="text-xs uppercase tracking-[0.22em] text-text-2">
+            {isMm ? 'သတိပေးချက်များ' : 'Reminders'}
+          </p>
+          <h1 className="mt-2 text-3xl font-serif text-text-1">
+            {isMm ? 'အချိန်မှန် သတိပေးရန်' : 'Timely Reminders'}
+          </h1>
         </div>
         <button
           type="button"
           onClick={enableNotifications}
-          className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white"
+          className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-accent-foreground shadow-sm transition hover:opacity-95 active:scale-[0.98]"
         >
           <AnimatedIcon name="Bell" animation="wiggle" trigger="hover" size={16} />{' '}
-          ဝဘ်အသိပေးခွင့်ပြုရန်
+          {isMm ? 'ဝဘ်အသိပေးခွင့်ပြုရန်' : 'Enable Web Notifications'}
         </button>
       </div>
 
       {!coupleId && (
         <p className="rounded-btn border border-warning/30 bg-warning/10 p-4 text-sm text-warning">
-          အကောင့်နှစ်ခုအကြား မျှဝေသတိပေးချက် ဖန်တီးရန် တွဲဖက်အကောင့်ကို ချိတ်ဆက်ပါ။
+          {isMm
+            ? 'အကောင့်နှစ်ခုအကြား မျှဝေသတိပေးချက် ဖန်တီးရန် တွဲဖက်အကောင့်ကို ချိတ်ဆက်ပါ။'
+            : 'Connect with your partner to share scheduled reminders together.'}
         </p>
       )}
       {errorMessage && (
@@ -197,16 +230,18 @@ export default function RemindersPage() {
       )}
 
       <div className="grid gap-6 xl:grid-cols-[1.3fr_0.7fr]">
-        <div className="rounded-modal border border-accent-1/20 bg-card p-5">
+        <div className="rounded-modal border border-accent-1/20 bg-card p-5 shadow-card">
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-text-2">လာမည့်သတိပေးချက်များ</p>
+            <p className="text-sm font-medium text-text-2">
+              {isMm ? 'လာမည့်သတိပေးချက်များ' : 'Upcoming Reminders'}
+            </p>
             <button
               type="button"
               onClick={() => void addReminder()}
               disabled={!coupleId}
-              className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-2 text-sm text-text-1"
+              className="inline-flex items-center gap-2 rounded-pill border border-border bg-card px-3 py-2 text-sm text-text-1 transition hover:bg-card-hover active:scale-[0.98]"
             >
-              <Plus className="h-4 w-4" /> ထည့်ရန်
+              <Plus className="h-4 w-4" /> {isMm ? 'ထည့်ရန်' : 'Add'}
             </button>
           </div>
 
@@ -214,30 +249,39 @@ export default function RemindersPage() {
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="သတိပေးချက် ခေါင်းစဉ်"
-              className="rounded-xl border border-border bg-soft-tint px-3 py-2 text-sm text-text-1"
+              placeholder={isMm ? 'သတိပေးချက် ခေါင်းစဉ်' : 'Reminder title'}
+              className="rounded-input border border-border bg-soft-tint px-3 py-2 text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-accent-1"
             />
             <input
               value={message}
               onChange={(event) => setMessage(event.target.value)}
-              placeholder="စာတို"
-              className="rounded-xl border border-border bg-soft-tint px-3 py-2 text-sm text-text-1"
+              placeholder={isMm ? 'စာတို' : 'Message (optional)'}
+              className="rounded-input border border-border bg-soft-tint px-3 py-2 text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-accent-1"
             />
             <input
               type="datetime-local"
               value={scheduledAt}
               onChange={(event) => setScheduledAt(event.target.value)}
-              className="rounded-xl border border-border bg-soft-tint px-3 py-2 text-sm text-text-1"
+              className="rounded-input border border-border bg-soft-tint px-3 py-2 text-sm text-text-1 focus:outline-none focus:ring-1 focus:ring-accent-1"
             />
           </div>
 
           <div className="space-y-3">
-            {isLoading && <p className="text-sm text-text-2">သတိပေးချက်များကို ဖတ်နေသည်…</p>}
+            {isLoading && (
+              <p className="text-sm text-text-2">
+                {isMm ? 'သတိပေးချက်များကို ဖတ်နေသည်…' : 'Loading reminders…'}
+              </p>
+            )}
             {!isLoading && reminders.length === 0 && (
-              <p className="text-sm text-text-2">သိမ်းထားသော သတိပေးချက် မရှိသေးပါ။</p>
+              <p className="text-sm text-text-2">
+                {isMm ? 'သိမ်းထားသော သတိပေးချက် မရှိသေးပါ။' : 'No saved reminders yet.'}
+              </p>
             )}
             {reminders.map((reminder) => (
-              <div key={reminder.id} className="rounded-[22px] border border-border bg-card p-4">
+              <div
+                key={reminder.id}
+                className="rounded-card border border-border bg-card p-4 transition hover:border-accent-1/30"
+              >
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-lg font-semibold text-text-1">{reminder.title}</p>
@@ -246,11 +290,17 @@ export default function RemindersPage() {
                   <button
                     type="button"
                     onClick={() => void handleToggle(reminder)}
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    className={`rounded-pill px-3 py-1 text-xs font-medium transition ${
                       reminder.enabled ? 'bg-success/15 text-success' : 'bg-soft-tint text-text-2'
                     }`}
                   >
-                    {reminder.enabled ? 'ဖွင့်ထားသည်' : 'ပိတ်ထားသည်'}
+                    {reminder.enabled
+                      ? isMm
+                        ? 'ဖွင့်ထားသည်'
+                        : 'Active'
+                      : isMm
+                        ? 'ပိတ်ထားသည်'
+                        : 'Paused'}
                   </button>
                 </div>
 
@@ -264,24 +314,30 @@ export default function RemindersPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="rounded-[24px] border border-accent-2/20 bg-card p-5">
+          <div className="rounded-panel border border-accent-2/20 bg-card p-5 shadow-card">
             <p className="text-xs uppercase tracking-[0.2em] text-text-2">
-              နောက်တစ်ကြိမ် သတိပေးမည့်အချိန်
+              {isMm ? 'နောက်တစ်ကြိမ် သတိပေးမည့်အချိန်' : 'Next Scheduled Reminder'}
             </p>
             <p className="mt-2 text-2xl font-semibold text-text-1">
               {nextReminder
                 ? new Date(nextReminder.scheduled_at).toLocaleString()
-                : 'လာမည့်သတိပေးချက် မရှိပါ'}
+                : isMm
+                  ? 'လာမည့်သတိပေးချက် မရှိပါ'
+                  : 'No upcoming reminders'}
             </p>
           </div>
 
-          <div className="rounded-[24px] border border-border bg-card p-5">
+          <div className="rounded-panel border border-border bg-card p-5 shadow-card">
             <div className="flex items-center gap-3 text-accent-1">
               <Sparkles className="h-5 w-5" />
-              <span className="text-sm font-medium">အဆင်ပြေသလို သတိပေးရန်</span>
+              <span className="text-sm font-medium">
+                {isMm ? 'အဆင်ပြေသလို သတိပေးရန်' : 'Gentle Reminders'}
+              </span>
             </div>
             <p className="mt-3 text-sm leading-relaxed text-text-2">
-              သတိပေးချက်များကို ဖိအားမဖြစ်စေဘဲ အချင်းချင်း သတိရစေရန် ဖန်တီးထားပါသည်။
+              {isMm
+                ? 'သတိပေးချက်များကို ဖိအားမဖြစ်စေဘဲ အချင်းချင်း သတိရစေရန် ဖန်တီးထားပါသည်။'
+                : 'Created to keep you thoughtfully connected without adding pressure.'}
             </p>
           </div>
         </div>

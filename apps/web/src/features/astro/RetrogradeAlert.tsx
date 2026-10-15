@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AlertTriangle, Clock, X, CheckCircle } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface RetrogradePeriod {
   planet: string
@@ -89,10 +90,15 @@ function getNextRetrograde(): RetrogradePeriod | null {
 }
 
 export default function RetrogradeAlert() {
+  const { language } = useLanguage()
   const [activeRetrograde, setActiveRetrograde] = useState<RetrogradePeriod | null>(null)
   const [nextRetrograde, setNextRetrograde] = useState<RetrogradePeriod | null>(null)
-  const [showMyanmar, setShowMyanmar] = useState(false)
+  const [showMyanmar, setShowMyanmar] = useState(language === 'my')
   const [dismissed, setDismissed] = useState(false)
+
+  useEffect(() => {
+    setShowMyanmar(language === 'my')
+  }, [language])
 
   useEffect(() => {
     setActiveRetrograde(getActiveRetrograde())
@@ -112,7 +118,7 @@ export default function RetrogradeAlert() {
 
   return (
     <div
-      className={`rounded-btn border p-6 ${
+      className={`rounded-card border p-6 shadow-card ${
         isActive
           ? 'border-amber-500/50 bg-amber-500/10'
           : 'border-accent-1/20 bg-card'
@@ -131,7 +137,7 @@ export default function RetrogradeAlert() {
               <button
                 type="button"
                 onClick={() => setShowMyanmar(!showMyanmar)}
-                className="rounded-full border border-accent-1/20 px-2 py-0.5 text-xs text-accent-1 transition hover:bg-accent-1/10"
+                className="rounded-pill border border-accent-1/20 px-2 py-0.5 text-xs text-accent-1 transition hover:bg-accent-1/10"
               >
                 {showMyanmar ? 'English' : 'မြန်မာ'}
               </button>

@@ -159,7 +159,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
       backgroundColor: colors.accent1,
       paddingHorizontal: 32,
       paddingVertical: 16,
-      borderRadius: 12,
+      borderRadius: 999,
       width: '100%',
       alignItems: 'center',
     },
@@ -167,7 +167,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
       opacity: 0.6,
     },
     buttonText: {
-      color: colors.background,
+      color: colors.accentForeground ?? '#ffffff',
       fontSize: 16,
       fontWeight: '600',
     },

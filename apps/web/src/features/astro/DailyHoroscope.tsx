@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Sparkles, Heart, Briefcase, Activity, DollarSign } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface HoroscopeData {
   love: string
@@ -138,8 +139,9 @@ const horoscopes: Record<string, HoroscopeData> = {
 }
 
 export default function DailyHoroscope() {
+  const { language } = useLanguage()
   const [selectedSign, setSelectedSign] = useState('Leo')
-  const [showMyanmar, setShowMyanmar] = useState(false)
+  const [showMyanmar, setShowMyanmar] = useState(language === 'my')
 
   const currentHoroscope = horoscopes[selectedSign]
 
@@ -151,7 +153,7 @@ export default function DailyHoroscope() {
   ]
 
   return (
-    <div className="rounded-btn border border-accent-1/20 bg-card p-6">
+    <div className="rounded-card border border-accent-1/20 bg-card p-6 shadow-card">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-accent-1/15 p-2 text-accent-1">
@@ -159,7 +161,7 @@ export default function DailyHoroscope() {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-text-2">Daily Horoscope</p>
-            <p className="mt-1 text-sm font-medium text-text-1">မနေ့မနက် နတ်မျက်နှာ</p>
+            <p className="mt-1 text-sm font-medium text-text-1">{showMyanmar ? 'နေ့စဉ် ဇာတာခွင်' : 'Your celestial forecast'}</p>
           </div>
         </div>
         <button

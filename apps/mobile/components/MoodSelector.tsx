@@ -37,13 +37,13 @@ export function MoodSelector({ value, onSelect }: MoodSelectorProps) {
         >
           <mood.Icon
             size={22}
-            color={value === mood.value ? colors.background : colors.textPrimary}
+            color={value === mood.value ? (colors.accentForeground ?? '#ffffff') : colors.textPrimary}
             accessibilityLabel={`${mood.label} mood`}
           />
           <Text
             style={[
               styles.label,
-              { color: value === mood.value ? colors.background : colors.textPrimary },
+              { color: value === mood.value ? (colors.accentForeground ?? '#ffffff') : colors.textPrimary },
             ]}
           >
             {mood.label}

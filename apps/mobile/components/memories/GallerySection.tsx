@@ -3,6 +3,7 @@ import { Alert, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } fr
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import ImageUpload from '@/components/ImageUpload'
+import PhotoMediaCalendar from '@/components/PhotoMediaCalendar'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
@@ -31,6 +32,7 @@ export default function GallerySection() {
   const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [items, setItems] = useState<GalleryItem[]>([])
+  const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [coupleId, setCoupleId] = useState<string | null>(null)
@@ -199,38 +201,63 @@ export default function GallerySection() {
       <Text style={styles.title}>Shared moments</Text>
       <Text style={styles.subtitle}>Save little snapshots of your story.</Text>
 
-      {coupleId ? <ImageUpload onUpload={handleUpload} coupleId={coupleId} /> : null}
+      <View style={styles.viewToggleRow}>
+        <TouchableOpacity
+          style={[styles.toggleBtn, viewMode === 'grid' && styles.toggleBtnActive]}
+          onPress={() => setViewMode('grid')}
+        >
+          <Text style={[styles.toggleText, viewMode === 'grid' && styles.toggleTextActive]}>
+            Grid View
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.toggleBtn, viewMode === 'calendar' && styles.toggleBtnActive]}
+          onPress={() => setViewMode('calendar')}
+        >
+          <Text style={[styles.toggleText, viewMode === 'calendar' && styles.toggleTextActive]}>
+            Photo Calendar
+          </Text>
+        </TouchableOpacity>
+      </View>
 
-      {error && <Text style={styles.error}>{error}</Text>}
-      {loading || authLoading ? (
-        <Text style={styles.loading}>Loading gallery…</Text>
-      ) : items.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No photos yet.</Text>
-        </View>
+      {viewMode === 'calendar' ? (
+        <PhotoMediaCalendar coupleId={coupleId} />
       ) : (
-        <View style={styles.grid}>
-          {items.map((item) => (
-            <View key={item.id} style={styles.card}>
-              <Image
-                source={{ uri: item.url }}
-                style={styles.image}
-                resizeMode="cover"
-                onError={() =>
-                  setItems((current) => current.filter((candidate) => candidate.id !== item.id))
-                }
-              />
-              <View style={styles.metaRow}>
-                <Text style={styles.meta}>{new Date(item.created_at).toLocaleDateString()}</Text>
-                {item.ownerId === user?.id ? (
-                  <TouchableOpacity onPress={() => handleDelete(item)}>
-                    <Text style={styles.delete}>Delete</Text>
-                  </TouchableOpacity>
-                ) : null}
-              </View>
+        <>
+          {coupleId ? <ImageUpload onUpload={handleUpload} coupleId={coupleId} /> : null}
+
+          {error && <Text style={styles.error}>{error}</Text>}
+          {loading || authLoading ? (
+            <Text style={styles.loading}>Loading gallery…</Text>
+          ) : items.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyText}>No photos yet.</Text>
             </View>
-          ))}
-        </View>
+          ) : (
+            <View style={styles.grid}>
+              {items.map((item) => (
+                <View key={item.id} style={styles.card}>
+                  <Image
+                    source={{ uri: item.url }}
+                    style={styles.image}
+                    resizeMode="cover"
+                    onError={() =>
+                      setItems((current) => current.filter((candidate) => candidate.id !== item.id))
+                    }
+                  />
+                  <View style={styles.metaRow}>
+                    <Text style={styles.meta}>{new Date(item.created_at).toLocaleDateString()}</Text>
+                    {item.ownerId === user?.id ? (
+                      <TouchableOpacity onPress={() => handleDelete(item)}>
+                        <Text style={styles.delete}>Delete</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+                </View>
+              ))}
+            </View>
+          )}
+        </>
       )}
     </ScrollView>
   )
@@ -310,4 +337,34 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     },
     delete: { color: colors.error, fontSize: sizes.text.xs, fontWeight: '700' },
     error: { color: colors.error, fontSize: sizes.text.sm, marginBottom: 10 },
+    viewToggleRow: {
+      flexDirection: 'row',
+      backgroundColor: colors.surface,
+      borderRadius: sizes.radius.pill,
+      padding: 4,
+      marginBottom: 16,
+      borderWidth: 1,
+      borderColor: colors.cardBorder,
+    },
+    toggleBtn: {
+      flex: 1,
+      paddingVertical: 8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: sizes.radius.pill,
+    },
+    toggleBtnActive: {
+      backgroundColor: colors.cardBg,
+      borderWidth: 1,
+      borderColor: colors.accent1 + '55',
+    },
+    toggleText: {
+      fontSize: sizes.text.xs,
+      fontWeight: '600',
+      color: colors.textSecondary,
+    },
+    toggleTextActive: {
+      color: colors.accent1,
+      fontWeight: '700',
+    },
   })

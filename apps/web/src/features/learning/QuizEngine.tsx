@@ -76,7 +76,7 @@ export function QuizEngine({
         <Trophy className="mx-auto text-accent-1" size={42} />
         <h3 className="text-2xl font-bold text-text-1">Quiz complete</h3>
         <p className="text-text-2">{score} / {questions.length} correct ({percent}%)</p>
-        <button type="button" onClick={() => onComplete(score)} className="rounded-xl bg-accent-1 px-5 py-3 font-semibold text-white">Done</button>
+        <button type="button" onClick={() => onComplete(score)} className="rounded-xl bg-accent-1 px-5 py-3 font-semibold text-[color:var(--accent-foreground)]">Done</button>
       </div>
     )
   }

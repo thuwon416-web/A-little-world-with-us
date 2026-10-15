@@ -81,7 +81,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
     button: {
       flex: 1,
       paddingVertical: 14,
-      borderRadius: 12,
+      borderRadius: 999,
       alignItems: 'center',
     },
     acceptButton: {
@@ -91,7 +91,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
       backgroundColor: colors.error,
     },
     buttonText: {
-      color: colors.background,
+      color: '#ffffff',
       fontWeight: '700',
     },
   })

@@ -87,7 +87,7 @@ export function PhotoShare({ visible, onClose, onPhotoSelect }: Props) {
             disabled={!photo || sending}
             onPress={() => void send()}
           >
-            <Send color={colors.background} size={18} />
+            <Send color={colors.accentForeground ?? '#ffffff'} size={18} />
             <Text style={styles.sendText}>{sending ? 'Sending...' : 'Send photo'}</Text>
           </TouchableOpacity>
           <View style={{ height: insets.bottom }} />
@@ -130,12 +130,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
     send: {
       marginTop: 16,
       backgroundColor: colors.accent1,
-      borderRadius: 14,
+      borderRadius: 999,
       padding: 14,
       flexDirection: 'row',
       justifyContent: 'center',
       gap: 8,
     },
-    sendText: { color: colors.background, fontWeight: '700' },
+    sendText: { color: colors.accentForeground ?? '#ffffff', fontWeight: '700' },
     disabled: { opacity: 0.45 },
   })

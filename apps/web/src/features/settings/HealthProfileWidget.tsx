@@ -436,7 +436,7 @@ export default function HealthProfileWidget() {
               <div className="flex gap-2">
                 <button
                   type="submit"
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98]"
                 >
                   <Save className="h-4 w-4" />
                   Save
@@ -444,7 +444,7 @@ export default function HealthProfileWidget() {
                 <button
                   type="button"
                   onClick={handleCancel}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm font-medium text-text-1"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-pill border border-border bg-soft-tint px-3 py-2 text-sm font-medium text-text-1 hover:bg-card-hover transition active:scale-[0.98]"
                 >
                   <X className="h-4 w-4" />
                   Cancel

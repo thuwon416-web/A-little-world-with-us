@@ -52,7 +52,7 @@ export default function ChatInputBar({
   return (
     <div className="relative border-t border-accent-1/20 p-4">
       {showAttachments && (
-        <div className="absolute bottom-full left-4 z-10 mb-2 w-52 rounded-btn border border-accent-1/20 bg-card p-2 shadow-lg">
+        <div className="absolute bottom-full left-4 z-10 mb-2 w-52 rounded-panel border border-accent-1/20 bg-card p-2.5 shadow-xl">
           <div className="mb-1 flex items-center justify-between px-2 py-1">
             <span className="text-xs font-semibold text-text-2">Attachments</span>
             <button type="button" onClick={() => setShowAttachments(false)} aria-label="Close attachments">
@@ -64,7 +64,7 @@ export default function ChatInputBar({
               key={label}
               type="button"
               onClick={() => selectAttachment(callback)}
-              className="flex w-full items-center gap-3 rounded-input px-3 py-2 text-left text-sm text-text-1 hover:bg-soft-tint"
+              className="flex w-full items-center gap-3 rounded-input px-3 py-2 text-left text-sm text-text-1 transition-colors hover:bg-soft-tint"
             >
               <Icon className="h-4 w-4 text-accent-1" />
               {label}
@@ -76,7 +76,7 @@ export default function ChatInputBar({
         <button
           type="button"
           onClick={() => setShowAttachments((open) => !open)}
-          className="rounded-input p-2 text-text-2 hover:bg-soft-tint"
+          className="rounded-full p-2.5 text-text-2 transition-colors hover:bg-soft-tint"
           aria-label="Open attachments"
         >
           <Paperclip className="h-5 w-5" />
@@ -93,13 +93,13 @@ export default function ChatInputBar({
           }}
           placeholder={placeholder}
           disabled={disabled}
-          className="flex-1 rounded-pill border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-1 disabled:opacity-50"
+          className="flex-1 rounded-pill border border-accent-1/20 bg-soft-tint px-4 py-2.5 text-sm text-text-1 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent-1 disabled:opacity-50"
         />
         <button
           type="button"
           onClick={canSend ? send : onVoiceRecord}
           disabled={disabled}
-          className="rounded-input bg-accent-1 p-2 text-white disabled:opacity-50"
+          className="rounded-full bg-accent-1 p-2.5 text-[color:var(--accent-foreground)] shadow-sm transition-all duration-150 hover:opacity-95 active:scale-95 disabled:opacity-50"
           aria-label={canSend ? 'Send message' : 'Record voice message'}
         >
           {canSend ? <Send className="h-5 w-5" /> : <Mic className="h-5 w-5" />}

@@ -93,7 +93,7 @@ export default function About() {
           </p>
           <Link
             href="/help"
-            className="mt-4 inline-flex rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white"
+            className="mt-4 inline-flex rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)]"
           >
             Visit Help & FAQ
           </Link>

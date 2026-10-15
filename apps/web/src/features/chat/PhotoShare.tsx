@@ -96,7 +96,7 @@ export default function PhotoShare({ onClose, onPhotoSelect }: Props) {
           <button
             onClick={handleSend}
             disabled={!selectedFile}
-            className="w-full rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="w-full rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] disabled:opacity-50"
           >
             Send
           </button>

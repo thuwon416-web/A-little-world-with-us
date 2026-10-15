@@ -17,10 +17,10 @@ export default function LanguageSwitcher() {
         <button
           type="button"
           onClick={() => setLanguage('my')}
-          className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium ${
+          className={`flex-1 rounded-pill px-4 py-2 text-sm font-medium transition active:scale-[0.98] ${
             language === 'my'
-              ? 'bg-accent-1 text-white'
-              : 'bg-soft-tint text-text-2'
+              ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+              : 'bg-soft-tint text-text-2 hover:bg-card-hover'
           }`}
         >
           မြန်မာ
@@ -28,10 +28,10 @@ export default function LanguageSwitcher() {
         <button
           type="button"
           onClick={() => setLanguage('en')}
-          className={`flex-1 rounded-xl px-4 py-2 text-sm font-medium ${
+          className={`flex-1 rounded-pill px-4 py-2 text-sm font-medium transition active:scale-[0.98] ${
             language === 'en'
-              ? 'bg-accent-1 text-white'
-              : 'bg-soft-tint text-text-2'
+              ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+              : 'bg-soft-tint text-text-2 hover:bg-card-hover'
           }`}
         >
           English

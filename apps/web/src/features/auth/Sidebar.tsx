@@ -1,13 +1,13 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
   LogOut, Calendar, Camera, HeartPulse, HelpCircle, Home, Info,
   Leaf, LockKeyhole, MapPin, MessageCircleHeart, Gamepad2, Music,
   PhoneCall, Settings, Sparkles, Star, MonitorPlay, Infinity,
-  Languages, Users, Shield, FileText,
+  Languages, Shield, FileText,
 } from 'lucide-react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { useLanguage } from '@/contexts/LanguageContext'
@@ -67,6 +67,7 @@ const navGroups = [
 ]
 
 export default function Sidebar() {
+  const router = useRouter()
   const pathname = usePathname()
   const { t } = useLanguage()
   const [canViewLocation, setCanViewLocation] = useState(false)
@@ -154,7 +155,7 @@ export default function Sidebar() {
             console.warn('Unable to clear this browser push subscription:', error)
           }
           await supabase.auth.signOut()
-          window.location.href = '/login'
+          router.push('/login')
         }}
         className="mt-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm text-text-2 hover:bg-soft-tint hover:text-text-1"
       >

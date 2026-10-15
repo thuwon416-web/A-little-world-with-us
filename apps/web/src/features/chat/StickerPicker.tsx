@@ -168,7 +168,7 @@ export default function StickerPicker({ onStickerSelect, onClose }: StickerPicke
                 onClick={() => setSelectedCategory(category)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-pill text-sm font-medium whitespace-nowrap transition ${
                   selectedCategory === category
-                    ? 'bg-accent-1 text-white'
+                    ? 'bg-accent-1 text-[color:var(--accent-foreground)]'
                     : 'bg-card text-text-2 hover:bg-accent-1/10'
                 }`}
               >

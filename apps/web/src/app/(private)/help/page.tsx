@@ -191,7 +191,7 @@ export default function HelpPage() {
 
             <a
               href="mailto:support@alittleworldwithus.com"
-              className="mt-4 inline-flex rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white"
+              className="mt-4 inline-flex rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)]"
             >
               support@alittleworldwithus.com
             </a>

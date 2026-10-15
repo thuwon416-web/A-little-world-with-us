@@ -11,6 +11,8 @@ import {
 } from '@/features/dashboard/widgetRegistry'
 import { getCoupleStatus } from '@/lib/couples'
 import { supabase } from '@/lib/supabase'
+import ConnectedCoupleAvatars from '@/components/shared/ConnectedCoupleAvatars'
+import LoveStreakBadge from '@/components/shared/LoveStreakBadge'
 
 const DaysCounter = dynamic(() => import('@/features/dashboard/DaysCounter'), { loading: () => <DashboardPanelSkeleton /> })
 const Countdown = dynamic(() => import('@/features/dashboard/Countdown'), { loading: () => <DashboardPanelSkeleton /> })
@@ -128,6 +130,8 @@ export default function DashboardPage() {
   const [coupleName, setCoupleName] = useState('Our World')
   const [anniversary, setAnniversary] = useState<string | null>(null)
   const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [userProfile, setUserProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
+  const [partnerProfile, setPartnerProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
 
   useEffect(() => {
     void loadDashboardLayout().then((saved) => {
@@ -144,7 +148,23 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const loadTodayOccasion = async () => {
-      const { couple } = await getCoupleStatus()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: myProf } = await supabase
+          .from('profiles')
+          .select('full_name,avatar_url')
+          .eq('id', user.id)
+          .single()
+        if (myProf) setUserProfile(myProf)
+      }
+
+      const { couple, partner } = await getCoupleStatus()
+      if (partner) {
+        setPartnerProfile({
+          full_name: partner.full_name,
+          avatar_url: partner.avatar_url ?? null,
+        })
+      }
       if (!couple) return
       setCoupleId(couple.id)
       setCoupleName(couple.name?.trim() || 'Our World')
@@ -197,26 +217,45 @@ export default function DashboardPage() {
       <section className="dashboard-hero">
         <div className="dashboard-hero__glow" />
         <div className="dashboard-hero__content min-w-0">
-          <div className="dashboard-hero__topline">
-            <p className="dashboard-kicker">Home</p>
-            <span className="dashboard-pill">{heroCopy.greeting}</span>
-          </div>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-2">
+            <div className="min-w-0 flex-1">
+              <div className="dashboard-hero__topline">
+                <p className="dashboard-kicker">Home</p>
+                <span className="dashboard-pill">{heroCopy.greeting}</span>
+              </div>
 
-          <div className="dashboard-hero__title-wrap">
-            <h1 className="dashboard-hero__title break-words text-3xl sm:text-4xl lg:text-5xl">A Little World with Us</h1>
-            <span className="dashboard-hero__badge">∞</span>
-          </div>
+              <div className="dashboard-hero__title-wrap">
+                <h1 className="dashboard-hero__title break-words text-3xl sm:text-4xl lg:text-5xl">A Little World with Us</h1>
+                <span className="dashboard-hero__badge">∞</span>
+              </div>
 
-          <p className="dashboard-hero__subtitle">{coupleName}</p>
-          <p className="dashboard-hero__meta">
-            {activeOccasion
-              ? activeOccasion.kind === 'anniversary'
-                ? `Happy anniversary — ${activeOccasion.title}.`
-                : activeOccasion.kind === 'birthday'
-                  ? `Happy birthday — ${activeOccasion.title}.`
-                  : `A little love day: ${activeOccasion.title}.`
-              : heroCopy.occasion}
-          </p>
+              <p className="dashboard-hero__subtitle">{coupleName}</p>
+              <p className="dashboard-hero__meta">
+                {activeOccasion
+                  ? activeOccasion.kind === 'anniversary'
+                    ? `Happy anniversary — ${activeOccasion.title}.`
+                    : activeOccasion.kind === 'birthday'
+                      ? `Happy birthday — ${activeOccasion.title}.`
+                      : `A little love day: ${activeOccasion.title}.`
+                  : heroCopy.occasion}
+              </p>
+
+              <div className="mt-4">
+                <LoveStreakBadge coupleId={coupleId} />
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center justify-center p-3 rounded-2xl bg-card/60 border border-accent-1/15 shadow-sm backdrop-blur-sm self-start sm:self-center">
+              <ConnectedCoupleAvatars
+                size="xl"
+                userAvatarUrl={userProfile?.avatar_url}
+                partnerAvatarUrl={partnerProfile?.avatar_url}
+                userName={userProfile?.full_name ?? 'You'}
+                partnerName={partnerProfile?.full_name ?? 'My Love'}
+                priority
+              />
+            </div>
+          </div>
 
           <div className="mt-4">
             <AnniversaryShareCard />
@@ -239,7 +278,6 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      <RelationshipStats />
       {coupleId ? <OnThisDay coupleId={coupleId} /> : null}
 
       <div className="dashboard-toolbar">
@@ -302,6 +340,7 @@ export default function DashboardPage() {
         })}
       </section>
 
+      <RelationshipStats />
       {coupleId ? <OurStats coupleId={coupleId} /> : null}
       <section className="dashboard-panel ui-card min-w-0 rounded-panel border border-accent-1/15 bg-card p-4 sm:p-5" aria-label="Couple scoreboard">
         <CoupleScoreboard />

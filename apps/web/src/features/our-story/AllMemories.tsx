@@ -27,7 +27,11 @@ function AllMemories({ coupleId, initialCategory = 'all' }: { coupleId: string; 
   const [error, setError] = useState('')
 
   const load = useCallback(async (offset = 0) => {
-    offset ? setLoadingMore(true) : setLoading(true)
+    if (offset) {
+      setLoadingMore(true)
+    } else {
+      setLoading(true)
+    }
     setError('')
     try {
       const next = search.trim()
@@ -39,7 +43,11 @@ function AllMemories({ coupleId, initialCategory = 'all' }: { coupleId: string; 
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Unable to load memories.')
     } finally {
-      offset ? setLoadingMore(false) : setLoading(false)
+      if (offset) {
+        setLoadingMore(false)
+      } else {
+        setLoading(false)
+      }
     }
   }, [coupleId, search])
 

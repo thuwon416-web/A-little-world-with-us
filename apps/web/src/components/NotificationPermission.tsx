@@ -30,7 +30,7 @@ export default function NotificationPermission() {
       </p>
       <button
         onClick={handleRequest}
-        className="px-4 py-2 bg-accent-1 hover:bg-accent-1/60 rounded-lg text-sm transition text-white"
+        className="px-4 py-2 bg-accent-1 hover:bg-accent-1/60 rounded-lg text-sm transition text-[color:var(--accent-foreground)]"
       >
         Enable Notifications
       </button>

@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useEffect, useMemo, useState } from 'react'
 import { ArrowRight, Calendar, CalendarDays, Sparkles } from 'lucide-react'
 import { EmptyState } from '@/components/ui/empty-state'
@@ -13,6 +14,7 @@ const memoryPrompts = [
 ]
 
 export default function MemoryOfTheDay() {
+  const router = useRouter()
   const [memory, setMemory] = useState<string>('')
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
@@ -65,7 +67,7 @@ export default function MemoryOfTheDay() {
           icon={Calendar}
           title="No memory today yet"
           description="Check back tomorrow or add a moment now."
-          action={{ label: 'Add one', onClick: () => { window.location.href = '/memories' } }}
+          action={{ label: 'Add one', onClick: () => { router.push('/memories') } }}
         />
       ) : hasError ? (
         <div className="rounded-btn border border-accent-1/20 bg-card/50 p-4">

@@ -34,7 +34,7 @@ export function CareChecklist({ values = {}, onToggle }: CareChecklistProps) {
               values[item.key] && { backgroundColor: colors.success, borderColor: colors.success },
             ]}
           >
-            {values[item.key] ? <Check size={14} color={colors.background} /> : null}
+            {values[item.key] ? <Check size={14} color="#ffffff" /> : null}
           </View>
           <Text
             style={[

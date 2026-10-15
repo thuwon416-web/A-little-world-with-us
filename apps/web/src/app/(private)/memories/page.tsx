@@ -706,7 +706,7 @@ function MemoriesPageContent() {
           </button>
         </div>
       <div className="space-y-3">
-        <button type="button" onClick={() => setIsAddMemoryOpen((open) => !open)} className="rounded-full bg-accent-1 px-5 py-2.5 text-sm font-medium text-white transition hover:opacity-90">
+        <button type="button" onClick={() => setIsAddMemoryOpen((open) => !open)} className="rounded-full bg-accent-1 px-5 py-2.5 text-sm font-medium text-[color:var(--accent-foreground)] transition hover:opacity-90">
           {isAddMemoryOpen ? 'Cancel' : '+ Add a memory'}
         </button>
         {isAddMemoryOpen ? <MemoryUploadPanel
@@ -754,7 +754,7 @@ function MemoriesPageContent() {
                 onClick={() => setFilter(option)}
                 className={`rounded-full px-3 py-1.5 text-xs capitalize transition ${
                   filter === option
-                    ? 'bg-accent-1 text-white'
+                    ? 'bg-accent-1 text-[color:var(--accent-foreground)]'
                     : 'bg-soft-tint text-text-2'
                 }`}
               >
@@ -766,7 +766,7 @@ function MemoriesPageContent() {
             <button
               type="button"
               onClick={openNewJournal}
-              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90"
+              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] transition hover:opacity-90"
             >
               New journal entry
             </button>
@@ -908,7 +908,7 @@ function JournalEntryModal({
             {JOURNAL_MOODS.map(({ id, label, Icon }) => {
               const selected = mood === id
               return (
-                <button key={id} type="button" onClick={() => onMoodChange(id)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${selected ? 'border-accent-1 bg-accent-1 text-white' : 'border-accent-1/20 text-text-2'}`}>
+                <button key={id} type="button" onClick={() => onMoodChange(id)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${selected ? 'border-accent-1 bg-accent-1 text-[color:var(--accent-foreground)]' : 'border-accent-1/20 text-text-2'}`}>
                   <Icon className="h-5 w-5" />
                   {label}
                 </button>
@@ -918,7 +918,7 @@ function JournalEntryModal({
         </div>
         <div className="flex justify-end gap-3">
           <button type="button" onClick={onClose} className="rounded-xl px-4 py-2 text-sm text-text-2">Cancel</button>
-          <button type="button" onClick={onSave} disabled={saving || !title.trim()} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+          <button type="button" onClick={onSave} disabled={saving || !title.trim()} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-[color:var(--accent-foreground)] disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
         </div>
       </section>
     </div>
@@ -1000,7 +1000,7 @@ function MemoryUploadPanel({
           <button
             type="submit"
             disabled={isUploading || !isSupabaseConfigured}
-            className="rounded-btn bg-accent-1 px-5 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-btn bg-accent-1 px-5 py-2 text-sm font-medium text-[color:var(--accent-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isUploading ? `Uploading ${uploadProgress}%` : 'Upload'}
           </button>
@@ -1014,7 +1014,7 @@ function MemoryUploadPanel({
         {error && <p className="mt-3 text-sm text-error">{error}</p>}
         {uploadSummary && <p className="mt-3 text-sm text-success">{uploadSummary}</p>}
       </section>
-      {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-panel bg-card p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-text-1">Memory location</h2><button type="button" onClick={() => onLocationOpenChange(false)} className="text-sm text-text-2">Close</button></div><MemoryLocationPicker value={location} onChange={onLocationChange} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => onLocationChange({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => onErrorChange('Unable to read your current location.'))} className="rounded-xl border border-accent-1/20 px-3 py-2 text-sm text-text-1">Use current location</button><input value={locationLabel} onChange={(event) => onLocationLabelChange(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><button type="button" onClick={() => onLocationOpenChange(false)} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white">Save location</button></div></div> : null}
+      {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-panel bg-card p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-text-1">Memory location</h2><button type="button" onClick={() => onLocationOpenChange(false)} className="text-sm text-text-2">Close</button></div><MemoryLocationPicker value={location} onChange={onLocationChange} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => onLocationChange({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => onErrorChange('Unable to read your current location.'))} className="rounded-xl border border-accent-1/20 px-3 py-2 text-sm text-text-1">Use current location</button><input value={locationLabel} onChange={(event) => onLocationLabelChange(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><button type="button" onClick={() => onLocationOpenChange(false)} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-[color:var(--accent-foreground)]">Save location</button></div></div> : null}
     </>
   )
 }
@@ -1140,5 +1140,5 @@ function MemoryDetail({ memory, onClose, onSaved }: { readonly memory: DisplayMe
     else onSaved({ id: memory.id, title, caption: title, date, category })
     setSaving(false)
   }
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative flex h-[42vh] min-h-56 max-h-[520px] w-full items-center justify-center overflow-hidden rounded-btn bg-black/10"><img src={memory.displayUrl} alt={memory.title || memory.caption || 'Memory'} loading="eager" decoding="async" className="absolute inset-0 h-full w-full object-contain" /></div> : <div className="h-64 rounded-btn bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-lg font-serif text-text-1" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-error">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-white disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative flex h-[42vh] min-h-56 max-h-[520px] w-full items-center justify-center overflow-hidden rounded-btn bg-black/10"><img src={memory.displayUrl} alt={memory.title || memory.caption || 'Memory'} loading="eager" decoding="async" className="absolute inset-0 h-full w-full object-contain" /></div> : <div className="h-64 rounded-btn bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-lg font-serif text-text-1" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-error">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-[color:var(--accent-foreground)] disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
 }

@@ -123,7 +123,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     },
     primaryButton: {
       backgroundColor: colors.accent1,
-      borderRadius: sizes.radius.input,
+      borderRadius: sizes.radius.pill,
       paddingVertical: 16,
       alignItems: 'center',
       marginBottom: 12,
@@ -132,7 +132,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       opacity: 0.7,
     },
     primaryButtonText: {
-      color: colors.background,
+      color: colors.accentForeground ?? '#ffffff',
       fontWeight: '700',
       fontSize: sizes.text.body,
     },

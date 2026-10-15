@@ -73,7 +73,7 @@ export function FileUpload({ visible, onClose, onFileSelect }: Props) {
             disabled={!file || sending}
             onPress={() => void send()}
           >
-            <Text style={[styles.sendText, { color: colors.background }]}>
+            <Text style={[styles.sendText, { color: colors.accentForeground ?? '#ffffff' }]}>
               {sending ? 'Sending...' : 'Send file'}
             </Text>
           </TouchableOpacity>
@@ -106,7 +106,7 @@ const createStyles = () =>
     secondary: { marginTop: 12, textAlign: 'center' },
     send: {
       marginTop: 16,
-      borderRadius: 14,
+      borderRadius: 999,
       padding: 14,
       alignItems: 'center',
     },

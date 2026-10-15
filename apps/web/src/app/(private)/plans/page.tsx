@@ -183,7 +183,7 @@ function PlanCreationModal({
           {error ? <p className="text-sm text-error" role="alert">{error}</p> : null}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded-xl border border-border px-4 py-2 text-sm text-text-2">Cancel</button>
-            <button type="button" onClick={onCreate} disabled={!title.trim() || creating} className="rounded-xl bg-accent-1 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">{creating ? 'Creating…' : 'Create plan'}</button>
+            <button type="button" onClick={onCreate} disabled={!title.trim() || creating} className="rounded-xl bg-accent-1 px-4 py-2 text-sm font-semibold text-[color:var(--accent-foreground)] disabled:cursor-not-allowed disabled:opacity-50">{creating ? 'Creating…' : 'Create plan'}</button>
           </div>
         </div>
       </section>
@@ -419,7 +419,7 @@ export default function PlansPage() {
                 // Force update by refetching
                 window.location.reload()
               }}
-              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-white"
+              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)]"
             >
               Reload latest
             </button>
@@ -439,7 +439,7 @@ export default function PlansPage() {
           <p className="text-xs uppercase tracking-[0.22em] text-text-2">Shared plans</p>
           <h1 className="mt-2 text-3xl font-serif text-text-1">Our next chapters</h1>
         </div>
-        <button type="button" onClick={() => { setCreateError(''); setCreateOpen(true) }} disabled={!coupleId} className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50">
+        <button type="button" onClick={() => { setCreateError(''); setCreateOpen(true) }} disabled={!coupleId} className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] disabled:cursor-not-allowed disabled:opacity-50">
           <Plus className="h-4 w-4" />
           New plan
         </button>
@@ -497,7 +497,7 @@ export default function PlansPage() {
                   placeholder="Add a shared dream"
                   className="min-w-0 flex-1 rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 />
-                <button type="submit" disabled={!coupleId || !newBucketItem.trim()} className="rounded-btn bg-accent-1 px-3 py-2 text-sm text-white disabled:opacity-50">Add</button>
+                <button type="submit" disabled={!coupleId || !newBucketItem.trim()} className="rounded-btn bg-accent-1 px-3 py-2 text-sm text-[color:var(--accent-foreground)] disabled:opacity-50">Add</button>
               </form>
               {bucketList.length ? (
                 <ul className="mt-4 space-y-2 text-sm text-text-1">

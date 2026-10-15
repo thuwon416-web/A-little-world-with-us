@@ -275,7 +275,7 @@ export default function CoupleSettings() {
             <button
               type="submit"
               disabled={inviting}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-accent-1 px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
             >
               <UserPlus className="h-4 w-4" />
               {inviting ? 'Sending invite...' : 'Send Invite'}
@@ -370,7 +370,7 @@ export default function CoupleSettings() {
               <button
                 type="submit"
                 disabled={saving}
-                className="w-full rounded-lg bg-accent-1 px-2 py-1.5 text-xs font-medium text-white disabled:opacity-50"
+                className="w-full rounded-pill bg-accent-1 px-2 py-1.5 text-xs font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
               >
                 {saving ? 'Saving...' : 'Update'}
               </button>
@@ -394,7 +394,7 @@ export default function CoupleSettings() {
                 const kind = OCCASION_KINDS.find((item) => item === event.target.value)
                 if (kind) setOccasionKind(kind)
               }} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1"><option value="birthday">Birthday</option><option value="custom">Special day</option></select>
-              <button type="submit" className="inline-flex items-center justify-center gap-1 rounded-lg bg-accent-1 px-3 py-1.5 text-xs font-medium text-white"><Plus className="h-3.5 w-3.5" />Add</button>
+              <button type="submit" className="inline-flex items-center justify-center gap-1 rounded-pill bg-accent-1 px-3 py-1.5 text-xs font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98]"><Plus className="h-3.5 w-3.5" />Add</button>
             </form>
             {occasions.length > 0 && <ul className="mt-3 space-y-2">{occasions.map((occasion) => <li key={occasion.id} className="flex items-center justify-between gap-3 rounded-lg bg-card px-3 py-2 text-xs"><span className="text-text-1">{occasion.title} · {String(occasion.month).padStart(2, '0')}/{String(occasion.day).padStart(2, '0')}</span><button type="button" onClick={() => void deleteOccasion(occasion.id)} aria-label={`Delete ${occasion.title}`} className="text-error hover:text-error/80"><Trash2 className="h-3.5 w-3.5" /></button></li>)}</ul>}
           </div>

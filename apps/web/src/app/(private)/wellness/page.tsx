@@ -8,6 +8,7 @@ import RelationshipQuests from '@/features/games/RelationshipQuests'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { supabase } from '@/lib/supabase'
 import { logWellnessActivity } from '@/services/wellness'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type TabId = 'physical' | 'mental' | 'relationship' | 'quests' | 'games'
 
@@ -30,6 +31,9 @@ type Workout = (typeof workouts)[number]
 type CompletedWorkout = Workout & { completedAt: string }
 
 export default function WellnessPage() {
+  const { language } = useLanguage()
+  const isMm = language === 'my'
+
   const [activeTab, setActiveTab] = useState<TabId>('physical')
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([])
   const [selectedWorkout, setSelectedWorkout] = useState<Workout | null>(null)
@@ -110,14 +114,14 @@ export default function WellnessPage() {
             type="button"
             role="tab"
             onClick={() => setActiveTab(tab.id)}
-            className={`shrink-0 rounded-full border px-4 py-2 text-sm transition ${
+            className={`shrink-0 rounded-pill border px-4 py-2 text-sm transition active:scale-[0.98] ${
               activeTab === tab.id
-                ? 'border-accent-1 bg-accent-1 text-white'
+                ? 'border-accent-1 bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
                 : 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
             }`}
             aria-selected={activeTab === tab.id}
           >
-            {tab.label}
+            {isMm ? tab.labelMy : tab.label}
           </button>
         ))}
       </nav>
@@ -135,7 +139,7 @@ export default function WellnessPage() {
             type="button"
             onClick={() => void completeGame()}
             disabled={completedGame}
-            className="mt-4 rounded-xl bg-accent-1 px-4 py-3 font-bold text-white disabled:opacity-60"
+            className="mt-4 rounded-pill bg-accent-1 px-4 py-3 font-bold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
           >
             {completedGame ? 'Game completed' : 'Complete a game'}
           </button>
@@ -153,7 +157,7 @@ export default function WellnessPage() {
               <button
                 key={i}
                 onClick={() => setSelectedWorkout(workout)}
-                className="border border-accent-1/20 rounded-xl p-4 text-left bg-card hover:bg-accent-1/10 transition"
+                className="border border-accent-1/20 rounded-card p-4 text-left bg-card hover:border-accent-1/40 hover:bg-accent-1/5 transition active:scale-[0.98]"
               >
                 <h3 className="font-bold text-lg text-text-1">{workout.name}</h3>
                 <p className="text-text-2 text-sm">
@@ -165,7 +169,7 @@ export default function WellnessPage() {
 
           {/* Selected Workout */}
           {selectedWorkout && (
-            <div className="border border-accent-1/20 rounded-xl p-6 bg-card">
+            <div className="border border-accent-1/20 rounded-card p-6 bg-card shadow-card">
               <h2 className="font-bold text-xl mb-4 text-text-1">{selectedWorkout.name}</h2>
               <p className="text-text-2 mb-4">
                 Duration: {selectedWorkout.duration} min -  Calories: {selectedWorkout.calories}
@@ -173,14 +177,14 @@ export default function WellnessPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => completeWorkout(selectedWorkout)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-accent-1 py-3 font-bold text-white"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-pill bg-accent-1 py-3 font-bold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98]"
                 >
                   <Check className="h-4 w-4" />
                   <span>Complete Workout</span>
                 </button>
                 <button
                   onClick={() => setSelectedWorkout(null)}
-                  className="px-6 py-3 border border-accent-1/20 rounded-xl text-text-1"
+                  className="px-6 py-3 border border-border rounded-pill text-text-1 hover:bg-card-hover transition active:scale-[0.98]"
                 >
                   Cancel
                 </button>

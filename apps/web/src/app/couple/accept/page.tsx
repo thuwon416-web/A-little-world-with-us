@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Heart, CheckCircle, AlertCircle, ArrowRight } from 'lucide-react'
@@ -201,12 +202,12 @@ function SuccessState() {
       <p className="mb-6 text-text-2">
         You&apos;re now linked with your partner. Welcome to A Little World With Us!
       </p>
-      <button
-        onClick={() => window.location.href = '/couple-linking'}
-        className="rounded-lg bg-accent-1 px-8 py-3 font-semibold text-white hover:shadow-lg hover:shadow-accent-1/20 transition"
+      <Link
+        href="/couple-linking"
+        className="inline-block rounded-pill bg-accent-1 px-8 py-3 font-semibold text-[color:var(--accent-foreground)] transition-all duration-200 hover:bg-accent-1/90 hover:shadow-lg active:scale-95"
       >
         Go to Your Dashboard
-      </button>
+      </Link>
     </motion.div>
   )
 }
@@ -231,7 +232,7 @@ function ErrorState({
       <p className="mb-6 text-text-2">{error}</p>
       <button
         onClick={onRetry}
-        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-white hover:shadow-lg hover:shadow-accent-1/20 transition"
+        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-[color:var(--accent-foreground)] hover:shadow-lg hover:shadow-accent-1/20 transition"
       >
         Try Again
       </button>

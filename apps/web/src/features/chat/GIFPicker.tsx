@@ -123,7 +123,7 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
             <button
               type="button"
               onClick={handleSearch}
-              className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-input bg-accent-1 text-white text-xs font-medium hover:opacity-90 transition"
+              className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1 rounded-input bg-accent-1 text-[color:var(--accent-foreground)] text-xs font-medium hover:opacity-90 transition"
             >
               Search
             </button>
@@ -160,7 +160,7 @@ export default function GIFPicker({ onGIFSelect, onClose }: GIFPickerProps) {
               <button
                 type="button"
                 onClick={() => searchGIFs('trending')}
-                className="mt-2 px-4 py-2 rounded-input bg-accent-1 text-white text-sm font-medium hover:opacity-90 transition"
+                className="mt-2 px-4 py-2 rounded-input bg-accent-1 text-[color:var(--accent-foreground)] text-sm font-medium hover:opacity-90 transition"
               >
                 Retry
               </button>

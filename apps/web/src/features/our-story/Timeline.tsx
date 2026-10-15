@@ -17,7 +17,11 @@ function Timeline({ coupleId }: { coupleId: string }) {
   const [error, setError] = useState('')
 
   const load = useCallback(async (reset = true) => {
-    reset ? setLoading(true) : setLoadingMore(true)
+    if (reset) {
+      setLoading(true)
+    } else {
+      setLoadingMore(true)
+    }
     setError('')
     try {
       const next = await relationshipMemoriesService.getHighlights(coupleId, reset ? PAGE_SIZE : memories.length + PAGE_SIZE)
@@ -25,7 +29,11 @@ function Timeline({ coupleId }: { coupleId: string }) {
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : 'Unable to load the timeline.')
     } finally {
-      reset ? setLoading(false) : setLoadingMore(false)
+      if (reset) {
+        setLoading(false)
+      } else {
+        setLoadingMore(false)
+      }
     }
   }, [coupleId, memories.length])
 

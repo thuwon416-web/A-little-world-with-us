@@ -119,7 +119,7 @@ export default function LearningPage() {
           </div>
         </div>
 
-        <div className="dashboard-mini-card w-full rounded-btn border border-accent-1/20 bg-card/90 px-4 py-3 text-left shadow-sm sm:w-auto sm:min-w-56 sm:text-right">
+        <div className="dashboard-mini-card w-full rounded-panel border border-accent-1/20 bg-card/90 px-4 py-3 text-left shadow-sm sm:w-auto sm:min-w-56 sm:text-right">
           <p className="text-xs text-text-2">Your progress</p>
           <p className="mt-1 text-base font-semibold text-text-1 sm:text-lg">
             {masteredIds.size} / {allVocab.length} words mastered
@@ -144,7 +144,7 @@ export default function LearningPage() {
         {levels.map((level) => {
           let levelTabClassName = 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
           if (selectedLevel === level) {
-            levelTabClassName = 'border-accent-1 bg-accent-1 text-white'
+            levelTabClassName = 'border-accent-1 bg-accent-1 text-[color:var(--accent-foreground)]'
           }
           return (
             <button
@@ -183,7 +183,7 @@ export default function LearningPage() {
               <button
                 type="button"
                 onClick={() => setQuizLevel(selectedLevel)}
-                className="rounded-xl bg-accent-1 px-4 py-2 text-sm font-semibold text-white"
+                className="rounded-pill bg-accent-1 px-5 py-2 text-sm font-semibold text-[color:var(--accent-foreground)] shadow-sm transition-all hover:bg-accent-1/90 active:scale-95"
               >
                 Start Quiz
               </button>
@@ -242,7 +242,7 @@ export default function LearningPage() {
                             key={vocab.id}
                             type="button"
                             onClick={() => setSelectedVocab(vocab)}
-                            className="rounded-btn border border-accent-1/15 bg-card p-4 text-left transition hover:border-accent-1/40"
+                            className="rounded-card border border-accent-1/15 bg-card p-4 text-left transition-all hover:border-accent-1/40 hover:-translate-y-0.5 shadow-sm"
                           >
                             <div className="flex items-start justify-between gap-2">
                               <span className="text-2xl font-semibold text-text-1">

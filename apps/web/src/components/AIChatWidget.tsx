@@ -37,7 +37,7 @@ export default function AIChatWidget() {
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 z-50 rounded-full bg-accent-1 p-4 text-white shadow-lg transition hover:opacity-90"
+        className="fixed bottom-4 right-4 z-50 rounded-full bg-accent-1 p-4 text-[color:var(--accent-foreground)] shadow-lg transition hover:opacity-90"
         aria-label="Open AI assistant"
       >
         <MessageCircle className="h-5 w-5" />
@@ -47,7 +47,7 @@ export default function AIChatWidget() {
       {isOpen && (
         <div className="fixed bottom-20 right-4 w-80 bg-card rounded-btn shadow-xl z-50 overflow-hidden border border-accent-1/20">
           {/* Header */}
-          <div className="bg-accent-1 text-white p-4">
+          <div className="bg-accent-1 text-[color:var(--accent-foreground)] p-4">
             <h3 className="font-bold">AI Assistant</h3>
             <p className="text-sm opacity-80">Your relationship companion</p>
           </div>
@@ -68,7 +68,7 @@ export default function AIChatWidget() {
                 key={i}
                 className={`p-3 rounded-btn max-w-[80%] ${
                   msg.role === 'user'
-                    ? 'bg-accent-1 text-white ml-auto'
+                    ? 'bg-accent-1 text-[color:var(--accent-foreground)] ml-auto'
                     : 'bg-card text-text-1 mr-auto'
                 }`}
               >
@@ -93,7 +93,7 @@ export default function AIChatWidget() {
               <button
                 onClick={sendMessage}
                 disabled={isLoading}
-                className="bg-accent-1 text-white px-4 py-2 rounded-lg font-medium disabled:opacity-50 hover:opacity-90 transition"
+                className="bg-accent-1 text-[color:var(--accent-foreground)] px-4 py-2 rounded-lg font-medium disabled:opacity-50 hover:opacity-90 transition"
               >
                 Send
               </button>

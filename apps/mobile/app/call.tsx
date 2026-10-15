@@ -91,7 +91,7 @@ export default function CallScreen() {
           </TouchableOpacity>
         )}
         <TouchableOpacity style={[styles.controlButton, styles.endButton]} onPress={endCall}>
-          <Text style={styles.controlText}>End call</Text>
+          <Text style={[styles.controlText, styles.endButtonText]}>End call</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -176,6 +176,9 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     },
     endButton: {
       backgroundColor: colors.error,
+    },
+    endButtonText: {
+      color: '#ffffff',
     },
     controlText: {
       color: colors.textPrimary,

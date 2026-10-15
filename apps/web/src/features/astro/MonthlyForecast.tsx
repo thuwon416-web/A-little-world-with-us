@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Calendar, Heart, Activity, DollarSign, TrendingUp, Briefcase } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface ForecastData {
   career: string
@@ -244,8 +245,13 @@ const monthlyForecasts: Record<string, ForecastData> = {
 const months = Object.keys(monthlyForecasts)
 
 export default function MonthlyForecast() {
+  const { language } = useLanguage()
   const [selectedMonth, setSelectedMonth] = useState(new Date().toLocaleString('default', { month: 'long' }))
-  const [showMyanmar, setShowMyanmar] = useState(false)
+  const [showMyanmar, setShowMyanmar] = useState(language === 'my')
+
+  useEffect(() => {
+    setShowMyanmar(language === 'my')
+  }, [language])
 
   const forecast = monthlyForecasts[selectedMonth]
 
@@ -257,7 +263,7 @@ export default function MonthlyForecast() {
   ]
 
   return (
-    <div className="rounded-btn border border-accent-1/20 bg-card p-6">
+    <div className="rounded-card border border-accent-1/20 bg-card p-6 shadow-card">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-accent-1/15 p-2 text-accent-1">
@@ -265,13 +271,15 @@ export default function MonthlyForecast() {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-text-2">Monthly Forecast</p>
-            <p className="mt-1 text-sm font-medium text-text-1">ဒီလ ဘာလုပ်ရမလဲ</p>
+            <p className="mt-1 text-sm font-medium text-text-1">
+              {showMyanmar ? 'ဒီလ ဘာလုပ်ရမလဲ' : 'Monthly Guidance'}
+            </p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setShowMyanmar(!showMyanmar)}
-          className="rounded-full border border-accent-1/20 px-3 py-1 text-xs text-accent-1 transition hover:bg-accent-1/10"
+          className="rounded-pill border border-accent-1/20 px-3 py-1 text-xs text-accent-1 transition hover:bg-accent-1/10"
         >
           {showMyanmar ? 'English' : 'မြန်မာ'}
         </button>

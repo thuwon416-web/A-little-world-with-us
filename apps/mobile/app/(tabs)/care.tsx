@@ -435,7 +435,7 @@ function Calendar({
                   today && styles.todayDay,
                 ]}
               >
-                <Text style={styles.dayText}>{day}</Text>
+                <Text style={[styles.dayText, actual && { color: colors.accentForeground ?? '#ffffff' }]}>{day}</Text>
               </TouchableOpacity>
             )
           })}
@@ -928,7 +928,7 @@ function TodayCareTab({
         onPress={onSave}
       >
         {saving ? (
-          <ActivityIndicator color={colors.background} />
+          <ActivityIndicator color={colors.accentForeground ?? '#ffffff'} />
         ) : (
           <Text style={styles.saveText}>Save shared daily log</Text>
         )}
@@ -1226,7 +1226,7 @@ export default function CareScreen() {
               onPress={() => void askIntimacy()}
               disabled={!intimacyMessage.trim() || intimacyLoading}
             >
-              <Text style={[styles.intimacyButtonText, { color: colors.background }]}>
+              <Text style={[styles.intimacyButtonText, { color: colors.accentForeground ?? '#ffffff' }]}>
                 {intimacyLoading ? 'Thinking…' : 'Ask intimacy guide'}
               </Text>
             </TouchableOpacity>
@@ -1259,7 +1259,19 @@ export default function CareScreen() {
             onPress={() => setActiveTab(tab)}
             style={[styles.tab, activeTab === tab && styles.tabActive]}
           >
-            <Text style={styles.tabText}>{tab}</Text>
+            <Text
+              style={[
+                styles.tabText,
+                {
+                  color:
+                    activeTab === tab
+                      ? (colors.accentForeground ?? '#ffffff')
+                      : colors.textSecondary,
+                },
+              ]}
+            >
+              {tab}
+            </Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -1385,13 +1397,13 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       backgroundColor: colors.background,
     },
     tab: {
-      borderRadius: sizes.radius.btn,
+      borderRadius: sizes.radius.pill,
       backgroundColor: colors.surface,
       paddingHorizontal: 14,
       paddingVertical: 9,
     },
     tabActive: { backgroundColor: colors.accent1 },
-    tabText: { color: colors.background, fontWeight: '700', fontSize: sizes.text.xs },
+    tabText: { fontWeight: '700', fontSize: sizes.text.xs },
     hero: {
       marginTop: 18,
       borderRadius: sizes.radius.panel,
@@ -1460,7 +1472,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     greenChip: { backgroundColor: colors.accent2 },
     chipSelected: { backgroundColor: colors.accent1 },
     chipText: { color: colors.textPrimary, fontWeight: '600', fontSize: sizes.text.sm },
-    chipTextSelected: { color: colors.background },
+    chipTextSelected: { color: colors.accentForeground ?? '#ffffff' },
     input: {
       borderRadius: sizes.radius.input,
       borderWidth: 1,
@@ -1476,18 +1488,18 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     saveButton: {
       marginTop: 16,
       alignItems: 'center',
-      borderRadius: sizes.radius.btn,
+      borderRadius: sizes.radius.pill,
       backgroundColor: colors.accent1,
       paddingVertical: 15,
     },
     secondaryButton: {
       alignItems: 'center',
-      borderRadius: sizes.radius.btn,
+      borderRadius: sizes.radius.pill,
       backgroundColor: colors.accent2,
       paddingVertical: 14,
       marginTop: 14,
     },
-    saveText: { color: colors.background, fontWeight: '800' },
+    saveText: { color: colors.accentForeground ?? '#ffffff', fontWeight: '800' },
     disabled: { opacity: 0.6 },
     reminder: {
       flexDirection: 'row',

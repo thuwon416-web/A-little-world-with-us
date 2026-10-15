@@ -107,7 +107,7 @@ export default function RemindersWidget({
           <div><label htmlFor={`${fieldId}-date`} className="text-sm font-medium text-text-1">Date *</label><input id={`${fieldId}-date`} type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" /></div>
           <div><label htmlFor={`${fieldId}-type`} className="text-sm font-medium text-text-1">Type</label><select id={`${fieldId}-type`} value={newType} onChange={(event) => { const value = REMINDER_TYPES.find((type) => type === event.target.value); if (value) setNewType(value) }} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"><option value="custom">Custom</option><option value="anniversary">Anniversary</option><option value="birthday">Birthday</option><option value="cycle">Cycle</option><option value="medication">Medication</option></select></div>
           <div><label htmlFor={`${fieldId}-repeat`} className="text-sm font-medium text-text-1">Repeat</label><select id={`${fieldId}-repeat`} value={newRepeat} onChange={(event) => { const value = REPEAT_INTERVALS.find((interval) => interval === event.target.value); if (value) setNewRepeat(value) }} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"><option value="once">Once</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></div>
-          <button type="button" onClick={handleAdd} disabled={!newTitle.trim() || !newDate} className="w-full rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50">Add Reminder</button>
+          <button type="button" onClick={handleAdd} disabled={!newTitle.trim() || !newDate} className="w-full rounded-pill bg-accent-1 px-4 py-3 text-sm font-semibold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">Add Reminder</button>
         </div>
       </div>
     </div>
@@ -166,7 +166,7 @@ export default function RemindersWidget({
           onModalOpen()
         }}
         disabled={modalBlocked}
-        className="w-full rounded-xl border border-dashed border-accent-1/30 bg-soft-tint px-3 py-3 text-sm text-text-2 flex items-center justify-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="w-full rounded-pill border border-dashed border-accent-1/30 bg-soft-tint px-3 py-3 text-sm text-text-2 flex items-center justify-center gap-2 hover:bg-card-hover transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
       >
         <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />
         Add Reminder

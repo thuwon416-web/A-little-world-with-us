@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 interface MemoryCardProps { id?: string | number; imageUrl: string; caption: string; date: string; index: number; priority?: boolean; onOpen?: () => void }
 
 const MemoryCardComponent = function MemoryCard({ imageUrl, caption, date, index, priority = false, onOpen }: MemoryCardProps) {
-  return <motion.button type="button" onClick={onOpen} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.28, delay: index * 0.03 }} className="glass-card group w-full overflow-hidden rounded-2xl p-2 text-left transition hover:glow-rose">
+  return <motion.button type="button" onClick={onOpen} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.28, delay: index * 0.03 }} className="glass-card group w-full overflow-hidden rounded-card border border-border/60 p-2.5 text-left shadow-card transition-all duration-200 hover:shadow-card-hover hover:border-accent-1/40 hover:-translate-y-0.5">
     <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-accent-1/20 via-card to-accent-2/15">
       <img src={imageUrl} alt={caption || 'Memory'} loading={priority ? 'eager' : 'lazy'} decoding="async" className="absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]" />
     </div>

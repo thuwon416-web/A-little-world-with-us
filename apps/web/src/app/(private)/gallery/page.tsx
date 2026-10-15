@@ -7,10 +7,11 @@ import ImageUpload from '@/components/shared/ImageUpload'
 import { LoadingState } from '@/components/shared/Loading'
 import { GallerySkeleton } from '@/components/shared/Skeleton'
 import { EmptyState } from '@/components/ui/empty-state'
-import { Image as ImageIcon } from 'lucide-react'
+import { Image as ImageIcon, LayoutGrid, Calendar as CalendarIcon } from 'lucide-react'
 import { deleteGalleryImage, listGalleryImages, type GalleryImage } from '@/lib/storage'
 import { supabase } from '@/lib/supabase'
 import { getDecryptedObjectUrl, revokeDecryptedUrl } from '@/lib/mediaEncryption'
+import PhotoMediaCalendar from '@/components/shared/PhotoMediaCalendar'
 
 export default function GalleryContent({ showUpload = true }: { showUpload?: boolean }) {
   const [images, setImages] = useState<GalleryImage[]>([])
@@ -18,6 +19,7 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
   const [error, setError] = useState('')
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [yearFilter, setYearFilter] = useState('all')
+  const [viewMode, setViewMode] = useState<'grid' | 'calendar'>('grid')
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   const imagesRef = useRef<GalleryImage[]>([])
   const router = useRouter()
@@ -102,13 +104,77 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
         <EmptyState icon={ImageIcon} title="Your gallery is ready for its first photo" description="Add a memory to begin building your shared gallery." action={{ label: 'Add your first memory', onClick: () => router.push('/memories') }} />
       ) : <>
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-sm text-text-2">{visibleImages.length} photos</p>
-          <label className="flex items-center gap-2 text-sm text-text-2"><span>Year</span><select value={yearFilter} onChange={(event) => setYearFilter(event.target.value)} className="rounded-full border border-accent-1/20 bg-card px-3 py-2 text-text-1" aria-label="Filter gallery by year"><option value="all">All years</option>{years.map((year) => <option key={year} value={year}>{year}</option>)}</select></label>
+          <div className="flex items-center gap-3">
+            <p className="text-sm text-text-2">{visibleImages.length} photos</p>
+            <div className="inline-flex rounded-full border border-accent-1/20 p-0.5 bg-card">
+              <button
+                type="button"
+                onClick={() => setViewMode('grid')}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
+                  viewMode === 'grid'
+                    ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+                    : 'text-text-2 hover:text-text-1'
+                }`}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                <span>Grid</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode('calendar')}
+                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
+                  viewMode === 'calendar'
+                    ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+                    : 'text-text-2 hover:text-text-1'
+                }`}
+              >
+                <CalendarIcon className="h-3.5 w-3.5" />
+                <span>Calendar</span>
+              </button>
+            </div>
+          </div>
+          {viewMode === 'grid' && (
+            <label className="flex items-center gap-2 text-sm text-text-2">
+              <span>Year</span>
+              <select
+                value={yearFilter}
+                onChange={(event) => setYearFilter(event.target.value)}
+                className="rounded-full border border-accent-1/20 bg-card px-3 py-2 text-text-1"
+                aria-label="Filter gallery by year"
+              >
+                <option value="all">All years</option>
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         </div>
-        {visibleImages.length === 0 ? <p className="rounded-btn border border-dashed border-border bg-card p-6 text-center text-text-2">No photos from this year.</p> : null}
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {visibleImages.map((image) => <div key={image.id} className="overflow-hidden rounded-btn border border-border bg-card shadow-[0_18px_40px_rgba(0,0,0,0.14)]"><Image src={image.url} alt={`Shared photo from ${new Date(image.created_at).toLocaleDateString()}`} width={256} height={256} unoptimized className="h-36 w-full object-cover sm:h-40 lg:h-44" /><div className="flex items-center justify-between gap-3 p-4"><span className="text-xs uppercase tracking-[0.16em] text-text-2">{new Date(image.created_at).toLocaleDateString()}</span>{image.ownerId === currentUserId && <button type="button" onClick={() => void handleDelete(image)} className="rounded-pill border border-error/30 bg-error/10 px-3 py-1 text-xs font-medium text-error">Delete</button>}</div></div>)}
-        </div>
+
+        {viewMode === 'calendar' ? (
+          <PhotoMediaCalendar coupleId={coupleId} />
+        ) : (
+          <>
+            {visibleImages.length === 0 ? <p className="rounded-btn border border-dashed border-border bg-card p-6 text-center text-text-2">No photos from this year.</p> : null}
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+              {visibleImages.map((image) => (
+                <div key={image.id} className="overflow-hidden rounded-btn border border-border bg-card shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
+                  <Image src={image.url} alt={`Shared photo from ${new Date(image.created_at).toLocaleDateString()}`} width={256} height={256} unoptimized className="h-36 w-full object-cover sm:h-40 lg:h-44" />
+                  <div className="flex items-center justify-between gap-3 p-4">
+                    <span className="text-xs uppercase tracking-[0.16em] text-text-2">{new Date(image.created_at).toLocaleDateString()}</span>
+                    {image.ownerId === currentUserId && (
+                      <button type="button" onClick={() => void handleDelete(image)} className="rounded-pill border border-error/30 bg-error/10 px-3 py-1 text-xs font-medium text-error">
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </>}
     </div>
   )

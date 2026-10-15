@@ -83,10 +83,10 @@ export default function FavoritesWidget() {
             <button
               key={category.id}
               onClick={() => setActiveCategory(category.id)}
-              className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-pill text-sm whitespace-nowrap transition active:scale-[0.98] ${
                 activeCategory === category.id
-                  ? 'bg-accent-1 text-white'
-                  : 'bg-soft-tint text-text-2'
+                  ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+                  : 'bg-soft-tint text-text-2 hover:bg-card-hover'
               }`}
             >
               <Icon className="h-4 w-4" />
@@ -258,7 +258,7 @@ export default function FavoritesWidget() {
               <button
                 onClick={handleAdd}
                 disabled={!newItemName.trim()}
-                className="w-full rounded-xl bg-accent-1 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                className="w-full rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
               >
                 Add Item
               </button>

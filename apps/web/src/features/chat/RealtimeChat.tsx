@@ -3,10 +3,12 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import dynamic from 'next/dynamic'
-import { Heart, Paperclip, Reply as ReplyIcon, MapPin, Captions, Sparkles, X } from 'lucide-react'
+import { Heart, Paperclip, Reply as ReplyIcon, MapPin, Captions, Sparkles, X, Pin, Image as ImageIcon } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { getCoupleStatus } from '@/lib/couples'
+import ConnectedCoupleAvatars from '@/components/shared/ConnectedCoupleAvatars'
 import { encryptMessage, decryptMessage, deriveChatKey } from '@/lib/chatEncryption'
 import { resolveB2ChatMediaUrl, resolveChatMediaUrl } from '@/lib/chatMedia'
 import { getCachedDecryptedUrl } from '@/lib/mediaEncryption'
@@ -175,12 +177,20 @@ function getContextHintDescription(contextCount: number): string {
   return `${contextCount} unprocessed context hints detected.`
 }
 
-export default function RealtimeChat() {
+interface RealtimeChatProps {
+  className?: string
+}
+
+export default function RealtimeChat({ className }: RealtimeChatProps = {}) {
   const [messages, setMessages] = useState<Message[]>([])
   const [loadError, setLoadError] = useState<string | null>(null)
   const [input, setInput] = useState('')
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [userProfile, setUserProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
+  const [partnerProfile, setPartnerProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
+  const [pinnedMessage, setPinnedMessage] = useState<Message | null>(null)
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null)
   const [showVoiceRecorder, setShowVoiceRecorder] = useState(false)
   const [showPhotoShare, setShowPhotoShare] = useState(false)
   const [showStickerPicker, setShowStickerPicker] = useState(false)
@@ -245,9 +255,22 @@ export default function RealtimeChat() {
       if (!user) return
       setCurrentUserId(user.id)
 
-      const { couple } = await getCoupleStatus()
+      const { data: myProfile } = await supabase
+        .from('profiles')
+        .select('full_name,avatar_url')
+        .eq('id', user.id)
+        .maybeSingle()
+      if (myProfile) setUserProfile(myProfile)
+
+      const { couple, partner } = await getCoupleStatus()
       if (!couple) return
       setCoupleId(couple.id)
+      if (partner) {
+        setPartnerProfile({
+          full_name: partner.full_name,
+          avatar_url: partner.avatar_url ?? null,
+        })
+      }
 
       // Load AI Context
       const { data: contextRows, count } = await supabase
@@ -310,6 +333,52 @@ export default function RealtimeChat() {
       setMessages(sortedMessages)
       void archiveChatDay(sortedMessages)
 
+      // Load Pinned Message
+      try {
+        const { data: pinnedRow } = await supabase
+          .from('chat_pinned_messages')
+          .select('message_id')
+          .eq('couple_id', couple.id)
+          .order('pinned_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (pinnedRow?.message_id) {
+          const matchMsg = decryptedMessages.find((m) => m.id === pinnedRow.message_id)
+          if (matchMsg) {
+            setPinnedMessage(matchMsg)
+          } else {
+            const { data: singleMsg } = await supabase.from('messages').select('*').eq('id', pinnedRow.message_id).maybeSingle()
+            if (singleMsg && isChatMessage(singleMsg)) {
+              if (singleMsg.encrypted && singleMsg.content) {
+                try {
+                  const decrypted = await decryptMessage(singleMsg.content, chatKey, couple.id)
+                  setPinnedMessage({ ...singleMsg, content: decrypted })
+                } catch {
+                  setPinnedMessage(singleMsg)
+                }
+              } else {
+                setPinnedMessage(singleMsg)
+              }
+            }
+          }
+        } else {
+          const localPinned = localStorage.getItem(`couple_pinned_${couple.id}`)
+          if (localPinned) {
+            try {
+              setPinnedMessage(JSON.parse(localPinned))
+            } catch {}
+          }
+        }
+      } catch {
+        const localPinned = localStorage.getItem(`couple_pinned_${couple.id}`)
+        if (localPinned) {
+          try {
+            setPinnedMessage(JSON.parse(localPinned))
+          } catch {}
+        }
+      }
+
       // Mark messages as seen
       const partnerMessages = activeMessages.filter(
         msg => msg.sender_id !== user.id && !msg.seen_at
@@ -331,6 +400,10 @@ export default function RealtimeChat() {
       // Setup Realtime Channel (✅ No infinite loop, proper cleanup)
       const channel = supabase
         .channel(`chat-${couple.id}`)
+        .on('broadcast', { event: 'pinned_message_updated' }, (eventPayload) => {
+          const pMsg = eventPayload.payload?.message as Message | null | undefined
+          setPinnedMessage(pMsg ?? null)
+        })
         .on(
           'postgres_changes',
           { event: 'INSERT', schema: 'public', table: 'messages', filter: `couple_id=eq.${couple.id}` },
@@ -417,6 +490,8 @@ export default function RealtimeChat() {
         channelRef.current = null
       }
     }
+    // Subscription and history are initialized on component mount once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Online/Offline Detection
@@ -765,36 +840,148 @@ export default function RealtimeChat() {
     }
   }
 
+  const handleTogglePin = async (message: Message) => {
+    if (!coupleId) return
+    const isCurrentlyPinned = pinnedMessage?.id === message.id
+    if (isCurrentlyPinned) {
+      setPinnedMessage(null)
+      try {
+        localStorage.removeItem(`couple_pinned_${coupleId}`)
+        await supabase.from('chat_pinned_messages').delete().eq('couple_id', coupleId).eq('message_id', message.id)
+      } catch {}
+      channelRef.current?.send({
+        type: 'broadcast',
+        event: 'pinned_message_updated',
+        payload: { message: null },
+      })
+    } else {
+      setPinnedMessage(message)
+      try {
+        localStorage.setItem(`couple_pinned_${coupleId}`, JSON.stringify(message))
+        await supabase.from('chat_pinned_messages').upsert({
+          couple_id: coupleId,
+          message_id: message.id,
+          pinned_by: currentUserId,
+        })
+      } catch {}
+      channelRef.current?.send({
+        type: 'broadcast',
+        event: 'pinned_message_updated',
+        payload: { message },
+      })
+    }
+  }
+
+  const scrollToMessage = (msgId: string) => {
+    const el = document.getElementById(`chat-msg-${msgId}`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setHighlightedMessageId(msgId)
+      setTimeout(() => setHighlightedMessageId(null), 2500)
+    }
+  }
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
   if (!coupleId) {
     return (
-      <div className="flex h-[min(600px,calc(100dvh-10rem))] min-h-[360px] items-center justify-center glass-card">
+      <div className={`flex ${className ?? 'h-[min(680px,calc(100dvh-10rem))]'} min-h-[360px] items-center justify-center glass-card`}>
         <p className="text-text-2">Link with your partner to start chatting</p>
       </div>
     )
   }
 
   return (
-    <div className="flex h-[min(600px,calc(100dvh-10rem))] min-h-[360px] flex-col glass-card">
+    <div className={`flex ${className ?? 'h-[min(680px,calc(100dvh-10rem))]'} min-h-[360px] flex-col glass-card`}>
       <div role="status" aria-live="polite" className="sr-only">
         {messages.length > 0 && `Latest message from ${messages[messages.length - 1].sender_id === currentUserId ? 'you' : 'your partner'}`}
       </div>
-      <header className="flex items-center gap-3 border-b border-accent-1/20 bg-card px-4 py-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-pill bg-accent-1 text-lg text-white"><Heart className="h-5 w-5 fill-current" /></div>
-        <div><p className="font-semibold text-text-1">Your love</p><p className="text-xs text-emerald-400">{isOnline ? 'Online' : 'Offline'}{pendingCount > 0 && ` (${pendingCount} pending)`}</p></div>
-        <button type="button" onClick={() => setShowAIPanel((open) => !open)} className="ml-auto inline-flex items-center gap-1 rounded-pill border border-accent-1/20 px-3 py-1.5 text-xs text-text-1" aria-label="Open AI Guardian">
-          <Sparkles className="h-3.5 w-3.5" /> AI {contextCount > 0 ? `•${contextCount}` : ''}
-        </button>
+      <header className="flex items-center justify-between border-b border-accent-1/20 bg-card px-4 py-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <ConnectedCoupleAvatars
+            size="sm"
+            userAvatarUrl={userProfile?.avatar_url}
+            partnerAvatarUrl={partnerProfile?.avatar_url}
+            userName={userProfile?.full_name ?? 'You'}
+            partnerName={partnerProfile?.full_name ?? 'Your love'}
+          />
+          <div className="min-w-0">
+            <p className="font-semibold text-text-1 truncate">{partnerProfile?.full_name ?? 'Your love'}</p>
+            <p className="text-xs text-emerald-400 flex items-center gap-1">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              {isOnline ? 'Online' : 'Offline'}{pendingCount > 0 && ` (${pendingCount} pending)`}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <Link
+            href="/gallery"
+            className="inline-flex items-center gap-1.5 rounded-full border border-accent-1/25 bg-accent-1/10 px-3 py-1.5 text-xs font-medium text-text-1 hover:bg-accent-1/20 hover:scale-[1.02] transition shadow-sm"
+          >
+            <ImageIcon className="h-3.5 w-3.5 text-accent-1" />
+            <span>View gallery</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setShowAIPanel((open) => !open)}
+            className="inline-flex items-center gap-1 rounded-pill border border-accent-1/20 px-3 py-1.5 text-xs text-text-1 hover:bg-card/80 transition"
+            aria-label="Open AI Guardian"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-accent-1" /> AI {contextCount > 0 ? `•${contextCount}` : ''}
+          </button>
+        </div>
       </header>
+
+      {/* Telegram-style Pinned Message Banner */}
+      {pinnedMessage && (
+        <div className="flex items-center justify-between border-b border-accent-1/15 bg-accent-1/10 px-4 py-2 backdrop-blur-sm transition animate-fade-in">
+          <button
+            type="button"
+            onClick={() => scrollToMessage(pinnedMessage.id)}
+            className="flex flex-1 items-center gap-2.5 text-left min-w-0 pr-2 group cursor-pointer"
+            title="Jump to pinned message"
+          >
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-accent-1/20 text-accent-1 group-hover:scale-105 transition">
+              <Pin className="h-3.5 w-3.5 fill-current rotate-45" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-accent-1 flex items-center gap-1">
+                Pinned message
+              </p>
+              <p className="truncate text-xs text-text-1 group-hover:text-accent-1 transition">
+                {pinnedMessage.message_type === 'text'
+                  ? (pinnedMessage.content || 'Text message')
+                  : pinnedMessage.message_type === 'photo'
+                    ? '📷 Photo'
+                    : pinnedMessage.message_type === 'voice'
+                      ? '🎤 Voice message'
+                      : pinnedMessage.message_type === 'file'
+                        ? '📎 File attachment'
+                        : 'Message'}
+              </p>
+            </div>
+          </button>
+          <button
+            type="button"
+            onClick={() => void handleTogglePin(pinnedMessage)}
+            className="shrink-0 p-1 rounded-full text-text-2 hover:bg-accent-1/20 hover:text-text-1 transition"
+            title="Unpin message"
+            aria-label="Unpin message"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {loadError && <div role="alert" className="border-b border-error/30 bg-error/10 px-4 py-2 text-sm text-error">{loadError}</div>}
       {showAIPanel && <section className="border-b border-accent-1/20 bg-card p-4">
         <div className="flex items-center justify-between"><p className="text-sm font-semibold text-text-1">AI Guardian context</p><button type="button" onClick={() => setShowAIPanel(false)} aria-label="Close AI Guardian"><X className="h-4 w-4 text-text-2" /></button></div>
         <p className="mt-2 text-xs text-text-2">{getContextHintDescription(contextCount)}</p>
         {contexts.length > 0 && <ul className="mt-3 space-y-2">{contexts.map((context) => <li key={context.id} className="flex items-center justify-between rounded-input bg-card px-3 py-2 text-xs text-text-1"><span>{context.category} · {context.sender_role}</span><button type="button" onClick={() => void deleteContext(context.id)} className="text-text-2 underline">Delete</button></li>)}</ul>}
-        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-pill bg-accent-1 px-4 py-2 text-xs font-semibold text-white disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
+        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-pill bg-accent-1 px-4 py-2 text-xs font-semibold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
         {aiResponse && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-text-1">{aiResponse}</p>}
       </section>}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -807,13 +994,21 @@ export default function RealtimeChat() {
         )}
         {messages.length === 0 ? <div className="flex h-full items-center justify-center text-center text-text-2"><p>Say hello to your love <Heart className="inline h-4 w-4" /></p></div> : messages.map((message) => {
           const replyToMessage = message.reply_to ? messages.find((m) => m.id === message.reply_to) : null
+          const isMessagePinned = pinnedMessage?.id === message.id
+          const isMessageHighlighted = highlightedMessageId === message.id
           let deliveryStatus = <span>✓</span>
           if (message.delivered_at) deliveryStatus = <span>✓✓</span>
           if (message.seen_at) deliveryStatus = <span className="text-blue-400">✓✓</span>
           return (
-            <div key={message.id} className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} group`}>
+            <div key={message.id} id={`chat-msg-${message.id}`} className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} group transition-all duration-300`}>
               <div className="flex flex-col gap-1">
-                <div className={`max-w-[88%] sm:max-w-[70%] rounded-btn px-4 py-2 ${message.sender_id === currentUserId ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-white' : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1'}`} onContextMenu={(e) => { e.preventDefault(); handleMessageLongPress(message) }}>
+                <div className={`max-w-[88%] sm:max-w-[70%] px-4 py-2 transition duration-300 ${isMessageHighlighted ? 'ring-2 ring-accent-1 ring-offset-2 scale-[1.02]' : ''} ${message.sender_id === currentUserId ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm' : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1 border border-border/40'}`} onContextMenu={(e) => { e.preventDefault(); handleMessageLongPress(message) }}>
+                  {isMessagePinned && (
+                    <div className="mb-1 flex items-center gap-1 text-[11px] font-semibold opacity-80">
+                      <Pin className="h-3 w-3 fill-current rotate-45" />
+                      <span>Pinned</span>
+                    </div>
+                  )}
                   {replyToMessage && (
                     <div className="mb-2 pb-2 border-b border-accent-1/20">
                       <p className="text-xs text-text-2 mb-1">Replying to {replyToMessage.sender_id === currentUserId ? 'yourself' : 'partner'}</p>
@@ -845,7 +1040,7 @@ export default function RealtimeChat() {
                 </div>
                 <div className="hidden items-center justify-end gap-1 text-xs" aria-hidden="true" />
                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
-                  <button type="button" onClick={() => { setSelectedMessage(message); setShowReplyThread(true); }} className="p-1 rounded-pill bg-accent-1/10 hover:bg-accent-1/20 text-accent-1">
+                  <button type="button" onClick={() => { setSelectedMessage(message); setShowReplyThread(true); }} className="p-1 rounded-pill bg-accent-1/10 hover:bg-accent-1/20 text-accent-1" title="Reply or options">
                     <ReplyIcon className="h-3 w-3" />
                   </button>
                 </div>
@@ -872,7 +1067,16 @@ export default function RealtimeChat() {
       {showGIFPicker && <GIFPicker onGIFSelect={handleGIFSelect} onClose={() => setShowGIFPicker(false)} />}
       {showFileUpload && <FileUpload onFileUpload={handleFileUpload} onClose={() => setShowFileUpload(false)} coupleId={coupleId ?? ''} />}
       {showReplyThread && selectedMessage && (
-        <ReplyThread message={selectedMessage} currentUserId={currentUserId} onReply={handleReply} onEdit={handleEditMessageSync} onDelete={handleDeleteMessageSync} onClose={() => { setShowReplyThread(false); setSelectedMessage(null); }} />
+        <ReplyThread
+          message={selectedMessage}
+          currentUserId={currentUserId}
+          isPinned={pinnedMessage?.id === selectedMessage.id}
+          onPin={handleTogglePin}
+          onReply={handleReply}
+          onEdit={handleEditMessageSync}
+          onDelete={handleDeleteMessageSync}
+          onClose={() => { setShowReplyThread(false); setSelectedMessage(null); }}
+        />
       )}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -886,8 +1090,8 @@ export default function RealtimeChat() {
             <div className="p-4 space-y-4">
               <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={4} className="w-full rounded-input border-2 border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 placeholder:text-text-2/50 resize-none focus:outline-none focus:ring-2 focus:ring-accent-1/50" />
               <div className="flex gap-2">
-                <button type="button" onClick={saveEdit} disabled={!editContent.trim()} className="flex-1 rounded-btn bg-gradient-to-r from-accent-1 to-accent-2 px-6 py-3 text-base font-medium text-white transition hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed">Save</button>
-                <button type="button" onClick={() => { setShowEditModal(false); setSelectedMessage(null); setEditContent(''); }} className="flex-1 rounded-btn border border-accent-1/30 px-6 py-3 text-base font-medium text-text-1 hover:bg-accent-1/10 transition">Cancel</button>
+                <button type="button" onClick={saveEdit} disabled={!editContent.trim()} className="flex-1 rounded-pill bg-accent-1 px-6 py-3 text-base font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">Save</button>
+                <button type="button" onClick={() => { setShowEditModal(false); setSelectedMessage(null); setEditContent(''); }} className="flex-1 rounded-pill border border-border px-6 py-3 text-base font-medium text-text-1 hover:bg-card-hover transition active:scale-[0.98]">Cancel</button>
               </div>
             </div>
           </div>

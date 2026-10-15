@@ -1,4 +1,4 @@
-﻿import type { Metadata, Viewport } from 'next'
+import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
 import { randomInt } from 'node:crypto'
 import { Inter, Playfair_Display } from 'next/font/google'
@@ -11,6 +11,7 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt'
 import { QueryProvider } from '@/components/QueryProvider'
 import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import AIChatWidget from '@/components/AIChatWidget'
+import OfflineBanner from '@/components/shared/OfflineBanner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
@@ -103,13 +104,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <ThemeProvider>
               <a
                 href="#main-content"
-                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent-1 focus:px-4 focus:py-2 focus:text-white focus:outline-none focus:ring-2 focus:ring-accent-1/50"
+                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:rounded-md focus:bg-accent-1 focus:px-4 focus:py-2 focus:text-[color:var(--accent-foreground)] focus:outline-none focus:ring-2 focus:ring-accent-1/50"
               >
                 Skip to main content
               </a>
               {children}
               <Toaster />
               <PWAInstallPrompt />
+              <OfflineBanner />
               <AIChatWidget />
               <SpeedInsights />
               <WebVitalsReporter />

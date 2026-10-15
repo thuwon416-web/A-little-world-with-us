@@ -10,6 +10,7 @@ import BucketList from '@/features/planning/BucketList'
 import SharedWishlist from '@/features/planning/SharedWishlist'
 import RemindersPage from '@/app/(private)/reminders/page'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
+import PhotoMediaCalendar from '@/components/shared/PhotoMediaCalendar'
 
 const FuturePlansContent = dynamic(() => import('@/app/(private)/planning/page'), { ssr: false })
 const FinanceContent = dynamic(() => import('@/app/(private)/finance/page'), { ssr: false })
@@ -177,7 +178,7 @@ export default function CalendarPage() {
               key={tab}
               type="button"
               onClick={() => selectSection(tab)}
-              className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-accent-1 bg-accent-1 text-white' : 'border-accent-1/20 bg-card text-text-2'}`}
+              className={`rounded-full border px-4 py-2 text-sm capitalize ${activeTab === tab ? 'border-accent-1 bg-accent-1 text-[color:var(--accent-foreground)]' : 'border-accent-1/20 bg-card text-text-2'}`}
             >
               {tab}
             </button>
@@ -188,6 +189,10 @@ export default function CalendarPage() {
         {activeTab === 'finance' && <FinanceContent />}
         {activeTab === 'calendar' && (
           <>
+            <div className="glass-card p-5">
+              <PhotoMediaCalendar coupleId={coupleId} />
+            </div>
+
             <div className="glass-card p-5">
               <LoveCalendar />
             </div>
@@ -302,7 +307,7 @@ export default function CalendarPage() {
                       </h3>
                       <button
                         onClick={() => void addEvent()}
-                        className="w-full bg-accent-1 text-white py-3 rounded-xl font-medium"
+                        className="w-full bg-accent-1 text-[color:var(--accent-foreground)] py-3 rounded-xl font-medium"
                       >
                         + Add Event
                       </button>

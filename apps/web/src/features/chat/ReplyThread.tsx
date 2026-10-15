@@ -1,7 +1,7 @@
 'use client'
 
 import { useId, useState } from 'react'
-import { Image as ImageIcon, Mic, Music, Paperclip, Smile, Video, X, Reply as ReplyIcon, Send, Edit2, Trash2 } from 'lucide-react'
+import { Image as ImageIcon, Mic, Music, Paperclip, Smile, Video, X, Reply as ReplyIcon, Send, Edit2, Trash2, Pin } from 'lucide-react'
 
 interface Message {
   id: string
@@ -22,13 +22,15 @@ interface Message {
 interface ReplyThreadProps {
   message: Message
   currentUserId: string | null
+  isPinned?: boolean
+  onPin?: (message: Message) => Promise<void> | void
   onReply: (replyData: { text: string; replyTo: string }) => void
   onEdit?: (message: Message) => Promise<void>
   onDelete?: (message: Message) => Promise<void>
   onClose: () => void
 }
 
-export default function ReplyThread({ message, currentUserId, onReply, onEdit, onDelete, onClose }: ReplyThreadProps) {
+export default function ReplyThread({ message, currentUserId, isPinned = false, onPin, onReply, onEdit, onDelete, onClose }: ReplyThreadProps) {
   const [replyText, setReplyText] = useState('')
   const replyInputId = useId()
 
@@ -141,31 +143,46 @@ export default function ReplyThread({ message, currentUserId, onReply, onEdit, o
             Send Reply
           </button>
 
-          {/* Edit/Delete Actions (only for own messages) */}
-          {message.sender_id === currentUserId && (
-            <div className="flex gap-2 pt-4 border-t border-accent-1/20">
-              {message.message_type === 'text' && onEdit && (
-                <button
-                  type="button"
-                  onClick={() => { void onEdit(message) }}
-                  className="flex-1 rounded-btn border border-accent-1/30 px-4 py-2 text-sm font-medium text-text-1 hover:bg-accent-1/10 transition flex items-center justify-center gap-2"
-                >
-                  <Edit2 className="h-4 w-4" />
-                  Edit
-                </button>
-              )}
-              {onDelete && (
-                <button
-                  type="button"
-                  onClick={() => { void onDelete(message) }}
-                  className="flex-1 rounded-btn border border-error/30 px-4 py-2 text-sm font-medium text-error hover:bg-error/10 transition flex items-center justify-center gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </button>
-              )}
-            </div>
-          )}
+          {/* Actions (Pin, Edit, Delete) */}
+          <div className="flex flex-wrap gap-2 pt-3 border-t border-accent-1/20">
+            {onPin && (
+              <button
+                type="button"
+                onClick={() => {
+                  void onPin(message)
+                  onClose()
+                }}
+                className={`flex-1 min-w-[120px] rounded-btn border ${isPinned ? 'border-amber-400/50 bg-amber-400/10 text-amber-500' : 'border-accent-1/30 text-text-1 hover:bg-accent-1/10'} px-3 py-2 text-sm font-medium transition flex items-center justify-center gap-2`}
+              >
+                <Pin className={`h-4 w-4 ${isPinned ? 'fill-current rotate-45' : ''}`} />
+                {isPinned ? 'Unpin message' : 'Pin message'}
+              </button>
+            )}
+            {message.sender_id === currentUserId && (
+              <>
+                {message.message_type === 'text' && onEdit && (
+                  <button
+                    type="button"
+                    onClick={() => { void onEdit(message) }}
+                    className="flex-1 min-w-[100px] rounded-btn border border-accent-1/30 px-3 py-2 text-sm font-medium text-text-1 hover:bg-accent-1/10 transition flex items-center justify-center gap-2"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Edit
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    type="button"
+                    onClick={() => { void onDelete(message) }}
+                    className="flex-1 min-w-[100px] rounded-btn border border-error/30 px-3 py-2 text-sm font-medium text-error hover:bg-error/10 transition flex items-center justify-center gap-2"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Delete
+                  </button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -198,7 +198,7 @@ function CreateInviteState({
         <button
           onClick={onCreateInvite}
           disabled={isCreating}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent-1 px-8 py-3 font-semibold text-white transition hover:shadow-lg hover:shadow-accent-1/20 disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-lg bg-accent-1 px-8 py-3 font-semibold text-[color:var(--accent-foreground)] transition hover:shadow-lg hover:shadow-accent-1/20 disabled:opacity-50"
         >
           {isCreating ? (
             <>
@@ -218,7 +218,7 @@ function CreateInviteState({
         <h3 className="font-semibold text-accent-2 mb-3">Already have a code?</h3>
         <div className="flex gap-2">
           <input value={acceptCode} onChange={(event) => setAcceptCode(event.target.value.toUpperCase())} maxLength={8} placeholder="8-character code" className="min-w-0 flex-1 rounded-lg border border-accent-1/20 bg-card px-3 py-2 text-text-1" />
-          <button type="button" onClick={onAccept} disabled={isAccepting || acceptCode.length !== 8} className="rounded-lg bg-accent-1 px-4 py-2 font-semibold text-white disabled:opacity-50">{isAccepting ? 'Linking…' : 'Accept'}</button>
+          <button type="button" onClick={onAccept} disabled={isAccepting || acceptCode.length !== 8} className="rounded-lg bg-accent-1 px-4 py-2 font-semibold text-[color:var(--accent-foreground)] disabled:opacity-50">{isAccepting ? 'Linking…' : 'Accept'}</button>
         </div>
       </div>
 
@@ -327,7 +327,7 @@ function LinkedState() {
       <div className="flex gap-3 justify-center">
         <a
           href="/chat"
-          className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-white hover:shadow-lg hover:shadow-accent-1/20 transition"
+          className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-[color:var(--accent-foreground)] hover:shadow-lg hover:shadow-accent-1/20 transition"
         >
           Send Message
         </a>
@@ -362,7 +362,7 @@ function ErrorState({
       <p className="mb-6 text-text-2">{error}</p>
       <button
         onClick={onRetry}
-        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-white hover:shadow-lg hover:shadow-accent-1/20 transition"
+        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-[color:var(--accent-foreground)] hover:shadow-lg hover:shadow-accent-1/20 transition"
       >
         Try Again
       </button>

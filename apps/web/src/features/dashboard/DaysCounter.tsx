@@ -23,7 +23,7 @@ export default memo(function DaysCounter() {
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}
-      className="glass-card p-8 text-center relative overflow-hidden"
+      className="glass-card rounded-card border border-border/60 p-8 text-center relative overflow-hidden shadow-card transition-all duration-200"
     >
       {/* Decorative heart */}
       <motion.div

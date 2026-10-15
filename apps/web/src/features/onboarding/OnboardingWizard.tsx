@@ -224,7 +224,7 @@ function WelcomeStep({ onNext }: Readonly<{ onNext: () => void }>) {
 
       <button
         onClick={onNext}
-        className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-accent-1/90"
+        className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-6 py-3 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98]"
       >
         Get Started
         <ChevronRight className="h-4 w-4" />
@@ -328,7 +328,7 @@ function ProfileStep({
         <button
           onClick={onNext}
           disabled={saving}
-          className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
+          className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-6 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-40"
         >
           {saving ? 'Saving...' : 'Next'}
           <ChevronRight className="h-4 w-4" />
@@ -400,7 +400,7 @@ function PairReadyStep({
           <button
             onClick={onNext}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-6 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Continue'}
             <ChevronRight className="h-4 w-4" />
@@ -511,7 +511,7 @@ function HealthStep({
           <button
             onClick={onNext}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-6 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Next'}
             <ChevronRight className="h-4 w-4" />
@@ -600,7 +600,7 @@ function CycleStep({
           <button
             onClick={onNext}
             disabled={saving}
-            className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-2 text-sm font-medium text-white disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-6 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-40"
           >
             {saving ? 'Saving...' : 'Next'}
             <ChevronRight className="h-4 w-4" />
@@ -646,7 +646,7 @@ function CompleteStep({ onFinish, saving }: Readonly<{ onFinish: () => void; sav
       <button
         onClick={onFinish}
         disabled={saving}
-        className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-6 py-3 text-sm font-medium text-white disabled:opacity-40"
+        className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-6 py-3 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-40"
       >
         {saving ? 'Finishing...' : 'Go to Dashboard'}
         <Star className="h-4 w-4" />

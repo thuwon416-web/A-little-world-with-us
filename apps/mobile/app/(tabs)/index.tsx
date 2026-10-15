@@ -13,8 +13,10 @@ import {
   ChevronUp,
   Settings2,
   X,
+  Flame,
 } from 'lucide-react-native'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { checkInStreak } from '@/services/advanced'
 import {
   Image,
   Linking,
@@ -30,6 +32,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import OnThisDay from '@/components/dashboard/OnThisDay'
 import OurStats from '@/components/dashboard/OurStats'
+import { ConnectedCoupleAvatars } from '@/components/ConnectedCoupleAvatars'
 import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
@@ -131,6 +134,8 @@ export default function DashboardScreen() {
   const [error, setError] = useState<string | null>(null)
   const [playing, setPlaying] = useState(false)
   const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [userProfile, setUserProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
+  const [partnerProfile, setPartnerProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
   const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout>({
     order: [...DEFAULT_DASHBOARD_WIDGETS],
     visibility: Object.fromEntries(DEFAULT_DASHBOARD_WIDGETS.map((id) => [id, true])) as Record<
@@ -140,6 +145,9 @@ export default function DashboardScreen() {
   })
   const [customizing, setCustomizing] = useState(false)
   const [layoutError, setLayoutError] = useState('')
+  const [streak, setStreak] = useState<number>(0)
+  const [streakCheckedInToday, setStreakCheckedInToday] = useState(false)
+  const [streakCheckingIn, setStreakCheckingIn] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -152,13 +160,38 @@ export default function DashboardScreen() {
         data: { user },
       } = await supabase.auth.getUser()
       if (user) {
+        const { data: myProf } = await supabase.from('profiles').select('full_name,avatar_url').eq('id', user.id).maybeSingle()
+        if (myProf) setUserProfile(myProf)
+
         const { data: link } = await supabase
           .from('couple_links')
-          .select('couple_id')
+          .select('couple_id, inviter_id, accepted_by')
           .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
           .eq('status', 'accepted')
           .maybeSingle()
         setCoupleId(link?.couple_id ?? null)
+        if (link?.couple_id) {
+          const { data: streakRow } = await supabase
+            .from('love_streaks')
+            .select('current_streak, last_check_in')
+            .eq('couple_id', link.couple_id)
+            .maybeSingle()
+          if (streakRow) {
+            setStreak(streakRow.current_streak ?? 0)
+            const todayKey = new Date().toISOString().slice(0, 10)
+            const lastKey = streakRow.last_check_in
+              ? new Date(streakRow.last_check_in).toISOString().slice(0, 10)
+              : null
+            setStreakCheckedInToday(lastKey === todayKey)
+          }
+        }
+        if (link) {
+          const pId = link.inviter_id === user.id ? link.accepted_by : link.inviter_id
+          if (pId) {
+            const { data: pProf } = await supabase.from('profiles').select('full_name,avatar_url').eq('id', pId).maybeSingle()
+            if (pProf) setPartnerProfile(pProf)
+          }
+        }
       }
     } catch (error_) {
       setError(error_ instanceof Error ? error_.message : 'Unable to load your dashboard.')
@@ -166,6 +199,20 @@ export default function DashboardScreen() {
       setLoading(false)
     }
   }, [])
+
+  const handleStreakCheckIn = async () => {
+    if (!coupleId || streakCheckingIn || streakCheckedInToday) return
+    setStreakCheckingIn(true)
+    try {
+      const updated = await checkInStreak(coupleId)
+      setStreak(updated?.current_streak ?? streak + 1)
+      setStreakCheckedInToday(true)
+    } catch (err) {
+      console.warn('Streak checkin error:', err)
+    } finally {
+      setStreakCheckingIn(false)
+    }
+  }
   useEffect(() => {
     void load()
   }, [load])
@@ -367,9 +414,43 @@ export default function DashboardScreen() {
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top }]}>
-      <Text style={styles.eyebrow}>Love dashboard</Text>
-      <Text style={styles.title}>{dashboard.coupleName}</Text>
-      <Text style={styles.subtitle}>Today is a good day to notice the little things.</Text>
+      <View style={styles.heroRow}>
+        <View style={styles.heroTextWrap}>
+          <Text style={styles.eyebrow}>Love dashboard</Text>
+          <Text style={styles.title}>{dashboard.coupleName}</Text>
+          <Text style={styles.subtitle}>Today is a good day to notice the little things.</Text>
+        </View>
+        <ConnectedCoupleAvatars
+          size="lg"
+          userAvatarUrl={userProfile?.avatar_url}
+          partnerAvatarUrl={partnerProfile?.avatar_url}
+          userName={userProfile?.full_name}
+          partnerName={partnerProfile?.full_name}
+        />
+      </View>
+      <TouchableOpacity
+        style={[
+          styles.streakBadge,
+          { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
+        ]}
+        onPress={() => void handleStreakCheckIn()}
+        disabled={streakCheckingIn || streakCheckedInToday}
+        activeOpacity={0.8}
+      >
+        <View style={styles.streakLeft}>
+          <Flame color={colors.accent1} size={18} />
+          <Text style={[styles.streakCount, { color: colors.textPrimary }]}>
+            {streak} {streak === 1 ? 'day' : 'days'} streak
+          </Text>
+        </View>
+        <Text style={[styles.streakAction, { color: colors.accent1 }]}>
+          {streakCheckedInToday
+            ? 'Checked in today ❤️'
+            : streakCheckingIn
+              ? 'Checking in…'
+              : 'Tap to check-in ❤️'}
+        </Text>
+      </TouchableOpacity>
       <TouchableOpacity
         style={[styles.customizeButton, { backgroundColor: colors.cardBg }]}
         onPress={() => setCustomizing(true)}
@@ -553,6 +634,15 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       gap: 16,
       padding: 24,
     },
+    heroRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: 12,
+    },
+    heroTextWrap: {
+      flex: 1,
+    },
     eyebrow: {
       color: colors.accent2,
       fontSize: sizes.text.xs,
@@ -728,4 +818,27 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       paddingVertical: 7,
     },
     widgetLabel: { flex: 1, fontWeight: '700' },
+    streakBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      borderWidth: 1,
+      borderRadius: sizes.radius.input,
+      paddingHorizontal: sizes.space.md,
+      paddingVertical: sizes.space.sm,
+      marginBottom: sizes.space.md,
+    },
+    streakLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: sizes.space.xs,
+    },
+    streakCount: {
+      fontSize: sizes.text.body,
+      fontWeight: '700',
+    },
+    streakAction: {
+      fontSize: sizes.text.sm,
+      fontWeight: '600',
+    },
   })

@@ -63,7 +63,7 @@ export default function ExplicitAdviceControl({
           type="button"
           onClick={() => void ask()}
           disabled={!message.trim() || loading}
-          className="rounded-full bg-accent-1 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-full bg-accent-1 px-4 py-2 text-sm font-semibold text-[color:var(--accent-foreground)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? 'Thinking…' : mode === 'intimacy' ? 'Ask intimacy guide' : 'Ask mediator'}
         </button>

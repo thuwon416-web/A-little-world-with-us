@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type ImportedMessage = {
   id: string
@@ -13,6 +14,9 @@ type ImportedMessage = {
 const PAGE_SIZE = 5
 
 export default function ImportedTelegramMessages({ coupleId }: { coupleId: string }) {
+  const { language } = useLanguage()
+  const isMm = language === 'my'
+
   const [messages, setMessages] = useState<ImportedMessage[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
@@ -36,25 +40,91 @@ export default function ImportedTelegramMessages({ coupleId }: { coupleId: strin
       const visible = page.slice(0, PAGE_SIZE)
       setMessages((current) => offset ? [...current, ...visible] : visible)
     } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'မှတ်တမ်းများကို ဖတ်မရပါ။')
+      setError(
+        error_ instanceof Error
+          ? error_.message
+          : isMm
+            ? 'မှတ်တမ်းများကို ဖတ်မရပါ။'
+            : 'Unable to load imported messages.'
+      )
     } finally {
       setLoading(false)
       setLoadingMore(false)
     }
-  }, [coupleId])
+  }, [coupleId, isMm])
 
   useEffect(() => { void load() }, [load])
 
-  if (loading) return <div className="h-48 animate-pulse rounded-panel bg-card" aria-label="မှတ်တမ်းများ ဖွင့်နေသည်" />
-  if (error) return <div role="alert" className="rounded-panel border border-error/30 p-5 text-error">{error}<button type="button" onClick={() => void load()} className="ml-3 underline">ပြန်စမ်းရန်</button></div>
-  if (!messages.length) return <div className="rounded-panel border border-dashed border-accent-1/25 p-8 text-center text-text-2">တင်သွင်းထားတဲ့ Telegram စာသားမှတ်တမ်း မရှိသေးပါ။</div>
+  if (loading) {
+    return (
+      <div
+        className="h-48 animate-pulse rounded-panel bg-card"
+        aria-label={isMm ? 'မှတ်တမ်းများ ဖွင့်နေသည်' : 'Loading messages'}
+      />
+    )
+  }
+  if (error) {
+    return (
+      <div role="alert" className="rounded-panel border border-error/30 p-5 text-error">
+        {error}
+        <button
+          type="button"
+          onClick={() => void load()}
+          className="ml-3 underline hover:opacity-80"
+        >
+          {isMm ? 'ပြန်စမ်းရန်' : 'Try again'}
+        </button>
+      </div>
+    )
+  }
+  if (!messages.length) {
+    return (
+      <div className="rounded-panel border border-dashed border-accent-1/25 p-8 text-center text-text-2">
+        {isMm
+          ? 'တင်သွင်းထားတဲ့ Telegram စာသားမှတ်တမ်း မရှိသေးပါ။'
+          : 'No imported Telegram chat messages yet.'}
+      </div>
+    )
+  }
 
-  return <div className="space-y-3">
-    <p className="text-sm text-text-2">နောက်ဆုံးမှတ်တမ်း {messages.length} ခုကို ပြထားသည်။</p>
-    <ol className="space-y-3">{messages.map((message) => <li key={message.id} className="rounded-btn border border-accent-1/15 bg-card p-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-2"><strong className="text-sm text-text-1">{message.sender_name}</strong><time className="text-xs text-text-2" dateTime={message.message_date}>{new Date(message.message_date).toLocaleString()}</time></div>
-      <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-text-1">{message.message_text}</p>
-    </li>)}</ol>
-    {hasMore ? <button type="button" disabled={loadingMore} onClick={() => void load(messages.length)} className="rounded-xl border border-accent-1/25 px-4 py-2 text-sm text-text-1 disabled:opacity-60">{loadingMore ? 'Loading…' : 'View all / Load more'}</button> : null}
-  </div>
+  return (
+    <div className="space-y-3">
+      <p className="text-sm text-text-2">
+        {isMm
+          ? `နောက်ဆုံးမှတ်တမ်း ${messages.length} ခုကို ပြထားသည်။`
+          : `Showing latest ${messages.length} messages.`}
+      </p>
+      <ol className="space-y-3">
+        {messages.map((message) => (
+          <li key={message.id} className="rounded-card border border-accent-1/15 bg-card p-4 shadow-sm">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <strong className="text-sm text-text-1">{message.sender_name}</strong>
+              <time className="text-xs text-text-2" dateTime={message.message_date}>
+                {new Date(message.message_date).toLocaleString()}
+              </time>
+            </div>
+            <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-text-1">
+              {message.message_text}
+            </p>
+          </li>
+        ))}
+      </ol>
+      {hasMore ? (
+        <button
+          type="button"
+          disabled={loadingMore}
+          onClick={() => void load(messages.length)}
+          className="rounded-pill border border-accent-1/25 px-4 py-2 text-sm text-text-1 transition hover:bg-card-hover active:scale-[0.98] disabled:opacity-60"
+        >
+          {loadingMore
+            ? isMm
+              ? 'ဖတ်နေသည်…'
+              : 'Loading…'
+            : isMm
+              ? 'နောက်ထပ်ဖတ်ရန်'
+              : 'Load more'}
+        </button>
+      ) : null}
+    </div>
+  )
 }

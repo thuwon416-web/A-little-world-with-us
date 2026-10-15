@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Moon, Heart } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface MoonPhaseData {
   phase: string
@@ -97,15 +98,20 @@ function getCurrentMoonPhase(): MoonPhaseData {
 }
 
 export default function MoonPhase() {
+  const { language } = useLanguage()
   const [currentPhase, setCurrentPhase] = useState<MoonPhaseData>(getCurrentMoonPhase())
-  const [showMyanmar, setShowMyanmar] = useState(false)
+  const [showMyanmar, setShowMyanmar] = useState(language === 'my')
+
+  useEffect(() => {
+    setShowMyanmar(language === 'my')
+  }, [language])
 
   useEffect(() => {
     setCurrentPhase(getCurrentMoonPhase())
   }, [])
 
   return (
-    <div className="rounded-btn border border-accent-1/20 bg-card p-6">
+    <div className="rounded-card border border-accent-1/20 bg-card p-6 shadow-card">
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="rounded-xl bg-accent-1/15 p-2 text-accent-1">
@@ -113,13 +119,15 @@ export default function MoonPhase() {
           </div>
           <div>
             <p className="text-xs uppercase tracking-[0.2em] text-text-2">Moon Phase</p>
-            <p className="mt-1 text-sm font-medium text-text-1">လညွှန်း</p>
+            <p className="mt-1 text-sm font-medium text-text-1">
+              {showMyanmar ? 'လညွှန်း' : 'Lunar Calendar'}
+            </p>
           </div>
         </div>
         <button
           type="button"
           onClick={() => setShowMyanmar(!showMyanmar)}
-          className="rounded-full border border-accent-1/20 px-3 py-1 text-xs text-accent-1 transition hover:bg-accent-1/10"
+          className="rounded-pill border border-accent-1/20 px-3 py-1 text-xs text-accent-1 transition hover:bg-accent-1/10"
         >
           {showMyanmar ? 'English' : 'မြန်မာ'}
         </button>
