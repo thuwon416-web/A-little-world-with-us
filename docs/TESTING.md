@@ -9,7 +9,7 @@ Test layers: Web lint/TypeScript/unit/accessibility/build; Mobile TypeScript/lin
 Automated PASS is evidence for the tested revision only. Full authenticated cross-device flows, Drive E2E, native permissions, offline/media recovery, visual UI regression, and real-user period/fertility scenarios remain release-boundary checks until exercised.
 
 ## Current close-out evidence
-- Local Web checks on the current working tree: `npm --prefix apps/web test` PASS (26 files / 102 tests); `npm --prefix apps/web run typecheck` PASS; `npm --prefix apps/web run lint` PASS with 0 errors and 33 warnings.
+- Local Web checks on the current working tree: `npm --prefix apps/web-platform/frontend test` PASS (26 files / 102 tests); `npm --prefix apps/web-platform/frontend run typecheck` PASS; `npm --prefix apps/web-platform/frontend run lint` PASS with 0 errors and 33 warnings.
 - Local Mobile checks: `npm --prefix apps/mobile run typecheck` PASS; `npm --prefix apps/mobile test -- --runInBand` PASS (5 suites / 17 tests).
 - 2026-10-13 mobile close-out pass: `npm run mobile:typecheck` PASS and `npm run mobile:test -- --runInBand` PASS (5 suites / 17 tests); coverage report shows 88.14% lines for the Jest-included files. The unused `fetchAllBatched` helper was removed from `apps/mobile/services/relationship-memories.ts` in commit `ac182cbcdbf62ddc6c65b537778c4a90e2a55dc2`.
 - The above mobile checks were run against the working tree containing the cleanup before its GitHub API commit. They do not prove that GitHub Actions passed on the new SHA, and no production authenticated Drive E2E is implied.

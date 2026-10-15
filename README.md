@@ -4,7 +4,7 @@ A private couples application for shared memories/media, chat, Care, planning, w
 
 ## Architecture at a glance
 
-- Web: Next.js in apps/web, deployed on Vercel.
+- Web: Next.js in apps/web-platform/frontend, deployed on Vercel.
 - Mobile: Expo/React Native in apps/mobile, released through EAS.
 - Backend/data: Supabase Auth/Postgres/RLS/realtime/offline infrastructure and metadata source of truth.
 - Media: provider-specific paths documented in docs/STORAGE.md.
@@ -12,7 +12,7 @@ A private couples application for shared memories/media, chat, Care, planning, w
 
 ## Repository structure
 
-apps/web — Web application and Route Handlers.
+apps/web-platform/frontend — Web application and Route Handlers.
 apps/mobile — Expo / React Native application.
 packages/shared — stable cross-app contracts.
 apps/web-platform/backend/supabase — database/bootstrap and Edge Functions.
@@ -26,7 +26,7 @@ The project is in final production-audit/release-verification work. Web/Mobile i
 
 ## Quick start
 
-Use the package manifests and environment examples under apps/web and apps/mobile. Root shortcuts include web and mobile install/dev/check commands. Never commit production credentials.
+Use the package manifests and environment examples under apps/web-platform/frontend and apps/mobile. Root shortcuts include web and mobile install/dev/check commands. Never commit production credentials.
 
 ## Documentation map
 

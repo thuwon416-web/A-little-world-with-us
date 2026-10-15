@@ -4,7 +4,7 @@ Owner: Engineering
 Update when: setup, local development, or scripts change
 Last Updated: 2026-10-08
 
-apps/web is the Web application; apps/mobile is the Expo application; apps/web-platform/backend/supabase contains database/bootstrap material; scripts contains utilities.
+apps/web-platform/frontend is the Web application; apps/mobile is the Expo application; apps/web-platform/backend/supabase contains database/bootstrap material; scripts contains utilities.
 
 Use each package manifest and environment template for local setup. Never put production credentials in source.
 
