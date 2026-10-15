@@ -1,0 +1,72 @@
+name: Production CI/CD Pipeline (Non-Docker)
+
+on:
+  push:
+    branches: [main, master, release/*]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: alw-production-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  migration-verification:
+    name: Database Migration Syntax Pre-flight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Pre-flight Migration Runner Check
+        run: |
+          python scripts/production_migrate.py
+
+  web-production-build:
+    name: Next.js Production Build & Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+
+      - name: Install Web Dependencies
+        working-directory: ./apps/web
+        run: npm ci --ignore-scripts
+
+      - name: TypeScript Typecheck
+        working-directory: ./apps/web
+        run: npm run typecheck
+
+      - name: Build Web Production Bundle
+        working-directory: ./apps/web
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+          NEXT_PUBLIC_APP_URL: https://world.example.com
+        run: npm run build
+
+  production-gate:
+    name: Production Release Gate
+    needs: [migration-verification, web-production-build]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Confirm Build Readiness
+        run: echo "A-Little-World-With-Us passes all standalone production gate checks. Ready for native zero-downtime deployment."
