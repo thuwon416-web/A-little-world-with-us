@@ -15,7 +15,6 @@ on:
       - 'CHANGELOG.md'
   workflow_dispatch:
 
-# Keep only the newest run for the same branch/PR to avoid stale queued work.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -27,25 +26,20 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      # E2E must use a dedicated non-production Supabase project.
       NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
       NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.E2E_SUPABASE_ANON_KEY }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24.x
           cache: npm
           cache-dependency-path: apps/web-platform/frontend/package-lock.json
-
       - name: Install web dependencies
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm ci --ignore-scripts
-
       - name: Check E2E environment
         id: e2e_env
         shell: bash
@@ -55,19 +49,15 @@ jobs:
           else
             echo "available=false" >> "$GITHUB_OUTPUT"
           fi
-
-
       - name: Install Playwright browsers
         if: steps.e2e_env.outputs.available == 'true'
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: ./node_modules/.bin/playwright install --with-deps
-
       - name: Run Playwright tests
         if: steps.e2e_env.outputs.available == 'true'
         id: playwright
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm run test:e2e
-
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v4
@@ -76,7 +66,6 @@ jobs:
           path: apps/web-platform/frontend/playwright-report/
           retention-days: 7
           if-no-files-found: ignore
-
       - name: Report E2E outcome
         if: always()
         env:
@@ -88,12 +77,10 @@ jobs:
             echo "::warning::E2E NOT RUN / ENVIRONMENT UNAVAILABLE: Supabase E2E secrets are not configured."
             exit 0
           fi
-
           if [ "$PLAYWRIGHT_OUTCOME" = "success" ]; then
             echo "E2E PASSED" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-
           echo "E2E FAILED (Playwright outcome: $PLAYWRIGHT_OUTCOME)" >> "$GITHUB_STEP_SUMMARY"
           echo "::error::E2E FAILED (Playwright outcome: $PLAYWRIGHT_OUTCOME)."
           exit 1
