@@ -16,46 +16,37 @@ jobs:
     name: Database Migration Syntax Pre-flight
     runs-on: ubuntu-latest
     timeout-minutes: 10
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-
       - name: Pre-flight Migration Runner Check
-        run: |
-          python scripts/production_migrate.py
+        run: python scripts/production_migrate.py
 
   web-production-build:
     name: Next.js Production Build & Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
+    timeout-minutes: 20
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24.x
           cache: npm
           cache-dependency-path: apps/web-platform/frontend/package-lock.json
-
       - name: Install Web Dependencies
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm ci --ignore-scripts
-
       - name: TypeScript Typecheck
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm run typecheck
-
       - name: Build Web Production Bundle
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         env:
           NODE_ENV: production
           NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
@@ -69,4 +60,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Confirm Build Readiness
-        run: echo "A-Little-World-With-Us passes all standalone production gate checks. Ready for native zero-downtime deployment."
+        run: echo "A-Little-World-With-Us passes standalone production gate checks. Ready for native zero-downtime deployment."
