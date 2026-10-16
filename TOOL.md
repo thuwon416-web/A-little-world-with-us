@@ -34,3 +34,9 @@ DONE means implementation exists and relevant automated checks pass. VERIFIED re
 
 ## Evidence
 Separate repository head from live head and configured values from verified behavior. If evidence is unavailable, use VERIFY. Do not convert a source-code inspection into live verification.
+
+## Local Development Ports & Verification
+- **Web Portal (Next.js):** `cd apps/web-platform/frontend && npm install && npm run dev -- -p 3005`
+- **Mobile Client (Expo):** `cd apps/mobile && npm install && npx expo start --port 8081`
+- **Frontend Build Check:** `cd apps/web-platform/frontend && npm run build` (Passing)
+- **Supabase Functions:** `npx supabase functions serve`

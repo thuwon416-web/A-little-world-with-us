@@ -2,7 +2,17 @@
 
 Owner: Project maintainers
 Update when: release gates or verification evidence change
-Last Updated: 2026-10-11
+Last Updated: 2026-10-16 (Latest Operational Verification)
+
+## Local Standalone Operational Verification — 2026-10-16
+
+- **Standalone Runtime Decoupling:** Port 3005 assigned to Next.js Web Portal; Port 8081 assigned to React Native / Expo Mobile App.
+- **Backend & Edge Functions Verified:** Database bootstrap SQL migrations (1 through 56) verified. Supabase Edge Functions (`check-battery`, `check-geofence`, `checkin-notify`, `location-alerts`, `sos-resolved`, `reverse-geocode`) contracts verified against client call signatures.
+- **Web & Mobile Parity:** Web Portal (105 pages, 74 components) and Mobile App (218 files including WebRTC `call.tsx`, push notifications `notifications.ts`, and Google Drive resilient auto-refresh) structurally verified.
+- **Documentation Consolidation:** Archived duplicate files in `docs/` (`COUPLE-UNLINK.md`, `WELLNESS-DESIGN.md`, `KOREAN_CURRICULUM.md`, `A11Y-TESTING.md`) into `archive/duplicate_drafts/`. Rewrote `ROADMAP.md` completely in English incorporating all 185 legacy checklist items into 5 prioritized categories.
+- **Release Status:** Local standalone platform 100% operational. Staging WebRTC STUN/TURN peer connection and EAS mobile device builds remain pending.
+
+---
 
 ## 1. Current Release
 Final production close-out audit.

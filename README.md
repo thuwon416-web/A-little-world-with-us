@@ -24,9 +24,15 @@ scripts — repository tooling.
 
 The project is in final production-audit/release-verification work. Web/Mobile implementation and prior automated checks have substantial coverage, while Google Drive end-to-end, native/device, cross-device parity, and some external-console checks remain pending. See CURRENT_STATE.md for evidence-based status and ROADMAP.md for the master backlog.
 
-## Quick start
+## Quick start & Development Ports
 
-Use the package manifests and environment examples under apps/web-platform/frontend and apps/mobile. Root shortcuts include web and mobile install/dev/check commands. Never commit production credentials.
+| Component | Target Port / Shell | Startup Command |
+|---|---|---|
+| **Web Portal** | `http://localhost:3005` | `cd apps/web-platform/frontend && npm install && npm run dev -- -p 3005` |
+| **Mobile App** | Expo Port `8081` | `cd apps/mobile && npm install && npx expo start --port 8081` |
+| **Supabase Functions**| Local / Cloud Functions | `npx supabase functions serve` |
+
+Never commit production credentials or API keys.
 
 ## Documentation map
 
