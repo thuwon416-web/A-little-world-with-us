@@ -35,22 +35,22 @@ jobs:
           cache: npm
           cache-dependency-path: apps/web-platform/frontend/package-lock.json
       - name: Install web dependencies
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm ci --ignore-scripts
       - name: Run web lint
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm run lint
       - name: Run web TypeScript check
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm run typecheck
       - name: Run web tests with coverage (Vitest)
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm run test:coverage
       - name: Run web A11Y tests
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: ./node_modules/.bin/vitest run src/tests/a11y.test.tsx
       - name: Build web production bundle
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         env:
           NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
