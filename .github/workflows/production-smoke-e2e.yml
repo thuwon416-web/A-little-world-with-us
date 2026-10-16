@@ -34,7 +34,7 @@ jobs:
           cache-dependency-path: apps/web-platform/frontend/package-lock.json
 
       - name: Install web dependencies
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm ci --ignore-scripts
 
       - name: Wait for production
@@ -50,11 +50,11 @@ jobs:
           exit 1
 
       - name: Install Playwright browsers
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: ./node_modules/.bin/playwright install --with-deps chromium
 
       - name: Run production smoke E2E
-        working-directory: ./apps/web
+        working-directory: ./apps/web-platform/frontend
         run: npm run test:e2e
 
       - name: Upload Playwright report
