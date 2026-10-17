@@ -160,3 +160,9 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 - Vercel production deployment `dpl_J41emJ7BN6u2uH5NqCSAQn3GvhWS` is READY for that SHA.
 - Owner configuration remains required: add a dedicated `TELEGRAM_ACTION_SECRET` to Vercel Production and the matching Cloudflare Gateway secret. This was intentionally not changed by automation.
 - This is not release close-out evidence for Drive OAuth, Drive memory E2E, native builds, or device smoke.
+
+## 2026-10-17 verification follow-up
+- Current production SHA `7c3d6c8be0747af0151822333fce66ae0fd23237` is READY and all 9 exact-SHA checks passed.
+- Telegram gateway is not runtime-configured in the linked production project according to both environment inventory and live endpoint response (`GET /api/telegram/daily-question` → 503). Owner reports the variable was added; verify project/target/deployment propagation before treating this gate as complete. Do not rotate or overwrite any unrelated secret.
+- Google Drive production variables exist by name, but callback value and authenticated E2E still require confirmation. Runtime aggregation continues to show Drive encryption/decryption failures on the older deployment only.
+- Supabase read-only advisor audit found 12 SECURITY DEFINER warnings, leaked-password protection disabled, and 120 unused-index notices; no automatic remediation applied.

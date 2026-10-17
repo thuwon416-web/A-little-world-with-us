@@ -156,3 +156,8 @@ Only after release stability: curriculum grammar/vocabulary sequencing, Korea Li
 - [ ] Confirm a request without/with an invalid bearer token returns 401 and does not send a Telegram message.
 - [ ] Confirm the authorized Cloudflare Gateway request successfully dispatches a supported action.
 - [ ] Until the secret is configured, a 503 response is expected and the Telegram action integration remains gated.
+
+- [ ] Confirm `TELEGRAM_ACTION_SECRET` is present on the linked Vercel project's **Production** environment and available to the latest production deployment. Live `GET /api/telegram/daily-question` currently returns 503 `Action gateway is not configured.`; do not mark complete until this response is resolved.
+- [ ] Verify both `/api/telegram/action` (POST) and `/api/telegram/daily-question` (GET/POST) reject missing/invalid bearer credentials and only allow the configured Cloudflare Gateway secret. A GET 405 on the POST-only action route is not sufficient verification.
+- [ ] Confirm `GOOGLE_DRIVE_REDIRECT_URI` exact value against the production callback URL and Google Cloud OAuth client, then perform authenticated Drive connect/consent/callback and memory upload/read/re-render.
+- [ ] Review Supabase's 12 SECURITY DEFINER warnings and leaked-password protection setting; review 120 unused-index notices with query/index usage evidence before any database changes.
