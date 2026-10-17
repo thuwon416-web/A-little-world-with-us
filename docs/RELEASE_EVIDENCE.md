@@ -240,3 +240,14 @@ After release stability:
 - Device-only checks remain pending until observed: login/session, chat, memory and Drive media readback, push notification delivery, offline/reconnect, camera/microphone/location permissions, and two-device WebRTC/TURN.
 - Remaining code/operations backlog: provider-neutral media upload/read/delete round-trip and large-file reliability; review (not blindly remove) Supabase SECURITY DEFINER warnings and unused-index notices; enable leaked-password protection if supported; add production monitoring for Telegram, Drive, media, and mobile failures.
 - Evidence note: Telegram/Drive completion is based on the owner's successful tests, not an independently replayed authenticated request in this environment.
+
+
+## 2026-10-17 execution evidence — EAS build blocker and offline-sync security remediation
+
+- Telegram and Google Drive are **owner-tested complete** per the owner's successful production tests.
+- Added `.github/workflows/mobile-eas-build.yml` with separate Android and iOS preview build jobs. [First workflow run](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/39044384282) failed at the explicit secret check because GitHub Actions secret `EXPO_TOKEN` is missing. The EAS build commands were not run. Add the Expo token through repository Settings → Secrets and variables → Actions, then rerun the workflow; do not commit the token.
+- Applied Supabase migration `harden_offline_operation_owner_scope_20261017` (version `20261017152114`) to harden `offline.apply_op`: cached operation results are bound to their owner, operation-ID reuse with different metadata is rejected, and a CREATE request cannot return a message row owned by another sender/couple. Source: [commit `b8b8a08`](https://github.com/thuwon416-web/A-little-world-with-us/commit/b8b8a08e33966842b723e9d4ee20eb7d283a6246), file `apps/web-platform/backend/supabase/bootstrap/57_harden_offline_operation_owner_scope.sql`.
+- Live regression check passed for cross-user operation-ID replay and same-user operation-ID mismatch; the follow-up verification confirmed all three guards are present and no test fixture rows remain.
+- Latest Supabase advisor snapshot: 12 authenticated-callable SECURITY DEFINER warnings, leaked-password protection disabled, 122 unused-index notices. Review functions individually; do not blanket-revoke or drop indexes.
+- Historical Drive runtime decryption errors were last observed on old deployment `dpl_3EKyzLHevhxdKS9ZfhW2btgHrFqc` on 2026-10-16. The owner reports a successful post-fix test, so this is historical context rather than evidence of a current outage.
+- Remaining: current-main Android/iOS EAS builds and physical-device smoke, media provider round-trip/large-file reliability, a live WebRTC/TURN call, leaked-password protection, and production monitoring/alerts.
