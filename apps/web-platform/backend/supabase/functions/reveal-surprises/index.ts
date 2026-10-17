@@ -3,13 +3,14 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 type Device = { expo_push_token: string; preferences: { surprises?: boolean } | null }
 const url = Deno.env.get('SUPABASE_URL')
 const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-const jobSecret = Deno.env.get('SURPRISE_REVEAL_SECRET')
 if (!url || !serviceRole) throw new Error('Missing Supabase Edge Function environment.')
 const supabase = createClient(url, serviceRole)
 
 Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
-  if (!jobSecret || request.headers.get('x-job-secret') !== jobSecret) return new Response('Unauthorized', { status: 401 })
+  const candidate = request.headers.get('x-job-secret') ?? ''
+  const { data: authorized, error: authError } = await supabase.rpc('verify_surprise_reveal_job_secret', { p_candidate: candidate })
+  if (authError || authorized !== true) return new Response('Unauthorized', { status: 401 })
   const { data: due, error } = await supabase.from('time_capsules').select('id,recipient_id,title').eq('status', 'scheduled').lte('unlock_at', new Date().toISOString())
   if (error) return Response.json({ error: 'Unable to load scheduled surprises.' }, { status: 500 })
   let revealed = 0
