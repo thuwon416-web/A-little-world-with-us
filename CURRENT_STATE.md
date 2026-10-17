@@ -271,3 +271,12 @@ Owner-side manual verification remains last.
 - `Us` is the `location_label` for 50 Drive-backed rows. This confirms indexed metadata, not successful file retrieval/rendering from Google's API.
 - The Drive image route returns 401 for unauthenticated access, checks a user's couple membership through metadata, and returns 404/409 for inaccessible files or no connected Drive account. Authenticated browser E2E is still needed to identify which branch the affected photos hit.
 - Current preview deployment for the diagnostic branch is READY; GitHub Test/E2E/CodeQL runs were still in progress at last check. Snyk, Secret scan, and Vercel status were successful. No production write or merge was performed.
+
+## 2026-10-17 latest-main CI and deployment checkpoint
+
+- Latest main commit: `8d391176a4c0a374ccf24fbf2f85d856abc6c147` (`fix(mobile): preserve async chat composer callback types`).
+- Exact-SHA GitHub checks: all 9 check runs completed successfully, including Web, Mobile, TypeScript/CodeQL, Next.js Production Build & Tests, Smoke, Tests, Gitleaks, Database Migration Syntax Pre-flight, and Production Release Gate. [Checks](https://github.com/thuwon416-web/A-little-world-with-us/commit/8d391176a4c0a374ccf24fbf2f85d856abc6c147/checks).
+- Vercel production deployment `dpl_4wWNX8FnBssKKdcVEVqxHKurQonk` is `READY`, points to the exact same SHA, and has the canonical `a-little-world-with-us.vercel.app` alias.
+- WebRTC ICE configuration tests were added for web and mobile; Mobile ChatComposer async callback return types were corrected. Automated checks passing does not prove authenticated Google Drive, device, or user-flow E2E.
+- Vercel runtime error aggregation still shows 6 Drive file lookup errors and 1 Drive memory-sync error with `Unsupported state or unable to authenticate data`, last observed on 2026-10-16 and associated with older deployment `dpl_3EKyzLHevhxdKS9ZfhW2btgHrFqc`. Current deployment has not yet been proven to resolve this because authenticated Drive use after deployment is not evidenced. Do not rotate `GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY` blindly; first establish whether existing ciphertext and the current key match, then use the OAuth reconnect path if required. Existing Drive originals must not be deleted or rewritten as part of recovery.
+- No Vercel environment variables were changed. Native Android/iOS current-main EAS builds, authenticated Drive E2E, and device verification remain open; release status stays `PENDING RELEASE VERIFICATION`.
