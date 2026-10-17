@@ -205,3 +205,13 @@ After release stability:
 - Google Drive OAuth/state/encryption variable names are present in Production, but the actual redirect URI value was not exposed by the metadata response. Confirm it matches `https://a-little-world-with-us.vercel.app/api/drive/callback` in the Vercel dashboard and Google Cloud OAuth client.
 - The last 7-day runtime error clusters remain 24 Drive file lookup errors and 4 Drive memory-sync errors, last seen 2026-10-16 on old deployment `dpl_3EKyzLHevhxdKS9ZfhW2btgHrFqc`. Authenticated Drive end-to-end remains unverified.
 - Supabase advisors: 12 SECURITY DEFINER warnings, leaked-password protection disabled, and 120 unused-index notices. No database changes were made; review before altering grants or indexes.
+
+
+## 2026-10-17 automated production audit addendum
+
+- Vercel: deployment `dpl_HwcYhvV3eszjsuk4aiesQiiGQ1a4` READY for commit `e73d0ecf42bff872e44c3bc93d54046bb1947957`; 10/10 GitHub checks passed. `/api/ai/usage` returned HTTP 200 with the requested AI providers configured.
+- Telegram gateway: Production variable exists and was present before redeploy, but the authorized live request could not be executed with the available fetch interface; HTTP 200 and Telegram delivery remain unchecked.
+- Supabase: live migration history now contains 42 entries after additive migrations `chat_pinned_messages_20261017` and `chat_pinned_messages_fk_indexes_20261017`. Verified pinned-message table, RLS, Realtime, and supporting indexes. No existing user/media/Drive rows were modified or deleted.
+- RLS is enabled on the relevant existing message, relationship-memory, wellness, safety, vault, and Drive connection tables. Supabase advisors still report 12 callable SECURITY DEFINER warnings and disabled leaked-password protection; 123 unused-index INFO notices remain. Do not drop indexes or revoke function grants without reviewing actual usage/authorization intent.
+- Storage, Google Drive, cron, TURN, VAPID, pooler and native/device checks are not all runtime-verified. In particular, authenticated Drive OAuth/decryption, storage-provider E2E, a real TURN peer connection, and current-main EAS/device smoke remain release gates.
+- **Release decision: PENDING RELEASE VERIFICATION — not signed off.** See the 2026-10-17 checkpoint in `CURRENT_STATE.md` for details and limitations.
