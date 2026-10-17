@@ -38,11 +38,11 @@ export interface ChatComposerProps {
   draft: string
   onDraftChange: (text: string) => void
   onSend: () => void
-  onSendLocation: () => void
-  onSendMedia: (attachment: ChatAttachment, type: 'photo' | 'voice' | 'file' | 'audio', duration?: number) => void
-  onSendSticker: (emoji: string) => void
-  onSendGif: (url: string) => void
-  onSendReply: (text: string, replyTo: string) => void
+  onSendLocation: () => Promise<void>
+  onSendMedia: (attachment: ChatAttachment, type: 'photo' | 'voice' | 'file' | 'audio', duration?: number) => Promise<void>
+  onSendSticker: (emoji: string) => Promise<void>
+  onSendGif: (url: string) => Promise<void>
+  onSendReply: (text: string, replyTo: string) => Promise<void>
   replyMessage: NativeChatMessage | null
   onCloseReply: () => void
   coupleId: string | null
