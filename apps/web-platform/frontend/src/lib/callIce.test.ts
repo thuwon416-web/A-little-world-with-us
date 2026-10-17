@@ -1,11 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-const turnEnvKeys = [
-  'NEXT_PUBLIC_TURN_URLS',
-  'NEXT_PUBLIC_TURN_USERNAME',
-  'NEXT_PUBLIC_TURN_CREDENTIAL',
-] as const
-
 afterEach(() => {
   vi.unstubAllEnvs()
   vi.resetModules()
