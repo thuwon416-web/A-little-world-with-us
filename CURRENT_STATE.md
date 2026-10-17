@@ -325,3 +325,15 @@ Owner-side manual verification remains last.
 - The web call hook consumes `getCallIceConfiguration()`; Production has `NEXT_PUBLIC_TURN_URLS`, username, and credential variables. No live TURN relay/peer-call test or current-main native EAS/device smoke has been completed.
 - The inspected Next.js routes use Supabase JS/PostgREST rather than a direct `DATABASE_URL` PostgreSQL connection, so the 6543/`pgbouncer=true` requirement is not verified as applicable to those routes. Vercel metadata flags `DATABASE_URL` and `STAGING_DATABASE_URL` with `readable-secret`; review their visibility/permissions without exposing their values.
 - **Release status remains PENDING RELEASE VERIFICATION.** Do not issue official Production Sign-Off until the authenticated Telegram request, Drive OAuth/token decryption, provider-backed media tests, live WebRTC relay, and remaining owner/device checks have evidence.
+
+
+## 2026-10-17 owner decision — conditional production sign-off
+
+- **Status: PRODUCTION READY — CONDITIONAL (owner-approved launch with listed post-launch work).** This supersedes the prior pending status for the limited launch scope, not the individual E2E gates.
+- Current code SHA `e4594daa4478b3cba37410bd725c608514b3a530`: all 9 exact-SHA GitHub checks completed successfully, including Production Release Gate. [Checks](https://github.com/thuwon416-web/A-little-world-with-us/commit/e4594daa4478b3cba37410bd725c608514b3a530/checks).
+- Vercel deployment `dpl_CBu6Rb5gqXoJ6nc5ztaTx7NYLLBP` is `READY` with canonical alias `https://a-little-world-with-us.vercel.app`.
+- Telegram: owner reports unauthenticated live request now returns 401 rather than the former 503. This supports that the gateway is no longer in the known “secret not configured” failure mode, but a valid authorized 200/delivery has not been independently verified here.
+- Google Drive: client-side Production re-authorization is still to be performed at Settings → Google Drive → Connect. After OAuth consent, verify Connected status and read back an existing Drive-backed Memory. Preserve existing connection rows and media; do not blindly rotate `GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY`.
+- Owner-approved post-launch backlog: current-main Android/iOS EAS builds and physical-device smoke; chunked/multipart large-media upload; live TURN peer-call test. These remain unverified/deferred. Provider-backed storage round-trip and universal AES-GCM-before-export are not certified.
+- Existing Supabase advisor items remain: 12 callable SECURITY DEFINER findings, leaked-password protection disabled, and 123 unused-index INFO notices. Review with workload/authorization context rather than blanket revocation or index deletion.
+- Interpretation: production launch is accepted with explicit owner risk acceptance; this is not a claim that Drive re-auth, storage E2E, TURN, or native-device verification has already passed. Detailed evidence and caveats: [Release Evidence](docs/RELEASE_EVIDENCE.md).
