@@ -261,3 +261,12 @@ After release stability:
 - Security advisor still reports 12 authenticated-callable SECURITY DEFINER functions and disabled leaked-password protection; performance advisor reports 120 unused-index notices. Function bodies were reviewed; do not blanket-revoke or drop indexes. Continue per-function authorization review and enable leaked-password protection through Auth settings.
 - Historical Drive decryption errors (24 file lookups, 4 memory syncs) last occurred on old deployment `dpl_3EKyzLHevhxdKS9ZfhW2btgHrFqc` on 2026-10-16. Owner reports post-fix Drive tests passed; monitor for recurrence.
 - Still open: verify the three repaired cron jobs' next scheduled HTTP responses; full media provider upload/read/delete and large-file test; live WebRTC/TURN call; Android/iOS EAS builds and device smoke (requires GitHub Actions secret `EXPO_TOKEN`); leaked-password protection setting.
+
+
+## 2026-10-17 final verification of scheduled backend jobs
+
+- After the missing table permissions were identified, migration `grant_scheduled_job_table_privileges_20261017` granted only the minimum service-role operations needed by scheduled handlers: SELECT/UPDATE `safety_checkins`, SELECT `emergency_contacts`, SELECT/INSERT `battery_alert_log`, and SELECT/INSERT/UPDATE `geofence_events`. No DELETE privileges were added.
+- The 16:35 UTC scheduled cycle returned HTTP 200 for `check-geofence` (`checked=1, places=0, inserted=0, notified=0`), `check-missed-checkin` (`processed=0, notified=0, contactsConsidered=0`), and `reveal-surprises` (`revealed=0`). `check-battery` returned HTTP 200 at 16:30 UTC (`checked=0, sent=0`).
+- The cron routing/authentication and service-role permission issues found during this audit are now verified fixed for observed scheduled cycles. Since no push devices, saved places, low-battery locations, expired check-ins, or due surprise capsules were present, no user notifications were sent. Actual push delivery remains untested.
+- GitHub CI on commit `77ce9e554ead14a8dec6c978f37216af63e8ba0e`: production pipeline, smoke E2E, E2E tests, unit tests, CodeQL, and secret scan all passed.
+- All six Storage buckets are private. Bucket-level file-size and MIME-type restrictions are unset; review application-level validation and decide whether provider limits should be configured.
