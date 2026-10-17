@@ -191,3 +191,10 @@ After release stability:
 - [x] Web Memories now stops and reports an uncertain upload response instead of blindly trying another provider after a network exception. This avoids possible duplicate uploads if the server completed the first request but the response was lost.
 - [ ] Run GitHub Actions for the latest source/docs commits and inspect the results; do not treat the prior green workflows as evidence for later commits.
 - [ ] After Vercel is explicitly unpaused and a corrected deployment is available, verify authenticated Memory Map, journal create/edit/reflection, Drive upload/readback and partner fallback in production.
+
+
+## 2026-10-17 Telegram action gateway security evidence
+- Fix commit: `0ba959a0bc803d9b87c5d8c58c4c008ebb7c2fe3`.
+- Verification: all 9 exact-SHA GitHub checks passed, including Web, Mobile, Tests, Next.js Production Build & Tests, Smoke, Gitleaks, Database Migration Syntax Pre-flight, CodeQL, and Production Release Gate. [Exact-SHA checks](https://github.com/thuwon416-web/A-little-world-with-us/commit/0ba959a0bc803d9b87c5d8c58c4c008ebb7c2fe3/checks).
+- Production deployment: `dpl_J41emJ7BN6u2uH5NqCSAQn3GvhWS`, READY, canonical alias `https://a-little-world-with-us.vercel.app`.
+- Remaining config gate: `TELEGRAM_ACTION_SECRET` is absent from the Vercel environment inventory. Configure a new dedicated secret in Vercel Production and the same secret in the Cloudflare Gateway before expecting the action endpoint to accept calls. No secret values were read or changed.

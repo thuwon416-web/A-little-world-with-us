@@ -290,3 +290,12 @@ Owner-side manual verification remains last.
 - The latest runtime error query still reports 6 Drive file lookup and 1 Drive memory-sync encryption errors, last observed 2026-10-16 on older deployment `dpl_3EKyzLHevhxdKS9ZfhW2btgHrFqc`; no post-deployment authenticated Google Drive E2E has yet established whether the current release resolves them.
 - Do not rotate `GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY` blindly, delete connection rows, or remove Drive originals. Next verification gate is authenticated OAuth consent/reconnect followed by reading an existing Drive-backed Memory and checking that metadata/file render persists.
 - No Vercel environment variables or live database rows were changed. Current-main Android/iOS EAS builds and physical-device smoke remain pending; release remains `PENDING RELEASE VERIFICATION`.
+
+
+## 2026-10-17 Telegram action gateway hardening checkpoint
+- Security audit found that unauthenticated `POST /api/telegram/action` could trigger outbound bot messages. Commit `0ba959a0bc803d9b87c5d8c58c4c008ebb7c2fe3` now requires a dedicated bearer secret checked with constant-time comparison, fails closed with 503 if the secret is not configured, rejects invalid credentials with 401, validates quiz answer values, and avoids returning provider exception details.
+- Regression tests cover missing server secret, invalid bearer credentials, and successful authenticated dispatch.
+- Exact-SHA GitHub checks: all 9 completed successfully (Web, Mobile, Tests, Next.js Production Build & Tests, Smoke, Gitleaks, Database Migration Syntax Pre-flight, CodeQL, and Production Release Gate). [Checks](https://github.com/thuwon416-web/A-little-world-with-us/commit/0ba959a0bc803d9b87c5d8c58c4c008ebb7c2fe3/checks).
+- Vercel production deployment `dpl_J41emJ7BN6u2uH5NqCSAQn3GvhWS` is `READY`, points to the exact SHA, and has the canonical `a-little-world-with-us.vercel.app` alias.
+- The Vercel environment inventory does not yet contain `TELEGRAM_ACTION_SECRET`. No environment variables were changed. The Telegram action route will intentionally return 503 until the owner configures a new dedicated random secret in Vercel Production and the same secret in the Cloudflare Gateway. Do not reuse `TELEGRAM_BOT_TOKEN` or `CRON_SECRET`.
+- Release remains `PENDING RELEASE VERIFICATION`; authenticated Drive E2E, Google Cloud callback verification, current-main EAS/device smoke, and remaining manual release checks are still open.

@@ -152,3 +152,11 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 - [ ] Unify legacy `/gallery` (Supabase Storage `gallery` bucket) with `/memories` only after inventory, duplicate detection, ownership checks, and rollback evidence.
 - [ ] Re-run exact-SHA CI and production build after current documentation/source commits; latest observed production READY deployment at the start of this audit was SHA `49d8c4b65f1aabdcb8ae725d65db32b2f2040ed3`, with no runtime error clusters in the last 24 hours. Docs-only commits may be queued separately and must be checked again.
 - [ ] Refresh Supabase advisor evidence: 12 authenticated-callable SECURITY DEFINER findings; 120 unused-index notices. Review function authorization individually and defer index removal until workload/query-plan review.
+
+
+## 2026-10-17 security audit continuation
+- Telegram action gateway auth hardening is implemented on `main` at `0ba959a0bc803d9b87c5d8c58c4c008ebb7c2fe3`; route tests cover unconfigured secret, rejected credentials, and valid dispatch.
+- All 9 exact-SHA GitHub checks passed: [checks](https://github.com/thuwon416-web/A-little-world-with-us/commit/0ba959a0bc803d9b87c5d8c58c4c008ebb7c2fe3/checks).
+- Vercel production deployment `dpl_J41emJ7BN6u2uH5NqCSAQn3GvhWS` is READY for that SHA.
+- Owner configuration remains required: add a dedicated `TELEGRAM_ACTION_SECRET` to Vercel Production and the matching Cloudflare Gateway secret. This was intentionally not changed by automation.
+- This is not release close-out evidence for Drive OAuth, Drive memory E2E, native builds, or device smoke.

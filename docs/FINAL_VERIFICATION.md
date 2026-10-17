@@ -148,3 +148,11 @@ Only after release stability: curriculum grammar/vocabulary sequencing, Korea Li
 - [ ] Sign in with an accepted couple and verify old Gallery photos render in the embedded section for both partners; confirm no photo count changes.
 - [ ] Finish full provider-grid unification and row/object reconciliation before claiming the migration complete.
 - [ ] Real-account Google Drive OAuth/upload/retrieve/archive E2E remains pending; source/env presence alone is not acceptance evidence.
+
+
+## H. Telegram action gateway
+- [ ] Configure a new, dedicated random `TELEGRAM_ACTION_SECRET` in Vercel Production and the same value in the Central Cloudflare Gateway.
+- [ ] Do not reuse `TELEGRAM_BOT_TOKEN` or `CRON_SECRET`; do not place the secret in client-side code or public documentation.
+- [ ] Confirm a request without/with an invalid bearer token returns 401 and does not send a Telegram message.
+- [ ] Confirm the authorized Cloudflare Gateway request successfully dispatches a supported action.
+- [ ] Until the secret is configured, a 503 response is expected and the Telegram action integration remains gated.
