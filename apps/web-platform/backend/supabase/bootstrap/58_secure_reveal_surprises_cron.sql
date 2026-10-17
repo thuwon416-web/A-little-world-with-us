@@ -1,7 +1,9 @@
+-- 58_secure_reveal_surprises_cron.sql
+-- Keep the scheduled surprise-reveal job authenticated without a hardcoded
+-- credential in cron.job.command. The secret itself is generated in Vault.
+
 begin;
 
--- Create a dedicated random secret for the surprise-reveal scheduled job.
--- Never print or return the generated value from this migration.
 do $$
 begin
   if not exists (select 1 from vault.secrets where name = 'surprise_reveal_secret') then
@@ -14,8 +16,6 @@ begin
 end
 $$;
 
--- The Edge Function calls this RPC with its service-role client. Only
--- service_role can execute it; callers learn only whether a candidate matches.
 create or replace function public.verify_surprise_reveal_job_secret(p_candidate text)
 returns boolean
 language sql
@@ -35,15 +35,9 @@ $function$;
 revoke all on function public.verify_surprise_reveal_job_secret(text) from public, anon, authenticated;
 grant execute on function public.verify_surprise_reveal_job_secret(text) to service_role;
 
--- Repair the existing schedule without invoking it here. The next scheduled
--- run will process only capsules whose unlock_at has passed and send expected
--- notifications for those capsules.
-do $$
-declare
-  v_count integer;
-begin
-  update cron.job
-  set command = $job$
+select cron.alter_job(
+  (select jobid from cron.job where jobname = 'reveal-surprises'),
+  command := $job$
     select net.http_post(
       url := (select decrypted_secret from vault.decrypted_secrets where name = 'project_url')
              || '/functions/v1/reveal-surprises',
@@ -55,12 +49,6 @@ begin
       timeout_milliseconds := 5000
     ) as request_id;
   $job$
-  where jobname = 'reveal-surprises';
-  get diagnostics v_count = row_count;
-  if v_count <> 1 then
-    raise exception 'Expected exactly one reveal-surprises cron job; updated %', v_count;
-  end if;
-end
-$$;
+);
 
 commit;
