@@ -118,6 +118,7 @@ await notifySafetyCheckinAlert(
 
 This project includes a dedicated inbound endpoint to receive callbacks from the Central Cloudflare Gateway:
 * **Endpoint:** `POST /api/telegram/action`
+* **Authentication:** send `Authorization: Bearer <TELEGRAM_ACTION_SECRET>` on every request. Configure the same dedicated random secret in Vercel and the Cloudflare Gateway. Requests are rejected if the secret is missing or invalid; the endpoint returns `503` when the server secret is not configured. Do not reuse `TELEGRAM_BOT_TOKEN` or `CRON_SECRET` for this purpose.
 * **Supported Actions:**
   * `world_korean_quiz` -> Sends interactive Korean Quiz with multiple choice options
   * `world_quiz_ans:<A|B|C|D>` -> Evaluates user answer, awards points, and gives instant feedback
