@@ -19,9 +19,12 @@ const debounceMs = 30 * 60 * 1000
 
 Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
-  if (request.headers.get('Authorization') !== `Bearer ${serviceRole}`) {
-    return new Response('Unauthorized', { status: 401 })
-  }
+  const candidate = request.headers.get('x-job-secret') ?? ''
+  const { data: authorized, error: authError } = await supabase.rpc('verify_backend_cron_secret', {
+    p_secret_name: 'check_battery_secret',
+    p_candidate: candidate,
+  })
+  if (authError || authorized !== true) return new Response('Unauthorized', { status: 401 })
 
   try {
     const { data: locations, error: locationsError } = await supabase

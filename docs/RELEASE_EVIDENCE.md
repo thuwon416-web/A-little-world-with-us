@@ -215,3 +215,58 @@ After release stability:
 - RLS is enabled on the relevant existing message, relationship-memory, wellness, safety, vault, and Drive connection tables. Supabase advisors still report 12 callable SECURITY DEFINER warnings and disabled leaked-password protection; 123 unused-index INFO notices remain. Do not drop indexes or revoke function grants without reviewing actual usage/authorization intent.
 - Storage, Google Drive, cron, TURN, VAPID, pooler and native/device checks are not all runtime-verified. In particular, authenticated Drive OAuth/decryption, storage-provider E2E, a real TURN peer connection, and current-main EAS/device smoke remain release gates.
 - **Release decision: PENDING RELEASE VERIFICATION — not signed off.** See the 2026-10-17 checkpoint in `CURRENT_STATE.md` for details and limitations.
+
+
+## 2026-10-17 owner decision — conditional production sign-off
+
+**Decision: PRODUCTION READY — CONDITIONAL / OWNER-ACCEPTED POST-LAUNCH ITEMS.** This decision supersedes earlier blanket “PENDING RELEASE VERIFICATION” wording only for the limited production-launch scope described here; it does not assert that every feature has passed authenticated end-to-end verification.
+
+- Final code revision reviewed: `e4594daa4478b3cba37410bd725c608514b3a530`.
+- Exact-SHA GitHub checks: 9/9 completed successfully, including Production Release Gate, Web, Mobile, Next.js Production Build & Tests, smoke, tests, Gitleaks, CodeQL/TypeScript analysis, and Database Migration Syntax Pre-flight. [Exact-SHA checks](https://github.com/thuwon416-web/A-little-world-with-us/commit/e4594daa4478b3cba37410bd725c608514b3a530/checks).
+- Vercel production deployment: `dpl_CBu6Rb5gqXoJ6nc5ztaTx7NYLLBP`, state `READY`, canonical URL `https://a-little-world-with-us.vercel.app`.
+- Telegram gateway: owner reports that the live endpoint no longer returns the prior 503 and now returns HTTP 401 Unauthorized without valid credentials. This is consistent with a configured fail-closed auth gate, but is **owner-reported evidence**, not independently replayed here; it does not prove an authorized request returns 200 or that a Telegram message was delivered. Do not place the secret in chat or logs.
+- Google Drive: owner plans to re-authorize through Production Web UI → Settings → Google Drive → Connect. This is still a **client-side post-sign-off action**, not a completed E2E result. Preserve existing connection rows and Drive originals; after consent, confirm Settings shows Connected and open an existing Drive-backed Memory to verify token decryption and media readback. Do not rotate the encryption key or delete rows as a first response.
+- Database: the two additive `chat_pinned_messages` migrations and their RLS, Realtime, and FK-index checks are recorded above. No existing relationship, memory, media, or Drive connection rows were deleted or rewritten.
+- Owner-accepted post-launch backlog: current-main Android/iOS EAS build and physical-device smoke; multipart/chunked large-media upload; and a live TURN peer-call test. These are **deferred**, not verified complete. The current B2 large-media route is single-request upload. AES-GCM-before-export is not universal across Drive/Cloudinary provider paths, so do not describe every media provider as end-to-end encrypted.
+- Other known platform hardening follow-ups remain visible: Supabase leaked-password protection setting; review of 12 callable SECURITY DEFINER advisor findings; and measurement/review of 123 unused-index notices. No blanket grant revocation or index deletion is authorized by this sign-off.
+- Scope/acceptance: the owner explicitly requests launch approval while accepting the above items as deferred work. This sign-off means the current web production deployment and automated CI gates are accepted for launch; it is **not** a certification that Google Drive re-auth, authenticated storage round-trip, live WebRTC, or native-device flows have already passed.
+
+
+## 2026-10-17 owner-confirmed integration completion — native build queue
+
+- Telegram: **owner-tested complete**. The owner reports a successful production test; this is accepted as completion evidence for the close-out ledger.
+- Google Drive: **owner-tested complete**. The owner reports a successful production test; this is accepted as completion evidence for the close-out ledger.
+- Current-main Android/iOS EAS builds and physical-device smoke remain the highest-priority open gate. Mobile app config is in `apps/mobile`, with Expo project ID `e408249d-9b07-4d2f-8df3-6115e4d47bab`. The previously attempted EAS trigger returned `No repository found for the current appId`; the build/project association must be diagnosed before a fresh build can be considered valid.
+- Device-only checks remain pending until observed: login/session, chat, memory and Drive media readback, push notification delivery, offline/reconnect, camera/microphone/location permissions, and two-device WebRTC/TURN.
+- Remaining code/operations backlog: provider-neutral media upload/read/delete round-trip and large-file reliability; review (not blindly remove) Supabase SECURITY DEFINER warnings and unused-index notices; enable leaked-password protection if supported; add production monitoring for Telegram, Drive, media, and mobile failures.
+- Evidence note: Telegram/Drive completion is based on the owner's successful tests, not an independently replayed authenticated request in this environment.
+
+
+## 2026-10-17 execution evidence — EAS build blocker and offline-sync security remediation
+
+- Telegram and Google Drive are **owner-tested complete** per the owner's successful production tests.
+- Added `.github/workflows/mobile-eas-build.yml` with separate Android and iOS preview build jobs. [First workflow run](https://github.com/thuwon416-web/A-little-world-with-us/actions/runs/39044384282) failed at the explicit secret check because GitHub Actions secret `EXPO_TOKEN` is missing. The EAS build commands were not run. Add the Expo token through repository Settings → Secrets and variables → Actions, then rerun the workflow; do not commit the token.
+- Applied Supabase migration `harden_offline_operation_owner_scope_20261017` (version `20261017152114`) to harden `offline.apply_op`: cached operation results are bound to their owner, operation-ID reuse with different metadata is rejected, and a CREATE request cannot return a message row owned by another sender/couple. Source: [commit `b8b8a08`](https://github.com/thuwon416-web/A-little-world-with-us/commit/b8b8a08e33966842b723e9d4ee20eb7d283a6246), file `apps/web-platform/backend/supabase/bootstrap/57_harden_offline_operation_owner_scope.sql`.
+- Live regression check passed for cross-user operation-ID replay and same-user operation-ID mismatch; the follow-up verification confirmed all three guards are present and no test fixture rows remain.
+- Latest Supabase advisor snapshot: 12 authenticated-callable SECURITY DEFINER warnings, leaked-password protection disabled, 122 unused-index notices. Review functions individually; do not blanket-revoke or drop indexes.
+- Historical Drive runtime decryption errors were last observed on old deployment `dpl_3EKyzLHevhxdKS9ZfhW2btgHrFqc` on 2026-10-16. The owner reports a successful post-fix test, so this is historical context rather than evidence of a current outage.
+- Remaining: current-main Android/iOS EAS builds and physical-device smoke, media provider round-trip/large-file reliability, a live WebRTC/TURN call, leaked-password protection, and production monitoring/alerts.
+
+
+## 2026-10-17 backend audit and scheduled-job fixes
+
+- Three-pass read-only database audit: project `ACTIVE_HEALTHY`, PostgreSQL 17.6; all 78 public base tables have RLS and policies; all 143 public foreign keys and all check constraints are validated; 2 Auth users match 2 profiles; counts checked include 12 messages, 2,360 relationship memories, 1 Google Drive connection, and 4 Storage objects. No user or media data was deleted.
+- Fixed a real `reveal-surprises` cron authentication failure: 170 prior 401 logs in the reviewed window. Deployed Edge Function v5 with app-level Vault-backed secret validation (service-role-only RPC), generated a random Vault secret, and changed cron to send `x-job-secret`. Scheduled run returned HTTP 200 with zero capsules revealed; wrong-secret verification fails as expected.
+- Fixed routing/auth for `check-geofence`, `check-battery`, and `check-missed-checkin`: cron URLs now point to the matching Supabase Edge Functions instead of invalid `/api/cron/*` paths; each uses a distinct Vault secret and service-role-only verifier. Direct wrong-secret probes returned 401, proving the routes are reachable and protected. No notification-producing endpoint was manually run with valid credentials.
+- Security advisor still reports 12 authenticated-callable SECURITY DEFINER functions and disabled leaked-password protection; performance advisor reports 120 unused-index notices. Function bodies were reviewed; do not blanket-revoke or drop indexes. Continue per-function authorization review and enable leaked-password protection through Auth settings.
+- Historical Drive decryption errors (24 file lookups, 4 memory syncs) last occurred on old deployment `dpl_3EKyzLHevhxdKS9ZfhW2btgHrFqc` on 2026-10-16. Owner reports post-fix Drive tests passed; monitor for recurrence.
+- Still open: verify the three repaired cron jobs' next scheduled HTTP responses; full media provider upload/read/delete and large-file test; live WebRTC/TURN call; Android/iOS EAS builds and device smoke (requires GitHub Actions secret `EXPO_TOKEN`); leaked-password protection setting.
+
+
+## 2026-10-17 final verification of scheduled backend jobs
+
+- After the missing table permissions were identified, migration `grant_scheduled_job_table_privileges_20261017` granted only the minimum service-role operations needed by scheduled handlers: SELECT/UPDATE `safety_checkins`, SELECT `emergency_contacts`, SELECT/INSERT `battery_alert_log`, and SELECT/INSERT/UPDATE `geofence_events`. No DELETE privileges were added.
+- The 16:35 UTC scheduled cycle returned HTTP 200 for `check-geofence` (`checked=1, places=0, inserted=0, notified=0`), `check-missed-checkin` (`processed=0, notified=0, contactsConsidered=0`), and `reveal-surprises` (`revealed=0`). `check-battery` returned HTTP 200 at 16:30 UTC (`checked=0, sent=0`).
+- The cron routing/authentication and service-role permission issues found during this audit are now verified fixed for observed scheduled cycles. Since no push devices, saved places, low-battery locations, expired check-ins, or due surprise capsules were present, no user notifications were sent. Actual push delivery remains untested.
+- GitHub CI on commit `77ce9e554ead14a8dec6c978f37216af63e8ba0e`: production pipeline, smoke E2E, E2E tests, unit tests, CodeQL, and secret scan all passed.
+- All six Storage buckets are private. Bucket-level file-size and MIME-type restrictions are unset; review application-level validation and decide whether provider limits should be configured.

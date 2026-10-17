@@ -1,0 +1,54 @@
+name: Mobile EAS Build (Android + iOS)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - ".github/workflows/mobile-eas-build.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-eas-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  eas-build:
+    name: EAS preview build — ${{ matrix.platform }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [android, ios]
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - name: Checkout current source
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.3.0"
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+
+      - name: Check Expo authentication
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::Repository secret EXPO_TOKEN is missing. Add an Expo access token in GitHub Actions secrets, then rerun this workflow."
+            exit 1
+          fi
+
+      - name: Install mobile dependencies
+        run: npm ci
+
+      - name: Build ${{ matrix.platform }} with EAS
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: npx --yes eas-cli@latest build --platform "${{ matrix.platform }}" --profile preview --non-interactive

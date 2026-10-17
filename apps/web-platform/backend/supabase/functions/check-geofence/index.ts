@@ -48,8 +48,13 @@ if (!supabaseUrl || !serviceRole) {
 
 const supabase = createClient(supabaseUrl, serviceRole)
 
-function unauthorized(request: Request): boolean {
-  return request.headers.get('Authorization') !== `Bearer ${serviceRole}`
+async function unauthorized(request: Request, secretName: string): Promise<boolean> {
+  const candidate = request.headers.get('x-job-secret') ?? ''
+  const { data, error } = await supabase.rpc('verify_backend_cron_secret', {
+    p_secret_name: secretName,
+    p_candidate: candidate,
+  })
+  return Boolean(error) || data !== true
 }
 
 async function notifyPartner(
@@ -169,7 +174,7 @@ async function processLocation(
 
 Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
-  if (unauthorized(request)) return new Response('Unauthorized', { status: 401 })
+  if (await unauthorized(request, 'check_geofence_secret')) return new Response('Unauthorized', { status: 401 })
 
   try {
     const { data: places, error: placesError } = await supabase
