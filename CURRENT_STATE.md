@@ -372,3 +372,16 @@ Owner-side manual verification remains last.
 - **Historical Vercel Drive errors:** 24 file lookup and 4 memory-sync decryption errors, last seen 2026-10-16 on old deployment `dpl_3EKyzLHevhxdKS9ZfhW2btgHrFqc`. Owner reports Drive is fixed/tested; keep under monitoring rather than treating old logs as a current outage.
 - **Still not independently verified:** full media upload/read/delete and large-file round-trip; live two-device WebRTC/TURN; physical Android/iOS EAS build/device smoke (build workflow still needs repository secret `EXPO_TOKEN`); Supabase Auth leaked-password protection toggle. EAS builds are not claimed complete.
 - **Code references:** reveal cron auth source commit `90995c377fcc6cef9f1793a7ad4834f347428880`; additional cron handlers `bfe30c48daca983c1e310580cff01e8bb849b9f7`, `e35f919ff190e901d5061299dff15d6f14bc5041`, `166cf2fb16e5985ee606fee6e3d9e774878f402d`; cron bootstrap `ac5b79e4d2a2cb023bc3e8c9df99aeace4f20dfe`, `dfd0080eb96eefeacd5157c36346e8e8c4f9eced`.
+
+
+## 2026-10-17 final scheduled-job verification after permission fix
+
+- Applied migration `grant_scheduled_job_table_privileges_20261017`; only the required service-role grants were added: `safety_checkins` SELECT/UPDATE, `emergency_contacts` SELECT, `battery_alert_log` SELECT/INSERT, `geofence_events` SELECT/INSERT/UPDATE. No DELETE grants or new anon/authenticated grants were added.
+- The next scheduled cycle at 16:35 UTC verified all relevant jobs return HTTP 200:
+  - `check-geofence`: `checked=1, places=0, inserted=0, notified=0`
+  - `check-missed-checkin`: `processed=0, notified=0, contactsConsidered=0`
+  - `reveal-surprises`: `revealed=0`
+- `check-battery` returned HTTP 200 at 16:30 UTC: `checked=0, sent=0`. The data snapshot showed no low-battery locations and no push devices.
+- This closes the identified cron routing/auth/table-permission failures for the currently observed scheduled cycles. Keep monitoring future runs; do not infer that physical notification delivery is tested, because no push devices/recipients were present.
+- GitHub CI on the latest backend bootstrap commit `77ce9e554ead14a8dec6c978f37216af63e8ba0e`: Production CI/CD Pipeline, Production Smoke E2E, E2E Tests, Test, CodeQL, and Secret scan all completed successfully.
+- Storage buckets `chat_files`, `chat_photos`, `gallery`, `memories`, `surprises`, and `voice_messages` are all private. Bucket-level size/MIME limits are unset; continue reviewing whether application-level upload validation is sufficient.
