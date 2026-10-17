@@ -230,3 +230,13 @@ After release stability:
 - Owner-accepted post-launch backlog: current-main Android/iOS EAS build and physical-device smoke; multipart/chunked large-media upload; and a live TURN peer-call test. These are **deferred**, not verified complete. The current B2 large-media route is single-request upload. AES-GCM-before-export is not universal across Drive/Cloudinary provider paths, so do not describe every media provider as end-to-end encrypted.
 - Other known platform hardening follow-ups remain visible: Supabase leaked-password protection setting; review of 12 callable SECURITY DEFINER advisor findings; and measurement/review of 123 unused-index notices. No blanket grant revocation or index deletion is authorized by this sign-off.
 - Scope/acceptance: the owner explicitly requests launch approval while accepting the above items as deferred work. This sign-off means the current web production deployment and automated CI gates are accepted for launch; it is **not** a certification that Google Drive re-auth, authenticated storage round-trip, live WebRTC, or native-device flows have already passed.
+
+
+## 2026-10-17 owner-confirmed integration completion — native build queue
+
+- Telegram: **owner-tested complete**. The owner reports a successful production test; this is accepted as completion evidence for the close-out ledger.
+- Google Drive: **owner-tested complete**. The owner reports a successful production test; this is accepted as completion evidence for the close-out ledger.
+- Current-main Android/iOS EAS builds and physical-device smoke remain the highest-priority open gate. Mobile app config is in `apps/mobile`, with Expo project ID `e408249d-9b07-4d2f-8df3-6115e4d47bab`. The previously attempted EAS trigger returned `No repository found for the current appId`; the build/project association must be diagnosed before a fresh build can be considered valid.
+- Device-only checks remain pending until observed: login/session, chat, memory and Drive media readback, push notification delivery, offline/reconnect, camera/microphone/location permissions, and two-device WebRTC/TURN.
+- Remaining code/operations backlog: provider-neutral media upload/read/delete round-trip and large-file reliability; review (not blindly remove) Supabase SECURITY DEFINER warnings and unused-index notices; enable leaked-password protection if supported; add production monitoring for Telegram, Drive, media, and mobile failures.
+- Evidence note: Telegram/Drive completion is based on the owner's successful tests, not an independently replayed authenticated request in this environment.
