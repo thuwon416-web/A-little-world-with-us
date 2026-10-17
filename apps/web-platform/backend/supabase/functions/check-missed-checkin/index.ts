@@ -17,8 +17,7 @@ type EmergencyContact = {
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')
 const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-const cronSecret = Deno.env.get('CRON_SECRET')
-if (!supabaseUrl || !serviceRole || !cronSecret) {
+if (!supabaseUrl || !serviceRole) {
   throw new Error('Missing Supabase Edge Function environment.')
 }
 
@@ -26,9 +25,12 @@ const supabase = createClient(supabaseUrl, serviceRole)
 
 Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
-  if (request.headers.get('x-cron-secret') !== cronSecret) {
-    return new Response('Unauthorized', { status: 401 })
-  }
+  const candidate = request.headers.get('x-job-secret') ?? ''
+  const { data: authorized, error: authError } = await supabase.rpc('verify_backend_cron_secret', {
+    p_secret_name: 'check_missed_checkin_secret',
+    p_candidate: candidate,
+  })
+  if (authError || authorized !== true) return new Response('Unauthorized', { status: 401 })
 
   try {
     const { data: checkins, error: checkinsError } = await supabase
