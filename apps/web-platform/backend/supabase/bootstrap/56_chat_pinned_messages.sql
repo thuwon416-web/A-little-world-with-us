@@ -11,6 +11,10 @@ create table if not exists public.chat_pinned_messages (
 
 create index if not exists chat_pinned_messages_couple_pinned_at_idx
   on public.chat_pinned_messages(couple_id, pinned_at desc);
+create index if not exists chat_pinned_messages_message_id_idx
+  on public.chat_pinned_messages(message_id);
+create index if not exists chat_pinned_messages_pinned_by_idx
+  on public.chat_pinned_messages(pinned_by);
 
 alter table public.chat_pinned_messages enable row level security;
 
