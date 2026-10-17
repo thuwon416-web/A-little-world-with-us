@@ -12,6 +12,7 @@ import {
   getDriveAccessToken,
   listDriveFile,
   parseOAuthState,
+  saveConnection,
 } from './google-drive'
 
 describe('google-drive helpers', () => {
@@ -65,6 +66,27 @@ describe('google-drive helpers', () => {
   })
 
 
+
+  it('does not preserve an undecryptable refresh token when OAuth returns no replacement', async () => {
+    const query = {
+      select: vi.fn(() => query),
+      eq: vi.fn(() => query),
+      maybeSingle: vi.fn().mockResolvedValue({
+        data: {
+          user_id: 'user-1',
+          refresh_token_enc: 'invalid-encrypted-refresh',
+          refresh_token_iv: 'invalid-iv',
+        },
+        error: null,
+      }),
+      upsert: vi.fn().mockResolvedValue({ error: null }),
+    }
+    createClient.mockReturnValue({ from: vi.fn(() => query) })
+
+    await expect(saveConnection('user-1', { access_token: 'fresh-access', expires_in: 3600 }))
+      .rejects.toThrow('Google Drive connection must be reauthorized with Google consent to restore token access.')
+    expect(query.upsert).not.toHaveBeenCalled()
+  })
 
   it('refreshes once and retries a Drive request after provider 401', async () => {
     const key = Buffer.from(process.env.GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY!, 'hex')

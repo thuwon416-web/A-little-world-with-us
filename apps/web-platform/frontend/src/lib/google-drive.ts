@@ -115,6 +115,14 @@ export async function saveConnection(userId: string, token: Awaited<ReturnType<t
   const refresh = token.refresh_token ? encrypt(token.refresh_token) : null
   const existing = await getConnection(userId)
   if (!token.refresh_token && existing?.refresh_token_enc && existing.refresh_token_iv) {
+    // Never report a successful reconnect while preserving a refresh token that
+    // cannot be decrypted with the currently configured key. Google consent
+    // should issue a fresh refresh token; if it does not, leave the old row intact.
+    try {
+      decrypt(existing.refresh_token_enc, existing.refresh_token_iv)
+    } catch {
+      throw new Error('Google Drive connection must be reauthorized with Google consent to restore token access.')
+    }
     const payload = {
       user_id: userId,
       access_token_enc: access.ciphertext,
