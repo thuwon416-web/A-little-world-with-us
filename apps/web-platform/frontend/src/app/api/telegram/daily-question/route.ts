@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { sendTelegramMessage } from '@/lib/telegram'
 
@@ -15,11 +16,31 @@ const COUPLE_QUESTIONS = [
   'What is something I did recently that made you feel proud of me?',
 ]
 
+function authorizeGatewayRequest(req: Request): NextResponse | null {
+  const secret = process.env.TELEGRAM_ACTION_SECRET
+  if (!secret) return NextResponse.json({ error: 'Action gateway is not configured.' }, { status: 503 })
+
+  const authorization = req.headers.get('authorization')
+  if (!authorization?.startsWith('Bearer ')) {
+    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
+  }
+  const provided = Buffer.from(authorization.slice('Bearer '.length), 'utf8')
+  const expected = Buffer.from(secret, 'utf8')
+  if (provided.length !== expected.length || !timingSafeEqual(provided, expected)) {
+    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
+  }
+  return null
+}
+
 export async function GET(req: Request) {
+  const denied = authorizeGatewayRequest(req)
+  if (denied) return denied
   return handleDailyQuestion(req)
 }
 
 export async function POST(req: Request) {
+  const denied = authorizeGatewayRequest(req)
+  if (denied) return denied
   return handleDailyQuestion(req)
 }
 
