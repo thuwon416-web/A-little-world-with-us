@@ -1,38 +1,106 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
   <defs>
-    <radialGradient id="bg" cx="50%" cy="50%" r="80%">
-      <stop offset="0%" stop-color="#0a0810"/>
-      <stop offset="100%" stop-color="#000000"/>
-    </radialGradient>
-    <linearGradient id="goldR" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFD700"/>
-      <stop offset="100%" stop-color="#FFE57F"/>
+    <!-- Background Space & Heart Gradients -->
+    <linearGradient id="lwSpaceGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e112a" />
+      <stop offset="50%" stop-color="#0f0917" />
+      <stop offset="100%" stop-color="#1f0a1c" />
     </linearGradient>
-    <linearGradient id="roseR" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FF6B9D"/>
-      <stop offset="100%" stop-color="#FFD700"/>
+
+    <!-- Partner A: Rose Pink Heart Gradient -->
+    <linearGradient id="heartPinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fda4af" />
+      <stop offset="40%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#be123c" />
     </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="8" result="blur"/>
-      <feMerge>
-        <feMergeNode in="blur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+
+    <!-- Partner B: Warm Sunset Gold & Violet Gradient -->
+    <linearGradient id="heartSunsetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d946ef" />
+    </linearGradient>
+
+    <!-- Planetary Ribbon Orbit Gradient -->
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0" />
+      <stop offset="35%" stop-color="#f43f5e" stop-opacity="0.8" />
+      <stop offset="65%" stop-color="#fb7185" stop-opacity="0.9" />
+      <stop offset="85%" stop-color="#fde047" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#fde047" stop-opacity="0" />
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="heartGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
 
-  <rect width="1024" height="1024" rx="200" fill="url(#bg)"/>
+  <!-- ================= CELESTIAL BACKGROUND ORB ================= -->
+  <circle cx="250" cy="210" r="160" fill="url(#lwSpaceGrad)" stroke="rgba(244, 63, 94, 0.25)" stroke-width="2" />
 
-  <!-- Silken Ribbons forming an abstract knot (Premium abstract geometry) -->
-  <g transform="translate(512,512)" filter="url(#glow)">
-    <!-- Gold ribbon (smooth curve) -->
-    <path d="M -180,-20 C -80,-180 80,-180 180,-20 C 240,60 120,160 0,160 C -120,160 -240,60 -180,-20" fill="none" stroke="url(#goldR)" stroke-width="18" stroke-linecap="round"/>
-    
-    <!-- Rose ribbon (intertwining reverse curve) -->
-    <path d="M 180,-20 C 80,180 -80,180 -180,-20 C -240,-60 -120,-160 0,-160 C 120,-160 240,-60 180,-20" fill="none" stroke="url(#roseR)" stroke-width="18" stroke-linecap="round"/>
-    
-    <!-- Add subtle inner shadow/shimmer to mimic liquid metal -->
-    <path d="M -180,-20 C -80,-180 80,-180 180,-20 C 240,60 120,160 0,160 C -120,160 -240,60 -180,-20" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.3"/>
-    <path d="M 180,-20 C 80,180 -80,180 -180,-20 C -240,-60 -120,-160 0,-160 C 120,-160 240,-60 180,-20" fill="none" stroke="#FFFFFF" stroke-width="2" opacity="0.2"/>
+  <!-- Constellation Stars -->
+  <circle cx="160" cy="140" r="2.5" fill="#fde047" opacity="0.8" />
+  <circle cx="340" cy="130" r="2.5" fill="#fde047" opacity="0.9" />
+  <circle cx="360" cy="240" r="1.8" fill="#fda4af" opacity="0.7" />
+  <circle cx="130" cy="250" r="1.8" fill="#fda4af" opacity="0.7" />
+  <circle cx="250" cy="80" r="3" fill="#ffffff" opacity="0.9" />
+
+  <!-- Orbiting Star Cross (Spark of Togetherness) -->
+  <path d="M 250 72 L 250 88 M 242 80 L 258 80" stroke="#fde047" stroke-width="1.8" stroke-linecap="round" />
+
+  <!-- ================= PLANETARY COZY ORBIT RING ================= -->
+  <ellipse cx="250" cy="215" rx="180" ry="70" 
+           fill="none" 
+           stroke="url(#orbitGrad)" 
+           stroke-width="5" 
+           transform="rotate(-20 250 215)" 
+           stroke-linecap="round" />
+
+  <!-- Small Satellite Love Bead on Orbit -->
+  <circle cx="395" cy="165" r="5" fill="#fde047" filter="url(#heartGlow)" />
+
+  <!-- ================= INTERTWINED HEARTS (COUPLE EMBRACE) ================= -->
+  <!-- Left Heart (She/Partner A) -->
+  <g filter="url(#heartGlow)">
+    <path d="M 215 140 
+             C 175 110, 130 145, 145 195 
+             C 160 245, 230 285, 240 295 
+             C 230 255, 195 210, 205 175 
+             C 210 160, 220 150, 230 145 Z" 
+          fill="url(#heartPinkGrad)" 
+          opacity="0.95" />
+  </g>
+
+  <!-- Right Heart (He/Partner B - Interlocking Infinity) -->
+  <g filter="url(#heartGlow)">
+    <path d="M 285 140 
+             C 325 110, 370 145, 355 195 
+             C 340 245, 270 285, 260 295 
+             C 270 255, 305 210, 295 175 
+             C 290 160, 280 150, 270 145 Z" 
+          fill="url(#heartSunsetGrad)" 
+          opacity="0.9" />
+  </g>
+
+  <!-- Center Heart Fusion Peak (Infinity Knot of Love) -->
+  <path d="M 250 165 C 235 140, 205 155, 220 185 C 230 205, 250 230, 250 230 C 250 230, 270 205, 280 185 C 295 155, 265 140, 250 165 Z" 
+        fill="#f43f5e" 
+        opacity="0.85" />
+
+  <!-- Delicate Golden Heart Core Reflection -->
+  <circle cx="250" cy="200" r="7" fill="#fde047" opacity="0.9" filter="url(#heartGlow)" />
+
+  <!-- ================= TYPOGRAPHY (A LITTLE WORLD WITH US) ================= -->
+  <g id="brand-text">
+    <text x="250" y="420" font-family="'Comfortaa', 'Quicksand', 'Inter', 'Segoe UI', sans-serif" font-size="34" font-weight="800" letter-spacing="4" fill="#ffffff" text-anchor="middle">
+      A LITTLE WORLD
+    </text>
+
+    <!-- Warm Highlight Ribbon with Heart -->
+    <text x="250" y="450" font-family="'Inter', 'Segoe UI', sans-serif" font-size="12" font-weight="700" letter-spacing="6" fill="#fb7185" text-anchor="middle">
+      • WITH US •
+    </text>
   </g>
 </svg>
