@@ -1,7 +1,122 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <rect width="1024" height="1024" rx="200" fill="#000000"/>
-  <g transform="translate(512,512)">
-    <path d="M -180,-20 C -80,-180 80,-180 180,-20 C 240,60 120,160 0,160 C -120,160 -240,60 -180,-20" fill="none" stroke="#FFD700" stroke-width="18" stroke-linecap="round"/>
-    <path d="M 180,-20 C 80,180 -80,180 -180,-20 C -240,-60 -120,-160 0,-160 C 120,-160 240,-60 180,-20" fill="none" stroke="#FF6B9D" stroke-width="18" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100%" height="100%">
+  <defs>
+    <!-- Background Space & Heart Gradients -->
+    <radialGradient id="lwCosmicGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#3b154c" stop-opacity="0.95" />
+      <stop offset="60%" stop-color="#190a24" stop-opacity="0.98" />
+      <stop offset="100%" stop-color="#090310" stop-opacity="1" />
+    </radialGradient>
+
+    <!-- Partner A: Rose Pink Heart Gradient -->
+    <linearGradient id="heartPinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fda4af" />
+      <stop offset="40%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#be123c" />
+    </linearGradient>
+
+    <!-- Partner B: Warm Sunset Gold & Violet Gradient -->
+    <linearGradient id="heartSunsetGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#d946ef" />
+    </linearGradient>
+
+    <!-- Planetary Ribbon Orbit Gradient (Both Ends Protruding with Contrast) -->
+    <!-- From Left Red Wing (x=0%) through center to Right Gold Wing (x=100%) -->
+    <linearGradient id="dualOrbitGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="25%" stop-color="#fb7185" />
+      <stop offset="50%" stop-color="#e11d48" stop-opacity="0.5" />
+      <stop offset="75%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fde047" />
+    </linearGradient>
+
+    <!-- Soft Glow Filter -->
+    <filter id="heartGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+
+    <filter id="beadSparkle" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- ================= CELESTIAL BACKGROUND ORB ================= -->
+  <!-- Outer subtle halo -->
+  <circle cx="250" cy="250" r="215" fill="none" stroke="rgba(244, 63, 94, 0.2)" stroke-width="1.8" stroke-dasharray="4 8" />
+  <circle cx="250" cy="250" r="185" fill="url(#lwCosmicGlow)" stroke="rgba(244, 63, 94, 0.45)" stroke-width="2.5" />
+
+  <!-- Constellation Stars Inside Sphere -->
+  <circle cx="160" cy="180" r="2.8" fill="#fde047" opacity="0.85" />
+  <circle cx="340" cy="170" r="2.8" fill="#fde047" opacity="0.9" />
+  <circle cx="360" cy="280" r="2.2" fill="#fda4af" opacity="0.8" />
+  <circle cx="140" cy="290" r="2.2" fill="#fda4af" opacity="0.8" />
+  <circle cx="250" cy="120" r="3.2" fill="#ffffff" opacity="0.95" />
+  <circle cx="210" cy="350" r="2" fill="#fde047" opacity="0.75" />
+  <circle cx="290" cy="355" r="2" fill="#fda4af" opacity="0.75" />
+
+  <!-- Orbiting Star Cross (Spark of Togetherness) -->
+  <path d="M 250 112 L 250 128 M 242 120 L 258 120" stroke="#fde047" stroke-width="2" stroke-linecap="round" />
+
+  <!-- ================= PLANETARY COZY ORBIT RING (EXTENDED DUAL WINGS) ================= -->
+  <!-- Extended wide ellipse (rx=235) sweeping out past the orb on BOTH left & right -->
+  <ellipse cx="250" cy="255" rx="235" ry="85" 
+           fill="none" 
+           stroke="url(#dualOrbitGrad)" 
+           stroke-width="5.5" 
+           transform="rotate(-22 250 255)" 
+           stroke-linecap="round" />
+
+  <!-- RIGHT WING (GOLDEN EXTENSION) -->
+  <!-- Extends outside the orb to (465, 168) -->
+  <g transform="translate(465, 168)" filter="url(#beadSparkle)">
+    <circle cx="0" cy="0" r="7.5" fill="#fde047" />
+    <circle cx="0" cy="0" r="4" fill="#ffffff" />
+    <!-- Golden Starlight Spark -->
+    <path d="M 0 -13 L 0 13 M -13 0 L 13 0" stroke="#fde047" stroke-width="1.8" stroke-linecap="round" />
+  </g>
+
+  <!-- LEFT WING (CRIMSON/RED EXTENSION) -->
+  <!-- Extends outside the orb to (35, 342) as requested by user -->
+  <g transform="translate(35, 342)" filter="url(#beadSparkle)">
+    <circle cx="0" cy="0" r="7.5" fill="#f43f5e" />
+    <circle cx="0" cy="0" r="4" fill="#ffffff" />
+    <!-- Crimson Starlight Spark -->
+    <path d="M 0 -13 L 0 13 M -13 0 L 13 0" stroke="#f43f5e" stroke-width="1.8" stroke-linecap="round" />
+  </g>
+
+  <!-- ================= INTERTWINED HEARTS (COUPLE EMBRACE) ================= -->
+  <g transform="translate(0, 40)">
+    <!-- Left Heart (She/Partner A) -->
+    <g filter="url(#heartGlow)">
+      <path d="M 215 140 
+               C 175 110, 130 145, 145 195 
+               C 160 245, 230 285, 240 295 
+               C 230 255, 195 210, 205 175 
+               C 210 160, 220 150, 230 145 Z" 
+            fill="url(#heartPinkGrad)" 
+            opacity="0.95" />
+    </g>
+
+    <!-- Right Heart (He/Partner B - Interlocking Infinity) -->
+    <g filter="url(#heartGlow)">
+      <path d="M 285 140 
+               C 325 110, 370 145, 355 195 
+               C 340 245, 270 285, 260 295 
+               C 270 255, 305 210, 295 175 
+               C 290 160, 280 150, 270 145 Z" 
+            fill="url(#heartSunsetGrad)" 
+            opacity="0.92" />
+    </g>
+
+    <!-- Center Heart Fusion Peak (Infinity Knot of Love) -->
+    <path d="M 250 165 C 235 140, 205 155, 220 185 C 230 205, 250 230, 250 230 C 250 230, 270 205, 280 185 C 295 155, 265 140, 250 165 Z" 
+          fill="#f43f5e" 
+          opacity="0.9" />
+
+    <!-- Delicate Golden Heart Core Reflection -->
+    <circle cx="250" cy="200" r="8" fill="#fde047" opacity="0.95" filter="url(#heartGlow)" />
   </g>
 </svg>
