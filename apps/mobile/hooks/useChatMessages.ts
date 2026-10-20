@@ -167,6 +167,14 @@ export function useChatMessages(userId: string | undefined, coupleId: string | n
   const [messages, setMessages] = useState<ChatMessage[]>([])
 
   useEffect(() => {
+    // Guard: do not subscribe until coupleId is resolved.
+    // Without coupleId the decryption key cannot be derived, so subscribing
+    // would produce undecryptable messages and leak decrypt errors to the console.
+    if (!coupleId) {
+      setMessages([])
+      return
+    }
+
     const subscription = database
       .get('messages')
       .query(Q.sortBy('created_at', 'asc'))

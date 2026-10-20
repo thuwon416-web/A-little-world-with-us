@@ -9,7 +9,6 @@
  *  - `components/chat/ChatMessageList` — FlatList + ChatBubble
  *  - `components/chat/ChatComposer`    — input bar + all media modals
  */
-import * as Location from 'expo-location'
 import { useRouter } from 'expo-router'
 import { Image as ImageIcon, Pin, X } from 'lucide-react-native'
 import { useMemo, useRef, useState } from 'react'
@@ -56,13 +55,11 @@ type MessageLocation = { latitude: number; longitude: number; accuracy?: number 
 // ---------------------------------------------------------------------------
 
 async function prepareTextMessage(content: string, coupleId: string): Promise<PreparedTextMessage> {
-  try {
-    const key = await deriveChatKey(coupleId)
-    return { content: await encryptMessage(content, key), encrypted: true, encryptionVersion: 1 }
-  } catch (error) {
-    console.error('Failed to encrypt message:', error)
-    return { content, encrypted: false, encryptionVersion: null }
-  }
+  // Encryption failures must abort the send — never silently fall back to plaintext.
+  // Catching here and returning { encrypted: false } would silently break E2E guarantees.
+  const key = await deriveChatKey(coupleId)
+  const encrypted = await encryptMessage(content, key)
+  return { content: encrypted, encrypted: true, encryptionVersion: 1 }
 }
 
 async function persistTextMessage(
@@ -71,23 +68,28 @@ async function persistTextMessage(
   message: PreparedTextMessage,
   synced: boolean
 ): Promise<void> {
-  await database.write(async () => {
-    await database.get('messages').create((record) => {
-      const raw = record as unknown as {
-        _raw: { id: string }; content: string; sender_id: string
-        couple_id: string; created_at: number; synced: boolean
-        encrypted: boolean; encryption_version: number | null
-      }
-      raw._raw.id = crypto.randomUUID()
-      raw.content = message.content
-      raw.sender_id = userId
-      raw.couple_id = coupleId
-      raw.created_at = Date.now()
-      raw.synced = synced
-      raw.encrypted = message.encrypted
-      raw.encryption_version = message.encryptionVersion
+  try {
+    await database.write(async () => {
+      await database.get('messages').create((record) => {
+        const raw = record as unknown as {
+          _raw: { id: string }; content: string; sender_id: string
+          couple_id: string; created_at: number; synced: boolean
+          encrypted: boolean; encryption_version: number | null
+        }
+        raw._raw.id = crypto.randomUUID()
+        raw.content = message.content
+        raw.sender_id = userId
+        raw.couple_id = coupleId
+        raw.created_at = Date.now()
+        raw.synced = synced
+        raw.encrypted = message.encrypted
+        raw.encryption_version = message.encryptionVersion
+      })
     })
-  })
+  } catch (err) {
+    // Re-throw so the caller (handleSend) can surface the error to the user
+    throw new Error(`Failed to save message locally: ${err instanceof Error ? err.message : String(err)}`)
+  }
 }
 
 async function persistLocationMessage(
@@ -143,9 +145,12 @@ export default function ChatScreen() {
   const listRef = useRef<FlatList<ChatMessage>>(null)
 
   // ---------- Data hooks ----------
-  const messages = useChatMessages(user?.id, null /* coupleId resolved below */)
+  // useChatPartner resolves coupleId from the couple table; useChatMessages subscribes
+  // to local DB for the given coupleId. Pass coupleId from useChatPartner to avoid
+  // subscribing with null and decrypting messages before the key is available.
   const { partnerId, coupleId, userProfile, partnerProfile, pinnedMessage, clearPinnedMessage } =
-    useChatPartner(user?.id, messages)
+    useChatPartner(user?.id)
+  const messages = useChatMessages(user?.id, coupleId ?? null)
   const { status, isOffline, pendingCount, refresh } = useSync(coupleId ?? undefined)
 
   // ---------- Send handlers ----------
@@ -153,8 +158,13 @@ export default function ChatScreen() {
   const handleSend = async () => {
     const trimmed = draft.trim()
     if (!trimmed || !user?.id || !coupleId) return
-    const message = await prepareTextMessage(trimmed, coupleId)
-    await persistTextMessage(user.id, coupleId, message, false)
+    try {
+      const message = await prepareTextMessage(trimmed, coupleId)
+      await persistTextMessage(user.id, coupleId, message, false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send message. Please try again.')
+      return
+    }
     setDraft('')
     if (isOffline) return
     try { await refresh() } catch (err) {
@@ -164,6 +174,8 @@ export default function ChatScreen() {
 
   const handleSendLocation = async () => {
     if (!user?.id || !coupleId) return
+    // Lazy-import expo-location to avoid requiring location permission at app startup
+    const Location = await import('expo-location')
     const { status: permission } = await Location.requestForegroundPermissionsAsync()
     if (permission !== 'granted') {
       Alert.alert('Location permission needed', 'Allow location access to send your current map pin.')
