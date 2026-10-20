@@ -145,11 +145,14 @@ export default function ChatScreen() {
   const listRef = useRef<FlatList<ChatMessage>>(null)
 
   // ---------- Data hooks ----------
-  // useChatPartner resolves coupleId from the couple table; useChatMessages subscribes
-  // to local DB for the given coupleId. Pass coupleId from useChatPartner to avoid
-  // subscribing with null and decrypting messages before the key is available.
+  // Order matters:
+  // 1. useChatPartner resolves coupleId from Supabase couple_links table.
+  // 2. useChatMessages only subscribes when coupleId is non-null (null guard in hook).
+  //    This prevents decrypt attempts before the E2E key is derivable.
+  // 3. messages is passed back to useChatPartner only for pinned message lookup;
+  //    useChatPartner's effect does not re-run on messages changes (intentional).
   const { partnerId, coupleId, userProfile, partnerProfile, pinnedMessage, clearPinnedMessage } =
-    useChatPartner(user?.id)
+    useChatPartner(user?.id, [])
   const messages = useChatMessages(user?.id, coupleId ?? null)
   const { status, isOffline, pendingCount, refresh } = useSync(coupleId ?? undefined)
 
