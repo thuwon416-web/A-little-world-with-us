@@ -21,13 +21,14 @@
       <stop offset="100%" stop-color="#d946ef" />
     </linearGradient>
 
-    <!-- Planetary Ribbon Orbit Gradient -->
-    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#f43f5e" stop-opacity="0" />
-      <stop offset="30%" stop-color="#f43f5e" stop-opacity="0.85" />
-      <stop offset="65%" stop-color="#fb7185" stop-opacity="0.95" />
-      <stop offset="85%" stop-color="#fde047" stop-opacity="0.9" />
-      <stop offset="100%" stop-color="#fde047" stop-opacity="1" />
+    <!-- Planetary Ribbon Orbit Gradient (Both Ends Protruding with Contrast) -->
+    <!-- From Left Red Wing (x=0%) through center to Right Gold Wing (x=100%) -->
+    <linearGradient id="dualOrbitGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="25%" stop-color="#fb7185" />
+      <stop offset="50%" stop-color="#e11d48" stop-opacity="0.5" />
+      <stop offset="75%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fde047" />
     </linearGradient>
 
     <!-- Soft Glow Filter -->
@@ -35,35 +36,56 @@
       <feGaussianBlur stdDeviation="6" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
+
+    <filter id="beadSparkle" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
   </defs>
 
   <!-- ================= CELESTIAL BACKGROUND ORB ================= -->
-  <circle cx="250" cy="250" r="215" fill="none" stroke="rgba(244, 63, 94, 0.22)" stroke-width="2" stroke-dasharray="4 8" />
-  <circle cx="250" cy="250" r="195" fill="url(#lwCosmicGlow)" stroke="rgba(244, 63, 94, 0.45)" stroke-width="2.5" />
+  <!-- Outer subtle halo -->
+  <circle cx="250" cy="250" r="215" fill="none" stroke="rgba(244, 63, 94, 0.2)" stroke-width="1.8" stroke-dasharray="4 8" />
+  <circle cx="250" cy="250" r="185" fill="url(#lwCosmicGlow)" stroke="rgba(244, 63, 94, 0.45)" stroke-width="2.5" />
 
-  <!-- Constellation Stars -->
-  <circle cx="150" cy="170" r="2.8" fill="#fde047" opacity="0.85" />
-  <circle cx="350" cy="160" r="2.8" fill="#fde047" opacity="0.9" />
-  <circle cx="370" cy="290" r="2.2" fill="#fda4af" opacity="0.8" />
-  <circle cx="130" cy="300" r="2.2" fill="#fda4af" opacity="0.8" />
-  <circle cx="250" cy="110" r="3.2" fill="#ffffff" opacity="0.95" />
-  <circle cx="200" cy="360" r="2" fill="#fde047" opacity="0.75" />
-  <circle cx="300" cy="370" r="2" fill="#fda4af" opacity="0.75" />
+  <!-- Constellation Stars Inside Sphere -->
+  <circle cx="160" cy="180" r="2.8" fill="#fde047" opacity="0.85" />
+  <circle cx="340" cy="170" r="2.8" fill="#fde047" opacity="0.9" />
+  <circle cx="360" cy="280" r="2.2" fill="#fda4af" opacity="0.8" />
+  <circle cx="140" cy="290" r="2.2" fill="#fda4af" opacity="0.8" />
+  <circle cx="250" cy="120" r="3.2" fill="#ffffff" opacity="0.95" />
+  <circle cx="210" cy="350" r="2" fill="#fde047" opacity="0.75" />
+  <circle cx="290" cy="355" r="2" fill="#fda4af" opacity="0.75" />
 
   <!-- Orbiting Star Cross (Spark of Togetherness) -->
-  <path d="M 250 102 L 250 118 M 242 110 L 258 110" stroke="#fde047" stroke-width="2" stroke-linecap="round" />
+  <path d="M 250 112 L 250 128 M 242 120 L 258 120" stroke="#fde047" stroke-width="2" stroke-linecap="round" />
 
-  <!-- ================= PLANETARY COZY ORBIT RING ================= -->
-  <ellipse cx="250" cy="255" rx="210" ry="80" 
+  <!-- ================= PLANETARY COZY ORBIT RING (EXTENDED DUAL WINGS) ================= -->
+  <!-- Extended wide ellipse (rx=235) sweeping out past the orb on BOTH left & right -->
+  <ellipse cx="250" cy="255" rx="235" ry="85" 
            fill="none" 
-           stroke="url(#orbitGrad)" 
+           stroke="url(#dualOrbitGrad)" 
            stroke-width="5.5" 
-           transform="rotate(-20 250 255)" 
+           transform="rotate(-22 250 255)" 
            stroke-linecap="round" />
 
-  <!-- Small Satellite Love Bead on Orbit -->
-  <circle cx="415" cy="200" r="6" fill="#fde047" filter="url(#heartGlow)" />
-  <circle cx="85" cy="310" r="4.5" fill="#f43f5e" filter="url(#heartGlow)" />
+  <!-- RIGHT WING (GOLDEN EXTENSION) -->
+  <!-- Extends outside the orb to (465, 168) -->
+  <g transform="translate(465, 168)" filter="url(#beadSparkle)">
+    <circle cx="0" cy="0" r="7.5" fill="#fde047" />
+    <circle cx="0" cy="0" r="4" fill="#ffffff" />
+    <!-- Golden Starlight Spark -->
+    <path d="M 0 -13 L 0 13 M -13 0 L 13 0" stroke="#fde047" stroke-width="1.8" stroke-linecap="round" />
+  </g>
+
+  <!-- LEFT WING (CRIMSON/RED EXTENSION) -->
+  <!-- Extends outside the orb to (35, 342) as requested by user -->
+  <g transform="translate(35, 342)" filter="url(#beadSparkle)">
+    <circle cx="0" cy="0" r="7.5" fill="#f43f5e" />
+    <circle cx="0" cy="0" r="4" fill="#ffffff" />
+    <!-- Crimson Starlight Spark -->
+    <path d="M 0 -13 L 0 13 M -13 0 L 13 0" stroke="#f43f5e" stroke-width="1.8" stroke-linecap="round" />
+  </g>
 
   <!-- ================= INTERTWINED HEARTS (COUPLE EMBRACE) ================= -->
   <g transform="translate(0, 40)">
