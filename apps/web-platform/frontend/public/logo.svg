@@ -2,9 +2,9 @@
   <defs>
     <!-- Background Space & Heart Gradients -->
     <radialGradient id="lwCosmicGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#3b154c" stop-opacity="0.9" />
-      <stop offset="60%" stop-color="#190a24" stop-opacity="0.95" />
-      <stop offset="100%" stop-color="#0a0410" stop-opacity="1" />
+      <stop offset="0%" stop-color="#3b154c" stop-opacity="0.95" />
+      <stop offset="60%" stop-color="#190a24" stop-opacity="0.98" />
+      <stop offset="100%" stop-color="#090310" stop-opacity="1" />
     </radialGradient>
 
     <!-- Partner A: Rose Pink Heart Gradient -->
@@ -38,17 +38,17 @@
   </defs>
 
   <!-- ================= CELESTIAL BACKGROUND ORB ================= -->
-  <circle cx="250" cy="250" r="215" fill="none" stroke="rgba(244, 63, 94, 0.2)" stroke-width="2" stroke-dasharray="4 8" />
-  <circle cx="250" cy="250" r="195" fill="url(#lwCosmicGlow)" stroke="rgba(244, 63, 94, 0.4)" stroke-width="2.5" />
+  <circle cx="250" cy="250" r="215" fill="none" stroke="rgba(244, 63, 94, 0.22)" stroke-width="2" stroke-dasharray="4 8" />
+  <circle cx="250" cy="250" r="195" fill="url(#lwCosmicGlow)" stroke="rgba(244, 63, 94, 0.45)" stroke-width="2.5" />
 
   <!-- Constellation Stars -->
-  <circle cx="150" cy="170" r="2.8" fill="#fde047" opacity="0.8" />
+  <circle cx="150" cy="170" r="2.8" fill="#fde047" opacity="0.85" />
   <circle cx="350" cy="160" r="2.8" fill="#fde047" opacity="0.9" />
-  <circle cx="370" cy="290" r="2.2" fill="#fda4af" opacity="0.75" />
-  <circle cx="130" cy="300" r="2.2" fill="#fda4af" opacity="0.75" />
+  <circle cx="370" cy="290" r="2.2" fill="#fda4af" opacity="0.8" />
+  <circle cx="130" cy="300" r="2.2" fill="#fda4af" opacity="0.8" />
   <circle cx="250" cy="110" r="3.2" fill="#ffffff" opacity="0.95" />
-  <circle cx="200" cy="360" r="2" fill="#fde047" opacity="0.7" />
-  <circle cx="300" cy="370" r="2" fill="#fda4af" opacity="0.7" />
+  <circle cx="200" cy="360" r="2" fill="#fde047" opacity="0.75" />
+  <circle cx="300" cy="370" r="2" fill="#fda4af" opacity="0.75" />
 
   <!-- Orbiting Star Cross (Spark of Togetherness) -->
   <path d="M 250 102 L 250 118 M 242 110 L 258 110" stroke="#fde047" stroke-width="2" stroke-linecap="round" />
@@ -86,7 +86,7 @@
                C 270 255, 305 210, 295 175 
                C 290 160, 280 150, 270 145 Z" 
             fill="url(#heartSunsetGrad)" 
-            opacity="0.9" />
+            opacity="0.92" />
     </g>
 
     <!-- Center Heart Fusion Peak (Infinity Knot of Love) -->
