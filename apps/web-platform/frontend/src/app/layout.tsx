@@ -113,6 +113,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <PWAInstallPrompt />
               <OfflineBanner />
               <AIChatWidget />
+              <Script src="https://telegram.org/js/telegram-web-app.js" strategy="lazyOnload" />
               <SpeedInsights />
               <WebVitalsReporter />
             </ThemeProvider>

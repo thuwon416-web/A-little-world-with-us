@@ -16,7 +16,8 @@
 @layer base {
   :root {
     --font-display: "Playfair Display", "Cormorant Garamond", Georgia, serif;
-    --font-body: "Inter", "Poppins", system-ui, sans-serif;
+    --font-body: "Inter", "Poppins", "Noto Sans Myanmar", "Pyidaungsu", "Padauk", system-ui, sans-serif;
+    line-height: 1.6;
     --font-serif: var(--font-display);
     --font-sans: var(--font-body);
     --font-accent: var(--font-display);
