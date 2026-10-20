@@ -51,6 +51,7 @@ const navGroups = [
       { href: '/games', key: 'games', icon: Gamepad2 },
       { href: '/music', key: 'music', icon: Music },
       { href: '/astrology', key: 'astrology', icon: Star },
+      { href: '/automations', key: 'automations', icon: Sparkles },
     ],
   },
   {
