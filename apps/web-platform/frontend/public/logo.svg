@@ -1,53 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
   <defs>
-    <linearGradient id="lwBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#180b1e" />
-      <stop offset="100%" stop-color="#0b040f" />
-    </linearGradient>
-
-    <linearGradient id="lwBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="lwBorderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#f43f5e" />
-      <stop offset="50%" stop-color="#d946ef" />
-      <stop offset="100%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#fb7185" />
     </linearGradient>
-
-    <linearGradient id="lwPink" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fda4af" />
-      <stop offset="50%" stop-color="#f43f5e" />
-      <stop offset="100%" stop-color="#be123c" />
-    </linearGradient>
-
-    <linearGradient id="lwGold" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fde047" />
-      <stop offset="50%" stop-color="#f59e0b" />
-      <stop offset="100%" stop-color="#d946ef" />
-    </linearGradient>
-
     <filter id="lwGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feGaussianBlur stdDeviation="2.5" result="blur" />
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
 
-  <!-- Squircle App Container Tile -->
-  <rect x="8" y="8" width="184" height="184" rx="44" fill="url(#lwBg)" stroke="url(#lwBorder)" stroke-width="4.5" />
+  <!-- Squircle App Tile -->
+  <rect x="5" y="5" width="90" height="90" rx="24" fill="#180b1e" stroke="url(#lwBorderGrad)" stroke-width="3.5" />
 
-  <!-- Planetary Orbit Ring -->
-  <ellipse cx="100" cy="102" rx="68" ry="26" fill="none" stroke="rgba(244, 63, 94, 0.4)" stroke-width="3" transform="rotate(-20 100 102)" />
-  <circle cx="156" cy="80" r="3" fill="#fde047" />
+  <!-- Inner Ambient Rose Fill -->
+  <rect x="5" y="5" width="90" height="90" rx="24" fill="rgba(244, 63, 94, 0.05)" />
 
-  <!-- Intertwined Hearts (Couple Infinity Embrace) -->
-  <g filter="url(#lwGlow)">
-    <!-- Left Heart -->
-    <path d="M 88 74 C 74 60, 56 74, 62 94 C 68 114, 94 130, 98 134 C 94 118, 80 100, 84 86 Z" fill="url(#lwPink)" opacity="0.95" />
-    <!-- Right Heart -->
-    <path d="M 112 74 C 126 60, 144 74, 138 94 C 132 114, 106 130, 102 134 C 106 118, 120 100, 116 86 Z" fill="url(#lwGold)" opacity="0.9" />
-    <!-- Center Core Fusion -->
-    <path d="M 100 84 C 94 74, 82 80, 88 92 C 92 100, 100 110, 100 110 C 100 110, 108 100, 112 92 C 118 80, 106 74, 100 84 Z" fill="#f43f5e" />
+  <!-- Exact Scaled Intertwined Twin Hearts Glyph -->
+  <g transform="translate(18, 18) scale(2.666)" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#lwGlow)">
+    <!-- Primary Heart (Rose Pink) -->
+    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+          stroke="#f43f5e" stroke-width="1.8" />
+    <!-- Secondary Small Heart (Sunset Gold Glow) -->
+    <path d="M 12 7 C 10.5 5.5, 8.5 6, 8 7.5 C 7.5 9, 12 13, 12 13 C 12 13, 16.5 9, 16 7.5 C 15.5 6, 13.5 5.5, 12 7 Z"
+          stroke="#fde047" stroke-width="1.4" fill="rgba(253, 224, 71, 0.15)" />
   </g>
-
-  <!-- Starlight Sparks -->
-  <circle cx="100" cy="50" r="2.5" fill="#ffffff" />
-  <circle cx="140" cy="120" r="2" fill="#fde047" />
-  <circle cx="62" cy="122" r="2" fill="#fda4af" />
 </svg>
