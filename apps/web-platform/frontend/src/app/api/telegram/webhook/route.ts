@@ -51,11 +51,11 @@ export async function POST(req: Request) {
       // /start or /help
       if (text.startsWith('/start') || text.startsWith('/help')) {
         const helpText = (
-          '❤️ <b>A Little World With Us — Couple Commands:</b>\n\n'
-          '• <code>/status</code> — Check our world heartbeat & sync\n'
-          '• <code>/morning_brief</code> — Today\'s couple morning briefing\n'
-          '• <code>/quiz</code> — Take today\'s Korean intimacy quiz\n'
-          '• <code>/spend [amount] [for]</code> — Quick expense log (e.g. <code>/spend 25000 dinner</code>)\n\n'
+          '❤️ <b>A Little World With Us — Couple Commands:</b>\n\n' +
+          '• <code>/status</code> — Check our world heartbeat & sync\n' +
+          '• <code>/morning_brief</code> — Today\'s couple morning briefing\n' +
+          '• <code>/quiz</code> — Take today\'s Korean intimacy quiz\n' +
+          '• <code>/spend [amount] [for]</code> — Quick expense log (e.g. <code>/spend 25000 dinner</code>)\n\n' +
           '👇 Click below to open Our World directly in Telegram:'
         )
         const buttons = [
@@ -68,9 +68,9 @@ export async function POST(req: Request) {
       // /status
       if (text.startsWith('/status')) {
         const statusText = (
-          '🟢 <b>[Our Little World] Heartbeat Status:</b>\n\n'
-          '• <b>Togetherness Status:</b> <code>100% In Sync 💕</code>\n'
-          '• <b>Memory Vault:</b> <code>Cloudinary & Supabase Synced</code>\n'
+          '🟢 <b>[Our Little World] Heartbeat Status:</b>\n\n' +
+          '• <b>Togetherness Status:</b> <code>100% In Sync 💕</code>\n' +
+          '• <b>Memory Vault:</b> <code>Cloudinary & Supabase Synced</code>\n' +
           '• <b>Care Reminders:</b> <code>Active & Healthy</code>'
         )
         const buttons = [
@@ -83,13 +83,13 @@ export async function POST(req: Request) {
       // /morning_brief
       if (text.startsWith('/morning_brief') || text.startsWith('/digest')) {
         const digestText = (
-          '☀️ <b>[Our Little World] AI Morning Couple Briefing</b> 💕\n'
-          '━━━━━━━━━━━━━━━━━━━━━━━━━\n'
-          '💌 <b>Today\'s Message:</b>\n'
-          '<i>\"Together is our favorite place to be. Have a gentle, beautiful day!\"</i>\n\n'
-          '🗓️ <b>Daily Milestone:</b> Another precious day written in our story.\n'
-          '✍️ <b>Intimacy Quiz:</b> Today\'s Korean challenge is waiting for you!\n'
-          '━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+          '☀️ <b>[Our Little World] AI Morning Couple Briefing</b> 💕\n' +
+          '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
+          '💌 <b>Today\'s Message:</b>\n' +
+          '<i>\"Together is our favorite place to be. Have a gentle, beautiful day!\"</i>\n\n' +
+          '🗓️ <b>Daily Milestone:</b> Another precious day written in our story.\n' +
+          '✍️ <b>Intimacy Quiz:</b> Today\'s Korean challenge is waiting for you!\n' +
+          '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
           '<i>Open your shared space via the Mini App below:</i>'
         )
         const buttons = [
