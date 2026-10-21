@@ -270,3 +270,15 @@ After release stability:
 - The cron routing/authentication and service-role permission issues found during this audit are now verified fixed for observed scheduled cycles. Since no push devices, saved places, low-battery locations, expired check-ins, or due surprise capsules were present, no user notifications were sent. Actual push delivery remains untested.
 - GitHub CI on commit `77ce9e554ead14a8dec6c978f37216af63e8ba0e`: production pipeline, smoke E2E, E2E tests, unit tests, CodeQL, and secret scan all passed.
 - All six Storage buckets are private. Bucket-level file-size and MIME-type restrictions are unset; review application-level validation and decide whether provider limits should be configured.
+
+
+## 2026-10-21 current-main observed evidence
+- [x] Current-main Android EAS preview build succeeded for source SHA `38bbdc955fdccf13631f6f0b82ee8a86186071ce`: build `fe31b055-357b-4455-b95e-5b8eec04269e` (https://expo.dev/accounts/thuwon/projects/a-little-world-with-us/builds/fe31b055-357b-4455-b95e-5b8eec04269e).
+- [x] Current-main iOS EAS simulator build succeeded for source SHA `38bbdc955fdccf13631f6f0b82ee8a86186071ce`: build `e689d59c-d59f-4881-a7cd-85036f5fddcd` (https://expo.dev/accounts/thuwon/projects/a-little-world-with-us/builds/e689d59c-d59f-4881-a7cd-85036f5fddcd).
+- [x] Vercel Production deployment `dpl_7HmERGDoaV79a5S8HaTR9Ze5k6Dg` is READY for the same source SHA.
+- [x] GitHub Actions on that SHA: Mobile EAS Build, E2E Tests, Secret scan, Production CI/CD Pipeline (Non-Docker), Production Smoke E2E, Test, and CodeQL all succeeded.
+- [ ] Android 15 physical-device smoke remains open: the user-reported `Maximum update depth exceeded` has not yet been confirmed fixed on-device.
+- [ ] Physical iOS build/signing and device smoke remain open; the recorded iOS artifact is simulator-only.
+- [x] Owner reports Telegram and Google Drive setup/testing complete. This is owner-reported evidence; automation did not repeat authenticated end-to-end user flows.
+- [ ] B2 upload/download round-trip (if enabled), real push delivery, two-device WebRTC, background location, offline recovery, Memories visual pass, controlled fertility scenario, Korean Levels 4–6 human QA, and refreshed Dependabot/security snapshot remain outstanding.
+- Note: Vercel's latest aggregated Drive-not-connected errors observed during this check were associated with older deployment `dpl_ERULU7Y2hFxrPYgtZ1FPwB992HBi`; no conclusion about post-reconnection success/failure is inferred from those historical events.
