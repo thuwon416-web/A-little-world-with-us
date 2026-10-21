@@ -5,6 +5,9 @@ on:
   push:
     paths:
       - ".github/workflows/mobile-eas-build.yml"
+      - "apps/mobile/**"
+      - "packages/**"
+      - "package.json"
 
 permissions:
   contents: read
