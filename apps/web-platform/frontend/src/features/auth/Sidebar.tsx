@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import {
   LogOut, Calendar, Camera, HeartPulse, HelpCircle, Home, Info,
   Leaf, LockKeyhole, MapPin, MessageCircleHeart, Gamepad2, Music,
-  PhoneCall, Settings, Sparkles, Star, MonitorPlay, Infinity,
+  PhoneCall, Settings, Sparkles, Star, MonitorPlay,
   Languages, Shield, FileText,
 } from 'lucide-react'
 import LittleWorldLogo from '@/components/shared/LittleWorldLogo'

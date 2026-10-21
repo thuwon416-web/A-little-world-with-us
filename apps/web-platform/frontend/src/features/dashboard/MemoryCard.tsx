@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Calendar, Heart, Image as ImageIcon, MapPin, Trash2 } from 'lucide-react'
+import { Calendar, Heart, Image as MapPin, Trash2 } from 'lucide-react'
 
 export interface MemoryCardProps {
   id?: string | number
