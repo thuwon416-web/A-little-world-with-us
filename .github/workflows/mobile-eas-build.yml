@@ -56,5 +56,5 @@ jobs:
             # Simulator builds do not require Apple device provisioning.
             npx --yes eas-cli@latest build --platform ios --profile development --non-interactive
           else
-            npx --yes eas-cli@latest build --platform android --profile preview --non-interactive
+            npx --yes eas-cli@latest build --platform android --profile preview --clear-cache --non-interactive
           fi
