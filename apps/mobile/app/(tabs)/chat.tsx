@@ -117,6 +117,44 @@ async function persistLocationMessage(
   })
 }
 
+
+// ---------------------------------------------------------------------------
+// Emoji Reaction Strip
+// ---------------------------------------------------------------------------
+
+const REACTION_KEYS = ['heart', 'laugh', 'wow', 'sad', 'fire']
+const REACTION_EMOJI = {
+  heart: '❤️',
+  laugh: '😂',
+  wow:   '😮',
+  sad:   '😢',
+  fire:  '🔥',
+}
+
+function EmojiReactionStrip({ messageId, reactions, onReact }) {
+  const chosen = reactions[messageId]
+  return (
+    <View style={rxSt.row}>
+      {REACTION_KEYS.map(key => (
+        <TouchableOpacity
+          key={key}
+          style={[rxSt.pill, chosen === key && rxSt.pillChosen]}
+          onPress={() => onReact(messageId, key)}
+        >
+          <Text style={rxSt.emoji}>{REACTION_EMOJI[key]}</Text>
+        </TouchableOpacity>
+      ))}
+    </View>
+  )
+}
+
+const rxSt = StyleSheet.create({
+  row:        { flexDirection: 'row', gap: 4, marginTop: 4, flexWrap: 'wrap' },
+  pill:       { paddingHorizontal: 7, paddingVertical: 3, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.06)', borderWidth: 1, borderColor: 'rgba(255,255,255,0.12)' },
+  pillChosen: { backgroundColor: 'rgba(236,72,153,0.25)', borderColor: 'rgba(236,72,153,0.50)' },
+  emoji:      { fontSize: 16 },
+})
+
 // ---------------------------------------------------------------------------
 // Screen
 // ---------------------------------------------------------------------------

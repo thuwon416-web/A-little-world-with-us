@@ -123,6 +123,39 @@ function StatCard({ title, value }: { readonly title: string; readonly value: nu
   )
 }
 
+// -- Days Together Banner --------------------------------------------------
+// Pass the couple's start date ISO string; renders a romantic day counter.
+// No network calls needed -- pure date math.
+function DaysTogetherBanner({ startDateISO }: { startDateISO: string | null }) {
+  if (!startDateISO) return null;
+  const start = new Date(startDateISO);
+  if (isNaN(start.getTime())) return null;
+  const diffMs = Date.now() - start.getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (days < 0) return null;
+  return (
+    <View style={daysBannerSt.container}>
+      <Text style={daysBannerSt.days}>{days}</Text>
+      <Text style={daysBannerSt.label}>days together</Text>
+    </View>
+  );
+}
+const daysBannerSt = StyleSheet.create({
+  container: {
+    alignItems: 'center',
+    paddingVertical: 14,
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 16,
+    backgroundColor: 'rgba(236,72,153,0.10)',
+    borderWidth: 1,
+    borderColor: 'rgba(236,72,153,0.22)',
+  },
+  days:  { fontSize: 36, fontWeight: '800', color: '#ec4899' },
+  label: { fontSize: 13, color: '#f9a8d4', marginTop: 2, fontWeight: '500' },
+});
+
+
 export default function DashboardScreen() {
   const router = useRouter()
   const { colors } = useTheme()
