@@ -166,3 +166,16 @@ Product and hardening backlog is pre-staged now, but completion is recorded only
 - Telegram gateway is not runtime-configured in the linked production project according to both environment inventory and live endpoint response (`GET /api/telegram/daily-question` → 503). Owner reports the variable was added; verify project/target/deployment propagation before treating this gate as complete. Do not rotate or overwrite any unrelated secret.
 - Google Drive production variables exist by name, but callback value and authenticated E2E still require confirmation. Runtime aggregation continues to show Drive encryption/decryption failures on the older deployment only.
 - Supabase read-only advisor audit found 12 SECURITY DEFINER warnings, leaked-password protection disabled, and 120 unused-index notices; no automatic remediation applied.
+
+
+## 2026-10-21 current-main release checkpoint
+- Verified current `main` commit: `38bbdc955fdccf13631f6f0b82ee8a86186071ce` (`ci(mobile): build EAS on mobile source changes`).
+- Vercel Production deployment `dpl_7HmERGDoaV79a5S8HaTR9Ze5k6Dg` is `READY` for that exact SHA.
+- GitHub Actions for that SHA passed: Mobile EAS Build (Android + iOS), E2E Tests, Secret scan, Production CI/CD Pipeline (Non-Docker), Production Smoke E2E, Test, and CodeQL.
+- Current-main Android EAS preview APK build: `fe31b055-357b-4455-b95e-5b8eec04269e`. Artifact: https://expo.dev/accounts/thuwon/projects/a-little-world-with-us/builds/fe31b055-357b-4455-b95e-5b8eec04269e
+- Current-main iOS EAS simulator build: `e689d59c-d59f-4881-a7cd-85036f5fddcd`. Artifact: https://expo.dev/accounts/thuwon/projects/a-little-world-with-us/builds/e689d59c-d59f-4881-a7cd-85036f5fddcd
+- User reports Telegram and Google Drive setup/testing complete; recorded as owner-reported verification, not independently repeated by automation.
+- Android 15 `Maximum update depth exceeded` remains unresolved until the new APK is exercised on the physical device and runtime evidence identifies whether the redirect/provider path is responsible. Do not mark device smoke complete from EAS/CI success alone.
+- iOS artifact is a simulator build, not a physical-device signed release build.
+- Latest Vercel runtime aggregation still contains historical Drive-not-connected errors on deployment `dpl_ERULU7Y2hFxrPYgtZ1FPwB992HBi`; these events predate the latest current-main deployment and do not independently establish a current failure after the user's reconnection.
+- Next gates: physical Android smoke (launch/login/navigation), physical iOS signing/device smoke, B2 media round-trip if enabled, actual push delivery, two-device WebRTC, background location/offline recovery, Memories UI/fertility/Korean 4–6 QA, and a fresh Dependabot/security alert review.
