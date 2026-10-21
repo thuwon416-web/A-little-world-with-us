@@ -332,8 +332,8 @@ export default function AutomationPipelinePage() {
             disabled={isRunning}
             className={`flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded-full shadow-sm transition-all ${
               isRunning
-                ? 'bg-amber-500/20 text-amber-500 border border-amber-500/30 animate-pulse'
-                : 'bg-accent-1 hover:opacity-90 text-[color:var(--accent-foreground)]'
+                ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30 animate-pulse'
+                : 'bg-accent-1 hover:opacity-90 text-white font-medium shadow-sm'
             }`}
           >
             {isRunning ? (
@@ -358,9 +358,9 @@ export default function AutomationPipelinePage() {
         <div
           ref={canvasRef}
           onClick={() => setSelectedNodeId(null)}
-          className="flex-1 h-full relative cursor-grab active:cursor-grabbing overflow-auto bg-background/50"
+          className="flex-1 h-full relative cursor-grab active:cursor-grabbing overflow-auto bg-[#faf7fd]"
           style={{
-            backgroundImage: 'radial-gradient(rgba(180, 140, 210, 0.22) 1.5px, transparent 1.5px)',
+            backgroundImage: 'radial-gradient(rgba(140, 100, 180, 0.16) 1.5px, transparent 1.5px)',
             backgroundSize: '24px 24px',
           }}
         >

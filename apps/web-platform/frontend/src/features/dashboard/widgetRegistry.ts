@@ -4,6 +4,7 @@ export type DashboardWidgetId =
   | 'memory-of-the-day'
   | 'mini-care-check'
   | 'music-player'
+  | 'our-stats'
 
 export const DEFAULT_WIDGETS: DashboardWidgetId[] = [
   'days-counter',
@@ -11,6 +12,7 @@ export const DEFAULT_WIDGETS: DashboardWidgetId[] = [
   'memory-of-the-day',
   'mini-care-check',
   'music-player',
+  'our-stats',
 ]
 
 export type DashboardLayout = {

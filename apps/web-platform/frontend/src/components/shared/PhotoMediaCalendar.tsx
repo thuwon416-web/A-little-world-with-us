@@ -253,10 +253,12 @@ export default function PhotoMediaCalendar({
               ) : (
                 /* Clean date circle */
                 <div
-                  className={`flex h-full w-full items-center justify-center rounded-full text-xs sm:text-sm font-medium transition ${
-                    isToday
-                      ? 'border border-accent-1 bg-accent-1/15 font-bold text-accent-1'
-                      : 'text-text-1/80 hover:bg-accent-1/10 hover:text-text-1'
+                  className={`flex h-full w-full items-center justify-center rounded-full text-xs sm:text-sm transition-all ${
+                    isSelected
+                      ? 'bg-accent-1 text-white font-bold shadow-md'
+                      : isToday
+                      ? 'border-2 border-accent-1 bg-accent-1/15 font-bold text-accent-1'
+                      : 'text-text-1 font-medium hover:bg-accent-1/10 hover:text-text-1'
                   }`}
                 >
                   {day}

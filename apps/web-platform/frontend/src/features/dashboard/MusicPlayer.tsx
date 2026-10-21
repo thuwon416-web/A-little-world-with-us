@@ -54,7 +54,7 @@ export default memo(function MusicPlayer() {
 
   if (audioError) {
     return (
-      <div className="dashboard-card-interactive dashboard-card-glow flex items-center justify-between gap-3 rounded-panel border border-accent-1/20 bg-card/60 p-3">
+      <div className="dashboard-card-interactive dashboard-card-glow flex items-center justify-between gap-3 rounded-panel border border-accent-1/20 bg-card/60 p-5 min-h-[140px]">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
             <AlertCircle className="h-5 w-5" />
@@ -77,7 +77,7 @@ export default memo(function MusicPlayer() {
   }
 
   return (
-    <div className="dashboard-card-interactive dashboard-card-glow flex items-center justify-between gap-3 rounded-panel border border-accent-1/20 bg-card/60 p-3">
+    <div className="dashboard-card-interactive dashboard-card-glow flex items-center justify-between gap-3 rounded-panel border border-accent-1/20 bg-card/60 p-5 min-h-[140px]">
       <div className="flex items-center gap-3">
         <motion.button
           whileHover={{ scale: 1.04 }}

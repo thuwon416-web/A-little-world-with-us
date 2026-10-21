@@ -182,9 +182,9 @@ export default function CalendarPage() {
               key={tab}
               type="button"
               onClick={() => selectSection(tab)}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition-all ${
+              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold capitalize transition-all ${
                 activeTab === tab
-                  ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+                  ? 'bg-accent-1 text-white shadow-sm'
                   : 'text-text-2 hover:text-text-1 hover:bg-card'
               }`}
             >
@@ -236,7 +236,7 @@ export default function CalendarPage() {
                   <button
                     type="button"
                     onClick={() => setIsAddingEvent((prev) => !prev)}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-accent-1 px-3 py-1.5 text-xs font-semibold text-[color:var(--accent-foreground)] shadow-sm hover:opacity-90 transition active:scale-95"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-accent-1 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:opacity-90 transition active:scale-95"
                   >
                     {isAddingEvent ? <X className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
                     {isAddingEvent ? 'Cancel' : 'Add Plan'}
@@ -281,7 +281,7 @@ export default function CalendarPage() {
                     <button
                       type="submit"
                       disabled={savingEvent || !newTitle.trim()}
-                      className="w-full rounded-lg bg-accent-1 py-2 text-xs font-semibold text-[color:var(--accent-foreground)] hover:opacity-90 transition disabled:opacity-50"
+                      className="w-full rounded-lg bg-accent-1 py-2 text-xs font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
                     >
                       {savingEvent ? 'Saving...' : 'Save to Our Calendar'}
                     </button>

@@ -735,22 +735,22 @@ function MemoriesPageContent() {
   return (
     <div className="dashboard-shell mx-auto w-full max-w-7xl space-y-6 px-4 py-4 sm:px-6 sm:py-6">
       {/* Unified Romantic Hero Header */}
-      <header className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 p-6 backdrop-blur-xl shadow-lg">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-secondary/10 blur-3xl" />
+      <header className="relative overflow-hidden rounded-3xl border border-border/70 bg-card p-6 shadow-sm">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-accent-1/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-accent-2/10 blur-3xl" />
 
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-              <Heart className="h-3.5 w-3.5 fill-primary text-primary" />
+            <div className="inline-flex items-center gap-2 rounded-full border border-accent-1/25 bg-accent-1/10 px-3 py-1 text-xs font-semibold text-accent-1">
+              <Heart className="h-3.5 w-3.5 fill-current text-accent-1" />
               <span>A Little World, Just For Us</span>
               <span className="opacity-40">•</span>
               <span>{memories.length} Keepsakes</span>
             </div>
-            <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            <h1 className="font-serif text-3xl font-semibold tracking-tight text-text-1 sm:text-4xl">
               Memories & Keepsakes
             </h1>
-            <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+            <p className="max-w-xl text-sm leading-relaxed text-text-2">
               Every shared glance, travel postcard, quiet ritual, and little moment we cherish forever.
             </p>
           </div>
@@ -760,7 +760,7 @@ function MemoriesPageContent() {
             <button
               type="button"
               onClick={() => setIsAddMemoryOpen(true)}
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-md transition hover:opacity-90 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 active:scale-95"
             >
               <Plus className="h-4 w-4" />
               <span>Add Memory</span>
@@ -769,47 +769,47 @@ function MemoriesPageContent() {
             <button
               type="button"
               onClick={openNewJournal}
-              className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-3.5 py-2.5 text-sm font-medium text-foreground backdrop-blur-md transition hover:bg-card/90 active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card px-3.5 py-2.5 text-sm font-medium text-text-1 transition hover:bg-soft-tint active:scale-95"
             >
-              <Pencil className="h-4 w-4 text-primary" />
+              <Pencil className="h-4 w-4 text-accent-1" />
               <span className="hidden sm:inline">Write Journal</span>
             </button>
 
             <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
 
             {/* Drive Controls */}
-            <div className="flex items-center gap-1 rounded-full border border-border/70 bg-card/50 p-1 backdrop-blur-md">
+            <div className="flex items-center gap-1 rounded-full border border-border/70 bg-card/70 p-1">
               <button
                 type="button"
                 title="Sync with Google Drive"
                 disabled={isDriveSyncing || !coupleLinkId}
                 onClick={() => void triggerDriveSync()}
-                className="rounded-full p-2 text-muted-foreground transition hover:bg-card hover:text-foreground disabled:opacity-40"
+                className="rounded-full p-2 text-text-2 transition hover:bg-card hover:text-text-1 disabled:opacity-40"
               >
-                <RefreshCw className={`h-4 w-4 ${isDriveSyncing ? 'animate-spin text-primary' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${isDriveSyncing ? 'animate-spin text-accent-1' : ''}`} />
               </button>
               <button
                 type="button"
                 title="Migrate photos to Google Drive"
                 disabled={isMigratingToDrive || !coupleLinkId}
                 onClick={() => void triggerDriveMigration()}
-                className="rounded-full p-2 text-muted-foreground transition hover:bg-card hover:text-foreground disabled:opacity-40"
+                className="rounded-full p-2 text-text-2 transition hover:bg-card hover:text-text-1 disabled:opacity-40"
               >
-                <UploadCloud className={`h-4 w-4 ${isMigratingToDrive ? 'animate-bounce text-primary' : ''}`} />
+                <UploadCloud className={`h-4 w-4 ${isMigratingToDrive ? 'animate-bounce text-accent-1' : ''}`} />
               </button>
             </div>
           </div>
         </div>
 
         {driveSyncSummary ? (
-          <div className="relative mt-3 rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs text-foreground/80">
+          <div className="relative mt-3 rounded-xl border border-accent-1/20 bg-accent-1/5 px-3.5 py-2 text-xs text-text-1">
             {driveSyncSummary}
           </div>
         ) : null}
       </header>
 
       {/* Navigation Sub-Tabs */}
-      <nav aria-label="Memories navigation" className="flex items-center gap-1 overflow-x-auto rounded-2xl border border-border/70 bg-card/60 p-1.5 backdrop-blur-xl shadow-sm">
+      <nav aria-label="Memories navigation" className="flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-border/70 bg-card p-1.5 shadow-xs">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
@@ -818,16 +818,16 @@ function MemoriesPageContent() {
               key={tab.id}
               type="button"
               onClick={() => setActiveTab(tab.id)}
-              className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition ${
+              className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-all ${
                 isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'text-muted-foreground hover:bg-card/80 hover:text-foreground'
+                  ? 'bg-accent-1 text-white shadow-sm font-semibold'
+                  : 'text-text-2 hover:bg-soft-tint hover:text-text-1'
               }`}
             >
               <Icon className="h-4 w-4" />
               <span>{tab.label}</span>
               {tab.badge !== undefined ? (
-                <span className={`rounded-full px-2 py-0.5 text-xs ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                <span className={`rounded-full px-2 py-0.5 text-xs ${isActive ? 'bg-white/20 text-white' : 'bg-soft-tint text-text-2'}`}>
                   {tab.badge}
                 </span>
               ) : null}
@@ -840,17 +840,17 @@ function MemoriesPageContent() {
       {activeTab === 'photos' && (
         <section className="space-y-5">
           {/* Filter and Sort Bar */}
-          <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/40 p-3.5 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card p-3.5 sm:flex-row sm:items-center sm:justify-between shadow-xs">
             <div className="flex flex-wrap items-center gap-1.5">
               {(['all', 'favorite', 'travel', 'ritual', 'journal'] as MemoryCategory[]).map((category) => (
                 <button
                   key={category}
                   type="button"
                   onClick={() => setFilter(category)}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition ${
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-semibold capitalize transition ${
                     filter === category
-                      ? 'bg-primary text-primary-foreground shadow-sm'
-                      : 'border border-border/50 bg-card/60 text-muted-foreground hover:bg-card hover:text-foreground'
+                      ? 'bg-accent-1 text-white shadow-sm'
+                      : 'border border-border/60 bg-card text-text-2 hover:bg-soft-tint hover:text-text-1'
                   }`}
                 >
                   {category}
@@ -859,11 +859,11 @@ function MemoriesPageContent() {
             </div>
 
             <div className="flex items-center gap-2.5 self-end sm:self-auto">
-              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+              <SlidersHorizontal className="h-4 w-4 text-text-2" />
               <select
                 value={sortBy}
                 onChange={(event) => setSortBy(event.target.value as MemorySort)}
-                className="rounded-xl border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-1 focus:ring-primary"
+                className="rounded-xl border border-border/70 bg-card px-3 py-1.5 text-xs font-medium text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -871,34 +871,35 @@ function MemoriesPageContent() {
             </div>
           </div>
 
+
           {/* Loading / Status */}
           {isLoading && (
-            <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
-              <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+            <div className="flex items-center justify-center gap-2 py-12 text-sm text-text-2">
+              <RefreshCw className="h-4 w-4 animate-spin text-accent-1" />
               <span>Loading our memories...</span>
             </div>
           )}
 
           {error && (
-            <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+            <div className="rounded-xl border border-error/20 bg-error/10 p-4 text-sm text-error">
               {error}
             </div>
           )}
 
           {/* Empty State */}
           {!isLoading && sortedMemories.length === 0 && (
-            <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border border-dashed border-border/80 bg-card/30 p-8 text-center backdrop-blur-md">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+            <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border border-dashed border-border/80 bg-card p-8 text-center shadow-xs">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
                 <Heart className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 font-serif text-lg font-semibold text-foreground">No memories in this view</h3>
-              <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+              <h3 className="mt-4 font-serif text-lg font-semibold text-text-1">No memories in this view</h3>
+              <p className="mt-1 max-w-sm text-xs text-text-2">
                 Capture your special days, date nights, and heartfelt journals together.
               </p>
               <button
                 type="button"
                 onClick={() => setIsAddMemoryOpen(true)}
-                className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition hover:opacity-90"
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Upload First Memory</span>
@@ -1162,13 +1163,13 @@ function JournalEntryModal({
     >
       <section className="w-full max-w-lg space-y-4 rounded-3xl border border-border/80 bg-card/95 p-6 backdrop-blur-2xl shadow-2xl">
         <div className="flex items-center justify-between border-b border-border/40 pb-3">
-          <h2 className="font-serif text-lg font-semibold text-foreground">
+          <h2 className="font-serif text-lg font-semibold text-text-1">
             {isEditing ? 'Edit Journal Entry' : 'New Journal Entry'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="rounded-full p-1.5 text-text-2 hover:bg-soft-tint hover:text-text-1"
             aria-label="Close journal modal"
           >
             <X className="h-5 w-5" />
@@ -1178,17 +1179,17 @@ function JournalEntryModal({
           value={title}
           onChange={(event) => onTitleChange(event.target.value)}
           placeholder="Journal Title..."
-          className="w-full rounded-2xl border border-border/70 bg-card/60 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+          className="w-full rounded-2xl border border-border/70 bg-card px-4 py-2.5 text-sm text-text-1 placeholder:text-text-2/60 outline-none focus:ring-1 focus:ring-accent-1"
         />
         <textarea
           value={body}
           onChange={(event) => onBodyChange(event.target.value)}
           placeholder="Pour your heartfelt thoughts, intimate memories, or feelings here..."
           rows={5}
-          className="w-full resize-y rounded-2xl border border-border/70 bg-card/60 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+          className="w-full resize-y rounded-2xl border border-border/70 bg-card px-4 py-2.5 text-sm text-text-1 placeholder:text-text-2/60 outline-none focus:ring-1 focus:ring-accent-1"
         />
         <div>
-          <p className="mb-2 text-xs font-medium text-muted-foreground">How are you feeling today?</p>
+          <p className="mb-2 text-xs font-semibold text-text-2">How are you feeling today?</p>
           <div className="flex flex-wrap gap-2">
             {JOURNAL_MOODS.map(({ id, label, Icon }) => {
               const selected = mood === id
@@ -1199,8 +1200,8 @@ function JournalEntryModal({
                   onClick={() => onMoodChange(id)}
                   className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
                     selected
-                      ? 'border-primary bg-primary text-primary-foreground shadow-sm'
-                      : 'border-border/60 bg-card/60 text-muted-foreground hover:bg-card hover:text-foreground'
+                      ? 'border-accent-1 bg-accent-1 text-white shadow-sm'
+                      : 'border-border/60 bg-card text-text-2 hover:bg-soft-tint hover:text-text-1'
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -1214,7 +1215,7 @@ function JournalEntryModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+            className="rounded-full px-4 py-2 text-xs font-medium text-text-2 hover:text-text-1"
           >
             Cancel
           </button>
@@ -1222,7 +1223,7 @@ function JournalEntryModal({
             type="button"
             onClick={onSave}
             disabled={saving || !title.trim()}
-            className="rounded-full bg-primary px-5 py-2 text-xs font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-50"
+            className="rounded-full bg-accent-1 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
           >
             {saving ? 'Saving...' : 'Save Journal'}
           </button>
@@ -1277,34 +1278,34 @@ function MemoryUploadPanel({
     <div className="space-y-4 pt-3">
       <form className="space-y-3.5" onSubmit={onUpload}>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Select Photos</label>
+          <label className="text-xs font-semibold text-text-2">Select Photos</label>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
             multiple
             onChange={onFileChange}
-            className="w-full rounded-2xl border border-border/70 bg-card/50 px-3.5 py-2 text-xs text-foreground file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary hover:file:bg-primary/20"
+            className="w-full rounded-2xl border border-border/70 bg-card px-3.5 py-2 text-xs text-text-1 file:mr-3 file:rounded-full file:border-0 file:bg-accent-1/10 file:px-3 file:py-1 file:text-xs file:font-semibold file:text-accent-1 hover:file:bg-accent-1/20"
           />
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">Caption or Title</label>
+          <label className="text-xs font-semibold text-text-2">Caption or Title</label>
           <input
             type="text"
             value={caption}
             onChange={(event) => onCaptionChange(event.target.value)}
             placeholder="e.g. Coffee date at the corner cafe"
-            className="w-full rounded-2xl border border-border/70 bg-card/50 px-3.5 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-2xl border border-border/70 bg-card px-3.5 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Category</label>
+            <label className="text-xs font-semibold text-text-2">Category</label>
             <select
               value={memoryCategory}
               onChange={(event) => onMemoryCategoryChange(event.target.value as MemoryCategory)}
-              className="w-full rounded-2xl border border-border/70 bg-card/50 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-2xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
             >
               <option value="favorite">Favorite</option>
               <option value="travel">Travel</option>
@@ -1314,12 +1315,12 @@ function MemoryUploadPanel({
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Date</label>
+            <label className="text-xs font-semibold text-text-2">Date</label>
             <input
               type="date"
               value={memoryDate}
               onChange={(event) => onMemoryDateChange(event.target.value)}
-              className="w-full rounded-2xl border border-border/70 bg-card/50 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-2xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
               aria-label="Memory date"
             />
           </div>
@@ -1329,36 +1330,36 @@ function MemoryUploadPanel({
           <button
             type="button"
             onClick={() => onLocationOpenChange(true)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 text-xs text-foreground hover:bg-card"
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card px-3 py-1.5 text-xs text-text-1 hover:bg-soft-tint"
           >
-            <MapPin className="h-3.5 w-3.5 text-primary" />
+            <MapPin className="h-3.5 w-3.5 text-accent-1" />
             <span>{location ? (locationLabel || 'Location pinned') : 'Add Location (Optional)'}</span>
           </button>
         </div>
 
         {isUploading && (
           <div className="space-y-1.5 pt-2">
-            <div className="flex justify-between text-xs text-muted-foreground">
+            <div className="flex justify-between text-xs text-text-2">
               <span>Uploading & encrypting...</span>
               <span>{uploadProgress}%</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-soft-tint">
               <div
-                className="h-full bg-primary transition-all duration-300"
+                className="h-full bg-accent-1 transition-all duration-300"
                 style={{ width: `${uploadProgress}%` }}
               />
             </div>
           </div>
         )}
 
-        {error && <p className="text-xs text-destructive">{error}</p>}
-        {uploadSummary && <p className="text-xs text-emerald-500">{uploadSummary}</p>}
+        {error && <p className="text-xs text-error">{error}</p>}
+        {uploadSummary && <p className="text-xs text-emerald-600 font-medium">{uploadSummary}</p>}
 
         <div className="flex justify-end gap-2 pt-2">
           <button
             type="submit"
             disabled={isUploading || !isSupabaseConfigured}
-            className="w-full rounded-full bg-primary py-2.5 text-xs font-medium text-primary-foreground shadow-md transition hover:opacity-90 disabled:opacity-50"
+            className="w-full rounded-full bg-accent-1 py-2.5 text-xs font-semibold text-white shadow-md transition hover:opacity-90 disabled:opacity-50"
           >
             {isUploading ? `Uploading ${uploadProgress}%` : 'Upload & Save Memory'}
           </button>
@@ -1369,8 +1370,8 @@ function MemoryUploadPanel({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md space-y-3.5 rounded-3xl border border-border bg-card p-5 shadow-2xl">
             <div className="flex items-center justify-between">
-              <h4 className="font-serif text-sm font-semibold text-foreground">Pick Location</h4>
-              <button type="button" onClick={() => onLocationOpenChange(false)} className="text-xs text-muted-foreground hover:text-foreground">
+              <h4 className="font-serif text-sm font-semibold text-text-1">Pick Location</h4>
+              <button type="button" onClick={() => onLocationOpenChange(false)} className="text-xs text-text-2 hover:text-text-1">
                 Close
               </button>
             </div>
@@ -1383,7 +1384,7 @@ function MemoryUploadPanel({
                   () => onErrorChange('Unable to read your current location.')
                 )
               }
-              className="w-full rounded-xl border border-border/70 py-2 text-xs font-medium text-foreground hover:bg-card/80"
+              className="w-full rounded-xl border border-border/70 py-2 text-xs font-medium text-text-1 hover:bg-soft-tint"
             >
               Use Current Location
             </button>
@@ -1391,12 +1392,18 @@ function MemoryUploadPanel({
               value={locationLabel}
               onChange={(event) => onLocationLabelChange(event.target.value)}
               placeholder="Place label (e.g. Cozy Cafe, Riverside Park)"
-              className="w-full rounded-xl border border-border/70 bg-card/60 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
             />
             <button
               type="button"
               onClick={() => onLocationOpenChange(false)}
-              className="w-full rounded-full bg-primary py-2 text-xs font-medium text-primary-foreground"
+              className="w-full rounded-full bg-accent-1 py-2 text-xs font-semibold text-white shadow-sm"
+            >
+              Confirm Location
+            </button>
+          </div>
+        </div>
+      )}
             >
               Confirm Location
             </button>
@@ -1434,19 +1441,19 @@ function MemoryGrid({
         memory.category === 'journal' ? (
           <article
             key={memory.id}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/70 bg-card/60 p-4.5 backdrop-blur-md shadow-sm transition hover:border-primary/40 hover:shadow-md"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/70 bg-card p-4.5 shadow-sm transition hover:border-accent-1/40 hover:shadow-md"
           >
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-accent-1">
                     <Pencil className="h-3 w-3" />
                     <span>Journal</span>
                   </span>
-                  <h3 className="line-clamp-1 font-serif text-base font-semibold text-foreground">
+                  <h3 className="line-clamp-1 font-serif text-base font-semibold text-text-1">
                     {memory.title}
                   </h3>
-                  <p className="text-[11px] text-muted-foreground">{memory.date}</p>
+                  <p className="text-[11px] text-text-2">{memory.date}</p>
                 </div>
 
                 <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100">
@@ -1456,12 +1463,12 @@ function MemoryGrid({
                       JOURNAL_MOODS.find((item) => item.id === 'okay')
                     if (!mood) return null
                     const MoodIcon = mood.Icon
-                    return <MoodIcon className="h-4 w-4 text-primary" aria-label={mood.label} />
+                    return <MoodIcon className="h-4 w-4 text-accent-1" aria-label={mood.label} />
                   })() : null}
                   <button
                     type="button"
                     onClick={() => onEditJournal(memory)}
-                    className="rounded-full p-1 text-muted-foreground hover:bg-card hover:text-foreground"
+                    className="rounded-full p-1 text-text-2 hover:bg-soft-tint hover:text-text-1"
                     aria-label="Edit journal entry"
                   >
                     <Pencil className="h-3.5 w-3.5" />
@@ -1469,7 +1476,7 @@ function MemoryGrid({
                   <button
                     type="button"
                     onClick={() => onDeleteJournal(memory)}
-                    className="rounded-full p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    className="rounded-full p-1 text-text-2 hover:bg-error/10 hover:text-error"
                     aria-label="Delete journal entry"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -1478,14 +1485,14 @@ function MemoryGrid({
               </div>
 
               {memory.description ? (
-                <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
+                <p className="line-clamp-3 text-xs leading-relaxed text-text-2">
                   {memory.description}
                 </p>
               ) : null}
 
               {memory.metadata?.ai_reflection ? (
-                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-3">
-                  <div className="flex items-center justify-between text-xs font-semibold text-primary">
+                <div className="rounded-2xl border border-accent-1/20 bg-accent-1/5 p-3">
+                  <div className="flex items-center justify-between text-xs font-semibold text-accent-1">
                     <span className="inline-flex items-center gap-1.5">
                       <Sparkles className="h-3.5 w-3.5" />
                       AI Reflection
@@ -1494,7 +1501,7 @@ function MemoryGrid({
                       type="button"
                       onClick={() => onSpeakReflection(memory)}
                       aria-label="Read reflection aloud"
-                      className="rounded-full p-1 hover:bg-primary/10"
+                      className="rounded-full p-1 hover:bg-accent-1/10"
                     >
                       {speakingJournalId === memory.id ? (
                         <Square className="h-3.5 w-3.5" />
@@ -1503,7 +1510,7 @@ function MemoryGrid({
                       )}
                     </button>
                   </div>
-                  <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-foreground/90">
+                  <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-text-1">
                     {memory.metadata.ai_reflection}
                   </p>
                 </div>
@@ -1516,12 +1523,12 @@ function MemoryGrid({
                   type="button"
                   onClick={() => void onRequestReflection(memory)}
                   disabled={reflectingId !== null}
-                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/50 py-1.5 text-xs font-medium text-foreground transition hover:border-primary/40 hover:text-primary disabled:opacity-50"
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card py-1.5 text-xs font-medium text-text-1 transition hover:border-accent-1/40 hover:text-accent-1 disabled:opacity-50"
                 >
                   {reflectingId === memory.id ? (
-                    <RefreshCw className="h-3.5 w-3.5 animate-spin text-primary" />
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin text-accent-1" />
                   ) : (
-                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                    <Sparkles className="h-3.5 w-3.5 text-accent-1" />
                   )}
                   <span>{reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}</span>
                 </button>
@@ -1604,11 +1611,11 @@ function MemoryDetail({
         className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border/80 bg-card/95 p-5 backdrop-blur-2xl shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-border/40 pb-3">
-          <span className="text-xs font-medium text-muted-foreground">Memory Details</span>
+          <span className="text-xs font-semibold text-text-2">Memory Details</span>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            className="rounded-full p-1.5 text-text-2 hover:bg-soft-tint hover:text-text-1"
             aria-label="Close"
           >
             <X className="h-5 w-5" />
@@ -1626,38 +1633,38 @@ function MemoryDetail({
             />
           </div>
         ) : (
-          <div className="mt-3 flex h-48 w-full items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <div className="mt-3 flex h-48 w-full items-center justify-center rounded-2xl bg-accent-1/10 text-accent-1">
             <Heart className="h-12 w-12" />
           </div>
         )}
 
         <div className="space-y-3.5 pt-4">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground">Title</label>
+            <label className="text-xs font-semibold text-text-2">Title</label>
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               aria-label="Memory title"
-              className="w-full rounded-2xl border border-border/70 bg-card/60 px-3.5 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
+              className="w-full rounded-2xl border border-border/70 bg-card px-3.5 py-2 text-sm text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">Date</label>
+              <label className="text-xs font-semibold text-text-2">Date</label>
               <input
                 type="date"
                 value={date}
                 onChange={(event) => setDate(event.target.value)}
-                className="w-full rounded-2xl border border-border/70 bg-card/60 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-2xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground">Category</label>
+              <label className="text-xs font-semibold text-text-2">Category</label>
               <select
                 value={category}
                 onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)}
-                className="w-full rounded-2xl border border-border/70 bg-card/60 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+                className="w-full rounded-2xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
               >
                 <option value="favorite">Favorite</option>
                 <option value="travel">Travel</option>
@@ -1667,13 +1674,13 @@ function MemoryDetail({
             </div>
           </div>
 
-          {saveError && <p className="text-xs text-destructive">{saveError}</p>}
+          {saveError && <p className="text-xs text-error">{saveError}</p>}
 
           <div className="flex justify-end gap-2.5 pt-2 border-t border-border/40">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-full px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+              className="rounded-full px-4 py-2 text-xs font-medium text-text-2 hover:text-text-1"
             >
               Cancel
             </button>
@@ -1681,7 +1688,7 @@ function MemoryDetail({
               type="button"
               onClick={save}
               disabled={saving}
-              className="rounded-full bg-primary px-5 py-2 text-xs font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-50"
+              className="rounded-full bg-accent-1 px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 disabled:opacity-50"
             >
               {saving ? 'Saving...' : 'Save Changes'}
             </button>

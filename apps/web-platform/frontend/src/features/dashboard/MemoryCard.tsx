@@ -58,14 +58,15 @@ const MemoryCardComponent = function MemoryCard({
       <button
         type="button"
         onClick={onOpen}
-        className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden rounded-xl bg-gradient-to-br from-accent-1/15 via-card to-accent-2/15 text-left focus:outline-none focus:ring-2 focus:ring-accent-1"
+        className="relative aspect-square sm:aspect-[4/5] w-full overflow-hidden rounded-xl bg-gradient-to-br from-accent-1/10 via-soft-tint to-accent-2/15 text-left focus:outline-none focus:ring-2 focus:ring-accent-1"
         aria-label={`View memory: ${caption || 'Untitled memory'}`}
       >
         {hasValidImage ? (
           <>
             {!loaded && (
-              <div className="absolute inset-0 animate-pulse bg-card/60 flex items-center justify-center">
-                <ImageIcon className="h-6 w-6 text-accent-1/30" />
+              <div className="absolute inset-0 bg-gradient-to-br from-card via-soft-tint to-accent-1/10 animate-pulse flex flex-col items-center justify-center p-3 text-center">
+                <Heart className="h-8 w-8 text-accent-1/40 mb-1" />
+                <span className="text-[11px] text-text-2/70 font-serif">Keeping memory safe...</span>
               </div>
             )}
             <img
@@ -81,14 +82,14 @@ const MemoryCardComponent = function MemoryCard({
             />
           </>
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-accent-1/10 via-soft-tint to-accent-2/10">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-1/15 text-accent-1 mb-2">
-              <Heart className="h-6 w-6 fill-current" />
+          <div className="flex h-full w-full flex-col items-center justify-center p-4 text-center bg-gradient-to-br from-accent-1/15 via-soft-tint to-accent-2/15">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-1/20 text-accent-1 mb-2.5 shadow-xs">
+              <Heart className="h-6 w-6 fill-current text-accent-1" />
             </div>
-            <p className="line-clamp-2 font-serif text-sm font-medium text-text-1">
-              {caption || 'A precious moment'}
+            <p className="line-clamp-2 font-serif text-sm font-semibold text-text-1">
+              {caption || 'A moment together'}
             </p>
-            <p className="mt-1 text-[11px] text-text-2">Memory note</p>
+            <p className="mt-1 text-[11px] text-text-2">Shared keepsake</p>
           </div>
         )}
 

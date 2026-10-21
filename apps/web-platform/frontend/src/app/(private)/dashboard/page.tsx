@@ -34,6 +34,7 @@ const defaultVisibility: Record<DashboardWidgetId, boolean> = {
   'memory-of-the-day': true,
   'mini-care-check': true,
   'music-player': true,
+  'our-stats': true,
 }
 
 const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.Element }> = {
@@ -56,6 +57,10 @@ const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.El
   'music-player': {
     label: 'Music player',
     render: () => <MusicPlayer />,
+  },
+  'our-stats': {
+    label: 'Our stats',
+    render: () => <div className="p-4 text-xs text-text-2">Loading stats...</div>,
   },
 }
 
@@ -326,6 +331,8 @@ export default function DashboardPage() {
                   targetDate={anniversary ?? new Date().toISOString()}
                   label={anniversary ? 'Anniversary' : 'Next occasion'}
                 />
+              ) : widgetId === 'our-stats' ? (
+                coupleId ? <OurStats coupleId={coupleId} /> : <div className="p-5 text-center text-xs text-text-2">Link with partner to view stats</div>
               ) : (
                 widget.render()
               )}
@@ -342,7 +349,6 @@ export default function DashboardPage() {
 
       {/* Secondary Relationship Stats & Scoreboard */}
       <RelationshipStats />
-      {coupleId ? <OurStats coupleId={coupleId} /> : null}
 
       <section className="dashboard-panel ui-card min-w-0 rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-card" aria-label="Couple scoreboard">
         <CoupleScoreboard />
