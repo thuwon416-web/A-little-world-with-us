@@ -149,7 +149,7 @@ function ErrorState({
       <p className="mb-6 text-text-2">{error}</p>
       <button
         onClick={onRetry}
-        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-[color:var(--accent-foreground)] hover:shadow-lg hover:shadow-accent-1/20 transition"
+        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-white font-semibold shadow-sm hover:shadow-lg hover:shadow-accent-1/20 transition"
       >
         Try Again
       </button>
@@ -259,7 +259,7 @@ function StatusCards({
       <div className="flex gap-3">
         <a
           href="/couple-linking"
-          className="flex-1 rounded-lg bg-accent-1 px-4 py-3 text-center font-semibold text-[color:var(--accent-foreground)] hover:shadow-lg hover:shadow-accent-1/20 transition"
+          className="flex-1 rounded-lg bg-accent-1 px-4 py-3 text-center font-semibold text-white font-semibold shadow-sm hover:shadow-lg hover:shadow-accent-1/20 transition"
         >
           Back to Linking
         </a>

@@ -64,7 +64,7 @@ export default function ExportData() {
       <button
         type="button"
         onClick={handleExport}
-        className="px-4 py-2 bg-accent-1 hover:bg-accent-1/90 text-[color:var(--accent-foreground)] rounded-lg text-sm transition"
+        className="px-4 py-2 bg-accent-1 hover:bg-accent-1/90 text-white font-semibold shadow-sm rounded-lg text-sm transition"
       >
         <Download className="mr-2 inline h-4 w-4" /> Download CSV
       </button>

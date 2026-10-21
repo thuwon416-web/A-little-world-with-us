@@ -86,7 +86,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => router.replace('/login')}
-            className="mt-5 rounded-xl bg-accent-1 px-4 py-2 font-semibold text-[color:var(--accent-foreground)]"
+            className="mt-5 rounded-xl bg-accent-1 px-4 py-2 font-semibold text-white font-semibold shadow-sm"
           >
             Go to login
           </button>

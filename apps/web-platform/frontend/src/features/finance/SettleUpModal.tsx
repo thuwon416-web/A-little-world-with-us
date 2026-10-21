@@ -110,7 +110,7 @@ export default function SettleUpModal({
           <button type="button" onClick={onClose} className="rounded-xl border border-accent-1/20 px-4 py-3 text-sm text-text-1">
             Cancel
           </button>
-          <button type="submit" disabled={submitting} className="rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-[color:var(--accent-foreground)] disabled:cursor-not-allowed disabled:opacity-60">
+          <button type="submit" disabled={submitting} className="rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white font-semibold shadow-sm disabled:cursor-not-allowed disabled:opacity-60">
             {submitting ? 'Saving…' : 'Confirm'}
           </button>
         </div>

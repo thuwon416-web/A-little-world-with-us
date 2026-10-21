@@ -208,7 +208,7 @@ export default function BucketList() {
           <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} /> Add to list
         </button>
       </div>
-      <div className="rounded-card border border-accent-1/20 bg-gradient-to-r from-accent-2 to-accent-1 p-3 text-sm text-[color:var(--accent-foreground)]">
+      <div className="rounded-card border border-accent-1/20 bg-gradient-to-r from-accent-2 to-accent-1 p-3 text-sm text-white shadow-sm">
         <div className="mb-1 flex items-center gap-2 font-medium">
           <Sparkles className="h-4 w-4" />
           Shared promise

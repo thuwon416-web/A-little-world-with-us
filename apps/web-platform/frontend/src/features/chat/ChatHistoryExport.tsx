@@ -89,7 +89,7 @@ export default function ChatHistoryExport() {
               onClick={() => setDateRange('7d')}
               className={`flex-1 rounded-input px-3 py-2 text-sm ${
                 dateRange === '7d'
-                  ? 'bg-accent-1 text-[color:var(--accent-foreground)]'
+                  ? 'bg-accent-1 text-white font-semibold shadow-sm'
                   : 'bg-soft-tint text-text-2'
               }`}
             >
@@ -99,7 +99,7 @@ export default function ChatHistoryExport() {
               onClick={() => setDateRange('30d')}
               className={`flex-1 rounded-input px-3 py-2 text-sm ${
                 dateRange === '30d'
-                  ? 'bg-accent-1 text-[color:var(--accent-foreground)]'
+                  ? 'bg-accent-1 text-white font-semibold shadow-sm'
                   : 'bg-soft-tint text-text-2'
               }`}
             >
@@ -109,7 +109,7 @@ export default function ChatHistoryExport() {
               onClick={() => setDateRange('all')}
               className={`flex-1 rounded-input px-3 py-2 text-sm ${
                 dateRange === 'all'
-                  ? 'bg-accent-1 text-[color:var(--accent-foreground)]'
+                  ? 'bg-accent-1 text-white font-semibold shadow-sm'
                   : 'bg-soft-tint text-text-2'
               }`}
             >
@@ -121,7 +121,7 @@ export default function ChatHistoryExport() {
         <button
           onClick={handleExport}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 rounded-input bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] disabled:opacity-50"
+          className="w-full flex items-center justify-center gap-2 rounded-input bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm disabled:opacity-50"
         >
           <Download className="h-4 w-4" />
           {loading ? 'Exporting...' : 'Export as JSON'}

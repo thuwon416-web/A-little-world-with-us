@@ -84,7 +84,7 @@ export default function FeedbackWidget() {
           <button
             type="submit"
             disabled={busy || !feedback.trim()}
-            className="rounded-pill bg-accent-1 px-4 py-2 text-sm font-semibold text-[color:var(--accent-foreground)] transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-pill bg-accent-1 px-4 py-2 text-sm font-semibold text-white font-semibold shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? (isMm ? 'ပို့နေသည်…' : 'Sending…') : isMm ? 'ပို့ရန်' : 'Send Feedback'}
           </button>

@@ -132,7 +132,7 @@ export default function TelegramImport({ coupleId }: { coupleId: string }) {
             type="button"
             onClick={() => void importRows()}
             disabled={loading || !rows.length}
-            className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-pill bg-accent-1 px-4 py-2 text-sm font-semibold text-[color:var(--accent-foreground)] transition hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
+            className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-pill bg-accent-1 px-4 py-2 text-sm font-semibold text-white font-semibold shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
           >
             {loading ? (
               <>

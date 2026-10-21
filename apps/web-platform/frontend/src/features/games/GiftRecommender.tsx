@@ -83,7 +83,7 @@ export default function GiftRecommender() {
             onClick={() => setVibe(option)}
             className={`rounded-full px-3 py-2 text-[11px] capitalize ${
               vibe === option
-                ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-md'
+                ? 'bg-accent-1 text-white font-semibold shadow-sm shadow-md'
                 : 'bg-card/35 text-text-1'
             }`}
           >

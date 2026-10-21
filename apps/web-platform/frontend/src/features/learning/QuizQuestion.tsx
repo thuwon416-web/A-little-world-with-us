@@ -77,7 +77,7 @@ export function QuizQuestion({
         type="button"
         disabled={disabled || (!value.trim() && !selected)}
         onClick={submit}
-        className="rounded-xl bg-accent-1 px-5 py-3 text-sm font-semibold text-[color:var(--accent-foreground)] disabled:opacity-50"
+        className="rounded-xl bg-accent-1 px-5 py-3 text-sm font-semibold text-white font-semibold shadow-sm disabled:opacity-50"
       >
         Check answer
       </button>

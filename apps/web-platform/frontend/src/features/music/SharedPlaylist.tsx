@@ -214,7 +214,7 @@ export default function SharedPlaylist({ coupleId: requestedCoupleId, realtime, 
           <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="A note for your partner (optional)" aria-label="Song notes" rows={2} className="sm:col-span-2 rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1" />
         </div>
         {previewId && <div className="mt-4"><YouTubePlayer videoId={previewId} title={title || 'Song preview'} /></div>}
-        <button type="submit" disabled={saving || !previewId || !title.trim()} className="mt-4 inline-flex items-center gap-2 rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />} {saving ? 'Adding…' : 'Add to playlist'}</button>
+        <button type="submit" disabled={saving || !previewId || !title.trim()} className="mt-4 inline-flex items-center gap-2 rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">{saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />} {saving ? 'Adding…' : 'Add to playlist'}</button>
       </form>
 
       <div className="space-y-3">

@@ -192,7 +192,7 @@ export default function TwoFactorAuthWidget() {
           type="button"
           disabled={loading}
           onClick={() => void beginSetup()}
-          className="w-full rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
+          className="w-full rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
         >
           {loading
             ? isMm
@@ -281,7 +281,7 @@ export default function TwoFactorAuthWidget() {
               type="button"
               disabled={loading || code.length !== 6}
               onClick={() => void verifySetup()}
-              className="w-full rounded-pill bg-accent-1 px-4 py-2 text-sm font-semibold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
+              className="w-full rounded-pill bg-accent-1 px-4 py-2 text-sm font-semibold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
             >
               {loading
                 ? isMm

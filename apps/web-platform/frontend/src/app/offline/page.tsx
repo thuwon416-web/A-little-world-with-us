@@ -37,7 +37,7 @@ export default function OfflinePage() {
           </p>
           <Link
             href="/dashboard"
-            className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-6 py-3 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98]"
+            className="inline-flex items-center gap-2 rounded-pill bg-accent-1 px-6 py-3 text-sm font-medium font-semibold text-white shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98]"
           >
             Go to Dashboard
           </Link>
@@ -68,7 +68,7 @@ export default function OfflinePage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <button
             onClick={() => window.location.reload()}
-            className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent-1 px-6 py-3 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98]"
+            className="inline-flex items-center justify-center gap-2 rounded-pill bg-accent-1 px-6 py-3 text-sm font-medium font-semibold text-white shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98]"
           >
             <RefreshCw className="h-4 w-4" />
             Retry

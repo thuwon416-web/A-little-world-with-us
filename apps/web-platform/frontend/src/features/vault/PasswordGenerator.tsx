@@ -85,7 +85,7 @@ export default function PasswordGenerator({ onSelect, onClose }: PasswordGenerat
         </div>
         <div className="mt-6 flex justify-end gap-2">
           <button type="button" onClick={() => setSeed((value) => value + 1)} className="inline-flex items-center gap-2 rounded-pill border border-border px-4 py-2 text-sm text-text-1 hover:bg-card-hover transition active:scale-[0.98]"><RefreshCw className="h-4 w-4" />Regenerate</button>
-          <button type="button" onClick={() => { onSelect(password); onClose() }} className="rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98]">Use password</button>
+          <button type="button" onClick={() => { onSelect(password); onClose() }} className="rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98]">Use password</button>
         </div>
       </div>
     </div>

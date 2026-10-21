@@ -144,7 +144,7 @@ export default function LearningPage() {
         {levels.map((level) => {
           let levelTabClassName = 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
           if (selectedLevel === level) {
-            levelTabClassName = 'border-accent-1 bg-accent-1 text-[color:var(--accent-foreground)]'
+            levelTabClassName = 'border-accent-1 bg-accent-1 text-white font-semibold shadow-sm'
           }
           return (
             <button
@@ -183,7 +183,7 @@ export default function LearningPage() {
               <button
                 type="button"
                 onClick={() => setQuizLevel(selectedLevel)}
-                className="rounded-pill bg-accent-1 px-5 py-2 text-sm font-semibold text-[color:var(--accent-foreground)] shadow-sm transition-all hover:bg-accent-1/90 active:scale-95"
+                className="rounded-pill bg-accent-1 px-5 py-2 text-sm font-semibold text-white font-semibold shadow-sm shadow-sm transition-all hover:bg-accent-1/90 active:scale-95"
               >
                 Start Quiz
               </button>

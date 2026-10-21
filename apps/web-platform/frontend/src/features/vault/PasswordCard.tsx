@@ -44,7 +44,7 @@ export default function PasswordCard({ credential, masterKey, onEdit, onDelete, 
     <article className={`rounded-panel border bg-card p-5 shadow-md backdrop-blur-xl ${highlighted ? 'border-amber-300 ring-2 ring-amber-300/30' : 'border-accent-1/20'}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-btn bg-accent-1 text-[color:var(--accent-foreground)]"><Globe className="h-5 w-5" /></div>
+          <div className="flex h-11 w-11 items-center justify-center rounded-btn bg-accent-1 text-white font-semibold shadow-sm"><Globe className="h-5 w-5" /></div>
           <div>
             <h3 className="font-medium text-text-1">{credential.label}</h3>
             <p className="text-xs capitalize text-text-2">{credential.category}{credential.isShared ? ' · Shared' : ''}</p>

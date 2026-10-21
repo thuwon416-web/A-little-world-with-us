@@ -50,7 +50,7 @@ export default function MessageSuggestions() {
       <button
         onClick={generateSuggestions}
         disabled={isLoading}
-        className="w-full bg-accent-1 text-[color:var(--accent-foreground)] py-2 rounded-lg font-medium disabled:opacity-50 hover:opacity-90 transition"
+        className="w-full bg-accent-1 text-white font-semibold shadow-sm py-2 rounded-lg font-medium disabled:opacity-50 hover:opacity-90 transition"
       >
         {isLoading ? 'Generating...' : 'Generate Suggestions'}
       </button>

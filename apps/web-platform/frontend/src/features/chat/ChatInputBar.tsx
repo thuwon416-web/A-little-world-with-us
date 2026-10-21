@@ -99,7 +99,7 @@ export default function ChatInputBar({
           type="button"
           onClick={canSend ? send : onVoiceRecord}
           disabled={disabled}
-          className="rounded-full bg-accent-1 p-2.5 text-[color:var(--accent-foreground)] shadow-sm transition-all duration-150 hover:opacity-95 active:scale-95 disabled:opacity-50"
+          className="rounded-full bg-accent-1 p-2.5 text-white font-semibold shadow-sm shadow-sm transition-all duration-150 hover:opacity-95 active:scale-95 disabled:opacity-50"
           aria-label={canSend ? 'Send message' : 'Record voice message'}
         >
           {canSend ? <Send className="h-5 w-5" /> : <Mic className="h-5 w-5" />}

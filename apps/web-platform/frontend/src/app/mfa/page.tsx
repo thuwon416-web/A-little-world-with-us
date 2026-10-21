@@ -123,7 +123,7 @@ export default function MfaPage() {
           <button
             type="submit"
             disabled={!ready || loading || code.length !== 6}
-            className="w-full rounded-pill bg-accent-1 px-4 py-3 text-sm font-semibold text-[color:var(--accent-foreground)] transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
+            className="w-full rounded-pill bg-accent-1 px-4 py-3 text-sm font-semibold font-semibold text-white shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
           >
             {loading
               ? isMm

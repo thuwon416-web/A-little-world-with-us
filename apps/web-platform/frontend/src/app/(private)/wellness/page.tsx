@@ -116,7 +116,7 @@ export default function WellnessPage() {
             onClick={() => setActiveTab(tab.id)}
             className={`shrink-0 rounded-pill border px-4 py-2 text-sm transition active:scale-[0.98] ${
               activeTab === tab.id
-                ? 'border-accent-1 bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+                ? 'border-accent-1 bg-accent-1 text-white font-semibold shadow-sm shadow-sm'
                 : 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
             }`}
             aria-selected={activeTab === tab.id}
@@ -139,7 +139,7 @@ export default function WellnessPage() {
             type="button"
             onClick={() => void completeGame()}
             disabled={completedGame}
-            className="mt-4 rounded-pill bg-accent-1 px-4 py-3 font-bold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
+            className="mt-4 rounded-pill bg-accent-1 px-4 py-3 font-bold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
           >
             {completedGame ? 'Game completed' : 'Complete a game'}
           </button>
@@ -177,7 +177,7 @@ export default function WellnessPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => completeWorkout(selectedWorkout)}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-pill bg-accent-1 py-3 font-bold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-pill bg-accent-1 py-3 font-bold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98]"
                 >
                   <Check className="h-4 w-4" />
                   <span>Complete Workout</span>

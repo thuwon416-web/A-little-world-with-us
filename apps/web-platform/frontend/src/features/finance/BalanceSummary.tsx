@@ -69,7 +69,7 @@ export default function BalanceSummary() {
           <p className="text-xs text-text-2">
             {balance?.expensesCount ?? 0} expenses · {balance?.settlementsCount ?? 0} settlements
           </p>
-          <button type="button" onClick={() => setModalOpen(true)} disabled={!canSettle || loading} className="rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-[color:var(--accent-foreground)] disabled:cursor-not-allowed disabled:opacity-50">
+          <button type="button" onClick={() => setModalOpen(true)} disabled={!canSettle || loading} className="rounded-xl bg-accent-1 px-4 py-3 text-sm font-semibold text-white font-semibold shadow-sm disabled:cursor-not-allowed disabled:opacity-50">
             Settle Up
           </button>
         </div>

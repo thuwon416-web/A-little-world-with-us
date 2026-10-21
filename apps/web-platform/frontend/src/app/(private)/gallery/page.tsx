@@ -112,7 +112,7 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
                 onClick={() => setViewMode('grid')}
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
                   viewMode === 'grid'
-                    ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+                    ? 'bg-accent-1 text-white font-semibold shadow-sm shadow-sm'
                     : 'text-text-2 hover:text-text-1'
                 }`}
               >
@@ -124,7 +124,7 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
                 onClick={() => setViewMode('calendar')}
                 className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
                   viewMode === 'calendar'
-                    ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+                    ? 'bg-accent-1 text-white font-semibold shadow-sm shadow-sm'
                     : 'text-text-2 hover:text-text-1'
                 }`}
               >

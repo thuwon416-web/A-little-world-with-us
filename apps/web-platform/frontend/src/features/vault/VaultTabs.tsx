@@ -16,7 +16,7 @@ export default function VaultTabs({ tab, onChange }: VaultTabsProps) {
         onClick={() => onChange('letters')}
         className={`inline-flex flex-1 items-center justify-center gap-2 rounded-pill px-4 py-2.5 text-sm font-medium transition active:scale-[0.98] ${
           tab === 'letters'
-            ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+            ? 'bg-accent-1 text-white font-semibold shadow-sm shadow-sm'
             : 'text-text-2 hover:text-text-1'
         }`}
       >
@@ -29,7 +29,7 @@ export default function VaultTabs({ tab, onChange }: VaultTabsProps) {
         onClick={() => onChange('passwords')}
         className={`inline-flex flex-1 items-center justify-center gap-2 rounded-pill px-4 py-2.5 text-sm font-medium transition active:scale-[0.98] ${
           tab === 'passwords'
-            ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+            ? 'bg-accent-1 text-white font-semibold shadow-sm shadow-sm'
             : 'text-text-2 hover:text-text-1'
         }`}
       >

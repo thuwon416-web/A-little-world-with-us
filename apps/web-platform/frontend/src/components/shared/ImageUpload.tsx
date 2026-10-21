@@ -106,7 +106,7 @@ export default function ImageUpload({
         type="button"
         onClick={() => void handleUpload()}
         disabled={!selectedFile || isUploading}
-        className="mt-4 w-full rounded-full bg-accent-1 px-4 py-3 text-sm font-semibold text-[color:var(--accent-foreground)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-4 w-full rounded-full bg-accent-1 px-4 py-3 text-sm font-semibold text-white font-semibold shadow-sm disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isUploading ? 'Uploading...' : 'Upload to gallery'}
       </button>

@@ -83,7 +83,7 @@ export default function VoiceMessageRecorder({ onClose, onRecord }: Props) {
             <>
               <button
                 onClick={handleStartRecording}
-                className="p-4 rounded-pill bg-accent-1 text-[color:var(--accent-foreground)]"
+                className="p-4 rounded-pill bg-accent-1 text-white font-semibold shadow-sm"
               >
                 <Mic className="h-8 w-8" />
               </button>

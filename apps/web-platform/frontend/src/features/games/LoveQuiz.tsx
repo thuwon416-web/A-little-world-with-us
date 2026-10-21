@@ -51,7 +51,7 @@ export default function LoveQuiz() {
                 key={oi}
                 onClick={() => handleSelect(qi, oi)}
                 disabled={submitted}
-                className={`px-3 py-1 rounded ${answers[qi] === oi ? 'bg-accent-1 text-[color:var(--accent-foreground)]' : 'bg-card/60'}`}
+                className={`px-3 py-1 rounded ${answers[qi] === oi ? 'bg-accent-1 text-white font-semibold shadow-sm' : 'bg-card/60'}`}
               >
                 {opt}
               </button>

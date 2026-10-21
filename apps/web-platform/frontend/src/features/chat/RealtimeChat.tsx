@@ -981,7 +981,7 @@ export default function RealtimeChat({ className }: RealtimeChatProps = {}) {
         <div className="flex items-center justify-between"><p className="text-sm font-semibold text-text-1">AI Guardian context</p><button type="button" onClick={() => setShowAIPanel(false)} aria-label="Close AI Guardian"><X className="h-4 w-4 text-text-2" /></button></div>
         <p className="mt-2 text-xs text-text-2">{getContextHintDescription(contextCount)}</p>
         {contexts.length > 0 && <ul className="mt-3 space-y-2">{contexts.map((context) => <li key={context.id} className="flex items-center justify-between rounded-input bg-card px-3 py-2 text-xs text-text-1"><span>{context.category} · {context.sender_role}</span><button type="button" onClick={() => void deleteContext(context.id)} className="text-text-2 underline">Delete</button></li>)}</ul>}
-        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-pill bg-accent-1 px-4 py-2 text-xs font-semibold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
+        <button type="button" onClick={() => void askGuardian()} disabled={aiLoading || contextCount === 0} className="mt-3 rounded-pill bg-accent-1 px-4 py-2 text-xs font-semibold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50">{aiLoading ? 'Thinking...' : 'Ask AI'}</button>
         {aiResponse && <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-text-1">{aiResponse}</p>}
       </section>}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -1003,7 +1003,7 @@ export default function RealtimeChat({ className }: RealtimeChatProps = {}) {
             <div key={message.id} id={`chat-msg-${message.id}`} className={`flex w-full ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} group transition-all duration-300`}>
               <div className={`flex flex-col gap-1 max-w-[85%] sm:max-w-[75%] md:max-w-[70%] ${message.sender_id === currentUserId ? 'items-end' : 'items-start'}`}>
                 <div
-                  className={`w-fit max-w-full min-w-[76px] px-3.5 py-2 sm:px-4 sm:py-2.5 transition duration-300 ${isMessageHighlighted ? 'ring-2 ring-accent-1 ring-offset-2 scale-[1.02]' : ''} ${message.sender_id === currentUserId ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm' : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1 border border-border/40 shadow-sm'}`}
+                  className={`w-fit max-w-full min-w-[76px] px-3.5 py-2 sm:px-4 sm:py-2.5 transition duration-300 ${isMessageHighlighted ? 'ring-2 ring-accent-1 ring-offset-2 scale-[1.02]' : ''} ${message.sender_id === currentUserId ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-white font-semibold shadow-sm shadow-sm' : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1 border border-border/40 shadow-sm'}`}
                   onContextMenu={(e) => { e.preventDefault(); handleMessageLongPress(message) }}
                 >
                   {isMessagePinned && (
@@ -1093,7 +1093,7 @@ export default function RealtimeChat({ className }: RealtimeChatProps = {}) {
             <div className="p-4 space-y-4">
               <textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} rows={4} className="w-full rounded-input border-2 border-accent-1/20 bg-card px-4 py-3 text-sm text-text-1 placeholder:text-text-2/50 resize-none focus:outline-none focus:ring-2 focus:ring-accent-1/50" />
               <div className="flex gap-2">
-                <button type="button" onClick={saveEdit} disabled={!editContent.trim()} className="flex-1 rounded-pill bg-accent-1 px-6 py-3 text-base font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">Save</button>
+                <button type="button" onClick={saveEdit} disabled={!editContent.trim()} className="flex-1 rounded-pill bg-accent-1 px-6 py-3 text-base font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed">Save</button>
                 <button type="button" onClick={() => { setShowEditModal(false); setSelectedMessage(null); setEditContent(''); }} className="flex-1 rounded-pill border border-border px-6 py-3 text-base font-medium text-text-1 hover:bg-card-hover transition active:scale-[0.98]">Cancel</button>
               </div>
             </div>

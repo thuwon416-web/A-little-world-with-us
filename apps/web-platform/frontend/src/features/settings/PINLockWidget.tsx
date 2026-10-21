@@ -196,7 +196,7 @@ export default function PINLockWidget({
             type="button"
             onClick={() => void handleSetPIN()}
             disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin || (hasPin && !/^\d{4,6}$/.test(currentPin))}
-            className="w-full rounded-pill bg-accent-1 px-4 py-3 text-sm font-semibold text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-pill bg-accent-1 px-4 py-3 text-sm font-semibold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {hasPin ? 'Change PIN' : 'Set PIN'}
           </button>
@@ -222,7 +222,7 @@ export default function PINLockWidget({
               type="button"
               onClick={openModal}
               disabled={modalBlocked}
-              className="w-full rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+              className="w-full rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               Change PIN
             </button>
@@ -244,7 +244,7 @@ export default function PINLockWidget({
             type="button"
             onClick={openModal}
             disabled={modalBlocked}
-            className="w-full rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Set PIN
           </button>

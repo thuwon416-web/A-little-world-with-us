@@ -180,7 +180,7 @@ export default function FinancialGoals() {
         <input value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} placeholder="Goal name (e.g., Vacation)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
         <input type="number" min="0" value={newGoal.target} onChange={(event) => setNewGoal({ ...newGoal, target: event.target.value })} placeholder="Target (MMK)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
         <input type="number" min="0" value={newGoal.current} onChange={(event) => setNewGoal({ ...newGoal, current: event.target.value })} placeholder="Current (MMK)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
-        <button type="button" onClick={addGoal} className="rounded-xl bg-accent-1 px-4 py-3 font-medium text-[color:var(--accent-foreground)]">+ Add Goal</button>
+        <button type="button" onClick={addGoal} className="rounded-xl bg-accent-1 px-4 py-3 font-medium text-white font-semibold shadow-sm">+ Add Goal</button>
       </section>
 
       <div className="space-y-4">

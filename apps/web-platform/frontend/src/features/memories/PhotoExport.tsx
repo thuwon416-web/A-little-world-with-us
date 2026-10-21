@@ -119,7 +119,7 @@ export default function PhotoExport({ photos }: Props) {
               className="object-cover"
             />
             {selectedPhotos.has(photo.id) && (
-              <div className="absolute top-1 right-1 bg-accent-1 text-[color:var(--accent-foreground)] rounded-full p-1">
+              <div className="absolute top-1 right-1 bg-accent-1 text-white font-semibold shadow-sm rounded-full p-1">
                 <ImageIcon className="h-3 w-3" />
               </div>
             )}
@@ -151,7 +151,7 @@ export default function PhotoExport({ photos }: Props) {
       <button
         onClick={handleExport}
         disabled={selectedPhotos.size === 0 || exporting}
-        className="w-full rounded-input bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] disabled:opacity-50 flex items-center justify-center gap-2"
+        className="w-full rounded-input bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <Download className="h-4 w-4" />
         {exporting ? 'Exporting...' : `Export ${selectedPhotos.size} Photos as ZIP`}

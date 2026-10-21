@@ -33,7 +33,7 @@ export default function PrivateError({
           <button
             type="button"
             onClick={reset}
-            className="rounded-xl bg-accent-1 px-5 py-3 text-sm font-medium text-[color:var(--accent-foreground)] transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent-1/50"
+            className="rounded-xl bg-accent-1 px-5 py-3 text-sm font-medium font-semibold text-white shadow-sm hover:opacity-90 transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-accent-1/50"
           >
             Try again
           </button>

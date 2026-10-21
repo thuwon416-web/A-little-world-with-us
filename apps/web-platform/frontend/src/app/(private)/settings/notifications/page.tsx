@@ -102,7 +102,7 @@ export default function NotificationSettingsPage() {
           <button
             type="button"
             onClick={handlePermissionRequest}
-            className="rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)]"
+            className="rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm"
           >
             {permission === 'granted' ? 'Update permission' : 'Enable notifications'}
           </button>

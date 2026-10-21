@@ -82,53 +82,55 @@ function PlanCard({ plan, onToggleItem }: { readonly plan: Plan; readonly onTogg
   const planProgress = plan.items.length ? Math.round((doneCount / plan.items.length) * 100) : 0
 
   return (
-    <div className="rounded-modal border border-accent-1/20 bg-card p-5">
+    <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs transition hover:border-accent-1/30">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">{plan.type}</p>
-          <h2 className="mt-2 text-2xl font-semibold text-text-1">{plan.title}</h2>
+          <span className="inline-block rounded-full bg-accent-1/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-accent-1 border border-accent-1/20">
+            {plan.type}
+          </span>
+          <h2 className="mt-1.5 text-base sm:text-lg font-semibold text-text-1">{plan.title}</h2>
         </div>
-        <div className="rounded-full bg-card px-3 py-1 text-xs text-text-2">
+        <div className="rounded-full bg-soft-tint px-2.5 py-0.5 text-xs font-medium text-text-2">
           {plan.status}
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-2 text-sm text-text-2">
-        <CalendarDays className="h-4 w-4 text-accent-2" />
-        Due {plan.dueDate}
+      <div className="mt-3 flex items-center gap-2 text-xs text-text-2">
+        <CalendarDays className="h-3.5 w-3.5 text-accent-1" />
+        Due {plan.dueDate || 'Flexible'}
       </div>
 
-      <div className="mt-5">
-        <div className="mb-2 flex items-center justify-between text-xs uppercase tracking-[0.2em] text-text-2">
+      <div className="mt-4">
+        <div className="mb-1.5 flex items-center justify-between text-[11px] uppercase tracking-wider text-text-2">
           <span>Progress</span>
-          <span>{planProgress}%</span>
+          <span className="font-semibold text-text-1">{planProgress}%</span>
         </div>
-        <div className="h-2.5 rounded-full bg-soft-tint">
+        <div className="h-2 rounded-full bg-soft-tint overflow-hidden">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-accent-1 to-accent-2"
+            className="h-full rounded-full bg-gradient-to-r from-accent-1 to-accent-2 transition-all duration-300"
             style={{ width: `${planProgress}%` }}
           />
         </div>
       </div>
 
-      <div className="mt-5 space-y-2">
+      <div className="mt-4 space-y-2">
         {plan.items.map((item) => (
           <button
             key={item.id}
             type="button"
             onClick={() => onToggleItem(plan.id, item.id)}
-            className="flex w-full items-center gap-3 rounded-btn border border-border bg-card px-3 py-2 text-left text-text-1"
+            className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-card/60 hover:bg-soft-tint/40 px-3 py-2 text-left text-xs sm:text-sm text-text-1 transition"
           >
             <span
-              className={`flex h-5 w-5 items-center justify-center rounded-full border ${
+              className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
                 item.done
                   ? 'border-success bg-success/20 text-success'
                   : 'border-text-2 text-transparent'
               }`}
             >
-              <CheckCircle2 className="h-3.5 w-3.5" />
+              <CheckCircle2 className="h-3 w-3" />
             </span>
-            <span className={item.done ? 'line-through text-text-2' : ''}>{item.label}</span>
+            <span className={item.done ? 'line-through text-text-2' : 'font-medium'}>{item.label}</span>
           </button>
         ))}
       </div>
@@ -183,7 +185,7 @@ function PlanCreationModal({
           {error ? <p className="text-sm text-error" role="alert">{error}</p> : null}
           <div className="flex justify-end gap-2 pt-2">
             <button type="button" onClick={onClose} className="rounded-xl border border-border px-4 py-2 text-sm text-text-2">Cancel</button>
-            <button type="button" onClick={onCreate} disabled={!title.trim() || creating} className="rounded-xl bg-accent-1 px-4 py-2 text-sm font-semibold text-[color:var(--accent-foreground)] disabled:cursor-not-allowed disabled:opacity-50">{creating ? 'Creating…' : 'Create plan'}</button>
+            <button type="button" onClick={onCreate} disabled={!title.trim() || creating} className="rounded-xl bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:cursor-not-allowed disabled:opacity-50">{creating ? 'Creating…' : 'Create plan'}</button>
           </div>
         </div>
       </section>
@@ -419,7 +421,7 @@ export default function PlansPage() {
                 // Force update by refetching
                 window.location.reload()
               }}
-              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)]"
+              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition"
             >
               Reload latest
             </button>
@@ -439,7 +441,7 @@ export default function PlansPage() {
           <p className="text-xs uppercase tracking-[0.22em] text-text-2">Shared plans</p>
           <h1 className="mt-2 text-3xl font-serif text-text-1">Our next chapters</h1>
         </div>
-        <button type="button" onClick={() => { setCreateError(''); setCreateOpen(true) }} disabled={!coupleId} className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] disabled:cursor-not-allowed disabled:opacity-50">
+        <button type="button" onClick={() => { setCreateError(''); setCreateOpen(true) }} disabled={!coupleId} className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:cursor-not-allowed disabled:opacity-50">
           <Plus className="h-4 w-4" />
           New plan
         </button>
@@ -475,29 +477,29 @@ export default function PlansPage() {
           </div>
 
           <div className="space-y-4">
-            <div className="rounded-[24px] border border-accent-1/20 bg-card p-5">
-              <div className="flex items-center gap-3 text-accent-1">
-                <Flag className="h-5 w-5" />
-                <span className="text-sm font-medium">Overall progress</span>
+            <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs">
+              <div className="flex items-center gap-2 text-accent-1">
+                <Flag className="h-4 w-4" />
+                <span className="text-xs font-semibold uppercase tracking-wider">Overall progress</span>
               </div>
-              <p className="mt-4 text-4xl font-semibold text-text-1">{progress}%</p>
-              <p className="mt-2 text-sm text-text-2">Shared dreams are moving forward.</p>
+              <p className="mt-3 text-2xl font-bold text-text-1">{progress}%</p>
+              <p className="mt-1 text-xs text-text-2">Shared dreams are moving forward together.</p>
             </div>
 
-            <div className="rounded-[24px] border border-border bg-card p-5">
-              <div className="flex items-center gap-3 text-accent-2">
-                <Sparkles className="h-5 w-5" />
-                <span className="text-sm font-medium">Bucket list</span>
+            <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs">
+              <div className="flex items-center gap-2 text-accent-2">
+                <Sparkles className="h-4 w-4 text-accent-1" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-text-1">Bucket list</span>
               </div>
-              <form className="mt-4 flex gap-2" onSubmit={(event) => { event.preventDefault(); void addBucketItem() }}>
+              <form className="mt-3 flex gap-2" onSubmit={(event) => { event.preventDefault(); void addBucketItem() }}>
                 <input
                   value={newBucketItem}
                   onChange={(event) => setNewBucketItem(event.target.value)}
                   maxLength={100}
                   placeholder="Add a shared dream"
-                  className="min-w-0 flex-1 rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
+                  className="min-w-0 flex-1 rounded-xl border border-border/60 bg-soft-tint px-3 py-2 text-xs sm:text-sm text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
                 />
-                <button type="submit" disabled={!coupleId || !newBucketItem.trim()} className="rounded-btn bg-accent-1 px-3 py-2 text-sm text-[color:var(--accent-foreground)] disabled:opacity-50">Add</button>
+                <button type="submit" disabled={!coupleId || !newBucketItem.trim()} className="rounded-xl bg-accent-1 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50">Add</button>
               </form>
               {bucketList.length ? (
                 <ul className="mt-4 space-y-2 text-sm text-text-1">

@@ -75,7 +75,7 @@ function VaultLockScreen({
         animate={{ opacity: 1, y: 0, scale: 1 }}
         className="w-full rounded-[32px] border border-accent-1/20 bg-card p-7 text-center shadow-xl backdrop-blur-xl"
       >
-        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-1 text-text-1 shadow-lg">
+        <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-1 text-white shadow-lg">
           <motion.div
             animate={prefersReduced ? {} : { rotate: [0, 10, -10, 0] }}
             transition={prefersReduced ? {} : { repeat: Infinity, duration: 3 }}
@@ -113,7 +113,7 @@ function VaultLockScreen({
           whileTap={{ scale: 0.98 }}
           onClick={onUnlock}
           disabled={!isPinValid}
-          className="mt-5 flex w-full items-center justify-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-3 text-sm font-medium text-text-1"
+          className="mt-5 flex w-full items-center justify-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition"
         >
           <Eye className="h-4 w-4" />
           Unlock Vault
@@ -291,7 +291,7 @@ function NewVaultLetterForm({
               type="button"
               onClick={onCreate}
               disabled={!title.trim() || !content.trim()}
-              className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-2.5 text-sm font-medium text-text-1 disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 bg-accent-1 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50"
             >
               <Save className="h-4 w-4" />
               Seal &amp; Save
@@ -576,7 +576,7 @@ function VaultPageContent() {
            onClick={() => setVaultCategory(option)}
            className={`rounded-full px-3 py-1.5 text-xs capitalize ${
              vaultCategory === option
-               ? 'bg-accent-1 text-text-1'
+               ? 'bg-accent-1 text-white font-medium shadow-xs'
                : 'bg-soft-tint text-text-2'
            }`}
          >
@@ -592,14 +592,14 @@ function VaultPageContent() {
           <button
             type="button"
             onClick={() => void fetchLetters()}
-            className="mt-5 rounded-xl bg-accent-1 px-4 py-2 font-semibold text-[color:var(--accent-foreground)]"
+            className="mt-5 rounded-xl bg-accent-1 px-4 py-2 font-semibold text-white shadow-sm hover:opacity-90 transition"
           >
             Retry
           </button>
         </div>
       ) : filteredLetters.length === 0 ? (
        <div className="rounded-[32px] border border-dashed border-accent-1/35 bg-card/65 p-10 text-center shadow-lg backdrop-blur-xl">
-         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent-1 text-text-1">
+         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-accent-1 text-white shadow-md">
            <Lock className="h-4 w-4" />
          </div>
          <h2
@@ -634,7 +634,7 @@ function VaultPageContent() {
               <KeyRound className="mx-auto h-8 w-8 text-accent-1" />
               <h2 className="mt-3 text-2xl text-text-1" style={{ fontFamily: 'var(--font-display)' }}>Set up your password vault</h2>
               <p className="mx-auto mt-2 max-w-md text-sm text-text-2">Create a passphrase before adding encrypted credentials. Your passphrase never leaves this device.</p>
-              <button type="button" onClick={() => setShowVaultSetup(true)} className="mt-5 rounded-btn bg-accent-1 px-4 py-2.5 text-sm text-text-1">Set up Vault Passphrase</button>
+              <button type="button" onClick={() => setShowVaultSetup(true)} className="mt-5 rounded-btn bg-accent-1 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition">Set up Vault Passphrase</button>
             </div>
           ) : !isPasswordVaultUnlocked ? (
             <div className="mx-auto max-w-md rounded-modal border border-accent-1/20 bg-card p-6">
@@ -642,7 +642,7 @@ function VaultPageContent() {
               <input type="password" value={passphrase} onChange={(event) => setPassphrase(event.target.value)} placeholder="Vault passphrase" className="mt-4 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1" />
               {passwordVaultError ? <p className="mt-2 text-sm text-error">{passwordVaultError}</p> : null}
               <div className="mt-4 flex flex-wrap gap-2">
-                <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))} disabled={passphrase.length < 8} className="rounded-btn bg-accent-1 px-4 py-2 text-sm text-text-1 disabled:opacity-50">Unlock</button>
+                <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))} disabled={passphrase.length < 8} className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50">Unlock</button>
                 <button type="button" onClick={() => void unlockWithBiometric().catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))} className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1"><Fingerprint className="h-4 w-4" />Biometric</button>
                 <button type="button" onClick={() => { setShowRecovery((value) => !value); setPasswordVaultError('') }} className="rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1">Use recovery phrase</button>
                 {showRecovery ? (
@@ -653,7 +653,7 @@ function VaultPageContent() {
                       type="button"
                       onClick={() => void unlockWithBackupPhrase(recoveryPhrase.trim().split(/\\s+/)).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to recover the vault.'))}
                       disabled={recoveryPhrase.trim().split(/\\s+/).length !== 12}
-                      className="rounded-btn bg-accent-1 px-4 py-2 text-sm text-text-1 disabled:opacity-50"
+                      className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50"
                     >
                       Recover vault
                     </button>

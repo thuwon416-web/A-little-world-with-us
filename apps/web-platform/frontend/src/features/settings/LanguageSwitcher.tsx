@@ -19,7 +19,7 @@ export default function LanguageSwitcher() {
           onClick={() => setLanguage('my')}
           className={`flex-1 rounded-pill px-4 py-2 text-sm font-medium transition active:scale-[0.98] ${
             language === 'my'
-              ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+              ? 'bg-accent-1 text-white font-semibold shadow-sm shadow-sm'
               : 'bg-soft-tint text-text-2 hover:bg-card-hover'
           }`}
         >
@@ -30,7 +30,7 @@ export default function LanguageSwitcher() {
           onClick={() => setLanguage('en')}
           className={`flex-1 rounded-pill px-4 py-2 text-sm font-medium transition active:scale-[0.98] ${
             language === 'en'
-              ? 'bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm'
+              ? 'bg-accent-1 text-white font-semibold shadow-sm shadow-sm'
               : 'bg-soft-tint text-text-2 hover:bg-card-hover'
           }`}
         >

@@ -57,7 +57,7 @@ export default function PasswordForm({ masterKey, credential, initialData, onSav
           <label className="flex items-center gap-2 text-sm text-text-1 md:col-span-2"><input type="checkbox" checked={isShared} onChange={(event) => setIsShared(event.target.checked)} /> Share with my partner</label>
         </div>
         {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
-        <div className="mt-6 flex justify-end gap-2"><button type="button" onClick={onClose} className="rounded-pill px-4 py-2 text-sm text-text-2 hover:bg-card-hover transition">Cancel</button><button type="button" onClick={save} disabled={saving} className="rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50">{saving ? 'Saving…' : 'Save password'}</button></div>
+        <div className="mt-6 flex justify-end gap-2"><button type="button" onClick={onClose} className="rounded-pill px-4 py-2 text-sm text-text-2 hover:bg-card-hover transition">Cancel</button><button type="button" onClick={save} disabled={saving} className="rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50">{saving ? 'Saving…' : 'Save password'}</button></div>
       </div>
       {showGenerator ? <PasswordGenerator onSelect={setPassword} onClose={() => setShowGenerator(false)} /> : null}
     </div>
