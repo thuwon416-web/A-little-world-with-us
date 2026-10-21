@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   eas-build:
-    name: EAS preview build — ${{ matrix.platform }}
+    name: EAS build — ${{ matrix.platform }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
     strategy:
@@ -51,4 +51,10 @@ jobs:
       - name: Build ${{ matrix.platform }} with EAS
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: npx --yes eas-cli@latest build --platform "${{ matrix.platform }}" --profile preview --non-interactive
+        run: |
+          if [ "${{ matrix.platform }}" = "ios" ]; then
+            # Simulator builds do not require Apple device provisioning.
+            npx --yes eas-cli@latest build --platform ios --profile development --non-interactive
+          else
+            npx --yes eas-cli@latest build --platform android --profile preview --non-interactive
+          fi
