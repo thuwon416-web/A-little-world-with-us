@@ -937,14 +937,14 @@ function MemoriesPageContent() {
 
       {/* Tab 2: Places Map */}
       {activeTab === 'map' && (
-        <section className="space-y-4 rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-xl shadow-sm">
+        <section className="space-y-4 rounded-3xl border border-border/70 bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-1/10 text-accent-1">
               <Compass className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-foreground">Places We Remember</h2>
-              <p className="text-xs text-muted-foreground">Pins, coordinates, and scenic spots from all our adventures.</p>
+              <h2 className="font-serif text-xl font-semibold text-text-1">Places We Remember</h2>
+              <p className="text-xs text-text-2">Pins, coordinates, and scenic spots from all our adventures.</p>
             </div>
           </div>
           <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
@@ -955,14 +955,14 @@ function MemoriesPageContent() {
 
       {/* Tab 3: Our Story */}
       {activeTab === 'story' && (
-        <section className="space-y-4 rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-xl shadow-sm">
+        <section className="space-y-4 rounded-3xl border border-border/70 bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-1/10 text-accent-1">
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-foreground">Our Story Timeline</h2>
-              <p className="text-xs text-muted-foreground">Every milestone and memory woven into a chronological journey.</p>
+              <h2 className="font-serif text-xl font-semibold text-text-1">Our Story Timeline</h2>
+              <p className="text-xs text-text-2">Every milestone and memory woven into a chronological journey.</p>
             </div>
           </div>
           <OurStoryContent />
@@ -971,14 +971,14 @@ function MemoriesPageContent() {
 
       {/* Tab 4: Time Capsules */}
       {activeTab === 'capsules' && (
-        <section className="space-y-4 rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-xl shadow-sm">
+        <section className="space-y-4 rounded-3xl border border-border/70 bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-1/10 text-accent-1">
               <Hourglass className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-foreground">Time Capsules</h2>
-              <p className="text-xs text-muted-foreground">Letters, photos, and secrets locked until a special future date.</p>
+              <h2 className="font-serif text-xl font-semibold text-text-1">Time Capsules</h2>
+              <p className="text-xs text-text-2">Letters, photos, and secrets locked until a special future date.</p>
             </div>
           </div>
           <TimeCapsulesContent />
@@ -987,14 +987,14 @@ function MemoriesPageContent() {
 
       {/* Tab 5: AI Companion */}
       {activeTab === 'ai' && (
-        <section className="space-y-5 rounded-3xl border border-border/70 bg-card/60 p-6 backdrop-blur-xl shadow-sm">
+        <section className="space-y-5 rounded-3xl border border-border/70 bg-card p-6 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-1/10 text-accent-1">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-foreground">AI Companion & Memory Reflection</h2>
-              <p className="text-xs text-muted-foreground">Turn moments into romantic stories, poetic highlights, or gentle reflections.</p>
+              <h2 className="font-serif text-xl font-semibold text-text-1">AI Companion & Memory Reflection</h2>
+              <p className="text-xs text-text-2">Turn moments into romantic stories, poetic highlights, or gentle reflections.</p>
             </div>
           </div>
           <MemoryCurationAI
@@ -1016,14 +1016,14 @@ function MemoriesPageContent() {
 
       {/* Tab 6: Archived Legacy Gallery */}
       {activeTab === 'legacy' && (
-        <section className="space-y-4 rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-xl shadow-sm">
+        <section className="space-y-4 rounded-3xl border border-border/70 bg-card p-5 shadow-sm">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-1/10 text-accent-1">
               <FolderArchive className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-foreground">Previously Saved Gallery Photos</h2>
-              <p className="text-xs text-muted-foreground">
+              <h2 className="font-serif text-xl font-semibold text-text-1">Previously Saved Gallery Photos</h2>
+              <p className="text-xs text-text-2">
                 Photos stored in original encrypted Gallery storage. Safely preserved without alteration.
               </p>
             </div>
@@ -1045,19 +1045,19 @@ function MemoriesPageContent() {
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
-              className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border/80 bg-card/95 p-6 backdrop-blur-2xl shadow-2xl"
+              className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border/80 bg-card p-6 shadow-2xl"
             >
               <div className="flex items-center justify-between border-b border-border/50 pb-4">
                 <div className="flex items-center gap-2.5">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent-1/10 text-accent-1">
                     <Plus className="h-4 w-4" />
                   </div>
-                  <h3 className="font-serif text-lg font-semibold text-foreground">Add a Shared Memory</h3>
+                  <h3 className="font-serif text-lg font-semibold text-text-1">Add a Shared Memory</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsAddMemoryOpen(false)}
-                  className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                  className="rounded-full p-1.5 text-text-2 transition hover:bg-soft-tint hover:text-text-1"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -1398,12 +1398,6 @@ function MemoryUploadPanel({
               type="button"
               onClick={() => onLocationOpenChange(false)}
               className="w-full rounded-full bg-accent-1 py-2 text-xs font-semibold text-white shadow-sm"
-            >
-              Confirm Location
-            </button>
-          </div>
-        </div>
-      )}
             >
               Confirm Location
             </button>
