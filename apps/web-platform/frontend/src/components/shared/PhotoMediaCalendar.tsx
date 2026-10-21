@@ -149,43 +149,43 @@ export default function PhotoMediaCalendar({
   }
 
   return (
-    <div className={`rounded-panel border border-accent-1/20 bg-card p-4 sm:p-6 shadow-sm ${className}`}>
+    <div className={`rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-card ${className}`}>
       {/* Calendar Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-1/15 text-accent-1">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-1/15 text-accent-1">
             <CalendarIcon className="h-4 w-4" />
           </div>
           <div>
-            <h2 className="text-lg font-serif font-semibold text-text-1">{monthLabel}</h2>
-            <p className="text-xs text-text-2">
+            <h2 className="text-base font-serif font-semibold text-text-1">{monthLabel}</h2>
+            <p className="text-[11px] text-text-2">
               {photos.length > 0 ? `${photos.length} shared photos this month` : 'Relive your memories by day'}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={prevMonth}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-accent-1/20 text-text-2 hover:bg-accent-1/10 hover:text-text-1 transition"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-text-2 hover:bg-accent-1/10 hover:text-text-1 transition"
             aria-label="Previous month"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={nextMonth}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-accent-1/20 text-text-2 hover:bg-accent-1/10 hover:text-text-1 transition"
+            className="flex h-7 w-7 items-center justify-center rounded-full border border-border text-text-2 hover:bg-accent-1/10 hover:text-text-1 transition"
             aria-label="Next month"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
 
       {/* Weekday Labels (S, M, T, W, T, F, S) */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-center text-xs font-semibold uppercase tracking-wider text-text-2/70">
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5 mb-2 text-center text-[11px] font-semibold uppercase tracking-wider text-text-2/70">
         <span>S</span>
         <span>M</span>
         <span>T</span>
@@ -196,7 +196,7 @@ export default function PhotoMediaCalendar({
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-1.5 sm:gap-2.5">
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
         {/* Empty slots before first day */}
         {Array.from({ length: firstDayOfWeek }).map((_, i) => (
           <div key={`empty-${i}`} className="aspect-square" />

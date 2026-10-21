@@ -3,8 +3,30 @@
 
 import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
-import { motion } from 'framer-motion'
-import { Frown, Heart, Meh, Pencil, Smile, Sparkles, Square, Trash2, TriangleAlert, Volume2, X } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  BookOpen,
+  Camera,
+  Compass,
+  FolderArchive,
+  Frown,
+  Heart,
+  Hourglass,
+  MapPin,
+  Meh,
+  Pencil,
+  Plus,
+  RefreshCw,
+  SlidersHorizontal,
+  Smile,
+  Sparkles,
+  Square,
+  Trash2,
+  TriangleAlert,
+  UploadCloud,
+  Volume2,
+  X,
+} from 'lucide-react'
 import MemoryCard from '@/features/dashboard/MemoryCard'
 import LegacyGallery from '@/features/memories/LegacyGallery'
 import MemorySlideshow from '@/features/memories/MemorySlideshow'
@@ -19,23 +41,23 @@ const MemoryCurationAI = dynamic(
   () => import('@/features/memories/MemoryCurationAI'),
   {
     ssr: false,
-    loading: () => <div className="h-64 animate-pulse rounded-btn bg-card" />,
+    loading: () => <div className="h-64 animate-pulse rounded-2xl bg-card/60" />,
   }
 )
 const MemoryMapContent = dynamic(
   () => import('@/app/(private)/memories/map/page'),
-  { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-panel bg-card" /> }
+  { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-2xl bg-card/60" /> }
 )
 const OurStoryContent = dynamic(
   () => import('@/app/(private)/our-story/page'),
-  { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-panel bg-card" /> }
+  { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-2xl bg-card/60" /> }
 )
 const TimeCapsulesContent = dynamic(
   () => import('@/app/(private)/time-capsules/page'),
-  { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-panel bg-card" /> }
+  { ssr: false, loading: () => <div className="h-96 animate-pulse rounded-2xl bg-card/60" /> }
 )
 
-const PAGE_SIZE = 6
+const PAGE_SIZE = 12
 
 type MemoryCategory = 'all' | 'favorite' | 'travel' | 'ritual' | 'journal'
 type MemorySort = 'newest' | 'oldest'
@@ -52,6 +74,8 @@ const JOURNAL_MOODS: { id: JournalMood; label: string; Icon: typeof Smile }[] = 
   { id: 'loved', label: 'Loved', Icon: Heart },
   { id: 'anxious', label: 'Anxious', Icon: TriangleAlert },
 ]
+
+type MemoryTab = 'photos' | 'map' | 'story' | 'capsules' | 'ai' | 'legacy'
 
 async function compressImage(file: File): Promise<Blob> {
   const bitmap = await createImageBitmap(file)
@@ -84,6 +108,7 @@ export default function MemoriesPage() {
 }
 
 function MemoriesPageContent() {
+  const [activeTab, setActiveTab] = useState<MemoryTab>('photos')
   const [memories, setMemories] = useState<JournalMemory[]>([])
   const [caption, setCaption] = useState('')
   const localDateKey = (value: Date) => {
@@ -156,7 +181,12 @@ function MemoriesPageContent() {
         return
       }
 
-      const { data: link, error: linkError } = await supabase.from('couple_links').select('couple_id').or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`).eq('status', 'accepted').maybeSingle()
+      const { data: link, error: linkError } = await supabase
+        .from('couple_links')
+        .select('couple_id')
+        .or(`inviter_id.eq.${userData.user.id},accepted_by.eq.${userData.user.id}`)
+        .eq('status', 'accepted')
+        .maybeSingle()
       if (linkError) {
         setError(linkError.message)
         return
@@ -166,15 +196,14 @@ function MemoriesPageContent() {
         setMemories([])
         return
       }
-      // Idempotently index legacy Gallery metadata before reading the canonical collection.
-      // The endpoint never moves or deletes original Gallery objects.
+
       const legacyIndexResponse = await fetch('/api/memories/index-legacy-gallery', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({}),
       })
       if (!legacyIndexResponse.ok) {
-        const legacyIndexBody = await legacyIndexResponse.json().catch(() => ({})) as { error?: string }
+        const legacyIndexBody = (await legacyIndexResponse.json().catch(() => ({}))) as { error?: string }
         console.warn('Legacy Gallery indexing was not completed:', legacyIndexBody.error ?? legacyIndexResponse.status)
       }
 
@@ -241,9 +270,9 @@ function MemoriesPageContent() {
       )
 
       setMemories(displayMemories)
-    } catch (error) {
-      console.error('Failed to load shared memories:', error)
-      setError(error instanceof Error ? error.message : 'Unable to load shared memories.')
+    } catch (loadError) {
+      console.error('Failed to load shared memories:', loadError)
+      setError(loadError instanceof Error ? loadError.message : 'Unable to load shared memories.')
     } finally {
       setIsLoading(false)
     }
@@ -296,6 +325,7 @@ function MemoriesPageContent() {
       .subscribe()
     return () => { void supabase.removeChannel(channel) }
   }, [coupleLinkId])
+
   useEffect(() => () => {
     if (typeof window !== 'undefined') window.speechSynthesis.cancel()
   }, [])
@@ -355,7 +385,6 @@ function MemoriesPageContent() {
         const driveStatus = (await driveStatusResponse.json().catch(() => ({}))) as { connected?: boolean }
         driveConnected = driveStatusResponse.ok && driveStatus.connected === true
       } catch {
-        // A status endpoint/network hiccup should not block the configured fallback chain.
         driveConnected = false
       }
 
@@ -386,17 +415,13 @@ function MemoriesPageContent() {
             try {
               driveResponse = await fetch('/api/drive/upload', { method: 'POST', body: formData })
             } catch {
-              // The server may have stored the file even if the browser lost the response.
-              // Do not trigger another provider and create a duplicate memory on an uncertain outcome.
-              throw new Error('Google Drive upload response was interrupted. Check Memories before retrying to avoid a duplicate upload.')
+              throw new Error('Google Drive upload response was interrupted. Check Memories before retrying.')
             }
             if (driveResponse) {
               const driveBody = (await driveResponse.json().catch(() => ({}))) as { file?: { id?: string }; error?: string }
               if (driveResponse.ok && driveBody.file?.id) {
                 memoryCreatedByMediaApi = true
               } else if (driveResponse.status >= 500) {
-                // A connected flag can outlive a revoked/expired Drive grant. The Drive
-                // route rolls back partial uploads; only provider/server failures fall back.
                 tryFallbackStorage = true
               } else {
                 throw new Error(driveBody.error || 'Google Drive memory upload failed.')
@@ -411,9 +436,7 @@ function MemoriesPageContent() {
               mediaResponse = await fetch('/api/media/upload', { method: 'POST', body: formData })
               mediaBody = (await mediaResponse.json().catch(() => ({}))) as typeof mediaBody
             } catch {
-              // A lost response does not prove the server failed to store the file.
-              // Stop this file rather than automatically creating a duplicate in another provider.
-              throw new Error('Media upload response was interrupted. Check Memories before retrying to avoid a duplicate upload.')
+              throw new Error('Media upload response was interrupted. Check Memories before retrying.')
             }
             if (mediaResponse?.ok && mediaBody.file?.id) {
               storageProvider = 'cloudinary'
@@ -459,8 +482,7 @@ function MemoriesPageContent() {
           setUploadProgress(Math.round(((uploadedCount + uploadErrors.length) / selectedFiles.length) * 100))
         }
       }
-      // Keep failed selections and their metadata so the user can inspect/retry them.
-      // Successful files are removed from the pending list to avoid accidental re-upload.
+
       setSelectedFiles(failedFiles)
       if (uploadErrors.length === 0) {
         setCaption('')
@@ -468,6 +490,7 @@ function MemoriesPageContent() {
         setMemoryCategory('favorite')
         setLocation(null)
         setLocationLabel('')
+        setIsAddMemoryOpen(false)
       }
       setUploadSummary(`${uploadedCount} ${uploadedCount === 1 ? 'photo' : 'photos'} uploaded${uploadErrors.length ? `; ${uploadErrors.length} failed` : ''}.`)
       if (uploadErrors.length) setError(uploadErrors.join(' '))
@@ -554,8 +577,8 @@ function MemoriesPageContent() {
           : [saved, ...current]
       )
       closeJournalModal()
-    } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Unable to save journal entry.')
+    } catch (saveError_) {
+      setError(saveError_ instanceof Error ? saveError_.message : 'Unable to save journal entry.')
     } finally {
       setJournalSaving(false)
     }
@@ -583,12 +606,13 @@ function MemoriesPageContent() {
           ? { ...item, metadata: { ...(item.metadata ?? {}), ai_reflection: body.reflection } }
           : item
       ))
-    } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Unable to reflect right now.')
+    } catch (reflectError_) {
+      setError(reflectError_ instanceof Error ? reflectError_.message : 'Unable to reflect right now.')
     } finally {
       setReflectingId(null)
     }
   }
+
   const speakReflection = (memory: JournalMemory) => {
     const text = memory.metadata?.ai_reflection
     if (!text || typeof window === 'undefined' || !window.speechSynthesis) return
@@ -607,280 +631,487 @@ function MemoriesPageContent() {
     window.speechSynthesis.speak(utterance)
   }
 
+  const triggerDriveMigration = async () => {
+    if (!coupleLinkId || isMigratingToDrive) return
+    setIsMigratingToDrive(true)
+    setDriveSyncSummary('Checking Google Drive connection…')
+    try {
+      const statusRes = await fetch('/api/drive/status').catch(() => null)
+      const statusData = statusRes?.ok ? await statusRes.json().catch(() => ({})) : {}
+      if (!statusData?.connected) {
+        setDriveSyncSummary('Google Drive is not connected. Please connect Google Drive first.')
+        return
+      }
+
+      setDriveSyncSummary('Moving Supabase photos to Google Drive…')
+      const { data: sessionData } = await supabase.auth.getSession()
+      const authHeader: Record<string, string> = {}
+      if (sessionData?.session?.access_token) {
+        authHeader.Authorization = `Bearer ${sessionData.session.access_token}`
+      }
+
+      let migrated = 0
+      let failed = 0
+      let lastFailReason = ''
+      const candidates = memories.filter((memory) => {
+        const row = memory as DisplayMemory & { storage_provider?: string; storage_path?: string | null }
+        return row.storage_provider === 'supabase' && Boolean(row.storage_path)
+      })
+
+      if (candidates.length === 0) {
+        setDriveSyncSummary('No Supabase-stored memories need migration.')
+        return
+      }
+
+      for (const item of candidates) {
+        const row = item as DisplayMemory & { storage_provider?: string; storage_path?: string | null }
+        const path = row.storage_path
+        if (!path) continue
+        try {
+          const blob = await downloadAndDecrypt(coupleLinkId, 'memories', path, row.mime_type || 'image/jpeg')
+          const file = new File([blob], `memory-${row.id}.${(row.mime_type || 'image/jpeg').split('/')[1] || 'jpg'}`, { type: row.mime_type || 'image/jpeg' })
+          const form = new FormData()
+          form.append('memoryId', row.id)
+          form.append('file', file)
+          const response = await fetch('/api/drive/migrate-memory', {
+            method: 'POST',
+            headers: authHeader,
+            body: form,
+          })
+          const body = (await response.json().catch(() => ({}))) as { migrated?: boolean; alreadyInDrive?: boolean; oldStoragePath?: string; error?: string }
+          if (!response.ok || (!body.migrated && !body.alreadyInDrive)) {
+            throw new Error(body.error || response.statusText || 'Migration failed.')
+          }
+          if (body.migrated && body.oldStoragePath) {
+            const { error: removeError } = await supabase.storage.from('memories').remove([body.oldStoragePath])
+            if (removeError) console.warn('Migrated memory old storage object cleanup failed:', row.id)
+          }
+          migrated += body.migrated ? 1 : 0
+        } catch (migrationError) {
+          failed += 1
+          const msg = migrationError instanceof Error ? migrationError.message : 'unknown error'
+          lastFailReason = msg
+        }
+      }
+      setDriveSyncSummary(`Drive migration: ${migrated} moved${failed ? `, ${failed} failed (${lastFailReason || 'originals kept'})` : ''}.`)
+      await loadMemories()
+    } catch (migrationError) {
+      setDriveSyncSummary(migrationError instanceof Error ? migrationError.message : 'Drive migration failed.')
+    } finally {
+      setIsMigratingToDrive(false)
+    }
+  }
+
+  const triggerDriveSync = async () => {
+    if (!coupleLinkId || isDriveSyncing) return
+    setIsDriveSyncing(true)
+    setDriveSyncSummary('')
+    try {
+      const response = await fetch('/api/drive/sync-memories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ coupleId: coupleLinkId }),
+      })
+      const body = (await response.json().catch(() => ({}))) as { imported?: number; updated?: number; error?: string }
+      if (!response.ok) throw new Error(body.error || 'Drive memory sync failed.')
+      setDriveSyncSummary(`Drive synced: ${body.imported ?? 0} new, ${body.updated ?? 0} updated.`)
+      await loadMemories()
+    } catch (syncError) {
+      setDriveSyncSummary(syncError instanceof Error ? syncError.message : 'Drive sync failed.')
+    } finally {
+      setIsDriveSyncing(false)
+    }
+  }
+
+  const tabs: { id: MemoryTab; label: string; icon: typeof Camera; badge?: string | number }[] = [
+    { id: 'photos', label: 'Photos & Moments', icon: Camera, badge: memories.length },
+    { id: 'map', label: 'Places Map', icon: MapPin },
+    { id: 'story', label: 'Our Story', icon: BookOpen },
+    { id: 'capsules', label: 'Time Capsules', icon: Hourglass },
+    { id: 'ai', label: 'AI Companion', icon: Sparkles },
+    { id: 'legacy', label: 'Archived Gallery', icon: FolderArchive },
+  ]
+
   return (
-    <div className="dashboard-shell mx-auto w-full max-w-7xl space-y-6 px-4 py-5 sm:space-y-8 sm:px-6 sm:py-8">
-      <header className="dashboard-hero relative overflow-hidden rounded-modal border border-accent-1/15 bg-gradient-to-br from-card via-soft-tint to-accent-2/10 p-5 sm:p-7">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div className="max-w-2xl">
-            <p className="text-xs uppercase tracking-[0.22em] text-accent-1">A little world, just for us</p>
-            <h1 className="mt-2 font-serif text-3xl text-text-1 sm:text-4xl">Our Gallery</h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-text-2">
-              Our shared photos, favorite places, and little moments worth keeping.
+    <div className="dashboard-shell mx-auto w-full max-w-7xl space-y-6 px-4 py-4 sm:px-6 sm:py-6">
+      {/* Unified Romantic Hero Header */}
+      <header className="relative overflow-hidden rounded-3xl border border-border/70 bg-card/60 p-6 backdrop-blur-xl shadow-lg">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full bg-secondary/10 blur-3xl" />
+
+        <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <Heart className="h-3.5 w-3.5 fill-primary text-primary" />
+              <span>A Little World, Just For Us</span>
+              <span className="opacity-40">•</span>
+              <span>{memories.length} Keepsakes</span>
+            </div>
+            <h1 className="font-serif text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+              Memories & Keepsakes
+            </h1>
+            <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Every shared glance, travel postcard, quiet ritual, and little moment we cherish forever.
             </p>
           </div>
-          <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
-        </div>
-        <div className="mt-5 flex flex-wrap gap-2 text-xs text-text-2">
-          <span className="rounded-full border border-accent-1/15 bg-card/70 px-3 py-1.5">{memories.length} saved moments</span>
-          <span className="rounded-full border border-accent-1/15 bg-card/70 px-3 py-1.5">Shared with your partner</span>
-        </div>
-      </header>
 
-      <section aria-labelledby="add-memory-heading" className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Add to our memories</p>
-            <h2 id="add-memory-heading" className="mt-1 text-2xl font-serif text-text-1">Add a memory</h2>
-            {driveSyncSummary ? <p className="mt-1 text-xs text-text-2">{driveSyncSummary}</p> : null}
-          </div>
-          <button
-            type="button"
-            disabled={isMigratingToDrive || isUploading || !coupleLinkId}
-            onClick={() => {
-              if (!coupleLinkId) return
-              setIsMigratingToDrive(true)
-              setDriveSyncSummary('Checking Google Drive connection…')
-              void (async () => {
-                const statusRes = await fetch('/api/drive/status').catch(() => null)
-                const statusData = statusRes?.ok ? await statusRes.json().catch(() => ({})) : {}
-                if (!statusData?.connected) {
-                  setDriveSyncSummary('Google Drive is not connected. Please connect Google Drive first.')
-                  return
-                }
+          {/* Action Toolbar */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setIsAddMemoryOpen(true)}
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-md transition hover:opacity-90 active:scale-95"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Add Memory</span>
+            </button>
 
-                setDriveSyncSummary('Moving existing Supabase memories to Google Drive…')
-                const { data: sessionData } = await supabase.auth.getSession()
-                const authHeader: Record<string, string> = {}
-                if (sessionData?.session?.access_token) {
-                  authHeader.Authorization = `Bearer ${sessionData.session.access_token}`
-                }
-
-                let migrated = 0
-                let failed = 0
-                let lastFailReason = ''
-                const candidates = memories.filter((memory) => {
-                  const row = memory as DisplayMemory & { storage_provider?: string; storage_path?: string | null }
-                  return row.storage_provider === 'supabase' && Boolean(row.storage_path)
-                })
-
-                if (candidates.length === 0) {
-                  setDriveSyncSummary('No Supabase-stored memories need migration.')
-                  return
-                }
-
-                for (const item of candidates) {
-                  const row = item as DisplayMemory & { storage_provider?: string; storage_path?: string | null }
-                  const path = row.storage_path
-                  if (!path) continue
-                  try {
-                    const blob = await downloadAndDecrypt(coupleLinkId, 'memories', path, row.mime_type || 'image/jpeg')
-                    const file = new File([blob], `memory-${row.id}.${(row.mime_type || 'image/jpeg').split('/')[1] || 'jpg'}`, { type: row.mime_type || 'image/jpeg' })
-                    const form = new FormData()
-                    form.append('memoryId', row.id)
-                    form.append('file', file)
-                    const response = await fetch('/api/drive/migrate-memory', {
-                      method: 'POST',
-                      headers: authHeader,
-                      body: form,
-                    })
-                    const body = await response.json().catch(() => ({})) as { migrated?: boolean; alreadyInDrive?: boolean; oldStoragePath?: string; error?: string }
-                    if (!response.ok || (!body.migrated && !body.alreadyInDrive)) {
-                      throw new Error(body.error || response.statusText || 'Migration failed.')
-                    }
-                    if (body.migrated && body.oldStoragePath) {
-                      const { error: removeError } = await supabase.storage.from('memories').remove([body.oldStoragePath])
-                      if (removeError) console.warn('Migrated memory has an old storage object that could not be cleaned up:', row.id)
-                    }
-                    migrated += body.migrated ? 1 : 0
-                  } catch (migrationError) {
-                    failed += 1
-                    const msg = migrationError instanceof Error ? migrationError.message : 'unknown error'
-                    lastFailReason = msg
-                    console.error('Memory migration failed:', row.id, msg)
-                  }
-                }
-                setDriveSyncSummary(`Drive migration finished: ${migrated} moved${failed ? `, ${failed} failed (${lastFailReason || 'originals kept'})` : ''}.`)
-                await loadMemories()
-              })().catch((migrationError) => setDriveSyncSummary(migrationError instanceof Error ? migrationError.message : 'Drive migration failed.'))
-                .finally(() => setIsMigratingToDrive(false))
-            }}
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 disabled:opacity-50"
-          >
-            {isMigratingToDrive ? 'Moving memories…' : 'Move existing memories to Drive'}
-          </button>
-          <button
-            type="button"
-            disabled={isDriveSyncing || isMigratingToDrive || !coupleLinkId}
-            onClick={() => {
-              if (!coupleLinkId) return
-              setIsDriveSyncing(true)
-              setDriveSyncSummary('')
-              void fetch('/api/drive/sync-memories', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ coupleId: coupleLinkId }),
-              })
-                .then(async (response) => {
-                  const body = (await response.json().catch(() => ({}))) as { imported?: number; updated?: number; error?: string }
-                  if (!response.ok) throw new Error(body.error || 'Drive memory sync failed.')
-                  setDriveSyncSummary(`Drive synced: ${body.imported ?? 0} new, ${body.updated ?? 0} updated.`)
-                  await loadMemories()
-                })
-                .catch((syncError) => setDriveSyncSummary(syncError instanceof Error ? syncError.message : 'Drive memory sync failed.'))
-                .finally(() => setIsDriveSyncing(false))
-            }}
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 disabled:opacity-50"
-          >
-            {isDriveSyncing ? 'Syncing Drive…' : 'Sync Drive memories'}
-          </button>
-        </div>
-      <div className="space-y-3">
-        <button type="button" onClick={() => setIsAddMemoryOpen((open) => !open)} className="rounded-full bg-accent-1 px-5 py-2.5 text-sm font-medium text-[color:var(--accent-foreground)] transition hover:opacity-90">
-          {isAddMemoryOpen ? 'Cancel' : '+ Add a memory'}
-        </button>
-        {isAddMemoryOpen ? <MemoryUploadPanel
-        caption={caption}
-        memoryDate={memoryDate}
-        memoryCategory={memoryCategory}
-        location={location}
-        locationLabel={locationLabel}
-        isLocationOpen={isLocationOpen}
-        isUploading={isUploading}
-        uploadProgress={uploadProgress}
-        uploadSummary={uploadSummary}
-        error={error}
-        onCaptionChange={setCaption}
-        onMemoryDateChange={setMemoryDate}
-        onMemoryCategoryChange={setMemoryCategory}
-        onLocationChange={setLocation}
-        onLocationLabelChange={setLocationLabel}
-        onLocationOpenChange={setIsLocationOpen}
-        onErrorChange={setError}
-        onFileChange={handleFileChange}
-        onUpload={handleUpload}
-      /> : null}
-      </div>
-
-      </section>
-
-
-
-      <section aria-labelledby="photo-memories-heading" className="space-y-2">
-        <div className="ui-card rounded-modal border border-accent-1/15 bg-card p-4 sm:p-5">
-          <p className="text-xs uppercase tracking-[0.2em] text-accent-1">The moments we keep</p>
-          <h2 id="photo-memories-heading" className="mt-1 font-serif text-2xl text-text-1">Our photos & memories</h2>
-          <p className="mt-1 text-sm leading-6 text-text-2">Browse saved photos and moments below. Use the filters to find favorites, trips, rituals, and journal entries.</p>
-        </div>
-      </section>
-
-      <section className="glass-card p-5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-wrap gap-2">
-            {(['all', 'favorite', 'travel', 'ritual', 'journal'] as MemoryCategory[]).map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setFilter(option)}
-                className={`rounded-full px-3 py-1.5 text-xs capitalize transition ${
-                  filter === option
-                    ? 'bg-accent-1 text-[color:var(--accent-foreground)]'
-                    : 'bg-soft-tint text-text-2'
-                }`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-          {filter === 'journal' ? (
             <button
               type="button"
               onClick={openNewJournal}
-              className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-medium text-[color:var(--accent-foreground)] transition hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-card/60 px-3.5 py-2.5 text-sm font-medium text-foreground backdrop-blur-md transition hover:bg-card/90 active:scale-95"
             >
-              New journal entry
+              <Pencil className="h-4 w-4 text-primary" />
+              <span className="hidden sm:inline">Write Journal</span>
             </button>
-          ) : null}
-          <select
-            value={sortBy}
-            onChange={(event) => setSortBy(event.target.value as MemorySort)}
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
-          >
-            <option value="newest">Newest first</option>
-            <option value="oldest">Oldest first</option>
-          </select>
-        </div>
-      </section>
 
-      {isLoading && <p className="text-sm text-text-2">Loading memories...</p>}
-      <MemoryGrid
-        memories={visibleMemories}
-        reflectingId={reflectingId}
-        speakingJournalId={speakingJournalId}
-        onEditJournal={openEditJournal}
-        onDeleteJournal={deleteJournal}
-        onSpeakReflection={speakReflection}
-        onRequestReflection={requestReflection}
-        onOpenMemory={setSelectedMemory}
-        onDeleteMemory={handleDelete}
-      />
+            <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
 
-      <section aria-labelledby="legacy-gallery-heading" className="space-y-3">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">From your original gallery</p>
-          <h2 id="legacy-gallery-heading" className="mt-1 text-2xl font-serif text-text-1">Previously saved photos</h2>
-          <p className="mt-1 text-sm text-text-2">These photos stay in their original encrypted Gallery storage. Nothing is moved or deleted while the safe migration is prepared.</p>
-        </div>
-        <LegacyGallery showUpload={false} />
-      </section>
-
-      {visibleCount < sortedMemories.length && (
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}
-            className="rounded-full border border-accent-1/20 bg-soft-tint px-5 py-2 text-sm text-text-1"
-          >
-            Load more memories
-          </button>
-        </div>
-      )}
-      {!isLoading && sortedMemories.length === 0 && <section className="glass-card flex min-h-56 flex-col items-center justify-center p-6 text-center"><Heart className="h-9 w-9 text-accent-1" /><p className="mt-4 text-lg text-text-1">No memories yet. Start creating your little world together!</p></section>}
-      <section aria-labelledby="memory-map-heading" className="space-y-4">
-        <div className="flex items-end justify-between gap-3">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-accent-1">Explore together</p>
-            <h2 id="memory-map-heading" className="mt-1 font-serif text-2xl text-text-1 sm:text-3xl">Places we remember</h2>
-            <p className="mt-1 max-w-2xl text-sm leading-6 text-text-2">Your map pins and saved place names live together here, including place names found in synced Drive folders.</p>
+            {/* Drive Controls */}
+            <div className="flex items-center gap-1 rounded-full border border-border/70 bg-card/50 p-1 backdrop-blur-md">
+              <button
+                type="button"
+                title="Sync with Google Drive"
+                disabled={isDriveSyncing || !coupleLinkId}
+                onClick={() => void triggerDriveSync()}
+                className="rounded-full p-2 text-muted-foreground transition hover:bg-card hover:text-foreground disabled:opacity-40"
+              >
+                <RefreshCw className={`h-4 w-4 ${isDriveSyncing ? 'animate-spin text-primary' : ''}`} />
+              </button>
+              <button
+                type="button"
+                title="Migrate photos to Google Drive"
+                disabled={isMigratingToDrive || !coupleLinkId}
+                onClick={() => void triggerDriveMigration()}
+                className="rounded-full p-2 text-muted-foreground transition hover:bg-card hover:text-foreground disabled:opacity-40"
+              >
+                <UploadCloud className={`h-4 w-4 ${isMigratingToDrive ? 'animate-bounce text-primary' : ''}`} />
+              </button>
+            </div>
           </div>
         </div>
-        <div className="ui-card overflow-hidden rounded-modal border border-accent-1/15 bg-card p-2 sm:p-3">
-          <MemoryMapContent embedded />
-        </div>
-      </section>
 
-      <section aria-labelledby="time-capsule-heading" className="space-y-4 rounded-modal border border-accent-1/15 bg-card/50 p-4 sm:p-5">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Time Capsule</p>
-          <h2 id="time-capsule-heading" className="mt-1 text-2xl font-serif text-text-1">Keep something for later</h2>
-        </div>
-        <TimeCapsulesContent />
-      </section>
+        {driveSyncSummary ? (
+          <div className="relative mt-3 rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-2 text-xs text-foreground/80">
+            {driveSyncSummary}
+          </div>
+        ) : null}
+      </header>
 
-      <section aria-labelledby="our-story-heading" className="space-y-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-text-2">Our Story</p>
-          <h2 id="our-story-heading" className="mt-1 text-2xl font-serif text-text-1">Every memory we’ve made together</h2>
-        </div>
-        <OurStoryContent />
-      </section>
+      {/* Navigation Sub-Tabs */}
+      <nav aria-label="Memories navigation" className="flex items-center gap-1 overflow-x-auto rounded-2xl border border-border/70 bg-card/60 p-1.5 backdrop-blur-xl shadow-sm">
+        {tabs.map((tab) => {
+          const Icon = tab.icon
+          const isActive = activeTab === tab.id
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`relative inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium whitespace-nowrap transition ${
+                isActive
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'text-muted-foreground hover:bg-card/80 hover:text-foreground'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              <span>{tab.label}</span>
+              {tab.badge !== undefined ? (
+                <span className={`rounded-full px-2 py-0.5 text-xs ${isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                  {tab.badge}
+                </span>
+              ) : null}
+            </button>
+          )
+        })}
+      </nav>
 
-      <section className="glass-card rounded-modal border border-accent-1/15 p-4 sm:p-5"><div className="mb-4"><p className="text-xs uppercase tracking-[0.2em] text-text-2">AI companion</p><h2 className="mt-1 text-xl font-serif text-text-1">Make more of a memory</h2><p className="mt-1 text-sm text-text-2">Reflect on a moment, turn it into a story, or talk it through gently.</p></div><MemoryCurationAI memories={memories.map((memory) => ({ id: memory.id, title: memory.title ?? memory.caption ?? 'A memory together', date: memory.date }))} /><div className="mt-4 border-t border-border/30 pt-4"><ExplicitAdviceControl title="Talk through a memory" description="Ask for a gentle, two-sided reflection about a memory." placeholder="What happened, and what would you like help understanding?" /></div></section>
+      {/* Tab 1: Photos & Moments */}
+      {activeTab === 'photos' && (
+        <section className="space-y-5">
+          {/* Filter and Sort Bar */}
+          <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/40 p-3.5 backdrop-blur-md sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {(['all', 'favorite', 'travel', 'ritual', 'journal'] as MemoryCategory[]).map((category) => (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => setFilter(category)}
+                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition ${
+                    filter === category
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'border border-border/50 bg-card/60 text-muted-foreground hover:bg-card hover:text-foreground'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
 
-      {isSlideshowOpen ? <MemorySlideshow memories={memories} onClose={() => setIsSlideshowOpen(false)} coupleId={coupleLinkId ?? ''} /> : null}
-      {selectedMemory && <MemoryDetail memory={selectedMemory} onClose={() => setSelectedMemory(null)} onSaved={(updated) => {
-        setMemories((current) => current.map((memory) => memory.id === updated.id ? { ...memory, ...updated } : memory))
-        setSelectedMemory((current) => current?.id === updated.id ? { ...current, ...updated } : current)
-      }} />}
+            <div className="flex items-center gap-2.5 self-end sm:self-auto">
+              <SlidersHorizontal className="h-4 w-4 text-muted-foreground" />
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as MemorySort)}
+                className="rounded-xl border border-border/70 bg-card/70 px-3 py-1.5 text-xs font-medium text-foreground outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Loading / Status */}
+          {isLoading && (
+            <div className="flex items-center justify-center gap-2 py-12 text-sm text-muted-foreground">
+              <RefreshCw className="h-4 w-4 animate-spin text-primary" />
+              <span>Loading our memories...</span>
+            </div>
+          )}
+
+          {error && (
+            <div className="rounded-xl border border-destructive/20 bg-destructive/10 p-4 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          {/* Empty State */}
+          {!isLoading && sortedMemories.length === 0 && (
+            <div className="flex min-h-64 flex-col items-center justify-center rounded-3xl border border-dashed border-border/80 bg-card/30 p-8 text-center backdrop-blur-md">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Heart className="h-7 w-7" />
+              </div>
+              <h3 className="mt-4 font-serif text-lg font-semibold text-foreground">No memories in this view</h3>
+              <p className="mt-1 max-w-sm text-xs text-muted-foreground">
+                Capture your special days, date nights, and heartfelt journals together.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsAddMemoryOpen(true)}
+                className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-xs font-medium text-primary-foreground transition hover:opacity-90"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                <span>Upload First Memory</span>
+              </button>
+            </div>
+          )}
+
+          {/* Memories Grid: Responsive 4-column */}
+          <MemoryGrid
+            memories={visibleMemories}
+            reflectingId={reflectingId}
+            speakingJournalId={speakingJournalId}
+            onEditJournal={openEditJournal}
+            onDeleteJournal={deleteJournal}
+            onSpeakReflection={speakReflection}
+            onRequestReflection={requestReflection}
+            onOpenMemory={setSelectedMemory}
+            onDeleteMemory={handleDelete}
+          />
+
+          {/* Pagination */}
+          {visibleCount < sortedMemories.length && (
+            <div className="flex justify-center pt-4">
+              <button
+                type="button"
+                onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}
+                className="rounded-full border border-border/80 bg-card/70 px-6 py-2.5 text-xs font-medium text-foreground backdrop-blur-md transition hover:bg-card hover:border-primary/40 active:scale-95"
+              >
+                Load More Memories ({sortedMemories.length - visibleCount} remaining)
+              </button>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Tab 2: Places Map */}
+      {activeTab === 'map' && (
+        <section className="space-y-4 rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-xl shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Compass className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-foreground">Places We Remember</h2>
+              <p className="text-xs text-muted-foreground">Pins, coordinates, and scenic spots from all our adventures.</p>
+            </div>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
+            <MemoryMapContent embedded />
+          </div>
+        </section>
+      )}
+
+      {/* Tab 3: Our Story */}
+      {activeTab === 'story' && (
+        <section className="space-y-4 rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-xl shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <BookOpen className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-foreground">Our Story Timeline</h2>
+              <p className="text-xs text-muted-foreground">Every milestone and memory woven into a chronological journey.</p>
+            </div>
+          </div>
+          <OurStoryContent />
+        </section>
+      )}
+
+      {/* Tab 4: Time Capsules */}
+      {activeTab === 'capsules' && (
+        <section className="space-y-4 rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-xl shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Hourglass className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-foreground">Time Capsules</h2>
+              <p className="text-xs text-muted-foreground">Letters, photos, and secrets locked until a special future date.</p>
+            </div>
+          </div>
+          <TimeCapsulesContent />
+        </section>
+      )}
+
+      {/* Tab 5: AI Companion */}
+      {activeTab === 'ai' && (
+        <section className="space-y-5 rounded-3xl border border-border/70 bg-card/60 p-6 backdrop-blur-xl shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Sparkles className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-foreground">AI Companion & Memory Reflection</h2>
+              <p className="text-xs text-muted-foreground">Turn moments into romantic stories, poetic highlights, or gentle reflections.</p>
+            </div>
+          </div>
+          <MemoryCurationAI
+            memories={memories.map((memory) => ({
+              id: memory.id,
+              title: memory.title ?? memory.caption ?? 'A memory together',
+              date: memory.date,
+            }))}
+          />
+          <div className="border-t border-border/40 pt-5">
+            <ExplicitAdviceControl
+              title="Talk Through a Memory"
+              description="Ask for a gentle, loving reflection about any shared experience."
+              placeholder="What happened, and what would you like help understanding?"
+            />
+          </div>
+        </section>
+      )}
+
+      {/* Tab 6: Archived Legacy Gallery */}
+      {activeTab === 'legacy' && (
+        <section className="space-y-4 rounded-3xl border border-border/70 bg-card/60 p-5 backdrop-blur-xl shadow-sm">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <FolderArchive className="h-5 w-5" />
+            </div>
+            <div>
+              <h2 className="font-serif text-xl font-semibold text-foreground">Previously Saved Gallery Photos</h2>
+              <p className="text-xs text-muted-foreground">
+                Photos stored in original encrypted Gallery storage. Safely preserved without alteration.
+              </p>
+            </div>
+          </div>
+          <LegacyGallery showUpload={false} />
+        </section>
+      )}
+
+      {/* Add Memory Modal / Sheet */}
+      <AnimatePresence>
+        {isAddMemoryOpen ? (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Add Memory"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-border/80 bg-card/95 p-6 backdrop-blur-2xl shadow-2xl"
+            >
+              <div className="flex items-center justify-between border-b border-border/50 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <Plus className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-serif text-lg font-semibold text-foreground">Add a Shared Memory</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAddMemoryOpen(false)}
+                  className="rounded-full p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <MemoryUploadPanel
+                caption={caption}
+                memoryDate={memoryDate}
+                memoryCategory={memoryCategory}
+                location={location}
+                locationLabel={locationLabel}
+                isLocationOpen={isLocationOpen}
+                isUploading={isUploading}
+                uploadProgress={uploadProgress}
+                uploadSummary={uploadSummary}
+                error={error}
+                onCaptionChange={setCaption}
+                onMemoryDateChange={setMemoryDate}
+                onMemoryCategoryChange={setMemoryCategory}
+                onLocationChange={setLocation}
+                onLocationLabelChange={setLocationLabel}
+                onLocationOpenChange={setIsLocationOpen}
+                onErrorChange={setError}
+                onFileChange={handleFileChange}
+                onUpload={handleUpload}
+              />
+            </motion.div>
+          </div>
+        ) : null}
+      </AnimatePresence>
+
+      {/* Memory Slideshow Modal */}
+      {isSlideshowOpen ? (
+        <MemorySlideshow
+          memories={memories}
+          onClose={() => setIsSlideshowOpen(false)}
+          coupleId={coupleLinkId ?? ''}
+        />
+      ) : null}
+
+      {/* Memory Detail Modal */}
+      {selectedMemory && (
+        <MemoryDetail
+          memory={selectedMemory}
+          onClose={() => setSelectedMemory(null)}
+          onSaved={(updated) => {
+            setMemories((current) =>
+              current.map((memory) => (memory.id === updated.id ? { ...memory, ...updated } : memory))
+            )
+            setSelectedMemory((current) => (current?.id === updated.id ? { ...current, ...updated } : current))
+          }}
+        />
+      )}
+
+      {/* Journal Entry Modal */}
       {journalModalOpen ? (
         <JournalEntryModal
           isEditing={editingJournalId !== null}
@@ -923,31 +1154,78 @@ function JournalEntryModal({
   readonly onSave: () => void
 }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={isEditing ? 'Edit journal entry' : 'New journal entry'}>
-      <section className="glass-card w-full max-w-xl space-y-4 p-5">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-text-1">{isEditing ? 'Edit journal entry' : 'New journal entry'}</h2>
-          <button type="button" onClick={onClose} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close journal modal"><X className="h-5 w-5" /></button>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      role="dialog"
+      aria-modal="true"
+      aria-label={isEditing ? 'Edit journal entry' : 'New journal entry'}
+    >
+      <section className="w-full max-w-lg space-y-4 rounded-3xl border border-border/80 bg-card/95 p-6 backdrop-blur-2xl shadow-2xl">
+        <div className="flex items-center justify-between border-b border-border/40 pb-3">
+          <h2 className="font-serif text-lg font-semibold text-foreground">
+            {isEditing ? 'Edit Journal Entry' : 'New Journal Entry'}
+          </h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label="Close journal modal"
+          >
+            <X className="h-5 w-5" />
+          </button>
         </div>
-        <input value={title} onChange={(event) => onTitleChange(event.target.value)} placeholder="Title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
-        <textarea value={body} onChange={(event) => onBodyChange(event.target.value)} placeholder="Write your thoughts..." rows={5} className="w-full resize-y rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
+        <input
+          value={title}
+          onChange={(event) => onTitleChange(event.target.value)}
+          placeholder="Journal Title..."
+          className="w-full rounded-2xl border border-border/70 bg-card/60 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+        />
+        <textarea
+          value={body}
+          onChange={(event) => onBodyChange(event.target.value)}
+          placeholder="Pour your heartfelt thoughts, intimate memories, or feelings here..."
+          rows={5}
+          className="w-full resize-y rounded-2xl border border-border/70 bg-card/60 px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:ring-1 focus:ring-primary"
+        />
         <div>
-          <p className="mb-2 text-sm font-medium text-text-1">How are you feeling?</p>
+          <p className="mb-2 text-xs font-medium text-muted-foreground">How are you feeling today?</p>
           <div className="flex flex-wrap gap-2">
             {JOURNAL_MOODS.map(({ id, label, Icon }) => {
               const selected = mood === id
               return (
-                <button key={id} type="button" onClick={() => onMoodChange(id)} className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm ${selected ? 'border-accent-1 bg-accent-1 text-[color:var(--accent-foreground)]' : 'border-accent-1/20 text-text-2'}`}>
-                  <Icon className="h-5 w-5" />
-                  {label}
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => onMoodChange(id)}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition ${
+                    selected
+                      ? 'border-primary bg-primary text-primary-foreground shadow-sm'
+                      : 'border-border/60 bg-card/60 text-muted-foreground hover:bg-card hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  <span>{label}</span>
                 </button>
               )
             })}
           </div>
         </div>
-        <div className="flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="rounded-xl px-4 py-2 text-sm text-text-2">Cancel</button>
-          <button type="button" onClick={onSave} disabled={saving || !title.trim()} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-[color:var(--accent-foreground)] disabled:opacity-50">{saving ? 'Saving...' : 'Save'}</button>
+        <div className="flex justify-end gap-2.5 pt-2 border-t border-border/40">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onSave}
+            disabled={saving || !title.trim()}
+            className="rounded-full bg-primary px-5 py-2 text-xs font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-50"
+          >
+            {saving ? 'Saving...' : 'Save Journal'}
+          </button>
         </div>
       </section>
     </div>
@@ -996,55 +1274,136 @@ function MemoryUploadPanel({
   readonly onUpload: (event: React.FormEvent<HTMLFormElement>) => void
 }) {
   return (
-    <>
-      <section className="glass-card p-5">
-        <h2 className="text-xl text-text-1">Add to our memories</h2><p className="mt-1 text-sm text-text-2">Add photos, a journal entry, date, category, or an optional location without leaving this flow.</p>
-        <form className="mt-4 grid gap-3 md:grid-cols-[1.2fr_1fr_0.8fr_0.7fr_auto]" onSubmit={onUpload}>
+    <div className="space-y-4 pt-3">
+      <form className="space-y-3.5" onSubmit={onUpload}>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground">Select Photos</label>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
             multiple
             onChange={onFileChange}
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
+            className="w-full rounded-2xl border border-border/70 bg-card/50 px-3.5 py-2 text-xs text-foreground file:mr-3 file:rounded-full file:border-0 file:bg-primary/10 file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary hover:file:bg-primary/20"
           />
+        </div>
+
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-muted-foreground">Caption or Title</label>
           <input
             type="text"
             value={caption}
             onChange={(event) => onCaptionChange(event.target.value)}
-            placeholder="Caption (optional)"
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-2 text-sm text-text-1 outline-none focus:border-accent-1"
+            placeholder="e.g. Coffee date at the corner cafe"
+            className="w-full rounded-2xl border border-border/70 bg-card/50 px-3.5 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
           />
-          <select
-            value={memoryCategory}
-            onChange={(event) => onMemoryCategoryChange(event.target.value as MemoryCategory)}
-            className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1 outline-none focus:border-accent-1"
+        </div>
+
+        <div className="grid grid-cols-2 gap-2.5">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Category</label>
+            <select
+              value={memoryCategory}
+              onChange={(event) => onMemoryCategoryChange(event.target.value as MemoryCategory)}
+              className="w-full rounded-2xl border border-border/70 bg-card/50 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+            >
+              <option value="favorite">Favorite</option>
+              <option value="travel">Travel</option>
+              <option value="ritual">Ritual</option>
+              <option value="journal">Journal</option>
+            </select>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Date</label>
+            <input
+              type="date"
+              value={memoryDate}
+              onChange={(event) => onMemoryDateChange(event.target.value)}
+              className="w-full rounded-2xl border border-border/70 bg-card/50 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+              aria-label="Memory date"
+            />
+          </div>
+        </div>
+
+        <div className="pt-1">
+          <button
+            type="button"
+            onClick={() => onLocationOpenChange(true)}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border/70 bg-card/60 px-3 py-1.5 text-xs text-foreground hover:bg-card"
           >
-            <option value="favorite">Favorite</option>
-            <option value="travel">Travel</option>
-            <option value="ritual">Ritual</option>
-            <option value="journal">Journal</option>
-          </select>
-          <input type="date" value={memoryDate} onChange={(event) => onMemoryDateChange(event.target.value)} className="rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" aria-label="Memory date" />
-          <button type="button" onClick={() => onLocationOpenChange(true)} className="rounded-btn border border-accent-1/20 px-3 py-2 text-sm text-text-1">{location ? 'Location added' : 'Add location (optional)'}</button>
+            <MapPin className="h-3.5 w-3.5 text-primary" />
+            <span>{location ? (locationLabel || 'Location pinned') : 'Add Location (Optional)'}</span>
+          </button>
+        </div>
+
+        {isUploading && (
+          <div className="space-y-1.5 pt-2">
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Uploading & encrypting...</span>
+              <span>{uploadProgress}%</span>
+            </div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full bg-primary transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        {error && <p className="text-xs text-destructive">{error}</p>}
+        {uploadSummary && <p className="text-xs text-emerald-500">{uploadSummary}</p>}
+
+        <div className="flex justify-end gap-2 pt-2">
           <button
             type="submit"
             disabled={isUploading || !isSupabaseConfigured}
-            className="rounded-btn bg-accent-1 px-5 py-2 text-sm font-medium text-[color:var(--accent-foreground)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-full bg-primary py-2.5 text-xs font-medium text-primary-foreground shadow-md transition hover:opacity-90 disabled:opacity-50"
           >
-            {isUploading ? `Uploading ${uploadProgress}%` : 'Upload'}
+            {isUploading ? `Uploading ${uploadProgress}%` : 'Upload & Save Memory'}
           </button>
-        </form>
-        {isUploading ? <div className="mt-3 h-2 overflow-hidden rounded-full bg-soft-tint" role="progressbar" aria-valuenow={uploadProgress} aria-valuemin={0} aria-valuemax={100}><div className="h-full bg-accent-1 transition-all" style={{ width: `${uploadProgress}%` }} /></div> : null}
-        {!isSupabaseConfigured && (
-          <p className="mt-3 text-xs text-text-2">
-            Configure Supabase to upload new memories.
-          </p>
-        )}
-        {error && <p className="mt-3 text-sm text-error">{error}</p>}
-        {uploadSummary && <p className="mt-3 text-sm text-success">{uploadSummary}</p>}
-      </section>
-      {isLocationOpen ? <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 p-4"><div className="w-full max-w-xl space-y-4 rounded-panel bg-card p-5"><div className="flex items-center justify-between"><h2 className="text-lg text-text-1">Memory location</h2><button type="button" onClick={() => onLocationOpenChange(false)} className="text-sm text-text-2">Close</button></div><MemoryLocationPicker value={location} onChange={onLocationChange} /><button type="button" onClick={() => navigator.geolocation.getCurrentPosition((position) => onLocationChange({ latitude: position.coords.latitude, longitude: position.coords.longitude }), () => onErrorChange('Unable to read your current location.'))} className="rounded-xl border border-accent-1/20 px-3 py-2 text-sm text-text-1">Use current location</button><input value={locationLabel} onChange={(event) => onLocationLabelChange(event.target.value)} placeholder="Label (optional, e.g. Home or Cafe)" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><button type="button" onClick={() => onLocationOpenChange(false)} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-[color:var(--accent-foreground)]">Save location</button></div></div> : null}
-    </>
+        </div>
+      </form>
+
+      {isLocationOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md space-y-3.5 rounded-3xl border border-border bg-card p-5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <h4 className="font-serif text-sm font-semibold text-foreground">Pick Location</h4>
+              <button type="button" onClick={() => onLocationOpenChange(false)} className="text-xs text-muted-foreground hover:text-foreground">
+                Close
+              </button>
+            </div>
+            <MemoryLocationPicker value={location} onChange={onLocationChange} />
+            <button
+              type="button"
+              onClick={() =>
+                navigator.geolocation.getCurrentPosition(
+                  (pos) => onLocationChange({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+                  () => onErrorChange('Unable to read your current location.')
+                )
+              }
+              className="w-full rounded-xl border border-border/70 py-2 text-xs font-medium text-foreground hover:bg-card/80"
+            >
+              Use Current Location
+            </button>
+            <input
+              value={locationLabel}
+              onChange={(event) => onLocationLabelChange(event.target.value)}
+              placeholder="Place label (e.g. Cozy Cafe, Riverside Park)"
+              className="w-full rounded-xl border border-border/70 bg-card/60 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+            />
+            <button
+              type="button"
+              onClick={() => onLocationOpenChange(false)}
+              className="w-full rounded-full bg-primary py-2 text-xs font-medium text-primary-foreground"
+            >
+              Confirm Location
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -1070,55 +1429,103 @@ function MemoryGrid({
   readonly onDeleteMemory: (memory: DisplayMemory) => void
 }) {
   return (
-    <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 xl:grid-cols-4">
-      {memories.map((memory, index) => (
+    <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      {memories.map((memory, index) =>
         memory.category === 'journal' ? (
-          <article key={memory.id} className="glass-card relative space-y-3 p-5">
-            <div className="flex items-start justify-between gap-4">
-              <div className="min-w-0">
-                <h3 className="font-semibold text-text-1">{memory.title}</h3>
-                <p className="mt-1 text-xs text-text-2">{memory.date}</p>
-              </div>
-              <div className="flex items-center gap-3">
-                {memory.metadata?.mood_tag ? (() => {
-                  const mood = JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
-                    JOURNAL_MOODS.find((item) => item.id === 'okay')
-                  if (!mood) return null
-                  const MoodIcon = mood.Icon
-                  return <MoodIcon className="h-5 w-5 text-accent-1" aria-label={mood.label} />
-                })() : null}
-                <button type="button" onClick={() => onEditJournal(memory)} className="text-accent-1" aria-label="Edit journal entry">
-                  <Pencil className="h-5 w-5" />
-                </button>
-                <button type="button" onClick={() => onDeleteJournal(memory)} className="text-error" aria-label="Delete journal entry">
-                  <Trash2 className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-            {memory.description ? <p className="line-clamp-2 text-sm text-text-2">{memory.description}</p> : null}
-            {memory.metadata?.ai_reflection ? (
-              <div className="rounded-xl border border-accent-1/20 bg-soft-tint p-3">
-                <div className="flex items-center gap-2 text-xs font-semibold text-accent-1">
-                  <Sparkles className="h-4 w-4" />
-                  AI reflection
-                  <button type="button" onClick={() => onSpeakReflection(memory)} aria-label="Read AI reflection aloud">
-                    {speakingJournalId === memory.id
-                      ? <Square className="h-4 w-4" />
-                      : <Volume2 className="h-4 w-4" />}
+          <article
+            key={memory.id}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-border/70 bg-card/60 p-4.5 backdrop-blur-md shadow-sm transition hover:border-primary/40 hover:shadow-md"
+          >
+            <div className="space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="inline-flex items-center gap-1 text-[11px] font-medium text-primary">
+                    <Pencil className="h-3 w-3" />
+                    <span>Journal</span>
+                  </span>
+                  <h3 className="line-clamp-1 font-serif text-base font-semibold text-foreground">
+                    {memory.title}
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">{memory.date}</p>
+                </div>
+
+                <div className="flex items-center gap-1.5 opacity-80 group-hover:opacity-100">
+                  {memory.metadata?.mood_tag ? (() => {
+                    const mood =
+                      JOURNAL_MOODS.find((item) => item.id === memory.metadata?.mood_tag) ??
+                      JOURNAL_MOODS.find((item) => item.id === 'okay')
+                    if (!mood) return null
+                    const MoodIcon = mood.Icon
+                    return <MoodIcon className="h-4 w-4 text-primary" aria-label={mood.label} />
+                  })() : null}
+                  <button
+                    type="button"
+                    onClick={() => onEditJournal(memory)}
+                    className="rounded-full p-1 text-muted-foreground hover:bg-card hover:text-foreground"
+                    aria-label="Edit journal entry"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onDeleteJournal(memory)}
+                    className="rounded-full p-1 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                    aria-label="Delete journal entry"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <p className="mt-2 text-sm text-text-1">{memory.metadata.ai_reflection}</p>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => void onRequestReflection(memory)}
-                disabled={reflectingId !== null}
-                className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-2 text-sm text-accent-1 disabled:opacity-50"
-              >
-                {reflectingId === memory.id ? <span className="h-4 w-4 animate-spin rounded-full border-2 border-accent-1 border-t-transparent" /> : <Sparkles className="h-4 w-4" />}
-                {reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}
-              </button>
+
+              {memory.description ? (
+                <p className="line-clamp-3 text-xs leading-relaxed text-muted-foreground">
+                  {memory.description}
+                </p>
+              ) : null}
+
+              {memory.metadata?.ai_reflection ? (
+                <div className="rounded-2xl border border-primary/20 bg-primary/5 p-3">
+                  <div className="flex items-center justify-between text-xs font-semibold text-primary">
+                    <span className="inline-flex items-center gap-1.5">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      AI Reflection
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => onSpeakReflection(memory)}
+                      aria-label="Read reflection aloud"
+                      className="rounded-full p-1 hover:bg-primary/10"
+                    >
+                      {speakingJournalId === memory.id ? (
+                        <Square className="h-3.5 w-3.5" />
+                      ) : (
+                        <Volume2 className="h-3.5 w-3.5" />
+                      )}
+                    </button>
+                  </div>
+                  <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-foreground/90">
+                    {memory.metadata.ai_reflection}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
+            {!memory.metadata?.ai_reflection && (
+              <div className="pt-3">
+                <button
+                  type="button"
+                  onClick={() => void onRequestReflection(memory)}
+                  disabled={reflectingId !== null}
+                  className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/50 py-1.5 text-xs font-medium text-foreground transition hover:border-primary/40 hover:text-primary disabled:opacity-50"
+                >
+                  {reflectingId === memory.id ? (
+                    <RefreshCw className="h-3.5 w-3.5 animate-spin text-primary" />
+                  ) : (
+                    <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  )}
+                  <span>{reflectingId === memory.id ? 'Reflecting...' : 'Reflect with AI'}</span>
+                </button>
+              </div>
             )}
           </article>
         ) : (
@@ -1133,29 +1540,154 @@ function MemoryGrid({
             index={index}
             onOpen={() => onOpenMemory(memory)}
             onDelete={
-              memory.user_id && !(memory.metadata && typeof memory.metadata === 'object' && 'legacy_gallery_original' in memory.metadata && memory.metadata.legacy_gallery_original === true)
+              memory.user_id &&
+              !(
+                memory.metadata &&
+                typeof memory.metadata === 'object' &&
+                'legacy_gallery_original' in memory.metadata &&
+                memory.metadata.legacy_gallery_original === true
+              )
                 ? () => onDeleteMemory(memory)
                 : undefined
             }
           />
         )
-      ))}
+      )}
     </section>
   )
 }
 
-function MemoryDetail({ memory, onClose, onSaved }: { readonly memory: DisplayMemory; readonly onClose: () => void; readonly onSaved: (memory: Partial<DisplayMemory> & { id: string }) => void }) {
+function MemoryDetail({
+  memory,
+  onClose,
+  onSaved,
+}: {
+  readonly memory: DisplayMemory
+  readonly onClose: () => void
+  readonly onSaved: (memory: Partial<DisplayMemory> & { id: string }) => void
+}) {
   const [title, setTitle] = useState(memory.title ?? memory.caption ?? '')
   const [date, setDate] = useState(memory.date)
-  const [category, setCategory] = useState<Exclude<MemoryCategory, 'all'>>((memory.category as Exclude<MemoryCategory, 'all'>) ?? 'favorite')
+  const [category, setCategory] = useState<Exclude<MemoryCategory, 'all'>>(
+    (memory.category as Exclude<MemoryCategory, 'all'>) ?? 'favorite'
+  )
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState('')
+
   const save = async () => {
-    setSaving(true); setSaveError('')
-    const { error } = await supabase.from('memories').update({ title: title.trim() || 'A memory together', caption: title.trim() || 'A memory together', date, category }).eq('id', memory.id)
+    setSaving(true)
+    setSaveError('')
+    const { error } = await supabase
+      .from('memories')
+      .update({
+        title: title.trim() || 'A memory together',
+        caption: title.trim() || 'A memory together',
+        date,
+        category,
+      })
+      .eq('id', memory.id)
     if (error) setSaveError(error.message)
     else onSaved({ id: memory.id, title, caption: title, date, category })
     setSaving(false)
   }
-  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label="Memory details"><motion.section initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="glass-card max-h-[90vh] w-full max-w-2xl overflow-y-auto p-4"><div className="flex justify-end"><button type="button" onClick={onClose} className="rounded-full p-2 text-text-2 hover:bg-card/10" aria-label="Close"><X className="h-5 w-5" /></button></div>{memory.displayUrl ? <div className="relative flex h-[42vh] min-h-56 max-h-[520px] w-full items-center justify-center overflow-hidden rounded-btn bg-black/10"><img src={memory.displayUrl} alt={memory.title || memory.caption || 'Memory'} loading="eager" decoding="async" className="absolute inset-0 h-full w-full object-contain" /></div> : <div className="h-64 rounded-btn bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20" />}<div className="space-y-3 p-3"><input value={title} onChange={(event) => setTitle(event.target.value)} aria-label="Memory title" className="w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-lg font-serif text-text-1" /><div className="grid gap-2 sm:grid-cols-2"><input type="date" value={date} onChange={(event) => setDate(event.target.value)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" /><select value={category} onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)} className="rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"><option value="favorite">Favorite</option><option value="travel">Travel</option><option value="ritual">Ritual</option><option value="journal">Journal</option></select></div>{saveError && <p className="text-sm text-error">{saveError}</p>}<button type="button" onClick={save} disabled={saving} className="rounded-xl bg-accent-1 px-4 py-2 text-sm text-[color:var(--accent-foreground)] disabled:opacity-50">{saving ? 'Saving...' : 'Save changes'}</button></div></motion.section></div>
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Memory details"
+    >
+      <motion.section
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border/80 bg-card/95 p-5 backdrop-blur-2xl shadow-2xl"
+      >
+        <div className="flex items-center justify-between border-b border-border/40 pb-3">
+          <span className="text-xs font-medium text-muted-foreground">Memory Details</span>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            aria-label="Close"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {memory.displayUrl ? (
+          <div className="relative mt-3 flex h-[45vh] min-h-60 max-h-[500px] w-full items-center justify-center overflow-hidden rounded-2xl bg-black/20">
+            <img
+              src={memory.displayUrl}
+              alt={memory.title || memory.caption || 'Memory'}
+              loading="eager"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-contain"
+            />
+          </div>
+        ) : (
+          <div className="mt-3 flex h-48 w-full items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Heart className="h-12 w-12" />
+          </div>
+        )}
+
+        <div className="space-y-3.5 pt-4">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">Title</label>
+            <input
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              aria-label="Memory title"
+              className="w-full rounded-2xl border border-border/70 bg-card/60 px-3.5 py-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">Date</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(event) => setDate(event.target.value)}
+                className="w-full rounded-2xl border border-border/70 bg-card/60 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground">Category</label>
+              <select
+                value={category}
+                onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)}
+                className="w-full rounded-2xl border border-border/70 bg-card/60 px-3 py-2 text-xs text-foreground outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="favorite">Favorite</option>
+                <option value="travel">Travel</option>
+                <option value="ritual">Ritual</option>
+                <option value="journal">Journal</option>
+              </select>
+            </div>
+          </div>
+
+          {saveError && <p className="text-xs text-destructive">{saveError}</p>}
+
+          <div className="flex justify-end gap-2.5 pt-2 border-t border-border/40">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full px-4 py-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving}
+              className="rounded-full bg-primary px-5 py-2 text-xs font-medium text-primary-foreground shadow-sm transition hover:opacity-90 disabled:opacity-50"
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </div>
+      </motion.section>
+    </div>
+  )
 }

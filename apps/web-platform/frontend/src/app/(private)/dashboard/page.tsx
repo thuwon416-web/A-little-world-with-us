@@ -13,6 +13,7 @@ import { getCoupleStatus } from '@/lib/couples'
 import { supabase } from '@/lib/supabase'
 import ConnectedCoupleAvatars from '@/components/shared/ConnectedCoupleAvatars'
 import LoveStreakBadge from '@/components/shared/LoveStreakBadge'
+import { SlidersHorizontal } from 'lucide-react'
 
 const DaysCounter = dynamic(() => import('@/features/dashboard/DaysCounter'), { loading: () => <DashboardPanelSkeleton /> })
 const Countdown = dynamic(() => import('@/features/dashboard/Countdown'), { loading: () => <DashboardPanelSkeleton /> })
@@ -46,27 +47,21 @@ const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.El
   },
   'memory-of-the-day': {
     label: 'Memory of the day',
-    render: () => (
-        <MemoryOfTheDay />
-    ),
+    render: () => <MemoryOfTheDay />,
   },
   'mini-care-check': {
     label: 'Mini care check',
-    render: () => (
-        <MiniCareCheck />
-    ),
+    render: () => <MiniCareCheck />,
   },
   'music-player': {
     label: 'Music player',
-    render: () => (
-        <MusicPlayer />
-    ),
+    render: () => <MusicPlayer />,
   },
 }
 
 function DashboardPanelSkeleton() {
   return (
-    <div className="space-y-3 rounded-panel border border-accent-1/10 bg-card/40 p-4">
+    <div className="space-y-3 rounded-2xl border border-accent-1/10 bg-card/40 p-4">
       <div className="dashboard-shimmer h-5 w-24 rounded-full" />
       <div className="dashboard-shimmer h-20 w-full rounded-btn" />
       <div className="dashboard-shimmer h-10 w-32 rounded-full" />
@@ -76,7 +71,6 @@ function DashboardPanelSkeleton() {
 
 function getTimeGreeting() {
   const hour = new Date().getHours()
-
   if (hour >= 5 && hour < 12) return 'Good morning'
   if (hour >= 12 && hour < 18) return 'Good afternoon'
   if (hour >= 18 && hour < 22) return 'Good evening'
@@ -92,61 +86,60 @@ function getDailyFocus() {
     'Be extra present with each other today.',
     'Hold each other with patience and warmth.',
   ]
-
   return focuses[daySeed % focuses.length]
 }
 
 function getLittleRitual() {
   const daySeed = new Date().getDate()
   const rituals = [
-    'Share one thing that made your heart feel full today.',
     'Hold hands for a minute without talking.',
-    'Send a warm voice note or sweet message.',
-    'Take a slow walk and notice one beautiful thing together.',
-    'Make tea or coffee and sit in the same quiet moment.',
+    'Say one little thing you appreciate about them before sleeping.',
+    'Send a 10-second voice note of your favorite inside joke.',
+    'Brew a warm drink and share the first sip together.',
+    'Take a slow deep breath together.',
   ]
-
   return rituals[daySeed % rituals.length]
 }
 
-type ActiveOccasion = { title: string; kind: 'anniversary' | 'birthday' | 'custom' }
-const defaultOccasionMessage = 'Today is another beautiful day to love each other softly and fully.'
+type ActiveOccasion = {
+  title: string
+  kind: 'anniversary' | 'birthday' | 'custom'
+}
 
 export default function DashboardPage() {
-  const heroCopy = useMemo(() => {
-    return {
-      greeting: getTimeGreeting(),
-      focus: getDailyFocus(),
-      ritual: getLittleRitual(),
-      occasion: defaultOccasionMessage,
-    }
-  }, [])
-
+  const [coupleId, setCoupleId] = useState<string | null>(null)
+  const [coupleName, setCoupleName] = useState('Our World')
+  const [anniversary, setAnniversary] = useState<string | null>(null)
+  const [activeOccasion, setActiveOccasion] = useState<ActiveOccasion | null>(null)
   const [widgetOrder, setWidgetOrder] = useState<DashboardWidgetId[]>(DEFAULT_WIDGETS)
   const [widgetVisibility, setWidgetVisibility] =
     useState<Record<DashboardWidgetId, boolean>>(defaultVisibility)
+  const [userProfile, setUserProfile] = useState<{ full_name?: string | null; avatar_url?: string | null } | null>(null)
+  const [partnerProfile, setPartnerProfile] = useState<{ full_name?: string | null; avatar_url?: string | null } | null>(null)
+  const [showCustomize, setShowCustomize] = useState(false)
   const layoutReady = useRef(false)
-  const [activeOccasion, setActiveOccasion] = useState<ActiveOccasion | null>(null)
-  const [coupleName, setCoupleName] = useState('Our World')
-  const [anniversary, setAnniversary] = useState<string | null>(null)
-  const [coupleId, setCoupleId] = useState<string | null>(null)
-  const [userProfile, setUserProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
-  const [partnerProfile, setPartnerProfile] = useState<{ full_name: string | null; avatar_url: string | null } | null>(null)
+
+  const heroCopy = useMemo(
+    () => ({
+      greeting: getTimeGreeting(),
+      focus: getDailyFocus(),
+      ritual: getLittleRitual(),
+      occasion: 'Today is another beautiful day to love each other softly and fully.',
+    }),
+    []
+  )
 
   useEffect(() => {
-    void loadDashboardLayout().then((saved) => {
-      if (saved) {
-        const validOrder = saved.order.filter((id): id is DashboardWidgetId =>
-          DEFAULT_WIDGETS.includes(id as DashboardWidgetId)
-        )
-        setWidgetOrder(validOrder.length > 0 ? validOrder : DEFAULT_WIDGETS)
+    const applySavedLayout = async () => {
+      const saved = await loadDashboardLayout()
+      if (saved?.order?.length) setWidgetOrder(saved.order)
+      if (saved?.visibility) {
         setWidgetVisibility({ ...defaultVisibility, ...saved.visibility })
       }
       layoutReady.current = true
-    })
-  }, [])
+    }
+    void applySavedLayout()
 
-  useEffect(() => {
     const loadTodayOccasion = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
@@ -195,14 +188,11 @@ export default function DashboardPage() {
 
   const handleWidgetDrop = (fromId: string, toId: DashboardWidgetId) => {
     if (fromId === toId) return
-
     setWidgetOrder((current) => {
       const next = [...current]
       const fromIndex = next.indexOf(fromId as DashboardWidgetId)
       const toIndex = next.indexOf(toId)
-
       if (fromIndex < 0 || toIndex < 0) return current
-
       const [item] = next.splice(fromIndex, 1)
       if (!item) return current
       next.splice(toIndex, 0, item)
@@ -212,26 +202,26 @@ export default function DashboardPage() {
 
   return (
     <div
-      className={`dashboard-shell mx-auto w-full max-w-7xl space-y-6 px-3 py-4 animate-fade-in sm:space-y-8 sm:px-6 sm:py-8 ${activeOccasion ? `dashboard-shell--${activeOccasion.kind}` : ''}`}
+      className={`dashboard-shell mx-auto w-full max-w-7xl space-y-6 px-3 py-4 animate-fade-in sm:space-y-6 sm:px-6 sm:py-6 ${activeOccasion ? `dashboard-shell--${activeOccasion.kind}` : ''}`}
     >
-      <section className="dashboard-hero">
+      {/* Compact, Unified Hero */}
+      <section className="dashboard-hero rounded-2xl border border-border/70 p-5 sm:p-6 shadow-card">
         <div className="dashboard-hero__glow" />
-        <div className="dashboard-hero__content min-w-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-2">
+        <div className="dashboard-hero__content min-w-0 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
             <div className="min-w-0 flex-1">
-              <div className="dashboard-hero__topline">
-                <p className="dashboard-kicker">Home</p>
+              <div className="flex flex-wrap items-center gap-2 mb-1.5">
                 <span className="dashboard-pill">{heroCopy.greeting}</span>
+                <CoupleLinkStatus />
               </div>
 
-              <div className="dashboard-hero__title-wrap">
-                <h1 className="dashboard-hero__title break-words text-3xl sm:text-4xl lg:text-5xl">A Little World with Us</h1>
-                <span className="dashboard-hero__badge">∞</span>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-serif text-text-1">A Little World with Us</h1>
+                <span className="text-accent-1 text-xl">∞</span>
               </div>
 
-              <p className="dashboard-hero__subtitle">{coupleName}</p>
-              <p className="dashboard-hero__meta">
-                {activeOccasion
+              <p className="mt-1 text-sm text-text-2 font-medium">
+                {coupleName} · {activeOccasion
                   ? activeOccasion.kind === 'anniversary'
                     ? `Happy anniversary — ${activeOccasion.title}.`
                     : activeOccasion.kind === 'birthday'
@@ -240,12 +230,24 @@ export default function DashboardPage() {
                   : heroCopy.occasion}
               </p>
 
-              <div className="mt-4">
+              {/* Badges & Actions Row */}
+              <div className="mt-3 flex flex-wrap items-center gap-3">
                 <LoveStreakBadge coupleId={coupleId} />
+                <AnniversaryShareCard />
+                <button
+                  type="button"
+                  onClick={() => setShowCustomize((prev) => !prev)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-card/60 px-3 py-1.5 text-xs text-text-2 hover:text-text-1 hover:bg-card transition"
+                  title="Customize Home Widgets"
+                >
+                  <SlidersHorizontal className="h-3.5 w-3.5" />
+                  Customize
+                </button>
               </div>
             </div>
 
-            <div className="flex shrink-0 items-center justify-center p-3 rounded-2xl bg-card/60 border border-accent-1/15 shadow-sm backdrop-blur-sm self-start sm:self-center">
+            {/* Connected Couple Avatars */}
+            <div className="flex shrink-0 items-center justify-center p-3 rounded-2xl bg-card/70 border border-border/60 shadow-sm backdrop-blur-sm self-start sm:self-center">
               <ConnectedCoupleAvatars
                 size="xl"
                 userAvatarUrl={userProfile?.avatar_url}
@@ -257,50 +259,45 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <AnniversaryShareCard />
-          </div>
-
-          <div className="mt-4">
-            <CoupleLinkStatus />
-          </div>
-
-          <div className="dashboard-hero__microcards grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4">
-            <div className="dashboard-mini-card min-w-0 rounded-panel border border-accent-1/15 bg-card/80 p-4">
-              <span className="dashboard-mini-label">Today&apos;s focus</span>
-              <p>{heroCopy.focus}</p>
+          {/* Today's Focus & Little Ritual side-by-side */}
+          <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 pt-2 border-t border-border/40">
+            <div className="min-w-0 rounded-xl border border-border/50 bg-card/60 p-3 shadow-xs">
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-accent-1 block mb-0.5">Today&apos;s Focus</span>
+              <p className="text-xs text-text-1 leading-relaxed">{heroCopy.focus}</p>
             </div>
-            <div className="dashboard-mini-card min-w-0 rounded-panel border border-accent-1/15 bg-card/80 p-4">
-              <span className="dashboard-mini-label">Little ritual</span>
-              <p>{heroCopy.ritual}</p>
+            <div className="min-w-0 rounded-xl border border-border/50 bg-card/60 p-3 shadow-xs">
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-accent-2 block mb-0.5">Little Ritual</span>
+              <p className="text-xs text-text-1 leading-relaxed">{heroCopy.ritual}</p>
             </div>
           </div>
         </div>
       </section>
 
-      {coupleId ? <OnThisDay coupleId={coupleId} /> : null}
-
-      <div className="dashboard-toolbar">
-        <p className="dashboard-kicker">Customize home</p>
-        <div className="dashboard-layout-controls">
-          {DEFAULT_WIDGETS.map((widgetId) => (
-            <button
-              key={widgetId}
-              type="button"
-              onClick={() =>
-                setWidgetVisibility((current) => ({
-                  ...current,
-                  [widgetId]: !current[widgetId],
-                }))
-              }
-              className={`dashboard-layout-chip ${widgetVisibility[widgetId] ? 'is-active' : ''}`}
-            >
-              {widgetMap[widgetId].label}
-            </button>
-          ))}
+      {/* Collapsible Customize Toolbar */}
+      {showCustomize && (
+        <div className="rounded-2xl border border-accent-1/25 bg-card/90 p-4 backdrop-blur-md shadow-card animate-fade-in space-y-2">
+          <p className="text-xs uppercase font-semibold tracking-wider text-accent-1">Customize Home Layout</p>
+          <div className="flex flex-wrap gap-2">
+            {DEFAULT_WIDGETS.map((widgetId) => (
+              <button
+                key={widgetId}
+                type="button"
+                onClick={() =>
+                  setWidgetVisibility((current) => ({
+                    ...current,
+                    [widgetId]: !current[widgetId],
+                  }))
+                }
+                className={`dashboard-layout-chip ${widgetVisibility[widgetId] ? 'is-active' : ''}`}
+              >
+                {widgetMap[widgetId].label}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
+      {/* Primary Interactive Widgets Grid (Immediately visible above the fold) */}
       <section className="dashboard-grid dashboard-grid--dynamic min-w-0">
         {visibleWidgets.map((widgetId, index) => {
           const widget = widgetMap[widgetId]
@@ -322,7 +319,7 @@ export default function DashboardPage() {
                 const fromId = event.dataTransfer.getData('text/plain')
                 handleWidgetDrop(fromId, widgetId)
               }}
-              className="dashboard-panel dashboard-card-interactive min-w-0"
+              className="dashboard-panel dashboard-card-interactive min-w-0 rounded-2xl border border-border/70 shadow-card"
             >
               {widgetId === 'countdown' ? (
                 <Countdown
@@ -340,11 +337,17 @@ export default function DashboardPage() {
         })}
       </section>
 
+      {/* On This Day Highlight Section */}
+      {coupleId ? <OnThisDay coupleId={coupleId} /> : null}
+
+      {/* Secondary Relationship Stats & Scoreboard */}
       <RelationshipStats />
       {coupleId ? <OurStats coupleId={coupleId} /> : null}
-      <section className="dashboard-panel ui-card min-w-0 rounded-panel border border-accent-1/15 bg-card p-4 sm:p-5" aria-label="Couple scoreboard">
+
+      <section className="dashboard-panel ui-card min-w-0 rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-card" aria-label="Couple scoreboard">
         <CoupleScoreboard />
       </section>
+
       <QuickActions />
     </div>
   )
