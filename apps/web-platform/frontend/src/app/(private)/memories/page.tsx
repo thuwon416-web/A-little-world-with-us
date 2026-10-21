@@ -639,14 +639,35 @@ function MemoriesPageContent() {
             onClick={() => {
               if (!coupleLinkId) return
               setIsMigratingToDrive(true)
-              setDriveSyncSummary('Moving existing Supabase memories to Google Drive…')
+              setDriveSyncSummary('Checking Google Drive connection…')
               void (async () => {
+                const statusRes = await fetch('/api/drive/status').catch(() => null)
+                const statusData = statusRes?.ok ? await statusRes.json().catch(() => ({})) : {}
+                if (!statusData?.connected) {
+                  setDriveSyncSummary('Google Drive is not connected. Please connect Google Drive first.')
+                  return
+                }
+
+                setDriveSyncSummary('Moving existing Supabase memories to Google Drive…')
+                const { data: sessionData } = await supabase.auth.getSession()
+                const authHeader: Record<string, string> = {}
+                if (sessionData?.session?.access_token) {
+                  authHeader.Authorization = `Bearer ${sessionData.session.access_token}`
+                }
+
                 let migrated = 0
                 let failed = 0
+                let lastFailReason = ''
                 const candidates = memories.filter((memory) => {
                   const row = memory as DisplayMemory & { storage_provider?: string; storage_path?: string | null }
                   return row.storage_provider === 'supabase' && Boolean(row.storage_path)
                 })
+
+                if (candidates.length === 0) {
+                  setDriveSyncSummary('No Supabase-stored memories need migration.')
+                  return
+                }
+
                 for (const item of candidates) {
                   const row = item as DisplayMemory & { storage_provider?: string; storage_path?: string | null }
                   const path = row.storage_path
@@ -657,9 +678,15 @@ function MemoriesPageContent() {
                     const form = new FormData()
                     form.append('memoryId', row.id)
                     form.append('file', file)
-                    const response = await fetch('/api/drive/migrate-memory', { method: 'POST', body: form })
+                    const response = await fetch('/api/drive/migrate-memory', {
+                      method: 'POST',
+                      headers: authHeader,
+                      body: form,
+                    })
                     const body = await response.json().catch(() => ({})) as { migrated?: boolean; alreadyInDrive?: boolean; oldStoragePath?: string; error?: string }
-                    if (!response.ok || (!body.migrated && !body.alreadyInDrive)) throw new Error(body.error || 'Migration failed.')
+                    if (!response.ok || (!body.migrated && !body.alreadyInDrive)) {
+                      throw new Error(body.error || response.statusText || 'Migration failed.')
+                    }
                     if (body.migrated && body.oldStoragePath) {
                       const { error: removeError } = await supabase.storage.from('memories').remove([body.oldStoragePath])
                       if (removeError) console.warn('Migrated memory has an old storage object that could not be cleaned up:', row.id)
@@ -667,10 +694,12 @@ function MemoriesPageContent() {
                     migrated += body.migrated ? 1 : 0
                   } catch (migrationError) {
                     failed += 1
-                    console.error('Memory migration failed:', row.id, migrationError instanceof Error ? migrationError.message : 'unknown error')
+                    const msg = migrationError instanceof Error ? migrationError.message : 'unknown error'
+                    lastFailReason = msg
+                    console.error('Memory migration failed:', row.id, msg)
                   }
                 }
-                setDriveSyncSummary(`Drive migration finished: ${migrated} moved${failed ? `, ${failed} failed (originals kept)` : ''}.`)
+                setDriveSyncSummary(`Drive migration finished: ${migrated} moved${failed ? `, ${failed} failed (${lastFailReason || 'originals kept'})` : ''}.`)
                 await loadMemories()
               })().catch((migrationError) => setDriveSyncSummary(migrationError instanceof Error ? migrationError.message : 'Drive migration failed.'))
                 .finally(() => setIsMigratingToDrive(false))
@@ -1093,34 +1122,22 @@ function MemoryGrid({
             )}
           </article>
         ) : (
-          <div key={memory.id} className="relative">
-            {memory.displayUrl ? (
-              <MemoryCard
-                id={memory.id}
-                imageUrl={memory.displayUrl}
-                caption={memory.title || memory.caption || 'A moment together'}
-                date={memory.date}
-                index={index}
-                onOpen={() => onOpenMemory(memory)}
-              />
-            ) : (
-              <button type="button" onClick={() => onOpenMemory(memory)} className="glass-card w-full bg-gradient-to-br from-accent-1/25 via-soft-tint to-accent-2/20 p-6 text-left"><p className="font-serif text-xl text-text-1">{memory.caption || 'A moment together'}</p><p className="mt-2 text-sm text-text-2">{new Date(memory.date).toLocaleDateString()}</p></button>
-            )}
-            {memory.category && (
-              <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2 py-1 text-[10px] uppercase tracking-[0.15em] text-white">
-                {memory.category}
-              </span>
-            )}
-            {memory.user_id && !(memory.metadata && typeof memory.metadata === 'object' && 'legacy_gallery_original' in memory.metadata && memory.metadata.legacy_gallery_original === true) && (
-              <button
-                type="button"
-                onClick={() => onDeleteMemory(memory)}
-                className="absolute right-3 top-3 rounded-full bg-error/80 px-3 py-1 text-xs text-accent-foreground hover:bg-error"
-              >
-                Delete
-              </button>
-            )}
-          </div>
+          <MemoryCard
+            key={memory.id}
+            id={memory.id}
+            imageUrl={memory.displayUrl || null}
+            caption={memory.title || memory.caption || 'A moment together'}
+            date={memory.date}
+            category={memory.category}
+            locationLabel={(memory as DisplayMemory & { location_label?: string | null }).location_label || null}
+            index={index}
+            onOpen={() => onOpenMemory(memory)}
+            onDelete={
+              memory.user_id && !(memory.metadata && typeof memory.metadata === 'object' && 'legacy_gallery_original' in memory.metadata && memory.metadata.legacy_gallery_original === true)
+                ? () => onDeleteMemory(memory)
+                : undefined
+            }
+          />
         )
       ))}
     </section>

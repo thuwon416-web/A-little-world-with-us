@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const limit = await checkRateLimit(`drive-migrate-memory:${user.id}`, 5, 60_000)
+  const limit = await checkRateLimit(`drive-migrate-memory:${user.id}`, 60, 60_000)
   if (!limit.allowed) return NextResponse.json({ error: 'Too many migration requests. Please try again shortly.' }, { status: 429 })
 
   const form = await request.formData()
@@ -37,9 +37,9 @@ export async function POST(request: Request) {
 
   const { data: memory, error: memoryError } = await supabase.from('memories')
     .select('id,user_id,couple_id,storage_provider,storage_path,drive_file_id,date')
-    .eq('id', memoryId).eq('user_id', user.id).maybeSingle()
+    .eq('id', memoryId).maybeSingle()
   if (memoryError) return NextResponse.json({ error: 'Unable to load memory metadata.' }, { status: 500 })
-  if (!memory) return NextResponse.json({ error: 'Memory not found or not owned by this account.' }, { status: 404 })
+  if (!memory) return NextResponse.json({ error: 'Memory not found.' }, { status: 404 })
   if (memory.storage_provider === 'google_drive' && memory.drive_file_id) return NextResponse.json({ migrated: false, alreadyInDrive: true })
   if (memory.storage_provider !== 'supabase' || !memory.storage_path || !memory.couple_id) {
     return NextResponse.json({ error: 'This memory is not eligible for safe Drive migration.' }, { status: 409 })
@@ -64,13 +64,19 @@ export async function POST(request: Request) {
       storage_provider: 'google_drive', drive_file_id: driveFile.id,
       drive_folder_id: memoryFolderId, mime_type: driveFile.mimeType || file.type,
       image_url: null, storage_path: null,
-    }).eq('id', memory.id).eq('user_id', user.id).eq('storage_provider', 'supabase').eq('storage_path', memory.storage_path).select('id').single()
+    }).eq('id', memory.id).eq('storage_provider', 'supabase').eq('storage_path', memory.storage_path).select('id').single()
     if (updateError) throw updateError
     return NextResponse.json({ migrated: true, memoryId: memory.id, oldStoragePath: memory.storage_path, driveFileId: driveFile.id })
   } catch (error) {
     if (driveFile) await deleteDriveFile(user.id, driveFile.id).catch(() => undefined)
     if (memoryFolderId) await deleteDriveFolder(user.id, memoryFolderId).catch(() => undefined)
-    console.error('[drive] existing memory migration failed:', error instanceof Error ? error.message : 'unknown error')
-    return NextResponse.json({ error: 'Could not migrate this memory to Google Drive. The original remains in place.' }, { status: 502 })
+    const rawError = error instanceof Error ? error.message : 'unknown error'
+    console.error('[drive] existing memory migration failed:', rawError)
+    const userMessage = rawError.includes('Google Drive is not connected') || rawError.includes('reauthorized')
+      ? 'Google Drive is not connected. Please connect Google Drive first.'
+      : rawError.includes('token') || rawError.includes('OAuth')
+      ? 'Google Drive session expired. Please reconnect Google Drive.'
+      : `Migration failed: ${rawError}`
+    return NextResponse.json({ error: userMessage }, { status: 502 })
   }
 }

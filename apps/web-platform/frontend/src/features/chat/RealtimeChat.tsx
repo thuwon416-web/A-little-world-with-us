@@ -1000,9 +1000,12 @@ export default function RealtimeChat({ className }: RealtimeChatProps = {}) {
           if (message.delivered_at) deliveryStatus = <span>✓✓</span>
           if (message.seen_at) deliveryStatus = <span className="text-blue-400">✓✓</span>
           return (
-            <div key={message.id} id={`chat-msg-${message.id}`} className={`flex ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} group transition-all duration-300`}>
-              <div className="flex flex-col gap-1">
-                <div className={`max-w-[88%] sm:max-w-[70%] px-4 py-2 transition duration-300 ${isMessageHighlighted ? 'ring-2 ring-accent-1 ring-offset-2 scale-[1.02]' : ''} ${message.sender_id === currentUserId ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm' : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1 border border-border/40'}`} onContextMenu={(e) => { e.preventDefault(); handleMessageLongPress(message) }}>
+            <div key={message.id} id={`chat-msg-${message.id}`} className={`flex w-full ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'} group transition-all duration-300`}>
+              <div className={`flex flex-col gap-1 max-w-[85%] sm:max-w-[75%] md:max-w-[70%] ${message.sender_id === currentUserId ? 'items-end' : 'items-start'}`}>
+                <div
+                  className={`w-fit max-w-full min-w-[76px] px-3.5 py-2 sm:px-4 sm:py-2.5 transition duration-300 ${isMessageHighlighted ? 'ring-2 ring-accent-1 ring-offset-2 scale-[1.02]' : ''} ${message.sender_id === currentUserId ? 'rounded-[18px] rounded-br-[4px] bg-accent-1 text-[color:var(--accent-foreground)] shadow-sm' : 'rounded-[18px] rounded-bl-[4px] bg-card text-text-1 border border-border/40 shadow-sm'}`}
+                  onContextMenu={(e) => { e.preventDefault(); handleMessageLongPress(message) }}
+                >
                   {isMessagePinned && (
                     <div className="mb-1 flex items-center gap-1 text-[11px] font-semibold opacity-80">
                       <Pin className="h-3 w-3 fill-current rotate-45" />
@@ -1015,7 +1018,9 @@ export default function RealtimeChat({ className }: RealtimeChatProps = {}) {
                       <p className="text-xs text-text-2 line-clamp-1">{replyToMessage.message_type === 'text' ? replyToMessage.content : 'Message'}</p>
                     </div>
                   )}
-                  {message.message_type === 'text' && <p className="text-sm">{message.content}</p>}
+                  {message.message_type === 'text' && (
+                    <p className="text-sm leading-relaxed break-words whitespace-pre-wrap select-text">{message.content}</p>
+                  )}
                   {message.message_type === 'voice' && message.media_url && (
                     <div className="space-y-2"><audio controls src={message.media_url} className="h-8 max-w-full" /><button type="button" onClick={() => void handleTranscribe(message)} className="inline-flex items-center gap-1 text-xs text-accent-2 hover:underline"><Captions className="h-3.5 w-3.5" />{message.transcript ? 'Refresh transcript' : 'Transcribe'}</button>{message.transcript ? <p className="rounded-lg bg-black/10 p-2 text-xs leading-relaxed text-text-2">{message.transcript}</p> : null}</div>
                   )}
@@ -1024,22 +1029,20 @@ export default function RealtimeChat({ className }: RealtimeChatProps = {}) {
                   {message.message_type === 'audio' && message.media_url && <audio controls src={message.media_url} className="h-8" />}
                   {message.message_type === 'sticker' && <span className="text-4xl">{message.content}</span>}
                   {message.message_type === 'gif' && message.media_url && <Image src={message.media_url} alt="GIF" width={480} height={480} unoptimized className="max-w-full rounded-lg" />}
-                  {message.message_type === 'file' && <div className="flex items-center gap-2"><Paperclip className="h-4 w-4" /><span className="text-sm">{message.content}</span></div>}
-                  {message.message_type === 'location' && message.location_payload && <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-input bg-soft-tint p-3 text-sm hover:bg-accent-1/10"><MapPin className="h-5 w-5 text-accent-1" /><span><strong>Shared location</strong><br />{message.location_payload.latitude.toFixed(5)}, {message.location_payload.longitude.toFixed(5)} · ±{Math.round(message.location_payload.accuracy ?? 0)}m</span></a>}
-                  {message.message_type === 'sos' && message.location_payload && <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 p-3 text-sm text-red-100 hover:bg-red-500/25"><MapPin className="h-5 w-5 text-red-300" /><span><strong>🆘 Emergency SOS</strong><br />Open the sender’s current location.</span></a>}
-                  <div className="mt-1 flex items-center justify-end gap-1 text-[10px] opacity-70">
-                    <span>{new Date(message.created_at).toLocaleTimeString()}</span>
-                    {message.edited_at && <span className="text-accent-2">(edited)</span>}
+                  {message.message_type === 'file' && <div className="flex items-center gap-2"><Paperclip className="h-4 w-4" /><span className="text-sm break-words">{message.content}</span></div>}
+                  {message.message_type === 'location' && message.location_payload && <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-input bg-soft-tint p-3 text-sm hover:bg-accent-1/10"><MapPin className="h-5 w-5 text-accent-1 shrink-0" /><span><strong>Shared location</strong><br />{message.location_payload.latitude.toFixed(5)}, {message.location_payload.longitude.toFixed(5)} · ±{Math.round(message.location_payload.accuracy ?? 0)}m</span></a>}
+                  {message.message_type === 'sos' && message.location_payload && <a href={`https://www.google.com/maps?q=${message.location_payload.latitude},${message.location_payload.longitude}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-500/15 p-3 text-sm text-red-100 hover:bg-red-500/25"><MapPin className="h-5 w-5 text-red-300 shrink-0" /><span><strong>🆘 Emergency SOS</strong><br />Open the sender’s current location.</span></a>}
+                  <div className={`mt-1 flex items-center justify-end gap-1.5 text-[10px] select-none ${message.sender_id === currentUserId ? 'opacity-85' : 'text-text-2 opacity-80'}`}>
+                    <span>{(() => { try { return new Date(message.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch { return ''; } })()}</span>
+                    {message.edited_at && <span className="text-accent-2 italic">(edited)</span>}
                     {message.sender_id === currentUserId && (
-                      <span className="flex items-center gap-0.5">
+                      <span className="flex items-center gap-0.5 font-medium">
                         {deliveryStatus}
                       </span>
                     )}
-                    <span aria-hidden="true" />
                   </div>
                 </div>
-                <div className="hidden items-center justify-end gap-1 text-xs" aria-hidden="true" />
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition">
+                <div className={`flex gap-1 opacity-0 group-hover:opacity-100 transition ${message.sender_id === currentUserId ? 'justify-end' : 'justify-start'}`}>
                   <button type="button" onClick={() => { setSelectedMessage(message); setShowReplyThread(true); }} className="p-1 rounded-pill bg-accent-1/10 hover:bg-accent-1/20 text-accent-1" title="Reply or options">
                     <ReplyIcon className="h-3 w-3" />
                   </button>

@@ -55,6 +55,8 @@ export default function CoupleLocationDashboard() {
   const [authUserId, setAuthUserId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [webLocationStatus, setWebLocationStatus] = useState<'idle' | 'syncing' | 'synced' | 'denied'>('idle')
+  const [lastWebSyncTime, setLastWebSyncTime] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true); setError(null)
@@ -65,7 +67,7 @@ export default function CoupleLocationDashboard() {
 
     const { data: link, error: linkError } = await supabase.from('couple_links').select('inviter_id, accepted_by, couple_id').or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`).eq('status', 'accepted').maybeSingle()
     if (linkError || !link?.accepted_by || !link.couple_id) { setError('No accepted linked partner is available yet.'); setLoading(false); return }
-    if (link.inviter_id !== user.id) { router.push('/dashboard'); return }
+    // Both accepted couple members can access and sync location
     const userIds = [link.inviter_id, link.accepted_by]
     const [profilesResult, locationResult, historyResult, alertsResult, placesResult, callsResult, checkinsResult, geofenceEventsResult, aggregatedResult] = await Promise.all([
       supabase.from('profiles').select('id,email,full_name,avatar_url').in('id', userIds),
@@ -91,6 +93,105 @@ export default function CoupleLocationDashboard() {
     setSelectedUser((current) => current && userIds.includes(current) ? current : user.id)
     setLoading(false)
   }, [router])
+
+  const syncBrowserLocation = useCallback(async (isMounted = true) => {
+    if (typeof window === 'undefined' || !navigator.geolocation) return
+    const { data: authData } = await supabase.auth.getUser()
+    const user = authData.user
+    if (!user) return
+
+    const { data: link } = await supabase
+      .from('couple_links')
+      .select('couple_id')
+      .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+      .eq('status', 'accepted')
+      .maybeSingle()
+    if (!link?.couple_id) return
+
+    setWebLocationStatus('syncing')
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          await supabase.from('location_sharing_settings').upsert({
+            user_id: user.id,
+            enabled: true,
+            last_permission_state: 'granted',
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'user_id' })
+
+          let batteryLevel: number | null = null
+          let isCharging: boolean | null = null
+          if ('getBattery' in navigator) {
+            try {
+              const battery = await (navigator as unknown as { getBattery: () => Promise<{ level: number; charging: boolean }> }).getBattery()
+              batteryLevel = Math.round(battery.level * 100)
+              isCharging = battery.charging
+            } catch {
+              // optional battery metrics
+            }
+          }
+
+          const deviceStatus = {
+            battery_level: batteryLevel,
+            is_charging: isCharging,
+            network_type: navigator.onLine ? 'online' : 'offline',
+            device_name: 'Web Browser',
+            app_version: 'Web 1.0',
+            last_sync_at: new Date().toISOString(),
+          }
+
+          const { error: rpcErr } = await supabase.rpc('record_location_point', {
+            p_couple_id: link.couple_id,
+            p_latitude: pos.coords.latitude,
+            p_longitude: pos.coords.longitude,
+            p_accuracy: pos.coords.accuracy || 10,
+            p_updated_at: new Date(pos.timestamp).toISOString(),
+            p_status: deviceStatus,
+          })
+
+          if (rpcErr) {
+            await supabase.from('user_locations').upsert({
+              user_id: user.id,
+              couple_id: link.couple_id,
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
+              accuracy: pos.coords.accuracy || 10,
+              battery_level: batteryLevel,
+              is_charging: isCharging,
+              network_type: navigator.onLine ? 'online' : 'offline',
+              device_name: 'Web Browser',
+              app_version: 'Web 1.0',
+              updated_at: new Date().toISOString(),
+              last_sync_at: new Date().toISOString(),
+            })
+          }
+
+          if (isMounted) {
+            setWebLocationStatus('synced')
+            setLastWebSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+            void load()
+          }
+        } catch (err) {
+          console.warn('Web location update failed:', err)
+          if (isMounted) setWebLocationStatus('idle')
+        }
+      },
+      (err) => {
+        console.warn('Geolocation lookup:', err.message)
+        if (isMounted) setWebLocationStatus(err.code === 1 ? 'denied' : 'idle')
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 30000 }
+    )
+  }, [load])
+
+  useEffect(() => {
+    void syncBrowserLocation(true)
+    const interval = setInterval(() => {
+      void syncBrowserLocation(true)
+    }, 60000)
+    return () => clearInterval(interval)
+  }, [syncBrowserLocation])
 
   const savePlace = async () => {
     const latitude = Number(placeForm.latitude)
@@ -146,7 +247,38 @@ export default function CoupleLocationDashboard() {
   if (error) return <section className="glass-card mx-auto max-w-2xl p-6 text-center"><AlertTriangle className="mx-auto h-8 w-8 text-accent-1" /><h1 className="mt-3 text-2xl text-text-1">Location is not ready</h1><p className="mt-2 text-sm text-text-2">{error}</p></section>
 
   return <div className="space-y-6">
-    <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.22em] text-text-2">Shared location dashboard</p><h1 className="mt-2 text-3xl font-serif text-text-1">Location</h1></div><button type="button" onClick={() => void load()} className="glass-button inline-flex items-center gap-2 px-4 py-2 text-sm"><RefreshCw className="icon-pulse-soft h-4 w-4" /> Refresh</button></header>
+    <header className="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Shared location dashboard</p>
+        <h1 className="mt-2 text-3xl font-serif text-text-1">Location</h1>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => void syncBrowserLocation(true)}
+          disabled={webLocationStatus === 'syncing'}
+          className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-xs font-medium transition ${
+            webLocationStatus === 'synced'
+              ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400'
+              : webLocationStatus === 'syncing'
+              ? 'border-accent-1/40 bg-accent-1/10 text-accent-1'
+              : webLocationStatus === 'denied'
+              ? 'border-amber-500/40 bg-amber-500/10 text-amber-400'
+              : 'border-border bg-card text-text-2 hover:text-text-1'
+          }`}
+          title="Share current browser location to update partner map"
+        >
+          <MapPin className={`h-3.5 w-3.5 ${webLocationStatus === 'syncing' ? 'animate-bounce text-accent-1' : ''}`} />
+          {webLocationStatus === 'syncing' && 'Syncing your live location…'}
+          {webLocationStatus === 'synced' && `Live web location active (${lastWebSyncTime})`}
+          {webLocationStatus === 'denied' && 'Location permission blocked'}
+          {webLocationStatus === 'idle' && 'Sync My Live Location'}
+        </button>
+        <button type="button" onClick={() => void load()} className="glass-button inline-flex items-center gap-2 px-4 py-2 text-sm">
+          <RefreshCw className="icon-pulse-soft h-4 w-4" /> Refresh
+        </button>
+      </div>
+    </header>
     <nav className="flex gap-2 overflow-x-auto pb-1">{tabs.map(({ id, label, icon: Icon }) => <button key={id} type="button" onClick={() => setTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm ${tab === id ? 'border-accent-1/50 bg-accent-1/15 text-accent-1' : 'border-border bg-card text-text-2'}`}><Icon className="h-4 w-4" />{label}</button>)}</nav>
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_330px]">
       <section className="glass-card min-h-[520px] overflow-hidden p-4">
