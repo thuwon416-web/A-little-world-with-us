@@ -103,10 +103,11 @@ function MfaGate({ children }: { children: ReactNode }) {
   }, [authLoading, currentKey])
 
   useEffect(() => {
-    if (checkedKey === currentKey && requiredKey === currentKey && !segments.includes('mfa')) {
+    const isMfaRoute = routeKey.split('/').includes('mfa')
+    if (checkedKey === currentKey && requiredKey === currentKey && !isMfaRoute) {
       router.replace('/(tabs)/mfa')
     }
-  }, [checkedKey, currentKey, requiredKey, segments, router])
+  }, [checkedKey, currentKey, requiredKey, routeKey, router])
 
   const isChecking = authLoading || checkedKey !== currentKey
 
