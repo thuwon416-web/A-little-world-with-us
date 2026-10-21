@@ -9,6 +9,7 @@ import {
   PhoneCall, Settings, Sparkles, Star, MonitorPlay, Infinity,
   Languages, Shield, FileText,
 } from 'lucide-react'
+import LittleWorldLogo from '@/components/shared/LittleWorldLogo'
 import ThemeToggle from '@/components/shared/ThemeToggle'
 import { useLanguage } from '@/contexts/LanguageContext'
 import { supabase } from '@/lib/supabase'
@@ -96,9 +97,7 @@ export default function Sidebar() {
   return (
     <aside aria-label="Main sidebar" className="flex h-full w-full flex-col rounded-panel border border-accent-1/20 bg-card px-3 py-6 shadow-lg backdrop-blur-xl">
       <Link href="/dashboard" className="mb-7 flex items-center gap-3 px-2">
-        <div className="flex h-10 w-10 items-center justify-center rounded-btn bg-gradient-to-br from-accent-1 to-accent-2 text-lg">
-          <Infinity size={22} aria-hidden="true" />
-        </div>
+        <LittleWorldLogo size={36} showText={false} />
 
         <div>
           <p

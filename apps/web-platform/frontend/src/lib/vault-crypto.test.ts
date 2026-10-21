@@ -10,6 +10,10 @@ import {
   generateSalt,
   unwrapMasterKey,
   wrapMasterKey,
+  encryptMediaBuffer,
+  decryptMediaBuffer,
+  encryptVaultNote,
+  decryptVaultNote,
 } from './vault-crypto'
 
 describe('Vault crypto', () => {
@@ -68,5 +72,26 @@ describe('Vault crypto', () => {
     const master = await generateMasterKey()
     const wrapped = await wrapMasterKey(master, first)
     expect(await unwrapMasterKey(wrapped.ciphertext, wrapped.iv, second)).toEqual(master)
+  })
+
+  it('encrypts and decrypts media buffer (client-side AES-GCM)', async () => {
+    const master = await generateMasterKey()
+    const testBytes = new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10, 1, 2, 3, 4]) // PNG header bytes
+    const encrypted = await encryptMediaBuffer(testBytes.buffer, 'image/png', master)
+    expect(encrypted.iv).toBeDefined()
+    expect(encrypted.mimeType).toBe('image/png')
+    expect(encrypted.byteLength).toBe(testBytes.length)
+
+    const decryptedBlob = await decryptMediaBuffer(encrypted.encryptedBuffer, encrypted.iv, 'image/png', master)
+    const arrayBuffer = await decryptedBlob.arrayBuffer()
+    expect(new Uint8Array(arrayBuffer)).toEqual(testBytes)
+  })
+
+  it('encrypts and decrypts private vault notes', async () => {
+    const master = await generateMasterKey()
+    const secret = "Pu Tuu & KoKo secret couple memories memo."
+    const encrypted = await encryptVaultNote(secret, master)
+    const decrypted = await decryptVaultNote(encrypted.ciphertext, encrypted.iv, master)
+    expect(decrypted).toBe(secret)
   })
 })

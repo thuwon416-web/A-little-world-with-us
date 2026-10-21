@@ -56,7 +56,7 @@ const openAiCompatibleProviders: Partial<Record<AiProvider, { key: string; endpo
   groq: {
     key: 'GROQ_API_KEY',
     endpoint: 'https://api.groq.com/openai/v1/chat/completions',
-    model: 'openai/gpt-oss-20b',
+    model: 'llama-3.1-8b-instant',
   },
   openrouter: {
     key: 'OPENROUTER_API_KEY',
@@ -145,9 +145,16 @@ async function callGemini(messages: AiMessage[], maxTokens: number): Promise<str
   if (!key) throw new Error('gemini is not configured')
   const prompt = messages.map((message) => `${message.role}: ${message.content}`).join('\n\n')
   const model = getModel('gemini', 'gemini-2.5-flash')
-  const response = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`, {
+  const url = key.startsWith('AQ')
+    ? `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
+    : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`
+  const response = await fetchWithTimeout(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'x-goog-api-key': key,
+      'Authorization': `Bearer ${key}`,
+    },
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: maxTokens } }),
   })
   if (!response.ok) throw new Error(`gemini request failed with ${response.status}`)

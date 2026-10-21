@@ -142,3 +142,78 @@ export async function deriveKeyFromBackupPhrase(
 ): Promise<CryptoKey> {
   return deriveKeyFromPassphrase(phrase.join(' '), salt)
 }
+
+
+// ==========================================
+// Client-Side AES-GCM Media & Note Vault Extensions
+// ==========================================
+
+export interface EncryptedMediaPayload {
+  encryptedBuffer: ArrayBuffer
+  iv: string
+  mimeType: string
+  byteLength: number
+}
+
+export async function encryptMediaBuffer(
+  buffer: ArrayBuffer,
+  mimeType: string,
+  masterKey: Uint8Array
+): Promise<EncryptedMediaPayload> {
+  const iv = getCrypto().getRandomValues(new Uint8Array(IV_LENGTH))
+  const key = await importRawKey(masterKey, ['encrypt'])
+  const encrypted = await getCrypto().subtle.encrypt(
+    { name: 'AES-GCM', iv: asBufferSource(iv) },
+    key,
+    buffer
+  )
+  return {
+    encryptedBuffer: encrypted,
+    iv: b64encode(iv),
+    mimeType,
+    byteLength: buffer.byteLength,
+  }
+}
+
+export async function decryptMediaBuffer(
+  encryptedBuffer: ArrayBuffer,
+  iv: string,
+  mimeType: string,
+  masterKey: Uint8Array
+): Promise<Blob> {
+  const key = await importRawKey(masterKey, ['decrypt'])
+  const decrypted = await getCrypto().subtle.decrypt(
+    { name: 'AES-GCM', iv: asBufferSource(b64decode(iv)) },
+    key,
+    encryptedBuffer
+  )
+  return new Blob([decrypted], { type: mimeType })
+}
+
+export async function encryptVaultNote(
+  noteContent: string,
+  masterKey: Uint8Array
+): Promise<{ ciphertext: string; iv: string }> {
+  const iv = getCrypto().getRandomValues(new Uint8Array(IV_LENGTH))
+  const key = await importRawKey(masterKey, ['encrypt'])
+  const encrypted = await getCrypto().subtle.encrypt(
+    { name: 'AES-GCM', iv: asBufferSource(iv) },
+    key,
+    asBufferSource(new TextEncoder().encode(noteContent))
+  )
+  return { ciphertext: b64encode(new Uint8Array(encrypted)), iv: b64encode(iv) }
+}
+
+export async function decryptVaultNote(
+  ciphertext: string,
+  iv: string,
+  masterKey: Uint8Array
+): Promise<string> {
+  const key = await importRawKey(masterKey, ['decrypt'])
+  const decrypted = await getCrypto().subtle.decrypt(
+    { name: 'AES-GCM', iv: asBufferSource(b64decode(iv)) },
+    key,
+    asBufferSource(b64decode(ciphertext))
+  )
+  return new TextDecoder().decode(decrypted)
+}
