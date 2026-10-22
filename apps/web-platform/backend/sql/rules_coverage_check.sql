@@ -172,7 +172,7 @@ from (
   select schemaname, tablename, issue, grantee::text as policyname, privilege_type::text as cmd, null::text as qual, null::text as with_check
   from protected_grants
   union all
-  select schemaname, tablename, issue, policyname, cmd, qual, with_check
+  select schemaname, tablename, issue, policyname, cmd, null::text as qual, null::text as with_check
   from storage_missing_or_permissive
   union all
   select schemaname, funcname as tablename, issue, grantee::text as policyname, privilege_type::text as cmd, null::text as qual, null::text as with_check
