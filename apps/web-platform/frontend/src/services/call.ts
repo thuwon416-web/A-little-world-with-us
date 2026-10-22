@@ -34,7 +34,8 @@ export async function initiateCall(receiverId: string, type: CallType): Promise<
     .eq('status', 'accepted')
     .maybeSingle()
 
-  if (!link?.couple_id || receiverId === user.id) return null
+  const members = link ? [link.inviter_id, link.accepted_by] : []
+  if (!link?.couple_id || receiverId === user.id || !members.includes(receiverId)) return null
 
   const payload = {
     id: crypto.randomUUID(),
@@ -60,6 +61,7 @@ export async function acceptCall(callId: string): Promise<boolean> {
     .update({ status: 'in_call', updated_at: new Date().toISOString() })
     .eq('id', callId)
     .eq('receiver_id', user.id)
+    .eq('status', 'calling')
     .select('id')
     .maybeSingle()
 
@@ -75,6 +77,7 @@ export async function rejectCall(callId: string): Promise<boolean> {
     .update({ status: 'rejected', updated_at: new Date().toISOString() })
     .eq('id', callId)
     .eq('receiver_id', user.id)
+    .eq('status', 'calling')
     .select('id')
     .maybeSingle()
 
@@ -82,10 +85,15 @@ export async function rejectCall(callId: string): Promise<boolean> {
 }
 
 export async function endCall(callId: string): Promise<boolean> {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+
   const { data, error } = await supabase
     .from('call_signals')
     .update({ status: 'ended', updated_at: new Date().toISOString() })
     .eq('id', callId)
+    .or(`caller_id.eq.${user.id},receiver_id.eq.${user.id}`)
+    .in('status', ['calling', 'in_call'])
     .select('id')
     .maybeSingle()
 
@@ -93,21 +101,35 @@ export async function endCall(callId: string): Promise<boolean> {
 }
 
 export async function saveCallOffer(callId: string, offer: RTCSessionDescriptionInit): Promise<boolean> {
-  const { error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { data, error } = await supabase
     .from('call_signals')
     .update({ offer, updated_at: new Date().toISOString() })
     .eq('id', callId)
+    .eq('caller_id', user.id)
+    .in('status', ['calling', 'in_call'])
+    .select('id')
+    .maybeSingle()
 
-  return !error
+  return !error && Boolean(data)
 }
 
 export async function saveCallAnswer(callId: string, answer: RTCSessionDescriptionInit): Promise<boolean> {
-  const { error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return false
+
+  const { data, error } = await supabase
     .from('call_signals')
     .update({ answer, updated_at: new Date().toISOString() })
     .eq('id', callId)
+    .eq('receiver_id', user.id)
+    .eq('status', 'in_call')
+    .select('id')
+    .maybeSingle()
 
-  return !error
+  return !error && Boolean(data)
 }
 
 export async function saveCallIceCandidate(callId: string, candidate: RTCIceCandidateInit): Promise<boolean> {
