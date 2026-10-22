@@ -1,3 +1,5 @@
+import 'server-only'
+
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
 export async function assertAdmin(serviceClient: SupabaseClient, accessToken: string) {

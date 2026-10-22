@@ -122,8 +122,14 @@ async function persistLocationMessage(
 // Emoji Reaction Strip
 // ---------------------------------------------------------------------------
 
-const REACTION_KEYS = ['heart', 'laugh', 'wow', 'sad', 'fire']
-const REACTION_EMOJI = {
+const REACTION_KEYS = ['heart', 'laugh', 'wow', 'sad', 'fire'] as const
+type ReactionKey = (typeof REACTION_KEYS)[number]
+type EmojiReactionStripProps = {
+  messageId: string
+  reactions: Record<string, string>
+  onReact: (messageId: string, reaction: ReactionKey) => void
+}
+const REACTION_EMOJI: Record<ReactionKey, string> = {
   heart: '❤️',
   laugh: '😂',
   wow:   '😮',
@@ -131,7 +137,7 @@ const REACTION_EMOJI = {
   fire:  '🔥',
 }
 
-function EmojiReactionStrip({ messageId, reactions, onReact }) {
+function EmojiReactionStrip({ messageId, reactions, onReact }: EmojiReactionStripProps) {
   const chosen = reactions[messageId]
   return (
     <View style={rxSt.row}>
