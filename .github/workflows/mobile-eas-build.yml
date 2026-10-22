@@ -51,12 +51,25 @@ jobs:
       - name: Install mobile dependencies
         run: npm ci
 
+      - name: Validate EAS build profiles
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const eas = JSON.parse(fs.readFileSync("eas.json", "utf8"));
+          if (eas.build?.development?.ios?.simulator !== true) {
+            throw new Error("The iOS CI build must use a simulator-enabled development profile.");
+          }
+          if (eas.build?.preview?.android?.buildType !== "apk") {
+            throw new Error("The Android CI preview profile must produce an APK.");
+          }
+          console.log("EAS iOS simulator and Android APK profiles are configured.");
+          NODE
+
       - name: Build ${{ matrix.platform }} with EAS
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
           if [ "${{ matrix.platform }}" = "ios" ]; then
-            # Simulator builds do not require Apple device provisioning.
             npx --yes eas-cli@latest build --platform ios --profile development --non-interactive
           else
             npx --yes eas-cli@latest build --platform android --profile preview --clear-cache --non-interactive
