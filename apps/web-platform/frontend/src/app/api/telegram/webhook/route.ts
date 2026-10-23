@@ -24,6 +24,19 @@ type TelegramUpdate = {
   callback_query?: TelegramCallbackQuery
 }
 
+type TelegramSendOptions = NonNullable<Parameters<typeof sendTelegramMessage>[1]>
+
+async function sendReply(text: string, options?: TelegramSendOptions): Promise<void> {
+  const result = await sendTelegramMessage(text, options)
+  if (!result || typeof result !== 'object' || !('ok' in result) || result.ok !== true) {
+    console.error('[Telegram:OurWorld:Webhook] reply delivery failed', {
+      hasExplicitChat: options?.chatId !== undefined,
+      topicConfigured: Boolean(process.env.TELEGRAM_TOPIC_ID),
+    })
+    throw new Error('Telegram reply delivery failed')
+  }
+}
+
 function constantTimeEqual(providedValue: string, expectedValue: string): boolean {
   const provided = Buffer.from(providedValue, 'utf8')
   const expected = Buffer.from(expectedValue, 'utf8')
@@ -71,7 +84,7 @@ function quizButtons() {
 
 async function sendQuiz(topicId?: number, chatId?: number) {
   const message = '✍️ <b>Daily Korean Quiz</b>\n"사랑해" (Saranghae) ၏ မြန်မာလို အဓိပ္ပာယ်မှာ အဘယ်နည်း?\n\nအဖြေကို ခလုတ်နှိပ်ပြီး ရွေးချယ်ပါ။'
-  await sendTelegramMessage(message, { topicId, chatId, inlineKeyboard: quizButtons() })
+  await sendReply(message, { topicId, chatId, inlineKeyboard: quizButtons() })
 }
 
 export async function POST(req: Request) {
@@ -96,6 +109,7 @@ export async function POST(req: Request) {
 
   const actorId = update.message?.from?.id ?? update.callback_query?.from?.id
   if (!actorId || !getAllowedUserIds().has(actorId)) {
+    console.warn('[Telegram:OurWorld:Webhook] update rejected by user allowlist.')
     return NextResponse.json({ error: 'Telegram user is not allowed.' }, { status: 403 })
   }
 
@@ -119,12 +133,12 @@ export async function POST(req: Request) {
         const feedback = choice === 'B'
           ? '🎉 <b>မှန်ကန်ပါတယ်!</b> "사랑해" = ချစ်တယ် (I love you) ဖြစ်ပါတယ်။ 💖'
           : '❌ အဖြေမှန်မှာ B) ချစ်တယ် (I love you) ဖြစ်ပါတယ်။ နောက်တစ်ကြိမ် ထပ်ကြိုးစားပါ။ ✨'
-        await sendTelegramMessage(feedback, { topicId, chatId })
+        await sendReply(feedback, { topicId, chatId })
         return NextResponse.json({ ok: true, action: 'quiz_answered' })
       }
 
       if (action === 'world_open_memories') {
-        await sendTelegramMessage('📖 Couple Memories ကို ဒီမှာဖွင့်နိုင်ပါတယ်။', {
+        await sendReply('📖 Couple Memories ကို ဒီမှာဖွင့်နိုင်ပါတယ်။', {
           topicId,
           chatId,
           inlineKeyboard: appButton('💖 Open Memories', `${APP_URL}/memories`),
@@ -133,7 +147,7 @@ export async function POST(req: Request) {
       }
 
       if (action === 'world_open_budget') {
-        await sendTelegramMessage('📊 Shared Budget ကို ဒီမှာဖွင့်နိုင်ပါတယ်။', {
+        await sendReply('📊 Shared Budget ကို ဒီမှာဖွင့်နိုင်ပါတယ်။', {
           topicId,
           chatId,
           inlineKeyboard: appButton('Open Budget Tracker', `${APP_URL}/budget`),
@@ -154,6 +168,13 @@ export async function POST(req: Request) {
       if (!chatId) return NextResponse.json({ error: 'Message chat is missing.' }, { status: 400 })
 
       const command = getCommand(text)
+      if (command.startsWith('/')) {
+        console.info('[Telegram:OurWorld:Webhook] command received', {
+          command,
+          chatType: message.chat?.type ?? 'unknown',
+          topicId: topicId ?? null,
+        })
+      }
       if (command === '/start' || command === '/help') {
         const helpText = [
           '❤️ <b>A Little World With Us — Commands</b>',
@@ -165,7 +186,7 @@ export async function POST(req: Request) {
           '• <code>/memories</code> — Open memories',
           '• <code>/spend</code> — Open budget to record an expense',
         ].join('\n')
-        await sendTelegramMessage(helpText, {
+        await sendReply(helpText, {
           topicId,
           chatId,
           inlineKeyboard: appButton('❤️ Open Our World', APP_URL),
@@ -174,7 +195,7 @@ export async function POST(req: Request) {
       }
 
       if (command === '/status') {
-        await sendTelegramMessage(
+        await sendReply(
           '🤖 <b>Our World Bot</b>\nWebhook request authenticated and command access allowed. Shared-data sync is managed by the app; this command does not independently verify database or media sync.',
           {
             topicId,
@@ -196,7 +217,7 @@ export async function POST(req: Request) {
           '',
           '✍️ Korean quiz is ready whenever you are.',
         ].join('\n')
-        await sendTelegramMessage(briefing, {
+        await sendReply(briefing, {
           topicId,
           chatId,
           inlineKeyboard: [
@@ -213,7 +234,7 @@ export async function POST(req: Request) {
       }
 
       if (command === '/budget') {
-        await sendTelegramMessage('📊 Shared Budget ကိုဖွင့်ပြီး မှတ်တမ်းတင်နိုင်ပါတယ်။', {
+        await sendReply('📊 Shared Budget ကိုဖွင့်ပြီး မှတ်တမ်းတင်နိုင်ပါတယ်။', {
           topicId,
           chatId,
           inlineKeyboard: appButton('Open Budget Tracker', `${APP_URL}/budget`),
@@ -222,7 +243,7 @@ export async function POST(req: Request) {
       }
 
       if (command === '/memories') {
-        await sendTelegramMessage('📖 Couple Memories ကိုဖွင့်ကြည့်နိုင်ပါတယ်။', {
+        await sendReply('📖 Couple Memories ကိုဖွင့်ကြည့်နိုင်ပါတယ်။', {
           topicId,
           chatId,
           inlineKeyboard: appButton('Open Memories', `${APP_URL}/memories`),
@@ -231,7 +252,7 @@ export async function POST(req: Request) {
       }
 
       if (command === '/spend') {
-        await sendTelegramMessage(
+        await sendReply(
           'လုံခြုံရေးအတွက် Telegram မှ expense ကို database ထဲသို့ တိုက်ရိုက်မရေးသေးပါ။ Shared Budget ကိုဖွင့်ပြီး အတည်ပြုမှတ်တမ်းတင်ပါ။',
           { topicId, chatId, inlineKeyboard: appButton('Record Expense in App', `${APP_URL}/budget`) }
         )
@@ -241,6 +262,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ ok: true, action: 'ignored' })
   } catch {
-    return NextResponse.json({ error: 'Unable to process Telegram update.' }, { status: 500 })
+    console.error('[Telegram:OurWorld:Webhook] update processing or reply delivery failed.')
+    return NextResponse.json({ error: 'Unable to process Telegram update or deliver reply.' }, { status: 502 })
   }
 }
