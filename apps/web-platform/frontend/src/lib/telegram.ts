@@ -19,24 +19,26 @@ export async function sendTelegramMessage(
     parseMode?: 'HTML' | 'MarkdownV2'
     inlineKeyboard?: TelegramInlineButton[][]
     disableWebPagePreview?: boolean
+    chatId?: string | number
   }
 ): Promise<unknown | null> {
-  const { token, chatId, topicId: defaultTopic, enabled } = getTelegramConfig()
+  const { token, chatId: configuredChatId, topicId: defaultTopic, enabled } = getTelegramConfig()
+  const effectiveChatId = options?.chatId ?? configuredChatId
   const effectiveTopic = options?.topicId ?? defaultTopic
 
-  if (!token || !chatId) {
-    console.info(`[Telegram:OurWorld:DryRun] ${text.replace(/\n/g, ' ')}`)
+  if (!token || !effectiveChatId) {
+    console.info('[Telegram:OurWorld:DryRun] message suppressed; bot configuration is incomplete.')
     return null
   }
 
   if (!enabled) {
-    console.debug(`[Telegram:OurWorld:Disabled] ${text.replace(/\n/g, ' ')}`)
+    console.debug('[Telegram:OurWorld:Disabled] message suppressed; integration is disabled.')
     return null
   }
 
   const url = `${TELEGRAM_API_BASE}/bot${token}/sendMessage`
   const payload: Record<string, unknown> = {
-    chat_id: chatId,
+    chat_id: effectiveChatId,
     text,
     parse_mode: options?.parseMode ?? 'HTML',
     disable_web_page_preview: options?.disableWebPagePreview ?? false,
@@ -60,8 +62,7 @@ export async function sendTelegramMessage(
     })
 
     if (!res.ok) {
-      const errText = await res.text()
-      console.error(`Telegram API error (${res.status}): ${errText}`)
+      console.error(`Telegram API error (${res.status}); response body omitted.`)
       return null
     }
 
