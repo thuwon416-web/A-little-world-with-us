@@ -24,12 +24,10 @@ export async function sendTelegramMessage(
 ): Promise<unknown | null> {
   const { token, chatId: configuredChatId, topicId: defaultTopic, enabled } = getTelegramConfig()
   const effectiveChatId = options?.chatId ?? configuredChatId
-  // Replies directed to an explicit chat must stay in the supplied topic context.
-  // Do not fall back to the configured notification topic when the incoming message
-  // belongs to the General topic (where Telegram may omit message_thread_id).
-  const effectiveTopic = options?.chatId !== undefined
-    ? options.topicId
-    : options?.topicId ?? defaultTopic
+  // Preserve the incoming forum topic when Telegram supplies one. If the update
+  // omits message_thread_id (including General-topic messages), use the configured
+  // TELEGRAM_TOPIC_ID so command replies go to the intended operations topic.
+  const effectiveTopic = options?.topicId ?? defaultTopic
 
   if (!token || !effectiveChatId) {
     console.info('[Telegram:OurWorld:DryRun] message suppressed; bot configuration is incomplete.')
@@ -66,14 +64,19 @@ export async function sendTelegramMessage(
       body: JSON.stringify(payload),
     })
 
-    if (!res.ok) {
-      console.error(`Telegram API error (${res.status}); response body omitted.`)
+    const result = await res.json().catch(() => null) as { ok?: boolean; error_code?: number } | null
+    if (!res.ok || result?.ok !== true) {
+      console.error('[Telegram:OurWorld] send failed', {
+        httpStatus: res.status,
+        telegramErrorCode: result?.error_code ?? null,
+      })
       return null
     }
 
-    return await res.json()
-  } catch (err) {
-    console.warn('Failed to send Telegram message:', err)
+    return result
+  } catch {
+    // Do not log the exception object: fetch errors can include the bot-token URL.
+    console.error('[Telegram:OurWorld] send failed before receiving a response.')
     return null
   }
 }
