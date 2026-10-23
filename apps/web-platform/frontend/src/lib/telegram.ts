@@ -19,12 +19,14 @@ export async function sendTelegramMessage(
     parseMode?: 'HTML' | 'MarkdownV2'
     inlineKeyboard?: TelegramInlineButton[][]
     disableWebPagePreview?: boolean
+    chatId?: string | number
   }
 ): Promise<unknown | null> {
-  const { token, chatId, topicId: defaultTopic, enabled } = getTelegramConfig()
+  const { token, chatId: configuredChatId, topicId: defaultTopic, enabled } = getTelegramConfig()
+  const effectiveChatId = options?.chatId ?? configuredChatId
   const effectiveTopic = options?.topicId ?? defaultTopic
 
-  if (!token || !chatId) {
+  if (!token || !effectiveChatId) {
     console.info(`[Telegram:OurWorld:DryRun] ${text.replace(/\n/g, ' ')}`)
     return null
   }
@@ -36,7 +38,7 @@ export async function sendTelegramMessage(
 
   const url = `${TELEGRAM_API_BASE}/bot${token}/sendMessage`
   const payload: Record<string, unknown> = {
-    chat_id: chatId,
+    chat_id: effectiveChatId,
     text,
     parse_mode: options?.parseMode ?? 'HTML',
     disable_web_page_preview: options?.disableWebPagePreview ?? false,
