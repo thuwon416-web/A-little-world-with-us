@@ -1,135 +1,246 @@
+import { timingSafeEqual } from 'node:crypto'
 import { NextResponse } from 'next/server'
 import { sendTelegramMessage } from '@/lib/telegram'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://alittleworldwithus.com'
+const MAX_UPDATE_BYTES = 1024 * 1024
+
+type TelegramChat = { id?: number; type?: string }
+type TelegramUser = { id?: number }
+type TelegramMessage = {
+  text?: string
+  from?: TelegramUser
+  chat?: TelegramChat
+  message_thread_id?: number
+}
+type TelegramCallbackQuery = {
+  id?: string
+  data?: string
+  from?: TelegramUser
+  message?: TelegramMessage
+}
+type TelegramUpdate = {
+  message?: TelegramMessage
+  callback_query?: TelegramCallbackQuery
+}
+
+function constantTimeEqual(providedValue: string, expectedValue: string): boolean {
+  const provided = Buffer.from(providedValue, 'utf8')
+  const expected = Buffer.from(expectedValue, 'utf8')
+  return provided.length === expected.length && timingSafeEqual(provided, expected)
+}
+
+function getAllowedUserIds(): Set<number> {
+  return new Set(
+    (process.env.TELEGRAM_ALLOWED_USER_IDS || '')
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => /^\d+$/.test(value))
+      .map(Number)
+      .filter((value) => Number.isSafeInteger(value) && value > 0)
+  )
+}
+
+function isAuthorizedWebhook(req: Request): boolean {
+  const expectedToken = process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN
+  const providedToken = req.headers.get('x-telegram-bot-api-secret-token') || ''
+  return Boolean(expectedToken && constantTimeEqual(providedToken, expectedToken))
+}
+
+function getCommand(text: string): string {
+  const firstToken = text.trim().split(/\s+/, 1)[0] || ''
+  return (firstToken.split('@', 1)[0] || '').toLowerCase()
+}
+
+function appButton(text: string, url: string) {
+  return [[{ text, url }]]
+}
+
+function quizButtons() {
+  return [
+    [
+      { text: 'A) ကျေးဇူးတင်ပါတယ်', callback_data: 'world_quiz_ans:A' },
+      { text: 'B) ချစ်တယ်', callback_data: 'world_quiz_ans:B' },
+    ],
+    [
+      { text: 'C) မင်္ဂလာပါ', callback_data: 'world_quiz_ans:C' },
+      { text: 'D) တောင်းပန်ပါတယ်', callback_data: 'world_quiz_ans:D' },
+    ],
+  ]
+}
+
+async function sendQuiz(topicId?: number, chatId?: number) {
+  const message = '✍️ <b>Daily Korean Quiz</b>\n"사랑해" (Saranghae) ၏ မြန်မာလို အဓိပ္ပာယ်မှာ အဘယ်နည်း?\n\nအဖြေကို ခလုတ်နှိပ်ပြီး ရွေးချယ်ပါ။'
+  await sendTelegramMessage(message, { topicId, chatId, inlineKeyboard: quizButtons() })
+}
 
 export async function POST(req: Request) {
-  try {
-    const update = await req.json()
+  if (!process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN || getAllowedUserIds().size === 0) {
+    return NextResponse.json({ error: 'Telegram webhook access control is not configured.' }, { status: 503 })
+  }
+  if (!isAuthorizedWebhook(req)) {
+    return NextResponse.json({ error: 'Unauthorized webhook.' }, { status: 401 })
+  }
 
-    // 1. Handle Callback Query (Button clicks)
+  const contentLength = Number(req.headers.get('content-length') || 0)
+  if (contentLength > MAX_UPDATE_BYTES) {
+    return NextResponse.json({ error: 'Update is too large.' }, { status: 413 })
+  }
+
+  let update: TelegramUpdate
+  try {
+    update = (await req.json()) as TelegramUpdate
+  } catch {
+    return NextResponse.json({ error: 'Invalid Telegram update.' }, { status: 400 })
+  }
+
+  const actorId = update.message?.from?.id ?? update.callback_query?.from?.id
+  if (!actorId || !getAllowedUserIds().has(actorId)) {
+    return NextResponse.json({ error: 'Telegram user is not allowed.' }, { status: 403 })
+  }
+
+  try {
     if (update.callback_query) {
-      const cq = update.callback_query
-      const action = cq.data || ''
-      const topicId = cq.message?.message_thread_id
+      const callback = update.callback_query
+      const action = callback.data || ''
+      const chatId = callback.message?.chat?.id
+      const topicId = callback.message?.message_thread_id
+
+      if (action === 'world_start_quiz') {
+        await sendQuiz(topicId, chatId)
+        return NextResponse.json({ ok: true, action: 'quiz_started' })
+      }
 
       if (action.startsWith('world_quiz_ans:')) {
         const choice = action.split(':')[1]
-        const isCorrect = choice === 'B'
-        const feedback = isCorrect
-          ? '🎉 <b>မှန်ကန်ပါတယ်!</b> "사랑해" = ချစ်တယ် (I love you) ဖြစ်ပါတယ်။ အမှတ် +10 ရရှိပါပြီ! 💖'
-          : '❌ <b>မှားယွင်းနေပါတယ်ခင်ဗျာ။</b> အဖြေမှန်မှာ B) ချစ်တယ် ဖြစ်ပါတယ်။ မနက်ဖြန် ထပ်ကြိုးစားပါ! ✨'
-        await sendTelegramMessage(feedback, { topicId })
+        if (!['A', 'B', 'C', 'D'].includes(choice)) {
+          return NextResponse.json({ error: 'Invalid quiz answer.' }, { status: 400 })
+        }
+        const feedback = choice === 'B'
+          ? '🎉 <b>မှန်ကန်ပါတယ်!</b> "사랑해" = ချစ်တယ် (I love you) ဖြစ်ပါတယ်။ 💖'
+          : '❌ အဖြေမှန်မှာ B) ချစ်တယ် (I love you) ဖြစ်ပါတယ်။ နောက်တစ်ကြိမ် ထပ်ကြိုးစားပါ။ ✨'
+        await sendTelegramMessage(feedback, { topicId, chatId })
         return NextResponse.json({ ok: true, action: 'quiz_answered' })
       }
 
-      if (action === 'world_start_quiz') {
-        const msg = '✍️ <b>Daily Korean Quiz:</b>\n"사랑해" (Saranghae) ၏ မြန်မာလို အဓိပ္ပာယ်မှာ အဘယ်နည်း?\n\nခလုတ်နှိပ်၍ ဖြေဆိုပါ:'
-        const buttons = [
-          [
-            { text: 'A) ကျေးဇူးတင်ပါတယ်', callback_data: 'world_quiz_ans:A' },
-            { text: 'B) ချစ်တယ် (Correct)', callback_data: 'world_quiz_ans:B' },
-          ],
-          [
-            { text: 'C) မင်္ဂလာပါ', callback_data: 'world_quiz_ans:C' },
-            { text: 'D) တောင်းပန်ပါတယ်', callback_data: 'world_quiz_ans:D' },
-          ],
-        ]
-        await sendTelegramMessage(msg, { topicId, inlineKeyboard: buttons })
-        return NextResponse.json({ ok: true, action: 'quiz_started' })
+      if (action === 'world_open_memories') {
+        await sendTelegramMessage('📖 Couple Memories ကို ဒီမှာဖွင့်နိုင်ပါတယ်။', {
+          topicId,
+          chatId,
+          inlineKeyboard: appButton('💖 Open Memories', `${APP_URL}/memories`),
+        })
+        return NextResponse.json({ ok: true, action: 'memories_link_sent' })
       }
+
+      if (action === 'world_open_budget') {
+        await sendTelegramMessage('📊 Shared Budget ကို ဒီမှာဖွင့်နိုင်ပါတယ်။', {
+          topicId,
+          chatId,
+          inlineKeyboard: appButton('Open Budget Tracker', `${APP_URL}/budget`),
+        })
+        return NextResponse.json({ ok: true, action: 'budget_link_sent' })
+      }
+
+      return NextResponse.json({ ok: true, action: 'ignored' })
     }
 
-    // 2. Handle Message Text (Slash Commands)
     if (update.message) {
-      const msg = update.message
-      const text = (msg.text || '').trim()
-      const topicId = msg.message_thread_id
+      const message = update.message
+      const text = (message.text || '').trim()
+      const chatId = message.chat?.id
+      const topicId = message.message_thread_id
 
       if (!text) return NextResponse.json({ ok: true })
+      if (!chatId) return NextResponse.json({ error: 'Message chat is missing.' }, { status: 400 })
 
-      // /start or /help
-      if (text.startsWith('/start') || text.startsWith('/help')) {
-        const helpText = (
-          '❤️ <b>A Little World With Us — Couple Commands:</b>\n\n' +
-          '• <code>/status</code> — Check our world heartbeat & sync\n' +
-          '• <code>/morning_brief</code> — Today\'s couple morning briefing\n' +
-          '• <code>/quiz</code> — Take today\'s Korean intimacy quiz\n' +
-          '• <code>/spend [amount] [for]</code> — Quick expense log (e.g. <code>/spend 25000 dinner</code>)\n\n' +
-          '👇 Click below to open Our World directly in Telegram:'
-        )
-        const buttons = [
-          [{ text: '❤️ Open Our World (Mini App)', web_app: { url: APP_URL } }]
-        ]
-        await sendTelegramMessage(helpText, { topicId, inlineKeyboard: buttons })
+      const command = getCommand(text)
+      if (command === '/start' || command === '/help') {
+        const helpText = [
+          '❤️ <b>A Little World With Us — Commands</b>',
+          '',
+          '• <code>/status</code> — Bot and app links',
+          '• <code>/morning_brief</code> — Couple daily briefing',
+          '• <code>/quiz</code> — Korean quiz',
+          '• <code>/budget</code> — Open shared budget',
+          '• <code>/memories</code> — Open memories',
+          '• <code>/spend</code> — Open budget to record an expense',
+        ].join('\n')
+        await sendTelegramMessage(helpText, {
+          topicId,
+          chatId,
+          inlineKeyboard: appButton('❤️ Open Our World', APP_URL),
+        })
         return NextResponse.json({ ok: true, command: 'help' })
       }
 
-      // /status
-      if (text.startsWith('/status')) {
-        const statusText = (
-          '🟢 <b>[Our Little World] Heartbeat Status:</b>\n\n' +
-          '• <b>Togetherness Status:</b> <code>100% In Sync 💕</code>\n' +
-          '• <b>Memory Vault:</b> <code>Cloudinary & Supabase Synced</code>\n' +
-          '• <b>Care Reminders:</b> <code>Active & Healthy</code>'
+      if (command === '/status') {
+        await sendTelegramMessage(
+          '🤖 <b>Our World Bot</b>\nWebhook request authenticated and command access allowed. Shared-data sync is managed by the app; this command does not independently verify database or media sync.',
+          {
+            topicId,
+            chatId,
+            inlineKeyboard: [
+              [{ text: 'Open Our World', url: APP_URL }],
+              [{ text: 'Open Budget', url: `${APP_URL}/budget` }, { text: 'Open Memories', url: `${APP_URL}/memories` }],
+            ],
+          }
         )
-        const buttons = [
-          [{ text: '❤️ Open Our World', web_app: { url: APP_URL } }]
-        ]
-        await sendTelegramMessage(statusText, { topicId, inlineKeyboard: buttons })
         return NextResponse.json({ ok: true, command: 'status' })
       }
 
-      // /morning_brief
-      if (text.startsWith('/morning_brief') || text.startsWith('/digest')) {
-        const digestText = (
-          '☀️ <b>[Our Little World] AI Morning Couple Briefing</b> 💕\n' +
-          '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
-          '💌 <b>Today\'s Message:</b>\n' +
-          '<i>\"Together is our favorite place to be. Have a gentle, beautiful day!\"</i>\n\n' +
-          '🗓️ <b>Daily Milestone:</b> Another precious day written in our story.\n' +
-          '✍️ <b>Intimacy Quiz:</b> Today\'s Korean challenge is waiting for you!\n' +
-          '━━━━━━━━━━━━━━━━━━━━━━━━━\n' +
-          '<i>Open your shared space via the Mini App below:</i>'
-        )
-        const buttons = [
-          [{ text: '❤️ Open Our World (Mini App)', web_app: { url: APP_URL } }],
-          [{ text: '✍️ Play Korean Quiz', callback_data: 'world_start_quiz' }],
-        ]
-        await sendTelegramMessage(digestText, { topicId, inlineKeyboard: buttons })
+      if (command === '/morning_brief' || command === '/digest') {
+        const briefing = [
+          '☀️ <b>Our Little World — Daily Briefing</b>',
+          '',
+          '💌 <i>Together is our favorite place to be. Have a gentle, beautiful day!</i>',
+          '',
+          '✍️ Korean quiz is ready whenever you are.',
+        ].join('\n')
+        await sendTelegramMessage(briefing, {
+          topicId,
+          chatId,
+          inlineKeyboard: [
+            [{ text: 'Open Couple Journal', url: `${APP_URL}/couple` }],
+            [{ text: 'Play Korean Quiz', callback_data: 'world_start_quiz' }],
+          ],
+        })
         return NextResponse.json({ ok: true, command: 'morning_brief' })
       }
 
-      // /quiz
-      if (text.startsWith('/quiz')) {
-        const msg = '✍️ <b>Daily Korean Quiz:</b>\n"사랑해" (Saranghae) ၏ မြန်မာလို အဓိပ္ပာယ်မှာ အဘယ်နည်း?\n\nခလုတ်နှိပ်၍ ဖြေဆိုပါ:'
-        const buttons = [
-          [
-            { text: 'A) ကျေးဇူးတင်ပါတယ်', callback_data: 'world_quiz_ans:A' },
-            { text: 'B) ချစ်တယ် (Correct)', callback_data: 'world_quiz_ans:B' },
-          ],
-          [
-            { text: 'C) မင်္ဂလာပါ', callback_data: 'world_quiz_ans:C' },
-            { text: 'D) တောင်းပန်ပါတယ်', callback_data: 'world_quiz_ans:D' },
-          ],
-        ]
-        await sendTelegramMessage(msg, { topicId, inlineKeyboard: buttons })
+      if (command === '/quiz') {
+        await sendQuiz(topicId, chatId)
         return NextResponse.json({ ok: true, command: 'quiz' })
       }
 
-      // /spend <amount> <desc>
-      if (text.startsWith('/spend')) {
-        const parts = text.split(' ')
-        const amount = parts[1] || '0'
-        const desc = parts.slice(2).join(' ') || 'Expense'
-        const reply = `💸 <b>Shared Expense Recorded:</b>\n• Amount: <code>${amount}</code>\n• Details: <i>${desc}</i>\n• Logged to couple shared ledger. ✅`
-        await sendTelegramMessage(reply, { topicId })
-        return NextResponse.json({ ok: true, command: 'spend' })
+      if (command === '/budget') {
+        await sendTelegramMessage('📊 Shared Budget ကိုဖွင့်ပြီး မှတ်တမ်းတင်နိုင်ပါတယ်။', {
+          topicId,
+          chatId,
+          inlineKeyboard: appButton('Open Budget Tracker', `${APP_URL}/budget`),
+        })
+        return NextResponse.json({ ok: true, command: 'budget' })
+      }
+
+      if (command === '/memories') {
+        await sendTelegramMessage('📖 Couple Memories ကိုဖွင့်ကြည့်နိုင်ပါတယ်။', {
+          topicId,
+          chatId,
+          inlineKeyboard: appButton('Open Memories', `${APP_URL}/memories`),
+        })
+        return NextResponse.json({ ok: true, command: 'memories' })
+      }
+
+      if (command === '/spend') {
+        await sendTelegramMessage(
+          'လုံခြုံရေးအတွက် Telegram မှ expense ကို database ထဲသို့ တိုက်ရိုက်မရေးသေးပါ။ Shared Budget ကိုဖွင့်ပြီး အတည်ပြုမှတ်တမ်းတင်ပါ။',
+          { topicId, chatId, inlineKeyboard: appButton('Record Expense in App', `${APP_URL}/budget`) }
+        )
+        return NextResponse.json({ ok: true, command: 'spend_redirected' })
       }
     }
 
-    return NextResponse.json({ ok: true })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ ok: true, action: 'ignored' })
+  } catch {
+    return NextResponse.json({ error: 'Unable to process Telegram update.' }, { status: 500 })
   }
 }
