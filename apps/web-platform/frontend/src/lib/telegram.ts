@@ -24,7 +24,12 @@ export async function sendTelegramMessage(
 ): Promise<unknown | null> {
   const { token, chatId: configuredChatId, topicId: defaultTopic, enabled } = getTelegramConfig()
   const effectiveChatId = options?.chatId ?? configuredChatId
-  const effectiveTopic = options?.topicId ?? defaultTopic
+  // Replies directed to an explicit chat must stay in the supplied topic context.
+  // Do not fall back to the configured notification topic when the incoming message
+  // belongs to the General topic (where Telegram may omit message_thread_id).
+  const effectiveTopic = options?.chatId !== undefined
+    ? options.topicId
+    : options?.topicId ?? defaultTopic
 
   if (!token || !effectiveChatId) {
     console.info('[Telegram:OurWorld:DryRun] message suppressed; bot configuration is incomplete.')
