@@ -27,12 +27,12 @@ export async function sendTelegramMessage(
   const effectiveTopic = options?.topicId ?? defaultTopic
 
   if (!token || !effectiveChatId) {
-    console.info(`[Telegram:OurWorld:DryRun] ${text.replace(/\n/g, ' ')}`)
+    console.info('[Telegram:OurWorld:DryRun] message suppressed; bot configuration is incomplete.')
     return null
   }
 
   if (!enabled) {
-    console.debug(`[Telegram:OurWorld:Disabled] ${text.replace(/\n/g, ' ')}`)
+    console.debug('[Telegram:OurWorld:Disabled] message suppressed; integration is disabled.')
     return null
   }
 
@@ -62,8 +62,7 @@ export async function sendTelegramMessage(
     })
 
     if (!res.ok) {
-      const errText = await res.text()
-      console.error(`Telegram API error (${res.status}): ${errText}`)
+      console.error(`Telegram API error (${res.status}); response body omitted.`)
       return null
     }
 
