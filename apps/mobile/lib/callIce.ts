@@ -61,11 +61,14 @@ export async function getCallIceConfigurationAsync(
     return cachedDynamicConfiguration.configuration
   }
 
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 5_000)
   try {
     const baseUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl
     const response = await fetch(`${baseUrl}/api/turn/credentials`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store',
+      signal: controller.signal,
     })
     if (!response.ok) return fallback
     const payload = await response.json() as { iceServers?: unknown; expiresAt?: unknown }
@@ -78,5 +81,7 @@ export async function getCallIceConfigurationAsync(
     return configuration
   } catch {
     return fallback
+  } finally {
+    clearTimeout(timeout)
   }
 }
