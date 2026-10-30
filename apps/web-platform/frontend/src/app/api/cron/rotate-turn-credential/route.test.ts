@@ -17,6 +17,17 @@ describe('Metered TURN rotation cron authentication', () => {
     expect(response.status).toBe(503)
   })
 
+  it('skips rotation cleanly until Metered provider credentials are configured', async () => {
+    process.env.CRON_SECRET = 'configured-cron-secret'
+    delete process.env.METERED_APP_URL
+    delete process.env.METERED_SECRET_KEY
+    const response = await GET(new Request('https://example.test/api/cron/rotate-turn-credential', {
+      headers: { Authorization: 'Bearer configured-cron-secret' },
+    }))
+    expect(response.status).toBe(200)
+    await expect(response.json()).resolves.toMatchObject({ status: 'skipped' })
+  })
+
   it('rejects requests without the configured bearer secret', async () => {
     process.env.CRON_SECRET = 'configured-cron-secret'
     const response = await GET(new Request('https://example.test/api/cron/rotate-turn-credential', {
