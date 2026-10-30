@@ -10,6 +10,10 @@ declare
   couple_id uuid;
   invite_code text;
 begin
+  if caller_id is null then
+    raise exception 'User not authenticated' using errcode = '42501';
+  end if;
+
   -- Serialize invite creation so concurrent callers cannot create two couples.
   perform pg_catalog.pg_advisory_xact_lock(20261030, 1);
 
@@ -52,6 +56,9 @@ begin
   if caller_id is null then
     raise exception 'User not authenticated' using errcode = '42501';
   end if;
+
+  -- Serialize invite creation so concurrent callers cannot create two couples.
+  perform pg_catalog.pg_advisory_xact_lock(20261030, 1);
 
   if exists (select 1 from public.couple_links) then
     raise exception 'This private app already has its one couple.';
@@ -96,3 +103,5 @@ revoke execute on function public.create_couple_code_invite() from public, anon;
 grant execute on function public.create_couple_code_invite() to authenticated;
 revoke execute on function public.create_couple_invite(text) from public, anon;
 grant execute on function public.create_couple_invite(text) to authenticated;
+
+commit;
