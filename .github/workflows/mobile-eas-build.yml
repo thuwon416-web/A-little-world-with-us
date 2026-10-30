@@ -20,6 +20,9 @@ jobs:
   configure-eas-environments:
     name: Configure shared web API URL in EAS
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
     steps:
       - name: Checkout current source
         uses: actions/checkout@v4
