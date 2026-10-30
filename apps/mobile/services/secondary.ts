@@ -118,7 +118,7 @@ export async function createLinkInvite() {
 
 export async function acceptLink(code: string) {
   const normalized = code.trim().toUpperCase()
-  if (!/^[A-Z0-9]{8}$/.test(normalized)) throw new Error('Invalid invite code')
+  if (!/^(?:[A-F0-9]{8}|[A-F0-9]{16})$/.test(normalized)) throw new Error('Invalid invite code')
 
   const { data: coupleId, error } = await supabase.rpc('accept_couple_code_invite', {
     p_invite_code: normalized,

@@ -126,15 +126,15 @@ function InputState({
           <input
             type="text"
             value={code}
-            onChange={(e) => onCodeChange(e.target.value.toUpperCase())}
-            placeholder="Enter 6-character code"
-            maxLength={6}
+            onChange={(e) => onCodeChange(e.target.value.toUpperCase().replace(/[^A-F0-9]/g, ''))}
+            placeholder="Enter 8- or 16-character code"
+            maxLength={16}
             className="w-full rounded-lg border border-accent-1/20 bg-card px-4 py-3 text-center font-mono text-2xl font-bold tracking-widest text-accent-1 placeholder-text-text-2 transition focus:border-accent-1 focus:outline-none focus:ring-1 focus:ring-accent-1/30"
           />
           
           <button
             type="submit"
-            disabled={isSubmitting || code.length !== 6}
+            disabled={isSubmitting || !/^(?:[A-F0-9]{8}|[A-F0-9]{16})$/.test(code)}
             className="w-full flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-accent-1 to-accent-2 px-8 py-3 font-semibold text-white transition hover:shadow-lg hover:shadow-accent-1/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? (

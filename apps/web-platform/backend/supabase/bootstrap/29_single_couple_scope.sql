@@ -16,6 +16,9 @@ begin
     raise exception 'User not authenticated' using errcode = '42501';
   end if;
 
+  -- Serialize invite creation so concurrent callers cannot create two couples.
+  perform pg_catalog.pg_advisory_xact_lock(20261030, 1);
+
   if exists (select 1 from public.couple_links) then
     raise exception 'This private app already has its one couple.';
   end if;
@@ -25,7 +28,7 @@ begin
   returning id into couple_id;
 
   loop
-    invite_code := upper(substr(encode(gen_random_bytes(8), 'hex'), 1, 8));
+    invite_code := upper(encode(gen_random_bytes(8), 'hex'));
     exit when not exists (
       select 1 from public.couple_links
       where couple_links.invite_code = invite_code
@@ -55,6 +58,9 @@ begin
   if caller_id is null then
     raise exception 'User not authenticated' using errcode = '42501';
   end if;
+
+  -- Serialize invite creation so concurrent callers cannot create two couples.
+  perform pg_catalog.pg_advisory_xact_lock(20261030, 1);
 
   if exists (select 1 from public.couple_links) then
     raise exception 'This private app already has its one couple.';

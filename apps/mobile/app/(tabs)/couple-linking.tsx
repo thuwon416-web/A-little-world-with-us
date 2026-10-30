@@ -91,7 +91,7 @@ export default function CoupleLinkingScreen() {
     }
   }
   const accept = async () => {
-    if (!/^[a-zA-Z0-9]{8}$/.test(code.trim()))
+    if (!/^(?:[a-fA-F0-9]{8}|[a-fA-F0-9]{16})$/.test(code.trim()))
       return Alert.alert('Invalid code', 'Enter the invitation code.')
     if (!context) return Alert.alert('Unable to link', 'Please wait for link status to load.')
     try {
@@ -124,10 +124,11 @@ export default function CoupleLinkingScreen() {
       <TextInput
         style={s.input}
         value={code}
-        onChangeText={setCode}
+        onChangeText={(value) => setCode(value.toUpperCase().replace(/[^A-F0-9]/g, ''))}
+        maxLength={16}
         placeholder="Invitation code"
         placeholderTextColor={colors.textSecondary}
-        autoCapitalize="none"
+        autoCapitalize="characters"
       />
       <TouchableOpacity style={s.button} onPress={() => void accept()}>
         <Text style={s.buttonText}>Accept link</Text>
