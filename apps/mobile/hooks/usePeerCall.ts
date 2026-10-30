@@ -7,7 +7,8 @@ import {
 } from 'react-native-webrtc'
 
 import { useAuth } from '@/lib/auth'
-import { getCallIceConfiguration } from '@/lib/callIce'
+import { supabase } from '@/lib/supabase'
+import { getCallIceConfigurationAsync } from '@/lib/callIce'
 import {
   getCallIceCandidates,
   getCallSignal,
@@ -52,7 +53,12 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
   const ensurePeer = useCallback(async () => {
     if (!callId || !user?.id) throw new Error('Call information is incomplete.')
     if (!peerRef.current) {
-      const peer = new RTCPeerConnection(getCallIceConfiguration())
+      const { data: { session } } = await supabase.auth.getSession()
+      const iceConfiguration = await getCallIceConfigurationAsync(
+        session?.access_token,
+        process.env.EXPO_PUBLIC_APP_URL?.trim()
+      )
+      const peer = new RTCPeerConnection(iceConfiguration)
       peerRef.current = peer
       const peerEvents = peer as RTCPeerConnection & {
         ontrack: ((event: { streams: MediaStream[] }) => void) | null
