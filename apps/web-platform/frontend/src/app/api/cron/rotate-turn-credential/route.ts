@@ -24,8 +24,11 @@ export async function GET(request: Request) {
   const appUrl = getMeteredAppUrl()
   const secretKey = process.env.METERED_SECRET_KEY?.trim()
   const redis = getMeteredRedis()
-  if (!appUrl || !secretKey || !redis) {
-    return NextResponse.json({ error: 'Metered TURN rotation is not configured.' }, { status: 503 })
+  if (!appUrl || !secretKey) {
+    return NextResponse.json({ status: 'skipped', reason: 'metered-provider-not-configured' })
+  }
+  if (!redis) {
+    return NextResponse.json({ error: 'Redis is not configured for TURN rotation.' }, { status: 503 })
   }
 
   const lock = await redis.set('turn:metered:rotation-lock:v1', String(Date.now()), { nx: true, ex: 90 })
