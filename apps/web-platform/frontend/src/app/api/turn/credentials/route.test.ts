@@ -1,5 +1,9 @@
 // @vitest-environment node
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('@/lib/rate-limit', () => ({
+  checkRateLimit: vi.fn(),
+}))
 import { GET } from './route'
 
 describe('Metered TURN credential endpoint authentication', () => {
