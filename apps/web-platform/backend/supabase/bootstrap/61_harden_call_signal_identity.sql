@@ -38,7 +38,7 @@ create policy call_signals_security_insert
   for insert
   with check (
     public.is_couple_member(couple_id)
-    and auth.uid() = caller_id
+    and (select auth.uid()) = caller_id
     and receiver_id <> caller_id
     and public.is_linked_user(receiver_id)
   );
