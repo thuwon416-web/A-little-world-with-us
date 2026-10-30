@@ -57,7 +57,7 @@ function getAllowedUserIds(): Set<number> {
 function isExpectedGroupTopic(chatId?: number, topicId?: number): boolean {
   const expectedChatId = (process.env.TELEGRAM_CHAT_ID || '').trim()
   const expectedTopicValue = (process.env.TELEGRAM_TOPIC_ID || '').trim()
-  if (!/^-?\\d+$/.test(expectedChatId) || !/^\\d+$/.test(expectedTopicValue)) return false
+  if (!/^-?\d+$/.test(expectedChatId) || !/^\d+$/.test(expectedTopicValue)) return false
   const expectedTopicId = Number(expectedTopicValue)
   return Number.isSafeInteger(expectedTopicId) &&
     expectedTopicId > 0 &&
