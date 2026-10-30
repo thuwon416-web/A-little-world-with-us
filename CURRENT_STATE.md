@@ -385,3 +385,25 @@ Owner-side manual verification remains last.
 - This closes the identified cron routing/auth/table-permission failures for the currently observed scheduled cycles. Keep monitoring future runs; do not infer that physical notification delivery is tested, because no push devices/recipients were present.
 - GitHub CI on the latest backend bootstrap commit `77ce9e554ead14a8dec6c978f37216af63e8ba0e`: Production CI/CD Pipeline, Production Smoke E2E, E2E Tests, Test, CodeQL, and Secret scan all completed successfully.
 - Storage buckets `chat_files`, `chat_photos`, `gallery`, `memories`, `surprises`, and `voice_messages` are all private. Bucket-level size/MIME limits are unset; continue reviewing whether application-level upload validation is sufficient.
+
+
+## 2026-10-30 release checkpoint — dependency security and deployment refresh
+
+- Main is at `93a09b114b02eb706ab2984729a26d3f9554b84d` after merging PRs #103, #104, and #105.
+- PR #103 adds server-side Metered TURN credential rotation and authenticated ICE configuration. Production deployment is READY, but Vercel Production currently has no `METERED_APP_URL` or `METERED_SECRET_KEY`; the cron therefore safely returns a skipped/unconfigured state. The legacy `NEXT_PUBLIC_TURN_*` variables remain in place to avoid breaking existing calls. Do not claim short-lived TURN credentials are active until the provider's app URL and secret key are configured and a two-device call succeeds.
+- PR #104 patches web Zod and Seroval dependency advisories. Web npm audit went from 5 findings (4 high, 1 moderate) to 0; web tests (143), typecheck, and lint passed. Main CI and production deployment succeeded.
+- PR #105 aligns Expo SDK 57 patch dependencies and pins Expo CLI's nested Zod to 4.6.7. Mobile tests (22), typecheck, Expo config, dependency check, and Android JS export passed. Mobile npm audit now reports 0 high/critical and 16 low advisories in the SDK/tooling tree.
+- Exact-SHA GitHub CI on main `93a09b1`: Test, E2E, Production CI/CD, Production Smoke E2E, Secret scan, and CodeQL all passed. Vercel Production deployment for this SHA is READY; latest 24h runtime error aggregation returned no errors.
+- Mobile EAS workflow was attempted on this SHA. `EXPO_TOKEN` is configured and accepted; both Android and iOS failed only because the Expo Free plan included build credits are exhausted, with reset shown as 2026-11-01. Do not upgrade the plan without approval. Retry after reset. iOS EAS also warned that `ios.infoPlist.ITSAppUsesNonExemptEncryption` needs an explicit export-compliance decision; do not set it automatically because the app uses application-layer AES encryption.
+- Supabase live read-only check: 78/78 public tables have RLS; zero anon table grants; zero public Storage buckets; all 18 public SECURITY DEFINER functions have empty search_path and none are executable by anon. Twelve authenticated-callable functions remain intentional-review warnings; no blanket revokes applied.
+- Six Storage buckets remain private, but all have no bucket-level file-size or MIME limits. Application paths encrypt payloads as `application/octet-stream`; choose per-bucket size ceilings only after preserving compatibility with existing mobile/web clients and legacy media. No bucket settings or media objects were changed in this checkpoint.
+- Supabase performance advisor reports 120 unused-index notices; no index was dropped without query/workload evidence. Leaked-password protection remains unavailable on the Free plan and is intentionally deferred per owner instruction.
+- Open PR search returned no open PRs; Dependabot PR #99 is closed unmerged due Node/Expo/Babel/Jest major-version incompatibility. No remaining open PRs were returned by GitHub search.
+
+## Remaining release gates
+
+- Configure the Metered TURN provider's production app URL and server-only secret, then verify credential rotation and a real two-device WebRTC call. Do not share the secret in chat.
+- Retry current-main Android/iOS EAS builds after the Free-plan credit reset; then install and test on physical devices. Android physical-device smoke, iOS signing/device smoke, push delivery, background location, and offline recovery remain unverified.
+- Verify media upload/read/delete across storage providers and B2 large-file round-trip. Six private Supabase Storage buckets still need a safe, client-compatible size-limit policy.
+- Review the 12 SECURITY DEFINER functions individually; do not blanket-revoke. Review 120 unused indexes against real query plans/usage before removal.
+- Branch protection remains an owner/admin UI action. Keep leaked-password protection deferred on the Free plan.
