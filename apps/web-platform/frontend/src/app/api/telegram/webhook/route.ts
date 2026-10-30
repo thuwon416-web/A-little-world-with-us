@@ -54,6 +54,18 @@ function getAllowedUserIds(): Set<number> {
   )
 }
 
+function isExpectedGroupTopic(chatId?: number, topicId?: number): boolean {
+  const expectedChatId = (process.env.TELEGRAM_CHAT_ID || '').trim()
+  const expectedTopicValue = (process.env.TELEGRAM_TOPIC_ID || '').trim()
+  if (!/^-?\d+$/.test(expectedChatId) || !/^\d+$/.test(expectedTopicValue)) return false
+  const expectedTopicId = Number(expectedTopicValue)
+  return Number.isSafeInteger(expectedTopicId) &&
+    expectedTopicId > 0 &&
+    chatId !== undefined &&
+    String(chatId) === expectedChatId &&
+    topicId === expectedTopicId
+}
+
 function isAuthorizedWebhook(req: Request): boolean {
   const expectedToken = process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN
   const providedToken = req.headers.get('x-telegram-bot-api-secret-token') || ''
@@ -88,7 +100,7 @@ async function sendQuiz(topicId?: number, chatId?: number) {
 }
 
 export async function POST(req: Request) {
-  if (!process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN || getAllowedUserIds().size === 0) {
+  if (!process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN || getAllowedUserIds().size === 0 || !process.env.TELEGRAM_CHAT_ID || !process.env.TELEGRAM_TOPIC_ID) {
     return NextResponse.json({ error: 'Telegram webhook access control is not configured.' }, { status: 503 })
   }
   if (!isAuthorizedWebhook(req)) {
@@ -105,6 +117,12 @@ export async function POST(req: Request) {
     update = (await req.json()) as TelegramUpdate
   } catch {
     return NextResponse.json({ error: 'Invalid Telegram update.' }, { status: 400 })
+  }
+
+  const sourceMessage = update.message ?? update.callback_query?.message
+  if (!isExpectedGroupTopic(sourceMessage?.chat?.id, sourceMessage?.message_thread_id)) {
+    console.warn('[Telegram:OurWorld:Webhook] update rejected by group/topic scope.')
+    return NextResponse.json({ error: 'Telegram update is outside the configured group topic.' }, { status: 403 })
   }
 
   const actorId = update.message?.from?.id ?? update.callback_query?.from?.id
