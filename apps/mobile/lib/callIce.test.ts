@@ -16,7 +16,7 @@ afterEach(() => {
 })
 
 async function loadConfiguration() {
-  const module = await import('./callIce')
+  const callIceModule = await import('./callIce')
   return module.getCallIceConfiguration()
 }
 
@@ -72,8 +72,8 @@ describe('getCallIceConfigurationAsync', () => {
       expiresAt: Date.now() + 60 * 60_000,
     }), { status: 200 }))
 
-    const module = await import('./callIce')
-    const config = await module.getCallIceConfigurationAsync('access-token', 'https://app.example/')
+    const callIceModule = await import('./callIce')
+    const config = await callIceModule.getCallIceConfigurationAsync('access-token', 'https://app.example/')
 
     expect(global.fetch).toHaveBeenCalledWith('https://app.example/api/turn/credentials', expect.objectContaining({
       headers: { Authorization: 'Bearer access-token' },
@@ -88,8 +88,8 @@ describe('getCallIceConfigurationAsync', () => {
     process.env.EXPO_PUBLIC_TURN_CREDENTIAL = 'legacy-password'
     jest.spyOn(global, 'fetch').mockResolvedValue(new Response('', { status: 503 }))
 
-    const module = await import('./callIce')
-    const config = await module.getCallIceConfigurationAsync('access-token', 'https://app.example')
+    const callIceModule = await import('./callIce')
+    const config = await callIceModule.getCallIceConfigurationAsync('access-token', 'https://app.example')
 
     expect(config.iceServers).toHaveLength(2)
     expect(config.iceServers.some((server) => server.username === 'legacy-user')).toBe(true)
