@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: npm
-    directory: /apps/web
+    directory: /apps/web-platform/frontend
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
