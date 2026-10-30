@@ -23,6 +23,7 @@ export async function GET(request: Request) {
 
   const authClient = createClient(supabaseUrl, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
   })
   const { data: { user }, error: authError } = await authClient.auth.getUser(token)
   if (authError || !user) {
