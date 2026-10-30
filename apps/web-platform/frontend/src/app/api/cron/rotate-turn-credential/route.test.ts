@@ -3,10 +3,16 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { GET } from './route'
 
 const originalCronSecret = process.env.CRON_SECRET
+const originalMeteredAppUrl = process.env.METERED_APP_URL
+const originalMeteredSecretKey = process.env.METERED_SECRET_KEY
 
 afterEach(() => {
   if (originalCronSecret === undefined) delete process.env.CRON_SECRET
   else process.env.CRON_SECRET = originalCronSecret
+  if (originalMeteredAppUrl === undefined) delete process.env.METERED_APP_URL
+  else process.env.METERED_APP_URL = originalMeteredAppUrl
+  if (originalMeteredSecretKey === undefined) delete process.env.METERED_SECRET_KEY
+  else process.env.METERED_SECRET_KEY = originalMeteredSecretKey
 })
 
 describe('Metered TURN rotation cron authentication', () => {
