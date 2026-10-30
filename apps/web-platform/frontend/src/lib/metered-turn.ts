@@ -57,13 +57,22 @@ function isCredential(value: unknown): value is MeteredTurnCredential {
   )
 }
 
+export async function getPendingMeteredCredential(store: Redis): Promise<MeteredTurnCredential | null> {
+  const pending = await store.get<unknown>(PENDING_KEY)
+  return isCredential(pending) ? pending : null
+}
+
 export async function promotePendingMeteredCredential(
   store: Redis
 ): Promise<MeteredTurnCredential | null> {
-  const pending = await store.get<unknown>(PENDING_KEY)
-  if (!isCredential(pending)) return null
+  const pending = await getPendingMeteredCredential(store)
+  if (!pending) return null
   const now = Date.now()
-  if (now < pending.availableAt || now >= pending.expiresAt) return null
+  if (now < pending.availableAt) return null
+  if (now >= pending.expiresAt) {
+    await store.del(PENDING_KEY)
+    return null
+  }
   const ttlSeconds = Math.max(60, Math.floor((pending.expiresAt - now) / 1000))
   await store.set(CURRENT_KEY, pending, { ex: ttlSeconds })
   await store.del(PENDING_KEY)
