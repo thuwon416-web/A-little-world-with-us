@@ -63,7 +63,7 @@ export async function getCallIceConfigurationAsync(
   }
 
   try {
-    const baseUrl = appUrl.replace(/\\/+$/, '')
+    const baseUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl
     const response = await fetch(`${baseUrl}/api/turn/credentials`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store',
