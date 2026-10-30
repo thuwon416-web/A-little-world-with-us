@@ -32,7 +32,7 @@ export function getCallIceConfiguration(): RTCConfiguration {
 
 let cachedDynamicConfiguration: { configuration: RTCConfiguration; expiresAt: number } | null = null
 
-function isDynamicIceServerArray(value: unknown): value is RTCIceServer[] {
+function isDynamicIceServerArray(value: unknown): value is RTCConfiguration['iceServers'] {
   if (!Array.isArray(value) || value.length < 1 || value.length > 16) return false
   return value.every((item) => {
     if (!item || typeof item !== 'object') return false
@@ -62,7 +62,7 @@ export async function getCallIceConfigurationAsync(
   }
 
   try {
-    const baseUrl = appUrl.replace(/\\/+$/, '')
+    const baseUrl = appUrl.endsWith('/') ? appUrl.slice(0, -1) : appUrl
     const response = await fetch(`${baseUrl}/api/turn/credentials`, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: 'no-store',
