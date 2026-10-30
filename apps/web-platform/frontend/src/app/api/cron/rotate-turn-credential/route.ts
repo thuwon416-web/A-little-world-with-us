@@ -28,6 +28,9 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Metered TURN rotation is not configured.' }, { status: 503 })
   }
 
+  const lock = await redis.set('turn:metered:rotation-lock:v1', String(Date.now()), { nx: true, ex: 90 })
+  if (!lock) return NextResponse.json({ status: 'already-running' }, { status: 202 })
+
   try {
     // Promote the previous rotation first if it has completed its propagation window.
     await promotePendingMeteredCredential(redis)
@@ -84,5 +87,7 @@ export async function GET(request: Request) {
     })
   } catch {
     return NextResponse.json({ error: 'TURN credential rotation failed.' }, { status: 502 })
+  } finally {
+    await redis.del('turn:metered:rotation-lock:v1').catch(() => undefined)
   }
 }
