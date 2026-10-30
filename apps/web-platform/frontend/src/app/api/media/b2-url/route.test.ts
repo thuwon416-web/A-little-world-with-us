@@ -61,6 +61,27 @@ describe('POST /api/media/b2-url', () => {
     expect(response.status).toBe(400)
   })
 
+  it('rejects unauthenticated callers before authorizing a download', async () => {
+    getUser.mockResolvedValue({ data: { user: null } })
+    const response = await POST(request({ coupleId: 'couple-1', fileName: 'couples/couple-1/large-media/a.jpg' }))
+    expect(response.status).toBe(401)
+    expect(getB2DownloadUrl).not.toHaveBeenCalled()
+  })
+
+  it('rejects a caller who is not a member of the requested couple', async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: null })
+    const response = await POST(request({ coupleId: 'couple-1', fileName: 'couples/couple-1/large-media/a.jpg' }))
+    expect(response.status).toBe(403)
+    expect(getB2DownloadUrl).not.toHaveBeenCalled()
+  })
+
+  it('applies the per-user rate limit before issuing a download authorization', async () => {
+    checkRateLimit.mockResolvedValue({ allowed: false, resetTime: Date.now() + 60_000 })
+    const response = await POST(request({ coupleId: 'couple-1', fileName: 'couples/couple-1/large-media/a.jpg' }))
+    expect(response.status).toBe(429)
+    expect(getB2DownloadUrl).not.toHaveBeenCalled()
+  })
+
   it('does not authorize a B2 object outside the requested couple prefix', async () => {
     const response = await POST(request({ coupleId: 'couple-1', fileName: 'couples/couple-2/large-media/a.jpg' }))
     expect(response.status).toBe(403)
