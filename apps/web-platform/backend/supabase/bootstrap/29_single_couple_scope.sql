@@ -12,9 +12,8 @@ declare
   couple_id uuid;
   invite_code text;
 begin
-  if caller_id is null then
-    raise exception 'User not authenticated' using errcode = '42501';
-  end if;
+  -- Serialize invite creation so concurrent callers cannot create two couples.
+  perform pg_catalog.pg_advisory_xact_lock(20261030, 1);
 
   if exists (select 1 from public.couple_links) then
     raise exception 'This private app already has its one couple.';
