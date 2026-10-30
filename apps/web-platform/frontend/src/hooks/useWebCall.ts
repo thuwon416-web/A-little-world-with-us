@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { getCallIceConfiguration } from '@/lib/callIce'
+import { getCallIceConfigurationAsync } from '@/lib/callIce'
 import {
   initiateCall,
   acceptCall,
@@ -129,8 +129,11 @@ export function useWebCall() {
   }, [coupleId, userId, cleanupPeer])
 
   // Setup Peer Connection
-  const createPeerConnection = useCallback((cId: string, _currentCallType: CallType) => {
-    const peer = new RTCPeerConnection(getCallIceConfiguration())
+  const createPeerConnection = useCallback(async (cId: string, _currentCallType: CallType) => {
+    const { data: { session } } = await supabase.auth.getSession()
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+    const iceConfiguration = await getCallIceConfigurationAsync(session?.access_token, appUrl)
+    const peer = new RTCPeerConnection(iceConfiguration)
     peerRef.current = peer
 
     peer.onicecandidate = (event) => {
@@ -175,7 +178,7 @@ export function useWebCall() {
       }
       setActiveCall(signal)
 
-      const peer = createPeerConnection(signal.id, type)
+      const peer = await createPeerConnection(signal.id, type)
       stream.getTracks().forEach((track) => peer.addTrack(track, stream))
 
       const offer = await peer.createOffer()
@@ -198,7 +201,7 @@ export function useWebCall() {
       })
       setLocalStream(stream)
 
-      const peer = createPeerConnection(activeCall.id, activeCall.type)
+      const peer = await createPeerConnection(activeCall.id, activeCall.type)
       stream.getTracks().forEach((track) => peer.addTrack(track, stream))
 
       if (activeCall.offer) {
