@@ -32,6 +32,9 @@ jobs:
         with:
           node-version: "24.3.0"
 
+      - name: Install mobile dependencies
+        run: npm ci
+
       - name: Set shared web API URL for preview and production builds
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
