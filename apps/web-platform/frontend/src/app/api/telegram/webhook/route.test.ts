@@ -100,7 +100,7 @@ describe('Telegram webhook security and commands', () => {
     expect(payload.command).toBe('spend_redirected')
     expect(sendTelegramMessage).toHaveBeenCalledWith(
       expect.stringContaining('database ထဲသို့ တိုက်ရိုက်မရေးသေးပါ။'),
-      expect.objectContaining({ chatId: 123456789 })
+      expect.objectContaining({ chatId: -1003992125718, topicId: 2 })
     )
   })
 })
