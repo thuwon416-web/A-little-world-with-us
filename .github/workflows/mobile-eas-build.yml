@@ -3,6 +3,8 @@ name: Mobile EAS Build (Android + iOS)
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - ".github/workflows/mobile-eas-build.yml"
       - "apps/mobile/**"
@@ -19,6 +21,7 @@ concurrency:
 jobs:
   configure-eas-environments:
     name: Configure shared web API URL in EAS
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -47,6 +50,7 @@ jobs:
           npx --yes eas-cli@latest env:set --environment production --name EXPO_PUBLIC_WEB_URL --value https://a-little-world-with-us.vercel.app --visibility plaintext --non-interactive --json
 
   eas-build:
+    if: github.ref == 'refs/heads/main'
     needs: configure-eas-environments
     name: EAS build — ${{ matrix.platform }}
     runs-on: ubuntu-latest
