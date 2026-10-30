@@ -25,7 +25,7 @@ begin
   returning id into couple_id;
 
   loop
-    invite_code := upper(substr(encode(gen_random_bytes(8), 'hex'), 1, 8));
+    invite_code := upper(encode(gen_random_bytes(8), 'hex'));
     exit when not exists (
       select 1 from public.couple_links
       where couple_links.invite_code = invite_code
