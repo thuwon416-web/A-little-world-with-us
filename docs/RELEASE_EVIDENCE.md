@@ -304,3 +304,13 @@ After release stability:
 - Verify media upload/read/delete across storage providers and B2 large-file round-trip. Six private Supabase Storage buckets still need a safe, client-compatible size-limit policy.
 - Review the 12 SECURITY DEFINER functions individually; do not blanket-revoke. Review 120 unused indexes against real query plans/usage before removal.
 - Branch protection remains an owner/admin UI action. Keep leaked-password protection deferred on the Free plan.
+
+
+## 2026-10-30 Storage upload hardening follow-up
+
+- Merged PR #106 (`b2fc833310199f5b09293bfb694358ba6f9d411e`): `security(storage): constrain private bucket uploads`.
+- Applied and verified Supabase migration `20261030081415_restrict_storage_bucket_uploads` on project `mktfnwdvzbdrxfcvnolp`.
+- All six Storage buckets remain private. Five buckets now enforce a 50 MiB upload ceiling; `surprises` enforces 5 MiB. MIME allowlists include encrypted `application/octet-stream` plus supported legacy media/document types. This preserves current encryption and legacy client compatibility.
+- Read-only object inventory found no existing objects above 50 MiB. No objects, RLS policies, grants, or user data were modified.
+- PR #106 checks all passed: Test (web + mobile), E2E Tests, Production CI/CD (including migration syntax and release gate), DB RLS policy regression, Secret scan, and CodeQL.
+- Vercel Production deployment for merge SHA `b2fc833310199f5b09293bfb694358ba6f9d411e` was still BUILDING at the time of this note; verify READY before considering the deploy gate complete.
