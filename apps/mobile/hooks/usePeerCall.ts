@@ -56,7 +56,7 @@ export function usePeerCall(callId: string | null, callType: CallType, active: b
       const { data: { session } } = await supabase.auth.getSession()
       const iceConfiguration = await getCallIceConfigurationAsync(
         session?.access_token,
-        process.env.EXPO_PUBLIC_APP_URL?.trim()
+        process.env.EXPO_PUBLIC_APP_URL?.trim() || process.env.EXPO_PUBLIC_WEB_URL?.trim()
       )
       const peer = new RTCPeerConnection(iceConfiguration)
       peerRef.current = peer
