@@ -17,7 +17,7 @@ afterEach(() => {
 
 async function loadConfiguration() {
   const callIceModule = await import('./callIce')
-  return module.getCallIceConfiguration()
+  return callIceModule.getCallIceConfiguration()
 }
 
 describe('getCallIceConfiguration', () => {
