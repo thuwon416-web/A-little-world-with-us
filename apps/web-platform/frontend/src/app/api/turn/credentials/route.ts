@@ -28,6 +28,15 @@ export async function GET(request: Request) {
   if (authError || !user) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
   }
+  const { data: coupleLink, error: coupleError } = await authClient
+    .from('couple_links')
+    .select('id')
+    .or(`inviter_id.eq.${user.id},accepted_by.eq.${user.id}`)
+    .eq('status', 'accepted')
+    .maybeSingle()
+  if (coupleError || !coupleLink) {
+    return NextResponse.json({ error: 'An accepted couple link is required.' }, { status: 403 })
+  }
 
   const limit = await checkRateLimit(user.id, 10, 60_000)
   if (!limit.allowed) {
