@@ -217,8 +217,8 @@ function CreateInviteState({
       <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">
         <h3 className="font-semibold text-accent-2 mb-3">Already have a code?</h3>
         <div className="flex gap-2">
-          <input value={acceptCode} onChange={(event) => setAcceptCode(event.target.value.toUpperCase())} maxLength={8} placeholder="8-character code" className="min-w-0 flex-1 rounded-lg border border-accent-1/20 bg-card px-3 py-2 text-text-1" />
-          <button type="button" onClick={onAccept} disabled={isAccepting || acceptCode.length !== 8} className="rounded-lg bg-accent-1 px-4 py-2 font-semibold text-white font-semibold shadow-sm disabled:opacity-50">{isAccepting ? 'Linking…' : 'Accept'}</button>
+          <input value={acceptCode} onChange={(event) => setAcceptCode(event.target.value.toUpperCase().replace(/[^A-F0-9]/g, ''))} maxLength={16} placeholder="8- or 16-character code" className="min-w-0 flex-1 rounded-lg border border-accent-1/20 bg-card px-3 py-2 text-text-1" />
+          <button type="button" onClick={onAccept} disabled={isAccepting || !/^(?:[A-F0-9]{8}|[A-F0-9]{16})$/.test(acceptCode)} className="rounded-lg bg-accent-1 px-4 py-2 font-semibold text-white font-semibold shadow-sm disabled:opacity-50">{isAccepting ? 'Linking…' : 'Accept'}</button>
         </div>
       </div>
 
