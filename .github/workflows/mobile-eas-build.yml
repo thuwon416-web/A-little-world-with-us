@@ -17,7 +17,37 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  configure-eas-environments:
+    name: Configure shared web API URL in EAS
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - name: Checkout current source
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24.3.0"
+
+      - name: Install mobile dependencies
+        run: npm ci
+
+      - name: Set shared web API URL for preview and production builds
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "::error::Repository secret EXPO_TOKEN is missing."
+            exit 1
+          fi
+          npx --yes eas-cli@latest env:set --environment preview --name EXPO_PUBLIC_WEB_URL --value https://a-little-world-with-us.vercel.app --visibility plaintext --non-interactive --json
+          npx --yes eas-cli@latest env:set --environment production --name EXPO_PUBLIC_WEB_URL --value https://a-little-world-with-us.vercel.app --visibility plaintext --non-interactive --json
+
   eas-build:
+    needs: configure-eas-environments
     name: EAS build — ${{ matrix.platform }}
     runs-on: ubuntu-latest
     timeout-minutes: 360
