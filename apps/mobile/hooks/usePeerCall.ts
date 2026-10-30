@@ -7,8 +7,8 @@ import {
 } from 'react-native-webrtc'
 
 import { useAuth } from '@/lib/auth'
-import { supabase } from '@/lib/supabase'
 import { getCallIceConfigurationAsync } from '@/lib/callIce'
+import { supabase } from '@/lib/supabase'
 import {
   getCallIceCandidates,
   getCallSignal,
