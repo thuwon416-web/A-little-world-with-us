@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import {
   getMeteredAppUrl,
   getMeteredRedis,
+  getPendingMeteredCredential,
   meteredCredentialTtlSeconds,
   promotePendingMeteredCredential,
   type MeteredTurnCredential,
@@ -30,6 +31,14 @@ export async function GET(request: Request) {
   try {
     // Promote the previous rotation first if it has completed its propagation window.
     await promotePendingMeteredCredential(redis)
+    const existingPending = await getPendingMeteredCredential(redis)
+    if (existingPending && existingPending.availableAt > Date.now()) {
+      return NextResponse.json({
+        status: 'pending',
+        availableAt: new Date(existingPending.availableAt).toISOString(),
+        expiresAt: new Date(existingPending.expiresAt).toISOString(),
+      })
+    }
 
     const endpoint = new URL('/api/v1/turn/credential', appUrl)
     endpoint.searchParams.set('secretKey', secretKey)
