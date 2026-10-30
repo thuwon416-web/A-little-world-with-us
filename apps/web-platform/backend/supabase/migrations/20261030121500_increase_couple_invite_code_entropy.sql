@@ -104,4 +104,3 @@ grant execute on function public.create_couple_code_invite() to authenticated;
 revoke execute on function public.create_couple_invite(text) from public, anon;
 grant execute on function public.create_couple_invite(text) to authenticated;
 
-commit;
