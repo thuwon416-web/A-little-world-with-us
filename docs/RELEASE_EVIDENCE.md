@@ -314,3 +314,14 @@ After release stability:
 - Read-only object inventory found no existing objects above 50 MiB. No objects, RLS policies, grants, or user data were modified.
 - PR #106 checks all passed: Test (web + mobile), E2E Tests, Production CI/CD (including migration syntax and release gate), DB RLS policy regression, Secret scan, and CodeQL.
 - Vercel Production deployment for merge SHA `b2fc833310199f5b09293bfb694358ba6f9d411e` was still BUILDING at the time of this note; verify READY before considering the deploy gate complete.
+
+
+## 2026-10-30 EAS Mobile endpoint configuration
+
+- PR #107 merged to main as `efc37c2b4fd93488d695154e08d7a89f9d8f325e`.
+- The mobile EAS workflow now has a single setup job that sets the public `EXPO_PUBLIC_WEB_URL` value in both EAS `preview` and `production` environments before the Android/iOS build matrix.
+- The setup job completed successfully. The subsequent Android and iOS EAS build logs explicitly confirm `EXPO_PUBLIC_WEB_URL` is loaded from the EAS `preview` environment alongside the Supabase URL/anon key. This removes the missing-web-endpoint blocker for Mobile calls to `/api/turn/credentials`.
+- EAS builds still fail before starting a remote build because the Expo Free-plan included build credits are exhausted; EAS reports reset on 2026-11-01. `EXPO_TOKEN` is present and accepted. No plan upgrade was made.
+- Vercel Production deployment for main SHA `efc37c2b4fd93488d695154e08d7a89f9d8f325e` is READY.
+- Main checks observed: Test, E2E Tests, Production CI/CD Pipeline, Production Smoke E2E, and Secret scan passed; CodeQL was still in progress at this note's creation.
+- Remaining: retry Android/iOS EAS builds after reset; physical-device smoke; add Metered production app URL and server-only secret; verify live TURN credential rotation and two-device WebRTC.
