@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 afterEach(() => {
   vi.unstubAllEnvs()
+  vi.unstubAllGlobals()
   vi.resetModules()
 })
 
@@ -43,5 +44,43 @@ describe('getCallIceConfiguration', () => {
     const config = await loadConfiguration()
 
     expect(config.iceServers).toHaveLength(4)
+  })
+})
+
+
+describe('getCallIceConfigurationAsync', () => {
+  it('uses authenticated Metered ICE servers when the server endpoint returns them', async () => {
+    vi.stubEnv('NEXT_PUBLIC_TURN_URLS', '')
+    const iceServers = [
+      { urls: 'stun:global.relay.metered.ca:80' },
+      { urls: 'turn:global.relay.metered.ca:80', username: 'temporary-user', credential: 'temporary-password' },
+    ]
+    const fetchMock = vi.fn().mockResolvedValue(new Response(JSON.stringify({
+      iceServers,
+      expiresAt: Date.now() + 60 * 60_000,
+    }), { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const callIceModule = await import('./callIce')
+    const config = await callIceModule.getCallIceConfigurationAsync('access-token', 'https://app.example/')
+
+    expect(fetchMock).toHaveBeenCalledWith('https://app.example/api/turn/credentials', expect.objectContaining({
+      headers: { Authorization: 'Bearer access-token' },
+      cache: 'no-store',
+    }))
+    expect(config.iceServers).toEqual(iceServers)
+  })
+
+  it('falls back to the existing static configuration when the dynamic endpoint is unavailable', async () => {
+    vi.stubEnv('NEXT_PUBLIC_TURN_URLS', 'turn:legacy.relay.example:3478')
+    vi.stubEnv('NEXT_PUBLIC_TURN_USERNAME', 'legacy-user')
+    vi.stubEnv('NEXT_PUBLIC_TURN_CREDENTIAL', 'legacy-password')
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 503 })))
+
+    const callIceModule = await import('./callIce')
+    const config = await callIceModule.getCallIceConfigurationAsync('access-token', 'https://app.example')
+
+    expect(config.iceServers).toHaveLength(5)
+    expect(config.iceServers.some((server) => server.username === 'legacy-user')).toBe(true)
   })
 })

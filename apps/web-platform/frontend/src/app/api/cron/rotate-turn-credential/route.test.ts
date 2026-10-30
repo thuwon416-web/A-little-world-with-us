@@ -1,0 +1,45 @@
+// @vitest-environment node
+import { afterEach, describe, expect, it } from 'vitest'
+import { GET } from './route'
+
+const originalCronSecret = process.env.CRON_SECRET
+const originalMeteredAppUrl = process.env.METERED_APP_URL
+const originalMeteredSecretKey = process.env.METERED_SECRET_KEY
+
+afterEach(() => {
+  if (originalCronSecret === undefined) delete process.env.CRON_SECRET
+  else process.env.CRON_SECRET = originalCronSecret
+  if (originalMeteredAppUrl === undefined) delete process.env.METERED_APP_URL
+  else process.env.METERED_APP_URL = originalMeteredAppUrl
+  if (originalMeteredSecretKey === undefined) delete process.env.METERED_SECRET_KEY
+  else process.env.METERED_SECRET_KEY = originalMeteredSecretKey
+})
+
+describe('Metered TURN rotation cron authentication', () => {
+  it('fails closed when the cron secret is missing', async () => {
+    delete process.env.CRON_SECRET
+    const response = await GET(new Request('https://example.test/api/cron/rotate-turn-credential'))
+
+    expect(response.status).toBe(503)
+  })
+
+  it('skips rotation cleanly until Metered provider credentials are configured', async () => {
+    process.env.CRON_SECRET = 'configured-cron-secret'
+    delete process.env.METERED_APP_URL
+    delete process.env.METERED_SECRET_KEY
+    const response = await GET(new Request('https://example.test/api/cron/rotate-turn-credential', {
+      headers: { Authorization: 'Bearer configured-cron-secret' },
+    }))
+    expect(response.status).toBe(200)
+    await expect(response.json()).resolves.toMatchObject({ status: 'skipped' })
+  })
+
+  it('rejects requests without the configured bearer secret', async () => {
+    process.env.CRON_SECRET = 'configured-cron-secret'
+    const response = await GET(new Request('https://example.test/api/cron/rotate-turn-credential', {
+      headers: { Authorization: 'Bearer incorrect-secret' },
+    }))
+
+    expect(response.status).toBe(401)
+  })
+})

@@ -5,6 +5,7 @@ const originalTurnEnv = {
 }
 
 afterEach(() => {
+  jest.restoreAllMocks()
   if (originalTurnEnv.urls === undefined) delete process.env.EXPO_PUBLIC_TURN_URLS
   else process.env.EXPO_PUBLIC_TURN_URLS = originalTurnEnv.urls
   if (originalTurnEnv.username === undefined) delete process.env.EXPO_PUBLIC_TURN_USERNAME
@@ -15,8 +16,8 @@ afterEach(() => {
 })
 
 async function loadConfiguration() {
-  const module = await import('./callIce')
-  return module.getCallIceConfiguration()
+  const callIceModule = await import('./callIce')
+  return callIceModule.getCallIceConfiguration()
 }
 
 describe('getCallIceConfiguration', () => {
@@ -55,5 +56,42 @@ describe('getCallIceConfiguration', () => {
     const config = await loadConfiguration()
 
     expect(config.iceServers).toEqual([{ urls: 'stun:stun.l.google.com:19302' }])
+  })
+})
+
+
+describe('getCallIceConfigurationAsync', () => {
+  it('uses authenticated Metered ICE servers when the server endpoint returns them', async () => {
+    process.env.EXPO_PUBLIC_TURN_URLS = ''
+    const iceServers = [
+      { urls: 'stun:global.relay.metered.ca:80' },
+      { urls: 'turn:global.relay.metered.ca:80', username: 'temporary-user', credential: 'temporary-password' },
+    ]
+    jest.spyOn(global, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+      iceServers,
+      expiresAt: Date.now() + 60 * 60_000,
+    }), { status: 200 }))
+
+    const callIceModule = await import('./callIce')
+    const config = await callIceModule.getCallIceConfigurationAsync('access-token', 'https://app.example/')
+
+    expect(global.fetch).toHaveBeenCalledWith('https://app.example/api/turn/credentials', expect.objectContaining({
+      headers: { Authorization: 'Bearer access-token' },
+      cache: 'no-store',
+    }))
+    expect(config.iceServers).toEqual(iceServers)
+  })
+
+  it('falls back to the existing static configuration when the dynamic endpoint is unavailable', async () => {
+    process.env.EXPO_PUBLIC_TURN_URLS = 'turn:legacy.relay.example:3478'
+    process.env.EXPO_PUBLIC_TURN_USERNAME = 'legacy-user'
+    process.env.EXPO_PUBLIC_TURN_CREDENTIAL = 'legacy-password'
+    jest.spyOn(global, 'fetch').mockResolvedValue(new Response('', { status: 503 }))
+
+    const callIceModule = await import('./callIce')
+    const config = await callIceModule.getCallIceConfigurationAsync('access-token', 'https://app.example')
+
+    expect(config.iceServers).toHaveLength(2)
+    expect(config.iceServers.some((server) => server.username === 'legacy-user')).toBe(true)
   })
 })
