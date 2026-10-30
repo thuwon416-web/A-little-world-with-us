@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import {
+  getCurrentMeteredCredential,
   getMeteredAppUrl,
   getMeteredRedis,
   getPendingMeteredCredential,
@@ -44,6 +45,10 @@ export async function GET(request: Request) {
         availableAt: new Date(existingPending.availableAt).toISOString(),
         expiresAt: new Date(existingPending.expiresAt).toISOString(),
       })
+    }
+    const current = await getCurrentMeteredCredential(redis)
+    if (current && Date.now() - current.createdAt < 20 * 60 * 60_000) {
+      return NextResponse.json({ status: 'already-current', expiresAt: new Date(current.expiresAt).toISOString() })
     }
 
     const endpoint = new URL('/api/v1/turn/credential', appUrl)
