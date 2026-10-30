@@ -61,8 +61,8 @@ describe('getCallIceConfigurationAsync', () => {
     }), { status: 200 }))
     vi.stubGlobal('fetch', fetchMock)
 
-    const module = await import('./callIce')
-    const config = await module.getCallIceConfigurationAsync('access-token', 'https://app.example/')
+    const callIceModule = await import('./callIce')
+    const config = await callIceModule.getCallIceConfigurationAsync('access-token', 'https://app.example/')
 
     expect(fetchMock).toHaveBeenCalledWith('https://app.example/api/turn/credentials', expect.objectContaining({
       headers: { Authorization: 'Bearer access-token' },
@@ -77,8 +77,8 @@ describe('getCallIceConfigurationAsync', () => {
     vi.stubEnv('NEXT_PUBLIC_TURN_CREDENTIAL', 'legacy-password')
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response('', { status: 503 })))
 
-    const module = await import('./callIce')
-    const config = await module.getCallIceConfigurationAsync('access-token', 'https://app.example')
+    const callIceModule = await import('./callIce')
+    const config = await callIceModule.getCallIceConfigurationAsync('access-token', 'https://app.example')
 
     expect(config.iceServers).toHaveLength(5)
     expect(config.iceServers.some((server) => server.username === 'legacy-user')).toBe(true)
