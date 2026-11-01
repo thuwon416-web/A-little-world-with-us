@@ -203,6 +203,10 @@ export async function POST(req: Request) {
           '• <code>/budget</code> — Open shared budget',
           '• <code>/memories</code> — Open memories',
           '• <code>/spend</code> — Open budget to record an expense',
+          '• <code>/share</code> — Share memories & stories',
+          '• <code>/anniversary</code> — View milestones & anniversaries',
+          '• <code>/checkin</code> — Safety check-in',
+          '• <code>/korean</code> — Korean learning & quiz',
         ].join('\n')
         await sendReply(helpText, {
           topicId,
@@ -276,6 +280,61 @@ export async function POST(req: Request) {
         )
         return NextResponse.json({ ok: true, command: 'spend_redirected' })
       }
+
+      if (command === '/share') {
+        await sendReply(
+          '📤 <b>Share Our Content</b>\nOur World app ကနေ memories နဲ့ stories တွေကို share လုပ်နိုင်ပါတယ်။',
+          {
+            topicId,
+            chatId,
+            inlineKeyboard: [
+              [{ text: '📖 Share a Memory', url: `${APP_URL}/memories` }],
+              [{ text: '💌 Our Story', url: `${APP_URL}/couple` }],
+            ],
+          }
+        )
+        return NextResponse.json({ ok: true, command: 'share' })
+      }
+
+      if (command === '/anniversary') {
+        await sendReply(
+          '💍 <b>Anniversary & Milestones</b>\nSpecial dates နဲ့ milestones တွေကို app ထဲမှာ ကြည့်နိုင်ပါတယ်။ Anniversary reminders ကို bot က အလိုအလျောက် ပို့ပေးပါမယ်။',
+          {
+            topicId,
+            chatId,
+            inlineKeyboard: appButton('View Milestones', `${APP_URL}/couple`),
+          }
+        )
+        return NextResponse.json({ ok: true, command: 'anniversary' })
+      }
+
+      if (command === '/checkin') {
+        await sendReply(
+          '📍 <b>Safety Check-in</b>\nPartner ရဲ့ safety check-in status ကို app ကနေ update လုပ်နိုင်ပါတယ်။',
+          {
+            topicId,
+            chatId,
+            inlineKeyboard: appButton('Open Safety Check-in', `${APP_URL}/safety`),
+          }
+        )
+        return NextResponse.json({ ok: true, command: 'checkin' })
+      }
+
+      if (command === '/korean') {
+        await sendReply(
+          '🇰🇷 <b>Korean Learning</b>\nDaily Korean word နဲ့ quiz ကို app ထဲမှာ လေ့ကျင့်နိုင်ပါတယ်။',
+          {
+            topicId,
+            chatId,
+            inlineKeyboard: [
+              [{ text: '✍️ Take Quiz Now', callback_data: 'world_start_quiz' }],
+              [{ text: '📚 Korean Dictionary', url: `${APP_URL}/korean` }],
+            ],
+          }
+        )
+        return NextResponse.json({ ok: true, command: 'korean' })
+      }
+
     }
 
     return NextResponse.json({ ok: true, action: 'ignored' })
