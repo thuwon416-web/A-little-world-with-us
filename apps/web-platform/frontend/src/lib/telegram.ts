@@ -1,3 +1,4 @@
+import 'server-only'
 import type { TelegramInlineButton, TelegramNotificationPayload } from '@/shared-types'
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org'
