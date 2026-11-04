@@ -61,8 +61,7 @@ function getAllowedUserIds(): Set<number> {
 
 function isExpectedGroupTopic(
   chatId?: number,
-  topicId?: number,
-  allowConfiguredTopicFallback = false
+  topicId?: number
 ): boolean {
   const expectedChatId = (process.env.TELEGRAM_CHAT_ID || '').trim()
   const expectedTopicValue = (process.env.TELEGRAM_TOPIC_ID || '').trim()
@@ -75,11 +74,10 @@ function isExpectedGroupTopic(
     String(chatId) !== expectedChatId
   ) return false
 
-  // Telegram omits message_thread_id for General-topic messages and for some
-  // callback updates. Accept only explicit bot commands/callback actions in
-  // that case; sendTelegramMessage then routes the reply to the configured
-  // TELEGRAM_TOPIC_ID. Messages carrying another thread ID remain rejected.
-  return topicId === expectedTopicId || (topicId === undefined && allowConfiguredTopicFallback)
+  // Fail closed when Telegram omits message_thread_id. In forum groups,
+  // General-topic updates may omit it; accepting those would let commands from
+  // outside the explicitly authorized topic trigger bot actions.
+  return topicId === expectedTopicId
 }
 
 function isAuthorizedWebhook(req: Request): boolean {
@@ -136,13 +134,9 @@ export async function POST(req: Request) {
   }
 
   const sourceMessage = update.message ?? update.callback_query?.message
-  const allowConfiguredTopicFallback = Boolean(
-    update.callback_query || update.message?.text?.trim().startsWith('/')
-  )
   if (!isExpectedGroupTopic(
     sourceMessage?.chat?.id,
-    sourceMessage?.message_thread_id,
-    allowConfiguredTopicFallback
+    sourceMessage?.message_thread_id
   )) {
     console.warn('[Telegram:OurWorld:Webhook] update rejected by group/topic scope.')
     return NextResponse.json({ error: 'Telegram update is outside the configured group topic.' }, { status: 403 })
