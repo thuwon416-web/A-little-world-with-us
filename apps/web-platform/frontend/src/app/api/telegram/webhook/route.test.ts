@@ -81,7 +81,7 @@ describe('Telegram webhook security and commands', () => {
     sendTelegramMessage.mockResolvedValue({ ok: true })
     const response = await POST(allowedRequest({
       message: {
-        text: '/status@TW_ECObot',
+        text: '/status@ALittleWorldBot',
         from: { id: 123456789 },
         chat: { id: -1003992125718, type: 'supergroup' },
       },
