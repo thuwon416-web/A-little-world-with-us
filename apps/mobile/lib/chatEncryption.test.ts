@@ -27,7 +27,7 @@ async function deriveWebKey(): Promise<CryptoKey> {
     false,
     ['deriveKey']
   )
-  return webcrypto.subtle.deriveKey(
+  return (await webcrypto.subtle.deriveKey(
     {
       name: 'PBKDF2',
       salt: encoder.encode(COUPLE_ID),
@@ -38,7 +38,7 @@ async function deriveWebKey(): Promise<CryptoKey> {
     { name: 'AES-GCM', length: 256 },
     false,
     ['decrypt']
-  )
+  )) as unknown as CryptoKey
 }
 
 function toBase64(bytes: Uint8Array): string {
