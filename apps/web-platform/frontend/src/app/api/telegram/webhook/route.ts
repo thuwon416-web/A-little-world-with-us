@@ -138,7 +138,19 @@ export async function POST(req: Request) {
     sourceMessage?.chat?.id,
     sourceMessage?.message_thread_id
   )) {
-    console.warn('[Telegram:OurWorld:Webhook] update rejected by group/topic scope.')
+    const expectedChatId = (process.env.TELEGRAM_CHAT_ID || '').trim()
+    const expectedTopicId = (process.env.TELEGRAM_TOPIC_ID || '').trim()
+    const receivedChatId = sourceMessage?.chat?.id
+    const receivedTopicId = sourceMessage?.message_thread_id
+    console.warn('[Telegram:OurWorld:Webhook] update rejected by group/topic scope.', {
+      updateKind: update.message ? 'message' : update.callback_query ? 'callback_query' : 'unknown',
+      receivedChatId: receivedChatId ?? null,
+      receivedTopicId: receivedTopicId ?? null,
+      expectedChatId,
+      expectedTopicId,
+      chatMatches: receivedChatId !== undefined && String(receivedChatId) === expectedChatId,
+      topicMatches: receivedTopicId !== undefined && String(receivedTopicId) === expectedTopicId,
+    })
     return NextResponse.json({ error: 'Telegram update is outside the configured group topic.' }, { status: 403 })
   }
 
