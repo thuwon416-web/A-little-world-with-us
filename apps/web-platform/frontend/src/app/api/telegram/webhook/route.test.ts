@@ -77,8 +77,7 @@ describe('Telegram webhook security and commands', () => {
     expect(sendTelegramMessage).not.toHaveBeenCalled()
   })
 
-  it('routes an authorized command to the configured topic when Telegram omits message_thread_id', async () => {
-    sendTelegramMessage.mockResolvedValue({ ok: true })
+  it('rejects commands from General topic when Telegram omits message_thread_id', async () => {
     const response = await POST(allowedRequest({
       message: {
         text: '/status@ALittleWorldBot',
@@ -86,11 +85,8 @@ describe('Telegram webhook security and commands', () => {
         chat: { id: -1003992125718, type: 'supergroup' },
       },
     }))
-    expect(response.status).toBe(200)
-    expect(sendTelegramMessage).toHaveBeenCalledWith(
-      expect.stringContaining('does not independently verify database or media sync.'),
-      expect.objectContaining({ chatId: -1003992125718, topicId: undefined })
-    )
+    expect(response.status).toBe(403)
+    expect(sendTelegramMessage).not.toHaveBeenCalled()
   })
 
   it('does not treat ordinary General-topic messages as bot commands', async () => {
@@ -105,8 +101,7 @@ describe('Telegram webhook security and commands', () => {
     expect(sendTelegramMessage).not.toHaveBeenCalled()
   })
 
-  it('routes callback actions to the configured topic when callback message has no thread id', async () => {
-    sendTelegramMessage.mockResolvedValue({ ok: true })
+  it('rejects callback actions when the originating message has no thread id', async () => {
     const response = await POST(allowedRequest({
       callback_query: {
         data: 'world_quiz_ans:B',
@@ -114,11 +109,8 @@ describe('Telegram webhook security and commands', () => {
         message: { chat: { id: -1003992125718, type: 'supergroup' } },
       },
     }))
-    expect(response.status).toBe(200)
-    expect(sendTelegramMessage).toHaveBeenCalledWith(
-      expect.stringContaining('사랑해'),
-      expect.objectContaining({ chatId: -1003992125718, topicId: undefined })
-    )
+    expect(response.status).toBe(403)
+    expect(sendTelegramMessage).not.toHaveBeenCalled()
   })
 
   it('sends replies to the configured group topic and does not claim unverified sync', async () => {
