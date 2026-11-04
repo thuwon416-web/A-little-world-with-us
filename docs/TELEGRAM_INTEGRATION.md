@@ -22,7 +22,9 @@ Couples can interact with quizzes and quickly review shared memories via inline 
 ## 2. Topic Configuration
 
 * **Suggested Topic Name:** `❤️ A-Little-World`
-* **Suggested Topic ID:** `5` (or your assigned `message_thread_id`)
+* **Configured Production Group ID:** `-1003992125718`
+* **Configured Production Topic ID:** `2` (`message_thread_id`)
+* Replies from the webhook are restricted to this exact group/topic; update both Vercel variables and this document together if the target changes.
 * **Color / Icon:** ❤️ Heart / Couple Care
 
 ---
@@ -37,6 +39,9 @@ Configure these variables in `apps/web-platform/frontend/.env` or in the Vercel 
 | `TELEGRAM_CHAT_ID` | String | `""` | Supergroup ID (e.g. `-100xxxxxxxxxx`) |
 | `TELEGRAM_TOPIC_ID` | Integer | `None` | Thread ID for `#A-Little-World` topic |
 | `TELEGRAM_ENABLED` | Boolean | `false` | Master toggle (`true` to enable delivery) |
+| `TELEGRAM_ALLOWED_USER_IDS` | String | `\"\"` | Comma-separated Telegram numeric user IDs allowed to use the webhook |
+| `TELEGRAM_EXTRA_ALLOWED_USER_IDS` | String | `\"\"` | Additional numeric user IDs; additive to the primary allowlist |
+| `TELEGRAM_WEBHOOK_SECRET_TOKEN` | Secret | `\"\"` | Validates Telegram's `X-Telegram-Bot-Api-Secret-Token` header |
 
 ---
 
