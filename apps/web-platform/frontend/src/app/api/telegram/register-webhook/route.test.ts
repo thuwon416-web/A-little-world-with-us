@@ -14,12 +14,57 @@ describe('Telegram webhook registration', () => {
     process.env.TELEGRAM_BOT_TOKEN = 'bot-token-for-tests'
     process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN = WEBHOOK_SECRET
     process.env.NEXT_PUBLIC_APP_URL = 'https://example.test'
+    delete process.env.TELEGRAM_WEBHOOK_SETUP_TOKEN
+    delete process.env.TELEGRAM_WEBHOOK_SETUP_TOKEN_EXPIRES_AT
   })
 
   it('rejects missing or incorrect authorization without contacting Telegram', async () => {
     const fetchMock = vi.fn()
     vi.stubGlobal('fetch', fetchMock)
     const response = await POST(new Request('https://example.test/api/telegram/register-webhook', { method: 'POST' }))
+    expect(response.status).toBe(401)
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it('allows a valid, unexpired server-side setup token without exposing it', async () => {
+    process.env.TELEGRAM_WEBHOOK_SETUP_TOKEN = 'one-time-setup-token'
+    process.env.TELEGRAM_WEBHOOK_SETUP_TOKEN_EXPIRES_AT = String(Date.now() + 60_000)
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(Response.json({ ok: true, result: true }))
+      .mockResolvedValueOnce(Response.json({
+        ok: true,
+        result: {
+          url: WEBHOOK_URL,
+          pending_update_count: 0,
+          allowed_updates: ['message', 'callback_query'],
+        },
+      }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const response = await POST(new Request('https://example.test/api/telegram/register-webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ setupToken: 'one-time-setup-token' }),
+    }))
+    const payload = await response.json()
+
+    expect(response.status).toBe(200)
+    expect(payload.webhook_registered).toBe(true)
+    expect(JSON.stringify(payload)).not.toContain('one-time-setup-token')
+  })
+
+  it('rejects an expired server-side setup token', async () => {
+    process.env.TELEGRAM_WEBHOOK_SETUP_TOKEN = 'one-time-setup-token'
+    process.env.TELEGRAM_WEBHOOK_SETUP_TOKEN_EXPIRES_AT = String(Date.now() - 1)
+    const fetchMock = vi.fn()
+    vi.stubGlobal('fetch', fetchMock)
+
+    const response = await POST(new Request('https://example.test/api/telegram/register-webhook', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ setupToken: 'one-time-setup-token' }),
+    }))
+
     expect(response.status).toBe(401)
     expect(fetchMock).not.toHaveBeenCalled()
   })
