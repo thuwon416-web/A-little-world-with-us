@@ -110,7 +110,7 @@ describe('B2 large-media upload authorization', () => {
     expect(response.status).toBe(200)
     expect(body.provider).toBe('backblaze_b2')
     expect(getB2UploadTarget).toHaveBeenCalledWith(expect.objectContaining({
-      objectName: expect.stringMatching(/^couples\\/couple-1\\/large-media\\/user-1\\//),
+      objectName: expect.stringMatching(/^couples\/couple-1\/large-media\/user-1\//),
       contentType: 'video/mp4',
       contentLength: validBody.contentLength,
       sha1: validBody.sha1,
