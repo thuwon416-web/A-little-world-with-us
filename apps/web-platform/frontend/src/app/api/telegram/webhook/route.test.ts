@@ -25,6 +25,7 @@ describe('Telegram webhook security and commands', () => {
     vi.clearAllMocks()
     process.env.TELEGRAM_WEBHOOK_SECRET_TOKEN = SECRET
     process.env.TELEGRAM_ALLOWED_USER_IDS = '123456789,987654321'
+    process.env.TELEGRAM_EXTRA_ALLOWED_USER_IDS = ''
     process.env.TELEGRAM_ENABLED = 'true'
     process.env.TELEGRAM_BOT_TOKEN = 'test-token'
     process.env.TELEGRAM_CHAT_ID = '-1003992125718'
@@ -48,6 +49,20 @@ describe('Telegram webhook security and commands', () => {
     const response = await POST(allowedRequest({ message: { text: '/status', from: { id: 555555555 }, chat: { id: -1003992125718 }, message_thread_id: 2 } }))
     expect(response.status).toBe(403)
     expect(sendTelegramMessage).not.toHaveBeenCalled()
+  })
+
+  it('authorizes additional operators without replacing the primary allowlist', async () => {
+    process.env.TELEGRAM_EXTRA_ALLOWED_USER_IDS = '1686310706,6759217947'
+    sendTelegramMessage.mockResolvedValue({ ok: true })
+
+    for (const userId of [1686310706, 6759217947]) {
+      const response = await POST(allowedRequest({
+        message: { text: '/status', from: { id: userId }, chat: { id: -1003992125718 }, message_thread_id: 2 },
+      }))
+      expect(response.status).toBe(200)
+    }
+
+    expect(sendTelegramMessage).toHaveBeenCalledTimes(2)
   })
 
   it('rejects messages from a different group or topic', async () => {
