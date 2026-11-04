@@ -43,15 +43,20 @@ function constantTimeEqual(providedValue: string, expectedValue: string): boolea
   return provided.length === expected.length && timingSafeEqual(provided, expected)
 }
 
+function parseAllowedUserIds(value?: string): number[] {
+  return (value || '')
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => /^\d+$/.test(entry))
+    .map(Number)
+    .filter((entry) => Number.isSafeInteger(entry) && entry > 0)
+}
+
 function getAllowedUserIds(): Set<number> {
-  return new Set(
-    (process.env.TELEGRAM_ALLOWED_USER_IDS || '')
-      .split(',')
-      .map((value) => value.trim())
-      .filter((value) => /^\d+$/.test(value))
-      .map(Number)
-      .filter((value) => Number.isSafeInteger(value) && value > 0)
-  )
+  return new Set([
+    ...parseAllowedUserIds(process.env.TELEGRAM_ALLOWED_USER_IDS),
+    ...parseAllowedUserIds(process.env.TELEGRAM_EXTRA_ALLOWED_USER_IDS),
+  ])
 }
 
 function isExpectedGroupTopic(chatId?: number, topicId?: number): boolean {
