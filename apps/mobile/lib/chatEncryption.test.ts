@@ -36,7 +36,7 @@ async function deriveWebKey(): Promise<CryptoKey> {
     },
     material,
     { name: 'AES-GCM', length: 256 },
-    false,
+    true,
     ['decrypt']
   )) as unknown as CryptoKey
 }
