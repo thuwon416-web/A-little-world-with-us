@@ -10,13 +10,25 @@ type TelegramWebhookInfo = {
   allowed_updates?: unknown
 }
 
-function isAuthorized(req: Request): boolean {
+async function isAuthorized(req: Request): Promise<boolean> {
   const secret = process.env.TELEGRAM_ACTION_SECRET
   const authorization = req.headers.get('authorization')
-  if (!secret || !authorization?.startsWith('Bearer ')) return false
+  if (secret && authorization?.startsWith('Bearer ')) {
+    const provided = Buffer.from(authorization.slice('Bearer '.length), 'utf8')
+    const expected = Buffer.from(secret, 'utf8')
+    if (provided.length === expected.length && timingSafeEqual(provided, expected)) return true
+  }
 
-  const provided = Buffer.from(authorization.slice('Bearer '.length), 'utf8')
-  const expected = Buffer.from(secret, 'utf8')
+  // Short-lived server-to-server fallback for environments where operators cannot
+  // safely construct an Authorization header on their local shell.
+  const setupToken = process.env.TELEGRAM_WEBHOOK_SETUP_TOKEN
+  const expiresAt = Number(process.env.TELEGRAM_WEBHOOK_SETUP_TOKEN_EXPIRES_AT)
+  if (!setupToken || !Number.isFinite(expiresAt) || Date.now() > expiresAt) return false
+
+  const payload = await req.clone().json().catch(() => null) as { setupToken?: unknown } | null
+  if (typeof payload?.setupToken !== 'string') return false
+  const provided = Buffer.from(payload.setupToken, 'utf8')
+  const expected = Buffer.from(setupToken, 'utf8')
   return provided.length === expected.length && timingSafeEqual(provided, expected)
 }
 
@@ -24,7 +36,7 @@ export async function POST(req: Request) {
   if (!process.env.TELEGRAM_ACTION_SECRET) {
     return NextResponse.json({ error: 'Webhook setup authorization is not configured.' }, { status: 503 })
   }
-  if (!isAuthorized(req)) {
+  if (!(await isAuthorized(req))) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 })
   }
 
