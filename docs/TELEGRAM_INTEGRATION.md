@@ -3,6 +3,7 @@
 > **Project:** A Little World With Us (Couples Life, Memories, Learning & Care App)  
 > **Directory:** `thuwon416@gmail.com\A-little-world-with-us`  
 > **Runtime / Stack:** Next.js (TypeScript), Supabase, Expo, Vercel  
+> **Telegram Bot:** `@ALittleWorldBot`  
 > **Primary Topic:** `❤️ A-Little-World`
 
 ---
