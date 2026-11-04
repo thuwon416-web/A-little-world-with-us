@@ -1,3 +1,4 @@
+import { webcrypto } from 'node:crypto'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { decryptChatMessageServer } from './chatEncryptionServer'
 import { decryptMessage, deriveChatKey, encryptMessage } from './chatEncryption'
@@ -36,6 +37,7 @@ function toBase64(bytes: Uint8Array): string {
 
 describe('chat encryption compatibility', () => {
   beforeEach(() => {
+    Object.defineProperty(window, 'crypto', { configurable: true, value: webcrypto })
     process.env.NEXT_PUBLIC_CHAT_ENCRYPTION_KEY = TEST_SECRET
     process.env.CHAT_ENCRYPTION_KEY = TEST_SECRET
   })
