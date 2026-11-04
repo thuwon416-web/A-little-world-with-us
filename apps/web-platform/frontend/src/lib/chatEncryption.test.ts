@@ -27,7 +27,7 @@ async function deriveLegacyKey(coupleId: string): Promise<CryptoKey> {
     material,
     { name: 'AES-GCM', length: 256 },
     false,
-    ['encrypt']
+    ['encrypt', 'decrypt']
   )
 }
 
