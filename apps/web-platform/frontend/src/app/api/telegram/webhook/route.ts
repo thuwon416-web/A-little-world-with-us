@@ -59,16 +59,27 @@ function getAllowedUserIds(): Set<number> {
   ])
 }
 
-function isExpectedGroupTopic(chatId?: number, topicId?: number): boolean {
+function isExpectedGroupTopic(
+  chatId?: number,
+  topicId?: number,
+  allowConfiguredTopicFallback = false
+): boolean {
   const expectedChatId = (process.env.TELEGRAM_CHAT_ID || '').trim()
   const expectedTopicValue = (process.env.TELEGRAM_TOPIC_ID || '').trim()
   if (!/^-?\d+$/.test(expectedChatId) || !/^\d+$/.test(expectedTopicValue)) return false
   const expectedTopicId = Number(expectedTopicValue)
-  return Number.isSafeInteger(expectedTopicId) &&
-    expectedTopicId > 0 &&
-    chatId !== undefined &&
-    String(chatId) === expectedChatId &&
-    topicId === expectedTopicId
+  if (
+    !Number.isSafeInteger(expectedTopicId) ||
+    expectedTopicId <= 0 ||
+    chatId === undefined ||
+    String(chatId) !== expectedChatId
+  ) return false
+
+  // Telegram omits message_thread_id for General-topic messages and for some
+  // callback updates. Accept only explicit bot commands/callback actions in
+  // that case; sendTelegramMessage then routes the reply to the configured
+  // TELEGRAM_TOPIC_ID. Messages carrying another thread ID remain rejected.
+  return topicId === expectedTopicId || (topicId === undefined && allowConfiguredTopicFallback)
 }
 
 function isAuthorizedWebhook(req: Request): boolean {
@@ -125,7 +136,14 @@ export async function POST(req: Request) {
   }
 
   const sourceMessage = update.message ?? update.callback_query?.message
-  if (!isExpectedGroupTopic(sourceMessage?.chat?.id, sourceMessage?.message_thread_id)) {
+  const allowConfiguredTopicFallback = Boolean(
+    update.callback_query || update.message?.text?.trim().startsWith('/')
+  )
+  if (!isExpectedGroupTopic(
+    sourceMessage?.chat?.id,
+    sourceMessage?.message_thread_id,
+    allowConfiguredTopicFallback
+  )) {
     console.warn('[Telegram:OurWorld:Webhook] update rejected by group/topic scope.')
     return NextResponse.json({ error: 'Telegram update is outside the configured group topic.' }, { status: 403 })
   }
