@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "next dev -p 3005",
     "build": "next build",
+    "build:local": "set LOCAL_VALIDATION_BUILD=true&& npm run build",
     "build:analyze": "ANALYZE=true npm run build",
     "prebuild": "node scripts/validate-env.js",
     "start": "next start",

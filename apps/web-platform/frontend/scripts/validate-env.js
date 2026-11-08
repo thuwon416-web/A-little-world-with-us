@@ -28,6 +28,14 @@ const requiredEnv = [
   'NEXT_PUBLIC_SUPABASE_ANON_KEY',
 ]
 
+// Local validation may compile the UI without reaching Supabase.  Production
+// and ordinary builds still require real public configuration; this bypass is
+// deliberately opt-in so a missing deployment variable can never be masked.
+if (process.env.LOCAL_VALIDATION_BUILD === 'true') {
+  process.env.NEXT_PUBLIC_SUPABASE_URL ||= 'https://local-validation.supabase.co'
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||= 'local-validation-anon-key'
+}
+
 const missingRequired = requiredEnv.filter(
   (key) => !process.env[key] || !process.env[key].trim()
 )
