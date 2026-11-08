@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import GallerySection from '@/components/memories/GallerySection'
+import DateArchiveSection from '@/components/memories/DateArchiveSection'
 import MemoryJournal from '@/components/memories/MemoryJournal'
 import MemoryMapSection from '@/components/memories/MemoryMapSection'
 import OurStorySection from '@/components/memories/OurStorySection'
@@ -12,12 +13,13 @@ import { useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes } from '@/design-tokens'
 
-type Section = 'memories' | 'gallery' | 'map' | 'story' | 'capsules'
+type Section = 'memories' | 'gallery' | 'map' | 'story' | 'capsules' | 'archive'
 const exploreSections: { id: Exclude<Section, 'memories'>; label: string; Icon: typeof Heart }[] = [
   { id: 'gallery', label: 'Photo memories', Icon: Heart },
   { id: 'map', label: 'Memory Map', Icon: Map },
   { id: 'capsules', label: 'Time Capsule', Icon: Clock3 },
   { id: 'story', label: 'Our Story', Icon: BookHeart },
+  { id: 'archive', label: 'Date Archive', Icon: Clock3 },
 ]
 const isExploreSection = (value: unknown): value is Exclude<Section, 'memories'> =>
   exploreSections.some((item) => item.id === value)
@@ -76,6 +78,7 @@ export default function MemoriesHub() {
         {activeSection === 'map' ? <MemoryMapSection /> : null}
         {activeSection === 'story' ? <OurStorySection /> : null}
         {activeSection === 'capsules' ? <TimeCapsulesSection /> : null}
+        {activeSection === 'archive' ? <DateArchiveSection /> : null}
       </View>
     </View>
   )
