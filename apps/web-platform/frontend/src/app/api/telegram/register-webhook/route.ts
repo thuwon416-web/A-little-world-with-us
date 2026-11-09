@@ -68,6 +68,70 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Telegram rejected the webhook registration.' }, { status: 502 })
     }
 
+    // Register bot commands via setMyCommands for group chat menu
+    try {
+      const chatId = process.env.TELEGRAM_CHAT_ID?.trim()
+      const commandsPayload: Record<string, unknown> = {
+        commands: [
+          { command: 'start', description: 'Connect to A Little World With Us (Topic 2)' },
+          { command: 'help', description: 'Show couple commands list' },
+          { command: 'status', description: 'Check bot service & app status' },
+          { command: 'morning_brief', description: 'Daily couple briefing' },
+          { command: 'quiz', description: 'Daily Korean language quiz' },
+          { command: 'budget', description: 'Open shared budget tracker' },
+          { command: 'memories', description: 'Open shared couple memories' },
+          { command: 'spend', description: 'Record an expense' },
+          { command: 'share', description: 'Share memories & stories' },
+          { command: 'anniversary', description: 'View milestones & anniversaries' },
+          { command: 'checkin', description: 'Safety location check-in' },
+          { command: 'korean', description: 'Korean learning lessons' },
+        ],
+      }
+      if (chatId) {
+        commandsPayload.scope = { type: 'chat', chat_id: Number(chatId) }
+      }
+      await fetch(`${TELEGRAM_API_BASE}/bot${token}/setMyCommands`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(commandsPayload),
+        cache: 'no-store',
+      })
+    } catch {
+      // Command menu registration optional
+    }
+
+    // Register bot commands via setMyCommands for group chat menu
+    try {
+      const chatId = process.env.TELEGRAM_CHAT_ID?.trim()
+      const commandsPayload: Record<string, unknown> = {
+        commands: [
+          { command: 'start', description: 'Connect to A Little World With Us (Topic 2)' },
+          { command: 'help', description: 'Show couple commands list' },
+          { command: 'status', description: 'Check bot service & app status' },
+          { command: 'morning_brief', description: 'Daily couple briefing' },
+          { command: 'quiz', description: 'Daily Korean language quiz' },
+          { command: 'budget', description: 'Open shared budget tracker' },
+          { command: 'memories', description: 'Open shared couple memories' },
+          { command: 'spend', description: 'Record an expense' },
+          { command: 'share', description: 'Share memories & stories' },
+          { command: 'anniversary', description: 'View milestones & anniversaries' },
+          { command: 'checkin', description: 'Safety location check-in' },
+          { command: 'korean', description: 'Korean learning lessons' },
+        ],
+      }
+      if (chatId) {
+        commandsPayload.scope = { type: 'chat', chat_id: Number(chatId) }
+      }
+      await fetch(`${TELEGRAM_API_BASE}/bot${token}/setMyCommands`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(commandsPayload),
+        cache: 'no-store',
+      })
+    } catch {
+      // Command menu registration optional
+    }
+
     // Verify Telegram's persisted webhook configuration after setWebhook.
     // Keep this response secret-free: never return the bot token or webhook secret.
     let webhookInfoVerified = false
