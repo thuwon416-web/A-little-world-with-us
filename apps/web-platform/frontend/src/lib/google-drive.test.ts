@@ -129,7 +129,15 @@ describe('google-drive helpers', () => {
     expect(query.update).toHaveBeenCalled()
     expect(fetchMock.mock.calls[2][1]?.headers).toMatchObject({ Authorization: 'Bearer fresh-access' })
   })
-  it('does not accept a provider error as a successful refresh', async () => {
+  it('reports a sanitized Google OAuth refresh error code without logging provider details', async () => {
+    const key = Buffer.from(process.env.GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY!, 'hex')
+    const iv = randomBytes(12)
+    const cipher = createCipheriv('aes-256-gcm', key, iv)
+    const encrypted = Buffer.concat([
+      cipher.update('refresh-token', 'utf8'),
+      cipher.final(),
+      cipher.getAuthTag(),
+    ]).toString('base64')
     const query = {
       select: vi.fn(() => query),
       eq: vi.fn(() => query),
@@ -138,18 +146,29 @@ describe('google-drive helpers', () => {
           user_id: 'user-1',
           access_token_enc: 'not-a-valid-token',
           access_token_iv: 'not-a-valid-iv',
-          refresh_token_enc: 'invalid-encrypted-refresh',
-          refresh_token_iv: 'invalid-iv',
+          refresh_token_enc: encrypted,
+          refresh_token_iv: iv.toString('base64'),
           expires_at: new Date(Date.now() - 60_000).toISOString(),
         },
         error: null,
       }),
     }
     createClient.mockReturnValue({ from: vi.fn(() => query) })
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ error: 'invalid_grant' }), { status: 400, headers: { 'content-type': 'application/json' } }),
-    ))
+    const log = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({
+        error: 'invalid_grant',
+        error_description: 'private provider detail that must not be logged',
+      }), { status: 400, headers: { 'content-type': 'application/json' } }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
 
-    await expect(getDriveAccessToken('user-1')).rejects.toThrow()
+    await expect(getDriveAccessToken('user-1')).rejects.toThrow('invalid_grant')
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    expect(log).toHaveBeenCalledWith('[drive] Google OAuth token refresh rejected', {
+      status: 400,
+      providerError: 'invalid_grant',
+    })
+    expect(JSON.stringify(log.mock.calls)).not.toContain('private provider detail')
   })
 })
