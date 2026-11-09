@@ -41,8 +41,8 @@ describe('Telegram daily question gateway authentication', () => {
     expect(sendTelegramMessage).not.toHaveBeenCalled()
   })
 
-  it('allows an authenticated gateway request', async () => {
-    const request = new Request('https://example.test/api/telegram/daily-question', {
+  it('allows an authenticated gateway request and ignores caller topic overrides', async () => {
+    const request = new Request('https://example.test/api/telegram/daily-question?topic_id=999', {
       headers: { Authorization: `Bearer ${SECRET}` },
     })
 
