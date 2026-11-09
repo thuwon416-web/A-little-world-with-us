@@ -48,7 +48,7 @@ describe('Telegram action gateway authentication', () => {
     sendTelegramMessage.mockResolvedValue({ ok: true })
     const request = new Request('https://example.test/api/telegram/action', {
       method: 'POST',
-      body: JSON.stringify({ action: 'world_open_memories' }),
+      body: JSON.stringify({ action: 'world_open_memories', topic_id: 999 }),
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SECRET}` },
     })
 
@@ -58,5 +58,6 @@ describe('Telegram action gateway authentication', () => {
     expect(response.status).toBe(200)
     expect(payload.action).toBe('memories_link_sent')
     expect(sendTelegramMessage).toHaveBeenCalledTimes(1)
+    expect(sendTelegramMessage.mock.calls[0][1]).not.toHaveProperty('topicId')
   })
 })
