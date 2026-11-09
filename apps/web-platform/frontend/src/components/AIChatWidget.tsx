@@ -37,7 +37,7 @@ export default function AIChatWidget() {
       {/* Chat Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 z-50 rounded-full bg-accent-1 p-4 text-white font-semibold shadow-sm shadow-lg transition hover:opacity-90"
+        className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-[calc(1rem+env(safe-area-inset-right,0px))] z-50 rounded-full bg-accent-1 min-h-[48px] min-w-[48px] p-3 text-white font-semibold shadow-lg transition hover:opacity-90 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-accent-1/50"
         aria-label="Open AI assistant"
       >
         <MessageCircle className="h-5 w-5" />
@@ -45,7 +45,7 @@ export default function AIChatWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-4 w-80 bg-card rounded-btn shadow-xl z-50 overflow-hidden border border-accent-1/20">
+        <div className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] right-[calc(1rem+env(safe-area-inset-right,0px))] w-80 max-w-[calc(100vw-2rem)] bg-card rounded-btn shadow-xl z-50 overflow-hidden border border-accent-1/20">
           {/* Header */}
           <div className="bg-accent-1 text-white font-semibold shadow-sm p-4">
             <h3 className="font-bold">AI Assistant</h3>
