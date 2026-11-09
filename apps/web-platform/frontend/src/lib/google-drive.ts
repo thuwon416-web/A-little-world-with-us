@@ -185,11 +185,21 @@ async function refreshAccessToken(userId: string, connection: Record<string, unk
 export async function getDriveConnectionInfo(userId: string) {
   const connection = await getConnection(userId)
   if (!connection) return null
-  await getDriveAccessToken(userId)
+  let requiresReauthorization = false
+  try {
+    await getDriveAccessToken(userId)
+  } catch (error) {
+    // A revoked/invalid refresh token needs explicit user consent again.
+    // Do not mask transient provider/network errors as a broken connection.
+    requiresReauthorization = error instanceof Error &&
+      (error.message.includes('(invalid_grant)') || error.message.includes('needs to be reconnected'))
+    if (!requiresReauthorization) throw error
+  }
   return {
     connected: true,
     scope: typeof connection.scope === 'string' ? connection.scope : DRIVE_SCOPE,
     rootFolderId: typeof connection.root_folder_id === 'string' ? connection.root_folder_id : null,
+    requiresReauthorization,
   }
 }
 

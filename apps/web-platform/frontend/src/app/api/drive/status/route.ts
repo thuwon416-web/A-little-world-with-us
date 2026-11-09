@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   try {
     const info = await getDriveConnectionInfo(user.id)
     if (!info) return NextResponse.json({ connected: false })
-    return NextResponse.json({ connected: true, scope: info.scope, rootFolderId: info.rootFolderId, requiresReauthorization: info.scope !== 'https://www.googleapis.com/auth/drive' })
+    return NextResponse.json({ connected: true, scope: info.scope, rootFolderId: info.rootFolderId, requiresReauthorization: info.requiresReauthorization || info.scope !== 'https://www.googleapis.com/auth/drive' })
   } catch {
     return NextResponse.json({ connected: false })
   }
