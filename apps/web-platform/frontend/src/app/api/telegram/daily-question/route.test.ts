@@ -30,7 +30,7 @@ describe('Telegram daily question gateway authentication', () => {
   })
 
   it('rejects unauthenticated POST requests before sending a message', async () => {
-    const request = new Request('https://example.test/api/telegram/daily-question', {
+    const request = new Request('https://example.test/api/telegram/daily-question?topic_id=999', {
       method: 'POST',
       headers: { Authorization: 'Bearer wrong-secret' },
     })
@@ -52,5 +52,6 @@ describe('Telegram daily question gateway authentication', () => {
     expect(response.status).toBe(200)
     expect(payload.status).toBe('success')
     expect(sendTelegramMessage).toHaveBeenCalledTimes(1)
+    expect(sendTelegramMessage.mock.calls[0][1]).not.toHaveProperty('topicId')
   })
 })
