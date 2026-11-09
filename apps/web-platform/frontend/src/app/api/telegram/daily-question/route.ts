@@ -46,10 +46,6 @@ export async function POST(req: Request) {
 
 async function handleDailyQuestion(req: Request) {
   try {
-    const url = new URL(req.url)
-    const topicIdParam = url.searchParams.get('topic_id')
-    const topicId = topicIdParam ? parseInt(topicIdParam, 10) : undefined
-
     // Calculate day of year to deterministically rotate questions
     const now = new Date()
     const start = new Date(now.getFullYear(), 0, 0)
@@ -76,10 +72,7 @@ async function handleDailyQuestion(req: Request) {
       ],
     ]
 
-    const tgResult = await sendTelegramMessage(message, {
-      topicId,
-      inlineKeyboard,
-    })
+    const tgResult = await sendTelegramMessage(message, { inlineKeyboard })
 
     return NextResponse.json({
       status: 'success',
