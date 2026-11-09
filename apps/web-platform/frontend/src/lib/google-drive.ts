@@ -160,8 +160,18 @@ async function refreshAccessToken(userId: string, connection: Record<string, unk
     grant_type: 'refresh_token',
   })
   const response = await fetch(TOKEN_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body })
-  const data = (await response.json()) as Record<string, unknown>
-  if (!response.ok || typeof data.access_token !== 'string') throw new Error('Google Drive access token refresh failed.')
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>
+  if (!response.ok || typeof data.access_token !== 'string') {
+    // Keep diagnostics useful without logging token values or provider descriptions.
+    const providerError = typeof data.error === 'string' && /^[a-z_]{1,40}$/i.test(data.error)
+      ? data.error
+      : 'unknown_error'
+    console.error('[drive] Google OAuth token refresh rejected', {
+      status: response.status,
+      providerError,
+    })
+    throw new Error(`Google Drive access token refresh failed (${providerError}).`)
+  }
   const access = encrypt(data.access_token)
   const { error: updateError } = await adminClient().from('google_drive_connections').update({
     access_token_enc: access.ciphertext,
