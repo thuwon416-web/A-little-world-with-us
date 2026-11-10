@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { getLocationAlertRecipient } from './recipient.ts'
 
 type PushDevice = { expo_push_token: string; preferences: Record<string, boolean> | null }
 
@@ -29,7 +30,7 @@ Deno.serve(async (request) => {
     .maybeSingle()
   if (!link) return Response.json({ sent: 0 })
 
-  const recipientId = link.inviter_id
+  const recipientId = getLocationAlertRecipient(link, user.id)
   if (!recipientId) return Response.json({ sent: 0 })
   const { data: devices } = await supabase.from('push_devices').select('expo_push_token,preferences').eq('user_id', recipientId)
   const eligible = ((devices ?? []) as PushDevice[]).filter((device) => device.preferences?.[body.type] !== false)
