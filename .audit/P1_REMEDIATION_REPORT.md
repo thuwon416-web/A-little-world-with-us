@@ -227,7 +227,7 @@ Environment caveats: the available Node runtime is v25.9.0, while the package de
 
 ## Commit Inventory
 
-There are 33 commits on the branch before this v2 report commit. The report commit is intended to be the final branch tip; the preflight script verifies that this report is at `HEAD`.
+There are 34 commits on the branch before this final report update. This report update is the 35th commit and is intended to be the final branch tip; the preflight script verifies that this report is at `HEAD`.
 
 
 ## Changed Files (complete inventory)
