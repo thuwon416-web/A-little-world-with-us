@@ -81,6 +81,7 @@ describe('Telegram webhook registration', () => {
   it('registers and verifies the persisted Telegram webhook configuration', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(Response.json({ ok: true, result: true }))
+      .mockResolvedValueOnce(Response.json({ ok: true, result: true }))
       .mockResolvedValueOnce(Response.json({
         ok: true,
         result: {
@@ -122,7 +123,7 @@ describe('Telegram webhook registration', () => {
       })
     )
     expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
+      3,
       'https://api.telegram.org/botbot-token-for-tests/getWebhookInfo',
       expect.objectContaining({ method: 'GET', cache: 'no-store' })
     )
