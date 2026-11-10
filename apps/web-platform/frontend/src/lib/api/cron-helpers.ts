@@ -13,7 +13,7 @@ export function validateCronRequest(request: Request): CronRequestValidation {
   if (!cronSecret || !supabaseUrl || !serviceRole) {
     return {
       ok: false,
-      response: NextResponse.json({ error: 'Cron environment is not configured' }, { status: 401 }),
+      response: NextResponse.json({ error: 'Cron environment is not configured' }, { status: 500 }),
     }
   }
 
