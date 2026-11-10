@@ -3,7 +3,6 @@ import {
   createEmailNotifier,
   EmailProviderNotConfiguredError,
   NoopNotifier,
-  ResendApiError,
 } from '../../../backend/supabase/functions/_shared/emailNotifier'
 
 afterEach(() => vi.restoreAllMocks())
@@ -66,6 +65,6 @@ describe('ResendNotifier', () => {
     const fetcher = vi.fn().mockResolvedValue(new Response('{}', { status: 503 }))
     const notifier = createEmailNotifier(env({ RESEND_API_KEY: 'test-api-key', EMERGENCY_EMAIL_FROM: 'alerts@example.invalid' }), fetcher)
     await expect(notifier.sendEmergencyEmail({ to: 'contact@example.invalid', subject: 'test', body: 'test', metadata: {} }))
-      .rejects.toMatchObject<Partial<ResendApiError>>({ name: 'ResendApiError', status: 503 })
+      .rejects.toMatchObject({ name: 'ResendApiError', status: 503 })
   })
 })
