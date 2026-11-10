@@ -1,6 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { createEmailNotifier } from '../_shared/emailNotifier.ts'
-import { deliverEmergencyEmail } from './email-notification-state.ts'
+import { deliverAndPersistEmergencyEmail, type EmergencyEmailDeliveryState } from './email-notification-state.ts'
 import { expoTicketsDelivered, getNotificationRetryState } from './notification-state.ts'
 
 type SafetyCheckin = {
@@ -208,23 +208,29 @@ Deno.serve(async (request) => {
         .maybeSingle()
       if (contactError) return Response.json({ error: contactError.message }, { status: 500 })
 
-      const delivery = contact?.email
-        ? await deliverEmergencyEmail(emailNotifier, {
-            to: contact.email,
-            subject: 'Missed safety check-in',
-            body: 'A safety check-in has expired. Please contact your person and confirm they are safe.',
-            metadata: { contact_id: pending.contact_id, checkin_id: pending.checkin_id },
-          }, claimed.attempts)
-        : { status: 'failed' as const, attempts: claimed.attempts, lastError: 'Emergency contact email is unavailable.' }
+      const persistEmailState = async (delivery: EmergencyEmailDeliveryState) => {
+        const { error: emailStateError } = await supabase.from('safety_email_outbox').update({
+          status: delivery.status,
+          attempts: delivery.attempts,
+          last_error: delivery.lastError,
+          updated_at: new Date().toISOString(),
+          ...(delivery.status === 'pending' ? { next_attempt_at: new Date(Date.now() + 5 * 60_000).toISOString() } : {}),
+        }).eq('id', pending.id)
+        if (emailStateError) throw emailStateError
+      }
 
-      const { error: emailStateError } = await supabase.from('safety_email_outbox').update({
-        status: delivery.status,
-        attempts: delivery.attempts,
-        last_error: delivery.lastError,
-        updated_at: new Date().toISOString(),
-        ...(delivery.status === 'pending' ? { next_attempt_at: new Date(Date.now() + 5 * 60_000).toISOString() } : {}),
-      }).eq('id', pending.id)
-      if (emailStateError) return Response.json({ error: emailStateError.message }, { status: 500 })
+      let delivery: EmergencyEmailDeliveryState
+      if (contact?.email) {
+        delivery = await deliverAndPersistEmergencyEmail(emailNotifier, {
+          to: contact.email,
+          subject: 'Missed safety check-in',
+          body: 'A safety check-in has expired. Please contact your person and confirm they are safe.',
+          metadata: { contact_id: pending.contact_id, checkin_id: pending.checkin_id },
+        }, claimed.attempts, persistEmailState)
+      } else {
+        delivery = { status: 'failed', attempts: claimed.attempts, lastError: 'Emergency contact email is unavailable.' }
+        await persistEmailState(delivery)
+      }
       if (delivery.status === 'delivered') contactsConsidered += 1
       if (delivery.status === 'failed') {
         console.error('[check-missed-checkin] Emergency email permanently failed', { contact_id: pending.contact_id, checkin_id: pending.checkin_id })
