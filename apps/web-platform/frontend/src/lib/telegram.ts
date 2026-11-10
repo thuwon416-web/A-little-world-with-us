@@ -3,6 +3,10 @@ import type { TelegramInlineButton, TelegramNotificationPayload } from '@/shared
 
 const TELEGRAM_API_BASE = 'https://api.telegram.org'
 
+export function escapeTelegramHtml(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;')
+}
+
 function getTelegramConfig() {
   const token = (process.env.TELEGRAM_BOT_TOKEN || '').trim()
   const chatId = (process.env.TELEGRAM_CHAT_ID || '').trim()
@@ -92,7 +96,7 @@ export async function sendTelegramNotification(payload: TelegramNotificationPayl
   const statusIcon = iconMap[payload.status || 'INFO'] || '💌'
 
   const lines = [
-    `❤️ <b>[A-Little-World]</b> ${statusIcon} <b>${payload.title}</b>`,
+    `❤️ <b>[A-Little-World]</b> ${statusIcon} <b>${escapeTelegramHtml(payload.title)}</b>`,
     '',
     payload.details,
   ]
@@ -121,7 +125,7 @@ export async function sendTelegramNotification(payload: TelegramNotificationPayl
 
 export async function notifyAnniversaryReminder(title: string, daysLeft: number, dateStr: string): Promise<void> {
   const dayText = daysLeft === 0 ? "🎉 Today is the day!" : `⏳ Only <b>${daysLeft} days</b> left!`
-  const details = `📅 <b>${title}</b>\n🗓️ Date: <code>${dateStr}</code>\n${dayText}`
+  const details = `📅 <b>${escapeTelegramHtml(title)}</b>\n🗓️ Date: <code>${escapeTelegramHtml(dateStr)}</code>\n${dayText}`
 
   await sendTelegramNotification({
     title: 'Special Milestone Reminder',
@@ -132,9 +136,9 @@ export async function notifyAnniversaryReminder(title: string, daysLeft: number,
 }
 
 export async function notifyKoreanDailyWord(word: string, pronunciation: string, meaning: string, exampleSentence?: string): Promise<void> {
-  let details = `🇰🇷 <b>Word:</b> <b>${word}</b> [${pronunciation}]\n🇲🇲 <b>Meaning:</b> ${meaning}`
+  let details = `🇰🇷 <b>Word:</b> <b>${escapeTelegramHtml(word)}</b> [${escapeTelegramHtml(pronunciation)}]\n🇲🇲 <b>Meaning:</b> ${escapeTelegramHtml(meaning)}`
   if (exampleSentence) {
-    details += `\n\n💬 <i>${exampleSentence}</i>`
+    details += `\n\n💬 <i>${escapeTelegramHtml(exampleSentence)}</i>`
   }
 
   await sendTelegramNotification({
@@ -148,7 +152,7 @@ export async function notifyKoreanDailyWord(word: string, pronunciation: string,
 }
 
 export async function notifyExpenseLogged(amount: number, category: string, description: string, loggedBy: string): Promise<void> {
-  const details = `💰 <b>Amount:</b> ${amount.toLocaleString()} MMK\n🏷️ <b>Category:</b> ${category}\n📝 <b>Description:</b> ${description}\n👤 <b>Logged By:</b> ${loggedBy}`
+  const details = `💰 <b>Amount:</b> ${amount.toLocaleString()} MMK\n🏷️ <b>Category:</b> ${escapeTelegramHtml(category)}\n📝 <b>Description:</b> ${escapeTelegramHtml(description)}\n👤 <b>Logged By:</b> ${escapeTelegramHtml(loggedBy)}`
 
   await sendTelegramNotification({
     title: 'New Shared Expense Logged',
@@ -159,9 +163,9 @@ export async function notifyExpenseLogged(amount: number, category: string, desc
 }
 
 export async function notifySafetyCheckinAlert(partnerName: string, status: string, locationSummary?: string): Promise<void> {
-  let details = `👤 <b>Partner:</b> ${partnerName}\n📍 <b>Status:</b> ${status}`
+  let details = `👤 <b>Partner:</b> ${escapeTelegramHtml(partnerName)}\n📍 <b>Status:</b> ${escapeTelegramHtml(status)}`
   if (locationSummary) {
-    details += `\n🗺️ <b>Location:</b> ${locationSummary}`
+    details += `\n🗺️ <b>Location:</b> ${escapeTelegramHtml(locationSummary)}`
   }
 
   await sendTelegramNotification({
