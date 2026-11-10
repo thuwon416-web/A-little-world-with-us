@@ -8,6 +8,7 @@ describe('deploy readiness smoke-test helpers', () => {
     expect(isSafeStagingUrl('https://preview-example.vercel.app')).toBe(true)
     expect(isSafeStagingUrl('https://a-little-world-with-us.vercel.app')).toBe(false)
     expect(isSafeStagingUrl('http://localhost:3000')).toBe(false)
+    expect(isSafeStagingUrl('not a URL')).toBe(false)
   })
 
   it('requires a couple-scoped B2 object path', () => {

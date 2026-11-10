@@ -38,11 +38,12 @@
 
 ## Staging Smoke Test
 
-Run only against an isolated staging environment:
+Run only against an isolated staging environment. Cron checks are skipped unless `STAGING_ALLOW_CRON_SIDE_EFFECTS=true` because the cron wrapper triggers a mutating Edge Function:
 
 ```bash
 STAGING_BASE_URL=https://<staging-host> \
 STAGING_CRON_SECRET=<staging-cron-secret> \
+STAGING_ALLOW_CRON_SIDE_EFFECTS=true \
 STAGING_USER_BEARER_TOKEN=<staging-user-token> \
 STAGING_COUPLE_ID=<staging-couple-id> \
 STAGING_MEMBER_BEARER_TOKEN=<staging-member-token> \

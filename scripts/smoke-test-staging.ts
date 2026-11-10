@@ -23,9 +23,13 @@ async function request(path: string, init?: RequestInit) {
 }
 
 const cronSecret = process.env.STAGING_CRON_SECRET
-if (!cronSecret) {
+if (process.env.STAGING_ALLOW_CRON_SIDE_EFFECTS !== 'true') {
+  record('cron wrapper auth', 'SKIP', 'cron invokes a mutating Edge Function; set STAGING_ALLOW_CRON_SIDE_EFFECTS=true only in disposable staging')
+} else if (!cronSecret) {
   record('cron wrapper auth', 'SKIP', 'STAGING_CRON_SECRET is not configured')
 } else {
+  // This application route currently exposes GET (the Vercel Cron method); the
+  // check is opt-in because the Edge Function can mutate staging records.
   const valid = await request('/api/cron/check-geofence', { headers: { Authorization: `Bearer ${cronSecret}` } })
   record('cron wrapper valid auth', valid.status === 200 ? 'PASS' : 'FAIL', `HTTP ${valid.status}`)
   const invalid = await request('/api/cron/check-geofence')

@@ -11,6 +11,7 @@ import {
   exchangeCode,
   getDriveAccessToken,
   listDriveFile,
+  logDriveMediaAccess,
   parseOAuthState,
   saveConnection,
 } from './google-drive'
@@ -129,6 +130,32 @@ describe('google-drive helpers', () => {
     expect(query.update).toHaveBeenCalled()
     expect(fetchMock.mock.calls[2][1]?.headers).toMatchObject({ Authorization: 'Bearer fresh-access' })
   })
+  it('writes a durable, distinct audit row for orphaned media access', async () => {
+    const insert = vi.fn().mockResolvedValue({ error: null })
+    const from = vi.fn(() => ({ insert }))
+    createClient.mockReturnValue({ from })
+
+    await logDriveMediaAccess({ userId: 'partner-1', fileId: 'drive-file-1', action: 'read', outcome: 'allowed', orphaned: true, recordType: 'memory', recordId: 'memory-1' })
+
+    expect(from).toHaveBeenCalledWith('drive_media_access_audit')
+    expect(insert).toHaveBeenCalledWith(expect.objectContaining({
+      event_type: 'drive_orphan_media_access',
+      user_id: 'partner-1',
+      file_id: 'drive-file-1',
+      action: 'read',
+      outcome: 'allowed',
+      record_type: 'memory',
+      record_id: 'memory-1',
+    }))
+  })
+
+  it('fails closed if the durable Drive access audit insert fails', async () => {
+    const insert = vi.fn().mockResolvedValue({ error: new Error('audit unavailable') })
+    createClient.mockReturnValue({ from: vi.fn(() => ({ insert })) })
+    await expect(logDriveMediaAccess({ userId: 'partner-1', fileId: 'drive-file-1', action: 'delete', outcome: 'denied', orphaned: true }))
+      .rejects.toThrow('audit unavailable')
+  })
+
   it('reports a sanitized Google OAuth refresh error code without logging provider details', async () => {
     const key = Buffer.from(process.env.GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY!, 'hex')
     const iv = randomBytes(12)
