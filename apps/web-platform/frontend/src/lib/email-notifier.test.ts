@@ -22,10 +22,14 @@ describe('createEmailNotifier', () => {
   })
 
   it('offers a throwing no-op adapter for tests only', async () => {
-    const notifier = createEmailNotifier(env({ EMAIL_PROVIDER: 'noop' }))
+    const notifier = new NoopNotifier()
     expect(notifier).toBeInstanceOf(NoopNotifier)
     await expect(notifier.sendEmergencyEmail({ to: 'test@example.invalid', subject: 'test', body: 'test', metadata: {} }))
       .rejects.toThrow(EmailProviderNotConfiguredError)
+  })
+
+  it('does not allow the test-only no-op adapter to be selected by environment', () => {
+    expect(() => createEmailNotifier(env({ EMAIL_PROVIDER: 'noop' }))).toThrow('Unsupported EMAIL_PROVIDER')
   })
 
   it('rejects unknown providers', () => {

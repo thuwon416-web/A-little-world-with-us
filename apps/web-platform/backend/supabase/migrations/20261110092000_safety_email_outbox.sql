@@ -19,3 +19,16 @@ CREATE INDEX IF NOT EXISTS safety_email_outbox_pending_idx
 ALTER TABLE public.safety_email_outbox ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.safety_email_outbox FROM anon, authenticated;
 GRANT ALL ON public.safety_email_outbox TO service_role;
+
+
+-- Backfill pending email work for check-ins that were already expired before
+-- this outbox was installed. Existing contacts remain the source of addresses.
+INSERT INTO public.safety_email_outbox(checkin_id, contact_id)
+SELECT checkins.id, contacts.id
+  FROM public.safety_checkins AS checkins
+  JOIN public.emergency_contacts AS contacts
+    ON contacts.couple_id = checkins.couple_id
+ WHERE checkins.status = 'expired'
+   AND contacts.is_active = true
+   AND contacts.notify_on_checkin_missed = true
+ON CONFLICT (checkin_id, contact_id) DO NOTHING;

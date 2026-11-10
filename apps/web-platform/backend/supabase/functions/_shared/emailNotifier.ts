@@ -65,7 +65,6 @@ export function createEmailNotifier(
   fetcher: typeof fetch = fetch,
 ): EmailNotifier {
   const provider = (readEnv('EMAIL_PROVIDER') || 'resend').trim().toLowerCase()
-  if (provider === 'noop') return new NoopNotifier()
   if (provider !== 'resend') {
     throw new EmailProviderNotConfiguredError(`Unsupported EMAIL_PROVIDER: ${provider}.`)
   }
