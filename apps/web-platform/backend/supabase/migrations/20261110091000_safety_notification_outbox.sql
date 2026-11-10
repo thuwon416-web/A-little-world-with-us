@@ -52,3 +52,84 @@ DROP TRIGGER IF EXISTS safety_checkin_notification_outbox ON public.safety_check
 CREATE TRIGGER safety_checkin_notification_outbox
 AFTER UPDATE OF status ON public.safety_checkins
 FOR EACH ROW EXECUTE FUNCTION public.enqueue_missed_checkin_notification();
+
+
+-- Claim and finalize a notification in one database transaction so a worker
+-- crash cannot leave the check-in and its outbox row in different states.
+CREATE OR REPLACE FUNCTION public.claim_safety_notification(p_checkin_id uuid)
+RETURNS integer
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_attempts integer;
+BEGIN
+  UPDATE public.safety_checkins
+     SET status = 'expired',
+         notification_status = 'processing',
+         notification_attempts = notification_attempts + 1,
+         last_notification_error = NULL,
+         updated_at = now()
+   WHERE id = p_checkin_id
+     AND notification_status = 'pending'
+     AND status IN ('pending', 'expired')
+     AND expected_until < now()
+  RETURNING notification_attempts INTO v_attempts;
+
+  IF v_attempts IS NULL THEN
+    RETURN NULL;
+  END IF;
+
+  UPDATE public.safety_notification_outbox
+     SET status = 'processing', attempts = v_attempts, updated_at = now()
+   WHERE checkin_id = p_checkin_id AND status = 'pending';
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Safety notification outbox row missing for claimed check-in';
+  END IF;
+  RETURN v_attempts;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION public.set_safety_notification_state(
+  p_checkin_id uuid,
+  p_status public.safety_notification_status,
+  p_attempts integer,
+  p_error text
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  UPDATE public.safety_checkins
+     SET notification_status = p_status,
+         notification_attempts = p_attempts,
+         last_notification_error = left(p_error, 500),
+         updated_at = now()
+   WHERE id = p_checkin_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Safety check-in not found while updating notification state';
+  END IF;
+
+  UPDATE public.safety_notification_outbox
+     SET status = p_status,
+         attempts = p_attempts,
+         last_error = left(p_error, 500),
+         updated_at = now(),
+         next_attempt_at = CASE WHEN p_status = 'pending' THEN now() + interval '5 minutes' ELSE next_attempt_at END
+   WHERE checkin_id = p_checkin_id;
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Safety notification outbox row missing while updating state';
+  END IF;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.claim_safety_notification(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.set_safety_notification_state(uuid, public.safety_notification_status, integer, text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.claim_safety_notification(uuid) TO service_role;
+GRANT EXECUTE ON FUNCTION public.set_safety_notification_state(uuid, public.safety_notification_status, integer, text) TO service_role;

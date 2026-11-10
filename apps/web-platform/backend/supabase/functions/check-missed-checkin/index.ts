@@ -29,20 +29,13 @@ const supabase = createClient(supabaseUrl, serviceRole)
 
 
 async function setNotificationStatus(checkinId: string, status: 'pending' | 'processing' | 'delivered' | 'failed', attempts: number, error: string | null) {
-  const { error: checkinError } = await supabase.from('safety_checkins').update({
-    notification_status: status,
-    notification_attempts: attempts,
-    last_notification_error: error,
-  }).eq('id', checkinId)
-  if (checkinError) throw checkinError
-  const { error: outboxError } = await supabase.from('safety_notification_outbox').update({
-    status,
-    attempts,
-    last_error: error,
-    updated_at: new Date().toISOString(),
-    ...(status === 'pending' ? { next_attempt_at: new Date(Date.now() + 5 * 60_000).toISOString() } : {}),
-  }).eq('checkin_id', checkinId)
-  if (outboxError) throw outboxError
+  const { error: stateError } = await supabase.rpc('set_safety_notification_state', {
+    p_checkin_id: checkinId,
+    p_status: status,
+    p_attempts: attempts,
+    p_error: error,
+  })
+  if (stateError) throw stateError
 }
 
 Deno.serve(async (request) => {
@@ -100,16 +93,11 @@ Deno.serve(async (request) => {
 
     for (const checkin of (checkins ?? []) as SafetyCheckin[]) {
       if (checkin.status === 'expired' && !dueOutboxIds.has(checkin.id)) continue
-      const { data: expiredCheckin, error: updateError } = await supabase
-        .from('safety_checkins')
-        .update({ status: 'expired', notification_status: 'processing', notification_attempts: checkin.notification_attempts + 1, last_notification_error: null, updated_at: new Date().toISOString() })
-        .eq('id', checkin.id)
-        .eq('notification_status', 'pending')
-        .in('status', ['pending', 'expired'])
-        .select('id,notification_attempts')
-        .maybeSingle()
-      if (updateError) return Response.json({ error: updateError.message }, { status: 500 })
-      if (!expiredCheckin) continue
+      const { data: claimedAttempts, error: claimError } = await supabase.rpc('claim_safety_notification', {
+        p_checkin_id: checkin.id,
+      })
+      if (claimError) return Response.json({ error: claimError.message }, { status: 500 })
+      if (typeof claimedAttempts !== 'number') continue
       processed += 1
 
       const link = (links ?? []).find((candidate: CoupleLink) =>
@@ -117,13 +105,7 @@ Deno.serve(async (request) => {
       const partnerId = link
         ? (link.inviter_id === checkin.user_id ? link.accepted_by : link.inviter_id)
         : null
-      const attempts = expiredCheckin.notification_attempts ?? checkin.notification_attempts + 1
-      const { error: claimOutboxError } = await supabase
-        .from('safety_notification_outbox')
-        .update({ status: 'processing', attempts, updated_at: new Date().toISOString() })
-        .eq('checkin_id', checkin.id)
-        .eq('status', 'pending')
-      if (claimOutboxError) return Response.json({ error: claimOutboxError.message }, { status: 500 })
+      const attempts = claimedAttempts
       if (!partnerId) {
         const retry = getNotificationRetryState(attempts, 'No accepted partner is available for this safety alert.')
         await setNotificationStatus(checkin.id, retry.status, attempts, retry.lastError)
