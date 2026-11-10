@@ -1,18 +1,19 @@
 import { NextResponse } from 'next/server'
+import { getCronJobSecretHeaders } from '@/app/api/cron/_lib/cronAuth'
 
 type CronRequestValidation =
   | { ok: true; supabaseUrl: string; serviceRole: string }
   | { ok: false; response: NextResponse }
 
 export function validateCronRequest(request: Request): CronRequestValidation {
-  const cronSecret = process.env.CRON_SECRET
+  const cronSecret = process.env.CRON_SECRET || process.env.JOB_SECRET
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRole = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!cronSecret || !supabaseUrl || !serviceRole) {
     return {
       ok: false,
-      response: NextResponse.json({ error: 'Cron environment is not configured' }, { status: 500 }),
+      response: NextResponse.json({ error: 'Cron environment is not configured' }, { status: 401 }),
     }
   }
 
@@ -36,6 +37,7 @@ export function callEdgeFunction(
     Authorization: `Bearer ${serviceRole}`,
     'Content-Type': 'application/json',
   })
+  new Headers(getCronJobSecretHeaders()).forEach((value, key) => headers.set(key, value))
   new Headers(options.headers).forEach((value, key) => headers.set(key, value))
 
   // False positive: the base URL is deployment configuration and callers pass fixed function names.
