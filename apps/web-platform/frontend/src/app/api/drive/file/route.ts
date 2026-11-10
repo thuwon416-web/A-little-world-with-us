@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { downloadDriveFile, getDriveFileAccess, listDriveFile } from '@/lib/google-drive'
+import { downloadDriveFile, getDriveFileAccess, listDriveFile, logDriveMediaAccess } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function GET(request: Request) {
@@ -20,14 +20,20 @@ export async function GET(request: Request) {
   if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many Drive file requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
   try {
     const access = await getDriveFileAccess(user.id, fileId)
-    if (!access) return NextResponse.json({ error: 'File not found.' }, { status: 404 })
+    if (!access || access.accessDenied) {
+      await logDriveMediaAccess({ userId: user.id, fileId, action: 'read', outcome: 'denied', orphaned: Boolean(access?.readOnlyOrphaned), recordType: access?.recordType, recordId: access?.recordId })
+      return NextResponse.json({ error: 'File not found.' }, { status: 404 })
+    }
+    if (access.readOnlyOrphaned) {
+      await logDriveMediaAccess({ userId: user.id, fileId, action: 'read', outcome: 'allowed', orphaned: true, recordType: access.recordType, recordId: access.recordId })
+    }
     const driveUserId = access.accessUserId ?? access.ownerId
     if (!driveUserId) return NextResponse.json({ error: 'No connected Drive account can access this file.' }, { status: 409 })
     if (new URL(request.url).searchParams.get('download') === '1') {
       const response = await downloadDriveFile(driveUserId, fileId)
       return new NextResponse(response.body, { status: 200, headers: { 'Content-Type': response.headers.get('content-type') ?? 'application/octet-stream', 'Cache-Control': 'private, max-age=300' } })
     }
-    return NextResponse.json({ file: await listDriveFile(driveUserId, fileId) })
+    return NextResponse.json({ file: await listDriveFile(driveUserId, fileId), readOnlyOrphaned: Boolean(access.readOnlyOrphaned) })
   }
   catch (error) { console.error('[drive] file lookup failed:', error instanceof Error ? error.message : 'unknown error'); return NextResponse.json({ error: 'Google Drive lookup failed.' }, { status: 502 }) }
 }

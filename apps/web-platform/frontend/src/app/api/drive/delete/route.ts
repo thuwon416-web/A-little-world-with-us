@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { deleteDriveFile, getDriveFileAccess } from '@/lib/google-drive'
+import { deleteDriveFile, getDriveFileAccess, logDriveMediaAccess } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { isSameOriginRequest } from '@/lib/csrf'
 
@@ -21,7 +21,13 @@ export async function POST(request: Request) {
   if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many Drive delete requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
   try {
     const access = await getDriveFileAccess(user.id, fileId)
-    if (!access) return NextResponse.json({ error: 'File not found.' }, { status: 404 })
+    if (!access || access.accessDenied) {
+      await logDriveMediaAccess({ userId: user.id, fileId, action: 'delete', outcome: 'denied', orphaned: Boolean(access?.readOnlyOrphaned), recordType: access?.recordType, recordId: access?.recordId })
+      return NextResponse.json({ error: 'File not found.' }, { status: 404 })
+    }
+    if (access.readOnlyOrphaned) {
+      await logDriveMediaAccess({ userId: user.id, fileId, action: 'delete', outcome: 'denied', orphaned: true, recordType: access.recordType, recordId: access.recordId })
+    }
     if (!access.canDelete) return NextResponse.json({ error: 'Only the original media owner can permanently delete this Drive file.' }, { status: 403 })
     const driveActor = access.recordType === 'archived_media' ? access.accessUserId : access.ownerId
     if (!driveActor) return NextResponse.json({ error: 'No connected Drive account can access this file.' }, { status: 409 })

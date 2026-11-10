@@ -14,7 +14,17 @@ export default defineConfig({
     setupFiles: ['./src/tests/setup.ts'],
     coverage: {
       provider: 'v8',
-      include: ['src/lib/**/*.{ts,tsx}', 'src/components/**/*.{ts,tsx}', 'src/features/**/*.{ts,tsx}', 'src/app/api/**/*.{ts,tsx}'],
+      allowExternal: true,
+      include: [
+        'src/lib/**/*.{ts,tsx}',
+        'src/components/**/*.{ts,tsx}',
+        'src/features/**/*.{ts,tsx}',
+        'src/app/api/**/*.{ts,tsx}',
+        resolve(__dirname, '../backend/supabase/functions/_shared/emailNotifier.ts'),
+        resolve(__dirname, '../backend/supabase/functions/check-missed-checkin/email-notification-state.ts'),
+        resolve(__dirname, '../backend/src/lib/drive-orphan-transfer.ts'),
+        resolve(__dirname, '../../../scripts/deploy-readiness-utils.ts'),
+      ],
       exclude: [
         'node_modules/',
         'src/**/*.d.ts',

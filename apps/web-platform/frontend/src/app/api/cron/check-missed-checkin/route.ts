@@ -14,12 +14,7 @@ export async function GET(request: Request) {
   const response = await callEdgeFunction(
     validation.supabaseUrl,
     validation.serviceRole,
-    'check-missed-checkin',
-    {
-      headers: {
-        'x-cron-secret': process.env.CRON_SECRET!,
-      },
-    }
+    'check-missed-checkin'
   )
   const payload = await parseEdgeFunctionResponse(response)
   return NextResponse.json(payload, { status: response.ok ? 200 : 500 })

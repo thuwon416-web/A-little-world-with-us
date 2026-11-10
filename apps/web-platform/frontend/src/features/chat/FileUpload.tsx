@@ -195,7 +195,7 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
           }),
         })
         if (!targetResponse.ok) throw new Error('Unable to prepare large-media storage')
-        const target = await targetResponse.json() as { uploadUrl: string; authorizationToken: string; objectName: string }
+        const target = await targetResponse.json() as { uploadUrl: string; authorizationToken: string; objectName: string; expiresAt: number; signature: string; sha1: string; contentLength: number }
         const uploadResponse = await fetch(target.uploadUrl, {
           method: 'POST',
           headers: {
@@ -210,6 +210,20 @@ export default function FileUpload({ onFileUpload, onClose, coupleId }: FileUplo
         if (!uploadResponse.ok) throw new Error('Large-media upload failed')
         const uploaded = await uploadResponse.json() as { fileId?: string; fileName?: string }
         if (!uploaded.fileId || !uploaded.fileName) throw new Error('Large-media storage returned an invalid response')
+        const verifyResponse = await fetch('/api/media/b2-verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            coupleId,
+            fileId: uploaded.fileId,
+            objectName: uploaded.fileName,
+            contentLength: bytes.byteLength,
+            sha1,
+            expiresAt: target.expiresAt,
+            signature: target.signature,
+          }),
+        })
+        if (!verifyResponse.ok) throw new Error('Large-media upload verification failed')
         onFileUpload({
           url: uploaded.fileName,
           type: selectedFile.type,
