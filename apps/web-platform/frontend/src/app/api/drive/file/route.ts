@@ -27,7 +27,7 @@ export async function GET(request: Request) {
       const response = await downloadDriveFile(driveUserId, fileId)
       return new NextResponse(response.body, { status: 200, headers: { 'Content-Type': response.headers.get('content-type') ?? 'application/octet-stream', 'Cache-Control': 'private, max-age=300' } })
     }
-    return NextResponse.json({ file: await listDriveFile(driveUserId, fileId) })
+    return NextResponse.json({ file: await listDriveFile(driveUserId, fileId), readOnlyOrphaned: Boolean(access.readOnlyOrphaned) })
   }
   catch (error) { console.error('[drive] file lookup failed:', error instanceof Error ? error.message : 'unknown error'); return NextResponse.json({ error: 'Google Drive lookup failed.' }, { status: 502 }) }
 }

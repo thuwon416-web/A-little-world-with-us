@@ -475,11 +475,11 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
 
   const { data: memory, error: memoryError } = await client
     .from('memories')
-    .select('id,couple_id,user_id')
+    .select('id,couple_id,user_id,owner_deleted_at')
     .eq('drive_file_id', fileId)
     .maybeSingle()
   if (memoryError) throw memoryError
-  if (memory?.couple_id && memory.user_id) {
+  if (memory?.couple_id && (memory.user_id || memory.owner_deleted_at)) {
     const { data: link, error: linkError } = await client
       .from('couple_links')
       .select('id')
@@ -489,16 +489,16 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: memory.user_id as string, accessUserId: await resolveDriveAccessUser(memory.couple_id as string, memory.user_id as string), canDelete: memory.user_id === userId, recordType: 'memory' as const, recordId: memory.id }
+    return { ownerId: memory.user_id as string | null, accessUserId: await resolveDriveAccessUser(memory.couple_id as string, memory.user_id as string | null), canDelete: Boolean(memory.user_id && memory.user_id === userId), readOnlyOrphaned: !memory.user_id && Boolean(memory.owner_deleted_at), recordType: 'memory' as const, recordId: memory.id }
   }
 
   const { data: message, error: messageError } = await client
     .from('messages')
-    .select('id,couple_id,sender_id')
+    .select('id,couple_id,sender_id,owner_deleted_at')
     .eq('media_storage_file_id', fileId)
     .maybeSingle()
   if (messageError) throw messageError
-  if (message?.couple_id && message.sender_id) {
+  if (message?.couple_id && (message.sender_id || message.owner_deleted_at)) {
     const { data: link, error: linkError } = await client
       .from('couple_links')
       .select('id')
@@ -508,7 +508,7 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: message.sender_id as string, accessUserId: await resolveDriveAccessUser(message.couple_id as string, message.sender_id as string), canDelete: message.sender_id === userId, recordType: 'message' as const, recordId: message.id }
+    return { ownerId: message.sender_id as string | null, accessUserId: await resolveDriveAccessUser(message.couple_id as string, message.sender_id as string | null), canDelete: Boolean(message.sender_id && message.sender_id === userId), readOnlyOrphaned: !message.sender_id && Boolean(message.owner_deleted_at), recordType: 'message' as const, recordId: message.id }
   }
 
   const { data: archive, error: archiveError } = await client
