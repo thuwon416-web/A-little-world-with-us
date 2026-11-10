@@ -98,7 +98,7 @@ export async function sendTelegramNotification(payload: TelegramNotificationPayl
   const lines = [
     `❤️ <b>[A-Little-World]</b> ${statusIcon} <b>${escapeTelegramHtml(payload.title)}</b>`,
     '',
-    payload.details,
+    escapeTelegramHtml(payload.details),
   ]
   const text = lines.join('\n')
 
@@ -124,7 +124,7 @@ export async function sendTelegramNotification(payload: TelegramNotificationPayl
 // ==========================================
 
 export async function notifyAnniversaryReminder(title: string, daysLeft: number, dateStr: string): Promise<void> {
-  const dayText = daysLeft === 0 ? "🎉 Today is the day!" : `⏳ Only <b>${daysLeft} days</b> left!`
+  const dayText = daysLeft === 0 ? "🎉 Today is the day!" : `⏳ Only ${daysLeft} days left!`
   const details = `📅 <b>${escapeTelegramHtml(title)}</b>\n🗓️ Date: <code>${escapeTelegramHtml(dateStr)}</code>\n${dayText}`
 
   await sendTelegramNotification({
