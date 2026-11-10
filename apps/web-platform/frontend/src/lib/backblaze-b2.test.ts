@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createHmac } from 'node:crypto'
 
 vi.mock('server-only', () => ({}))
-let verifyB2Upload: typeof import('./backblaze-b2').verifyB2Upload
+import type { verifyB2Upload as VerifyB2Upload } from './backblaze-b2'
+let verifyB2Upload: typeof VerifyB2Upload
 
 const secret = 'test-only-signing-secret'
 const objectName = 'couples/couple-1/large-media/user-1/file.mp4'
