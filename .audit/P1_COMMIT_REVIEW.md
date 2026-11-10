@@ -68,3 +68,20 @@ The migration is rerunnable and marks owner deletion before the auth-user row is
 ## Overall Phase A decision
 
 **Phase A review: FAIL pending fixups.** P1-03, P1-06, P1-08, and material portions of P1-01, P1-02, P1-05, and P1-07 do not yet meet the stated acceptance criteria. This report is committed before Phase B. Follow-up fixup commits are required; no production systems were accessed or changed during this review.
+
+## Post-review fixup results (Phase A closure)
+
+The review findings above were addressed by follow-up commits; the original commits were not rewritten.
+
+| P1 | Follow-up commits | Closure result | Residual caveat |
+|---|---|---|---|
+| P1-01 | `c86d915` | Shared outbound helper now sets `x-job-secret`; missing server configuration returns 500 while invalid caller credentials return 401; outbound-header test added. All three wrappers call the shared helper. | No live Vercel-to-Supabase request was made; Vercel/Vault secret equality remains an Ops verification. |
+| P1-02 | `a901e06`, `6f3de8c` | Claim, finalization, and stale-lease recovery are database RPC transactions that update check-in and push outbox state together. | SQL is unapplied; no real Postgres integration test or Deno Edge Function run was possible in this environment. |
+| P1-03 | `60c55d6`, `9e8436e`, `80bb109`, `db77ee3`, `3cfe384`, `c558a21`, `09d0a7d` | Real Resend adapter, startup configuration validation, independent email outbox, retry persistence, Resend idempotency key, and mocked success/failure tests are present. | No live email was sent. Staging Edge Function env must be configured before the function can start. |
+| P1-04 | Original `44dcbbf` | Recipient selection helper and inviter/partner/stranger tests are correct. | Deno-specific tests were not run; equivalent Vitest helper tests passed. |
+| P1-05 | `4f7d373` | Untrusted context uses real line breaks and neutralizes injected closing delimiters; tests cover malicious content and delimiter injection. | A string-level test cannot prove a model will never follow malicious retrieved content; staging prompt-injection behavior must be verified. |
+| P1-06 | `aa0fc8e` | Untrusted `details` are escaped at the HTML message boundary; full notification payload test added. | Existing notification detail markup is rendered literally rather than interpreted as HTML, intentionally favoring safety. |
+| P1-07 | `8d7e5f3`, `dfabab5` | HMAC-bound metadata, expiry/path/content verification, and tamper tests are present. | **Mitigation, not a complete bucket-token isolation fix:** the browser still receives a temporary B2 upload token. The Backblaze key must be restricted to the intended bucket and `couples/` prefix. |
+| P1-08 | `a35111a`, `32d3cad`, `d3577bf` | Option C is documented; orphan access is read-only, accepted-member-gated, denied for non-members, and durably audited. Null-owner archived media cannot be deleted. | Option C does not grant new Google Drive permission. A private file in the deleted owner's Drive remains unreadable to the partner unless that partner already has Drive access. |
+
+**Phase A closure:** all eight original diffs have been reviewed; follow-up fixes were committed. P1-07 remains conditional on the Backblaze key-scope manual action, and P1-08 is an explicit Option C product limitation. Production readiness remains subject to staging validation and Ops actions.
