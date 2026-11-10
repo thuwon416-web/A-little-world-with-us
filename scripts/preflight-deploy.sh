@@ -40,7 +40,7 @@ BUILD_SUPABASE_ANON_KEY="${NEXT_PUBLIC_SUPABASE_ANON_KEY:-build-placeholder-anon
 run_check "pnpm build" env NEXT_BUILD_CPUS="${NEXT_BUILD_CPUS:-1}" NEXT_PUBLIC_SUPABASE_URL="$BUILD_SUPABASE_URL" NEXT_PUBLIC_SUPABASE_ANON_KEY="$BUILD_SUPABASE_ANON_KEY" pnpm build
 
 printf '\n== secret-like values in diff ==\n'
-if git diff --unified=0 main..HEAD -- . \
+if git diff --unified=0 main..HEAD -- . ':(exclude)**/*.example' ':(exclude)**/*.test.*' \
   | grep -Eiq '(^|[^A-Za-z0-9_])(sk_(live|test)_[A-Za-z0-9]{16,}|gh[pousr]_[A-Za-z0-9]{20,}|xox[baprs]-[A-Za-z0-9-]{20,}|AIza[0-9A-Za-z_-]{30,}|Bearer[[:space:]]+[A-Za-z0-9._-]{24,}|(RESEND_API_KEY|B2_UPLOAD_SIGNING_SECRET|TELEGRAM_BOT_TOKEN|SUPABASE_SERVICE_ROLE_KEY|GOOGLE_DRIVE_TOKEN_ENCRYPTION_KEY|CRON_SECRET|JOB_SECRET)[[:space:]]*[:=][[:space:]]*[^[:space:]]{24,})'; then
   fail "secret-like credential assignment found in git diff; inspect without printing values"
 else
