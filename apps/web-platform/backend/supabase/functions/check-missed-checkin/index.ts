@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmergencyContactEmail } from './emailNotifier.ts'
 
 type SafetyCheckin = {
   id: string
@@ -12,6 +13,7 @@ type SafetyCheckin = {
 type CoupleLink = { inviter_id: string; accepted_by: string }
 type PushDevice = { expo_push_token: string; preferences: Record<string, boolean> | null }
 type EmergencyContact = {
+  id: string
   email: string | null
 }
 
@@ -107,7 +109,7 @@ Deno.serve(async (request) => {
 
       const { data: contacts, error: contactsError } = await supabase
         .from('emergency_contacts')
-        .select('email')
+        .select('id,email')
         .eq('couple_id', checkin.couple_id)
         .eq('is_active', true)
         .eq('notify_on_checkin_missed', true)
@@ -115,9 +117,14 @@ Deno.serve(async (request) => {
       contactsConsidered += (contacts ?? []).length
       for (const contact of (contacts ?? []) as EmergencyContact[]) {
         if (contact.email) {
-          // TODO(phase-21.4): integrate email provider.
-          // eslint-disable-next-line no-console
-          console.log('[check-missed-checkin] Would email:', contact.email, 'about checkin', checkin.id)
+          try {
+            await sendEmergencyContactEmail({ to: contact.email, contactId: contact.id, checkinId: checkin.id })
+          } catch (error) {
+            console.warn('[check-missed-checkin] Emergency email unavailable', {
+              contact_id: contact.id,
+              error_code: error instanceof Error ? error.name : 'unknown_error',
+            })
+          }
         }
       }
     }
