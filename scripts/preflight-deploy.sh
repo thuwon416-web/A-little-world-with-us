@@ -5,7 +5,10 @@ ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
 FAILURES=0
 COVERAGE_LOG="$(mktemp)"
-trap 'rm -f "$COVERAGE_LOG"' EXIT
+NEXT_ENV_FILE="apps/web-platform/frontend/next-env.d.ts"
+NEXT_ENV_BACKUP="$(mktemp)"
+cp "$NEXT_ENV_FILE" "$NEXT_ENV_BACKUP"
+trap 'rm -f "$COVERAGE_LOG"; cp "$NEXT_ENV_BACKUP" "$NEXT_ENV_FILE"; rm -f "$NEXT_ENV_BACKUP"' EXIT
 
 pass() { printf 'PASS: %s\n' "$1"; }
 fail() { printf 'FAIL: %s\n' "$1" >&2; FAILURES=1; }
@@ -14,6 +17,8 @@ run_check() {
   printf '\n== %s ==\n' "$label"
   if "$@"; then pass "$label"; else fail "$label"; fi
 }
+
+if git diff --quiet && git diff --cached --quiet && [[ -z "$(git ls-files --others --exclude-standard)" ]]; then pass 'working tree is clean'; else fail 'working tree must be clean before preflight'; fi
 
 BRANCH="$(git branch --show-current)"
 if [[ "$BRANCH" == fix/p1-security-remediation-* ]]; then pass "branch name: $BRANCH"; else fail "branch must be fix/p1-security-remediation-* (found: $BRANCH)"; fi
