@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
-import { deleteDriveFile, getDriveFileAccess } from '@/lib/google-drive'
+import { deleteDriveFile, getDriveFileAccess, logDriveMediaAccess } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { isSameOriginRequest } from '@/lib/csrf'
-import { logEvent } from '@/lib/observability'
 
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -22,12 +21,12 @@ export async function POST(request: Request) {
   if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many Drive delete requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
   try {
     const access = await getDriveFileAccess(user.id, fileId)
-    if (!access) {
-      await logEvent('drive_media_access_denied', { user_id: user.id, file_id: fileId, access_mode: 'delete' })
+    if (!access || access.accessDenied) {
+      await logDriveMediaAccess({ userId: user.id, fileId, action: 'delete', outcome: 'denied', orphaned: Boolean(access?.readOnlyOrphaned), recordType: access?.recordType, recordId: access?.recordId })
       return NextResponse.json({ error: 'File not found.' }, { status: 404 })
     }
     if (access.readOnlyOrphaned) {
-      await logEvent('drive_orphan_media_access', { user_id: user.id, file_id: fileId, record_type: access.recordType, record_id: access.recordId, access_mode: 'delete_denied' })
+      await logDriveMediaAccess({ userId: user.id, fileId, action: 'delete', outcome: 'denied', orphaned: true, recordType: access.recordType, recordId: access.recordId })
     }
     if (!access.canDelete) return NextResponse.json({ error: 'Only the original media owner can permanently delete this Drive file.' }, { status: 403 })
     const driveActor = access.recordType === 'archived_media' ? access.accessUserId : access.ownerId

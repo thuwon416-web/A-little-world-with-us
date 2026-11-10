@@ -29,6 +29,27 @@ function adminClient(): SupabaseClient {
   })
 }
 
+export async function logDriveMediaAccess(input: {
+  userId: string
+  fileId: string
+  action: 'read' | 'delete'
+  outcome: 'allowed' | 'denied'
+  orphaned: boolean
+  recordType?: string
+  recordId?: string
+}) {
+  const { error } = await adminClient().from('drive_media_access_audit').insert({
+    event_type: input.orphaned ? 'drive_orphan_media_access' : 'drive_media_access',
+    user_id: input.userId,
+    file_id: input.fileId,
+    action: input.action,
+    outcome: input.outcome,
+    record_type: input.recordType ?? null,
+    record_id: input.recordId ?? null,
+  })
+  if (error) throw error
+}
+
 function encrypt(value: string): { ciphertext: string; iv: string } {
   const iv = randomBytes(12)
   const cipher = createCipheriv('aes-256-gcm', encryptionKey(), iv)
@@ -489,7 +510,10 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
       .maybeSingle()
     if (linkError) throw linkError
-    if (!link) return null
+    if (!link) {
+      if (!memory.user_id && memory.owner_deleted_at) return { ownerId: null, accessUserId: null, canDelete: false, readOnlyOrphaned: true, accessDenied: true, recordType: 'memory' as const, recordId: memory.id }
+      return null
+    }
     const orphanPolicy = memory.user_id ? null : orphanedDriveAccessPolicy({ ownerDeletedAt: memory.owner_deleted_at as string | null, isAcceptedCoupleMember: true })
     if (!memory.user_id && !orphanPolicy) return null
     return { ownerId: memory.user_id as string | null, accessUserId: await resolveDriveAccessUser(memory.couple_id as string, memory.user_id as string | null), canDelete: orphanPolicy ? false : memory.user_id === userId, readOnlyOrphaned: Boolean(orphanPolicy?.readOnlyOrphaned), recordType: 'memory' as const, recordId: memory.id }
@@ -510,7 +534,10 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
       .maybeSingle()
     if (linkError) throw linkError
-    if (!link) return null
+    if (!link) {
+      if (!message.sender_id && message.owner_deleted_at) return { ownerId: null, accessUserId: null, canDelete: false, readOnlyOrphaned: true, accessDenied: true, recordType: 'message' as const, recordId: message.id }
+      return null
+    }
     const orphanPolicy = message.sender_id ? null : orphanedDriveAccessPolicy({ ownerDeletedAt: message.owner_deleted_at as string | null, isAcceptedCoupleMember: true })
     if (!message.sender_id && !orphanPolicy) return null
     return { ownerId: message.sender_id as string | null, accessUserId: await resolveDriveAccessUser(message.couple_id as string, message.sender_id as string | null), canDelete: orphanPolicy ? false : message.sender_id === userId, readOnlyOrphaned: Boolean(orphanPolicy?.readOnlyOrphaned), recordType: 'message' as const, recordId: message.id }
@@ -550,11 +577,15 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .or(`inviter_id.eq.${userId},accepted_by.eq.${userId}`)
       .maybeSingle()
     if (linkError) throw linkError
-    if (!link) return null
+    if (!link) {
+      if (!archived.owner_id) return { ownerId: null, accessUserId: null, canDelete: false, readOnlyOrphaned: true, accessDenied: true, recordType: 'archived_media' as const, recordId: archived.id }
+      return null
+    }
     return {
       ownerId: archived.owner_id as string | null,
       accessUserId: await resolveDriveAccessUser(archived.couple_id as string, archived.owner_id as string | null),
-      canDelete: archived.owner_id ? archived.owner_id === userId : true,
+      canDelete: archived.owner_id ? archived.owner_id === userId : false,
+      readOnlyOrphaned: !archived.owner_id,
       recordType: 'archived_media' as const,
       recordId: archived.id,
     }
