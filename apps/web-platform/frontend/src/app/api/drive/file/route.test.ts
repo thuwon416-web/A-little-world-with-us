@@ -1,11 +1,12 @@
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-const { getUser, getDriveFileAccess, listDriveFile, downloadDriveFile, checkRateLimit } = vi.hoisted(() => ({
+const { getUser, getDriveFileAccess, listDriveFile, downloadDriveFile, checkRateLimit, logEvent } = vi.hoisted(() => ({
   getUser: vi.fn(),
   getDriveFileAccess: vi.fn(),
   listDriveFile: vi.fn(),
   downloadDriveFile: vi.fn(),
   checkRateLimit: vi.fn(),
+  logEvent: vi.fn(),
 }))
 
 vi.mock('@/lib/supabase-server', () => ({
@@ -25,6 +26,7 @@ vi.mock('@/lib/google-drive', () => ({
 vi.mock('@/lib/rate-limit', () => ({
   checkRateLimit,
 }))
+vi.mock('@/lib/observability', () => ({ logEvent }))
 
 import { GET } from './route'
 
@@ -33,6 +35,7 @@ describe('GET /api/drive/file', () => {
     vi.clearAllMocks()
     getUser.mockResolvedValue({ data: { user: null } })
     checkRateLimit.mockResolvedValue({ allowed: true, remaining: 29, resetTime: Date.now() + 60000 })
+    logEvent.mockResolvedValue(undefined)
   })
 
   it('requires authentication', async () => {
@@ -61,6 +64,17 @@ describe('GET /api/drive/file', () => {
     const response = await GET(new Request('https://a-little-world-with-us.vercel.app/api/drive/file?fileId=file-1'))
     expect(response.status).toBe(404)
     expect(listDriveFile).not.toHaveBeenCalled()
+    expect(downloadDriveFile).not.toHaveBeenCalled()
+    expect(logEvent).toHaveBeenCalledWith('drive_media_access_denied', expect.objectContaining({ user_id: 'user-1' }))
+  })
+
+  it('logs accepted-member reads of orphaned media as a distinct event', async () => {
+    getUser.mockResolvedValue({ data: { user: { id: 'partner-1' } } })
+    getDriveFileAccess.mockResolvedValue({ ownerId: null, accessUserId: 'partner-1', canDelete: false, readOnlyOrphaned: true, recordType: 'memory', recordId: 'memory-1' })
+    listDriveFile.mockResolvedValue({ id: 'file-1', name: 'memory.jpg' })
+    const response = await GET(new Request('https://a-little-world-with-us.vercel.app/api/drive/file?fileId=file-1'))
+    expect(response.status).toBe(200)
+    expect(logEvent).toHaveBeenCalledWith('drive_orphan_media_access', expect.objectContaining({ user_id: 'partner-1', access_mode: 'metadata' }))
   })
 
   it('returns metadata for an authorized file', async () => {

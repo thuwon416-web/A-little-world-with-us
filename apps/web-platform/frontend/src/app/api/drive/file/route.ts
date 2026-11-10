@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@/lib/supabase-server'
 import { downloadDriveFile, getDriveFileAccess, listDriveFile } from '@/lib/google-drive'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { logEvent } from '@/lib/observability'
 
 export async function GET(request: Request) {
   const authorization = request.headers.get('authorization')
@@ -20,7 +21,13 @@ export async function GET(request: Request) {
   if (!rateLimit.allowed) return NextResponse.json({ error: 'Too many Drive file requests. Please try again shortly.', resetAt: rateLimit.resetTime }, { status: 429 })
   try {
     const access = await getDriveFileAccess(user.id, fileId)
-    if (!access) return NextResponse.json({ error: 'File not found.' }, { status: 404 })
+    if (!access) {
+      await logEvent('drive_media_access_denied', { user_id: user.id, file_id: fileId })
+      return NextResponse.json({ error: 'File not found.' }, { status: 404 })
+    }
+    if (access.readOnlyOrphaned) {
+      await logEvent('drive_orphan_media_access', { user_id: user.id, file_id: fileId, record_type: access.recordType, record_id: access.recordId, access_mode: new URL(request.url).searchParams.get('download') === '1' ? 'download' : 'metadata' })
+    }
     const driveUserId = access.accessUserId ?? access.ownerId
     if (!driveUserId) return NextResponse.json({ error: 'No connected Drive account can access this file.' }, { status: 409 })
     if (new URL(request.url).searchParams.get('download') === '1') {
