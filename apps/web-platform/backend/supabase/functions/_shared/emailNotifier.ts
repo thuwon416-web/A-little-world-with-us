@@ -35,11 +35,17 @@ export class ResendNotifier implements EmailNotifier {
       name: name.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 256),
       value: String(value).slice(0, 256),
     }))
+    const checkinId = input.metadata.checkin_id
+    const contactId = input.metadata.contact_id
+    const idempotencyKey = typeof checkinId === 'string' && typeof contactId === 'string'
+      ? `emergency-checkin-${checkinId}-${contactId}`
+      : undefined
     const response = await this.fetcher('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
         'Content-Type': 'application/json',
+        ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
       },
       body: JSON.stringify({
         from: this.from,

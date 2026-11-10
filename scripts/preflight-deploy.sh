@@ -37,7 +37,7 @@ fi
 
 BUILD_SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL:-https://build-placeholder.supabase.co}"
 BUILD_SUPABASE_ANON_KEY="${NEXT_PUBLIC_SUPABASE_ANON_KEY:-build-placeholder-anon-key}"
-run_check "pnpm build" env NEXT_PUBLIC_SUPABASE_URL="$BUILD_SUPABASE_URL" NEXT_PUBLIC_SUPABASE_ANON_KEY="$BUILD_SUPABASE_ANON_KEY" pnpm build
+run_check "pnpm build" env NEXT_BUILD_CPUS="${NEXT_BUILD_CPUS:-1}" NEXT_PUBLIC_SUPABASE_URL="$BUILD_SUPABASE_URL" NEXT_PUBLIC_SUPABASE_ANON_KEY="$BUILD_SUPABASE_ANON_KEY" pnpm build
 
 printf '\n== secret-like values in diff ==\n'
 if git diff --unified=0 main..HEAD -- . \

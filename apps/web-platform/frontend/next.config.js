@@ -9,10 +9,12 @@ const withBundleAnalyzer = require('@next/bundle-analyzer')({
 })
 
 /** @type {import('next').NextConfig} */
+const buildCpus = Number.parseInt(process.env.NEXT_BUILD_CPUS || '', 10)
 const nextConfig = {
   reactStrictMode: true,
   turbopack: {},
   experimental: {
+    ...(Number.isSafeInteger(buildCpus) && buildCpus > 0 ? { cpus: buildCpus } : {}),
     optimizePackageImports: ['lucide-react', 'framer-motion'],
   },
   images: {
