@@ -57,6 +57,8 @@ export async function POST(request: Request) {
   try {
     const target = await getB2UploadTarget({
       objectName: `couples/${coupleId}/large-media/${user.id}/${crypto.randomUUID()}-${fileName}`,
+      userId: user.id,
+      coupleId,
       contentType,
       contentLength,
       sha1,

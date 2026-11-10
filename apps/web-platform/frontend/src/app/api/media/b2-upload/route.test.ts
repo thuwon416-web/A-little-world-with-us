@@ -63,6 +63,9 @@ describe('B2 large-media upload authorization', () => {
       uploadUrl: 'https://b2.example/upload',
       authorizationToken: 'temporary-upload-token',
       objectName: 'couples/couple-1/large-media/user-1/file.mp4',
+      expiresAt: Date.now() + 900000,
+      signature: 'signed-object',
+      sha1: 'a'.repeat(40),
     })
   })
 

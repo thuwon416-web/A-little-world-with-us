@@ -69,7 +69,7 @@ describe('GET /api/drive/file', () => {
     listDriveFile.mockResolvedValue({ id: 'file-1', name: 'memory.jpg' })
     const response = await GET(new Request('https://a-little-world-with-us.vercel.app/api/drive/file?fileId=file-1'))
     expect(response.status).toBe(200)
-    expect(await response.json()).toEqual({ file: { id: 'file-1', name: 'memory.jpg' } })
+    expect(await response.json()).toEqual({ file: { id: 'file-1', name: 'memory.jpg' }, readOnlyOrphaned: false })
     expect(listDriveFile).toHaveBeenCalledWith('owner-1', 'file-1')
   })
 })

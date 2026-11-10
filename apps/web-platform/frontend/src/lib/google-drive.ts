@@ -2,6 +2,7 @@ import 'server-only'
 
 import { createCipheriv, createDecipheriv, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { orphanedDriveAccessPolicy } from './google-drive-orphan-access'
 
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive'
 const TOKEN_URL = 'https://oauth2.googleapis.com/token'
@@ -489,7 +490,9 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: memory.user_id as string | null, accessUserId: await resolveDriveAccessUser(memory.couple_id as string, memory.user_id as string | null), canDelete: Boolean(memory.user_id && memory.user_id === userId), readOnlyOrphaned: !memory.user_id && Boolean(memory.owner_deleted_at), recordType: 'memory' as const, recordId: memory.id }
+    const orphanPolicy = memory.user_id ? null : orphanedDriveAccessPolicy({ ownerDeletedAt: memory.owner_deleted_at as string | null, isAcceptedCoupleMember: true })
+    if (!memory.user_id && !orphanPolicy) return null
+    return { ownerId: memory.user_id as string | null, accessUserId: await resolveDriveAccessUser(memory.couple_id as string, memory.user_id as string | null), canDelete: orphanPolicy ? false : memory.user_id === userId, readOnlyOrphaned: Boolean(orphanPolicy?.readOnlyOrphaned), recordType: 'memory' as const, recordId: memory.id }
   }
 
   const { data: message, error: messageError } = await client
@@ -508,7 +511,9 @@ export async function getDriveFileAccess(userId: string, fileId: string) {
       .maybeSingle()
     if (linkError) throw linkError
     if (!link) return null
-    return { ownerId: message.sender_id as string | null, accessUserId: await resolveDriveAccessUser(message.couple_id as string, message.sender_id as string | null), canDelete: Boolean(message.sender_id && message.sender_id === userId), readOnlyOrphaned: !message.sender_id && Boolean(message.owner_deleted_at), recordType: 'message' as const, recordId: message.id }
+    const orphanPolicy = message.sender_id ? null : orphanedDriveAccessPolicy({ ownerDeletedAt: message.owner_deleted_at as string | null, isAcceptedCoupleMember: true })
+    if (!message.sender_id && !orphanPolicy) return null
+    return { ownerId: message.sender_id as string | null, accessUserId: await resolveDriveAccessUser(message.couple_id as string, message.sender_id as string | null), canDelete: orphanPolicy ? false : message.sender_id === userId, readOnlyOrphaned: Boolean(orphanPolicy?.readOnlyOrphaned), recordType: 'message' as const, recordId: message.id }
   }
 
   const { data: archive, error: archiveError } = await client
