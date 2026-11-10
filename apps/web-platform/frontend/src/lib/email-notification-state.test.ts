@@ -16,6 +16,11 @@ describe('deliverEmergencyEmail', () => {
     await expect(deliverEmergencyEmail(notifier, email, 2)).resolves.toEqual({ status: 'pending', attempts: 2, lastError: 'Error' })
   })
 
+  it('sanitizes non-Error provider rejections into a retryable error code', async () => {
+    const notifier: EmailNotifier = { sendEmergencyEmail: vi.fn().mockRejectedValue('transport failure') }
+    await expect(deliverEmergencyEmail(notifier, email, 1)).resolves.toEqual({ status: 'pending', attempts: 1, lastError: 'unknown_error' })
+  })
+
   it('marks the final failed attempt as failed', async () => {
     const notifier: EmailNotifier = { sendEmergencyEmail: vi.fn().mockRejectedValue(new Error('permanent')) }
     await expect(deliverEmergencyEmail(notifier, email, 5)).resolves.toEqual({ status: 'failed', attempts: 5, lastError: 'Error' })
