@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmergencyContactEmail } from './emailNotifier.ts'
+import { expoTicketsDelivered, getNotificationRetryState } from './notification-state.ts'
 
 type SafetyCheckin = {
   id: string
@@ -9,6 +10,7 @@ type SafetyCheckin = {
   status: 'pending' | 'expired'
   message: string | null
   expected_until: string | null
+  notification_attempts: number
 }
 type CoupleLink = { inviter_id: string; accepted_by: string }
 type PushDevice = { expo_push_token: string; preferences: Record<string, boolean> | null }
@@ -25,6 +27,24 @@ if (!supabaseUrl || !serviceRole) {
 
 const supabase = createClient(supabaseUrl, serviceRole)
 
+
+async function setNotificationStatus(checkinId: string, status: 'pending' | 'processing' | 'delivered' | 'failed', attempts: number, error: string | null) {
+  const { error: checkinError } = await supabase.from('safety_checkins').update({
+    notification_status: status,
+    notification_attempts: attempts,
+    last_notification_error: error,
+  }).eq('id', checkinId)
+  if (checkinError) throw checkinError
+  const { error: outboxError } = await supabase.from('safety_notification_outbox').update({
+    status,
+    attempts,
+    last_error: error,
+    updated_at: new Date().toISOString(),
+    ...(status === 'pending' ? { next_attempt_at: new Date(Date.now() + 5 * 60_000).toISOString() } : {}),
+  }).eq('checkin_id', checkinId)
+  if (outboxError) throw outboxError
+}
+
 Deno.serve(async (request) => {
   if (request.method !== 'POST') return new Response('Method not allowed', { status: 405 })
   const candidate = request.headers.get('x-job-secret') ?? ''
@@ -35,10 +55,35 @@ Deno.serve(async (request) => {
   if (authError || authorized !== true) return new Response('Unauthorized', { status: 401 })
 
   try {
+    // Recover abandoned processing leases after a worker crash so the durable
+    // outbox can be retried by the next scheduled invocation.
+    const staleBefore = new Date(Date.now() - 10 * 60_000).toISOString()
+    const { error: staleCheckinError } = await supabase
+      .from('safety_checkins')
+      .update({ notification_status: 'pending' })
+      .eq('notification_status', 'processing')
+      .lt('updated_at', staleBefore)
+    if (staleCheckinError) return Response.json({ error: staleCheckinError.message }, { status: 500 })
+    const { error: staleOutboxError } = await supabase
+      .from('safety_notification_outbox')
+      .update({ status: 'pending', updated_at: new Date().toISOString() })
+      .eq('status', 'processing')
+      .lt('updated_at', staleBefore)
+    if (staleOutboxError) return Response.json({ error: staleOutboxError.message }, { status: 500 })
+
+    const { data: dueOutbox, error: dueOutboxError } = await supabase
+      .from('safety_notification_outbox')
+      .select('checkin_id')
+      .eq('status', 'pending')
+      .lte('next_attempt_at', new Date().toISOString())
+    if (dueOutboxError) return Response.json({ error: dueOutboxError.message }, { status: 500 })
+    const dueOutboxIds = new Set((dueOutbox ?? []).map((row: { checkin_id: string }) => row.checkin_id))
+
     const { data: checkins, error: checkinsError } = await supabase
       .from('safety_checkins')
-      .select('id,couple_id,user_id,checkin_type,status,message,expected_until')
-      .eq('status', 'pending')
+      .select('id,couple_id,user_id,checkin_type,status,message,expected_until,notification_attempts')
+      .in('status', ['pending', 'expired'])
+      .eq('notification_status', 'pending')
       .not('expected_until', 'is', null)
       .lt('expected_until', new Date().toISOString())
     if (checkinsError) return Response.json({ error: checkinsError.message }, { status: 500 })
@@ -54,12 +99,14 @@ Deno.serve(async (request) => {
     let contactsConsidered = 0
 
     for (const checkin of (checkins ?? []) as SafetyCheckin[]) {
+      if (checkin.status === 'expired' && !dueOutboxIds.has(checkin.id)) continue
       const { data: expiredCheckin, error: updateError } = await supabase
         .from('safety_checkins')
-        .update({ status: 'expired', updated_at: new Date().toISOString() })
+        .update({ status: 'expired', notification_status: 'processing', notification_attempts: checkin.notification_attempts + 1, last_notification_error: null, updated_at: new Date().toISOString() })
         .eq('id', checkin.id)
-        .eq('status', 'pending')
-        .select('id')
+        .eq('notification_status', 'pending')
+        .in('status', ['pending', 'expired'])
+        .select('id,notification_attempts')
         .maybeSingle()
       if (updateError) return Response.json({ error: updateError.message }, { status: 500 })
       if (!expiredCheckin) continue
@@ -70,7 +117,19 @@ Deno.serve(async (request) => {
       const partnerId = link
         ? (link.inviter_id === checkin.user_id ? link.accepted_by : link.inviter_id)
         : null
-      if (!partnerId) continue
+      const attempts = expiredCheckin.notification_attempts ?? checkin.notification_attempts + 1
+      const { error: claimOutboxError } = await supabase
+        .from('safety_notification_outbox')
+        .update({ status: 'processing', attempts, updated_at: new Date().toISOString() })
+        .eq('checkin_id', checkin.id)
+        .eq('status', 'pending')
+      if (claimOutboxError) return Response.json({ error: claimOutboxError.message }, { status: 500 })
+      if (!partnerId) {
+        const retry = getNotificationRetryState(attempts, 'No accepted partner is available for this safety alert.')
+        await setNotificationStatus(checkin.id, retry.status, attempts, retry.lastError)
+        if (retry.status === 'failed') console.error('[check-missed-checkin] Safety notification permanently failed', { checkin_id: checkin.id })
+        continue
+      }
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -94,17 +153,38 @@ Deno.serve(async (request) => {
           data: { type: 'missed_checkin', checkinId: checkin.id, userId: checkin.user_id },
         }))
 
-      if (messages.length) {
+      if (!messages.length) {
+        const retry = getNotificationRetryState(attempts, 'No eligible partner push devices are registered.')
+        await setNotificationStatus(checkin.id, retry.status, attempts, retry.lastError)
+        if (retry.status === 'failed') console.error('[check-missed-checkin] Safety notification permanently failed', { checkin_id: checkin.id })
+        continue
+      }
+
+      let delivered = false
+      let deliveryError = 'Expo did not confirm delivery for every notification.'
+      try {
         const response = await fetch('https://exp.host/--/api/v2/push/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify(messages),
         })
-        if (!response.ok) {
-          return Response.json({ error: 'Expo Push API rejected the notification' }, { status: 502 })
+        if (response.ok) {
+          const payload = await response.json()
+          delivered = expoTicketsDelivered(payload, messages.length)
+        } else {
+          deliveryError = 'Expo Push API returned HTTP ' + response.status
         }
-        await response.json()
+      } catch {
+        deliveryError = 'Expo Push API request failed.'
+      }
+
+      if (delivered) {
+        await setNotificationStatus(checkin.id, 'delivered', attempts, null)
         notified += messages.length
+      } else {
+        const retry = getNotificationRetryState(attempts, deliveryError)
+        await setNotificationStatus(checkin.id, retry.status, attempts, retry.lastError)
+        if (retry.status === 'failed') console.error('[check-missed-checkin] Safety notification permanently failed', { checkin_id: checkin.id })
       }
 
       const { data: contacts, error: contactsError } = await supabase
