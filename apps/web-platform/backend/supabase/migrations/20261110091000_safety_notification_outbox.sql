@@ -133,3 +133,28 @@ REVOKE ALL ON FUNCTION public.claim_safety_notification(uuid) FROM PUBLIC, anon,
 REVOKE ALL ON FUNCTION public.set_safety_notification_state(uuid, public.safety_notification_status, integer, text) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.claim_safety_notification(uuid) TO service_role;
 GRANT EXECUTE ON FUNCTION public.set_safety_notification_state(uuid, public.safety_notification_status, integer, text) TO service_role;
+
+
+-- Recover check-in and push-outbox leases together. This avoids split-brain
+-- state if a worker crashes between two independent REST updates.
+CREATE OR REPLACE FUNCTION public.recover_stale_safety_notifications(p_stale_before timestamptz)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  UPDATE public.safety_checkins
+     SET notification_status = 'pending', updated_at = now()
+   WHERE notification_status = 'processing'
+     AND updated_at < p_stale_before;
+
+  UPDATE public.safety_notification_outbox
+     SET status = 'pending', next_attempt_at = now(), updated_at = now()
+   WHERE status = 'processing'
+     AND updated_at < p_stale_before;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.recover_stale_safety_notifications(timestamptz) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.recover_stale_safety_notifications(timestamptz) TO service_role;

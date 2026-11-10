@@ -50,18 +50,10 @@ Deno.serve(async (request) => {
     // Recover abandoned processing leases after a worker crash so the durable
     // outbox can be retried by the next scheduled invocation.
     const staleBefore = new Date(Date.now() - 10 * 60_000).toISOString()
-    const { error: staleCheckinError } = await supabase
-      .from('safety_checkins')
-      .update({ notification_status: 'pending' })
-      .eq('notification_status', 'processing')
-      .lt('updated_at', staleBefore)
-    if (staleCheckinError) return Response.json({ error: staleCheckinError.message }, { status: 500 })
-    const { error: staleOutboxError } = await supabase
-      .from('safety_notification_outbox')
-      .update({ status: 'pending', updated_at: new Date().toISOString() })
-      .eq('status', 'processing')
-      .lt('updated_at', staleBefore)
-    if (staleOutboxError) return Response.json({ error: staleOutboxError.message }, { status: 500 })
+    const { error: staleNotificationError } = await supabase.rpc('recover_stale_safety_notifications', {
+      p_stale_before: staleBefore,
+    })
+    if (staleNotificationError) return Response.json({ error: staleNotificationError.message }, { status: 500 })
     const { error: staleEmailError } = await supabase
       .from('safety_email_outbox')
       .update({ status: 'pending', updated_at: new Date().toISOString() })
