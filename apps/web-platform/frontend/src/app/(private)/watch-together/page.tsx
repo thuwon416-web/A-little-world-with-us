@@ -25,7 +25,7 @@ type WatchHistoryItem = {
 }
 
 export default function WatchTogetherPage() {
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [items, setItems] = useState<WatchItem[]>([])
@@ -58,7 +58,7 @@ export default function WatchTogetherPage() {
         getCoupleStatus(),
       ])
       if (!user || !couple) {
-        setError('Link with your partner to use Watch Together.')
+        setError(t('WatchTogether.linkPartner'))
         return
       }
       setUserId(user.id)
@@ -88,13 +88,13 @@ export default function WatchTogetherPage() {
         })
         .subscribe()
     })().catch((reason: unknown) =>
-      setError(reason instanceof Error ? reason.message : 'Unable to load Watch Together.')
+      setError(reason instanceof Error ? reason.message : t('WatchTogether.loadError'))
     )
     return () => {
       channelRef.current = null
       if (channel) void supabase.removeChannel(channel)
     }
-  }, [loadHistory])
+  }, [loadHistory, t])
 
   const broadcast = async (event: 'video', payload: Record<string, unknown> = {}) => {
     if (!channelName || !channelRef.current) return
@@ -103,7 +103,7 @@ export default function WatchTogetherPage() {
       event,
       payload: { ...payload, timestamp: Date.now() },
     })
-    if (response !== 'ok') throw new Error(`Watch sync unavailable: ${response}`)
+    if (response !== 'ok') throw new Error(t('WatchTogether.syncUnavailable').replace('{status}', response))
   }
 
   const select = async (item: WatchItem) => {
@@ -122,7 +122,7 @@ export default function WatchTogetherPage() {
     const playItem: WatchItem = matched ?? {
       id: hist.id,
       youtube_id: hist.youtube_id,
-      title: `Video ${hist.youtube_id}`,
+      title: t('WatchTogether.video').replace('{id}', hist.youtube_id),
       thumbnail_url: getYouTubeThumbnail(hist.youtube_id),
       position: 0,
     }
@@ -133,7 +133,7 @@ export default function WatchTogetherPage() {
     event.preventDefault()
     const id = extractYouTubeId(url)
     if (!id || !coupleId || !userId) {
-      setError('Enter a valid YouTube URL or video ID.')
+      setError(t('WatchTogether.validYouTube'))
       return
     }
     const { count } = await supabase
@@ -171,12 +171,10 @@ export default function WatchTogetherPage() {
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8 animate-fade-in">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-sm uppercase tracking-[0.25em] text-text-2">Shared moment</p>
-          <h1 className="text-4xl font-serif text-text-1">Watch Together</h1>
+          <p className="text-sm uppercase tracking-[0.25em] text-text-2">{t('WatchTogether.sharedMoment')}</p>
+          <h1 className="text-4xl font-serif text-text-1">{t('WatchTogether.title')}</h1>
           <p className="mt-2 text-text-2">
-            {language === 'my'
-              ? 'ရွေးထားတဲ့ဗီဒီယိုက နှစ်ယောက်စလုံးရဲ့စာရင်းမှာ တစ်ပြိုင်တည်းပြောင်းပါမယ်။'
-              : 'Selected videos update on both partners’ screens in real-time.'}
+            {t('WatchTogether.description')}
           </p>
         </div>
         <Link href="/chat" className="glass-button rounded-xl px-4 py-2 text-sm font-semibold">
@@ -188,7 +186,7 @@ export default function WatchTogetherPage() {
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <section className="space-y-4">
-          <div className="glass-card overflow-hidden rounded-btn p-3">
+          <div className="glass-card overflow-hidden rounded-card p-3">
             {current ? (
               <>
                 <div className="aspect-video overflow-hidden rounded-xl bg-black shadow-md">
@@ -206,29 +204,29 @@ export default function WatchTogetherPage() {
               </>
             ) : (
               <div className="p-12 text-center text-text-2">
-                Add a video or choose from your watchlist to start watching together.
+                {t('WatchTogether.emptyPlayer')}
               </div>
             )}
           </div>
 
           <form
             onSubmit={(event) => void add(event)}
-            className="glass-card grid gap-3 rounded-btn p-4 md:grid-cols-[1fr_1fr_auto]"
+            className="glass-card grid gap-3 rounded-card p-4 md:grid-cols-[1fr_1fr_auto]"
           >
             <input
               value={url}
               onChange={(event) => setUrl(event.target.value)}
-              placeholder="YouTube URL or video ID"
-              className="rounded-lg border border-border bg-card/40 px-3 py-2 text-sm text-text-1 placeholder:text-text-2"
+              placeholder={t('WatchTogether.youtubeUrlPlaceholder')}
+              className="min-h-11 rounded-lg border border-border bg-card/40 px-3 py-2 text-sm text-text-1 placeholder:text-text-2"
             />
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              placeholder="Title (optional)"
+              placeholder={t('WatchTogether.titleOptional')}
               className="rounded-lg border border-border bg-card/40 px-3 py-2 text-sm text-text-1 placeholder:text-text-2"
             />
             <button
-              className="rounded-lg bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 active:scale-95"
+              className="min-h-11 rounded-lg bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 active:scale-95"
               type="submit"
             >
               Add video
@@ -239,7 +237,7 @@ export default function WatchTogetherPage() {
             <div className="glass-card rounded-btn p-4">
               <div className="flex items-center gap-2 mb-3">
                 <History className="h-4 w-4 text-accent-1" />
-                <h3 className="font-semibold text-text-1">Recently watched together</h3>
+                <h3 className="font-semibold text-text-1">{t('WatchTogether.recentlyWatched')}</h3>
               </div>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                 {history.map((hist) => (
@@ -263,7 +261,7 @@ export default function WatchTogetherPage() {
                       {hist.youtube_id}
                     </span>
                     <span className="text-[10px] text-text-2">
-                      {new Date(hist.watched_at).toLocaleDateString()}
+                      {new Date(hist.watched_at).toLocaleDateString(language === 'my' ? 'my-MM' : 'en-US')}
                     </span>
                   </button>
                 ))}
@@ -274,10 +272,10 @@ export default function WatchTogetherPage() {
 
         <aside className="space-y-4">
           <div className="glass-card rounded-btn p-4">
-            <h2 className="mb-3 text-xl font-serif text-text-1">Watchlist</h2>
+            <h2 className="mb-3 text-xl font-serif text-text-1">{t('WatchTogether.watchlist')}</h2>
             <div className="space-y-3 max-h-[280px] overflow-auto">
               {items.length === 0 ? (
-                <p className="text-sm text-text-2">Your watchlist is empty.</p>
+                <p className="text-sm text-text-2">{t('WatchTogether.emptyWatchlist')}</p>
               ) : (
                 items.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">
@@ -294,11 +292,11 @@ export default function WatchTogetherPage() {
                       <span className="block truncate text-sm font-medium text-text-1">
                         {item.title}
                       </span>
-                      <span className="text-xs text-accent-1 font-semibold">Play together</span>
+                      <span className="text-xs text-accent-1 font-semibold">{t('WatchTogether.playTogether')}</span>
                     </button>
                     <button
                       type="button"
-                      className="text-text-2 transition hover:text-error"
+                      className="min-h-11 min-w-11 text-text-2 transition hover:text-error"
                       onClick={() =>
                         void supabase
                           .from('watchlist')
@@ -306,7 +304,7 @@ export default function WatchTogetherPage() {
                           .eq('id', item.id)
                           .then(() => setItems((old) => old.filter((row) => row.id !== item.id)))
                       }
-                      title="Remove"
+                      title={t('WatchTogether.remove')} aria-label={t('WatchTogether.remove')}
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -317,7 +315,7 @@ export default function WatchTogetherPage() {
           </div>
 
           <div className="glass-card max-h-[500px] overflow-auto rounded-btn p-3">
-            <h2 className="mb-2 px-2 text-xl font-serif text-text-1">Party chat</h2>
+            <h2 className="mb-2 px-2 text-xl font-serif text-text-1">{t('WatchTogether.partyChat')}</h2>
             <RealtimeChat />
           </div>
         </aside>
