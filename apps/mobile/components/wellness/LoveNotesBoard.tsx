@@ -138,7 +138,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     label: {
       color: colors.textSecondary,
-      fontSize: 10,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
       marginBottom: 8,
@@ -169,7 +169,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     pillText: {
       color: colors.textPrimary,
-      fontSize: 9,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
@@ -229,8 +229,7 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: 16,
       paddingVertical: 12,
     },
-    buttonText: {
-      color: colors.textPrimary,
+    buttonText: { color: colors.accentForeground,
       fontWeight: '700',
       fontSize: 14,
     },
