@@ -28,7 +28,7 @@ export function WellnessBoardShell({
     <Pressable
       onPress={onPress}
       style={[styles.card, selected && styles.cardSelected]}
-      android_ripple={{ color: colors.accent2 }}
+      android_ripple={{ color: colors.textSecondary }}
     >
       <View style={styles.header}>
         <Text style={styles.title}>{title}</Text>
@@ -80,12 +80,12 @@ const createStyles = (colors: ThemeColors) =>
       marginBottom: 12,
     },
     badge: {
-      color: colors.accent2,
+      color: colors.textSecondary,
       backgroundColor: colors.cardBg,
       borderRadius: 999,
       paddingHorizontal: 8,
       paddingVertical: 4,
-      fontSize: 10,
+      fontSize: 12,
       fontWeight: '700',
       overflow: 'hidden',
     },
