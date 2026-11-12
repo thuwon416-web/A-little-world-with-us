@@ -132,7 +132,7 @@ export default function PINLockWidget({
               {hasPin ? t('Settings.changePIN') : t('Settings.setPIN')}
             </h3>
           </div>
-          <button type="button" onClick={closeModal} className="rounded-full p-2 text-text-2 transition hover:bg-soft-tint hover:text-text-1" aria-label={t('Settings.closePINSetup')}>
+          <button type="button" onClick={closeModal} className="min-h-11 min-w-11 rounded-full p-2 text-text-2 transition hover:bg-soft-tint hover:text-text-1" aria-label={t('Settings.closePINSetup')}>
             <X className="h-5 w-5" />
           </button>
         </div>
