@@ -3,55 +3,17 @@
 import { HelpCircle, Search, Sparkles } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 import KeyboardShortcutsHelp from '@/components/shared/KeyboardShortcutsHelp'
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts'
 import { trackFeatureUsage } from '@/lib/analytics'
 
-const faqItems = [
-  {
-    question: 'How do I invite my partner?',
-    answer:
-      'Open the couple-linking flow from the app or dashboard and share the invite link with your partner.',
-  },
-  {
-    question: 'Can I use this app offline?',
-    answer:
-      'The app includes PWA support and a service worker, so key pages can remain available when your connection is weak.',
-  },
-  {
-    question: 'How do I change the theme?',
-    answer:
-      'Use the theme panel in Settings or the quick theme control in the sidebar to switch between moods.',
-  },
-  {
-    question: 'Where do I find wellness activities?',
-    answer:
-      'Open the Wellness tab from the home navigation, where the board collection is grouped in themed sections.',
-  },
-  {
-    question: 'How do I add memories?',
-    answer:
-      'Go to the Memories page and click the upload button to add photos with captions and dates to your timeline.',
-  },
-  {
-    question: 'Is my data private?',
-    answer:
-      'Absolutely. All your memories, messages, and couple data are encrypted and only accessible to you and your partner.',
-  },
-  {
-    question: 'How do I export my data?',
-    answer:
-      'Go to Settings and use the Export button in the Care Data section to download all your memories and messages.',
-  },
-  {
-    question: 'How does the AI assistant work?',
-    answer:
-      'The AI assistant can help with relationship advice, date ideas, and love letters. Click the chat icon in the bottom right corner to start.',
-  },
-]
+const FAQ_COUNT = 8
 
 export default function HelpPage() {
+  const { t } = useLanguage()
+  const faqItems = Array.from({ length: FAQ_COUNT }, (_, index) => ({ question: t(`Help.faqs.${index}.0`), answer: t(`Help.faqs.${index}.1`) }))
   const [query, setQuery] = useState('')
   const [showShortcuts, setShowShortcuts] = useState(true)
   const searchRef = useRef<HTMLInputElement | null>(null)
@@ -64,13 +26,13 @@ export default function HelpPage() {
     {
       key: 'k',
       ctrlOrMeta: true,
-      description: 'Focus search',
+      description: t('Help.focusSearch'),
       action: () => searchRef.current?.focus(),
     },
     {
       key: '/',
       ctrlOrMeta: true,
-      description: 'Toggle shortcuts',
+      description: t('Help.toggleShortcuts'),
       action: () => setShowShortcuts((current) => !current),
     },
   ])
@@ -86,22 +48,22 @@ export default function HelpPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <section className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
+      <section className="rounded-panel border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
             <HelpCircle className="h-6 w-6" />
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">
+            <p className="text-xs uppercase tracking-[0.16em] text-text-2">
               Support
             </p>
-            <h1 className="mt-1 text-3xl font-serif text-text-1">Help & FAQ</h1>
+            <h1 className="mt-1 text-3xl font-serif text-text-1">{t('Help.title')}</h1>
           </div>
         </div>
       </section>
 
       <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-        <section className="rounded-modal border border-border/20 bg-card p-5">
+        <section className="rounded-panel border border-border/20 bg-card p-5">
           <div className="relative mb-4">
             <Search className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-text-2" />
             <input
@@ -109,8 +71,8 @@ export default function HelpPage() {
               type="search"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search help articles"
-              className="w-full rounded-full border border-accent-1/20 bg-card py-3 pl-11 pr-4 text-sm text-text-1 outline-none ring-0 placeholder:text-text-2"
+              placeholder={t('Help.search')}
+              className="min-h-11 w-full rounded-full border border-accent-1/20 bg-card py-3 pl-11 pr-4 text-sm text-text-1 outline-none ring-0 placeholder:text-text-2"
             />
           </div>
 
@@ -119,7 +81,7 @@ export default function HelpPage() {
               filteredFaq.map(({ question, answer }) => (
                 <details
                   key={question}
-                  className="rounded-[22px] border border-border/20 bg-card p-4"
+                  className="rounded-card border border-border/20 bg-card p-4"
                 >
                   <summary className="cursor-pointer font-medium text-text-1 marker:text-accent-1">{question}</summary>
                   <p className="mt-2 text-sm text-text-2">{answer}</p>
@@ -127,7 +89,7 @@ export default function HelpPage() {
               ))
             ) : (
               <div className="rounded-[22px] border border-dashed border-accent-1/20 bg-card p-4 text-sm text-text-2">
-                No matches found. Try another keyword.
+                {t('Help.noMatches')}
               </div>
             )}
           </div>
@@ -137,35 +99,25 @@ export default function HelpPage() {
           {showShortcuts ? <KeyboardShortcutsHelp /> : null}
 
           <div className="rounded-modal border border-accent-1/20 bg-card p-5">
-            <h2 className="text-lg font-semibold text-text-1">Troubleshooting</h2>
+            <h2 className="text-lg font-semibold text-text-1">{t('Help.troubleshooting')}</h2>
             <div className="mt-4 space-y-3 text-sm">
               <p>
-                <strong className="text-text-1">Cannot log in?</strong> Check your
-                connection, confirm your email, and try the password reset flow.
+                <strong className="text-text-1">{t('Help.cannotLogin')}</strong> {t('Help.loginHelp')}
               </p>
               <p>
-                <strong className="text-text-1">
-                  Cannot link with your partner?
-                </strong>{' '}
-                Confirm both accounts are registered and that the invite has not expired.
+                <strong className="text-text-1">{t('Help.cannotLink')}</strong> {t('Help.linkHelp')}
               </p>
               <p>
-                <strong className="text-text-1">App is slow or not loading?</strong>{' '}
-                Refresh the page, check your connection, and try again with the latest browser
-                version.
+                <strong className="text-text-1">{t('Help.slowApp')}</strong> {t('Help.slowHelp')}
               </p>
               <p>
-                <strong className="text-text-1">Notifications not working?</strong>{' '}
-                Review notification permissions in Settings and in your device or browser settings.
+                <strong className="text-text-1">{t('Help.notifications')}</strong> {t('Help.notificationsHelp')}
               </p>
               <p>
-                <strong className="text-text-1">Location not sharing?</strong>{' '}
-                Confirm location permission is enabled and that sharing has been turned on for your
-                accepted partner.
+                <strong className="text-text-1">{t('Help.location')}</strong> {t('Help.locationHelp')}
               </p>
               <p>
-                <strong className="text-text-1">AI not responding?</strong> Check
-                your connection, submit a shorter request, and try again.
+                <strong className="text-text-1">{t('Help.ai')}</strong> {t('Help.aiHelp')}
               </p>
             </div>
           </div>
@@ -186,12 +138,12 @@ export default function HelpPage() {
             </div>
 
             <p className="mt-4 text-sm text-text-2">
-              Send a message through the support link for issues, setup help, or feature requests.
+              {t('Help.contactCopy')}
             </p>
 
             <a
               href="mailto:support@alittleworldwithus.com"
-              className="mt-4 inline-flex rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm"
+              className="mt-4 inline-flex min-h-11 items-center rounded-full bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm"
             >
               support@alittleworldwithus.com
             </a>
