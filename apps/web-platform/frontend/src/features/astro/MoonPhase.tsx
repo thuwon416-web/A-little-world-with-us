@@ -98,7 +98,7 @@ function getCurrentMoonPhase(): MoonPhaseData {
 }
 
 export default function MoonPhase() {
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const [currentPhase, setCurrentPhase] = useState<MoonPhaseData>(getCurrentMoonPhase())
   const [showMyanmar, setShowMyanmar] = useState(language === 'my')
 
@@ -118,7 +118,7 @@ export default function MoonPhase() {
             <Moon className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Moon Phase</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">{t('Astrology.moonPhase')}</p>
             <p className="mt-1 text-sm font-medium text-text-1">
               {showMyanmar ? 'လညွှန်း' : 'Lunar Calendar'}
             </p>
@@ -159,7 +159,7 @@ export default function MoonPhase() {
       <div className="flex items-start gap-3 rounded-xl border border-accent-1/20 bg-accent-1/5 p-4">
         <Heart className="h-5 w-5 text-accent-1 flex-shrink-0 mt-0.5" />
         <div>
-          <p className="text-xs font-medium text-accent-1">Relationship Impact</p>
+          <p className="text-xs font-medium text-accent-1">{t('Astrology.relationshipImpact')}</p>
           <p className="mt-1 text-sm text-text-1">
             {showMyanmar ? currentPhase.relationshipImpactMy : currentPhase.relationshipImpact}
           </p>
