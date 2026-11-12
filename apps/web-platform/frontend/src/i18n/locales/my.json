@@ -928,6 +928,7 @@
     "biometricLater": "နောက်အဆင့်တွင် လက်ဗွေ/ဇီဝအချက်အလက် WebAuthn ဖွင့်နိုင်ပါမည်။",
     "done": "ပြီးပါပြီ",
     "createPassphrase": "Passphrase ဖန်တီးရန်",
-    "savedIt": "သိမ်းဆည်းပြီးပါပြီ"
+    "savedIt": "သိမ်းဆည်းပြီးပါပြီ",
+    "archiveRestoredSummary": "မှတ်တမ်း ပြန်ထည့်ပြီးပါပြီ - {imported} ခု ထည့်ပြီး၊ ထပ်နေသော {skipped} ခု ကျော်ထားသည်။ {errors} ခုကို ပြန်မထည့်နိုင်ပါ။"
   }
 }
