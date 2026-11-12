@@ -175,7 +175,8 @@
     "periodCalendarClose": "Close period calendar",
     "dailyLogClose": "Close log",
     "intimacy": "Intimacy",
-    "days": "days"
+    "days": "days",
+    "from2024": "From 2024 onward"
   },
   "Settings": {
     "title": "Settings",
