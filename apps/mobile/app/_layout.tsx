@@ -74,6 +74,17 @@ function ThemedStatusBar() {
   return <StatusBar style={isDark ? 'light' : 'dark'} />
 }
 
+function LocalizedStack() {
+  const { t } = useTranslation()
+  return (
+    <Stack>
+      <Stack.Screen name="login" options={{ title: t('common.login') }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="+not-found" options={{ title: t('common.notFound') }} />
+    </Stack>
+  )
+}
+
 function MfaGate({ children }: { children: ReactNode }) {
   const { user, loading: authLoading } = useAuth()
   const { colors } = useTheme()
@@ -148,11 +159,7 @@ export default function RootLayout() {
             <ErrorBoundary>
               <ThemedStatusBar />
               <MfaGate>
-                <Stack>
-                  <Stack.Screen name="login" options={{ title: 'Login' }} />
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
-                </Stack>
+                <LocalizedStack />
               </MfaGate>
             </ErrorBoundary>
           </ThemeProvider>
