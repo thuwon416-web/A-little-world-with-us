@@ -6,6 +6,7 @@ import { Bell, X, Calendar } from 'lucide-react'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { insertRow, readUserRows, deleteRow, getCurrentUserId, type Reminder } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type DisplayReminder = Pick<
   Reminder,
@@ -37,6 +38,7 @@ export default function RemindersWidget({
   onModalClose: () => void
 }) {
   const fieldId = useId()
+  const { t } = useLanguage()
   const [reminders, setReminders] = useState<DisplayReminder[]>([])
   const [showAddModal, setShowAddModal] = useState(false)
   const [newTitle, setNewTitle] = useState('')
@@ -94,20 +96,20 @@ export default function RemindersWidget({
       <div className="my-8 w-full max-w-md rounded-modal border border-accent-1/20 bg-card/95 p-6 shadow-2xl backdrop-blur-xl">
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-text-2">Shared reminders</p>
-            <h3 id="add-reminder-title" className="mt-1 text-lg font-semibold text-text-1">Add Reminder</h3>
+            <p className="text-xs uppercase tracking-[0.18em] text-text-2">{t('Settings.sharedReminders')}</p>
+            <h3 id="add-reminder-title" className="mt-1 text-lg font-semibold text-text-1">{t('Settings.addReminder')}</h3>
           </div>
-          <button type="button" onClick={closeModal} className="rounded-full p-2 text-text-2 transition hover:bg-soft-tint hover:text-text-1" aria-label="Close add reminder">
+          <button type="button" onClick={closeModal} className="rounded-full p-2 text-text-2 transition hover:bg-soft-tint hover:text-text-1" aria-label={t('Settings.closeAddReminder')}>
             <X className="h-5 w-5" />
           </button>
         </div>
         <div className="space-y-3">
-          <div><label htmlFor={`${fieldId}-title`} className="text-sm font-medium text-text-1">Title *</label><input id={`${fieldId}-title`} type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" placeholder="e.g., Anniversary" autoFocus /></div>
-          <div><label htmlFor={`${fieldId}-description`} className="text-sm font-medium text-text-1">Description</label><textarea id={`${fieldId}-description`} value={newDescription} onChange={(e) => setNewDescription(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" placeholder="Additional notes..." rows={2} /></div>
-          <div><label htmlFor={`${fieldId}-date`} className="text-sm font-medium text-text-1">Date *</label><input id={`${fieldId}-date`} type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" /></div>
-          <div><label htmlFor={`${fieldId}-type`} className="text-sm font-medium text-text-1">Type</label><select id={`${fieldId}-type`} value={newType} onChange={(event) => { const value = REMINDER_TYPES.find((type) => type === event.target.value); if (value) setNewType(value) }} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"><option value="custom">Custom</option><option value="anniversary">Anniversary</option><option value="birthday">Birthday</option><option value="cycle">Cycle</option><option value="medication">Medication</option></select></div>
-          <div><label htmlFor={`${fieldId}-repeat`} className="text-sm font-medium text-text-1">Repeat</label><select id={`${fieldId}-repeat`} value={newRepeat} onChange={(event) => { const value = REPEAT_INTERVALS.find((interval) => interval === event.target.value); if (value) setNewRepeat(value) }} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"><option value="once">Once</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="yearly">Yearly</option></select></div>
-          <button type="button" onClick={handleAdd} disabled={!newTitle.trim() || !newDate} className="w-full rounded-pill bg-accent-1 px-4 py-3 text-sm font-semibold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">Add Reminder</button>
+          <div><label htmlFor={`${fieldId}-title`} className="text-sm font-medium text-text-1">{t('Settings.titleRequired')}</label><input id={`${fieldId}-title`} type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" placeholder={t('Settings.anniversary')} autoFocus /></div>
+          <div><label htmlFor={`${fieldId}-description`} className="text-sm font-medium text-text-1">{t('Settings.description')}</label><textarea id={`${fieldId}-description`} value={newDescription} onChange={(e) => setNewDescription(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" placeholder={t('Settings.additionalNotes')} rows={2} /></div>
+          <div><label htmlFor={`${fieldId}-date`} className="text-sm font-medium text-text-1">{t('Settings.dateRequired')}</label><input id={`${fieldId}-date`} type="date" value={newDate} onChange={(e) => setNewDate(e.target.value)} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15" /></div>
+          <div><label htmlFor={`${fieldId}-type`} className="text-sm font-medium text-text-1">{t('Settings.type')}</label><select id={`${fieldId}-type`} value={newType} onChange={(event) => { const value = REMINDER_TYPES.find((type) => type === event.target.value); if (value) setNewType(value) }} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"><option value="custom">{t('Settings.custom')}</option><option value="anniversary">{t('Settings.anniversary')}</option><option value="birthday">{t('Settings.birthday')}</option><option value="cycle">{t('Settings.cycle')}</option><option value="medication">{t('Settings.medication')}</option></select></div>
+          <div><label htmlFor={`${fieldId}-repeat`} className="text-sm font-medium text-text-1">{t('Settings.repeat')}</label><select id={`${fieldId}-repeat`} value={newRepeat} onChange={(event) => { const value = REPEAT_INTERVALS.find((interval) => interval === event.target.value); if (value) setNewRepeat(value) }} className="mt-2 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-3 text-sm text-text-1 outline-none focus:border-accent-1/50 focus:ring-2 focus:ring-accent-1/15"><option value="once">{t('Settings.once')}</option><option value="daily">{t('Settings.daily')}</option><option value="weekly">{t('Settings.weekly')}</option><option value="monthly">{t('Settings.monthly')}</option><option value="yearly">{t('Settings.yearly')}</option></select></div>
+          <button type="button" onClick={handleAdd} disabled={!newTitle.trim() || !newDate} className="w-full rounded-pill bg-accent-1 px-4 py-3 text-sm font-semibold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50">{t('Settings.addReminder')}</button>
         </div>
       </div>
     </div>
@@ -154,8 +156,8 @@ export default function RemindersWidget({
         {reminders.length === 0 && (
           <EmptyState
             icon={Bell}
-            title="No reminders yet"
-            description="Create one to keep your connection on track."
+            title={t('Settings.noReminders')}
+            description={t('Settings.createReminder')}
           />
         )}
       </div>
