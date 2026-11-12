@@ -115,7 +115,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       marginBottom: 10,
     },
     pill: {
-      color: colors.accent2,
+      color: colors.textSecondary,
       fontSize: sizes.text.xs,
       letterSpacing: 1,
       textTransform: 'uppercase',
@@ -193,7 +193,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       marginBottom: 8,
     },
     cardTime: {
-      color: colors.accent2,
+      color: colors.textSecondary,
       fontSize: sizes.text.xs,
     },
     error: {
