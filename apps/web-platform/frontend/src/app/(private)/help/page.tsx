@@ -13,7 +13,7 @@ const FAQ_COUNT = 8
 
 export default function HelpPage() {
   const { t } = useLanguage()
-  const faqItems = Array.from({ length: FAQ_COUNT }, (_, index) => ({ question: t(`Help.faqs.${index}.0`), answer: t(`Help.faqs.${index}.1`) }))
+  const faqItems = useMemo(() => Array.from({ length: FAQ_COUNT }, (_, index) => ({ question: t(`Help.faqs.${index}.0`), answer: t(`Help.faqs.${index}.1`) })), [t])
   const [query, setQuery] = useState('')
   const [showShortcuts, setShowShortcuts] = useState(true)
   const searchRef = useRef<HTMLInputElement | null>(null)
@@ -44,7 +44,7 @@ export default function HelpPage() {
       const haystack = `${question} ${answer}`.toLowerCase()
       return haystack.includes(query.trim().toLowerCase())
     })
-  }, [query])
+  }, [query, faqItems])
 
   return (
     <div className="space-y-6 p-4 md:p-6">
