@@ -217,7 +217,7 @@ export default function LearningPage() {
                           {curriculumCodeByLessonId[lesson.id] ?? `${t('Learning.lesson')} ${lesson.order}`}
                         </p>
                         <h3 className="mt-1 text-xl font-semibold text-text-1">
-                          {lesson.title}
+                          {language === 'my' ? lesson.titleMy : lesson.title}
                         </h3>
                         <p className="mt-1 text-sm text-accent-1">{lesson.titleMy}</p>
                       </div>
