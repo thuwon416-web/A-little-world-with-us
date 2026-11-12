@@ -5,11 +5,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useTheme } from '@/context/ThemeContext'
+import { useTranslation } from '@/i18n/useTranslation'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import { calculateDaysTogether } from '@/services/relationshipDays'
 
 export default function OurStats({ coupleId }: { coupleId: string }) {
   const { colors } = useTheme()
+  const { t } = useTranslation()
   const styles = createStyles(colors)
   const router = useRouter()
   const [stats, setStats] = useState<Record<string, number> | null>(null)
@@ -24,26 +26,26 @@ export default function OurStats({ coupleId }: { coupleId: string }) {
   if (!total)
     return (
       <View style={styles.card}>
-        <Text style={styles.kicker}>Our Stats</Text>
+        <Text style={styles.kicker}>{t('dashboard.ourStats')}</Text>
         <EmptyState
           icon={BookHeart}
-          title="No stats yet"
-          description="Upload memories to see how your story grows over time."
+          title={t('dashboard.noStats')}
+          description={t('dashboard.uploadMemories')}
         />
       </View>
     )
   const cards = [
-    ['Total Memories', total],
-    ['Days Together', calculateDaysTogether()],
-    ['Love Expressions', stats.emotional_expressions ?? 0],
-    ['Promises', stats.promises ?? 0],
+    [t('dashboard.totalMemories'), total],
+    [t('dashboard.daysTogether'), calculateDaysTogether()],
+    [t('dashboard.loveExpressions'), stats.emotional_expressions ?? 0],
+    [t('dashboard.promises'), stats.promises ?? 0],
   ] as const
   return (
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.kicker}>Our Stats</Text>
         <TouchableOpacity onPress={() => router.push('/(tabs)/our-story')}>
-          <Text style={styles.link}>View All</Text>
+          <Text style={styles.link}>{t('dashboard.viewAll')}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.grid}>
@@ -62,12 +64,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.surface,
-      borderColor: colors.accent1,
-      borderRadius: 16,
+      borderColor: colors.cardBorder,
+      borderRadius: 20,
       borderWidth: 1,
       gap: 14,
-      padding: 24,
-      shadowColor: colors.accent1,
+      padding: 20,
+      shadowColor: colors.textPrimary,
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.12,
       shadowRadius: 14,
