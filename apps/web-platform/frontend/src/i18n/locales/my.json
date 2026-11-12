@@ -892,6 +892,15 @@
     "recoveryWords": "ပြန်လည်ရယူရန် စကားလုံး ၁၂ လုံးလုံးကို အစဉ်လိုက် ထည့်ပါ။",
     "recoveryPlaceholder": "စကားလုံး၁ စကားလုံး၂ စကားလုံး၃ …",
     "recoverVault": "Vault ပြန်လည်ရယူရန်",
-    "all": "အားလုံး"
+    "all": "အားလုံး",
+    "noLetters": "စာ မရှိသေးပါ",
+    "checkingAuth": "အကောင့်ဝင်မှုကို စစ်ဆေးနေသည်…",
+    "unableAuth": "အကောင့်ဝင်မှုကို စစ်ဆေး၍ မရပါ။",
+    "unableLoadKey": "Vault key ကို ရယူ၍ မရပါ။",
+    "pinDigitsError": "PIN သည် ဂဏန်း ၄–၆ လုံး ဖြစ်ရပါမည်။",
+    "invalidPIN": "PIN မှားယွင်းနေပါသည်။",
+    "unableUnlockPasswords": "စကားဝှက်များကို ဖွင့်၍ မရပါ။",
+    "biometricUnavailable": "လက်ဗွေ/ဇီဝအချက်အလက်ဖြင့် ဖွင့်၍ မရပါ။",
+    "unableRecoverVault": "Vault ကို ပြန်လည်ရယူ၍ မရပါ။"
   }
 }
