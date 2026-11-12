@@ -76,7 +76,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     document.documentElement.dataset.themeMode = mode
     document.documentElement.style.colorScheme =
-      mode === 'lavender-mist' || mode === 'monochrome' ? 'dark' : 'light'
+      mode === 'monochrome' ? 'dark' : 'light'
 
     localStorage.setItem('a-little-world-with-us-theme-mode', mode)
     localStorage.setItem('a-little-world-with-us-theme-preference', preference)
