@@ -202,7 +202,7 @@ export default function HealthProfileWidget() {
           <div className="grid gap-4 md:grid-cols-2">
             {profile.blood_type && (
               <div className="rounded-card bg-soft-tint p-3">
-                <p className="text-xs text-text-2">Blood type</p>
+                <p className="text-xs text-text-2">{t('Settings.bloodType')}</p>
                 <p className="text-sm font-medium text-text-1">{profile.blood_type}</p>
               </div>
             )}
@@ -255,7 +255,7 @@ export default function HealthProfileWidget() {
           {/* Emergency Contact */}
           {profile.emergency_contact?.name && (
             <div className="rounded-xl bg-soft-tint p-3">
-              <p className="text-xs text-text-2">Emergency contact</p>
+              <p className="text-xs text-text-2">{t('Settings.emergencyContact')}</p>
               <p className="text-sm font-medium text-text-1">{profile.emergency_contact.name}</p>
               <p className="text-xs text-text-2">{profile.emergency_contact.phone}</p>
               <p className="text-xs text-text-2">{profile.emergency_contact.relationship}</p>
@@ -403,7 +403,7 @@ export default function HealthProfileWidget() {
               </div>
 
               <div className="rounded-xl border border-accent-1/20 bg-soft-tint p-3">
-                <p className="text-xs font-medium text-text-1 mb-2">Emergency contact</p>
+                <p className="text-xs font-medium text-text-1 mb-2">{t('Settings.emergencyContact')}</p>
                 <div className="space-y-2">
                   <label htmlFor={`${fieldId}-emergency-name`} className="sr-only">{t('Settings.emergencyName')}</label>
                   <input
