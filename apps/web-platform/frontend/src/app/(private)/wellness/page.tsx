@@ -106,7 +106,7 @@ export default function WellnessPage() {
         </div>
       ) : null}
 
-      <nav className="flex gap-2 overflow-x-auto pb-2" aria-label="Wellness categories">
+      <nav className="flex gap-2 overflow-x-auto pb-2" aria-label={t('Wellness.categories')}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
