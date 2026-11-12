@@ -109,8 +109,8 @@
     --chart-4: 340 80% 75%;
     --chart-5: 210 60% 60%;
     --radius: 1.5rem;
-    --font-display: var(--font-playfair);
-    --font-body: var(--font-poppins);
+    --font-display: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
+    --font-body: var(--font-inter), "Noto Sans Myanmar", "Pyidaungsu", "Padauk", system-ui, sans-serif;
     --font-accent: var(--font-dancing);
 
     /* B2 Size Variables */
@@ -210,12 +210,10 @@
       transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
     }
 
-    button:not(:disabled):hover,
     .glass-button:hover {
       transform: translateY(-1px);
     }
 
-    button:not(:disabled):active,
     .glass-button:active {
       transform: translateY(0);
     }
@@ -1181,17 +1179,11 @@ p {
 }
 
 .glass-card {
-  background: rgb(var(--card) / 0.72);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgb(var(--border) / 0.6);
-  border-radius: 1.5rem;
-  box-shadow:
-    0 8px 32px -8px rgba(26, 11, 46, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
+  background: rgb(var(--card) / 0.96);
+  border: 1px solid rgb(var(--border) / 0.8);
+  border-radius: var(--ui-radius-card, 20px);
+  box-shadow: 0 8px 24px -12px rgb(var(--text-1) / 0.16);
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
 
 /* Card density variants:
@@ -1207,10 +1199,12 @@ p {
   padding: 28px;
 }
 
-.glass-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px -8px rgb(var(--text-1) / 0.12);
-  border-color: rgb(var(--border));
+@media (hover: hover) and (pointer: fine) {
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -12px rgb(var(--text-1) / 0.22);
+    border-color: rgb(var(--accent-1) / 0.35);
+  }
 }
 
 .glass-card-solid {
@@ -1659,4 +1653,12 @@ button.micro-interaction:active {
   .ui-card {
     transition: none;
   }
+}
+
+
+@layer components {
+  /* Shared card baseline: utilities such as p-4 can override this component-layer default. */
+  .glass-card { padding: 24px; }
+  .glass-card--compact { padding: 16px; }
+  .glass-card--hero { padding: 28px; }
 }
