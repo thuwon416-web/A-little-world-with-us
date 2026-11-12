@@ -124,7 +124,7 @@ export default function FavoritesWidget() {
                     className="text-xs text-accent-1 flex items-center gap-1 mt-1"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    Link
+                    {t('Settings.link')}
                   </a>
                 )}
                 {item.notes && (
@@ -133,7 +133,8 @@ export default function FavoritesWidget() {
               </div>
               <button
                 onClick={() => handleDelete(item.id)}
-                className="p-2 text-text-2 hover:text-error"
+                aria-label={`${t('Settings.deleteItem')} ${item.item_name}`}
+                className="min-h-11 min-w-11 p-2 text-text-2 hover:text-error"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -170,7 +171,7 @@ export default function FavoritesWidget() {
                     className="text-xs text-accent-1 flex items-center gap-1 mt-1"
                   >
                     <ExternalLink className="h-3 w-3" />
-                    Link
+                    {t('Settings.link')}
                   </a>
                 )}
                 {item.notes && (
