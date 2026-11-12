@@ -101,7 +101,7 @@ export default function PhotoExport({ photos }: Props) {
       </div>
 
       {/* Photo Grid */}
-      {photos.length === 0 ? <EmptyState title={t('Settings.noPhotosToExport')} /> : <div className="grid grid-cols-3 gap-2 mb-4 max-h-64 overflow-y-auto">
+      {photos.length === 0 ? <EmptyState icon={ImageIcon} title={t('Settings.noPhotosToExport')} /> : <div className="grid grid-cols-3 gap-2 mb-4 max-h-64 overflow-y-auto">
         {photos.map(photo => (
           <button
             type="button"
