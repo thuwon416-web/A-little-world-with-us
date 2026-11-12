@@ -752,5 +752,28 @@
   },
   "Wellness": {
     "categories": "Wellness categories"
+  },
+  "Calls": {
+    "title": "Calls",
+    "subtitle": "Stay close, even apart",
+    "incomingCall": "{name} is calling…",
+    "incomingVideo": "Incoming video call",
+    "incomingAudio": "Incoming audio call",
+    "decline": "Decline",
+    "answer": "Answer",
+    "calling": "Calling…",
+    "connected": "Connected",
+    "callingWith": "Calling {name}…",
+    "connectedWith": "Connected with {name}",
+    "unmute": "Unmute microphone",
+    "mute": "Mute microphone",
+    "enableCamera": "Enable camera",
+    "disableCamera": "Disable camera",
+    "endCall": "End call",
+    "callWithPartner": "Call with your partner",
+    "callDescription": "Start a live, private audio or video conversation anytime directly from your browser.",
+    "startAudioCall": "Start audio call",
+    "startVideoCall": "Start video call",
+    "linkPartnerFirst": "Please link with your partner first to place live calls."
   }
 }
