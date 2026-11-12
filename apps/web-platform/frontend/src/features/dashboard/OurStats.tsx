@@ -6,8 +6,10 @@ import Link from 'next/link'
 import { EmptyState } from '@/components/ui/empty-state'
 import { calculateDaysTogether } from '@/lib/relationship-days'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 function OurStats({ coupleId }: { coupleId: string }) {
+  const { t } = useLanguage()
   const [stats, setStats] = useState<Record<string, number> | null>(null)
 
   useEffect(() => {
@@ -25,12 +27,12 @@ function OurStats({ coupleId }: { coupleId: string }) {
   if (!total) {
     return (
       <section className="glass-card dashboard-panel rounded-btn p-6">
-        <p className="dashboard-kicker">Our Stats</p>
+        <p className="dashboard-kicker">{t('dashboard.widgets.ourStats')}</p>
         <div className="mt-3">
           <EmptyState
             icon={BookHeart}
-            title="No stats yet"
-            description="Upload memories to see how your story grows over time."
+            title={t('dashboard.noStats')}
+            description={t('dashboard.uploadMemories')}
           />
         </div>
       </section>
@@ -38,10 +40,10 @@ function OurStats({ coupleId }: { coupleId: string }) {
   }
 
   const cards = [
-    ['Total Memories', total],
-    ['Days Together', calculateDaysTogether()],
-    ['Love Expressions', stats.emotional_expressions ?? 0],
-    ['Promises', stats.promises ?? 0],
+    [t('dashboard.totalMemories'), total],
+    [t('dashboard.relationship.daysTogether'), calculateDaysTogether()],
+    [t('dashboard.loveExpressions'), stats.emotional_expressions ?? 0],
+    [t('dashboard.promises'), stats.promises ?? 0],
   ]
   return (
     <section className="glass-card dashboard-panel rounded-btn p-6">
