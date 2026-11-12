@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { calculateDaysTogether } from '@/lib/relationship-days'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type DashboardCounts = {
   memories: number | null
@@ -38,6 +39,7 @@ function countValue(count: number | null, error: unknown) {
 }
 
 export default function RelationshipStats() {
+  const { t } = useLanguage()
   const [counts, setCounts] = useState<DashboardCounts>(initialCounts)
   const [status, setStatus] = useState<'loading' | 'ready' | 'unlinked' | 'error'>('loading')
   const [showAll, setShowAll] = useState(false)
@@ -192,26 +194,26 @@ export default function RelationshipStats() {
       value === null ? '—' : `${value.toLocaleString()}${suffix}`
 
     return [
-      { label: 'Days together', value: calculateDaysTogether().toLocaleString() },
-      { label: 'Memories', value: display(counts.memories) },
-      { label: 'Messages', value: display(counts.messages) },
-      { label: 'Vault items', value: display(counts.vaultItems) },
-      { label: 'Longest streak', value: display(counts.longestStreak, ' days') },
-      { label: 'Date nights', value: display(counts.dateNights) },
-      { label: 'Inbox notes', value: display(counts.inboxNotes) },
-      { label: 'Care logs', value: display(counts.careLogs) },
-      { label: 'Love streak', value: display(counts.loveStreak, ' days') },
-      { label: 'Wellness logs', value: display(counts.wellnessLogs) },
-      { label: 'Finance progress', value: display(counts.financeProgress, '%') },
-      { label: 'Watched together', value: display(counts.watchHistory) },
+      { label: t('dashboard.relationship.daysTogether'), value: calculateDaysTogether().toLocaleString() },
+      { label: t('dashboard.relationship.memories'), value: display(counts.memories) },
+      { label: t('dashboard.relationship.messages'), value: display(counts.messages) },
+      { label: t('dashboard.relationship.vaultItems'), value: display(counts.vaultItems) },
+      { label: t('dashboard.relationship.longestStreak'), value: display(counts.longestStreak, ` ${t('dashboard.daysSuffix')}`) },
+      { label: t('dashboard.relationship.dateNights'), value: display(counts.dateNights) },
+      { label: t('dashboard.relationship.inboxNotes'), value: display(counts.inboxNotes) },
+      { label: t('dashboard.relationship.careLogs'), value: display(counts.careLogs) },
+      { label: t('dashboard.relationship.loveStreak'), value: display(counts.loveStreak, ` ${t('dashboard.daysSuffix')}`) },
+      { label: t('dashboard.relationship.wellnessLogs'), value: display(counts.wellnessLogs) },
+      { label: t('dashboard.relationship.financeProgress'), value: display(counts.financeProgress, '%') },
+      { label: t('dashboard.relationship.watchedTogether'), value: display(counts.watchHistory) },
     ]
-  }, [counts])
+  }, [counts, t])
 
   const visibleStats = showAll ? stats : stats.slice(0, 6)
 
   if (status === 'loading') {
     return (
-      <section aria-label="Relationship statistics" aria-busy="true">
+      <section aria-label={t('dashboard.relationship.ariaLabel')} aria-busy="true">
         <div className="dashboard-grid dashboard-grid--stats">
           {Array.from({ length: 6 }, (_, index) => (
             <div key={index} className="h-24 animate-pulse rounded-panel bg-card" />
@@ -224,9 +226,9 @@ export default function RelationshipStats() {
   if (status === 'unlinked') {
     return (
       <section aria-label="Relationship statistics" className="rounded-panel border border-accent-1/15 bg-card p-5">
-        <p className="font-medium text-text-1">Link your partner to see shared statistics.</p>
+        <p className="font-medium text-text-1">{t('dashboard.relationship.linkPartner')}</p>
         <Link href="/couple-linking" className="mt-2 inline-flex text-sm font-semibold text-accent-1 hover:underline">
-          Set up your couple link
+          {t('dashboard.relationship.setUpLink')}
         </Link>
       </section>
     )
@@ -235,7 +237,7 @@ export default function RelationshipStats() {
   return (
     <section aria-label="Relationship statistics">
       {status === 'error' ? (
-        <p className="mb-3 text-sm text-text-2" role="status">Some shared statistics could not be loaded.</p>
+        <p className="mb-3 text-sm text-text-2" role="status">{t('dashboard.relationship.partialError')}</p>
       ) : null}
       <div className="dashboard-grid dashboard-grid--stats">
         {visibleStats.map((stat) => (
@@ -251,7 +253,7 @@ export default function RelationshipStats() {
         aria-expanded={showAll}
         onClick={() => setShowAll((current) => !current)}
       >
-        {showAll ? 'Show fewer' : 'View all statistics'}
+        {showAll ? t('dashboard.relationship.showFewer') : t('dashboard.relationship.viewAll')}
       </button>
     </section>
   )
