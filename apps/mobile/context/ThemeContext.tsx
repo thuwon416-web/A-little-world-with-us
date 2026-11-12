@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 
-import { themes as themeTokens, semantic as semanticTokens } from '@/design-tokens'
+import { themes as themeTokens } from '@/design-tokens'
 
 type CanonicalThemeName =
   'lavender-mist' | 'peach-cream' | 'mint-whisper' | 'ocean-calm' | 'monochrome'
@@ -72,9 +72,9 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent2: themeTokens['lavender-mist'].accent2,
     accent3: themeTokens['lavender-mist'].accent3,
     accentForeground: themeTokens['lavender-mist'].accentForeground,
-    success: semanticTokens.success,
-    warning: semanticTokens.warning,
-    error: semanticTokens.errorLight,
+    success: themeTokens['lavender-mist'].success,
+    warning: themeTokens['lavender-mist'].warning,
+    error: themeTokens['lavender-mist'].error,
   },
   'peach-cream': {
     background: themeTokens['peach-cream'].bg,
@@ -87,9 +87,9 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent2: themeTokens['peach-cream'].accent2,
     accent3: themeTokens['peach-cream'].accent3,
     accentForeground: themeTokens['peach-cream'].accentForeground,
-    success: semanticTokens.success,
-    warning: semanticTokens.warning,
-    error: semanticTokens.errorLight,
+    success: themeTokens['peach-cream'].success,
+    warning: themeTokens['peach-cream'].warning,
+    error: themeTokens['peach-cream'].error,
   },
   'mint-whisper': {
     background: themeTokens['mint-whisper'].bg,
@@ -102,9 +102,9 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent2: themeTokens['mint-whisper'].accent2,
     accent3: themeTokens['mint-whisper'].accent3,
     accentForeground: themeTokens['mint-whisper'].accentForeground,
-    success: semanticTokens.success,
-    warning: semanticTokens.warning,
-    error: semanticTokens.errorLight,
+    success: themeTokens['mint-whisper'].success,
+    warning: themeTokens['mint-whisper'].warning,
+    error: themeTokens['mint-whisper'].error,
   },
   'ocean-calm': {
     background: themeTokens['ocean-calm'].bg,
@@ -117,9 +117,9 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent2: themeTokens['ocean-calm'].accent2,
     accent3: themeTokens['ocean-calm'].accent3,
     accentForeground: themeTokens['ocean-calm'].accentForeground,
-    success: semanticTokens.success,
-    warning: semanticTokens.warning,
-    error: semanticTokens.errorLight,
+    success: themeTokens['ocean-calm'].success,
+    warning: themeTokens['ocean-calm'].warning,
+    error: themeTokens['ocean-calm'].error,
   },
   monochrome: {
     background: themeTokens['monochrome'].bg,
@@ -132,9 +132,9 @@ export const themes: Record<CanonicalThemeName, ThemeColors> = {
     accent2: themeTokens['monochrome'].accent2,
     accent3: themeTokens['monochrome'].accent3,
     accentForeground: themeTokens['monochrome'].accentForeground,
-    success: semanticTokens.success,
-    warning: semanticTokens.warning,
-    error: semanticTokens.errorDark,
+    success: themeTokens['monochrome'].success,
+    warning: themeTokens['monochrome'].warning,
+    error: themeTokens['monochrome'].error,
   },
 }
 
