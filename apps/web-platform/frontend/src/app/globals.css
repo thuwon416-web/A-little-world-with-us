@@ -340,9 +340,9 @@
   --stat-label: 216 154 120;
   --stat-value: 204 111 69;
   --soft-tint: 251 228 208;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 208 138 138;
+  --success: 47 127 63;
+  --warning: 156 99 0;
+  --error: 191 70 70;
 }
 
 /* ===== MINT WHISPER THEME MODE ===== */
@@ -382,9 +382,9 @@
   --stat-label: 120 184 144;
   --stat-value: 61 144 104;
   --soft-tint: 216 235 222;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 208 138 138;
+  --success: 33 127 81;
+  --warning: 155 99 5;
+  --error: 173 84 84;
 }
 
 /* ===== OCEAN CALM THEME MODE ===== */
@@ -424,9 +424,9 @@
   --stat-label: 109 160 204;
   --stat-value: 61 122 180;
   --soft-tint: 212 230 242;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 208 138 138;
+  --success: 18 121 139;
+  --warning: 147 101 0;
+  --error: 181 76 76;
 }
 
 :root[data-theme-mode='monochrome'] {
@@ -465,9 +465,9 @@
   --stat-label: 160 160 168;
   --stat-value: 240 240 244;
   --soft-tint: 34 34 42;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 216 136 136; /* Monochrome-specific error override */
+  --success: 163 197 134;
+  --warning: 230 184 74;
+  --error: 217 112 112; /* Monochrome-specific error override */
 }
 
 :root[data-theme-mode='monochrome'] .glass-input:focus {
