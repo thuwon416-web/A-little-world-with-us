@@ -1315,6 +1315,13 @@
     "openAttachment": "Open attached {type}",
     "cancelCapsule": "Cancel time capsule",
     "loadError": "Unable to load time capsules.",
-    "saveError": "Unable to schedule this time capsule."
+    "saveError": "Unable to schedule this time capsule.",
+    "addRequired": "Add a title, message, and reveal time.",
+    "unsupportedAttachment": "Unsupported attachment.",
+    "signIn": "Please sign in first.",
+    "pairNotFound": "Your accepted pair could not be found.",
+    "attachmentUploadError": "Attachment upload failed.",
+    "attachment": "Attachment (image or PDF)",
+    "revealTime": "Reveal time"
   }
 }
