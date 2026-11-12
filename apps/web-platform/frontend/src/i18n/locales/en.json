@@ -475,5 +475,41 @@
     "tagline": "A shared space for two",
     "sidebarQuote": "You are my favorite hello and hardest goodbye.",
     "todaysWhisper": "Today's whisper"
+  },
+  "Calendar": {
+    "planningHub": "Planning hub",
+    "together": "Together",
+    "planningDescription": "Our shared calendar, dates, bucket-list dreams, and future goals in one place.",
+    "calendarSections": "Calendar sections",
+    "calendarTab": "Calendar",
+    "plansTab": "Plans",
+    "today": "Today",
+    "cancel": "Cancel",
+    "addPlan": "Add plan",
+    "scheduleForDay": "Schedule for this day",
+    "eventExample": "e.g. Candlelight dinner, movie date, trip…",
+    "romanticDate": "Romantic date",
+    "travelTrip": "Travel / trip",
+    "lifeGoal": "Life goal",
+    "milestone": "Milestone",
+    "reminder": "Reminder",
+    "saving": "Saving…",
+    "saveToCalendar": "Save to our calendar",
+    "eventsOccasions": "Events & occasions",
+    "scheduled": "scheduled",
+    "loadingPlans": "Loading plans…",
+    "noPlansToday": "No plans recorded for this day.",
+    "planSomethingSweet": "Plan something sweet",
+    "deletePlan": "Delete plan",
+    "planConversationTitle": "Plan a kinder conversation",
+    "planConversationDescription": "Ask the mediator for a small repair step around an upcoming plan or event.",
+    "planConversationPlaceholder": "What do we need to coordinate without turning it into an argument?",
+    "eventTypes": {
+      "date": "Romantic date",
+      "trip": "Travel / trip",
+      "goal": "Life goal",
+      "life": "Milestone",
+      "other": "Reminder"
+    }
   }
 }
