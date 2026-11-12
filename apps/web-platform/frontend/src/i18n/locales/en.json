@@ -86,6 +86,10 @@
     "askTitle": "Ask for a gentle reset",
     "askDescription": "Get one small, practical step for reconnecting. Nothing is sent automatically.",
     "askPlaceholder": "What feels difficult for us today?",
+    "minutes": "min",
+    "calories": "cal",
+    "saveFailed": "We could not save that activity. Please try again.",
+    "workouts": { "morningStretch": "Morning Stretch", "yogaFlow": "Yoga Flow", "hiit": "HIIT", "coupleWorkout": "Couple Workout", "eveningWalk": "Evening Walk" },
     "tabs": {
       "physical": "Health",
       "mental": "Mental Wellness",
