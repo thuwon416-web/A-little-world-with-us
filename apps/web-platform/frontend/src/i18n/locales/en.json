@@ -510,6 +510,8 @@
       "goal": "Life goal",
       "life": "Milestone",
       "other": "Reminder"
-    }
+    },
+    "remindersTab": "Reminders",
+    "financeTab": "Finance"
   }
 }
