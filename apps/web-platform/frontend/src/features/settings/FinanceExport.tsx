@@ -3,15 +3,17 @@
 import { useState } from 'react'
 import { getCoupleStatus } from '@/lib/couples'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function FinanceExport() {
+  const { t } = useLanguage()
   const [loading, setLoading] = useState(false)
 
   const exportFinance = async () => {
     setLoading(true)
     try {
       const { couple } = await getCoupleStatus()
-      if (!couple) throw new Error('Link with your partner before exporting finance data.')
+      if (!couple) throw new Error(t('Settings.financeLinkRequired'))
       const { data, error } = await supabase.from('financial_goals').select('*').eq('couple_id', couple.id)
       if (error) throw error
       const blob = new Blob([JSON.stringify(data ?? [], null, 2)], { type: 'application/json' })
@@ -22,11 +24,11 @@ export default function FinanceExport() {
       anchor.click()
       URL.revokeObjectURL(url)
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Unable to export finance data.')
+      alert(error instanceof Error ? error.message : t('Settings.financeExportError'))
     } finally {
       setLoading(false)
     }
   }
 
-  return <button type="button" onClick={() => void exportFinance()} disabled={loading} className="rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50">{loading ? 'Exporting...' : 'Export Finance Data'}</button>
+  return <button type="button" onClick={() => void exportFinance()} disabled={loading} className="ui-button-primary min-h-11 px-4 py-2 text-sm transition disabled:opacity-50">{loading ? t('Settings.exporting') : t('Settings.exportFinance')}</button>
 }
