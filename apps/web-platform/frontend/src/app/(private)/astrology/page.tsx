@@ -8,15 +8,16 @@ import MoonPhase from '@/features/astro/MoonPhase'
 import RetrogradeAlert from '@/features/astro/RetrogradeAlert'
 
 export default function AstrologyPage() {
+  const { t } = useLanguage()
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-text-2">Cosmic Connection</p>
-          <h1 className="mt-2 text-3xl font-serif text-text-1">Astrology</h1>
+          <h1 className="mt-2 text-3xl font-serif text-text-1">{t('Astrology.title')}</h1>
         </div>
         <p className="rounded-btn border border-accent-1/15 bg-card px-4 py-3 text-sm text-text-2">
-          Astrology is for entertainment only and is not medical, financial, or relationship advice.
+          {t('Astrology.disclaimer')}
         </p>
         <div className="ml-auto flex items-center gap-2 rounded-full bg-accent-1/10 px-4 py-2 text-sm text-accent-1">
           <Sparkles className="h-4 w-4" />
