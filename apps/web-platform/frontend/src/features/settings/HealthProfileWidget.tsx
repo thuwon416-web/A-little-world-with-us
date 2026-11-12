@@ -171,7 +171,7 @@ export default function HealthProfileWidget() {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <Heart className="h-5 w-5 text-accent-1" />
-          <h3 className="text-lg font-semibold text-text-1">healthProfile</h3>
+          <h3 className="text-lg font-semibold text-text-1">{t('Settings.healthProfile')}</h3>
         </div>
         {profile && !editing && (
           <button
@@ -216,13 +216,13 @@ export default function HealthProfileWidget() {
             )}
             {profile.height_cm && (
               <div className="rounded-xl bg-soft-tint p-3">
-                <p className="text-xs text-text-2">Height</p>
+                <p className="text-xs text-text-2">{t('Settings.height')}</p>
                 <p className="text-sm font-medium text-text-1">{profile.height_cm} cm</p>
               </div>
             )}
             {profile.weight_kg && (
               <div className="rounded-xl bg-soft-tint p-3">
-                <p className="text-xs text-text-2">Weight</p>
+                <p className="text-xs text-text-2">{t('Settings.weight')}</p>
                 <p className="text-sm font-medium text-text-1">{profile.weight_kg} kg</p>
               </div>
             )}
@@ -233,19 +233,19 @@ export default function HealthProfileWidget() {
             <div className="space-y-2">
               {profile.allergies?.length && (
                 <div>
-                  <p className="text-xs text-text-2">Allergies</p>
+                  <p className="text-xs text-text-2">{t('Settings.allergies')}</p>
                   <p className="text-sm text-text-1">{profile.allergies.join(', ')}</p>
                 </div>
               )}
               {profile.medications?.length && (
                 <div>
-                  <p className="text-xs text-text-2">Medications</p>
+                  <p className="text-xs text-text-2">{t('Settings.medications')}</p>
                   <p className="text-sm text-text-1">{profile.medications.join(', ')}</p>
                 </div>
               )}
               {profile.conditions?.length && (
                 <div>
-                  <p className="text-xs text-text-2">Conditions</p>
+                  <p className="text-xs text-text-2">{t('Settings.conditions')}</p>
                   <p className="text-sm text-text-1">{profile.conditions.join(', ')}</p>
                 </div>
               )}
@@ -309,8 +309,8 @@ export default function HealthProfileWidget() {
           {!editing ? (
             <EmptyState
               icon={HeartPulse}
-              title="{t('Settings.noHealthProfile')}"
-              description="{t('Settings.healthProfileDescription')}"
+              title={t('Settings.noHealthProfile')}
+              description={t('Settings.healthProfileDescription')}
               action={{ label: t('Settings.addProfile'), onClick: () => setEditing(true) }}
             />
           ) : (
@@ -373,7 +373,7 @@ export default function HealthProfileWidget() {
                   type="text"
                   value={allergies}
                   onChange={(e) => setAllergies(e.target.value)}
-                  placeholder="{t('Settings.peanutsShellfish')}"
+                  placeholder={t('Settings.peanutsShellfish')}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 />
               </div>
@@ -385,7 +385,7 @@ export default function HealthProfileWidget() {
                   type="text"
                   value={medications}
                   onChange={(e) => setMedications(e.target.value)}
-                  placeholder="{t('Settings.medicationExamples')}"
+                  placeholder={t('Settings.medicationExamples')}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 />
               </div>
@@ -397,7 +397,7 @@ export default function HealthProfileWidget() {
                   type="text"
                   value={conditions}
                   onChange={(e) => setConditions(e.target.value)}
-                  placeholder="{t('Settings.conditionExamples')}"
+                  placeholder={t('Settings.conditionExamples')}
                   className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1"
                 />
               </div>
