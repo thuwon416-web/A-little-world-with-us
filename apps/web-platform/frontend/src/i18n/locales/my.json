@@ -749,5 +749,8 @@
   },
   "Dashboard": {
     "loadingStats": "စာရင်းအင်းများ ဖွင့်နေသည်…"
+  },
+  "Wellness": {
+    "categories": "ကျန်းမာရေးကဏ္ဍများ"
   }
 }
