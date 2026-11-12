@@ -68,7 +68,7 @@ export default function AIFeaturePage() {
       })
       const data = await response.json() as { response?: string; ideas?: string; provider?: string; error?: string }
       const generated = tool === 'surprise' ? data.ideas : data.response
-      if (!response.ok || !generated) throw new Error(data.error || 'Unable to generate a response')
+      if (!response.ok || !generated) throw new Error(data.error || t('AI.generateError'))
       setResult(generated)
       setProvider(data.provider || '')
       localStorage.setItem('ai-last-result', JSON.stringify({ tool, input: input.trim(), result: generated, provider: data.provider || '', savedAt: new Date().toISOString() }))
@@ -114,7 +114,7 @@ export default function AIFeaturePage() {
         <div>
           <p className="text-xs uppercase tracking-[0.22em] text-text-2">AI companion</p>
           <h1 className="mt-2 text-3xl font-serif text-text-1">Love assistant</h1>
-          <p className="mt-2 max-w-xl text-sm text-text-2">Private prompts for the moments when a little help finding the right words is welcome.</p>
+          <p className="mt-2 max-w-xl text-sm text-text-2">{t('AI.description')}</p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 bg-card px-3 py-2 text-sm text-accent-1"><Sparkles className="h-4 w-4" /> AI assisted</div>
       </header>
@@ -131,11 +131,11 @@ export default function AIFeaturePage() {
 
         <section className="rounded-modal border border-accent-1/20 bg-card p-5 sm:p-7">
           <div className="flex items-center gap-2 text-accent-1"><Heart className="h-5 w-5" /><h2 className="text-xl font-semibold text-text-1">{tools.find((item) => item.id === tool)?.label}</h2></div>
-          <label className="mt-6 block text-sm font-medium text-text-1" htmlFor="ai-request">{current.label}</label>
-          <textarea id="ai-request" value={input} onChange={(event) => setInput(event.target.value)} placeholder={current.placeholder} maxLength={1000} className="mt-3 min-h-36 w-full rounded-btn border border-accent-1/20 bg-card p-4 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-2 focus:border-accent-1" />
+          <label className="mt-6 block text-sm font-medium text-text-1" htmlFor="ai-request">{t(`AI.promptLabels.${tool}`)}</label>
+          <textarea id="ai-request" value={input} onChange={(event) => setInput(event.target.value)} placeholder={t(`AI.promptPlaceholders.${tool}`)} maxLength={1000} className="mt-3 min-h-36 w-full rounded-btn border border-accent-1/20 bg-card p-4 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-2 focus:border-accent-1" />
           <div className="mt-3 flex items-center justify-between gap-3"><span className="text-xs text-text-2">{input.length}/1000</span><button type="button" disabled={!input.trim() || loading} onClick={() => void generate()} className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-5 py-2.5 text-sm font-semibold text-white font-semibold shadow-sm disabled:cursor-not-allowed disabled:opacity-50"><AnimatedIcon name="Send" animation="wiggle" trigger="press" size={16} />{loading ? 'Thinking…' : 'Generate'}</button></div>
           {error ? <p className="mt-5 rounded-btn bg-error/10 p-4 text-sm text-error">{error}</p> : null}
-          {result ? <div className="mt-6 rounded-panel border border-accent-1/15 bg-card p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-text-2">Your result{provider ? ` · ${provider}` : ''}</p><div className="flex items-center gap-2"><button type="button" onClick={() => void copyResult()} className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-1.5 text-xs text-text-1"><Copy className="h-3.5 w-3.5" />{copyStatus || 'Copy'}</button><button type="button" onClick={() => void saveResult()} className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-1.5 text-xs text-text-1"><Heart className="h-3.5 w-3.5" />{saveStatus || 'Save'}</button><button type="button" onClick={clearResult} className="rounded-full border border-error/30 px-3 py-1.5 text-xs text-error">Clear</button></div></div><p className="mt-4 whitespace-pre-wrap leading-7 text-text-1">{result}</p></div> : null}
+          {result ? <div className="mt-6 rounded-panel border border-accent-1/15 bg-card p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-text-2">Your result{provider ? ` · ${provider}` : ''}</p><div className="flex items-center gap-2"><button type="button" onClick={() => void copyResult()} className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-1.5 text-xs text-text-1"><Copy className="h-3.5 w-3.5" />{copyStatus || 'Copy'}</button><button type="button" onClick={() => void saveResult()} className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-1.5 text-xs text-text-1"><Heart className="h-3.5 w-3.5" />{saveStatus || 'Save'}</button><button type="button" onClick={clearResult} className="rounded-full border border-error/30 px-3 py-1.5 text-xs text-error">{t('AI.clear')}</button></div></div><p className="mt-4 whitespace-pre-wrap leading-7 text-text-1">{result}</p></div> : null}
         </section>
       </div>
     </div>
