@@ -1680,3 +1680,10 @@ button.micro-interaction:active {
     line-height: 1rem;
   }
 }
+
+
+@layer utilities {
+  /* Accent-2/3 are intentionally pale surfaces; use readable ink when used as text. */
+  .text-accent-2 { color: rgb(var(--text-2)); }
+  .text-accent-3 { color: rgb(var(--accent-1)); }
+}
