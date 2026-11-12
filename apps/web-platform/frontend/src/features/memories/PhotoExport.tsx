@@ -82,7 +82,7 @@ export default function PhotoExport({ photos }: Props) {
     <div className="glass-card p-5">
       <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
         <Download className="h-5 w-5 text-accent-1" />
-        Export Photos
+        {t('Settings.photoExportTitle')}
       </h3>
 
       {/* Quota Info */}
@@ -91,7 +91,7 @@ export default function PhotoExport({ photos }: Props) {
           onClick={checkQuota}
           className="min-h-11 text-xs text-text-2 hover:text-text-1"
         >
-          Check Storage Usage
+          {t('Settings.checkStorageUsage')}
         </button>
         {quotaUsage && (
           <div className="mt-2 text-xs text-text-2">
@@ -133,9 +133,9 @@ export default function PhotoExport({ photos }: Props) {
                 <ImageIcon className="h-3 w-3" />
               </div>
             )}
-          </div>
+          </button>
         ))}
-      </div>
+      </div>}
 
       {photos.length > 0 ? <>
       {/* Selection Controls */}
@@ -144,14 +144,14 @@ export default function PhotoExport({ photos }: Props) {
           onClick={selectAll}
           className="min-h-11 text-xs text-text-2 hover:text-text-1"
         >
-          Select All
+          {t('Settings.selectAll')}
         </button>
         <span className="text-xs text-text-2">|</span>
         <button
           onClick={deselectAll}
-          className="text-xs text-text-2 hover:text-text-1"
+          className="min-h-11 text-xs text-text-2 hover:text-text-1"
         >
-          Deselect All
+          {t('Settings.deselectAll')}
         </button>
         <span className="text-xs text-text-2 flex-1 text-right">
           {selectedPhotos.size} / {photos.length} {t('Settings.selected')}
@@ -167,6 +167,8 @@ export default function PhotoExport({ photos }: Props) {
         <Download className="h-4 w-4" />
         {exporting ? t('Settings.exporting') : `${t('Settings.exportPhotosZip')} (${selectedPhotos.size})`}
       </button>
+      </> : null}
+      {error ? <p role="alert" className="mt-3 text-sm text-error">{error}</p> : null}
     </div>
   )
 }
