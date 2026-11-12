@@ -12,7 +12,7 @@
   },
   "Settings": {
     "title": "Settings",
-    "language": "Language"
+    "language": "Language",
     "pageTitle": "Settings",
     "pageSubtitle": "Your shared space, arranged your way",
     "preferences": "Preferences",
@@ -48,7 +48,7 @@
     "openProductionToConnect": "Open production to connect Google Drive",
     "openProductionToReconnect": "Open production to reconnect Google Drive",
     "driveDisconnectError": "Unable to disconnect Google Drive.",
-    "skipToMain": "Skip to main content",
+    "skipToMain": "Skip to main content"
   },
   "Nav": {
     "chat": "Chat",
@@ -70,7 +70,13 @@
     "askTitle": "Ask for a gentle reset",
     "askDescription": "Get one small, practical step for reconnecting. Nothing is sent automatically.",
     "askPlaceholder": "What feels difficult for us today?",
-    "tabs": { "physical": "Health", "mental": "Mental Wellness", "relationship": "Relationship", "quests": "Quests", "games": "Games" }
+    "tabs": {
+      "physical": "Health",
+      "mental": "Mental Wellness",
+      "relationship": "Relationship",
+      "quests": "Quests",
+      "games": "Games"
+    }
   },
   "nav": {
     "home": "Home",
