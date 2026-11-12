@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'A little world with us',
-    description: randomDescription,
+    description,
     images: ['/og-image.png'],
   },
 }
