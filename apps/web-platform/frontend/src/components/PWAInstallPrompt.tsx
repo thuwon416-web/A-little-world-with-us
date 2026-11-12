@@ -44,7 +44,7 @@ export default function PWAInstallPrompt() {
           onClick={handleInstall}
           className="ui-button-primary min-h-11 flex-1 rounded-lg px-4 py-2 text-sm transition"
         >
-          Install
+          {t('Settings.install')}
         </button>
         <button
           onClick={() => setShowPrompt(false)}
