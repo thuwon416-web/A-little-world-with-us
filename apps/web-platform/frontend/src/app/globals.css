@@ -286,8 +286,8 @@
   --card: 255 255 255;
   --border: 221 200 234;
   --text-1: 74 56 96;
-  --text-2: 107 82 132;
-  --label: 168 142 196;
+  --text-2: 93 71 119;
+  --label: 127 95 156;
   --accent-1: 125 92 168;
   --accent-2: 188 160 212;
   --accent-3: 220 200 232;
@@ -298,9 +298,9 @@
   --stat-label: 168 142 196;
   --stat-value: 125 92 168;
   --soft-tint: 237 224 245;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 208 138 138;
+  --success: 53 121 74;
+  --warning: 135 103 31;
+  --error: 158 88 88;
 }
 
 /* ===== PEACH CREAM THEME MODE ===== */
@@ -312,9 +312,9 @@
   --card-border: rgb(var(--border));
   --text-primary: rgb(var(--text-1));
   --text-secondary: rgb(var(--text-2));
-  --success: #3a8a4a;
-  --warning: #d9a03a;
-  --error: #c95050;
+  --success: 47 127 63;
+  --warning: 156 99 0;
+  --error: 191 70 70;
   --glass-alpha: 0.7;
   --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(247, 184, 168, 0.12);
@@ -328,12 +328,12 @@
   --card: 255 255 255;
   --border: 240 208 176;
   --text-1: 95 59 42;
-  --text-2: 138 100 80;
-  --label: 216 154 120;
-  --accent-1: 204 111 69;
+  --text-2: 121 83 63;
+  --label: 158 96 62;
+  --accent-1: 178 85 43;
   --accent-2: 239 176 144;
   --accent-3: 248 213 192;
-  --accent-foreground: #2a170e;
+  --accent-foreground: #fff;
   --card-title: 179 90 52;
   --stat-bg: 255 250 245;
   --stat-border: 245 221 196;
@@ -354,9 +354,9 @@
   --card-border: rgb(var(--border));
   --text-primary: rgb(var(--text-1));
   --text-secondary: rgb(var(--text-2));
-  --success: #2c8a5c;
-  --warning: #e0a84a;
-  --error: #c97070;
+  --success: 33 127 81;
+  --warning: 155 99 5;
+  --error: 173 84 84;
   --glass-alpha: 0.72;
   --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(77, 184, 138, 0.1);
@@ -370,12 +370,12 @@
   --card: 255 255 255;
   --border: 196 220 205;
   --text-1: 38 72 56;
-  --text-2: 80 120 102;
-  --label: 120 184 144;
-  --accent-1: 61 144 104;
+  --text-2: 69 106 89;
+  --label: 60 124 84;
+  --accent-1: 42 125 85;
   --accent-2: 130 196 152;
   --accent-3: 178 220 194;
-  --accent-foreground: #122d21;
+  --accent-foreground: #fff;
   --card-title: 46 114 80;
   --stat-bg: 245 251 247;
   --stat-border: 212 235 220;
@@ -396,9 +396,9 @@
   --card-border: rgb(var(--border));
   --text-primary: rgb(var(--text-1));
   --text-secondary: rgb(var(--text-2));
-  --success: #5cc3d5;
-  --warning: #e6b84a;
-  --error: #d97070;
+  --success: 18 121 139;
+  --warning: 147 101 0;
+  --error: 181 76 76;
   --glass-alpha: 0.72;
   --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(92, 195, 213, 0.1);
@@ -412,9 +412,9 @@
   --card: 255 255 255;
   --border: 192 216 236;
   --text-1: 31 58 84;
-  --text-2: 78 118 148;
-  --label: 109 160 204;
-  --accent-1: 61 122 180;
+  --text-2: 65 101 126;
+  --label: 63 114 158;
+  --accent-1: 53 114 172;
   --accent-2: 136 184 218;
   --accent-3: 184 216 234;
   --accent-foreground: #fff;
@@ -453,8 +453,8 @@
   --card: 26 26 30;
   --border: 42 42 48;
   --text-1: 240 240 244;
-  --text-2: 190 190 198;
-  --label: 184 184 192;
+  --text-2: 184 184 194;
+  --label: 176 176 184;
   --accent-1: 224 224 228;
   --accent-2: 136 136 144;
   --accent-3: 58 58 69;
