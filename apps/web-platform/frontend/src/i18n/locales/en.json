@@ -1322,6 +1322,7 @@
     "pairNotFound": "Your accepted pair could not be found.",
     "attachmentUploadError": "Attachment upload failed.",
     "attachment": "Attachment (image or PDF)",
-    "revealTime": "Reveal time"
+    "revealTime": "Reveal time",
+    "sealing": "Sealing…"
   }
 }
