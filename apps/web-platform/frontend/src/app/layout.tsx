@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Inter, Noto_Sans_Myanmar, Playfair_Display } from 'next/font/google'
 
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -15,6 +15,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
+const notoMyanmar = Noto_Sans_Myanmar({ subsets: ['myanmar', 'latin'], variable: '--font-myanmar', display: 'swap' })
 
 const description = 'A private shared space for memories, care, plans, and everyday moments together.'
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -46,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${playfair.variable}`}
+      className={`${inter.variable} ${playfair.variable} ${notoMyanmar.variable}`}
     >
       <head>
         <meta charSet="UTF-8" />
