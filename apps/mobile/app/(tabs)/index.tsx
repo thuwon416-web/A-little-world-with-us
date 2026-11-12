@@ -101,7 +101,6 @@ function nextAnniversary(value: string | null) {
 
 function StatCard({ title, value }: { readonly title: string; readonly value: number }) {
   const { colors } = useTheme()
-  const { t } = useTranslation()
   const styles = createStyles(colors, sizes)
   return (
     <View style={styles.statCard}>
@@ -116,6 +115,7 @@ function StatCard({ title, value }: { readonly title: string; readonly value: nu
 // No network calls needed -- pure date math.
 function DaysTogetherBanner({ startDateISO }: { startDateISO: string | null }) {
   const { colors } = useTheme()
+  const { t } = useTranslation()
   if (!startDateISO) return null;
   const start = new Date(startDateISO);
   if (isNaN(start.getTime())) return null;
@@ -275,16 +275,16 @@ export default function DashboardScreen() {
     nextPeriodDays === null
       ? null
       : nextPeriodDays === 0
-        ? 'Period expected today'
+        ? t('dashboard.periodExpectedToday')
         : nextPeriodDays < 0
-          ? `Period overdue by ${Math.abs(nextPeriodDays)} days`
-          : `Next period in ${nextPeriodDays} days`
+          ? t('dashboard.periodOverdue').replace('{count}', String(Math.abs(nextPeriodDays)))
+          : t('dashboard.nextPeriodIn').replace('{count}', String(nextPeriodDays))
   const countdown =
     nextPeriodText && nextPeriodDays !== null && anniversaryDays !== null && nextPeriodDays < anniversaryDays
       ? nextPeriodText
       : anniversaryDays !== null
-        ? `${anniversaryDays} days until Anniversary`
-        : 'Add your anniversary to start a countdown'
+        ? `${anniversaryDays} ${t('dashboard.untilAnniversary')}`
+        : t('dashboard.addAnniversary')
   const yearsTogether = dashboard?.anniversary
     ? Math.max(0, new Date().getFullYear() - new Date(`${dashboard.anniversary}T12:00:00`).getFullYear())
     : 0
@@ -521,7 +521,7 @@ export default function DashboardScreen() {
             key={key}
             accessibilityRole="button"
             accessibilityLabel={t(`dashboard.actions.${key}`)}
-            accessibilityHint={`${t('dashboard.openCare')}: ${t(`dashboard.actions.${key}`)}`}
+            accessibilityHint={t('dashboard.openAction')}
             style={styles.action}
             onPress={() => router.push(route)}
           >
@@ -534,7 +534,7 @@ export default function DashboardScreen() {
         <Text style={styles.cardTitle}>{t('dashboard.anniversary')}</Text>
         <Text style={styles.anniversary}>{yearsTogether} {t('dashboard.yearsTogether')}</Text>
         <Text style={styles.muted}>
-          {dashboard.anniversary ? `${t('dashboard.every')} ${dashboard.anniversary.slice(5)} · ${anniversaryDays} ${t('dashboard.daysUntilNext')}` : t('dashboard.setAnniversary')}
+          {dashboard.anniversary ? t('dashboard.anniversaryDateLine').replace('{date}', dashboard.anniversary.slice(5)).replace('{days}', String(anniversaryDays ?? 0)) : t('dashboard.setAnniversary')}
         </Text>
         <TouchableOpacity
           accessibilityRole="button"
