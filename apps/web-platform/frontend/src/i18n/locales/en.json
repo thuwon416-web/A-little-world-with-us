@@ -1161,5 +1161,47 @@
     "signInToCreate": "Please sign in to create a plan.",
     "savedPlanIncomplete": "The saved plan response was incomplete.",
     "createError": "Unable to create the plan."
+  },
+  "CoupleLink": {
+    "title": "Couple Link",
+    "subtitle": "Connect with your partner to share experiences",
+    "loading": "Checking your link status…",
+    "checkError": "Failed to check link status",
+    "createError": "Failed to create invite",
+    "acceptError": "Failed to accept invite",
+    "ready": "Ready to connect?",
+    "createDescription": "Create an invite code to share with your partner. They can use it to link their account to yours.",
+    "creating": "Creating…",
+    "createCode": "Create invite code",
+    "alreadyHaveCode": "Already have a code?",
+    "codePlaceholder": "8- or 16-character code",
+    "linking": "Linking…",
+    "accept": "Accept",
+    "howItWorks": "How it works",
+    "steps": [
+      "Create a unique invite code",
+      "Share the code with your partner",
+      "They accept the link from their app",
+      "Your accounts will be connected"
+    ],
+    "inviteReady": "Invite code ready!",
+    "shareCode": "Share this code with your partner to complete the connection.",
+    "copyInviteCode": "Copy invite code",
+    "copied": "Copied!",
+    "copyCode": "Copy code",
+    "waiting": "Waiting for your partner to accept…",
+    "sharingTips": "Sharing tips",
+    "tips": [
+      "Share via message, email, or in person",
+      "The code is case-insensitive",
+      "Each code can only be used once",
+      "You’ll be notified when they accept"
+    ],
+    "connected": "Connected!",
+    "connectedDescription": "You’re now linked with your partner. Start sharing experiences together.",
+    "sendMessage": "Send message",
+    "back": "Back",
+    "somethingWrong": "Something went wrong",
+    "tryAgain": "Try again"
   }
 }
