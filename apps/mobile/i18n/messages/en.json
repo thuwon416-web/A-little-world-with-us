@@ -52,6 +52,7 @@
     "days": "days",
     "untilAnniversary": "days until Anniversary",
     "openAction": "Opens this section.",
+    "layoutSaveFailed": "We could not save your dashboard layout. Please try again.",
     "addAnniversary": "Add your anniversary to start a countdown",
     "loading": "Loading your little world...",
     "unavailable": "Dashboard data is unavailable.",
