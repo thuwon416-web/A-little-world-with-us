@@ -1040,7 +1040,13 @@
     "cosmicConnection": "Cosmic connection",
     "title": "Astrology",
     "disclaimer": "Astrology is for entertainment only and is not medical, financial, or relationship advice.",
-    "myanmarAstrology": "Myanmar astrology"
+    "myanmarAstrology": "Myanmar astrology",
+    "compatibility": "Compatibility",
+    "overall": "Overall",
+    "dailyHoroscope": "Daily horoscope",
+    "monthlyForecast": "Monthly forecast",
+    "moonPhase": "Moon phase",
+    "relationshipImpact": "Relationship impact"
   },
   "Help": {
     "support": "Support",
