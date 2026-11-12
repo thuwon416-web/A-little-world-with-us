@@ -571,7 +571,7 @@ export default function AutomationPipelinePage() {
                         {node.category === 'notify' && <Send className="h-3.5 w-3.5" />}
                       </div>
                       <div>
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-text-2">
+                        <span className="text-xs font-mono uppercase tracking-wider text-text-2">
                           {node.category}
                         </span>
                       </div>
@@ -605,7 +605,7 @@ export default function AutomationPipelinePage() {
                     <span className="truncate max-w-[140px] font-medium">
                       {node.enabled ? (
                         <span className="inline-flex items-center gap-1 text-emerald-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                           {node.config.cron || node.config.model || node.config.threshold || 'Active'}
                         </span>
                       ) : (
@@ -642,7 +642,7 @@ export default function AutomationPipelinePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedNodeId(null)}
-                  className="p-1 rounded-full text-text-2 hover:bg-soft-tint hover:text-text-1"
+                  className="min-h-11 min-w-11 rounded-full p-1 text-text-2 hover:bg-soft-tint hover:text-text-1"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -690,7 +690,7 @@ export default function AutomationPipelinePage() {
 
                 <div>
                   <label className="text-text-2 font-medium block mb-1">{t('Automations.moduleType')}</label>
-                  <div className="px-3 py-2 rounded-xl bg-soft-tint border border-border/60 text-text-1 font-mono text-[11px]">
+                  <div className="px-3 py-2 rounded-xl bg-soft-tint border border-border/60 text-text-1 font-mono text-xs">
                     {selectedNode.type}
                   </div>
                 </div>
@@ -930,7 +930,7 @@ export default function AutomationPipelinePage() {
 
       {/* Add Module Modal / Drawer */}
       {showAddDrawer && (
-        <div className="absolute top-4 left-6 w-80 bg-card border border-border/80 rounded-3xl shadow-2xl p-4 z-30 text-text-1">
+        <div className="absolute top-4 left-6 w-80 bg-card border border-border/80 rounded-panel shadow-xl p-4 z-30 text-text-1">
           <div className="flex items-center justify-between pb-3 border-b border-border/40 mb-3">
             <div>
               <h4 className="text-sm font-serif font-semibold text-text-1">{t('Automations.addRoutineModule')}</h4>
@@ -948,20 +948,20 @@ export default function AutomationPipelinePage() {
           <div className="space-y-2">
             {AVAILABLE_MODULES.map(mod => (
               <button
-                key={mod.title}
+                key={t('Automations.modules.' + (mod.category === 'ai' ? 'datePlanner' : mod.category === 'schedule' ? 'anniversary' : 'gratitude'))}
                 type="button"
                 onClick={() => handleAddModule(mod)}
-                className="w-full text-left p-3 rounded-2xl bg-soft-tint hover:bg-card border border-border/60 hover:border-accent-1/30 transition-all flex flex-col gap-1 group shadow-xs"
+                className="w-full min-h-11 text-left p-3 rounded-card bg-soft-tint hover:bg-card border border-border/60 hover:border-accent-1/30 transition-all flex flex-col gap-1 group shadow-xs"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-text-1 group-hover:text-accent-1 transition">
                     {mod.title}
                   </span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-card text-text-2 uppercase">
-                    {mod.category}
+                  <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-card text-text-2 uppercase">
+                    {t('Automations.categories.' + mod.category)}
                   </span>
                 </div>
-                <p className="text-[11px] text-text-2 leading-relaxed">{mod.desc}</p>
+                <p className="text-[11px] text-text-2 leading-relaxed">{t('Automations.modules.' + (mod.category === 'ai' ? 'datePlannerDescription' : mod.category === 'schedule' ? 'anniversaryDescription' : 'gratitudeDescription'))}</p>
               </button>
             ))}
           </div>
@@ -974,12 +974,12 @@ export default function AutomationPipelinePage() {
           <div className="flex items-center gap-2">
             <Activity className="h-3.5 w-3.5 text-accent-1" />
             <span className="text-[11px] font-mono uppercase tracking-wider text-text-2 font-semibold">
-              Live Pipeline Telemetry & Telegram Feed
+              {t('Automations.liveTelemetry')}
             </span>
           </div>
           <div className="flex items-center gap-2 text-[10px] font-mono text-text-2">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>{isRunning ? 'PIPELINE ACTIVE' : 'SYSTEM STANDBY'}</span>
+            <span>{isRunning ? t('Automations.pipelineActive') : t('Automations.systemStandby')}</span>
           </div>
         </div>
 
@@ -990,9 +990,9 @@ export default function AutomationPipelinePage() {
               <span
                 className={`px-1.5 py-0.2 rounded font-semibold text-[10px] shrink-0 ${
                   log.type === 'success'
-                    ? 'bg-emerald-500/10 text-emerald-600'
+                    ? 'bg-success/10 text-success'
                     : log.type === 'warn'
-                    ? 'bg-amber-500/10 text-amber-600'
+                    ? 'bg-warning/10 text-warning'
                     : 'bg-accent-1/10 text-accent-1'
                 }`}
               >
