@@ -212,7 +212,7 @@ export default function AIAssistantScreen() {
               { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
             ]}
           >
-            <Text style={[styles.badge, { color: colors.accent2 }]}>AI-generated</Text>
+            <Text style={[styles.badge, { color: colors.textSecondary }]}>AI-generated</Text>
             <Text style={[styles.content, { color: colors.textPrimary }]}>{customResult}</Text>
             <View style={styles.actions}>
               <TouchableOpacity
@@ -232,7 +232,7 @@ export default function AIAssistantScreen() {
                 { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
               ]}
             >
-              <Text style={[styles.badge, { color: colors.accent2 }]}>AI-generated</Text>
+              <Text style={[styles.badge, { color: colors.textSecondary }]}>AI-generated</Text>
               <Text style={[styles.content, { color: colors.textPrimary }]}>{item.content}</Text>
 
               <View style={styles.actions}>
@@ -331,7 +331,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderColor: colors.cardBorder,
     },
     badge: {
-      color: colors.accent2,
+      color: colors.textSecondary,
       fontSize: sizes.text.xs,
       letterSpacing: 1,
       textTransform: 'uppercase',
