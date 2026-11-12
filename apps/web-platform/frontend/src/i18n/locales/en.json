@@ -512,6 +512,7 @@
       "other": "Reminder"
     },
     "remindersTab": "Reminders",
-    "financeTab": "Finance"
+    "financeTab": "Finance",
+    "eventSaveError": "Unable to save this calendar event. Please try again."
   }
 }
