@@ -217,11 +217,11 @@ export default function DashboardScreen() {
         }
       }
     } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Unable to load your dashboard.')
+      setError(t('dashboard.unavailable'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   const handleStreakCheckIn = async () => {
     if (!coupleId || streakCheckingIn || streakCheckedInToday) return
@@ -293,7 +293,7 @@ export default function DashboardScreen() {
   const updateLayout = (next: DashboardLayout) => {
     setDashboardLayout(next)
     void saveDashboardLayout(next).catch((error_) =>
-      setLayoutError(error_ instanceof Error ? error_.message : 'Unable to save dashboard layout.')
+      setLayoutError(t('dashboard.layoutSaveFailed'))
     )
   }
   const moveWidget = (id: DashboardWidgetId, direction: -1 | 1) => {
