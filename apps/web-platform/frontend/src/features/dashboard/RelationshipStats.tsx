@@ -225,7 +225,7 @@ export default function RelationshipStats() {
 
   if (status === 'unlinked') {
     return (
-      <section aria-label="Relationship statistics" className="rounded-panel border border-accent-1/15 bg-card p-5">
+      <section aria-label={t('dashboard.relationship.ariaLabel')} className="rounded-panel border border-accent-1/15 bg-card p-5">
         <p className="font-medium text-text-1">{t('dashboard.relationship.linkPartner')}</p>
         <Link href="/couple-linking" className="mt-2 inline-flex text-sm font-semibold text-accent-1 hover:underline">
           {t('dashboard.relationship.setUpLink')}
@@ -235,7 +235,7 @@ export default function RelationshipStats() {
   }
 
   return (
-    <section aria-label="Relationship statistics">
+    <section aria-label={t('dashboard.relationship.ariaLabel')}>
       {status === 'error' ? (
         <p className="mb-3 text-sm text-text-2" role="status">{t('dashboard.relationship.partialError')}</p>
       ) : null}
