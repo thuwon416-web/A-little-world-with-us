@@ -181,7 +181,8 @@
     "cancel": "Cancel",
     "peanutsShellfish": "Peanuts, shellfish",
     "medicationExamples": "Aspirin, insulin",
-    "conditionExamples": "Diabetes, asthma"
+    "conditionExamples": "Diabetes, asthma",
+    "pinLock": "PIN Lock"
   },
   "Nav": {
     "chat": "Chat",
