@@ -33,6 +33,12 @@
     "everythingElse": "Everything else",
     "signOut": "Sign out"
   },
+  "common": {
+    "errorTitle": "Something went wrong",
+    "errorMessage": "Please close this screen and try again. If the problem continues, contact support.",
+    "login": "Login",
+    "notFound": "Not found"
+  },
   "dashboard": {
     "daysTogether": "days together",
     "onThisDay": "On This Day",
