@@ -21,10 +21,10 @@ export default function ThemeToggle() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-text-1/70">
-          Theme
+        <span className="text-xs uppercase tracking-[0.16em] text-text-1/70">
+          {t('Settings.themeLabel')}
         </span>
-        <span className="text-[10px] text-text-1/60">{t('Settings.' + ({ 'lavender-mist': 'themeLavender', 'peach-cream': 'themePeach', 'mint-whisper': 'themeMint', 'ocean-calm': 'themeOcean', monochrome: 'themeMonochrome' }[preference]))}</span>
+        <span className="text-xs text-text-1/60">{t('Settings.' + ({ 'lavender-mist': 'themeLavender', 'peach-cream': 'themePeach', 'mint-whisper': 'themeMint', 'ocean-calm': 'themeOcean', monochrome: 'themeMonochrome' }[preference]))}</span>
       </div>
 
       <div className="space-y-2">
