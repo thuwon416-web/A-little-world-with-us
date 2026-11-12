@@ -15,7 +15,6 @@ import ConnectedCoupleAvatars from '@/components/shared/ConnectedCoupleAvatars'
 import LoveStreakBadge from '@/components/shared/LoveStreakBadge'
 import { SlidersHorizontal } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
-import { useLanguage } from '@/contexts/LanguageContext'
 
 const DaysCounter = dynamic(() => import('@/features/dashboard/DaysCounter'), { loading: () => <DashboardPanelSkeleton /> })
 const Countdown = dynamic(() => import('@/features/dashboard/Countdown'), { loading: () => <DashboardPanelSkeleton /> })
@@ -102,7 +101,6 @@ type ActiveOccasion = {
 }
 
 export default function DashboardPage() {
-  const { t } = useLanguage()
   const { t } = useLanguage()
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [coupleName, setCoupleName] = useState('Our World')
@@ -263,7 +261,7 @@ export default function DashboardPage() {
               <p className="text-xs text-text-1 leading-relaxed">{heroCopy.focus}</p>
             </div>
             <div className="min-w-0 rounded-xl border border-border/50 bg-card/60 p-3 shadow-xs">
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-accent-2 block mb-0.5">{t('dashboard.ritual')}</span>
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-text-2 block mb-0.5">{t('dashboard.ritual')}</span>
               <p className="text-xs text-text-1 leading-relaxed">{heroCopy.ritual}</p>
             </div>
           </div>
