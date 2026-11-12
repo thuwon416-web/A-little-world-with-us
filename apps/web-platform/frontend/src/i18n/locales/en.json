@@ -1300,5 +1300,21 @@
       "finance": "Finance",
       "notify": "Notifications"
     }
+  },
+  "TimeCapsule": {
+    "title": "Partner-only surprise",
+    "description": "Only your partner can read this after its reveal time. You can cancel it before then.",
+    "surpriseTitle": "Surprise title",
+    "message": "Write a message for your future partner…",
+    "revealAt": "Reveal at",
+    "schedule": "Schedule surprise",
+    "cancel": "Cancel",
+    "scheduled": "Scheduled",
+    "revealed": "Revealed",
+    "cancelled": "Cancelled",
+    "openAttachment": "Open attached {type}",
+    "cancelCapsule": "Cancel time capsule",
+    "loadError": "Unable to load time capsules.",
+    "saveError": "Unable to schedule this time capsule."
   }
 }
