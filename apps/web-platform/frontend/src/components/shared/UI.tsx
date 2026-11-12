@@ -1,5 +1,6 @@
 'use client'
 
+import { useId } from 'react'
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from 'react'
 import { X } from 'lucide-react'
 
@@ -22,10 +23,11 @@ export function Badge({ tone='primary', children }: { tone?: 'primary'|'secondar
 }
 
 export function Modal({ open, onClose, title, children }: { open:boolean; onClose:()=>void; title?:string; children:ReactNode }) {
+  const titleId = useId()
   if (!open) return null
-  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[rgb(74_56_96/0.28)] p-4 backdrop-blur-sm" role="presentation" onMouseDown={onClose}>
-    <div className="ui-card max-h-[90dvh] w-full max-w-lg overflow-y-auto p-5 shadow-[0_18px_50px_rgb(74_56_96/0.16)]" role="dialog" aria-modal="true" aria-label={title} onMouseDown={(event)=>event.stopPropagation()}>
-      <div className="mb-4 flex items-center justify-between gap-3">{title?<h2 className="text-lg font-semibold text-text-1">{title}</h2>:<span/>}<button type="button" onClick={onClose} aria-label="Close" className="rounded-full p-2 text-text-2 hover:bg-accent-1/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40"><X className="h-4 w-4"/></button></div>
+  return <div className="fixed inset-0 z-[100] flex items-center justify-center bg-text-1/30 p-4 backdrop-blur-sm" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
+    <div className="ui-card max-h-[90dvh] w-full max-w-lg overflow-y-auto p-5 shadow-xl" role="dialog" aria-modal="true" aria-labelledby={title ? titleId : undefined} aria-label={title ? undefined : 'Dialog'} tabIndex={-1} onKeyDown={(event) => { if (event.key === 'Escape') onClose() }}>
+      <div className="mb-4 flex items-center justify-between gap-3">{title?<h2 id={titleId} className="text-lg font-semibold text-text-1">{title}</h2>:<span/>}<button type="button" onClick={onClose} aria-label="Close" className="min-h-11 min-w-11 rounded-full p-2 text-text-2 hover:bg-accent-1/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1/40"><X className="h-4 w-4"/></button></div>
       {children}
     </div>
   </div>
