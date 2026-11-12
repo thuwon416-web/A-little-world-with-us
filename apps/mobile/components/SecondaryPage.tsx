@@ -21,7 +21,7 @@ export default function SecondaryPage({
         { backgroundColor: colors.background, paddingTop: insets.top },
       ]}
     >
-      <Text style={[styles.eyebrow, { color: colors.accent2 }]}>{eyebrow ?? 'MORE'}</Text>
+      <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>{eyebrow ?? 'MORE'}</Text>
       <Text style={[styles.title, { color: colors.textPrimary }]}>{title}</Text>
       {children}
     </ScrollView>
