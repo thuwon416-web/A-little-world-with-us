@@ -127,6 +127,7 @@ function StatCard({ title, value }: { readonly title: string; readonly value: nu
 // Pass the couple's start date ISO string; renders a romantic day counter.
 // No network calls needed -- pure date math.
 function DaysTogetherBanner({ startDateISO }: { startDateISO: string | null }) {
+  const { colors } = useTheme()
   if (!startDateISO) return null;
   const start = new Date(startDateISO);
   if (isNaN(start.getTime())) return null;
@@ -134,9 +135,9 @@ function DaysTogetherBanner({ startDateISO }: { startDateISO: string | null }) {
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (days < 0) return null;
   return (
-    <View style={daysBannerSt.container}>
-      <Text style={daysBannerSt.days}>{days}</Text>
-      <Text style={daysBannerSt.label}>days together</Text>
+    <View style={[daysBannerSt.container, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <Text style={[daysBannerSt.days, { color: colors.accent1 }]}>{days}</Text>
+      <Text style={[daysBannerSt.label, { color: colors.textSecondary }]}>days together</Text>
     </View>
   );
 }
@@ -147,12 +148,12 @@ const daysBannerSt = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(236,72,153,0.10)',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(236,72,153,0.22)',
+    borderColor: 'transparent',
   },
-  days:  { fontSize: 36, fontWeight: '800', color: '#ec4899' },
-  label: { fontSize: 13, color: '#f9a8d4', marginTop: 2, fontWeight: '500' },
+  days:  { fontSize: 36, fontWeight: '800' },
+  label: { fontSize: 13, marginTop: 2, fontWeight: '500' },
 });
 
 
@@ -412,9 +413,9 @@ export default function DashboardScreen() {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           {playing ? (
-            <Pause color={colors.background} size={18} />
+            <Pause color={colors.accentForeground} size={18} />
           ) : (
-            <Play color={colors.background} size={18} />
+            <Play color={colors.accentForeground} size={18} />
           )}
           <Text style={styles.primaryText}>{playing ? 'Pause' : 'Play'}</Text>
         </TouchableOpacity>
@@ -692,8 +693,8 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderColor: `${colors.accent1}66`,
       alignItems: 'center',
     },
-    heroLabel: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 1.6 },
-    heroValue: { color: colors.accent3, fontSize: 42, fontWeight: '800', marginTop: 6 },
+    heroLabel: { color: colors.textSecondary, fontSize: sizes.text.xs, letterSpacing: 1.6 },
+    heroValue: { color: colors.accent1, fontSize: 42, fontWeight: '800', marginTop: 6 },
     heroText: { color: colors.textPrimary, fontSize: sizes.text.body },
     infoCard: {
       borderWidth: 1,
@@ -755,7 +756,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     cardTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
     countdown: {
-      color: colors.accent3,
+      color: colors.accent1,
       fontSize: sizes.text.hMd,
       fontWeight: '800',
       marginTop: 12,
@@ -793,7 +794,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       paddingVertical: 12,
       borderRadius: sizes.radius.input,
     },
-    primaryText: { color: colors.background, fontWeight: '800' },
+    primaryText: { color: colors.accentForeground, fontWeight: '800' },
     secondaryButton: {
       alignSelf: 'flex-start',
       backgroundColor: colors.accent2,
@@ -802,7 +803,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderRadius: sizes.radius.input,
       marginTop: 14,
     },
-    secondaryText: { color: colors.background, fontWeight: '800' },
+    secondaryText: { color: colors.textPrimary, fontWeight: '800' },
     playButton: {
       flexDirection: 'row',
       alignItems: 'center',
