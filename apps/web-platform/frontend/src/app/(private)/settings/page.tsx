@@ -84,10 +84,10 @@ export default function SettingsPage() {
     setDriveDisconnecting(true)
     try {
       const response = await fetch('/api/drive/disconnect', { method: 'POST' })
-      if (!response.ok) throw new Error('{t('Settings.driveDisconnectError')}')
+      if (!response.ok) throw new Error(t('Settings.driveDisconnectError'))
       setDriveConnected(false)
     } catch (error) {
-      window.alert(error instanceof Error ? error.message : 'Unable to disconnect Google Drive.')
+      window.alert(error instanceof Error ? error.message : t('Settings.driveDisconnectError'))
     } finally {
       setDriveDisconnecting(false)
     }
@@ -115,7 +115,7 @@ export default function SettingsPage() {
           <AIPrivacySettings />
         </section>
 
-        <aside className="space-y-5 rounded-modal border border-border bg-card p-5">
+        <aside className="space-y-5 rounded-panel border border-border bg-card p-5">
           <div>
             <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.theme')}</p>
             <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.atmosphere')}</h2>
@@ -127,7 +127,7 @@ export default function SettingsPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {settingCards.map(({ icon: Icon, title, description }) => (
-          <div key={title} className="rounded-[24px] border border-border bg-card p-4">
+          <div key={title} className="rounded-card border border-border bg-card p-4">
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
               <Icon className="h-5 w-5" />
             </div>
@@ -166,9 +166,9 @@ export default function SettingsPage() {
         <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.storage')}</p>
         <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.googleDrive')}</h2>
         <p className="mt-2 text-sm text-text-2">{t('Settings.driveDescription')}</p>
-        {driveResult === 'connected' ? <p className="mt-3 rounded-btn border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{t('Settings.driveConnected')}</p> : null}
-        {driveResult === 'error' ? <p className="mt-3 rounded-btn border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{t('Settings.driveError')}</p> : null}
-        {driveConnected && driveRequiresReauthorization ? <p role="status" className="mt-3 rounded-btn border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{t('Settings.driveNeedsPermission')}</p> : null}
+        {driveResult === 'connected' ? <p className="mt-3 rounded-btn border border-success/20 bg-success/10 px-3 py-2 text-sm text-success">{t('Settings.driveConnected')}</p> : null}
+        {driveResult === 'error' ? <p className="mt-3 rounded-btn border border-error/20 bg-error/10 px-3 py-2 text-sm text-error">{t('Settings.driveError')}</p> : null}
+        {driveConnected && driveRequiresReauthorization ? <p role="status" className="mt-3 rounded-btn border border-warning/20 bg-warning/10 px-3 py-2 text-sm text-warning">{t('Settings.driveNeedsPermission')}</p> : null}
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <span className="text-sm text-text-2">{driveLoading ? t('Settings.checking') : driveConnected ? (driveRequiresReauthorization ? t('Settings.reconnectRequired') : t('Settings.connected')) : t('Settings.notConnected')}</span>
           {!driveLoading && !driveConnected ? (
@@ -192,8 +192,8 @@ export default function SettingsPage() {
       </section>
 
       <section className="rounded-modal border border-border bg-card p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">Data & Export</p>
-        <h2 className="mt-1 text-xl font-semibold text-text-1">Your data, in one place</h2>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.dataExport')}</p>
+        <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.dataInOnePlace')}</h2>
 
         <div className="mt-4 space-y-4">
           <MoodChart />
