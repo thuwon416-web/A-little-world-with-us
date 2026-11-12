@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { BookOpen, Check, ChevronDown, ChevronUp, Languages, Volume2, X } from 'lucide-react'
 import { KOREAN_LESSONS } from '@/data/korean-lessons'
 import { KOREAN_ADVANCED_LESSONS } from '@/data/korean-advanced'
@@ -41,6 +42,7 @@ const curriculumCodeByLessonId: Record<string, string> = {
 }
 
 export default function LearningPage() {
+  const { t, language } = useLanguage()
   const { mode } = useTheme()
   const [selectedLevel, setSelectedLevel] = useState<KoreanLevel>(1)
   const [openLessonId, setOpenLessonId] = useState<string | null>(null)
@@ -113,21 +115,21 @@ export default function LearningPage() {
                 Korean Tutor
               </h1>
               <p className="mt-1 text-sm text-text-2">
-                Learn Korean together, one step at a time.
+                {t('Learning.description')}
               </p>
             </div>
           </div>
         </div>
 
         <div className="dashboard-mini-card w-full rounded-panel border border-accent-1/20 bg-card/90 px-4 py-3 text-left shadow-sm sm:w-auto sm:min-w-56 sm:text-right">
-          <p className="text-xs text-text-2">Your progress</p>
+          <p className="text-xs text-text-2">{t('Learning.yourProgress')}</p>
           <p className="mt-1 text-base font-semibold text-text-1 sm:text-lg">
-            {masteredIds.size} / {allVocab.length} words mastered
+            {masteredIds.size} / {allVocab.length} {t('Learning.wordsMastered')}
           </p>
           <div
             className="mt-2 h-2 overflow-hidden rounded-full bg-soft-tint"
             role="progressbar"
-            aria-label="Korean vocabulary mastered"
+            aria-label={t('Learning.vocabularyMastered')}
             aria-valuemin={0}
             aria-valuemax={allVocab.length}
             aria-valuenow={masteredIds.size}
@@ -140,7 +142,7 @@ export default function LearningPage() {
         </div>
       </header>
 
-      <nav className="flex gap-2 overflow-x-auto pb-2" aria-label="Korean levels">
+      <nav className="flex gap-2 overflow-x-auto pb-2" aria-label={t('Learning.levels')}>
         {levels.map((level) => {
           let levelTabClassName = 'border-accent-1/20 bg-card text-text-2 hover:bg-accent-1/10'
           if (selectedLevel === level) {
@@ -158,7 +160,7 @@ export default function LearningPage() {
               className={`shrink-0 rounded-full border px-4 py-2 text-left transition ${levelTabClassName}`}
               aria-selected={selectedLevel === level}
             >
-              <span className="block text-xs uppercase tracking-wider">Level {level}</span>
+              <span className="block text-xs uppercase tracking-wider">{t('Learning.level')} {level}</span>
             </button>
           )
         })}
@@ -172,18 +174,18 @@ export default function LearningPage() {
               Level {selectedLevel}
             </h2>
             <p className="mt-1 text-sm text-text-2">
-              {levelVocab.length} words and phrases to explore
+              {levelVocab.length} {t('Learning.wordsPhrases')}
             </p>
           </div>
           {levelVocab.length > 0 && (
             <div className="flex items-center gap-3">
               <span className="text-sm text-text-2">
-                {levelVocab.filter((vocab) => masteredIds.has(vocab.id)).length} mastered
+                {levelVocab.filter((vocab) => masteredIds.has(vocab.id)).length} {t('Learning.mastered')}
               </span>
               <button
                 type="button"
                 onClick={() => setQuizLevel(selectedLevel)}
-                className="rounded-pill bg-accent-1 px-5 py-2 text-sm font-semibold text-white font-semibold shadow-sm shadow-sm transition-all hover:bg-accent-1/90 active:scale-95"
+                className="min-h-11 rounded-pill bg-accent-1 px-5 py-2 text-sm font-semibold text-white font-semibold shadow-sm shadow-sm transition-all hover:bg-accent-1/90 active:scale-95"
               >
                 Start Quiz
               </button>
@@ -206,13 +208,13 @@ export default function LearningPage() {
                   <button
                     type="button"
                     onClick={() => setOpenLessonId(isOpen ? null : lesson.id)}
-                    className="w-full p-5 text-left transition hover:bg-accent-1/5"
+                    className="w-full min-h-11 p-5 text-left transition hover:bg-accent-1/5"
                     aria-expanded={isOpen}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <p className="text-xs uppercase tracking-wider text-accent-1">
-                          {curriculumCodeByLessonId[lesson.id] ?? `Lesson ${lesson.order}`}
+                          {curriculumCodeByLessonId[lesson.id] ?? `${t('Learning.lesson')} ${lesson.order}`}
                         </p>
                         <h3 className="mt-1 text-xl font-semibold text-text-1">
                           {lesson.title}
@@ -229,8 +231,8 @@ export default function LearningPage() {
                       {lesson.description}
                     </p>
                     <div className="mt-4 flex items-center justify-between text-xs text-text-2">
-                      <span>{lessonVocab.length} vocabulary items</span>
-                      <span>{mastered} mastered</span>
+                      <span>{lessonVocab.length} {t('Learning.vocabularyItems')}</span>
+                      <span>{mastered} {t('Learning.mastered')}</span>
                     </div>
                   </button>
 
@@ -249,7 +251,7 @@ export default function LearningPage() {
                                 {vocab.korean}
                               </span>
                               {masteredIds.has(vocab.id) && (
-                                <Check className="h-5 w-5 text-success" aria-label="Mastered" />
+                                <Check className="h-5 w-5 text-success" aria-label={t('Learning.masteredStatus')} />
                               )}
                             </div>
                             <p className="mt-1 text-xs text-accent-1">{vocab.romanization}</p>
@@ -266,23 +268,23 @@ export default function LearningPage() {
           </div>
         ) : (
           <div className="rounded-panel border border-dashed border-accent-1/25 bg-card p-10 text-center">
-            <p className="font-medium text-text-1">This level is coming soon.</p>
+            <p className="font-medium text-text-1">{t('Learning.comingSoon')}</p>
             <p className="mt-2 text-sm text-text-2">
-              We are preparing more Korean lessons for you to enjoy together.
+              {t('Learning.comingSoonDescription')}
             </p>
           </div>
         )}
       </section>
 
       {quizLevel !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="korean-quiz-title">
           <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-panel border border-accent-1/20 bg-card p-6 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <p className="text-xs uppercase tracking-wider text-accent-1">Level {quizLevel}</p>
-                <h2 className="text-2xl font-bold text-text-1">Korean Quiz</h2>
+                <h2 id="korean-quiz-title" className="text-2xl font-bold text-text-1">{t('Learning.quiz')}</h2>
               </div>
-              <button type="button" onClick={() => setQuizLevel(null)} className="rounded-lg px-3 py-2 text-sm text-text-2 hover:bg-accent-1/10">
+              <button type="button" onClick={() => setQuizLevel(null)} className="min-h-11 rounded-lg px-3 py-2 text-sm text-text-2 hover:bg-accent-1/10">
                 Close
               </button>
             </div>
@@ -298,7 +300,7 @@ export default function LearningPage() {
           <button
             type="button"
             className="absolute inset-0 bg-black/60"
-            aria-label="Close vocabulary details"
+            aria-label={t('Learning.closeVocabulary')}
             onClick={() => setSelectedVocab(null)}
           />
           <section
@@ -341,11 +343,11 @@ export default function LearningPage() {
                 setSpeakingVocabId(selectedVocab.id)
                 window.speechSynthesis?.addEventListener('end', () => setSpeakingVocabId(null), { once: true })
               }}
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl border border-accent-1/20 px-4 py-3 text-sm text-text-2 disabled:cursor-not-allowed disabled:opacity-60"
-              title={ttsSupported ? 'Play Korean pronunciation' : 'Speech synthesis is not supported'}
+              className="mt-6 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-accent-1/20 px-4 py-3 text-sm text-text-2 disabled:cursor-not-allowed disabled:opacity-60"
+              title={ttsSupported ? t('Learning.playPronunciation') : t('Learning.ttsUnsupported')}
             >
               <Volume2 size={18} aria-hidden="true" />
-              {speakingVocabId === selectedVocab.id ? 'Speaking...' : 'Listen'}
+              {speakingVocabId === selectedVocab.id ? t('Learning.speaking') : t('Learning.listen')}
             </button>
           </section>
         </div>
