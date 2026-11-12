@@ -95,7 +95,7 @@ export default function Sidebar() {
   }, [])
 
   return (
-    <aside aria-label="Main sidebar" className="flex h-full w-full flex-col rounded-panel border border-accent-1/20 bg-card px-3 py-6 shadow-lg backdrop-blur-xl">
+    <aside aria-label={t("nav.sidebarLabel")} className="flex h-full w-full flex-col rounded-panel border border-accent-1/20 bg-card px-3 py-6 shadow-lg backdrop-blur-xl">
       <Link href="/dashboard" className="mb-7 flex items-center gap-3 px-2">
         <LittleWorldLogo size={36} showText={false} />
 
@@ -110,7 +110,7 @@ export default function Sidebar() {
         </div>
       </Link>
 
-      <nav aria-label="Main navigation" className="flex flex-1 flex-col gap-2 overflow-y-auto">
+      <nav aria-label={t("nav.navigationLabel")} className="flex flex-1 flex-col gap-2 overflow-y-auto">
         {navGroups.map(({ label, labelKey, items }) => {
           const visibleItems = items.filter((item) => item.href !== '/location' || canViewLocation)
           if (!visibleItems.length) return null
