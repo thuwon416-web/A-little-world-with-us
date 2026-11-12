@@ -166,13 +166,13 @@ const createStyles = (colors: ThemeColors) =>
     },
     progressLabel: {
       color: colors.textSecondary,
-      fontSize: 10,
+      fontSize: 12,
       letterSpacing: 1.1,
       textTransform: 'uppercase',
     },
     progressValue: {
-      color: colors.accent2,
-      fontSize: 11,
+      color: colors.textSecondary,
+      fontSize: 12,
       fontWeight: '700',
     },
     barTrack: {
@@ -189,7 +189,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     count: {
       color: colors.textSecondary,
-      fontSize: 11,
+      fontSize: 12,
     },
     list: {
       gap: 10,
@@ -221,7 +221,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     promiseState: {
       color: colors.textSecondary,
-      fontSize: 9,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
@@ -248,8 +248,7 @@ const createStyles = (colors: ThemeColors) =>
       paddingHorizontal: 16,
       paddingVertical: 12,
     },
-    buttonText: {
-      color: colors.textPrimary,
+    buttonText: { color: colors.accentForeground,
       fontWeight: '700',
       fontSize: 14,
     },
@@ -268,8 +267,8 @@ const createStyles = (colors: ThemeColors) =>
       marginBottom: 8,
     },
     dreamLabel: {
-      color: colors.accent2,
-      fontSize: 10,
+      color: colors.textSecondary,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
@@ -283,7 +282,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     shuffleText: {
       color: colors.textPrimary,
-      fontSize: 9,
+      fontSize: 12,
       letterSpacing: 1.1,
       textTransform: 'uppercase',
     },
@@ -313,8 +312,8 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.cardBorder,
     },
     tagText: {
-      color: colors.accent2,
-      fontSize: 9,
+      color: colors.textSecondary,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
