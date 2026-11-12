@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { Button } from '@/components/shared/UI'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type DeletionState = {
   status?: 'scheduled' | 'cancelled'
@@ -10,6 +11,7 @@ type DeletionState = {
 }
 
 export default function AccountDeletion() {
+  const { t } = useLanguage()
   const [state, setState] = useState<DeletionState | null>(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
@@ -20,7 +22,7 @@ export default function AccountDeletion() {
       setLoading(true)
       setError('')
       const response = await fetch('/api/account/request-delete', { cache: 'no-store' })
-      if (!response.ok) throw new Error('Unable to load account deletion status.')
+      if (!response.ok) throw new Error(t('Settings.loadDeletionError'))
       setState(await response.json() as DeletionState)
     } catch (error_) {
       setError(error_ instanceof Error ? error_.message : 'Unable to load account deletion status.')
@@ -36,7 +38,7 @@ export default function AccountDeletion() {
   const requestDeletion = async () => {
     if (busy) return
     const confirmed = window.confirm(
-      'Schedule account deletion for 30 days from now? You can cancel during the grace period. Export anything you want to keep first.'
+      t('Settings.confirmDeletion')
     )
     if (!confirmed) return
 
@@ -49,7 +51,7 @@ export default function AccountDeletion() {
         body: JSON.stringify({ graceDays: 30 }),
       })
       const body = await response.json() as DeletionState & { error?: string }
-      if (!response.ok) throw new Error(body.error ?? 'Unable to schedule account deletion.')
+      if (!response.ok) throw new Error(body.error ?? t('Settings.scheduleDeletionError'))
       setState(body)
     } catch (error_) {
       setError(error_ instanceof Error ? error_.message : 'Unable to schedule account deletion.')
@@ -65,7 +67,7 @@ export default function AccountDeletion() {
       setError('')
       const response = await fetch('/api/account/cancel-delete', { method: 'POST' })
       const body = await response.json() as DeletionState & { error?: string }
-      if (!response.ok) throw new Error(body.error ?? 'Unable to cancel account deletion.')
+      if (!response.ok) throw new Error(body.error ?? t('Settings.cancelDeletionError'))
       setState(body)
     } catch (error_) {
       setError(error_ instanceof Error ? error_.message : 'Unable to cancel account deletion.')
@@ -77,29 +79,27 @@ export default function AccountDeletion() {
   const scheduled = state?.status === 'scheduled'
 
   return (
-    <section className="rounded-[24px] border border-error/30 bg-error/5 p-4">
-      <p className="text-[10px] uppercase tracking-[0.2em] text-error">Account lifecycle</p>
-      <h3 className="mt-1 text-lg font-semibold text-text-1">Delete this account</h3>
+    <section className="rounded-panel border border-error/30 bg-error/5 p-4">
+      <p className="text-xs uppercase tracking-[0.16em] text-error">{t('Settings.accountLifecycle')}</p>
+      <h3 className="mt-1 text-lg font-semibold text-text-1">{t('Settings.deleteThisAccount')}</h3>
       <p className="mt-2 text-sm text-text-2">
-        Account deletion uses a 30-day grace period. Personal account data is erased when the scheduled
-        job runs. Shared couple data follows the app&apos;s current data-ownership rules.
+        {t('Settings.deletionGrace')}
       </p>
 
-      {loading ? <p className="mt-3 text-sm text-text-2">Checking deletion status…</p> : null}
+      {loading ? <p className="mt-3 text-sm text-text-2">{t('Settings.checkingDeletion')}</p> : null}
       {!loading && scheduled ? (
         <div className="mt-3 space-y-3">
           <p className="text-sm text-text-1">
-            Deletion scheduled for{' '}
-            <strong>{state.scheduledFor ? new Date(state.scheduledFor).toLocaleString() : 'the scheduled date'}</strong>.
+            {t('Settings.deletionScheduled')}{' '}<strong>{state.scheduledFor ? new Date(state.scheduledFor).toLocaleString() : t('Settings.scheduledDate')}</strong>.
           </p>
-          <Button type="button" variant="secondary" onClick={() => void cancelDeletion()} disabled={busy}>
-            {busy ? 'Working…' : 'Cancel deletion'}
+          <Button type="button" variant="secondary" className="min-h-11 border-error/30 text-error" onClick={() => void cancelDeletion()} disabled={busy}>
+            {busy ? t('Settings.working') : t('Settings.cancelDeletion')}
           </Button>
         </div>
       ) : null}
       {!loading && !scheduled ? (
-        <Button type="button" variant="secondary" onClick={() => void requestDeletion()} disabled={busy}>
-          {busy ? 'Working…' : 'Schedule account deletion'}
+        <Button type="button" variant="secondary" className="min-h-11 border-error/30 text-error" onClick={() => void requestDeletion()} disabled={busy}>
+          {busy ? t('Settings.working') : t('Settings.scheduleDeletion')}
         </Button>
       ) : null}
       {error ? <p className="mt-3 text-sm text-error">{error}</p> : null}
