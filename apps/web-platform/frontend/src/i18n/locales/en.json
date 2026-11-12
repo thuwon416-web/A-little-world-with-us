@@ -1101,6 +1101,16 @@
         "How does the AI assistant work?",
         "The AI assistant can help with relationship advice, date ideas, and love letters. Choose a tool and submit only the details you want to share."
       ]
-    ]
+    ],
+    "quickActions": "Quick actions",
+    "keyboardShortcuts": "Keyboard shortcuts",
+    "searchShortcut": "Search",
+    "searchAction": "Focus the search box",
+    "sidebarShortcut": "Sidebar",
+    "sidebarAction": "Toggle the navigation panel",
+    "helpShortcut": "Help",
+    "helpAction": "Open shortcut list",
+    "closeShortcut": "Close",
+    "closeAction": "Dismiss overlays or modals"
   }
 }
