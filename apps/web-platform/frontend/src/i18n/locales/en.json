@@ -173,7 +173,9 @@
     "saveSharedSettings": "Save shared settings",
     "cycleDayTooltip": "Cycle day {day} · {date}",
     "periodCalendarClose": "Close period calendar",
-    "dailyLogClose": "Close log"
+    "dailyLogClose": "Close log",
+    "intimacy": "Intimacy",
+    "days": "days"
   },
   "Settings": {
     "title": "Settings",
