@@ -111,7 +111,7 @@
     --radius: 1.5rem;
     --font-display: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
     --font-body: var(--font-inter), var(--font-myanmar), "Noto Sans Myanmar", "Pyidaungsu", "Padauk", system-ui, sans-serif;
-    --font-accent: var(--font-dancing);
+    --font-accent: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
 
     /* B2 Size Variables */
     --text-ui-xs: 12px;
@@ -1666,4 +1666,15 @@ button.micro-interaction:active {
   .glass-card { padding: 24px; }
   .glass-card--compact { padding: 16px; }
   .glass-card--hero { padding: 28px; }
+}
+
+
+@layer utilities {
+  /* Normalize legacy 9–11px labels to a readable 12px floor. */
+  .text-\\[9px\\],
+  .text-\\[10px\\],
+  .text-\\[11px\\] {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
 }
