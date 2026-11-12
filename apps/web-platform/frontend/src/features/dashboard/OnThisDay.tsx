@@ -3,6 +3,7 @@
 
 import { BookHeart, Cake, Camera, Heart, HeartCrack, Handshake, MessageCircle, Sparkles, Star, type LucideIcon } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { EmptyState } from '@/components/ui/empty-state'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import { supabase, type Memory } from '@/lib/supabase'
@@ -40,6 +41,7 @@ type UnifiedMemory = {
 }
 
 function OnThisDay({ coupleId }: { coupleId: string }) {
+  const router = useRouter()
   const [memories, setMemories] = useState<UnifiedMemory[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -127,6 +129,7 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
             icon={BookHeart}
             title="No memories from this day yet"
             description="Add more shared moments to keep the timeline alive."
+            action={{ label: "Add a memory", onClick: () => router.push("/memories") }}
           />
         </div>
       ) : (
