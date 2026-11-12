@@ -1172,7 +1172,7 @@ function JournalEntryModal({
             type="button"
             onClick={onClose}
             className="rounded-full p-1.5 text-text-2 hover:bg-soft-tint hover:text-text-1"
-            aria-label="Close journal modal"
+            aria-label={t('Memories.closeJournalModal')}
           >
             <X className="h-5 w-5" />
           </button>
