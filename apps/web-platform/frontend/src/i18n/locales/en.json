@@ -11,7 +11,7 @@
     "symptoms": "Symptoms"
   },
   "Settings": {
-    "title": "Settings",
+    "title": "Title",
     "language": "Language",
     "pageTitle": "Settings",
     "pageSubtitle": "Your shared space, arranged your way",
@@ -64,7 +64,29 @@
     "enabled": "Enabled",
     "disabled": "Disabled",
     "toggleAIAccess": "Toggle AI access to",
-    "privacySaveError": "Could not save privacy setting."
+    "privacySaveError": "Could not save privacy setting.",
+    "sharedReminders": "Shared reminders",
+    "addReminder": "Add reminder",
+    "closeAddReminder": "Close add reminder",
+    "titleRequired": "Title *",
+    "description": "Description",
+    "additionalNotes": "Additional notes…",
+    "dateRequired": "Date *",
+    "type": "Type",
+    "repeat": "Repeat",
+    "custom": "Custom",
+    "anniversary": "Anniversary",
+    "birthday": "Birthday",
+    "cycle": "Cycle",
+    "medication": "Medication",
+    "once": "Once",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "noReminders": "No reminders yet",
+    "createReminder": "Create one to keep your connection on track",
+    "deleteReminder": "Delete reminder"
   },
   "Nav": {
     "chat": "Chat",
@@ -89,7 +111,13 @@
     "minutes": "min",
     "calories": "cal",
     "saveFailed": "We could not save that activity. Please try again.",
-    "workouts": { "morningStretch": "Morning Stretch", "yogaFlow": "Yoga Flow", "hiit": "HIIT", "coupleWorkout": "Couple Workout", "eveningWalk": "Evening Walk" },
+    "workouts": {
+      "morningStretch": "Morning Stretch",
+      "yogaFlow": "Yoga Flow",
+      "hiit": "HIIT",
+      "coupleWorkout": "Couple Workout",
+      "eveningWalk": "Evening Walk"
+    },
     "tabs": {
       "physical": "Health",
       "mental": "Mental Wellness",
