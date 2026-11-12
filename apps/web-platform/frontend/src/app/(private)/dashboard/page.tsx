@@ -61,7 +61,7 @@ const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.El
   },
   'our-stats': {
     label: 'dashboard.widgets.ourStats',
-    render: () => <div className="p-4 text-xs text-text-2">Loading stats...</div>,
+    render: () => <div className="p-4 text-xs text-text-2">{t('Dashboard.loadingStats')}</div>,
   },
 }
 
