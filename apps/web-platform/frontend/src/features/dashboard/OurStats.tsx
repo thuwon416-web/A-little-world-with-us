@@ -50,7 +50,7 @@ function OurStats({ coupleId }: { coupleId: string }) {
       <div className="flex items-center justify-between">
         <p className="dashboard-kicker">Our Stats</p>
         <Link href="/our-story" className="text-xs text-accent-1">
-          View All
+          {t('dashboard.viewAll')}
         </Link>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3">
