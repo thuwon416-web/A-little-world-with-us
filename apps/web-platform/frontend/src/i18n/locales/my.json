@@ -173,7 +173,9 @@
     "saveSharedSettings": "မျှဝေထားသော ဆက်တင်များ သိမ်းရန်",
     "cycleDayTooltip": "စက်ဝန်းရက် {day} · {date}",
     "periodCalendarClose": "ရာသီပြက္ခဒိန် ပိတ်ရန်",
-    "dailyLogClose": "မှတ်တမ်းပိတ်ရန်"
+    "dailyLogClose": "မှတ်တမ်းပိတ်ရန်",
+    "intimacy": "ရင်းနှီးမှု",
+    "days": "ရက်"
   },
   "Settings": {
     "title": "ဆက်တင်များ",
