@@ -191,7 +191,7 @@ export default function AutomationPipelinePage() {
           setLogs(logList => [
             {
               timestamp: new Date().toLocaleTimeString(),
-              nodeTitle: node.title,
+              nodeTitle: t('Automations.nodes.' + node.id),
               message: nextState ? t('Automations.enabled') : t('Automations.paused'),
               type: nextState ? 'success' : 'warn',
             },
@@ -597,7 +597,7 @@ export default function AutomationPipelinePage() {
                   </div>
 
                   {/* Title & Type */}
-                  <h3 className="text-xs font-semibold text-text-1 leading-tight">{node.title}</h3>
+                  <h3 className="text-xs font-semibold text-text-1 leading-tight">{t('Automations.nodes.' + node.id)}</h3>
                   <p className="text-xs text-text-2 line-clamp-1 mb-2 font-mono">{node.type}</p>
 
                   {/* Bottom Info & Setting link */}
@@ -637,7 +637,7 @@ export default function AutomationPipelinePage() {
                   <span className="text-[10px] font-mono text-accent-1 uppercase font-semibold">
                     Routine Inspector
                   </span>
-                  <h3 className="text-sm font-semibold text-text-1">{selectedNode.title}</h3>
+                  <h3 className="text-sm font-semibold text-text-1">{t('Automations.nodes.' + selectedNode.id)}</h3>
                 </div>
                 <button
                   type="button"
@@ -653,7 +653,7 @@ export default function AutomationPipelinePage() {
                 <div>
                   <p className="text-xs font-semibold text-text-1">{t('Automations.routineStatus')}</p>
                   <p className="text-[10px] text-text-2">
-                    {selectedNode.enabled ? 'Enabled in automated pipeline' : 'Paused — will skip on execution'}
+                    {selectedNode.enabled ? t('Automations.enabledInPipeline') : t('Automations.pausedSkip')}
                   </p>
                 </div>
                 <button
@@ -841,7 +841,7 @@ export default function AutomationPipelinePage() {
         </div>
       ) : (
         /* Routines List Mode (Clean cards with instant toggle switches) */
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-[#faf7fd]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-card">
           <div className="flex items-center justify-between pb-2">
             <div>
               <h2 className="font-serif text-lg font-semibold text-text-1">{t('Automations.prewiredRoutines')}</h2>
@@ -908,7 +908,7 @@ export default function AutomationPipelinePage() {
                         {node.config.cron || node.config.model || node.config.threshold || 'Active'}
                       </span>
                     ) : (
-                      <span className="italic text-text-2/70">Paused</span>
+                      <span className="italic text-text-2/70">{t('Automations.paused')}</span>
                     )}
                   </span>
                   <button
