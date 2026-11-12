@@ -931,5 +931,176 @@
     "createPassphrase": "Create passphrase",
     "savedIt": "I saved it",
     "archiveRestoredSummary": "Archive restored: {imported} imported, {skipped} duplicates skipped. {errors} item(s) could not be restored."
+  },
+  "About": {
+    "title": "About",
+    "ourWorld": "Our Little World",
+    "intro": "A Little World With Us is a private relationship app designed to help couples celebrate their love, preserve memories, and build meaningful rituals together.",
+    "appInformation": "App information",
+    "appName": "App name",
+    "version": "Version",
+    "platform": "Platform",
+    "lastUpdated": "Last updated",
+    "features": "Features",
+    "featureItems": [
+      "Memory timeline with photos and notes",
+      "Relationship goals and progress tracking",
+      "Private messaging between partners",
+      "Shared to-do lists and reminders",
+      "Daily love notes and gentle reminders",
+      "Bedtime stories and evening rituals",
+      "Random date ideas generator",
+      "AI-powered relationship assistant"
+    ],
+    "support": "Support",
+    "supportCopy": "For setup help, questions, or feature feedback, email support@alittleworldwithus.com. We’ll review your message as soon as possible.",
+    "visitHelp": "Visit Help & FAQ",
+    "faq": "Frequently asked questions",
+    "faqItems": [
+      [
+        "How do I link with my partner?",
+        "Use the couple-linking flow from the app and share the invite with your partner."
+      ],
+      [
+        "How is my data secured?",
+        "The app uses authenticated access and couple-scoped data access to protect shared content."
+      ],
+      [
+        "Does AI read my messages?",
+        "AI features process only the data you choose to submit for an AI request."
+      ],
+      [
+        "Can I export my data?",
+        "Yes. Use the Export option in Settings to download available account data."
+      ],
+      [
+        "How do I delete my account?",
+        "Open Settings and review the account-management options, or contact support for help."
+      ],
+      [
+        "Is my location shared with anyone?",
+        "Location sharing is an opt-in couple feature and is intended for your accepted partner."
+      ]
+    ],
+    "mission": "Our mission",
+    "missionCopy": "To create a digital space where couples can nurture their relationship, celebrate milestones, and build lasting memories together.",
+    "builtWithLove": "Built with love",
+    "builtCopy": "Made for couples who believe that every day together is worth celebrating."
+  },
+  "AI": {
+    "companion": "AI companion",
+    "title": "Love assistant",
+    "description": "Private prompts for the moments when a little help finding the right words is welcome.",
+    "assisted": "AI assisted",
+    "tools": {
+      "chat": "Love coach",
+      "letter": "Love letter",
+      "message": "Message helper",
+      "date": "Date planner",
+      "gift": "Gift ideas",
+      "surprise": "Surprise ideas"
+    },
+    "descriptions": {
+      "chat": "Ask for caring, practical relationship advice.",
+      "letter": "Turn a memory into a personal letter.",
+      "message": "Draft a sweet, supportive, or repair message.",
+      "date": "Plan a date around your budget and mood.",
+      "gift": "Find thoughtful gifts for an occasion.",
+      "surprise": "Plan a thoughtful surprise from details you choose to share."
+    },
+    "promptLabels": {
+      "chat": "What would you like to talk through?",
+      "letter": "Share names, memories, and the tone you want",
+      "message": "What message do you need?",
+      "date": "Tell us the budget, location, and interests",
+      "gift": "Tell us the occasion and what they enjoy",
+      "surprise": "Share the occasion, interests, and a budget"
+    },
+    "promptPlaceholders": {
+      "chat": "For example: We have both been busy lately. How can we reconnect this weekend?",
+      "letter": "Write a gentle anniversary letter. Mention a special memory and what you appreciate about your partner.",
+      "message": "A short apology after I forgot our call. I want it to feel honest, not dramatic.",
+      "date": "Budget 50,000 MMK, Yangon, quiet food and photo walks, 3 hours on Saturday.",
+      "gift": "Birthday gift under 60,000 MMK. They love journaling, tea, and handmade things.",
+      "surprise": "Birthday, loves coffee walks and handmade notes, budget 50,000 MMK. They dislike crowded places."
+    },
+    "thinking": "Thinking…",
+    "generate": "Generate",
+    "yourResult": "Your result",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyFailed": "Copy failed",
+    "save": "Save",
+    "saved": "Saved",
+    "saveFailed": "Save failed",
+    "clear": "Clear",
+    "generateError": "Unable to generate a response"
+  },
+  "Astrology": {
+    "cosmicConnection": "Cosmic connection",
+    "title": "Astrology",
+    "disclaimer": "Astrology is for entertainment only and is not medical, financial, or relationship advice.",
+    "myanmarAstrology": "Myanmar astrology"
+  },
+  "Help": {
+    "support": "Support",
+    "title": "Help & FAQ",
+    "search": "Search help articles",
+    "noMatches": "No matches found. Try another keyword.",
+    "troubleshooting": "Troubleshooting",
+    "cannotLogin": "Cannot log in?",
+    "loginHelp": "Check your connection, confirm your email, and try the password reset flow.",
+    "cannotLink": "Cannot link with your partner?",
+    "linkHelp": "Confirm both accounts are registered and that the invite has not expired.",
+    "slowApp": "App is slow or not loading?",
+    "slowHelp": "Refresh the page, check your connection, and try again with the latest browser version.",
+    "notifications": "Notifications not working?",
+    "notificationsHelp": "Review notification permissions in Settings and in your device or browser settings.",
+    "location": "Location not sharing?",
+    "locationHelp": "Confirm location permission is enabled and that sharing has been turned on for your accepted partner.",
+    "ai": "AI not responding?",
+    "aiHelp": "Check your connection, submit a shorter request, and try again.",
+    "needMoreHelp": "Need more help?",
+    "contactSupport": "Contact support",
+    "contactCopy": "Send a message through the support link for issues, setup help, or feature requests.",
+    "aboutLink": "About & FAQ",
+    "privacyLink": "Privacy policy",
+    "termsLink": "Terms of service",
+    "focusSearch": "Focus search",
+    "toggleShortcuts": "Toggle shortcuts",
+    "faqs": [
+      [
+        "How do I invite my partner?",
+        "Open the couple-linking flow from the app or dashboard and share the invite link with your partner."
+      ],
+      [
+        "Can I use this app offline?",
+        "The app includes PWA support and a service worker, so key pages can remain available when your connection is weak."
+      ],
+      [
+        "How do I change the theme?",
+        "Use the theme panel in Settings or the quick theme control in the sidebar to switch between moods."
+      ],
+      [
+        "Where do I find wellness activities?",
+        "Open the Wellness tab from the home navigation, where the board collection is grouped in themed sections."
+      ],
+      [
+        "How do I add memories?",
+        "Go to the Memories page and click the upload button to add photos with captions and dates to your timeline."
+      ],
+      [
+        "Is my data private?",
+        "Authenticated access and couple-scoped data policies are used to protect your shared content."
+      ],
+      [
+        "How do I export my data?",
+        "Go to Settings and use the Export button in the data section to download available account data."
+      ],
+      [
+        "How does the AI assistant work?",
+        "The AI assistant can help with relationship advice, date ideas, and love letters. Choose a tool and submit only the details you want to share."
+      ]
+    ]
   }
 }
