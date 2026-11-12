@@ -4,17 +4,19 @@ import { Circle, MoonStar, Sparkles, SunMedium, Waves } from 'lucide-react'
 
 import { useTheme } from '@/contexts/ThemeContext'
 import type { ThemeMode } from '@/contexts/ThemeContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 
-const themeOptions: Array<{ key: ThemeMode; label: string; icon: typeof Sparkles }> = [
-  { key: 'lavender-mist', label: 'Lavender Mist', icon: MoonStar },
-  { key: 'peach-cream', label: 'Peach Cream', icon: SunMedium },
-  { key: 'mint-whisper', label: 'Mint Whisper', icon: Sparkles },
-  { key: 'ocean-calm', label: 'Ocean Calm', icon: Waves },
-  { key: 'monochrome', label: 'Monochrome', icon: Circle },
+const themeOptions: Array<{ key: ThemeMode; labelKey: string; icon: typeof Sparkles }> = [
+  { key: 'lavender-mist', labelKey: 'themeLavender', icon: MoonStar },
+  { key: 'peach-cream', labelKey: 'themePeach', icon: SunMedium },
+  { key: 'mint-whisper', labelKey: 'themeMint', icon: Sparkles },
+  { key: 'ocean-calm', labelKey: 'themeOcean', icon: Waves },
+  { key: 'monochrome', labelKey: 'themeMonochrome', icon: Circle },
 ]
 
 export default function ThemeToggle() {
   const { preference, setPreference } = useTheme()
+  const { t } = useLanguage()
 
   return (
     <div className="flex flex-col gap-3">
@@ -22,11 +24,11 @@ export default function ThemeToggle() {
         <span className="text-[10px] uppercase tracking-[0.2em] text-text-1/70">
           Theme
         </span>
-        <span className="text-[10px] text-text-1/60">{preference}</span>
+        <span className="text-[10px] text-text-1/60">{t('Settings.' + ({ 'lavender-mist': 'themeLavender', 'peach-cream': 'themePeach', 'mint-whisper': 'themeMint', 'ocean-calm': 'themeOcean', monochrome: 'themeMonochrome' }[preference]))}</span>
       </div>
 
       <div className="space-y-2">
-        {themeOptions.map(({ key, label, icon: Icon }) => {
+        {themeOptions.map(({ key, labelKey, icon: Icon }) => {
           const isActive = preference === key
 
           return (
@@ -36,16 +38,16 @@ export default function ThemeToggle() {
               onClick={() => {
                 setPreference(key)
               }}
-              className={`flex w-full items-center justify-between gap-2 rounded-full border px-3 py-2 text-left text-[11px] transition-all ${
+              className={`flex min-h-11 w-full items-center justify-between gap-2 rounded-full border px-3 py-2 text-left text-sm transition-all ${
                 isActive
                   ? 'border-accent-1 bg-accent-1/12 text-text-1 shadow-[0_0_18px_rgb(var(--accent-1)_/_0.2)]'
                   : 'border-accent-1/20 bg-card text-text-1/80 hover:bg-card'
               }`}
-              aria-label={`Set ${label} theme`}
+              aria-label={`${t('Settings.setTheme')} ${t('Settings.' + labelKey)}`}
             >
               <span className="inline-flex items-center gap-1.5">
                 <Icon className="h-3.5 w-3.5" />
-                {label}
+                {t(`Settings.${labelKey}`)}
               </span>
               {isActive ? <span className="h-2 w-2 rounded-full bg-accent-2" /> : null}
             </button>
