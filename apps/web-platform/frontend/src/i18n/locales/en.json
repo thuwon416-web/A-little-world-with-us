@@ -1233,5 +1233,53 @@
     "partyChat": "Party chat",
     "video": "Video {id}",
     "syncUnavailable": "Watch sync unavailable: {status}"
+  },
+  "Automations": {
+    "title": "Couple smart automation pipeline",
+    "active": "Active",
+    "canvasView": "Visual workflow canvas",
+    "listView": "Routines list view",
+    "resetLayout": "Reset layout",
+    "addRoutine": "Add routine",
+    "executing": "Executing pipeline…",
+    "runPipeline": "Run pipeline now",
+    "paused": "Paused",
+    "routineStatus": "Routine status",
+    "routineTitle": "Routine title",
+    "moduleType": "Module type",
+    "alarmTime": "Alarm / schedule time",
+    "aiModel": "AI model",
+    "promptInstruction": "Prompt instruction",
+    "waterFrequency": "Water reminder frequency",
+    "monthlyBudget": "Monthly budget limit",
+    "telegramTarget": "Telegram dispatch target",
+    "prewiredRoutines": "All 5 pre-wired routines",
+    "routineDescription": "Toggle any routine on or off. Active routines run in harmony.",
+    "addRoutineModule": "Add routine module",
+    "preconfigured": "Pre-configured couple automation routines",
+    "resetPipelinePositions": "Reset pipeline positions",
+    "routines": "Routines",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "run": "Run",
+    "stop": "Stop",
+    "every1Hour": "Every 1 hour",
+    "every2Hours": "Every 2 hours",
+    "every3Hours": "Every 3 hours",
+    "nodes": {
+      "node-morning-time": "Morning routine alarm",
+      "node-love-note-ai": "Sweet morning note AI",
+      "node-wellness-check": "Cycle & hydration care",
+      "node-finance-guard": "Shared budget monitor",
+      "node-notify-couple": "Telegram & app dispatcher"
+    },
+    "modules": {
+      "datePlanner": "Date night planner AI",
+      "datePlannerDescription": "Auto-suggests weekend restaurant and movie plans.",
+      "anniversary": "Anniversary countdown alert",
+      "anniversaryDescription": "Pre-alerts 3 days before upcoming occasions.",
+      "gratitude": "Bedtime gratitude prompt",
+      "gratitudeDescription": "Prompts each partner to share one sweet appreciation."
+    }
   }
 }
