@@ -749,5 +749,8 @@
   },
   "Dashboard": {
     "loadingStats": "Loading stats…"
+  },
+  "Wellness": {
+    "categories": "Wellness categories"
   }
 }
