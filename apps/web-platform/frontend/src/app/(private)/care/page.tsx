@@ -5,6 +5,7 @@ import { Activity, Bell, CalendarDays, ChevronDown, ChevronUp, Droplet, Heart, P
 import { addDays, calendarDaysBetween, calculateCycleSummary, getAcceptedCareContext, getCareLogs, getCareReminders, getCycleSettings, getFertilityLabel, getPeriodForecastLabel, periodStarts, saveCareLog, saveCareReminder, saveCycleSettings, savePeriodDates, type CareDraft, type CareLog, type CareReminder, type CycleHistoryEntry, type CycleSettings } from '@/lib/care-data'
 import ExplicitAdviceControl from '@/features/ai-guardian/ExplicitAdviceControl'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type Tab = 'today' | 'insights' | 'calendar' | 'reminders' | 'settings'
 type Section = 'mood' | 'symptoms' | 'sex' | 'discharge' | 'digestion' | 'pregnancy_test' | 'ovulation_test' | 'contraceptives' | 'activities'
@@ -28,6 +29,7 @@ const dateKey = (date: Date) => {
 const formatDate = (value: string) => new Date(`${value}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 
 export default function CarePage() {
+  const { t } = useLanguage()
   const [tab, setTab] = useState<Tab>('today')
   const [logs, setLogs] = useState<CareLog[]>([])
   const [settings, setSettings] = useState<CycleSettings | null>(null)
@@ -40,7 +42,7 @@ export default function CarePage() {
   const reload = async () => {
     setLoading(true)
     setLoadError(null)
-    try { const next = await getAcceptedCareContext(); setContext(next); if (next) { const [nextLogs, nextSettings] = await Promise.all([getCareLogs(next.coupleId), getCycleSettings(next.coupleId)]); setLogs(nextLogs); setSettings(nextSettings) } } catch (error_) { console.error('[care] load failed:', error_); setLoadError(error_ instanceof Error ? error_.message : 'Unable to load care data.') } finally { setLoading(false) }
+    try { const next = await getAcceptedCareContext(); setContext(next); if (next) { const [nextLogs, nextSettings] = await Promise.all([getCareLogs(next.coupleId), getCycleSettings(next.coupleId)]); setLogs(nextLogs); setSettings(nextSettings) } } catch (error_) { console.error('[care] load failed:', error_); setLoadError(error_ instanceof Error ? error_.message : t('Care.loadErrorTitle')) } finally { setLoading(false) }
   }
   useEffect(() => { void reload() }, [])
 
@@ -72,14 +74,14 @@ export default function CarePage() {
   const summary = useMemo(() => calculateCycleSummary(logs, settings ?? { couple_id: '', cycle_length: 28, period_length: 5, last_period_start: null, updated_at: '' }), [logs, settings])
   const openLog = (section: Section | null = null) => { setInitialSection(section); setLogOpen(true) }
 
-  if (loading) return <div className="flex min-h-[420px] items-center justify-center"><div className="h-9 w-9 animate-spin rounded-full border-2 border-accent-1/25 border-t-accent-1" /></div>
-  if (loadError) return <section className="glass-card mx-auto max-w-xl p-7 text-center"><Heart className="mx-auto h-8 w-8 text-error" /><h1 className="mt-3 text-2xl text-text-1">Unable to load care data</h1><p className="mt-2 text-sm text-text-2">{loadError}</p><button type="button" onClick={() => void reload()} className="glass-button mt-5 px-4 py-2 text-sm font-semibold">Retry</button></section>
-  if (!context || !settings) return <section className="glass-card mx-auto max-w-xl p-7 text-center"><Heart className="mx-auto h-8 w-8 text-accent-1" /><h1 className="mt-3 text-2xl text-text-1">Cycle Care is shared</h1><p className="mt-2 text-sm text-text-2">Accept your couple link before creating shared cycle records.</p></section>
+  if (loading) return <div role="status" aria-label={t('Care.loading')} className="flex min-h-[420px] items-center justify-center"><div className="h-9 w-9 animate-spin rounded-full border-2 border-accent-1/25 border-t-accent-1" /></div>
+  if (loadError) return <section className="glass-card mx-auto max-w-xl p-7 text-center"><Heart className="mx-auto h-8 w-8 text-error" /><h1 className="mt-3 text-2xl text-text-1"{t('Care.loadErrorTitle')}</h1><p className="mt-2 text-sm text-text-2">{loadError}</p><button type="button" onClick={() => void reload()} className="glass-button mt-5 px-4 py-2 text-sm font-semibold"{t('Care.retry')}</button></section>
+  if (!context || !settings) return <section className="glass-card mx-auto max-w-xl p-7 text-center"><Heart className="mx-auto h-8 w-8 text-accent-1" /><h1 className="mt-3 text-2xl text-text-1"{t('Care.sharedTitle')}</h1><p className="mt-2 text-sm text-text-2">{t('Care.sharedDescription')}</p></section>
 
-  const tabs: Array<{ id: Tab; label: string; icon: typeof Sparkles }> = [{ id: 'today', label: 'Today', icon: Sparkles }, { id: 'insights', label: 'Insights', icon: Activity }, { id: 'calendar', label: 'Calendar', icon: CalendarDays }, { id: 'reminders', label: 'Reminders', icon: Bell }, { id: 'settings', label: 'Settings', icon: Settings2 }]
+  const tabs: Array<{ id: Tab; labelKey: string; icon: typeof Sparkles }> = [{ id: 'today', labelKey: 'today', icon: Sparkles }, { id: 'insights', labelKey: 'insights', icon: Activity }, { id: 'calendar', labelKey: 'calendar', icon: CalendarDays }, { id: 'reminders', labelKey: 'reminders', icon: Bell }, { id: 'settings', labelKey: 'settings', icon: Settings2 }]
   return <div className="mx-auto max-w-5xl space-y-5 pb-8">
-    <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.22em] text-text-2">Shared Cycle Care</p><h1 className="mt-1 text-3xl text-text-1">Cycle Care</h1></div><button onClick={() => openLog()} className="glass-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold"><Plus className="h-4 w-4" />Log today</button></header>
-    <nav className="flex gap-2 overflow-x-auto pb-1">{tabs.map(({ id, label, icon: Icon }) => <button key={id} onClick={() => id === 'calendar' ? setCalendarOpen(true) : setTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm ${tab === id && id !== 'calendar' ? 'border-accent-1/50 bg-accent-1/15 text-accent-1' : 'border-border/20 bg-card text-text-2'}`}><Icon className="h-4 w-4" />{label}</button>)}</nav>
+    <header className="flex flex-wrap items-center justify-between gap-4"><div><p className="text-xs uppercase tracking-[0.22em] text-text-2">{t('Care.sharedCycleCare')}</p><h1 className="mt-1 text-3xl text-text-1">{t('Care.cycleCare')}</h1></div><button onClick={() => openLog()} className="glass-button inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold"><Plus className="h-4 w-4" />{t('Care.logToday')}</button></header>
+    <nav className="flex gap-2 overflow-x-auto pb-1">{tabs.map(({ id, labelKey, icon: Icon }) => <button key={id} onClick={() => id === 'calendar' ? setCalendarOpen(true) : setTab(id)} className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm ${tab === id && id !== 'calendar' ? 'border-accent-1/50 bg-accent-1/15 text-accent-1' : 'border-border/20 bg-card text-text-2'}`}><Icon className="h-4 w-4" / >{t(`Care.tabs.${labelKey}`)}</button>)}</nav>
     {tab === 'today' && <Today summary={summary} onLogPeriod={() => setCalendarOpen(true)} onOpen={openLog} onInsights={() => setTab('insights')} onReminders={() => setTab('reminders')} logs={logs} />}
     {tab === 'insights' && <Insights logs={logs} summary={summary} />}
     {tab === 'reminders' && <Reminders coupleId={context.coupleId} userId={context.userId} />}
@@ -89,7 +91,7 @@ export default function CarePage() {
       await savePeriodDates(context.coupleId, selected)
       setCalendarOpen(false); await reload()
     }} />}
-    <ExplicitAdviceControl mode="intimacy" title="Ask before discussing intimacy" description="Share only what you choose for consent-led, non-graphic guidance." placeholder="What would help us talk about closeness or boundaries?" />
+    <ExplicitAdviceControl mode="intimacy" title={t('Care.askBeforeIntimacy')} description={t('Care.intimacyDescription')} placeholder={t('Care.intimacyPlaceholder')} />
   </div>
 }
 
