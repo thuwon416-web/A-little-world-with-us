@@ -1212,5 +1212,26 @@
     "linkPartner": "Link with your partner to see your shared story.",
     "telegramArchive": "Telegram archive",
     "archiveDescription": "Imported Telegram messages stay available here without crowding the shared timeline."
+  },
+  "WatchTogether": {
+    "sharedMoment": "Shared moment",
+    "title": "Watch Together",
+    "description": "Selected videos update on both partners’ screens in real time.",
+    "openFullChat": "Open full chat",
+    "linkPartner": "Link with your partner to use Watch Together.",
+    "loadError": "Unable to load Watch Together.",
+    "validYouTube": "Enter a valid YouTube URL or video ID.",
+    "youtubeUrlPlaceholder": "YouTube URL or video ID",
+    "titleOptional": "Title (optional)",
+    "addVideo": "Add video",
+    "recentlyWatched": "Recently watched together",
+    "watchlist": "Watchlist",
+    "emptyWatchlist": "Your watchlist is empty.",
+    "emptyPlayer": "Add a video or choose from your watchlist to start watching together.",
+    "playTogether": "Play together",
+    "remove": "Remove",
+    "partyChat": "Party chat",
+    "video": "Video {id}",
+    "syncUnavailable": "Watch sync unavailable: {status}"
   }
 }
