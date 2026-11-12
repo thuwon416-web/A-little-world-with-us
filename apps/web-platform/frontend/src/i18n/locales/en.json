@@ -177,7 +177,8 @@
     "intimacy": "Intimacy",
     "days": "days",
     "from2024": "From 2024 onward",
-    "periodSaveError": "Could not save period dates. Please try again."
+    "periodSaveError": "Could not save period dates. Please try again.",
+    "privateCare": "Private care"
   },
   "Settings": {
     "title": "Settings",
