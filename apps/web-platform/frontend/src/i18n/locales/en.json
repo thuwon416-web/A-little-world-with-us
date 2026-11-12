@@ -1203,5 +1203,14 @@
     "back": "Back",
     "somethingWrong": "Something went wrong",
     "tryAgain": "Try again"
+  },
+  "OurStory": {
+    "title": "Our Story",
+    "subtitle": "Every memory we’ve made together",
+    "loading": "Loading your shared story…",
+    "loadError": "Unable to load your shared story.",
+    "linkPartner": "Link with your partner to see your shared story.",
+    "telegramArchive": "Telegram archive",
+    "archiveDescription": "Imported Telegram messages stay available here without crowding the shared timeline."
   }
 }
