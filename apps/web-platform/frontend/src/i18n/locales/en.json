@@ -1282,6 +1282,17 @@
       "gratitudeDescription": "Prompts each partner to share one sweet appreciation."
     },
     "enabledInPipeline": "Enabled in automated pipeline",
-    "pausedSkip": "Paused — will skip on execution"
+    "pausedSkip": "Paused — will skip on execution",
+    "configure": "Configure",
+    "liveTelemetry": "Live pipeline telemetry & Telegram feed",
+    "pipelineActive": "Pipeline active",
+    "systemStandby": "System standby",
+    "categories": {
+      "ai": "AI",
+      "schedule": "Schedule",
+      "wellness": "Wellness",
+      "finance": "Finance",
+      "notify": "Notifications"
+    }
   }
 }
