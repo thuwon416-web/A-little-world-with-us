@@ -67,7 +67,7 @@ function ErrorFallback({ message }: { message: string }) {
 
 function ThemedStatusBar() {
   const { theme } = useTheme()
-  const isDark = theme === 'lavender-mist' || theme === 'monochrome'
+  const isDark = theme === 'monochrome'
 
   return <StatusBar style={isDark ? 'light' : 'dark'} />
 }
