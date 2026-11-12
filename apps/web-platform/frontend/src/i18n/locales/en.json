@@ -822,5 +822,25 @@
       "sad": "Tender & sad",
       "sadDescription": "Gentle songs for naming and holding difficult feelings."
     }
+  },
+  "Finance": {
+    "goals": "Goals",
+    "financialGoals": "Financial goals",
+    "talkMoney": "Talk through a money decision",
+    "neutralConversation": "Ask for a neutral conversation starter. AI never sees your finance records unless you type them here.",
+    "moneyPlaceholder": "How can we discuss a shared goal or budget difference respectfully?",
+    "sharedExpenses": "Shared expenses",
+    "addExpense": "Add expense",
+    "loadingExpenses": "Loading expenses…",
+    "loadExpensesError": "Unable to load expenses",
+    "retry": "Retry",
+    "linkPartnerFirst": "Link and accept a partner before creating shared financial goals.",
+    "goalNamePlaceholder": "Goal name (e.g. Vacation)",
+    "targetPlaceholder": "Target (MMK)",
+    "currentPlaceholder": "Current (MMK)",
+    "addGoal": "Add goal",
+    "addAmount": "Add amount",
+    "goalSaveError": "Unable to save this financial goal. Please try again.",
+    "expenseCount": "expenses"
   }
 }
