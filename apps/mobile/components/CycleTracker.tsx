@@ -14,7 +14,7 @@ export function CycleTracker({ prediction, cycleLength }: CycleTrackerProps) {
     <View
       style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
     >
-      <Text style={[styles.title, { color: colors.accent2 }]}>Cycle track</Text>
+      <Text style={[styles.title, { color: colors.textSecondary }]}>Cycle track</Text>
       <Text style={[styles.value, { color: colors.textPrimary }]}>
         {cycleLength ? `${cycleLength} day cycle` : 'Tracking soon'}
       </Text>
