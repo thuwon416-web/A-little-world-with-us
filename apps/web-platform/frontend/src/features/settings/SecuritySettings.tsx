@@ -9,7 +9,7 @@ export default function SecuritySettings() {
     <div className="glass-card p-5">
       <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
         <Shield className="h-5 w-5 text-accent-1" />
-        Security
+        {t('Settings.security')}
       </h3>
 
       <div className="space-y-3">
