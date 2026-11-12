@@ -120,7 +120,7 @@ export default function LoveStreakBadge({
       ) : (
         <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-accent-1/30 bg-accent-1/10 px-2.5 py-1 text-[11px] font-medium text-accent-1">
           <Heart className="h-3 w-3 fill-current" />
-          Done
+          {t('dashboard.streak.done')}
         </span>
       )}
     </div>
