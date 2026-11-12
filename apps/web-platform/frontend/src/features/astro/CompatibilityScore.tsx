@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Heart, Star, Calendar, Sparkles } from 'lucide-react'
 import { calculateChineseSign, calculateMyanmarDay, calculateNumerology, calculateSynastry, calculateWesternSign, type AstrologyProfile } from '@/lib/astrology'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 // Zodiac signs for Western astrology
 const _zodiacSigns = [
@@ -110,6 +111,7 @@ const _thadinne = [
 ]
 
 export default function CompatibilityScore() {
+  const { t } = useLanguage()
   const [selectedMethod, setSelectedMethod] = useState<'western' | 'vedic' | 'chinese' | 'myanmar'>('western')
   const [overallScore, setOverallScore] = useState<number | null>(null)
 
@@ -162,13 +164,13 @@ export default function CompatibilityScore() {
             <Heart className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Compatibility</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">{t('Astrology.compatibility')}</p>
             <p className="mt-1 text-sm font-medium text-text-1">ချစ်ကြိုက်မှုတွက်နည်း</p>
           </div>
         </div>
         <div className="text-right">
           <p className="text-3xl font-bold text-accent-1">{displayScore}%</p>
-          <p className="text-xs text-text-2">Overall</p>
+          <p className="text-xs text-text-2">{t('Astrology.overall')}</p>
         </div>
       </div>
 
