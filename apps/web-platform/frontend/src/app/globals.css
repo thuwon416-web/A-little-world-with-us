@@ -110,7 +110,7 @@
     --chart-5: 210 60% 60%;
     --radius: 1.5rem;
     --font-display: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
-    --font-body: var(--font-inter), "Noto Sans Myanmar", "Pyidaungsu", "Padauk", system-ui, sans-serif;
+    --font-body: var(--font-inter), var(--font-myanmar), "Noto Sans Myanmar", "Pyidaungsu", "Padauk", system-ui, sans-serif;
     --font-accent: var(--font-dancing);
 
     /* B2 Size Variables */
@@ -194,13 +194,18 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    html:focus-within { scroll-behavior: auto; }
+    .animate-float-gentle,
+    .animate-heart-beat,
+    .animate-glow-pulse,
+    .animate-twinkle,
+    .animate-breathe,
+    .skeleton-shimmer {
+      animation: none !important;
+    }
+    *, *::before, *::after {
+      transition-duration: 120ms !important;
       scroll-behavior: auto !important;
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
     }
   }
 
