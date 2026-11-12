@@ -254,7 +254,9 @@
     "errorReports": "Error reports",
     "refresh": "Refresh",
     "noRecentErrors": "No recent errors logged.",
-    "clearErrorLog": "Clear local error log"
+    "clearErrorLog": "Clear local error log",
+    "chatExportNeedsCouple": "Connect with your partner before exporting chat history.",
+    "chatExportError": "Unable to export chat history."
   },
   "Nav": {
     "chat": "Chat",
