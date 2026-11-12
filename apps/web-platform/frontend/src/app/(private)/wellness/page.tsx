@@ -31,8 +31,7 @@ type Workout = (typeof workouts)[number]
 type CompletedWorkout = Workout & { completedAt: string }
 
 export default function WellnessPage() {
-  const { language, t } = useLanguage()
-  const isMm = language === 'my'
+  const { t } = useLanguage()
 
   const [activeTab, setActiveTab] = useState<TabId>('physical')
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([])
