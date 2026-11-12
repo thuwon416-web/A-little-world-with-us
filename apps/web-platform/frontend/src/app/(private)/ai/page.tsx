@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Copy, Heart, Sparkles } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
 import { addFavorite, type FavoriteCategory } from '@/lib/favorites'
 
@@ -26,6 +27,7 @@ const prompts: Record<Tool, { label: string; placeholder: string; instruction: s
 }
 
 export default function AIFeaturePage() {
+  const { t } = useLanguage()
   const [tool, setTool] = useState<Tool>('chat')
   const [input, setInput] = useState('')
   const [result, setResult] = useState('')
