@@ -4,6 +4,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import { CalendarDays, CheckCircle2, Flag, Plus, Sparkles } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { EmptyState } from '@/components/ui/empty-state'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type Plan = {
   id: string
@@ -67,7 +68,7 @@ function toPlan(plan: PlanRecord, items: PlanItemRecord[]): Plan {
     title: plan.title,
     type: plan.type,
     dueDate: plan.due_date
-      ? new Date(`${plan.due_date}T12:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      ? new Date(`${plan.due_date}T12:00:00`).toLocaleDateString(typeof document !== 'undefined' && document.documentElement.lang === 'my' ? 'my-MM' : 'en-US', { month: 'short', day: 'numeric' })
       : '',
     status: plan.status === 'completed' ? 'Completed' : 'In progress',
     updated_at: plan.updated_at || plan.created_at,
@@ -78,11 +79,12 @@ function toPlan(plan: PlanRecord, items: PlanItemRecord[]): Plan {
 }
 
 function PlanCard({ plan, onToggleItem }: { readonly plan: Plan; readonly onToggleItem: (planId: string, itemId: string) => void }) {
+  const { t } = useLanguage()
   const doneCount = plan.items.filter((item) => item.done).length
   const planProgress = plan.items.length ? Math.round((doneCount / plan.items.length) * 100) : 0
 
   return (
-    <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs transition hover:border-accent-1/30">
+    <div className="rounded-card border border-border/70 bg-card p-4 sm:p-5 shadow-xs transition hover:border-accent-1/30">
       <div className="flex items-start justify-between gap-3">
         <div>
           <span className="inline-block rounded-full bg-accent-1/10 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-accent-1 border border-accent-1/20">
@@ -91,18 +93,18 @@ function PlanCard({ plan, onToggleItem }: { readonly plan: Plan; readonly onTogg
           <h2 className="mt-1.5 text-base sm:text-lg font-semibold text-text-1">{plan.title}</h2>
         </div>
         <div className="rounded-full bg-soft-tint px-2.5 py-0.5 text-xs font-medium text-text-2">
-          {plan.status}
+          {plan.status === 'Completed' ? t('Plans.completed') : t('Plans.inProgress')}
         </div>
       </div>
 
       <div className="mt-3 flex items-center gap-2 text-xs text-text-2">
         <CalendarDays className="h-3.5 w-3.5 text-accent-1" />
-        Due {plan.dueDate || 'Flexible'}
+        {t('Plans.due')} {plan.dueDate || t('Plans.flexible')}
       </div>
 
       <div className="mt-4">
         <div className="mb-1.5 flex items-center justify-between text-[11px] uppercase tracking-wider text-text-2">
-          <span>Progress</span>
+          <span>{t('Plans.progress')}</span>
           <span className="font-semibold text-text-1">{planProgress}%</span>
         </div>
         <div className="h-2 rounded-full bg-soft-tint overflow-hidden">
@@ -119,7 +121,7 @@ function PlanCard({ plan, onToggleItem }: { readonly plan: Plan; readonly onTogg
             key={item.id}
             type="button"
             onClick={() => onToggleItem(plan.id, item.id)}
-            className="flex w-full items-center gap-3 rounded-xl border border-border/60 bg-card/60 hover:bg-soft-tint/40 px-3 py-2 text-left text-xs sm:text-sm text-text-1 transition"
+            className="flex min-h-11 w-full items-center gap-3 rounded-xl border border-border/60 bg-card/60 hover:bg-soft-tint/40 px-3 py-2 text-left text-xs sm:text-sm text-text-1 transition"
           >
             <span
               className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
@@ -163,29 +165,30 @@ function PlanCreationModal({
   readonly onClose: () => void
   readonly onCreate: () => void
 }) {
+  const { t } = useLanguage()
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="new-plan-title">
-      <section className="w-full max-w-md rounded-modal border border-accent-1/20 bg-card p-6 shadow-xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-text-1/40 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose() }}>
+      <section role="dialog" aria-modal="true" aria-labelledby={`${fieldId}-new-plan-title`} tabIndex={-1} onKeyDown={(event) => { if (event.key === 'Escape') onClose() }} className="w-full max-w-md rounded-panel border border-accent-1/20 bg-card p-6 shadow-xl">
         <div className="flex items-center justify-between gap-3">
-          <h2 id="new-plan-title" className="text-xl font-semibold text-text-1">Create a shared plan</h2>
-          <button type="button" onClick={onClose} className="rounded-full px-2 py-1 text-text-2" aria-label="Close new plan">×</button>
+          <h2 id={`${fieldId}-new-plan-title`} className="text-xl font-semibold text-text-1">{t('Plans.createSharedPlan')}</h2>
+          <button type="button" onClick={onClose} className="rounded-full px-2 py-1 text-text-2" aria-label={t('Plans.closeNewPlan')}>×</button>
         </div>
         <div className="mt-4 space-y-3">
-          <label htmlFor={`${fieldId}-plan-name`} className="block text-sm text-text-2">Plan name{' '}
+          <label htmlFor={`${fieldId}-plan-name`} className="block text-sm text-text-2">{t('Plans.planName')}{' '}
             <input id={`${fieldId}-plan-name`} autoFocus value={title} onChange={(event) => onTitleChange(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" maxLength={120} />
           </label>
-          <label htmlFor={`${fieldId}-plan-type`} className="block text-sm text-text-2">Type{' '}
+          <label htmlFor={`${fieldId}-plan-type`} className="block text-sm text-text-2">{t('Plans.type')}{' '}
             <select id={`${fieldId}-plan-type`} value={type} onChange={(event) => onTypeChange(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1">
-              <option value="goal">Shared goal</option><option value="date">Date plan</option><option value="trip">Trip</option><option value="home">Home</option><option value="other">Other</option>
+              <option value="goal">{t('Plans.types.goal')}</option><option value="date">{t('Plans.types.date')}</option><option value="trip">{t('Plans.types.trip')}</option><option value="home">{t('Plans.types.home')}</option><option value="other">{t('Plans.types.other')}</option>
             </select>
           </label>
-          <label htmlFor={`${fieldId}-due-date`} className="block text-sm text-text-2">Due date (optional){' '}
+          <label htmlFor={`${fieldId}-due-date`} className="block text-sm text-text-2">{t('Plans.dueDateOptional')}{' '}
             <input id={`${fieldId}-due-date`} type="date" value={dueDate} onChange={(event) => onDueDateChange(event.target.value)} className="mt-1 w-full rounded-xl border border-accent-1/20 bg-soft-tint px-3 py-2 text-text-1" />
           </label>
           {error ? <p className="text-sm text-error" role="alert">{error}</p> : null}
           <div className="flex justify-end gap-2 pt-2">
-            <button type="button" onClick={onClose} className="rounded-xl border border-border px-4 py-2 text-sm text-text-2">Cancel</button>
-            <button type="button" onClick={onCreate} disabled={!title.trim() || creating} className="rounded-xl bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:cursor-not-allowed disabled:opacity-50">{creating ? 'Creating…' : 'Create plan'}</button>
+            <button type="button" onClick={onClose} className="rounded-xl border border-border px-4 py-2 text-sm text-text-2">{t('Plans.cancel')}</button>
+            <button type="button" onClick={onCreate} disabled={!title.trim() || creating} className="min-h-11 rounded-xl bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:cursor-not-allowed disabled:opacity-50">{creating ? 'Creating…' : 'Create plan'}</button>
           </div>
         </div>
       </section>
@@ -194,6 +197,7 @@ function PlanCreationModal({
 }
 
 export default function PlansPage() {
+  const { t } = useLanguage()
   const fieldId = useId()
   const [plans, setPlans] = useState<Plan[]>([])
   const [bucketList, setBucketList] = useState<{ id: string; item: string; completed: boolean }[]>([])
@@ -274,7 +278,7 @@ export default function PlansPage() {
           setBucketList((bucketData ?? []) as { id: string; item: string; completed: boolean }[])
         }
       } catch (error_) {
-        if (active) setLoadError(error_ instanceof Error ? error_.message : 'Unable to load shared plans.')
+        if (active) setLoadError(error_ instanceof Error ? error_.message : t('Plans.loadError'))
       } finally {
         if (showLoading && active) setLoading(false)
       }
@@ -353,12 +357,12 @@ export default function PlansPage() {
     const value = newBucketItem.trim()
     if (!coupleId || !value) return
     if (value.length > 100) {
-      setLoadError('Bucket list items must be 100 characters or fewer.')
+      setLoadError(t('Plans.bucketItemLength'))
       return
     }
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     if (userError || !user) {
-      setLoadError(userError?.message ?? 'Please sign in to add a bucket list item.')
+      setLoadError(userError?.message ?? t('Plans.signInToAdd'))
       return
     }
     const { data, error } = await supabase
@@ -380,7 +384,7 @@ export default function PlansPage() {
     setCreateError('')
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser()
-      if (userError || !user) throw userError ?? new Error('Please sign in to create a plan.')
+      if (userError || !user) throw userError ?? new Error(t('Plans.signInToCreate'))
       const { data, error } = await supabase
         .from('plans')
         .insert({
@@ -393,14 +397,14 @@ export default function PlansPage() {
         .select('id,title,type,due_date,status,updated_at,created_at')
         .single()
       if (error) throw error
-      if (!isPlanRecord(data)) throw new Error('The saved plan response was incomplete.')
+      if (!isPlanRecord(data)) throw new Error(t('Plans.savedPlanIncomplete'))
       setPlans((current) => [toPlan(data, []), ...current])
       setNewTitle('')
       setNewType('goal')
       setNewDueDate('')
       setCreateOpen(false)
     } catch (error_) {
-      setCreateError(error_ instanceof Error ? error_.message : 'Unable to create the plan.')
+      setCreateError(error_ instanceof Error ? error_.message : t('Plans.createError'))
     } finally {
       setCreating(false)
     }
@@ -410,9 +414,9 @@ export default function PlansPage() {
     <div className="space-y-6">
       {conflictPlan && (
         <div className="rounded-modal border border-error/50 bg-card p-5">
-          <p className="text-sm font-semibold text-error">Edit conflict detected</p>
+          <p className="text-sm font-semibold text-error">{t('Plans.editConflict')}</p>
           <p className="mt-2 text-sm text-text-2">
-            This plan was modified by your partner. Your changes may overwrite theirs.
+            {t('Plans.conflictDescription')}
           </p>
           <div className="mt-4 flex gap-3">
             <button
@@ -438,8 +442,8 @@ export default function PlansPage() {
 
       <div className="flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-text-2">Shared plans</p>
-          <h1 className="mt-2 text-3xl font-serif text-text-1">Our next chapters</h1>
+          <p className="text-xs uppercase tracking-[0.22em] text-text-2">{t('Plans.sharedPlans')}</p>
+          <h1 className="mt-2 text-3xl font-serif text-text-1">{t('Plans.ourNextChapters')}</h1>
         </div>
         <button type="button" onClick={() => { setCreateError(''); setCreateOpen(true) }} disabled={!coupleId} className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:cursor-not-allowed disabled:opacity-50">
           <Plus className="h-4 w-4" />
@@ -450,12 +454,12 @@ export default function PlansPage() {
       {loadError ? (
         <div className="rounded-btn border border-error/30 bg-error/10 p-4 text-sm text-error" role="alert">
           <p>{loadError}</p>
-          <button type="button" onClick={() => window.location.reload()} className="mt-2 font-semibold underline">Try again</button>
+          <button type="button" onClick={() => window.location.reload()} className="mt-2 font-semibold underline">{t('Plans.tryAgain')}</button>
         </div>
       ) : null}
 
       {loading ? (
-        <div className="space-y-3" aria-busy="true" aria-label="Loading shared plans">
+        <div className="space-y-3" aria-busy="true" aria-label={t('Plans.loadingSharedPlans')}>
           <div className="h-8 w-40 animate-pulse rounded-full bg-soft-tint" />
           <div className="h-48 animate-pulse rounded-panel bg-card" />
         </div>
@@ -465,9 +469,9 @@ export default function PlansPage() {
             {plans.length === 0 ? (
               <EmptyState
                 icon={CalendarDays}
-                title={coupleId ? 'No shared plans yet' : 'Link your partner to plan together'}
-                description={coupleId ? 'Make your first plan together and keep its next steps in one place.' : 'Your shared plans will appear after both accounts are linked.'}
-                action={coupleId ? { label: 'Create your first plan', onClick: () => setCreateOpen(true) } : undefined}
+                title={coupleId ? t('Plans.noSharedPlans') : t('Plans.linkPartnerPlan')}
+                description={coupleId ? t('Plans.firstPlanDescription') : t('Plans.linkedDescription')}
+                action={coupleId ? { label: t('Plans.createFirstPlan'), onClick: () => setCreateOpen(true) } : undefined}
               />
             ) : (
               plans.map((plan) => (
@@ -480,26 +484,26 @@ export default function PlansPage() {
             <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs">
               <div className="flex items-center gap-2 text-accent-1">
                 <Flag className="h-4 w-4" />
-                <span className="text-xs font-semibold uppercase tracking-wider">Overall progress</span>
+                <span className="text-xs font-semibold uppercase tracking-wider">{t('Plans.overallProgress')}</span>
               </div>
               <p className="mt-3 text-2xl font-bold text-text-1">{progress}%</p>
-              <p className="mt-1 text-xs text-text-2">Shared dreams are moving forward together.</p>
+              <p className="mt-1 text-xs text-text-2">{t('Plans.sharedDreams')}</p>
             </div>
 
             <div className="rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs">
               <div className="flex items-center gap-2 text-accent-2">
                 <Sparkles className="h-4 w-4 text-accent-1" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-text-1">Bucket list</span>
+                <span className="text-xs font-semibold uppercase tracking-wider text-text-1">{t('Plans.bucketList')}</span>
               </div>
               <form className="mt-3 flex gap-2" onSubmit={(event) => { event.preventDefault(); void addBucketItem() }}>
                 <input
                   value={newBucketItem}
                   onChange={(event) => setNewBucketItem(event.target.value)}
                   maxLength={100}
-                  placeholder="Add a shared dream"
+                  placeholder={t('Plans.addSharedDream')}
                   className="min-w-0 flex-1 rounded-xl border border-border/60 bg-soft-tint px-3 py-2 text-xs sm:text-sm text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
                 />
-                <button type="submit" disabled={!coupleId || !newBucketItem.trim()} className="rounded-xl bg-accent-1 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50">Add</button>
+                <button type="submit" disabled={!coupleId || !newBucketItem.trim()} className="rounded-xl bg-accent-1 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50">{t('Plans.add')}</button>
               </form>
               {bucketList.length ? (
                 <ul className="mt-4 space-y-2 text-sm text-text-1">
@@ -509,13 +513,13 @@ export default function PlansPage() {
                         type="button"
                         onClick={() => void toggleBucketItem(item.id, !item.completed)}
                         className={item.completed ? 'h-5 w-5 rounded-full border border-success bg-success/20' : 'h-5 w-5 rounded-full border border-text-2'}
-                        aria-label={item.completed ? 'Mark bucket item incomplete' : 'Mark bucket item complete'}
+                        aria-label={item.completed ? t('Plans.markBucketIncomplete') : t('Plans.markBucketComplete')}
                       />
                       <span className={item.completed ? 'text-text-2 line-through' : ''}>{item.item}</span>
                     </li>
                   ))}
                 </ul>
-              ) : <p className="mt-4 text-sm text-text-2">No shared bucket list items yet.</p>}
+              ) : <p className="mt-4 text-sm text-text-2">{t('Plans.noBucketItems')}</p>}
             </div>
           </div>
         </div>
