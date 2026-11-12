@@ -58,6 +58,16 @@
     "lists": "Lists",
     "reminders": "Reminders",
     "signOut": "Sign out",
+    "automations": "Automations",
+    "privacy": "Privacy",
+    "groupHome": "Home",
+    "groupConnection": "Connection",
+    "groupMemories": "Memories",
+    "groupPlans": "Plans",
+    "groupCarePlay": "Care & Play",
+    "groupAccount": "Account",
+    "tagline": "A shared space for two",
+    "sidebarQuote": "You are my favorite hello and hardest goodbye.",
     "todaysWhisper": "Today's whisper"
   }
 }
