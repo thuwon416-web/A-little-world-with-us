@@ -1350,7 +1350,8 @@
     "unknown": "Unknown",
     "you": "You",
     "backToLinking": "Back to linking",
-    "sendMessage": "Send message"
+    "sendMessage": "Send message",
+    "loading": "Loading link status…"
   },
   "Learning": {
     "title": "Korean tutor",
