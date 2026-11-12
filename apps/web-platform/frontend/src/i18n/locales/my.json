@@ -1039,7 +1039,13 @@
     "cosmicConnection": "ကြယ်တာရာဆက်နွယ်မှု",
     "title": "ဗေဒင်",
     "disclaimer": "ဗေဒင်သည် ဖျော်ဖြေရေးအတွက်သာဖြစ်ပြီး ဆေးဘက်ဆိုင်ရာ၊ ငွေကြေးဆိုင်ရာ သို့မဟုတ် ဆက်ဆံရေးအကြံဉာဏ် မဟုတ်ပါ။",
-    "myanmarAstrology": "မြန်မာ့ဗေဒင်"
+    "myanmarAstrology": "မြန်မာ့ဗေဒင်",
+    "compatibility": "လိုက်ဖက်ညီမှု",
+    "overall": "စုစုပေါင်း",
+    "dailyHoroscope": "နေ့စဉ်ဇာတာ",
+    "monthlyForecast": "လစဉ်ခန့်မှန်းချက်",
+    "moonPhase": "လ၏အဆင့်",
+    "relationshipImpact": "ဆက်ဆံရေးအပေါ် သက်ရောက်မှု"
   },
   "Help": {
     "support": "အကူအညီ",
