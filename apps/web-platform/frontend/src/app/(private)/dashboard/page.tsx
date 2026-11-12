@@ -15,6 +15,7 @@ import ConnectedCoupleAvatars from '@/components/shared/ConnectedCoupleAvatars'
 import LoveStreakBadge from '@/components/shared/LoveStreakBadge'
 import { SlidersHorizontal } from 'lucide-react'
 import { useLanguage } from '@/contexts/LanguageContext'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const DaysCounter = dynamic(() => import('@/features/dashboard/DaysCounter'), { loading: () => <DashboardPanelSkeleton /> })
 const Countdown = dynamic(() => import('@/features/dashboard/Countdown'), { loading: () => <DashboardPanelSkeleton /> })
@@ -101,6 +102,7 @@ type ActiveOccasion = {
 }
 
 export default function DashboardPage() {
+  const { t } = useLanguage()
   const { t } = useLanguage()
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [coupleName, setCoupleName] = useState('Our World')
@@ -236,7 +238,7 @@ export default function DashboardPage() {
                   title={t("dashboard.customizeTitle")}
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5" />
-                  Customize
+                  {t('dashboard.customize')}
                 </button>
               </div>
             </div>
