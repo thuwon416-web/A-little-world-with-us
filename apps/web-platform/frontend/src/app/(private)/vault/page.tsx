@@ -96,16 +96,21 @@ function VaultLockScreen({
         <p className="mt-2 text-sm text-text-2">
           Your private letters and memories, sealed until the right moment.
         </p>
+        <label htmlFor="vault-pin" className="sr-only">Vault PIN</label>
         <input
+          id="vault-pin"
           value={pin}
           onChange={(event) => onPinChange(event.target.value)}
           inputMode="numeric"
+          autoComplete="one-time-code"
           maxLength={6}
           type="password"
-          placeholder="Enter your 4-digit PIN"
+          placeholder="Enter your 4-6 digit PIN"
+          aria-describedby="vault-pin-hint"
+          aria-invalid={Boolean(unlockError)}
           className="mt-5 w-full rounded-btn border border-accent-1/20 bg-transparent px-4 py-3 text-center text-text-1"
         />
-        <p className="mt-2 text-xs text-text-2">PIN must be 4-6 digits</p>
+        <p id="vault-pin-hint" className="mt-2 text-xs text-text-2">Enter the 4-6 digit PIN you set for Love Vault.</p>
         {unlockError ? <p className="mt-2 text-sm text-error">{unlockError}</p> : null}
 
         <motion.button
