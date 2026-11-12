@@ -15,7 +15,7 @@ export function WellnessCard({ title, value, detail }: WellnessCardProps) {
     <View
       style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.cardBorder }]}
     >
-      <Text style={[styles.title, { color: colors.accent2 }]}>{title}</Text>
+      <Text style={[styles.title, { color: colors.textSecondary }]}>{title}</Text>
       <Text style={[styles.value, { color: colors.textPrimary }]}>{value}</Text>
       {detail ? (
         <Text style={[styles.detail, { color: colors.textSecondary }]}>{detail}</Text>
