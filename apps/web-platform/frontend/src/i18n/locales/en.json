@@ -893,6 +893,15 @@
     "recoveryPlaceholder": "word1 word2 word3 …",
     "recoverVault": "Recover vault",
     "freshLetters": "Fresh start",
-    "all": "All"
+    "all": "All",
+    "noLetters": "No letters yet",
+    "checkingAuth": "Checking authentication…",
+    "unableAuth": "Unable to check authentication.",
+    "unableLoadKey": "Unable to load the vault key.",
+    "pinDigitsError": "PIN must be 4–6 digits",
+    "invalidPIN": "Invalid PIN",
+    "unableUnlockPasswords": "Unable to unlock passwords.",
+    "biometricUnavailable": "Biometric unlock is unavailable.",
+    "unableRecoverVault": "Unable to recover the vault."
   }
 }
