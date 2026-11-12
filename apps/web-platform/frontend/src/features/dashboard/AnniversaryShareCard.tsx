@@ -55,7 +55,7 @@ function createCard(name: string, anniversary: string, copy: ShareCardCopy, loca
     context.font = '78px Georgia'
     context.fillStyle = colors.secondaryAccent
     context.fillText('♥', 1022, 494)
-    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error('Could not create your share card.')), 'image/png')
+    canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error(copy.createFailed)), 'image/png')
   })
 }
 
@@ -92,7 +92,7 @@ export default function AnniversaryShareCard() {
       link.click()
       window.setTimeout(() => URL.revokeObjectURL(url), 1000)
     } catch (error) {
-      window.alert(t('dashboard.shareCard.unable'))
+      window.alert(t('dashboard.shareCard.createFailed'))
     } finally {
       setBusy(false)
     }
@@ -101,7 +101,7 @@ export default function AnniversaryShareCard() {
   const share = async () => {
     setBusy(true)
     try {
-      const blob = await createCard(details.name, details.anniversary)
+      const blob = await createCard(details.name, details.anniversary, copy, locale)
       const file = new File([blob], 'our-anniversary.png', { type: 'image/png' })
       if (navigator.share && navigator.canShare?.({ files: [file] })) {
         await navigator.share({ title: copy.brand, files: [file] })
