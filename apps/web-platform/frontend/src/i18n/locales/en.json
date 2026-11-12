@@ -775,5 +775,52 @@
     "startAudioCall": "Start audio call",
     "startVideoCall": "Start video call",
     "linkPartnerFirst": "Please link with your partner first to place live calls."
+  },
+  "Games": {
+    "play": "Play",
+    "description": "A tiny game for two hearts.",
+    "playfulGames": "Playful games"
+  },
+  "Gallery": {
+    "title": "Our Gallery",
+    "subtitle": "Photos we keep close",
+    "grid": "Grid",
+    "calendar": "Calendar",
+    "year": "Year",
+    "filterYear": "Filter gallery by year",
+    "allYears": "All years",
+    "noFirstPhoto": "Your gallery is ready for its first photo",
+    "firstPhotoDescription": "Add a memory to begin building your shared gallery.",
+    "addFirstMemory": "Add your first memory",
+    "photos": "photos",
+    "noPhotosYear": "No photos from this year.",
+    "delete": "Delete",
+    "loading": "Fetching gallery…",
+    "loadError": "Unable to load gallery.",
+    "linkPartner": "Link with your partner to see shared photos.",
+    "deleteError": "Unable to delete this image."
+  },
+  "Music": {
+    "home": "Home",
+    "music": "Music",
+    "companionPlaylist": "Companion playlist",
+    "soundsForUs": "Sounds for us",
+    "description": "Keep the songs that feel like you two close at hand.",
+    "musicViews": "Music views",
+    "ourPlaylist": "Our Playlist",
+    "moodBoard": "Mood Board",
+    "findFeeling": "Find the right feeling",
+    "moodDescription": "A few starting points for your next shared moment. Add the ones you love to Our Playlist.",
+    "preview": "Preview",
+    "moods": {
+      "romantic": "Soft & romantic",
+      "romanticDescription": "Warm songs for slow evenings and close conversations.",
+      "happy": "Bright & happy",
+      "happyDescription": "A little lift for dancing in the kitchen together.",
+      "chill": "Slow & chill",
+      "chillDescription": "Low-key soundtracks for quiet mornings and rainy days.",
+      "sad": "Tender & sad",
+      "sadDescription": "Gentle songs for naming and holding difficult feelings."
+    }
   }
 }
