@@ -186,7 +186,7 @@ export default function FavoritesWidget() {
       {/* Add Button */}
       <button
         onClick={() => setShowAddModal(true)}
-        className="mt-4 w-full rounded-xl border border-dashed border-accent-1/30 bg-soft-tint px-3 py-3 text-sm text-text-2 flex items-center justify-center gap-2"
+        className="mt-4 min-h-11 w-full rounded-xl border border-dashed border-accent-1/30 bg-soft-tint px-3 py-3 text-sm text-text-2 flex items-center justify-center gap-2"
       >
         <AnimatedIcon name="Plus" animation="pulse" trigger="hover" size={16} />
         Add Item
@@ -194,10 +194,10 @@ export default function FavoritesWidget() {
 
       {/* Add Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="glass-card p-6 max-w-md w-full mx-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-text-1/50 p-4" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setShowAddModal(false) }}>
+          <div role="dialog" aria-modal="true" aria-labelledby={`${fieldId}-favorites-title`} className="glass-card my-6 max-h-[90dvh] w-full max-w-md overflow-y-auto p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-text-1">
+              <h3 id={`${fieldId}-favorites-title`} className="text-lg font-semibold text-text-1">
                 {t('Settings.addItem')} · {activeCategoryLabel}
               </h3>
               <button onClick={() => setShowAddModal(false)} aria-label={t('Settings.close')} className="text-text-2">
@@ -263,7 +263,7 @@ export default function FavoritesWidget() {
               <button
                 onClick={handleAdd}
                 disabled={!newItemName.trim()}
-                className="w-full rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
+                className="min-h-11 w-full rounded-pill bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
               >
                 Add Item
               </button>
