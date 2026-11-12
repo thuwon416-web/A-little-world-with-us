@@ -20,6 +20,9 @@ export const themes = {
     statBg: '#fbf7fe',
     statBorder: '#e8ddf3',
     softTint: '#ede0f5',
+    success: '#35794a',
+    warning: '#87671f',
+    error: '#9e5858',
   },
   'peach-cream': {
     bg: '#fdf2e8',
@@ -36,6 +39,9 @@ export const themes = {
     statBg: '#fffaf5',
     statBorder: '#f5ddc4',
     softTint: '#fbe4d0',
+    success: '#2f7f3f',
+    warning: '#9c6300',
+    error: '#bf4646',
   },
   'mint-whisper': {
     bg: '#ecf6ef',
@@ -52,6 +58,9 @@ export const themes = {
     statBg: '#f5fbf7',
     statBorder: '#d4ebdc',
     softTint: '#d8ebde',
+    success: '#217f51',
+    warning: '#9b6305',
+    error: '#ad5454',
   },
   'ocean-calm': {
     bg: '#eaf3fa',
@@ -68,6 +77,9 @@ export const themes = {
     statBg: '#f5fafd',
     statBorder: '#d0e4f2',
     softTint: '#d4e6f2',
+    success: '#12798b',
+    warning: '#936500',
+    error: '#b54c4c',
   },
   monochrome: {
     bg: '#0f0f12',
@@ -84,6 +96,9 @@ export const themes = {
     statBg: '#16161a',
     statBorder: '#26262c',
     softTint: '#22222a',
+    success: '#a3c586',
+    warning: '#e6b84a',
+    error: '#d97070',
   },
 } as const
 
