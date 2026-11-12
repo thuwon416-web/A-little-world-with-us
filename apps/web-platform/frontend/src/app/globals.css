@@ -548,17 +548,23 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  html { scroll-behavior: auto; }
+
+  /* Remove decorative movement without globally collapsing all state feedback. */
+  .glass-card,
+  .glass-button,
+  .dashboard-card-interactive,
+  .dashboard-mini-card,
+  .ui-card {
+    transition: none !important;
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .glass-card:hover,
+  .glass-button:hover,
+  .glass-button:active,
+  .dashboard-card-interactive:hover,
+  .dashboard-card-interactive:active {
+    transform: none !important;
   }
 }
 
