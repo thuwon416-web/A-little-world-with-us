@@ -211,7 +211,8 @@
     "pinProtection": "PIN ကာကွယ်မှု",
     "pinProtectionDescription": "PIN lock အတွက် PBKDF2 + AES-GCM ကုဒ်ဝှက်စနစ်။",
     "enableNotifications": "အသိပေးချက်များ ဖွင့်ရန်",
-    "notificationDescription": "သတိပေးချက်များနှင့် အရေးကြီးအကြောင်းကြားချက်များကို လက်ခံရယူပါ။"
+    "notificationDescription": "သတိပေးချက်များနှင့် အရေးကြီးအကြောင်းကြားချက်များကို လက်ခံရယူပါ။",
+    "deleteItem": "အချက်အလက် ဖျက်ရန်"
   },
   "Nav": {
     "chat": "ချက်တင်",
