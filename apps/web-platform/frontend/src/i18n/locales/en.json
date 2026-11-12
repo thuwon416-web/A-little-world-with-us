@@ -211,7 +211,8 @@
     "pinProtection": "PIN protection",
     "pinProtectionDescription": "PBKDF2 + AES-GCM encryption for PIN lock.",
     "enableNotifications": "Enable notifications",
-    "notificationDescription": "Stay updated with reminders and important alerts"
+    "notificationDescription": "Stay updated with reminders and important alerts",
+    "deleteItem": "Delete item"
   },
   "Nav": {
     "chat": "Chat",
