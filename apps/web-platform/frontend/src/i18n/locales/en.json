@@ -252,6 +252,49 @@
       "games": "Games"
     }
   },
+  "dashboard": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "night": "Good night",
+    "focus": "Today's focus",
+    "ritual": "Little ritual",
+    "occasion": "Today is another beautiful day to love each other softly and fully.",
+    "happyAnniversary": "Happy anniversary — {title}.",
+    "happyBirthday": "Happy birthday — {title}.",
+    "loveDay": "A little love day: {title}.",
+    "customize": "Customize",
+    "customizeTitle": "Customize Home Widgets",
+    "customizeLayout": "Customize Home Layout",
+    "nextOccasion": "Next occasion",
+    "anniversary": "Anniversary",
+    "partnerStats": "Link with partner to view stats",
+    "scoreboard": "Couple scoreboard",
+    "you": "You",
+    "myLove": "My Love",
+    "widgets": {
+      "daysTogether": "Days together",
+      "countdown": "Countdown",
+      "memoryOfDay": "Memory of the day",
+      "miniCare": "Mini care check",
+      "musicPlayer": "Music player",
+      "ourStats": "Our stats"
+    },
+    "focusItems": {
+      "one": "Slow down and enjoy the quiet rhythm of us.",
+      "two": "Make space for a little softness and calm today.",
+      "three": "Choose gentleness, even in the smallest moments.",
+      "four": "Be extra present with each other today.",
+      "five": "Hold each other with patience and warmth."
+    },
+    "ritualItems": {
+      "one": "Hold hands for a minute without talking.",
+      "two": "Say one little thing you appreciate about them before sleeping.",
+      "three": "Send a 10-second voice note of your favorite inside joke.",
+      "four": "Brew a warm drink and share the first sip together.",
+      "five": "Take a slow deep breath together."
+    }
+  },
   "nav": {
     "home": "Home",
     "memories": "Memories",
