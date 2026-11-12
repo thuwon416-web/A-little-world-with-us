@@ -245,7 +245,7 @@ const monthlyForecasts: Record<string, ForecastData> = {
 const months = Object.keys(monthlyForecasts)
 
 export default function MonthlyForecast() {
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const [selectedMonth, setSelectedMonth] = useState(new Date().toLocaleString('default', { month: 'long' }))
   const [showMyanmar, setShowMyanmar] = useState(language === 'my')
 
@@ -270,7 +270,7 @@ export default function MonthlyForecast() {
             <Calendar className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Monthly Forecast</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">{t('Astrology.monthlyForecast')}</p>
             <p className="mt-1 text-sm font-medium text-text-1">
               {showMyanmar ? 'ဒီလ ဘာလုပ်ရမလဲ' : 'Monthly Guidance'}
             </p>
