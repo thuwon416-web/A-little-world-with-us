@@ -106,8 +106,8 @@ export default function SettingsPage() {
         <section className="space-y-5 rounded-panel border border-border bg-card p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.preferences')}</p>
-              <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.appSettings')}</h2>
+              <p className="text-xs uppercase tracking-[0.16em] text-text-2">{t('Settings.preferences')}</p>
+              <h2 className="mt-1 text-xl font-semibold text-text-1">{t('Settings.appSettings')}</h2>
             </div>
             <PWAInstall />
           </div>
@@ -117,8 +117,8 @@ export default function SettingsPage() {
 
         <aside className="space-y-5 rounded-panel border border-border bg-card p-5">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.theme')}</p>
-            <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.atmosphere')}</h2>
+            <p className="text-xs uppercase tracking-[0.16em] text-text-2">{t('Settings.theme')}</p>
+            <h2 className="mt-1 text-xl font-semibold text-text-1">{t('Settings.atmosphere')}</h2>
           </div>
 
           <ThemeToggle />
@@ -131,15 +131,15 @@ export default function SettingsPage() {
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
               <Icon className="h-5 w-5" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-text-1" >{t(`Settings.${title}`)}</h3>
-            <p className="mt-2 text-sm text-text-2" >{t(`Settings.${description}`)}</p>
+            <h3 className="mt-4 text-lg font-semibold text-text-1">{t(`Settings.${title}`)}</h3>
+            <p className="mt-2 text-sm text-text-2">{t(`Settings.${description}`)}</p>
           </div>
         ))}
       </section>
 
-      <section className="rounded-modal border border-border bg-card p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.account')}</p>
-        <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.manageCoupleSpace')}</h2>
+      <section className="rounded-panel border border-border bg-card p-5">
+        <p className="text-xs uppercase tracking-[0.16em] text-text-2">{t('Settings.account')}</p>
+        <h2 className="mt-1 text-xl font-semibold text-text-1">{t('Settings.manageCoupleSpace')}</h2>
 
         <div className="mt-4 space-y-4">
           <CoupleSettings />
@@ -162,9 +162,9 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="rounded-modal border border-border bg-card p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.storage')}</p>
-        <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.googleDrive')}</h2>
+      <section className="rounded-panel border border-border bg-card p-5">
+        <p className="text-xs uppercase tracking-[0.16em] text-text-2">{t('Settings.storage')}</p>
+        <h2 className="mt-1 text-xl font-semibold text-text-1">{t('Settings.googleDrive')}</h2>
         <p className="mt-2 text-sm text-text-2">{t('Settings.driveDescription')}</p>
         {driveResult === 'connected' ? <p className="mt-3 rounded-btn border border-success/20 bg-success/10 px-3 py-2 text-sm text-success">{t('Settings.driveConnected')}</p> : null}
         {driveResult === 'error' ? <p className="mt-3 rounded-btn border border-error/20 bg-error/10 px-3 py-2 text-sm text-error">{t('Settings.driveError')}</p> : null}
@@ -191,9 +191,9 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <section className="rounded-modal border border-border bg-card p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.dataExport')}</p>
-        <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.dataInOnePlace')}</h2>
+      <section className="rounded-panel border border-border bg-card p-5">
+        <p className="text-xs uppercase tracking-[0.16em] text-text-2">{t('Settings.dataExport')}</p>
+        <h2 className="mt-1 text-xl font-semibold text-text-1">{t('Settings.dataInOnePlace')}</h2>
 
         <div className="mt-4 space-y-4">
           <MoodChart />
