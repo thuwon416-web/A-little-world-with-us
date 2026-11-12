@@ -744,6 +744,7 @@
       "sad": "Sad",
       "loved": "Loved",
       "anxious": "Anxious"
-    }
+    },
+    "closeJournalModal": "Close journal modal"
   }
 }
