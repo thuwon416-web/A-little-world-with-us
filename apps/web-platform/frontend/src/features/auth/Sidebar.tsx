@@ -106,7 +106,7 @@ export default function Sidebar() {
           >
             A Little World with Us
           </p>
-          <p className="text-[10px] text-text-2">KoKo × Pu Tuu</p>
+          <p className="text-xs text-text-2">A shared space for two</p>
         </div>
       </Link>
 
@@ -116,7 +116,7 @@ export default function Sidebar() {
           if (!visibleItems.length) return null
           return (
           <details key={label} open={items.some(({ href }) => pathname === href)} className="group/nav rounded-xl">
-            <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-text-2 hover:bg-soft-tint [&::-webkit-details-marker]:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold uppercase tracking-[0.14em] text-text-2 hover:bg-soft-tint [&::-webkit-details-marker]:hidden">
               {label}
               <span aria-hidden="true" className="transition-transform group-open/nav:rotate-180">⌄</span>
             </summary>
