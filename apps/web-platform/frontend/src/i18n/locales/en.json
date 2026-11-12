@@ -474,6 +474,8 @@
     "groupAccount": "Account",
     "tagline": "A shared space for two",
     "sidebarQuote": "You are my favorite hello and hardest goodbye.",
+    "sidebarLabel": "Main sidebar",
+    "navigationLabel": "Main navigation",
     "todaysWhisper": "Today's whisper"
   },
   "Calendar": {
