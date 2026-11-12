@@ -19,6 +19,7 @@ import FinanceExport from '@/features/settings/FinanceExport'
 import PhotoExportSettings from '@/features/settings/PhotoExportSettings'
 import AccountDeletion from '@/features/settings/AccountDeletion'
 import { Button, Card } from '@/components/shared/UI'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const CoupleSettings = dynamic(() => import('@/features/settings/CoupleSettings'), {
   ssr: false,
@@ -53,13 +54,14 @@ const TwoFactorAuthWidget = dynamic(() => import('@/features/settings/TwoFactorA
 })
 
 const settingCards = [
-  { icon: BellRing, title: 'Notices', description: 'Daily reminders and gentle nudges' },
-  { icon: NotebookPen, title: 'Rituals', description: 'Saved habits and shared memories' },
-  { icon: ShieldCheck, title: 'Privacy', description: 'Private couple space protection' },
-  { icon: Wand2, title: 'Theme', description: 'Aesthetic atmosphere for your home' },
+  { icon: BellRing, title: 'notices', description: 'noticesDescription' },
+  { icon: NotebookPen, title: 'rituals', description: 'ritualsDescription' },
+  { icon: ShieldCheck, title: 'privacy', description: 'privacyDescription' },
+  { icon: Wand2, title: 'themeCard', description: 'themeDescription' },
 ]
 
 export default function SettingsPage() {
+  const { t } = useLanguage()
   const [driveConnected, setDriveConnected] = useState(false)
   const [driveCanConnect, setDriveCanConnect] = useState(false)
   const [driveRequiresReauthorization, setDriveRequiresReauthorization] = useState(false)
@@ -82,7 +84,7 @@ export default function SettingsPage() {
     setDriveDisconnecting(true)
     try {
       const response = await fetch('/api/drive/disconnect', { method: 'POST' })
-      if (!response.ok) throw new Error('Unable to disconnect Google Drive.')
+      if (!response.ok) throw new Error('{t('Settings.driveDisconnectError')}')
       setDriveConnected(false)
     } catch (error) {
       window.alert(error instanceof Error ? error.message : 'Unable to disconnect Google Drive.')
@@ -93,19 +95,19 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6 p-4 md:p-6 animate-fade-in">
-      <Card className="rounded-[32px] p-6 shadow-[0_18px_42px_rgba(74,56,96,0.10)]">
-        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Settings</p>
-        <h1 className="mt-3 text-3xl font-serif text-text-1">Your little world</h1>
+      <Card className="rounded-panel p-6 shadow-[0_18px_42px_rgba(74,56,96,0.10)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">{t('Settings.pageTitle')}</p>
+        <h1 className="mt-3 text-3xl font-serif text-text-1">{t('Settings.pageSubtitle')}</h1>
       </Card>
 
       <NotificationPermission />
 
       <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-        <section className="space-y-5 rounded-modal border border-border bg-card p-5">
+        <section className="space-y-5 rounded-panel border border-border bg-card p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">Preferences</p>
-              <h2 className="mt-1 text-xl font-semibold text-text-1">App settings</h2>
+              <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.preferences')}</p>
+              <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.appSettings')}</h2>
             </div>
             <PWAInstall />
           </div>
@@ -115,8 +117,8 @@ export default function SettingsPage() {
 
         <aside className="space-y-5 rounded-modal border border-border bg-card p-5">
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">Theme</p>
-            <h2 className="mt-1 text-xl font-semibold text-text-1">Atmosphere</h2>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.theme')}</p>
+            <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.atmosphere')}</h2>
           </div>
 
           <ThemeToggle />
@@ -129,15 +131,15 @@ export default function SettingsPage() {
             <div className="flex h-11 w-11 items-center justify-center rounded-full bg-accent-2/10 text-accent-2">
               <Icon className="h-5 w-5" />
             </div>
-            <h3 className="mt-4 text-lg font-semibold text-text-1">{title}</h3>
-            <p className="mt-2 text-sm text-text-2">{description}</p>
+            <h3 className="mt-4 text-lg font-semibold text-text-1" >{t(`Settings.${title}`)}</h3>
+            <p className="mt-2 text-sm text-text-2" >{t(`Settings.${description}`)}</p>
           </div>
         ))}
       </section>
 
       <section className="rounded-modal border border-border bg-card p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">Account</p>
-        <h2 className="mt-1 text-xl font-semibold text-text-1">Manage your couple space</h2>
+        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.account')}</p>
+        <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.manageCoupleSpace')}</h2>
 
         <div className="mt-4 space-y-4">
           <CoupleSettings />
@@ -161,20 +163,20 @@ export default function SettingsPage() {
       </section>
 
       <section className="rounded-modal border border-border bg-card p-5">
-        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">Storage</p>
-        <h2 className="mt-1 text-xl font-semibold text-text-1">Google Drive</h2>
-        <p className="mt-2 text-sm text-text-2">Connect your Drive for future photo storage. The app keeps only the Drive file reference so saved photos can remain readable later.</p>
-        {driveResult === 'connected' ? <p className="mt-3 rounded-btn border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">Google Drive connected successfully.</p> : null}
-        {driveResult === 'error' ? <p className="mt-3 rounded-btn border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">Google Drive could not be connected. Check the Google OAuth callback configuration and try again.</p> : null}
-        {driveConnected && driveRequiresReauthorization ? <p role="status" className="mt-3 rounded-btn border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">Google Drive is connected, but needs updated permissions for full-folder sync. Reconnect Drive to continue.</p> : null}
+        <p className="text-[10px] uppercase tracking-[0.2em] text-text-2" >{t('Settings.storage')}</p>
+        <h2 className="mt-1 text-xl font-semibold text-text-1" >{t('Settings.googleDrive')}</h2>
+        <p className="mt-2 text-sm text-text-2">{t('Settings.driveDescription')}</p>
+        {driveResult === 'connected' ? <p className="mt-3 rounded-btn border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800">{t('Settings.driveConnected')}</p> : null}
+        {driveResult === 'error' ? <p className="mt-3 rounded-btn border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-800">{t('Settings.driveError')}</p> : null}
+        {driveConnected && driveRequiresReauthorization ? <p role="status" className="mt-3 rounded-btn border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">{t('Settings.driveNeedsPermission')}</p> : null}
         <div className="mt-4 flex flex-wrap items-center gap-3">
-          <span className="text-sm text-text-2">{driveLoading ? 'Checking…' : driveConnected ? (driveRequiresReauthorization ? 'Reconnect required' : 'Connected') : 'Not connected'}</span>
+          <span className="text-sm text-text-2">{driveLoading ? t('Settings.checking') : driveConnected ? (driveRequiresReauthorization ? t('Settings.reconnectRequired') : t('Settings.connected')) : t('Settings.notConnected')}</span>
           {!driveLoading && !driveConnected ? (
             <a
               href={driveCanConnect ? '/api/drive/start' : 'https://a-little-world-with-us.vercel.app/settings'}
               className="ui-button-primary inline-flex min-h-10 items-center justify-center gap-2 px-5 py-2 text-sm font-semibold transition hover:opacity-90 active:scale-95"
             >
-              {driveCanConnect ? 'Connect Google Drive' : 'Open production to connect Google Drive'}
+              {driveCanConnect ? t('Settings.connectDrive') : t('Settings.openProductionToConnect')}
             </a>
           ) : null}
           {!driveLoading && driveConnected && driveRequiresReauthorization ? (
@@ -182,10 +184,10 @@ export default function SettingsPage() {
               href={driveCanConnect ? '/api/drive/start' : 'https://a-little-world-with-us.vercel.app/settings'}
               className="ui-button-primary inline-flex min-h-10 items-center justify-center gap-2 px-5 py-2 text-sm font-semibold transition hover:opacity-90 active:scale-95"
             >
-              {driveCanConnect ? 'Reconnect Google Drive' : 'Open production to reconnect Google Drive'}
+              {driveCanConnect ? t('Settings.reconnectDrive') : t('Settings.openProductionToReconnect')}
             </a>
           ) : null}
-          {!driveLoading && driveConnected ? <Button type="button" variant="secondary" onClick={() => void disconnectDrive()} disabled={driveDisconnecting}>{driveDisconnecting ? 'Disconnecting…' : 'Disconnect'}</Button> : null}
+          {!driveLoading && driveConnected ? <Button type="button" variant="secondary" onClick={() => void disconnectDrive()} disabled={driveDisconnecting}>{driveDisconnecting ? t('Settings.disconnecting') : t('Settings.disconnect')}</Button> : null}
         </div>
       </section>
 
