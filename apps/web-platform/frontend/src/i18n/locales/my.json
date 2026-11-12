@@ -181,7 +181,8 @@
     "cancel": "မလုပ်တော့ပါ",
     "peanutsShellfish": "မြေပဲ၊ ပင်လယ်စာ",
     "medicationExamples": "Aspirin၊ Insulin",
-    "conditionExamples": "ဆီးချို၊ ပန်းနာရင်ကျပ်"
+    "conditionExamples": "ဆီးချို၊ ပန်းနာရင်ကျပ်",
+    "pinLock": "PIN လော့ခ်"
   },
   "Nav": {
     "chat": "ချက်တင်",
