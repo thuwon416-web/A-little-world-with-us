@@ -21,11 +21,11 @@ const tabs = [
 ]
 
 const workouts = [
-  { name: 'Morning Stretch', duration: 10, calories: 50 },
-  { name: 'Yoga Flow', duration: 30, calories: 150 },
-  { name: 'HIIT', duration: 20, calories: 250 },
-  { name: 'Couple Workout', duration: 25, calories: 200 },
-  { name: 'Evening Walk', duration: 30, calories: 120 },
+  { key: 'morningStretch', name: 'Morning Stretch', duration: 10, calories: 50 },
+  { key: 'yogaFlow', name: 'Yoga Flow', duration: 30, calories: 150 },
+  { key: 'hiit', name: 'HIIT', duration: 20, calories: 250 },
+  { key: 'coupleWorkout', name: 'Couple Workout', duration: 25, calories: 200 },
+  { key: 'eveningWalk', name: 'Evening Walk', duration: 30, calories: 120 },
 ]
 type Workout = (typeof workouts)[number]
 type CompletedWorkout = Workout & { completedAt: string }
@@ -54,7 +54,7 @@ export default function WellnessPage() {
       setSelectedWorkout(null)
     } catch (error_) {
       console.error('[wellness] log failed:', error_)
-      setActionError(error_ instanceof Error ? error_.message : 'Failed to save activity')
+      setActionError(t('wellness.saveFailed'))
     }
   }
 
@@ -158,9 +158,9 @@ export default function WellnessPage() {
                 onClick={() => setSelectedWorkout(workout)}
                 className="border border-accent-1/20 rounded-card p-4 text-left bg-card hover:border-accent-1/40 hover:bg-accent-1/5 transition active:scale-[0.98]"
               >
-                <h3 className="font-bold text-lg text-text-1">{workout.name}</h3>
+                <h3 className="font-bold text-lg text-text-1">{t(`wellness.workouts.${workout.key}`)}</h3>
                 <p className="text-text-2 text-sm">
-                  {workout.duration} min -  {workout.calories} cal
+                  {workout.duration} {t('wellness.minutes')} · {workout.calories} {t('wellness.calories')}
                 </p>
               </button>
             ))}
@@ -169,9 +169,9 @@ export default function WellnessPage() {
           {/* Selected Workout */}
           {selectedWorkout && (
             <div className="border border-accent-1/20 rounded-card p-6 bg-card shadow-card">
-              <h2 className="font-bold text-xl mb-4 text-text-1">{selectedWorkout.name}</h2>
+              <h2 className="font-bold text-xl mb-4 text-text-1">{t(`wellness.workouts.${selectedWorkout.key}`)}</h2>
               <p className="text-text-2 mb-4">
-                Duration: {selectedWorkout.duration} min -  Calories: {selectedWorkout.calories}
+                {t('wellness.minutes')}: {selectedWorkout.duration} · {t('wellness.calories')}: {selectedWorkout.calories}
               </p>
               <div className="flex gap-2">
                 <button
@@ -198,7 +198,7 @@ export default function WellnessPage() {
               <div className="space-y-2">
                 {completedWorkouts.map((workout, i) => (
                   <div key={i} className="flex justify-between items-center p-3 bg-accent-1/10 rounded-xl">
-                    <span className="text-text-1">{workout.name}</span>
+                    <span className="text-text-1">{t(`wellness.workouts.${workout.key}`)}</span>
                     <span className="text-text-2 text-sm">
                       {workout.duration} min -  {workout.calories} cal
                     </span>
