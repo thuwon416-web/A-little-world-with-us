@@ -139,7 +139,7 @@ const horoscopes: Record<string, HoroscopeData> = {
 }
 
 export default function DailyHoroscope() {
-  const { language } = useLanguage()
+  const { language, t } = useLanguage()
   const [selectedSign, setSelectedSign] = useState('Leo')
   const [showMyanmar, setShowMyanmar] = useState(language === 'my')
 
@@ -160,7 +160,7 @@ export default function DailyHoroscope() {
             <Sparkles className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-text-2">Daily Horoscope</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-text-2">{t('Astrology.dailyHoroscope')}</p>
             <p className="mt-1 text-sm font-medium text-text-1">{showMyanmar ? 'နေ့စဉ် ဇာတာခွင်' : 'Your celestial forecast'}</p>
           </div>
         </div>
