@@ -1280,6 +1280,8 @@
       "anniversaryDescription": "Pre-alerts 3 days before upcoming occasions.",
       "gratitude": "Bedtime gratitude prompt",
       "gratitudeDescription": "Prompts each partner to share one sweet appreciation."
-    }
+    },
+    "enabledInPipeline": "Enabled in automated pipeline",
+    "pausedSkip": "Paused — will skip on execution"
   }
 }
