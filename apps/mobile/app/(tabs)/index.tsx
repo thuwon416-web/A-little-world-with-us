@@ -603,7 +603,7 @@ export default function DashboardScreen() {
                   <Text
                     style={{
                       color: dashboardLayout.visibility[id]
-                        ? colors.background
+                        ? colors.accentForeground
                         : colors.textSecondary,
                     }}
                   >
@@ -781,7 +781,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       marginTop: 12,
     },
     anniversary: {
-      color: colors.accent3,
+      color: colors.accent1,
       fontSize: sizes.text.hMd,
       fontWeight: '800',
       marginTop: 10,
