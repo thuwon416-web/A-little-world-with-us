@@ -178,7 +178,7 @@ export default function HealthProfileWidget() {
             onClick={() => setEditing(true)}
             className="text-xs text-text-2 hover:text-text-1"
           >
-            Edit
+            {t('Settings.edit')}
           </button>
         )}
       </div>
@@ -201,7 +201,7 @@ export default function HealthProfileWidget() {
           {/* Basic Info */}
           <div className="grid gap-4 md:grid-cols-2">
             {profile.blood_type && (
-              <div className="rounded-xl bg-soft-tint p-3">
+              <div className="rounded-card bg-soft-tint p-3">
                 <p className="text-xs text-text-2">Blood type</p>
                 <p className="text-sm font-medium text-text-1">{profile.blood_type}</p>
               </div>
