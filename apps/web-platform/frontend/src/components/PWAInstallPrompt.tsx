@@ -1,5 +1,6 @@
 'use client'
 import { Smartphone } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { useEffect, useState } from 'react'
 
 type BeforeInstallPromptEvent = Event & {
@@ -8,6 +9,7 @@ type BeforeInstallPromptEvent = Event & {
 }
 
 export default function PWAInstallPrompt() {
+  const { t } = useLanguage()
   const [showPrompt, setShowPrompt] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null)
 
@@ -33,20 +35,20 @@ export default function PWAInstallPrompt() {
 
   return (
     <div className="fixed bottom-4 left-4 right-4 md:left-auto md:right-4 md:w-80 bg-card rounded-btn border border-accent-1/20 shadow-[0_18px_45px_rgba(0,0,0,0.15)] p-4 z-50 animate-fade-in">
-      <p className="mb-2 flex items-center gap-2 font-medium text-text-1"><Smartphone className="h-4 w-4" /> Install Our Little World</p>
+      <p className="mb-2 flex items-center gap-2 font-medium text-text-1"><Smartphone className="h-4 w-4" /> {t('Settings.installPromptTitle')}</p>
       <p className="text-sm text-text-2 mb-4">
-        Add to your home screen for quick access to your couple space
+        {t('Settings.installPromptDescription')}
       </p>
       <div className="flex gap-2">
         <button
           onClick={handleInstall}
-          className="flex-1 bg-accent-1 hover:bg-accent-1/80 text-white font-semibold shadow-sm py-2 px-4 rounded-lg font-medium transition"
+          className="ui-button-primary min-h-11 flex-1 rounded-lg px-4 py-2 text-sm transition"
         >
           Install
         </button>
         <button
           onClick={() => setShowPrompt(false)}
-          className="px-4 py-2 text-text-2 hover:text-text-1 transition"
+          className="min-h-11 px-4 py-2 text-text-2 hover:text-text-1 transition"
         >
           Later
         </button>
