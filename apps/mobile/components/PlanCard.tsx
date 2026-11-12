@@ -41,7 +41,7 @@ export function PlanCard({ plan, onPress, onToggleItem }: PlanCardProps) {
     >
       <View style={styles.headerRow}>
         <View>
-          <Text style={[styles.type, { color: colors.accent2 }]}>{plan.type}</Text>
+          <Text style={[styles.type, { color: colors.textSecondary }]}>{plan.type}</Text>
           <Text style={[styles.title, { color: colors.textPrimary }]}>{plan.title}</Text>
         </View>
         <Text style={[styles.status, { color: colors.success }]}>{plan.status}</Text>
