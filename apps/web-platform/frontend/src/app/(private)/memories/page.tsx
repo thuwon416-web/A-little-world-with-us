@@ -1156,6 +1156,7 @@ function JournalEntryModal({
   readonly onClose: () => void
   readonly onSave: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
@@ -1207,7 +1208,7 @@ function JournalEntryModal({
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  <span>{label}</span>
+                  <span>{t(`Memories.moods.${id}`)}</span>
                 </button>
               )
             })}
@@ -1276,6 +1277,7 @@ function MemoryUploadPanel({
   readonly onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
   readonly onUpload: (event: React.FormEvent<HTMLFormElement>) => void
 }) {
+  const { t } = useLanguage()
   return (
     <div className="space-y-4 pt-3">
       <form className="space-y-3.5" onSubmit={onUpload}>
@@ -1431,6 +1433,7 @@ function MemoryGrid({
   readonly onOpenMemory: (memory: DisplayMemory) => void
   readonly onDeleteMemory: (memory: DisplayMemory) => void
 }) {
+  const { t } = useLanguage()
   return (
     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {memories.map((memory, index) =>
@@ -1569,6 +1572,7 @@ function MemoryDetail({
   readonly onClose: () => void
   readonly onSaved: (memory: Partial<DisplayMemory> & { id: string }) => void
 }) {
+  const { t } = useLanguage()
   const [title, setTitle] = useState(memory.title ?? memory.caption ?? '')
   const [date, setDate] = useState(memory.date)
   const [category, setCategory] = useState<Exclude<MemoryCategory, 'all'>>(
