@@ -942,46 +942,46 @@
     "platform": "Platform",
     "lastUpdated": "Last updated",
     "features": "Features",
-    "featureItems": [
-      "Memory timeline with photos and notes",
-      "Relationship goals and progress tracking",
-      "Private messaging between partners",
-      "Shared to-do lists and reminders",
-      "Daily love notes and gentle reminders",
-      "Bedtime stories and evening rituals",
-      "Random date ideas generator",
-      "AI-powered relationship assistant"
-    ],
+    "featureItems": {
+      "0": "Memory timeline with photos and notes",
+      "1": "Relationship goals and progress tracking",
+      "2": "Private messaging between partners",
+      "3": "Shared to-do lists and reminders",
+      "4": "Daily love notes and gentle reminders",
+      "5": "Bedtime stories and evening rituals",
+      "6": "Random date ideas generator",
+      "7": "AI-powered relationship assistant"
+    },
     "support": "Support",
     "supportCopy": "For setup help, questions, or feature feedback, email support@alittleworldwithus.com. We’ll review your message as soon as possible.",
     "visitHelp": "Visit Help & FAQ",
     "faq": "Frequently asked questions",
-    "faqItems": [
-      [
-        "How do I link with my partner?",
-        "Use the couple-linking flow from the app and share the invite with your partner."
-      ],
-      [
-        "How is my data secured?",
-        "The app uses authenticated access and couple-scoped data access to protect shared content."
-      ],
-      [
-        "Does AI read my messages?",
-        "AI features process only the data you choose to submit for an AI request."
-      ],
-      [
-        "Can I export my data?",
-        "Yes. Use the Export option in Settings to download available account data."
-      ],
-      [
-        "How do I delete my account?",
-        "Open Settings and review the account-management options, or contact support for help."
-      ],
-      [
-        "Is my location shared with anyone?",
-        "Location sharing is an opt-in couple feature and is intended for your accepted partner."
-      ]
-    ],
+    "faqItems": {
+      "0": {
+        "0": "How do I link with my partner?",
+        "1": "Use the couple-linking flow from the app and share the invite with your partner."
+      },
+      "1": {
+        "0": "How is my data secured?",
+        "1": "The app uses authenticated access and couple-scoped data access to protect shared content."
+      },
+      "2": {
+        "0": "Does AI read my messages?",
+        "1": "AI features process only the data you choose to submit for an AI request."
+      },
+      "3": {
+        "0": "Can I export my data?",
+        "1": "Yes. Use the Export option in Settings to download available account data."
+      },
+      "4": {
+        "0": "How do I delete my account?",
+        "1": "Open Settings and review the account-management options, or contact support for help."
+      },
+      "5": {
+        "0": "Is my location shared with anyone?",
+        "1": "Location sharing is an opt-in couple feature and is intended for your accepted partner."
+      }
+    },
     "mission": "Our mission",
     "missionCopy": "To create a digital space where couples can nurture their relationship, celebrate milestones, and build lasting memories together.",
     "builtWithLove": "Built with love",
@@ -1074,40 +1074,40 @@
     "termsLink": "Terms of service",
     "focusSearch": "Focus search",
     "toggleShortcuts": "Toggle shortcuts",
-    "faqs": [
-      [
-        "How do I invite my partner?",
-        "Open the couple-linking flow from the app or dashboard and share the invite link with your partner."
-      ],
-      [
-        "Can I use this app offline?",
-        "The app includes PWA support and a service worker, so key pages can remain available when your connection is weak."
-      ],
-      [
-        "How do I change the theme?",
-        "Use the theme panel in Settings or the quick theme control in the sidebar to switch between moods."
-      ],
-      [
-        "Where do I find wellness activities?",
-        "Open the Wellness tab from the home navigation, where the board collection is grouped in themed sections."
-      ],
-      [
-        "How do I add memories?",
-        "Go to the Memories page and click the upload button to add photos with captions and dates to your timeline."
-      ],
-      [
-        "Is my data private?",
-        "Authenticated access and couple-scoped data policies are used to protect your shared content."
-      ],
-      [
-        "How do I export my data?",
-        "Go to Settings and use the Export button in the data section to download available account data."
-      ],
-      [
-        "How does the AI assistant work?",
-        "The AI assistant can help with relationship advice, date ideas, and love letters. Choose a tool and submit only the details you want to share."
-      ]
-    ],
+    "faqs": {
+      "0": {
+        "0": "How do I invite my partner?",
+        "1": "Open the couple-linking flow from the app or dashboard and share the invite link with your partner."
+      },
+      "1": {
+        "0": "Can I use this app offline?",
+        "1": "The app includes PWA support and a service worker, so key pages can remain available when your connection is weak."
+      },
+      "2": {
+        "0": "How do I change the theme?",
+        "1": "Use the theme panel in Settings or the quick theme control in the sidebar to switch between moods."
+      },
+      "3": {
+        "0": "Where do I find wellness activities?",
+        "1": "Open the Wellness tab from the home navigation, where the board collection is grouped in themed sections."
+      },
+      "4": {
+        "0": "How do I add memories?",
+        "1": "Go to the Memories page and click the upload button to add photos with captions and dates to your timeline."
+      },
+      "5": {
+        "0": "Is my data private?",
+        "1": "Authenticated access and couple-scoped data policies are used to protect your shared content."
+      },
+      "6": {
+        "0": "How do I export my data?",
+        "1": "Go to Settings and use the Export button in the data section to download available account data."
+      },
+      "7": {
+        "0": "How does the AI assistant work?",
+        "1": "The AI assistant can help with relationship advice, date ideas, and love letters. Choose a tool and submit only the details you want to share."
+      }
+    },
     "quickActions": "Quick actions",
     "keyboardShortcuts": "Keyboard shortcuts",
     "searchShortcut": "Search",
@@ -1184,12 +1184,12 @@
     "linking": "Linking…",
     "accept": "Accept",
     "howItWorks": "How it works",
-    "steps": [
-      "Create a unique invite code",
-      "Share the code with your partner",
-      "They accept the link from their app",
-      "Your accounts will be connected"
-    ],
+    "steps": {
+      "0": "Create a unique invite code",
+      "1": "Share the code with your partner",
+      "2": "They accept the link from their app",
+      "3": "Your accounts will be connected"
+    },
     "inviteReady": "Invite code ready!",
     "shareCode": "Share this code with your partner to complete the connection.",
     "copyInviteCode": "Copy invite code",
@@ -1197,12 +1197,12 @@
     "copyCode": "Copy code",
     "waiting": "Waiting for your partner to accept…",
     "sharingTips": "Sharing tips",
-    "tips": [
-      "Share via message, email, or in person",
-      "The code is case-insensitive",
-      "Each code can only be used once",
-      "You’ll be notified when they accept"
-    ],
+    "tips": {
+      "0": "Share via message, email, or in person",
+      "1": "The code is case-insensitive",
+      "2": "Each code can only be used once",
+      "3": "You’ll be notified when they accept"
+    },
     "connected": "Connected!",
     "connectedDescription": "You’re now linked with your partner. Start sharing experiences together.",
     "sendMessage": "Send message",
