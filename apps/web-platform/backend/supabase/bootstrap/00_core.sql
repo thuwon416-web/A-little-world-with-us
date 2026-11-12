@@ -30,7 +30,7 @@ declare partner_email text := current_setting('app.partner_seed_email', true);
 declare partner_uuid text := current_setting('app.partner_seed_uuid', true);
 begin
   if admin_email is null or admin_email = '' then
-    raise notice 'ADMIN_SEED_EMAIL not set, skipping admin seed. Set with: ALTER DATABASE postgres SET app.admin_seed_email = '\''...'\''';
+    raise notice $msg$ADMIN_SEED_EMAIL not set, skipping admin seed. Set with: ALTER DATABASE postgres SET app.admin_seed_email = '<email>';$msg$;
     return;
   end if;
   if admin_uuid is not null and admin_uuid != '' then
@@ -118,6 +118,18 @@ create table public.couple_links (
   check (accepted_by is null or accepted_by <> inviter_id)
 );
 create unique index couple_links_accepted_member_pair on public.couple_links (least(inviter_id, accepted_by), greatest(inviter_id, accepted_by)) where status = 'accepted' and accepted_by is not null;
+
+-- Define this trigger function before any trigger references it.
+-- The hardened definition is repeated in SECTION 5; keeping it here allows
+-- the foundational triggers to be created in the correct dependency order.
+create or replace function public.touch_updated_at()
+returns trigger
+language plpgsql
+set search_path = ''
+as 'begin
+  new.updated_at = pg_catalog.now();
+  return new;
+end';
 
 create trigger profiles_touch before update on public.profiles for each row execute function public.touch_updated_at();
 create trigger couples_touch before update on public.couples for each row execute function public.touch_updated_at();
@@ -346,7 +358,6 @@ create policy locations_pair_member_read on public.user_locations for select usi
     public.is_couple_member(couple_id)
     and exists (select 1 from public.location_sharing_settings s where s.user_id = user_locations.user_id and s.enabled)
   )
-  or (public.is_location_admin() and public.is_linked_user(user_id))
 );
 alter table public.location_history enable row level security;
 create policy location_history_owner_insert on public.location_history for insert with check (auth.uid() = user_id and public.is_couple_member(couple_id) and exists (select 1 from public.location_sharing_settings s where s.user_id = auth.uid() and s.enabled));
@@ -356,7 +367,6 @@ create policy location_history_pair_member_read on public.location_history for s
     public.is_couple_member(couple_id)
     and exists (select 1 from public.location_sharing_settings s where s.user_id = location_history.user_id and s.enabled)
   )
-  or (public.is_location_admin() and public.is_linked_user(user_id))
 );
 alter table public.location_sharing_settings enable row level security;
 create policy location_sharing_owner_access on public.location_sharing_settings for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
@@ -378,7 +388,14 @@ create policy shared_media_delete on storage.objects for delete using (bucket_id
 -- Duplicate policy omitted: surprise_media_creator_access is defined in SECTION 1.
 -- Duplicate policy omitted: surprise_media_recipient_read is defined in SECTION 1.
 
--- Preserve the supplied accounts, create their profiles, and directly accept the pair.
+-- Optional account/data seed. Never create a couple link unless both auth users exist.
+do $$
+begin
+  if nullif(current_setting('app.admin_seed_uuid', true), '') is not null
+     and nullif(current_setting('app.partner_seed_uuid', true), '') is not null
+     and exists (select 1 from auth.users where id = current_setting('app.admin_seed_uuid', true)::uuid)
+     and exists (select 1 from auth.users where id = current_setting('app.partner_seed_uuid', true)::uuid) then
+    -- Preserve the supplied accounts, create their profiles, and directly accept the pair.
 insert into public.profiles (id, email, role)
 select id, email, case when email = current_setting('app.admin_seed_email', true) then 'admin' else 'user' end
 from auth.users 
@@ -418,6 +435,12 @@ from public.couples order by created_at desc limit 1;
 
 insert into public.location_sharing_settings (user_id, enabled, last_permission_state)
 values (current_setting('app.admin_seed_uuid', true)::uuid, false, 'unknown'), (current_setting('app.partner_seed_uuid', true)::uuid, false, 'unknown');
+
+
+  else
+    raise notice 'Admin/partner seed UUIDs are missing or do not match auth.users; skipping profile, couple, couple-link, Flo, and location-sharing seed data.';
+  end if;
+end $$;
 
 create or replace function public.purge_expired_location_history() returns void language sql security definer set search_path = public as $$ delete from public.location_history where captured_at < now() - interval '7 days'; $$;
 commit;
@@ -469,14 +492,14 @@ select
 -- RLS verification. Each query must return exactly one accepted link row.
 begin;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', current_setting('app.admin_seed_uuid', true)::uuid, true);
+select set_config('request.jwt.claim.sub', current_setting('app.admin_seed_uuid', true), true) where nullif(current_setting('app.admin_seed_uuid', true), '') is not null;
 select id, email, role from public.profiles;
 select id, couple_id, status, inviter_id, accepted_by from public.couple_links;
 rollback;
 
 begin;
 set local role authenticated;
-select set_config('request.jwt.claim.sub', current_setting('app.partner_seed_uuid', true)::uuid, true);
+select set_config('request.jwt.claim.sub', current_setting('app.partner_seed_uuid', true), true) where nullif(current_setting('app.partner_seed_uuid', true), '') is not null;
 select id, email, role from public.profiles;
 select id, couple_id, status, inviter_id, accepted_by from public.couple_links;
 rollback;
@@ -575,7 +598,7 @@ select 'Release 2 schema upgrade complete' as status;
 --      schema-qualified body.
 --
 -- Deliberately NOT changed:
---   is_couple_member(uuid), is_linked_user(uuid), is_location_admin(),
+--   is_couple_member(uuid), is_linked_user(uuid),
 --   has_accepted_couple(). These are RLS helpers referenced by all 49 policies in
 --   the public schema, and every policy is declared `TO public`. Policy
 --   expressions are evaluated with the caller's privileges, so revoking EXECUTE
@@ -755,11 +778,9 @@ create policy storage_security_hardening_delete on storage.objects
   );
 
 revoke all on function public.is_couple_member(uuid) from public, anon;
-revoke all on function public.is_location_admin() from public, anon;
 revoke all on function public.is_linked_user(uuid) from public, anon;
 revoke all on function public.has_accepted_couple() from public, anon;
 grant execute on function public.is_couple_member(uuid) to authenticated;
-grant execute on function public.is_location_admin() to authenticated;
 grant execute on function public.is_linked_user(uuid) to authenticated;
 grant execute on function public.has_accepted_couple() to authenticated;
 revoke all on function public.purge_expired_location_history() from public, anon, authenticated;
