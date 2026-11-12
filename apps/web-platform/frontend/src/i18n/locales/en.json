@@ -19,6 +19,23 @@
     "care": "Care",
     "settings": "Settings"
   },
+  "wellness": {
+    "title": "Wellness Boards",
+    "subtitle": "21 curated boards for emotional wellness",
+    "dismiss": "Dismiss",
+    "games": "Games",
+    "gameDescription": "Playful ways to reconnect are coming together here.",
+    "gameCompleted": "Game completed",
+    "completeGame": "Complete a game",
+    "healthMovement": "Health & movement",
+    "completeWorkout": "Complete Workout",
+    "cancel": "Cancel",
+    "completedToday": "Completed Today",
+    "askTitle": "Ask for a gentle reset",
+    "askDescription": "Get one small, practical step for reconnecting. Nothing is sent automatically.",
+    "askPlaceholder": "What feels difficult for us today?",
+    "tabs": { "physical": "Health", "mental": "Mental Wellness", "relationship": "Relationship", "quests": "Quests", "games": "Games" }
+  },
   "nav": {
     "home": "Home",
     "memories": "Memories",
