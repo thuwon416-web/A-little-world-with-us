@@ -929,6 +929,7 @@
     "biometricLater": "Biometric/WebAuthn unlock can be enabled in a later phase.",
     "done": "Done",
     "createPassphrase": "Create passphrase",
-    "savedIt": "I saved it"
+    "savedIt": "I saved it",
+    "archiveRestoredSummary": "Archive restored: {imported} imported, {skipped} duplicates skipped. {errors} item(s) could not be restored."
   }
 }
