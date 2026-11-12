@@ -111,7 +111,6 @@ export default function About() {
               [t('About.faqItems.3.0'), t('About.faqItems.3.1')],
               [t('About.faqItems.4.0'), t('About.faqItems.4.1')],
               [t('About.faqItems.5.0'), t('About.faqItems.5.1')]
-            ]
             ].map(([question, answer]) => (
               <details key={question} className="rounded-xl border border-border/30 p-3">
                 <summary className="cursor-pointer font-semibold text-text-1 marker:text-accent-1">{question}</summary>
