@@ -151,45 +151,47 @@
 
   @layer components {
     .ui-card {
-      border: 1px solid rgb(var(--ui-border-soft));
+      border: 1px solid rgb(var(--border) / 0.8);
       border-radius: var(--ui-radius-card);
-      background: rgb(var(--ui-surface));
-      box-shadow: var(--ui-shadow-card);
+      background: rgb(var(--card));
+      color: rgb(var(--text-1));
+      box-shadow: 0 10px 30px rgb(var(--text-1) / 0.08);
     }
 
     .ui-panel {
-      border: 1px solid rgb(var(--ui-border));
+      border: 1px solid rgb(var(--border));
       border-radius: var(--ui-radius-panel);
-      background: rgb(var(--ui-surface-soft));
+      background: rgb(var(--soft-tint));
+      color: rgb(var(--text-1));
     }
 
     .ui-control {
-      border: 1px solid rgb(var(--ui-border));
+      border: 1px solid rgb(var(--border));
       border-radius: var(--ui-radius-control);
-      background: rgb(var(--ui-surface));
-      color: rgb(var(--ui-ink));
+      background: rgb(var(--card));
+      color: rgb(var(--text-1));
     }
 
-    .ui-control::placeholder { color: rgb(var(--ui-ink-muted) / 0.72); }
+    .ui-control::placeholder { color: rgb(var(--text-2) / 0.72); }
 
     .ui-control:focus-visible {
-      border-color: rgb(var(--ui-accent) / 0.62);
-      box-shadow: 0 0 0 3px rgb(var(--ui-accent) / 0.12);
+      border-color: rgb(var(--accent-1) / 0.62);
+      box-shadow: 0 0 0 3px rgb(var(--accent-1) / 0.12);
     }
 
     .ui-button-primary {
-      border: 1px solid rgb(var(--ui-accent) / 0.82);
+      border: 1px solid rgb(var(--accent-1) / 0.82);
       border-radius: 999px;
-      background: rgb(var(--ui-accent));
-      color: #fff;
-      box-shadow: 0 6px 18px rgb(var(--ui-accent) / 0.18);
+      background: rgb(var(--accent-1));
+      color: var(--accent-foreground);
+      box-shadow: 0 6px 18px rgb(var(--accent-1) / 0.18);
     }
 
     .ui-button-secondary {
-      border: 1px solid rgb(var(--ui-border));
+      border: 1px solid rgb(var(--border));
       border-radius: 999px;
-      background: rgb(var(--ui-surface-soft));
-      color: rgb(var(--ui-ink));
+      background: rgb(var(--soft-tint));
+      color: rgb(var(--text-1));
     }
   }
 
