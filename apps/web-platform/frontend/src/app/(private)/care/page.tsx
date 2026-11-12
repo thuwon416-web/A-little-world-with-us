@@ -133,7 +133,6 @@ function buildAllCycleHistory(logs: CareLog[], summary: ReturnType<typeof calcul
 
 function CycleStrip({ cycle, logs, current, fallbackPeriodLength, allowFertileEstimate }: Readonly<{ cycle: CycleHistoryEntry; logs: CareLog[]; current: boolean; fallbackPeriodLength: number; allowFertileEstimate: boolean }>) {
   const { t } = useLanguage()
-  const { t } = useLanguage()
   const periodLength = getPeriodRunLength(logs, cycle.startDate, cycle.endDate, current ? fallbackPeriodLength : 0)
   const ovulation = addDays(cycle.startDate, cycle.length - 14)
   const fertileStart = addDays(ovulation, -5)
