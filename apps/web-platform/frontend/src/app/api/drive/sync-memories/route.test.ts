@@ -32,8 +32,8 @@ function setup() {
     select: vi.fn(() => memoryQuery),
     eq: vi.fn(() => memoryQuery),
     maybeSingle: vi.fn(async () => ({ data: null, error: null })),
-    insert: vi.fn(() => memoryQuery),
-    update: vi.fn(() => memoryQuery),
+    insert: vi.fn((..._args: unknown[]) => memoryQuery),
+    update: vi.fn((..._args: unknown[]) => memoryQuery),
     single: vi.fn(async () => ({ data: { id: 'memory-1' }, error: null })),
   }
   from.mockImplementation((table: string) => table === 'couple_links' ? coupleQuery : memoryQuery)
