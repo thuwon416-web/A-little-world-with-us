@@ -157,7 +157,7 @@ export default function BottomNav() {
                 type="button"
                 onClick={() => setMoreMenuOpen(false)}
                 className="rounded-full p-2 hover:bg-accent-1/10"
-                aria-label={t('Common.close')}
+                aria-label={t('Settings.closePINSetup')}
               >
                 <X size={20} className="text-text-1" />
               </button>
