@@ -447,7 +447,10 @@
     "exportPhotosZip": "Export selected photos as ZIP",
     "noPhotosToExport": "No photos are available to export.",
     "photoExportError": "Unable to export photos. Please try again.",
-    "quotaError": "Unable to check storage usage."
+    "quotaError": "Unable to check storage usage.",
+    "errorDetails": "Technical details",
+    "errorSource": "Source",
+    "errorComponent": "Component"
   },
   "Nav": {
     "chat": "Chat",
