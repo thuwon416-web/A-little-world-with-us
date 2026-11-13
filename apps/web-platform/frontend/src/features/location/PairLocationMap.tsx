@@ -24,16 +24,23 @@ export default function PairLocationMap({ locations, history, selectedUser, name
   const theme = themes[mode]
   const darkMap = mode === 'lavender-mist' || mode === 'monochrome'
   const tileUrl = process.env.NEXT_PUBLIC_CARTO_TILE_URL ?? `https://{s}.basemaps.cartocdn.com/${darkMap ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`
-  const selected = locations.find((item) => item.user_id === selectedUser) ?? locations[0]
+  const hasValidCoordinates = (latitude: number | null, longitude: number | null) =>
+    typeof latitude === 'number' && Number.isFinite(latitude) && latitude >= -90 && latitude <= 90 &&
+    typeof longitude === 'number' && Number.isFinite(longitude) && longitude >= -180 && longitude <= 180
+  const mapLocations = locations.filter((row) => hasValidCoordinates(row.latitude, row.longitude))
+  const mapHistory = history.filter((row) => hasValidCoordinates(row.latitude, row.longitude))
+  const mapPlaces = places.filter((place) => hasValidCoordinates(place.latitude, place.longitude))
+  const mapAlerts = alerts.filter((alert) => hasValidCoordinates(alert.latitude, alert.longitude))
+  const selected = mapLocations.find((item) => item.user_id === selectedUser) ?? mapLocations[0]
   const focus: LatLngExpression | null = selected ? [selected.latitude, selected.longitude] : null
-  const route = history.filter((row) => row.user_id === selectedUser).slice().reverse().map((row) => [row.latitude, row.longitude] as LatLngExpression)
+  const route = mapHistory.filter((row) => row.user_id === selectedUser).slice().reverse().map((row) => [row.latitude, row.longitude] as LatLngExpression)
   return <MapContainer center={focus ?? [16.8661, 96.1951]} zoom={focus ? 13 : 4} scrollWheelZoom className="h-[430px] w-full rounded-btn" aria-label="Live pair location map">
     <TileLayer attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' url={tileUrl} />
     <FocusMap point={focus} />
     {route.length > 1 && <Polyline positions={route} pathOptions={{ color: theme.accent2, weight: 4, opacity: 0.75 }} />}
-    {locations.map((row, index) => <Marker key={row.user_id} position={[row.latitude, row.longitude]} icon={marker(index === 0 ? '♥' : '✦', index === 0 ? theme.accent1 : theme.accent2)}><Popup><strong>{names[row.user_id] ?? 'Linked account'}</strong><br />Updated {new Date(row.updated_at).toLocaleString()}<br />Accuracy ±{Math.round(row.accuracy ?? 0)}m</Popup></Marker>)}
-    {locations.map((row, index) => <Circle key={`${row.user_id}-accuracy`} center={[row.latitude, row.longitude]} radius={Math.max(row.accuracy ?? 0, 10)} pathOptions={{ color: index === 0 ? theme.accent1 : theme.accent2, fillOpacity: 0.08 }} />)}
-    {places.map((place) => <Circle key={place.id} center={[place.latitude, place.longitude]} radius={place.radius_meters} pathOptions={{ color: theme.accent1, fillOpacity: 0.12 }}><Popup><strong>{place.name}</strong><br />Safe zone · {place.radius_meters}m</Popup></Circle>)}
-    {alerts.filter((alert) => alert.latitude !== null && alert.longitude !== null).map((alert) => <Marker key={alert.id} position={[alert.latitude as number, alert.longitude as number]} icon={marker('!', '#ef4444')}><Popup><strong>SOS alert</strong><br />{new Date(alert.created_at).toLocaleString()}</Popup></Marker>)}
+    {mapLocations.map((row, index) => <Marker key={row.user_id} position={[row.latitude, row.longitude]} icon={marker(index === 0 ? '♥' : '✦', index === 0 ? theme.accent1 : theme.accent2)}><Popup><strong>{names[row.user_id] ?? 'Linked account'}</strong><br />Updated {new Date(row.updated_at).toLocaleString()}<br />Accuracy ±{Math.round(row.accuracy ?? 0)}m</Popup></Marker>)}
+    {mapLocations.map((row, index) => <Circle key={`${row.user_id}-accuracy`} center={[row.latitude, row.longitude]} radius={Math.max(row.accuracy ?? 0, 10)} pathOptions={{ color: index === 0 ? theme.accent1 : theme.accent2, fillOpacity: 0.08 }} />)}
+    {mapPlaces.map((place) => <Circle key={place.id} center={[place.latitude, place.longitude]} radius={place.radius_meters} pathOptions={{ color: theme.accent1, fillOpacity: 0.12 }}><Popup><strong>{place.name}</strong><br />Safe zone · {place.radius_meters}m</Popup></Circle>)}
+    {mapAlerts.map((alert) => <Marker key={alert.id} position={[alert.latitude as number, alert.longitude as number]} icon={marker('!', '#ef4444')}><Popup><strong>SOS alert</strong><br />{new Date(alert.created_at).toLocaleString()}</Popup></Marker>)}
   </MapContainer>
 }
