@@ -272,7 +272,8 @@
       "notificationsTitle": "Notifications",
       "unableLoad": "Unable to load settings.",
       "unableSavePreference": "Unable to save preference.",
-      "notificationsUpdate": "Unable to update notifications."
+      "notificationsUpdate": "Unable to update notifications.",
+      "unableUnlink": "Unable to unlink."
     }
   }
 }
