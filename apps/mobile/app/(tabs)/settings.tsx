@@ -64,14 +64,14 @@ const defaults: NotificationSettings = {
   wellness: true,
 }
 const privacyLabels = [
-  ['allow_ai_read_mood', 'Allow AI to read mood'],
-  ['allow_ai_read_cycle', 'Allow AI to read cycle'],
-  ['allow_ai_read_chat', 'Allow AI to read chat'],
-  ['allow_ai_read_location', 'Allow AI to read location'],
-  ['allow_ai_read_finance', 'Allow AI to read finance'],
-  ['share_cycle', 'Share cycle data'],
-  ['share_mood', 'Share mood data'],
-  ['share_location', 'Share location'],
+  ['allow_ai_read_mood', 'allowMood'],
+  ['allow_ai_read_cycle', 'allowCycle'],
+  ['allow_ai_read_chat', 'allowChat'],
+  ['allow_ai_read_location', 'allowLocation'],
+  ['allow_ai_read_finance', 'allowFinance'],
+  ['share_cycle', 'shareCycle'],
+  ['share_mood', 'shareMood'],
+  ['share_location', 'shareLocation'],
 ] as const
 
 function Section({ title, children }: Readonly<{ title: string; children: React.ReactNode }>) {
@@ -414,17 +414,17 @@ export default function SettingsScreen() {
     return (
       <View style={styles.center}>
         <Text style={styles.error}>{error}</Text>
-        <Button title="Retry" onPress={() => void load()} />
+        <Button title={t('settings.screen.retry')} onPress={() => void load()} />
       </View>
     )
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.eyebrow}>Settings</Text>
-      <Text style={styles.title}>Your shared world</Text>
+      <Text style={styles.eyebrow}>{t('settings.screen.title')}</Text>
+      <Text style={styles.title}>{t('settings.screen.subtitle')}</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
-      <Section title="Notifications">
+      <Section title={t('settings.screen.notifications')}>
         <Toggle
-          label={`Push notifications · ${notifications.pushEnabled ? 'Enabled' : 'Off'}`}
+          label={`${t('settings.screen.push')} · ${notifications.pushEnabled ? t('settings.screen.enabled') : t('settings.screen.off')}`}
           value={notifications.pushEnabled}
           onChange={async (value) => {
             try {
@@ -451,7 +451,7 @@ export default function SettingsScreen() {
         {(['reminders', 'messages', 'milestones', 'wellness'] as const).map((key) => (
           <Toggle
             key={key}
-            label={key[0].toUpperCase() + key.slice(1)}
+            label={t(`settings.screen.${key === 'reminders' ? 'remindersToggle' : key}`)}
             value={notifications[key]}
             onChange={(value) => setNotifications((current) => ({ ...current, [key]: value }))}
           />
@@ -465,7 +465,7 @@ export default function SettingsScreen() {
           />
         ))}
       </Section>
-      <Section title="Appearance">
+      <Section title={t('settings.screen.appearance')}>
         <View style={styles.options}>
           {(
             [
@@ -483,49 +483,49 @@ export default function SettingsScreen() {
             >
               <Text style={styles.buttonText}>
                 {option === 'lavender-mist'
-                  ? 'Lavender Mist'
+                  ? t('settings.screen.lavender')
                   : option === 'peach-cream'
-                    ? 'Peach Cream'
+                    ? t('settings.screen.peach')
                     : option === 'mint-whisper'
-                      ? 'Mint Whisper'
+                      ? t('settings.screen.mint')
                       : option === 'ocean-calm'
-                        ? 'Ocean Calm'
-                        : 'Monochrome'}
+                        ? t('settings.screen.ocean')
+                        : t('settings.screen.monochrome')}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
       </Section>
-      <Section title="Couple / Relationship">
+      <Section title={t('settings.screen.couple')}>
         <View style={{ backgroundColor: colors.background, borderRadius: sizes.radius.input, padding: 12, borderWidth: 1, borderColor: colors.cardBorder, gap: 3 }}>
-          <Text style={styles.label}>Connected with {data.partnerEmail ?? 'your partner'}</Text>
-          <Text style={styles.muted}>Status: {data.relationshipStatus === 'accepted' ? 'Connected' : data.relationshipStatus}</Text>
-          <Text style={styles.muted}>Manage relationship</Text>
+          <Text style={styles.label}>{t('settings.screen.connectedWith')} {data.partnerEmail ?? t('settings.screen.partner')}</Text>
+          <Text style={styles.muted}>{t('settings.screen.status')}: {data.relationshipStatus === 'accepted' ? t('settings.screen.connected') : data.relationshipStatus}</Text>
+          <Text style={styles.muted}>{t('settings.screen.manageRelationship')}</Text>
         </View>
         <TextInput
           value={name}
           onChangeText={setName}
-          placeholder="Couple name"
+          placeholder={t('settings.screen.coupleName')}
           placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
         <TextInput
           value={anniversary}
           onChangeText={setAnniversary}
-          placeholder="Anniversary (YYYY-MM-DD)"
+          placeholder={t('settings.screen.anniversary')}
           placeholderTextColor={colors.textSecondary}
           style={styles.input}
         />
-        <Button title="Save couple settings" onPress={() => void saveCoupleSettings()} />
+        <Button title={t('settings.screen.saveCouple')} onPress={() => void saveCoupleSettings()} />
         {data.coupleId ? (
           <Button
-            title="Unlink couple"
+            title={t('settings.screen.unlink')}
             danger
             onPress={() =>
-              Alert.alert('Unlink couple?', 'This revokes the accepted link.', [
-                { text: 'Cancel' },
+              Alert.alert(t('settings.screen.unlinkConfirm'), t('settings.screen.unlinkDescription'), [
+                { text: t('settings.screen.cancel') },
                 {
-                  text: 'Unlink',
+                  text: t('settings.screen.unlinkAction'),
                   style: 'destructive',
                   onPress: () =>
                     supabase
@@ -551,11 +551,11 @@ export default function SettingsScreen() {
           />
         ) : null}
       </Section>
-      <Section title="Health profile">
+      <Section title={t('settings.screen.health')}>
         <TextInput
           value={health.age}
           onChangeText={(value) => setHealth((current) => ({ ...current, age: value }))}
-          placeholder="Age (1-120)"
+          placeholder={t('settings.screen.age')}
           placeholderTextColor={colors.textSecondary}
           keyboardType="numeric"
           style={styles.input}
@@ -563,7 +563,7 @@ export default function SettingsScreen() {
         <TextInput
           value={health.weight}
           onChangeText={(value) => setHealth((current) => ({ ...current, weight: value }))}
-          placeholder="Weight kg (1-300)"
+          placeholder={t('settings.screen.weight')}
           placeholderTextColor={colors.textSecondary}
           keyboardType="decimal-pad"
           style={styles.input}
@@ -571,7 +571,7 @@ export default function SettingsScreen() {
         <TextInput
           value={health.height}
           onChangeText={(value) => setHealth((current) => ({ ...current, height: value }))}
-          placeholder="Height cm (50-250)"
+          placeholder={t('settings.screen.height')}
           placeholderTextColor={colors.textSecondary}
           keyboardType="decimal-pad"
           style={styles.input}
@@ -581,40 +581,40 @@ export default function SettingsScreen() {
             key={key}
             value={health[key]}
             onChangeText={(value) => setHealth((current) => ({ ...current, [key]: value }))}
-            placeholder={`${key[0].toUpperCase() + key.slice(1)} (comma separated)`}
+            placeholder={t(`settings.screen.${key}`)}
             placeholderTextColor={colors.textSecondary}
             style={styles.input}
           />
         ))}
-        <Button title="Save health profile" onPress={() => void saveHealth()} />
+        <Button title={t('settings.screen.saveHealth')} onPress={() => void saveHealth()} />
       </Section>
-      <Section title="Privacy controls">
+      <Section title={t('settings.screen.privacy')}>
         {privacyLabels.map(([key, label]) => (
           <Toggle
             key={key}
-            label={label}
+            label={t(`settings.screen.${label}`)}
             value={Boolean(privacy[key])}
             onChange={(value) => setPrivacy((current) => ({ ...current, [key]: value }))}
           />
         ))}
-        <Button title="Save privacy settings" onPress={() => void savePrivacySettings()} />
+        <Button title={t('settings.screen.savePrivacy')} onPress={() => void savePrivacySettings()} />
       </Section>
-      <Section title="Google Drive">
+      <Section title={t('settings.screen.drive')}>
         <GoogleDriveSection />
       </Section>
-      <Section title="Exports">
-        <Button title="Export photos (CSV)" onPress={() => void exportData('photos')} />
-        <Button title="Export chat (JSON)" onPress={() => void exportData('chat')} />
-        <Button title="Export Care data (CSV)" onPress={() => void exportData('care')} />
-        <Button title="Export finance (CSV)" onPress={() => void exportData('finance')} />
+      <Section title={t('settings.screen.exports')}>
+        <Button title={t('settings.screen.exportPhotos')} onPress={() => void exportData('photos')} />
+        <Button title={t('settings.screen.exportChat')} onPress={() => void exportData('chat')} />
+        <Button title={t('settings.screen.exportCare')} onPress={() => void exportData('care')} />
+        <Button title={t('settings.screen.exportFinance')} onPress={() => void exportData('finance')} />
       </Section>
-      <Section title="Security">
+      <Section title={t('settings.screen.security')}>
         <Toggle
-          label="PIN lock"
+          label={t('settings.screen.pinLock')}
           value={data.pinEnabled}
           onChange={(value) =>
             value
-              ? Alert.alert('Set PIN', 'Enter a PIN below, then tap Set PIN.')
+              ? Alert.alert(t('settings.screen.pinPrompt'), t('settings.screen.setupPinHint'))
               : void security(false)
           }
         />
@@ -623,40 +623,40 @@ export default function SettingsScreen() {
             <TextInput
               value={pin}
               onChangeText={setPin}
-              placeholder="New PIN (4-6 digits)"
+              placeholder={t('settings.screen.newPin')}
               placeholderTextColor={colors.textSecondary}
               keyboardType="numeric"
               secureTextEntry
               style={styles.input}
             />
-            <Button title="Set PIN" onPress={() => void security(true)} />
+            <Button title={t('settings.screen.setPin')} onPress={() => void security(true)} />
           </>
         ) : (
-          <Button title="Remove PIN" danger onPress={() => void security(false)} />
+          <Button title={t('settings.screen.removePin')} danger onPress={() => void security(false)} />
         )}
         <Toggle
-          label="Biometric authentication"
+          label={t('settings.screen.biometrics')}
           value={data.biometricEnabled}
           onChange={(value) => void biometric(value)}
         />
         <Button
-          title={mfaEnabled ? 'Turn off two-factor verification' : 'Set up two-factor verification'}
+          title={mfaEnabled ? t('settings.screen.mfaOff') : t('settings.screen.mfaOn')}
           onPress={() => (mfaEnabled ? disableMfa() : void startMfaSetup())}
           disabled={mfaBusy}
         />
-        <Button title="Log out" danger onPress={() => void signOut()} />
+        <Button title={t('settings.screen.logout')} danger onPress={() => void signOut()} />
       </Section>
-      <Section title="Favorites">
-        <Text style={styles.muted}>Quick access to the spaces you use most.</Text>
+      <Section title={t('settings.screen.favorites')}>
+        <Text style={styles.muted}>{t('settings.screen.favoritesHint')}</Text>
         <View style={styles.options}>
-          <Button title="Chat" onPress={() => router.push('/chat')} />
-          <Button title="Care" onPress={() => router.push('/care')} />
-          <Button title="Memories" onPress={() => router.push('/memories')} />
+          <Button title={t('settings.screen.chat')} onPress={() => router.push('/chat')} />
+          <Button title={t('settings.screen.care')} onPress={() => router.push('/care')} />
+          <Button title={t('settings.screen.memories')} onPress={() => router.push('/memories')} />
         </View>
       </Section>
-      <Section title="Reminders">
-        <Text style={styles.muted}>Manage your gentle care and connection nudges.</Text>
-        <Button title="Open reminders" onPress={() => router.push('/reminders')} />
+      <Section title={t('settings.screen.reminders')}>
+        <Text style={styles.muted}>{t('settings.screen.remindersHint')}</Text>
+        <Button title={t('settings.screen.openReminders')} onPress={() => router.push('/reminders')} />
       </Section>
       <Section title={t('settings.language')}>
         <View style={styles.options}>
@@ -668,7 +668,7 @@ export default function SettingsScreen() {
               setData((current) => (current ? { ...current, language: 'my' } : current))
             }}
           >
-            <Text style={styles.buttonText}>Myanmar</Text>
+            <Text style={styles.buttonText}>{t('settings.screen.myanmar')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.option, locale === 'en' && styles.optionActive]}
@@ -678,18 +678,18 @@ export default function SettingsScreen() {
               setData((current) => (current ? { ...current, language: 'en' } : current))
             }}
           >
-            <Text style={styles.buttonText}>English</Text>
+            <Text style={styles.buttonText}>{t('settings.screen.english')}</Text>
           </TouchableOpacity>
         </View>
       </Section>
-      <Section title="Location sharing">
+      <Section title={t('settings.screen.location')}>
         <Toggle
-          label={isSharing ? 'Sharing active' : 'Location private'}
+          label={isSharing ? t('settings.screen.sharing') : t('settings.screen.private')}
           value={isSharing}
           onChange={(value) => void toggleSharing(value).then(refreshSharingStatus)}
         />
         {lastUpdated ? (
-          <Text style={styles.muted}>Last sync {new Date(lastUpdated).toLocaleTimeString()}</Text>
+          <Text style={styles.muted}>{t('settings.screen.lastSync')} {new Date(lastUpdated).toLocaleTimeString()}</Text>
         ) : null}
         {locationError ? <Text style={styles.error}>{locationError}</Text> : null}
       </Section>
@@ -701,10 +701,9 @@ export default function SettingsScreen() {
       >
         <View style={styles.mfaOverlay}>
           <View style={styles.mfaPanel}>
-            <Text style={styles.sectionTitle}>Set up authenticator app</Text>
+            <Text style={styles.sectionTitle}>{t('settings.screen.mfaTitle')}</Text>
             <Text style={styles.muted}>
-              Open your authenticator app and scan the QR code. It is not sent to an external
-              website.
+              {t('settings.screen.mfaDescription')}
             </Text>
             {mfaQrCode ? (
               <WebView
@@ -717,7 +716,7 @@ export default function SettingsScreen() {
               />
             ) : null}
             <Text style={styles.muted}>
-              After scanning the QR code, enter the six-digit code from your authenticator app.
+              {t('settings.screen.mfaCodeHint')}
             </Text>
             <Text selectable style={styles.mfaSecret}>
               {mfaSecret}
@@ -725,18 +724,18 @@ export default function SettingsScreen() {
             <TextInput
               value={mfaCode}
               onChangeText={(value) => setMfaCode(value.replaceAll(/\D/g, '').slice(0, 6))}
-              placeholder="Six-digit code"
+              placeholder={t('settings.screen.sixDigit')}
               placeholderTextColor={colors.textSecondary}
               keyboardType="number-pad"
               maxLength={6}
               style={styles.input}
             />
             <Button
-              title={mfaBusy ? 'Verifying…' : 'Verify code'}
+              title={mfaBusy ? t('settings.screen.verifying') : t('settings.screen.verify')}
               onPress={() => void verifyMfaSetup()}
               disabled={mfaBusy || mfaCode.length !== 6}
             />
-            <Button title="Cancel" onPress={() => void cancelMfaSetup()} />
+            <Button title={t('settings.screen.cancel')} onPress={() => void cancelMfaSetup()} />
           </View>
         </View>
       </Modal>
