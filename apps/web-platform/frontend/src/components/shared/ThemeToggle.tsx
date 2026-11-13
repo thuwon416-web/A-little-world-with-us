@@ -27,7 +27,7 @@ export default function ThemeToggle() {
         <span className="text-xs text-text-1/60">{t('Settings.' + ({ 'lavender-mist': 'themeLavender', 'peach-cream': 'themePeach', 'mint-whisper': 'themeMint', 'ocean-calm': 'themeOcean', monochrome: 'themeMonochrome' }[preference]))}</span>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2" role="group" aria-label={t('Settings.themeLabel')}>
         {themeOptions.map(({ key, labelKey, icon: Icon }) => {
           const isActive = preference === key
 
@@ -44,12 +44,13 @@ export default function ThemeToggle() {
                   : 'border-accent-1/20 bg-card text-text-1/80 hover:bg-card'
               }`}
               aria-label={`${t('Settings.setTheme')} ${t('Settings.' + labelKey)}`}
+              aria-pressed={isActive}
             >
               <span className="inline-flex items-center gap-1.5">
                 <Icon className="h-3.5 w-3.5" />
                 {t(`Settings.${labelKey}`)}
               </span>
-              {isActive ? <span className="h-2 w-2 rounded-full bg-accent-2" /> : null}
+              {isActive ? <span aria-hidden="true" className="h-2 w-2 rounded-full bg-accent-2" /> : null}
             </button>
           )
         })}
