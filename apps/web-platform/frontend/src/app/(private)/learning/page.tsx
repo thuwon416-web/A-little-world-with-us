@@ -313,7 +313,7 @@ export default function LearningPage() {
               type="button"
               onClick={() => setSelectedVocab(null)}
               className="absolute right-4 top-4 rounded-full p-2 text-text-2 hover:bg-accent-1/10 hover:text-text-1"
-              aria-label="Close vocabulary details"
+              aria-label={t('Learning.closeVocabulary')}
             >
               <X size={18} />
             </button>
