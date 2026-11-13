@@ -1,7 +1,7 @@
 'use client'
 /* eslint-disable @next/next/no-img-element -- private signed URLs are resolved at runtime. */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { divIcon } from 'leaflet'
 import { MapContainer, Marker, Popup, TileLayer } from 'react-leaflet'
 import type { Memory } from '@/lib/supabase'
@@ -16,7 +16,9 @@ const memoryPin = divIcon({
   popupAnchor: [0, -38],
 })
 
-function hasValidCoordinates(memory: Memory): boolean {
+function hasValidCoordinates(
+  memory: Memory
+): memory is Memory & { latitude: number; longitude: number } {
   return (
     typeof memory.latitude === 'number' &&
     Number.isFinite(memory.latitude) &&
@@ -31,7 +33,7 @@ function hasValidCoordinates(memory: Memory): boolean {
 
 export default function MemoryMap({ memories, coupleId }: { memories: Memory[]; coupleId: string }) {
   const { mode } = useTheme()
-  const locatedMemories = memories.filter(hasValidCoordinates)
+  const locatedMemories = useMemo(() => memories.filter(hasValidCoordinates), [memories])
   const first = locatedMemories[0]
   const [urls, setUrls] = useState<Record<string, string>>({})
 
@@ -67,7 +69,7 @@ export default function MemoryMap({ memories, coupleId }: { memories: Memory[]; 
 
   return (
     <MapContainer
-      center={[first.latitude as number, first.longitude as number]}
+      center={[first.latitude, first.longitude]}
       zoom={4}
       scrollWheelZoom
       className="h-[70vh] w-full rounded-panel"
@@ -76,7 +78,7 @@ export default function MemoryMap({ memories, coupleId }: { memories: Memory[]; 
       {locatedMemories.map((memory) => (
         <Marker
           key={memory.id}
-          position={[memory.latitude as number, memory.longitude as number]}
+          position={[memory.latitude, memory.longitude]}
           icon={memoryPin}
         >
           <Popup>
