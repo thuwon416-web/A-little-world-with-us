@@ -219,7 +219,7 @@ export default function SettingsScreen() {
     } catch (error_) {
       setSafetyNotifications((current) => ({ ...current, [key]: !value }))
       Alert.alert(
-        'Notifications',
+        t('settings.screen.notificationsTitle'),
         error_ instanceof Error ? error_.message : t('settings.screen.unableSavePreference')
       )
     }
@@ -444,7 +444,7 @@ export default function SettingsScreen() {
               }
               setNotifications((current) => ({ ...current, pushEnabled: value }))
             } catch (error_) {
-              Alert.alert('Notifications', error_ instanceof Error ? error_.message : t('settings.screen.notificationsUpdate'))
+              Alert.alert(t('settings.screen.notificationsTitle'), error_ instanceof Error ? error_.message : t('settings.screen.notificationsUpdate'))
             }
           }}
         />
@@ -541,7 +541,7 @@ export default function SettingsScreen() {
                             .then(load)
                             .catch((error_) =>
                               setError(
-                                error_ instanceof Error ? error_.message : 'Unable to unlink.'
+                                error_ instanceof Error ? error_.message : t('settings.screen.unableUnlink')
                               )
                             )
                       ),
