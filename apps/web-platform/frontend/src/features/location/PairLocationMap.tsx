@@ -5,6 +5,7 @@ import { Circle, MapContainer, Marker, Polyline, Popup, TileLayer, useMap } from
 import { divIcon, type LatLngExpression } from 'leaflet'
 import { useTheme } from '@/contexts/ThemeContext'
 import { themes } from '@/lib/theme-tokens'
+import { hasValidMapCoordinates, isValidMapPoint } from './mapCoordinates'
 
 export type MapLocation = { user_id: string; latitude: number; longitude: number; accuracy: number | null; updated_at: string }
 export type MapHistory = { user_id: string; latitude: number; longitude: number; captured_at: string }
@@ -15,7 +16,10 @@ const marker = (label: string, color: string) => divIcon({ className: 'pair-map-
 
 function FocusMap({ point }: { point: LatLngExpression | null }) {
   const map = useMap()
-  useEffect(() => { if (point) map.flyTo(point, Math.max(map.getZoom(), 13), { duration: 0.7 }) }, [map, point])
+  useEffect(() => {
+    if (!point || !isValidMapPoint(point)) return
+    map.flyTo(point, Math.max(map.getZoom(), 13), { duration: 0.7 })
+  }, [map, point])
   return null
 }
 
@@ -24,13 +28,10 @@ export default function PairLocationMap({ locations, history, selectedUser, name
   const theme = themes[mode]
   const darkMap = mode === 'lavender-mist' || mode === 'monochrome'
   const tileUrl = process.env.NEXT_PUBLIC_CARTO_TILE_URL ?? `https://{s}.basemaps.cartocdn.com/${darkMap ? 'dark_all' : 'light_all'}/{z}/{x}/{y}{r}.png`
-  const hasValidCoordinates = (latitude: number | null, longitude: number | null) =>
-    typeof latitude === 'number' && Number.isFinite(latitude) && latitude >= -90 && latitude <= 90 &&
-    typeof longitude === 'number' && Number.isFinite(longitude) && longitude >= -180 && longitude <= 180
-  const mapLocations = locations.filter((row) => hasValidCoordinates(row.latitude, row.longitude))
-  const mapHistory = history.filter((row) => hasValidCoordinates(row.latitude, row.longitude))
-  const mapPlaces = places.filter((place) => hasValidCoordinates(place.latitude, place.longitude))
-  const mapAlerts = alerts.filter((alert) => hasValidCoordinates(alert.latitude, alert.longitude))
+  const mapLocations = locations.filter((row) => hasValidMapCoordinates(row.latitude, row.longitude))
+  const mapHistory = history.filter((row) => hasValidMapCoordinates(row.latitude, row.longitude))
+  const mapPlaces = places.filter((place) => hasValidMapCoordinates(place.latitude, place.longitude))
+  const mapAlerts = alerts.filter((alert) => hasValidMapCoordinates(alert.latitude, alert.longitude))
   const selected = mapLocations.find((item) => item.user_id === selectedUser) ?? mapLocations[0]
   const focus: LatLngExpression | null = selected ? [selected.latitude, selected.longitude] : null
   const route = mapHistory.filter((row) => row.user_id === selectedUser).slice().reverse().map((row) => [row.latitude, row.longitude] as LatLngExpression)
