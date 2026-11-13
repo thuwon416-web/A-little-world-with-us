@@ -8,13 +8,8 @@ import { addFavorite, type FavoriteCategory } from '@/lib/favorites'
 
 type Tool = 'chat' | 'letter' | 'message' | 'date' | 'gift' | 'surprise'
 
-const tools: Array<{ id: Tool; label: string; description: string }> = [
-  { id: 'chat', label: 'Love coach', description: 'Ask for caring, practical relationship advice.' },
-  { id: 'letter', label: 'Love letter', description: 'Turn a memory into a personal letter.' },
-  { id: 'message', label: 'Message helper', description: 'Draft a sweet, supportive, or repair message.' },
-  { id: 'date', label: 'Date planner', description: 'Plan a date around your budget and mood.' },
-  { id: 'gift', label: 'Gift ideas', description: 'Find thoughtful gifts for an occasion.' },
-  { id: 'surprise', label: 'Surprise ideas', description: 'Plan a thoughtful surprise from details you choose to share.' },
+const tools: Array<{ id: Tool }> = [
+  { id: 'chat' }, { id: 'letter' }, { id: 'message' }, { id: 'date' }, { id: 'gift' }, { id: 'surprise' },
 ]
 
 const prompts: Record<Tool, { label: string; placeholder: string; instruction: string }> = {
@@ -75,7 +70,7 @@ export default function AIFeaturePage() {
       setProvider(data.provider || '')
       localStorage.setItem('ai-last-result', JSON.stringify({ tool, input: input.trim(), result: generated, provider: data.provider || '', savedAt: new Date().toISOString() }))
     } catch (caughtError) {
-      setError(caughtError instanceof Error ? caughtError.message : 'Unable to generate a response')
+      setError(caughtError instanceof Error ? caughtError.message : t('AI.generateError'))
     } finally {
       setLoading(false)
     }
@@ -85,9 +80,9 @@ export default function AIFeaturePage() {
     if (!result) return
     try {
       await navigator.clipboard.writeText(result)
-      setCopyStatus('Copied')
+      setCopyStatus(t('AI.copied'))
     } catch {
-      setCopyStatus('Copy failed')
+      setCopyStatus(t('AI.copyFailed'))
     }
     window.setTimeout(() => setCopyStatus(''), 2000)
   }
@@ -103,9 +98,9 @@ export default function AIFeaturePage() {
     try {
       const category: FavoriteCategory = tool === 'gift' ? 'gift_ideas' : 'favorites'
       await addFavorite(category, result.slice(0, 120), tool, undefined, result)
-      setSaveStatus('Saved')
+      setSaveStatus(t('AI.saved'))
     } catch (error_) {
-      setSaveStatus(error_ instanceof Error ? error_.message : 'Save failed')
+      setSaveStatus(error_ instanceof Error ? error_.message : t('AI.saveFailed'))
     }
     window.setTimeout(() => setSaveStatus(''), 2500)
   }
@@ -114,8 +109,8 @@ export default function AIFeaturePage() {
     <div className="space-y-6">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.22em] text-text-2">AI companion</p>
-          <h1 className="mt-2 text-3xl font-serif text-text-1">Love assistant</h1>
+          <p className="text-xs uppercase tracking-[0.22em] text-text-2">{t('AI.companion')}</p>
+          <h1 className="mt-2 text-3xl font-serif text-text-1">{t('AI.title')}</h1>
           <p className="mt-2 max-w-xl text-sm text-text-2">{t('AI.description')}</p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 bg-card px-3 py-2 text-sm text-accent-1"><Sparkles className="h-4 w-4" /> AI assisted</div>
@@ -125,19 +120,19 @@ export default function AIFeaturePage() {
         <aside className="space-y-2 rounded-modal border border-accent-1/20 bg-card p-3">
           {tools.map((item) => (
             <button key={item.id} type="button" onClick={() => { setTool(item.id); setInput(''); setResult(''); setError('') }} className={`w-full rounded-btn p-4 text-left transition ${tool === item.id ? 'bg-accent-1/15 text-text-1' : 'text-text-2 hover:bg-card'}`}>
-              <span className="block font-semibold">{item.label}</span>
-              <span className="mt-1 block text-xs leading-relaxed opacity-75">{item.description}</span>
+              <span className="block font-semibold">{t(`AI.tools.${item.id}`)}</span>
+              <span className="mt-1 block text-xs leading-relaxed opacity-75">{t(`AI.descriptions.${item.id}`)}</span>
             </button>
           ))}
         </aside>
 
-        <section className="rounded-modal border border-accent-1/20 bg-card p-5 sm:p-7">
-          <div className="flex items-center gap-2 text-accent-1"><Heart className="h-5 w-5" /><h2 className="text-xl font-semibold text-text-1">{tools.find((item) => item.id === tool)?.label}</h2></div>
+        <section className="rounded-panel border border-accent-1/20 bg-card p-5 sm:p-7">
+          <div className="flex items-center gap-2 text-accent-1"><Heart className="h-5 w-5" /><h2 className="text-xl font-semibold text-text-1">{t(`AI.tools.${tool}`)}</h2></div>
           <label className="mt-6 block text-sm font-medium text-text-1" htmlFor="ai-request">{t(`AI.promptLabels.${tool}`)}</label>
-          <textarea id="ai-request" value={input} onChange={(event) => setInput(event.target.value)} placeholder={t(`AI.promptPlaceholders.${tool}`)} maxLength={1000} className="mt-3 min-h-36 w-full rounded-btn border border-accent-1/20 bg-card p-4 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-2 focus:border-accent-1" />
-          <div className="mt-3 flex items-center justify-between gap-3"><span className="text-xs text-text-2">{input.length}/1000</span><button type="button" disabled={!input.trim() || loading} onClick={() => void generate()} className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-5 py-2.5 text-sm font-semibold text-white font-semibold shadow-sm disabled:cursor-not-allowed disabled:opacity-50"><AnimatedIcon name="Send" animation="wiggle" trigger="press" size={16} />{loading ? 'Thinking…' : 'Generate'}</button></div>
+          <textarea id="ai-request" value={input} onChange={(event) => setInput(event.target.value)} placeholder={t(`AI.promptPlaceholders.${tool}`)} maxLength={1000} className="mt-3 min-h-36 w-full rounded-card border border-accent-1/20 bg-card p-4 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-2 focus:border-accent-1" />
+          <div className="mt-3 flex items-center justify-between gap-3"><span className="text-xs text-text-2">{input.length}/1000</span><button type="button" disabled={!input.trim() || loading} onClick={() => void generate()} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-accent-1 px-5 py-2.5 text-sm font-semibold text-white font-semibold shadow-sm disabled:cursor-not-allowed disabled:opacity-50"><AnimatedIcon name="Send" animation="wiggle" trigger="press" size={16} />{loading ? t('AI.thinking') : t('AI.generate')}</button></div>
           {error ? <p className="mt-5 rounded-btn bg-error/10 p-4 text-sm text-error">{error}</p> : null}
-          {result ? <div className="mt-6 rounded-panel border border-accent-1/15 bg-card p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-text-2">Your result{provider ? ` · ${provider}` : ''}</p><div className="flex items-center gap-2"><button type="button" onClick={() => void copyResult()} className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-1.5 text-xs text-text-1"><Copy className="h-3.5 w-3.5" />{copyStatus || 'Copy'}</button><button type="button" onClick={() => void saveResult()} className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-1.5 text-xs text-text-1"><Heart className="h-3.5 w-3.5" />{saveStatus || 'Save'}</button><button type="button" onClick={clearResult} className="rounded-full border border-error/30 px-3 py-1.5 text-xs text-error">{t('AI.clear')}</button></div></div><p className="mt-4 whitespace-pre-wrap leading-7 text-text-1">{result}</p></div> : null}
+          {result ? <div className="mt-6 rounded-panel border border-accent-1/15 bg-card p-5"><div className="flex items-center justify-between gap-3"><p className="text-xs uppercase tracking-[0.16em] text-text-2">{t('AI.yourResult')}{provider ? ` · ${provider}` : ''}</p><div className="flex items-center gap-2"><button type="button" onClick={() => void copyResult()} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-accent-1/20 px-3 py-1.5 text-xs text-text-1"><Copy className="h-3.5 w-3.5" />{copyStatus || t('AI.copy')}</button><button type="button" onClick={() => void saveResult()} className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 px-3 py-1.5 text-xs text-text-1"><Heart className="h-3.5 w-3.5" />{saveStatus || t('AI.save')}</button><button type="button" onClick={clearResult} className="min-h-11 rounded-full border border-error/30 px-3 py-1.5 text-xs text-error">{t('AI.clear')}</button></div></div><p className="mt-4 whitespace-pre-wrap leading-7 text-text-1">{result}</p></div> : null}
         </section>
       </div>
     </div>
