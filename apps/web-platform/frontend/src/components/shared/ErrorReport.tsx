@@ -3,7 +3,7 @@
 import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-import { clearErrorLog, getErrorLog, logError } from '@/lib/errorLogger'
+import { clearErrorLog, getErrorLog } from '@/lib/errorLogger'
 import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ErrorReport() {
@@ -14,11 +14,8 @@ export default function ErrorReport() {
     setErrors(getErrorLog())
   }, [])
 
-  const handleGenerateReport = () => {
-    const reportError = logError(new Error('Manual error report requested'), {
-      source: 'error-report-panel',
-    })
-    setErrors((current) => [reportError, ...current].slice(0, 5))
+  const handleRefresh = () => {
+    setErrors(getErrorLog())
   }
 
   const handleClear = () => {
@@ -41,18 +38,18 @@ export default function ErrorReport() {
 
         <button
           type="button"
-          onClick={handleGenerateReport}
+          onClick={handleRefresh}
           className="inline-flex min-h-11 items-center gap-2 rounded-full border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1"
         >
           <RefreshCw className="h-4 w-4" />
-          Refresh
+          {t('Settings.refresh')}
         </button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-3" aria-live="polite">
         {errors.length === 0 ? (
           <p className="rounded-btn border border-border/20 bg-card p-4 text-sm text-text-2">
-            No recent errors logged.
+            {t('Settings.noRecentErrors')}
           </p>
         ) : (
           errors.slice(0, 3).map((error) => (
@@ -72,7 +69,7 @@ export default function ErrorReport() {
         onClick={handleClear}
         className="mt-4 min-h-11 text-sm text-text-2 underline underline-offset-4"
       >
-        Clear local error log
+        {t('Settings.clearErrorLog')}
       </button>
     </div>
   )
