@@ -268,7 +268,11 @@
       "noBiometrics": "This device does not support biometric authentication.",
       "setupPinHint": "Enter a PIN below, then tap Set PIN.",
       "pinPrompt": "Set PIN",
-      "mfaSetupHint": "Setup failed"
+      "mfaSetupHint": "Setup failed",
+      "notificationsTitle": "Notifications",
+      "unableLoad": "Unable to load settings.",
+      "unableSavePreference": "Unable to save preference.",
+      "notificationsUpdate": "Unable to update notifications."
     }
   }
 }
