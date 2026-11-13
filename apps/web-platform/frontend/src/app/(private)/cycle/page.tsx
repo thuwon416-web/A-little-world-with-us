@@ -1,3 +1,5 @@
+'use client'
+
 import CareRhythmBoard from '@/features/cycle/CareRhythmBoard'
 import { useLanguage } from '@/contexts/LanguageContext'
 
