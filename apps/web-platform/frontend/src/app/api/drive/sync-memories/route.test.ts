@@ -100,6 +100,42 @@ describe('POST /api/drive/sync-memories', () => {
     expect(listDriveChildren).not.toHaveBeenCalledWith('user-1', 'couple-2-folder')
     // The live public.memories schema intentionally has no legacy visibility column.
     expect(memoryQuery.insert).toHaveBeenCalledWith(expect.not.objectContaining({ visibility: 'shared' }))
+    // Drive folder names are titles/categories, not geographic location labels.
+    for (const [payload] of memoryQuery.insert.mock.calls) {
+      expect(payload).toHaveProperty('location_label', null)
+    }
+  })
+
+  it('does not overwrite a memory location label with a Drive folder name', async () => {
+    const { memoryQuery } = setup()
+    listDriveChildren
+      .mockResolvedValueOnce({ files: [
+        { id: 'travel-folder', name: 'Kalaw 2026', mimeType: 'application/vnd.google-apps.folder' },
+      ] })
+      .mockResolvedValueOnce({ files: [
+        { id: 'existing-photo', name: 'kalaw.jpg', mimeType: 'image/jpeg', modifiedTime: '2026-10-08T12:00:00Z' },
+      ] })
+    memoryQuery.maybeSingle.mockResolvedValueOnce({
+      data: {
+        id: 'memory-1',
+        title: 'Existing memory',
+        date: '2026-10-08',
+        drive_folder_id: 'old-folder',
+        couple_id: 'couple-1',
+        location_label: 'My actual place',
+      },
+      error: null,
+    })
+
+    const response = await POST(new Request('https://a-little-world-with-us.vercel.app/api/drive/sync-memories', {
+      method: 'POST',
+      body: JSON.stringify({ coupleId: 'couple-1' }),
+      headers: { 'Content-Type': 'application/json' },
+    }))
+    expect(response.status).toBe(200)
+    expect(await response.json()).toMatchObject({ scanned: 1, imported: 0, updated: 1 })
+    const [updatePayload] = memoryQuery.update.mock.calls[0]
+    expect(updatePayload).not.toHaveProperty('location_label')
   })
 
   it('never rewrites a memory indexed to another couple', async () => {
@@ -122,5 +158,4 @@ describe('POST /api/drive/sync-memories', () => {
     expect(memoryQuery.update).not.toHaveBeenCalled()
     expect(memoryQuery.insert).not.toHaveBeenCalled()
   })
-
 })
