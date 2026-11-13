@@ -172,7 +172,7 @@ export function ConnectedCoupleAvatars({
           borderWidth={cfg.borderWidth}
           borderColor={colors.cardBg}
           bgColor={colors.accent2 ? colors.accent2 + '25' : colors.accent1 + '25'}
-          textColor={colors.accent2 || colors.accent1}
+          textColor={colors.textPrimary}
           fontSize={cfg.fontSize}
         />
       </View>

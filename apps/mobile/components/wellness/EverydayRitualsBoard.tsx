@@ -169,11 +169,11 @@ const createStyles = (colors: ThemeColors) =>
     },
     progressLabel: {
       color: colors.textSecondary,
-      fontSize: 10,
+      fontSize: 12,
       letterSpacing: 1.1,
       textTransform: 'uppercase',
     },
-    progressValue: { color: colors.accent2, fontSize: 11, fontWeight: '700' },
+    progressValue: { color: colors.textSecondary, fontSize: 12, fontWeight: '700' },
     barTrack: {
       height: 8,
       backgroundColor: colors.surface,
@@ -182,7 +182,7 @@ const createStyles = (colors: ThemeColors) =>
       marginBottom: 6,
     },
     barFill: { height: '100%', borderRadius: 999, backgroundColor: colors.accent1 },
-    count: { color: colors.textSecondary, fontSize: 11 },
+    count: { color: colors.textSecondary, fontSize: 12 },
     list: { gap: 10, marginBottom: 14 },
     item: {
       backgroundColor: colors.cardBg,
@@ -206,7 +206,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     pillText: {
       color: colors.textPrimary,
-      fontSize: 9,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
@@ -214,7 +214,7 @@ const createStyles = (colors: ThemeColors) =>
     itemTextDone: { opacity: 0.7, textDecorationLine: 'line-through' },
     itemState: {
       color: colors.textSecondary,
-      fontSize: 9,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
       marginTop: 2,
@@ -240,11 +240,11 @@ const createStyles = (colors: ThemeColors) =>
     optionSelected: { backgroundColor: colors.cardBg, borderColor: colors.accent1 },
     optionText: {
       color: colors.textSecondary,
-      fontSize: 9,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
-    optionTextSelected: { color: colors.accent2 },
+    optionTextSelected: { color: colors.textSecondary },
     input: {
       backgroundColor: colors.surface,
       borderRadius: 12,
@@ -262,7 +262,7 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: 12,
       alignItems: 'center',
     },
-    buttonText: { color: colors.textPrimary, fontWeight: '700', fontSize: 14 },
+    buttonText: { color: colors.accentForeground, fontWeight: '700', fontSize: 14 },
     promptCard: {
       backgroundColor: colors.cardBg,
       borderRadius: 14,
@@ -277,8 +277,8 @@ const createStyles = (colors: ThemeColors) =>
       marginBottom: 8,
     },
     promptLabel: {
-      color: colors.accent2,
-      fontSize: 10,
+      color: colors.textSecondary,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
@@ -292,7 +292,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     shuffleText: {
       color: colors.textPrimary,
-      fontSize: 9,
+      fontSize: 12,
       letterSpacing: 1.1,
       textTransform: 'uppercase',
     },

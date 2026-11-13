@@ -12,10 +12,12 @@ import {
 import { useEffect, useState } from 'react'
 
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type MoodLog = { log_date: string; mood: string | null }
 
 export default function MoodChart() {
+  const { language, t } = useLanguage()
   const [moods, setMoods] = useState<MoodLog[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -55,15 +57,15 @@ export default function MoodChart() {
 
   if (loading) {
     return (
-      <div className="rounded-lg bg-card p-4">
-        <div className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-accent-1"></div>
+      <div className="rounded-card border border-border/60 bg-card p-4">
+        <div role="status" aria-label={t('Settings.checking')} className="mx-auto h-6 w-6 animate-spin rounded-full border-b-2 border-accent-1"></div>
       </div>
     )
   }
 
   return (
     <div className="rounded-lg bg-card p-4">
-      <h3 className="font-medium mb-4">Mood This Week</h3>
+      <h3 className="font-medium mb-4">{t('Settings.moodThisWeek')}</h3>
       {moods.length > 0 ? (
         <div className="flex justify-between gap-2">
           {moods.map((log, i) => {
@@ -72,14 +74,14 @@ export default function MoodChart() {
               <div key={i} className="flex flex-col items-center">
                 <Icon className="h-7 w-7 text-accent-1" />
                 <span className="mt-1 text-xs text-text-2">
-                  {new Date(log.log_date).toLocaleDateString('en-US', { weekday: 'short' })}
+                  {new Date(log.log_date).toLocaleDateString(language === 'my' ? 'my-MM' : 'en-US', { weekday: 'short' })}
                 </span>
               </div>
             )
           })}
         </div>
       ) : (
-        <p className="text-sm text-text-2">No mood data yet</p>
+        <p className="text-sm text-text-2">{t('Settings.noMoodData')}</p>
       )}
     </div>
   )

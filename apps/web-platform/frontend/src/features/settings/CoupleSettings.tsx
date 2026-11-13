@@ -13,6 +13,7 @@ import {
   type CoupleStatusResult,
 } from '@/lib/couples'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type CoupleOccasion = { id: string; title: string; month: number; day: number; kind: 'anniversary' | 'birthday' | 'custom' }
 const OCCASION_KINDS: CoupleOccasion['kind'][] = ['anniversary', 'birthday', 'custom']
@@ -38,6 +39,7 @@ function errorMessage(error: unknown, fallback: string): string {
 }
 
 export default function CoupleSettings() {
+  const { t } = useLanguage()
   const fieldId = useId()
   const [status, setStatus] = useState<CoupleStatusResult | null>(null)
   const [loading, setLoading] = useState(true)
@@ -80,7 +82,7 @@ export default function CoupleSettings() {
         await loadOccasions(result.couple.id)
       }
     } catch {
-      setError('Failed to load couple status')
+      setError(t('Settings.loadCoupleError'))
     } finally {
       setLoading(false)
     }
@@ -98,12 +100,12 @@ export default function CoupleSettings() {
       setInviting(true)
       setError(null)
       await createCoupleAndInvite(email.trim(), coupleName.trim() || undefined)
-      setSuccess('Invite sent successfully!')
+      setSuccess(t('Settings.inviteSent'))
       setEmail('')
       setCoupleName('')
       await loadStatus()
     } catch (err) {
-      setError(errorMessage(err, 'Failed to send invite'))
+      setError(errorMessage(err, t('Settings.sendInviteError')))
     } finally {
       setInviting(false)
     }
@@ -115,10 +117,10 @@ export default function CoupleSettings() {
     try {
       setError(null)
       await acceptCoupleInvite(status.invite.id)
-      setSuccess('You are now coupled!')
+      setSuccess(t('Settings.nowCoupled'))
       await loadStatus()
     } catch (err) {
-      setError(errorMessage(err, 'Failed to accept invite'))
+      setError(errorMessage(err, t('Settings.acceptInviteError')))
     }
   }
 
@@ -128,25 +130,25 @@ export default function CoupleSettings() {
     try {
       setError(null)
       await declineCoupleInvite(status.invite.id)
-      setSuccess('Invite declined')
+      setSuccess(t('Settings.inviteDeclined'))
       await loadStatus()
     } catch (err) {
-      setError(errorMessage(err, 'Failed to decline invite'))
+      setError(errorMessage(err, t('Settings.declineInviteError')))
     }
   }
 
   const handleLeave = async (): Promise<void> => {
-    if (!confirm('Are you sure you want to leave this couple? This cannot be undone.')) {
+    if (!confirm(t('Settings.leaveCoupleConfirm'))) {
       return
     }
 
     try {
       setError(null)
       await leaveCouple()
-      setSuccess('You have left the couple')
+      setSuccess(t('Settings.leftCouple'))
       await loadStatus()
     } catch (err) {
-      setError(errorMessage(err, 'Failed to leave couple'))
+      setError(errorMessage(err, t('Settings.leaveCoupleError')))
     }
   }
 
@@ -171,10 +173,10 @@ export default function CoupleSettings() {
           kind: 'anniversary',
         }, { onConflict: 'couple_id,kind,title' })
       }
-      setSuccess('Couple updated successfully!')
+      setSuccess(t('Settings.coupleUpdated'))
       await loadStatus()
     } catch (err) {
-      setError(errorMessage(err, 'Failed to update couple'))
+      setError(errorMessage(err, t('Settings.updateCoupleError')))
     } finally {
       setSaving(false)
     }
@@ -224,7 +226,7 @@ export default function CoupleSettings() {
     <div className="glass-card p-5">
       <div className="flex items-center gap-2 mb-4">
         <Heart className="h-5 w-5 text-accent-1" />
-        <h3 className="text-lg font-semibold text-text-1">Couple / Relationship</h3>
+        <h3 className="text-lg font-semibold text-text-1">{t('Settings.coupleRelationship')}</h3>
       </div>
 
       {error && (
@@ -244,11 +246,11 @@ export default function CoupleSettings() {
       {status.status === 'none' && (
         <div className="space-y-4">
           <p className="text-sm text-text-2">
-            You&apos;re not currently coupled with anyone. Invite your partner to start sharing your journey together.
+            {t('Settings.invitePartnerDescription')}
           </p>
           <form onSubmit={handleInvite} className="space-y-3">
             <div>
-              <label htmlFor={`${fieldId}-partner-email`} className="text-sm text-text-2">Partner&apos;s email</label>
+              <label htmlFor={`${fieldId}-partner-email`} className="text-sm text-text-2">{t('Settings.partnerEmail')}</label>
               <input
                 id={`${fieldId}-partner-email`}
                 type="email"
@@ -261,7 +263,7 @@ export default function CoupleSettings() {
               />
             </div>
             <div>
-              <label htmlFor={`${fieldId}-couple-name`} className="text-sm text-text-2">Couple name (optional)</label>
+              <label htmlFor={`${fieldId}-couple-name`} className="text-sm text-text-2">{t('Settings.coupleNameOptional')}</label>
               <input
                 id={`${fieldId}-couple-name`}
                 type="text"
@@ -278,7 +280,7 @@ export default function CoupleSettings() {
               className="flex w-full items-center justify-center gap-2 rounded-pill bg-accent-1 px-3 py-2 text-sm font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
             >
               <UserPlus className="h-4 w-4" />
-              {inviting ? 'Sending invite...' : 'Send Invite'}
+              {inviting ? t('Settings.sendingInvite') : t('Settings.sendInvite')}
             </button>
           </form>
         </div>
@@ -290,7 +292,7 @@ export default function CoupleSettings() {
           {status.partner ? (
             <div className="rounded-xl bg-soft-tint p-4">
               <p className="text-sm text-text-2 mb-2">
-                <span className="font-medium text-text-1">{status.partner.full_name || status.partner.email}</span> has invited you to be their partner.
+                <span className="font-medium text-text-1">{status.partner.full_name || status.partner.email}</span> {t('Settings.partnerInvitedYou')}
               </p>
               <div className="flex gap-2">
                 <button
@@ -311,7 +313,7 @@ export default function CoupleSettings() {
             </div>
           ) : (
             <p className="text-sm text-text-2">
-              You have sent an invite. Waiting for your partner to accept...
+              {t('Settings.inviteWaiting')}
             </p>
           )}
         </div>
@@ -322,18 +324,18 @@ export default function CoupleSettings() {
         <div className="space-y-4">
           <div className="rounded-xl bg-soft-tint p-4">
             <div className="mb-4 rounded-lg border border-accent-1/15 bg-card px-3 py-2.5">
-              <p className="text-sm font-semibold text-text-1">Connected with ${status.partner?.full_name || status.partner?.email || "your partner"}</p>
-              <p className="mt-0.5 text-xs text-success">Status: Connected</p>
-              <p className="mt-1 text-xs text-text-2">Manage relationship</p>
+              <p className="text-sm font-semibold text-text-1">{t('Settings.connectedWith')} {status.partner?.full_name || status.partner?.email || t('Settings.partner')}</p>
+              <p className="mt-0.5 text-xs text-success">{t('Settings.statusConnected')}</p>
+              <p className="mt-1 text-xs text-text-2">{t('Settings.manageRelationship')}</p>
             </div>
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="text-sm font-medium text-text-1">
-                  {status.couple.name || 'My Couple'}
+                  {status.couple.name || t('Settings.myCouple')}
                 </p>
                 {status.partner && (
                   <p className="text-xs text-text-2">
-                    Partner: {status.partner.full_name || status.partner.email}
+                    {t('Settings.partner')}: {status.partner.full_name || status.partner.email}
                   </p>
                 )}
               </div>
@@ -348,7 +350,7 @@ export default function CoupleSettings() {
 
             <form onSubmit={handleUpdateCouple} className="space-y-3">
               <div>
-                <label htmlFor={`${fieldId}-edit-couple-name`} className="text-xs text-text-2">Couple name</label>
+                <label htmlFor={`${fieldId}-edit-couple-name`} className="text-xs text-text-2">{t('Settings.coupleName')}</label>
                 <input
                   id={`${fieldId}-edit-couple-name`}
                   type="text"
@@ -358,7 +360,7 @@ export default function CoupleSettings() {
                 />
               </div>
               <div>
-                <label htmlFor={`${fieldId}-anniversary`} className="text-xs text-text-2">Anniversary</label>
+                <label htmlFor={`${fieldId}-anniversary`} className="text-xs text-text-2">{t('Settings.anniversary')}</label>
                 <input
                   id={`${fieldId}-anniversary`}
                   type="date"
@@ -372,7 +374,7 @@ export default function CoupleSettings() {
                 disabled={saving}
                 className="w-full rounded-pill bg-accent-1 px-2 py-1.5 text-xs font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-50"
               >
-                {saving ? 'Saving...' : 'Update'}
+                {saving ? t('Settings.saving') : t('Settings.update')}
               </button>
             </form>
           </div>
@@ -380,23 +382,23 @@ export default function CoupleSettings() {
           {status.couple.anniversary && (
             <div className="flex items-center gap-2 text-xs text-text-2">
               <Calendar className="h-4 w-4" />
-              <span>Anniversary: {new Date(status.couple.anniversary).toLocaleDateString()}</span>
+              <span>{t('Settings.anniversary')}: {new Date(status.couple.anniversary).toLocaleDateString()}</span>
             </div>
           )}
 
           <div className="rounded-xl border border-accent-1/15 bg-soft-tint p-4">
-            <div className="flex items-center gap-2"><Cake className="h-4 w-4 text-accent-2" /><p className="text-sm font-medium text-text-1">Shared occasions</p></div>
-            <p className="mt-1 text-xs text-text-2">Birthdays and special dates add a gentle visual touch for both of you.</p>
+            <div className="flex items-center gap-2"><Cake className="h-4 w-4 text-accent-2" /><p className="text-sm font-medium text-text-1">{t('Settings.sharedOccasions')}</p></div>
+            <p className="mt-1 text-xs text-text-2">{t('Settings.occasionDescription')}</p>
             <form onSubmit={addOccasion} className="mt-3 grid gap-2 sm:grid-cols-[1fr_auto_auto_auto]">
-              <input aria-label="Occasion title" value={occasionTitle} onChange={(event) => setOccasionTitle(event.target.value)} maxLength={80} placeholder="Her birthday" className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
-              <input aria-label="Occasion date" type="date" value={occasionDate} onChange={(event) => setOccasionDate(event.target.value)} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
-              <select aria-label="Occasion type" value={occasionKind} onChange={(event) => {
+              <input aria-label={t('Settings.occasionTitle')} value={occasionTitle} onChange={(event) => setOccasionTitle(event.target.value)} maxLength={80} placeholder={t('Settings.birthday')} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
+              <input aria-label={t('Settings.occasionDate')} type="date" value={occasionDate} onChange={(event) => setOccasionDate(event.target.value)} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1" />
+              <select aria-label={t('Settings.occasionType')} value={occasionKind} onChange={(event) => {
                 const kind = OCCASION_KINDS.find((item) => item === event.target.value)
                 if (kind) setOccasionKind(kind)
-              }} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1"><option value="birthday">Birthday</option><option value="custom">Special day</option></select>
-              <button type="submit" className="inline-flex items-center justify-center gap-1 rounded-pill bg-accent-1 px-3 py-1.5 text-xs font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98]"><Plus className="h-3.5 w-3.5" />Add</button>
+              }} className="rounded-lg border border-accent-1/20 bg-card px-2 py-1.5 text-sm text-text-1"><option value="birthday">{t('Settings.birthday')}</option><option value="custom">{t('Settings.specialDay')}</option></select>
+              <button type="submit" className="inline-flex items-center justify-center gap-1 rounded-pill bg-accent-1 px-3 py-1.5 text-xs font-medium text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98]"><Plus className="h-3.5 w-3.5" />{t('Settings.add')}</button>
             </form>
-            {occasions.length > 0 && <ul className="mt-3 space-y-2">{occasions.map((occasion) => <li key={occasion.id} className="flex items-center justify-between gap-3 rounded-lg bg-card px-3 py-2 text-xs"><span className="text-text-1">{occasion.title} · {String(occasion.month).padStart(2, '0')}/{String(occasion.day).padStart(2, '0')}</span><button type="button" onClick={() => void deleteOccasion(occasion.id)} aria-label={`Delete ${occasion.title}`} className="text-error hover:text-error/80"><Trash2 className="h-3.5 w-3.5" /></button></li>)}</ul>}
+            {occasions.length > 0 && <ul className="mt-3 space-y-2">{occasions.map((occasion) => <li key={occasion.id} className="flex items-center justify-between gap-3 rounded-lg bg-card px-3 py-2 text-xs"><span className="text-text-1">{occasion.title} · {String(occasion.month).padStart(2, '0')}/{String(occasion.day).padStart(2, '0')}</span><button type="button" onClick={() => void deleteOccasion(occasion.id)} aria-label={`${t('Settings.deleteOccasion')} ${occasion.title}`} className="text-error hover:text-error/80"><Trash2 className="h-3.5 w-3.5" /></button></li>)}</ul>}
           </div>
         </div>
       )}

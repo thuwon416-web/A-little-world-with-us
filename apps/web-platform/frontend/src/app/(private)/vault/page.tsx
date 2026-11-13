@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useId, useMemo, useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Fingerprint, KeyRound, Lock, Eye, Plus, X, Save, Sparkles } from 'lucide-react'
 import VaultCard from '@/features/vault/VaultCard'
@@ -68,12 +69,13 @@ function VaultLockScreen({
   onPinChange: (value: string) => void
   onUnlock: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-10">
       <motion.div
         initial={{ opacity: 0, y: 20, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        className="w-full rounded-[32px] border border-accent-1/20 bg-card p-7 text-center shadow-xl backdrop-blur-xl"
+        className="w-full rounded-panel border border-accent-1/20 bg-card p-7 text-center shadow-xl backdrop-blur-xl"
       >
         <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-accent-1 text-white shadow-lg">
           <motion.div
@@ -84,8 +86,8 @@ function VaultLockScreen({
           </motion.div>
         </div>
 
-        <p className="text-[10px] uppercase tracking-[0.22em] text-text-2">
-          Private keepsake
+        <p className="text-xs uppercase tracking-[0.16em] text-text-2">
+          {t('Vault.privateKeepsake')}
         </p>
         <h1
           className="mt-2 text-4xl text-text-1"
@@ -94,18 +96,23 @@ function VaultLockScreen({
           Love Vault
         </h1>
         <p className="mt-2 text-sm text-text-2">
-          Your private letters and memories, sealed until the right moment.
+          {t('Vault.privateLettersDescription')}
         </p>
+        <label htmlFor="vault-pin" className="sr-only">{t('Vault.vaultPIN')}</label>
         <input
+          id="vault-pin"
           value={pin}
           onChange={(event) => onPinChange(event.target.value)}
           inputMode="numeric"
+          autoComplete="one-time-code"
           maxLength={6}
           type="password"
-          placeholder="Enter your 4-digit PIN"
+          placeholder={t('Vault.pinPlaceholder')}
+          aria-describedby="vault-pin-hint"
+          aria-invalid={Boolean(unlockError)}
           className="mt-5 w-full rounded-btn border border-accent-1/20 bg-transparent px-4 py-3 text-center text-text-1"
         />
-        <p className="mt-2 text-xs text-text-2">PIN must be 4-6 digits</p>
+        <p id="vault-pin-hint" className="mt-2 text-xs text-text-2">{t('Vault.pinHint')}</p>
         {unlockError ? <p className="mt-2 text-sm text-error">{unlockError}</p> : null}
 
         <motion.button
@@ -134,6 +141,7 @@ function VaultLetterStats({
   showForm: boolean
   onToggleForm: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <div className="mb-6 grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
       <div className="rounded-panel p-6 border border-accent-1/20 bg-card backdrop-blur">
@@ -143,17 +151,16 @@ function VaultLetterStats({
           </div>
           <div>
             <div className="text-[10px] uppercase tracking-[0.22em] text-text-2">
-              Private keepsake
+              {t('Vault.privateKeepsake')}
             </div>
             <div
               className="text-xl font-semibold text-text-1"
               style={{ fontFamily: "'Playfair Display',serif'" }}
             >
-              Some words are worth the wait.
+              {t('Vault.someWordsWait')}
             </div>
             <p className="text-sm text-text-2 mt-1">
-              Every letter opens only on its promised day — the future you writes to the future
-              us.
+              {t('Vault.letterPromise')}
             </p>
           </div>
         </div>
@@ -169,7 +176,7 @@ function VaultLetterStats({
           </button>
           <div className="inline-flex items-center gap-2 px-3 py-2 text-xs uppercase tracking-widest text-text-2 rounded-btn bg-soft-tint border border-accent-1/20">
             <Sparkles className="h-3.5 w-3.5" />
-            {letters.length === 0 ? 'Fresh start' : 'Keepsakes saved'}
+            {letters.length === 0 ? t('Vault.freshStart') : t('Vault.keepsakesSaved')}
           </div>
         </div>
       </div>
@@ -180,19 +187,19 @@ function VaultLetterStats({
         </div>
         <div className="mt-4 grid grid-cols-3 gap-3">
           <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">Letters</p>
+            <p className="text-xs uppercase tracking-[0.14em] text-text-2">{t('Vault.letters')}</p>
             <p className="mt-2 text-2xl text-text-1" style={{ fontFamily: "'Playfair Display',serif'" }}>
               {stats.total}
             </p>
           </div>
           <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">Sealed</p>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">{t('Vault.sealed')}</p>
             <p className="mt-2 text-2xl text-text-1" style={{ fontFamily: "'Playfair Display',serif'" }}>
               {stats.sealed}
             </p>
           </div>
           <div className="rounded-btn p-3 bg-soft-tint border border-accent-1/15 text-center">
-            <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">Latest</p>
+            <p className="text-[10px] uppercase tracking-[0.18em] text-text-2">{t('Vault.latest')}</p>
             <p className="mt-2 text-base text-text-1" style={{ fontFamily: "'Playfair Display',serif'" }}>
               {stats.newest}
             </p>
@@ -226,6 +233,7 @@ function NewVaultLetterForm({
   onRevealDateChange: (value: string) => void
   onCreate: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <motion.div
       initial={{ opacity: 0, height: 0, y: -10 }}
@@ -237,29 +245,29 @@ function NewVaultLetterForm({
       <div className="rounded-[32px] border border-accent-1/20 bg-card p-5 shadow-xl backdrop-blur-xl">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              <label htmlFor={`${fieldId}-title`} className="text-sm text-text-2">Title</label>
+              <label htmlFor={`${fieldId}-title`} className="text-sm text-text-2">{t('Vault.title')}</label>
               <input
                 id={`${fieldId}-title`}
                 type="text"
                 value={title}
                 onChange={(event) => onTitleChange(event.target.value)}
-                placeholder="A note for her heart"
-                className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
+                placeholder={t('Memories.journalTitlePlaceholder')}
+                className="mt-2 w-full min-h-11 rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
               />
             </div>
             <div className="md:col-span-2">
-              <label htmlFor={`${fieldId}-message`} className="text-sm text-text-2">Message</label>
+              <label htmlFor={`${fieldId}-message`} className="text-sm text-text-2">{t('Vault.message')}</label>
               <textarea
                 id={`${fieldId}-message`}
                 value={content}
                 onChange={(event) => onContentChange(event.target.value)}
-                placeholder="Write your heart out..."
+                placeholder={t('Memories.journalBodyPlaceholder')}
                 rows={6}
                 className="mt-2 w-full resize-none rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-base text-text-1 outline-none placeholder:text-text-2/80"
               />
             </div>
             <div>
-              <label htmlFor={`${fieldId}-category`} className="text-sm text-text-2">Category</label>
+              <label htmlFor={`${fieldId}-category`} className="text-sm text-text-2">{t('Vault.category')}</label>
               <select
                 id={`${fieldId}-category`}
                 value={category === 'all' ? 'private' : category}
@@ -268,14 +276,14 @@ function NewVaultLetterForm({
                 }}
                 className="mt-2 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1 outline-none"
               >
-                <option value="private">Private</option>
-                <option value="celebration">Celebration</option>
-                <option value="ritual">Ritual</option>
-                <option value="travel">Travel</option>
+                <option value="private">{t('Vault.private')}</option>
+                <option value="celebration">{t('Vault.celebration')}</option>
+                <option value="ritual">{t('Vault.ritual')}</option>
+                <option value="travel">{t('Vault.travel')}</option>
               </select>
             </div>
             <div>
-              <label htmlFor={`${fieldId}-reveal-date`} className="text-sm text-text-2">Reveal date</label>
+              <label htmlFor={`${fieldId}-reveal-date`} className="text-sm text-text-2">{t('Vault.revealDate')}</label>
               <input
                 id={`${fieldId}-reveal-date`}
                 type="date"
@@ -313,6 +321,7 @@ export default function VaultPage() {
 }
 
 function VaultPageContent() {
+  const { t } = useLanguage()
   const router = useRouter()
   const fieldId = useId()
   const { masterKey, isUnlocked: isPasswordVaultUnlocked, unlockWithPassphrase, unlockWithBackupPhrase, unlockWithBiometric } = useVaultKey()
@@ -349,9 +358,9 @@ function VaultPageContent() {
     () => ({
       total: letters.length,
       sealed: letters.filter((letter) => letter.is_locked || (letter.reveal_at && new Date(letter.reveal_at) > new Date())).length,
-      newest: letters[0]?.title ?? 'No letters yet',
+      newest: letters[0]?.title ?? t('Vault.noLetters'),
     }),
-    [letters]
+    [letters, t]
   )
 
   useEffect(() => {
@@ -371,7 +380,7 @@ function VaultPageContent() {
         setIsAuthenticated(true)
       } catch (error_) {
         if (active) {
-          setAuthError(error_ instanceof Error ? error_.message : 'Unable to check authentication.')
+          setAuthError(error_ instanceof Error ? error_.message : t('Vault.unableAuth'))
         }
       }
     }
@@ -390,7 +399,7 @@ function VaultPageContent() {
       })
       .catch((error_: unknown) => {
         if (active) {
-          setPasswordVaultError(error_ instanceof Error ? error_.message : 'Unable to load the vault key.')
+          setPasswordVaultError(error_ instanceof Error ? error_.message : t('Vault.unableLoadKey'))
         }
       })
     return () => {
@@ -424,7 +433,7 @@ function VaultPageContent() {
 
   const handleUnlock = async () => {
     if (!isPinValid) {
-      setUnlockError('PIN must be 4-6 digits')
+      setUnlockError(t('Vault.pinDigitsError'))
       return
     }
     setUnlockError('')
@@ -435,7 +444,7 @@ function VaultPageContent() {
     })
     const result = await response.json()
     if (!response.ok || !result.valid) {
-      setUnlockError(result.error ?? 'Invalid PIN')
+      setUnlockError(result.error ?? t('Vault.invalidPIN'))
       return
     }
     setIsUnlocked(true)
@@ -482,7 +491,7 @@ function VaultPageContent() {
       <div className="mx-auto flex min-h-screen max-w-md items-center justify-center px-4 py-10">
         <div className="text-center">
           <p className={authError ? 'text-sm text-error' : 'text-sm text-text-2'}>
-            {authError ?? 'Checking authentication...'}
+            {authError ?? t('Vault.checkingAuth')}
           </p>
         </div>
       </div>
@@ -514,7 +523,7 @@ function VaultPageContent() {
             <Lock className="h-3.5 w-3.5" /> Home
           </Link>
           <span className="text-text-2">/</span>
-          <span className="text-text-1">Vault</span>
+          <span className="text-text-1">{t('Vault.vault')}</span>
         </div>
 
         <div className="flex items-start justify-between">
@@ -526,16 +535,16 @@ function VaultPageContent() {
               Love Vault
             </h1>
             <p className="text-text-2 text-sm">
-              Letters, promises, and little surprises — locked until the moment they matter most.
+              {t('Vault.headerDescription')}
             </p>
           </div>
 
           <button
             onClick={() => setShowForm((v) => !v)}
-            className="px-4 py-2 rounded-full text-sm font-medium text-text-1 shadow-md hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0 bg-gradient-to-r from-accent-2 to-accent-1"
+            className="px-4 py-2 min-h-11 rounded-full text-sm font-medium text-text-1 shadow-md hover:opacity-90 transition-opacity flex items-center gap-2 shrink-0 bg-gradient-to-r from-accent-2 to-accent-1"
           >
             <Lock className="h-4 w-4" />
-            {showForm ? 'Cancel' : 'Seal a new letter'}
+            {showForm ? t('Vault.cancel') : t('Vault.sealNewLetter')}
           </button>
         </div>
       </div>
@@ -571,7 +580,7 @@ function VaultPageContent() {
       <div className="mb-6 flex flex-wrap gap-2">
        {VAULT_CATEGORIES.map((option) => (
          <button
-           key={option}
+           key={t(`Vault.${option}`)}
            type="button"
            onClick={() => setVaultCategory(option)}
            className={`rounded-full px-3 py-1.5 text-xs capitalize ${
@@ -587,7 +596,7 @@ function VaultPageContent() {
 
       {lettersError ? (
         <div className="rounded-[32px] border border-error/30 bg-error/10 p-10 text-center shadow-lg backdrop-blur-xl" role="alert">
-          <h2 className="text-2xl text-text-1">Unable to load vault letters</h2>
+          <h2 className="text-2xl text-text-1">{t('Vault.unableLoad')}</h2>
           <p className="mt-2 text-sm text-error">{lettersError}</p>
           <button
             type="button"
@@ -609,7 +618,7 @@ function VaultPageContent() {
            Your first letter is waiting
          </h2>
          <p className="mt-2 text-sm text-text-2">
-           Write a note for the version of your relationship that keeps getting sweeter.
+           {t('Vault.firstLetterDescription')}
          </p>
        </div>
       ) : (
@@ -624,34 +633,34 @@ function VaultPageContent() {
         <section>
           <div className="mb-5 flex items-center justify-between rounded-panel border border-accent-1/20 bg-card p-5 backdrop-blur-xl">
             <div>
-              <p className="text-xs uppercase tracking-[0.18em] text-text-2">Password security</p>
-              <p className="mt-1 text-sm text-text-1">{isPasswordVaultUnlocked ? 'Unlocked · auto-locks after five minutes of inactivity' : 'Encrypted credentials stay locked separately from Love Vault letters.'}</p>
+              <p className="text-xs uppercase tracking-[0.18em] text-text-2">{t('Vault.passwordSecurity')}</p>
+              <p className="mt-1 text-sm text-text-1">{isPasswordVaultUnlocked ? t('Vault.unlockedAutoLock') : t('Vault.encryptedCredentials')}</p>
             </div>
             {isPasswordVaultUnlocked ? <Fingerprint className="h-5 w-5 text-success" /> : <KeyRound className="h-5 w-5 text-accent-1" />}
           </div>
           {!hasWrappedKey ? (
             <div className="rounded-modal border border-dashed border-accent-1/30 bg-card p-10 text-center">
               <KeyRound className="mx-auto h-8 w-8 text-accent-1" />
-              <h2 className="mt-3 text-2xl text-text-1" style={{ fontFamily: 'var(--font-display)' }}>Set up your password vault</h2>
-              <p className="mx-auto mt-2 max-w-md text-sm text-text-2">Create a passphrase before adding encrypted credentials. Your passphrase never leaves this device.</p>
-              <button type="button" onClick={() => setShowVaultSetup(true)} className="mt-5 rounded-btn bg-accent-1 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition">Set up Vault Passphrase</button>
+              <h2 className="mt-3 text-2xl text-text-1" style={{ fontFamily: 'var(--font-display)' }}>{t('Vault.setupPasswordVault')}</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-text-2">{t('Vault.passphraseDescription')}</p>
+              <button type="button" onClick={() => setShowVaultSetup(true)} className="mt-5 rounded-btn bg-accent-1 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition">{t('Vault.setupPassphrase')}</button>
             </div>
           ) : !isPasswordVaultUnlocked ? (
             <div className="mx-auto max-w-md rounded-modal border border-accent-1/20 bg-card p-6">
-              <h2 className="text-2xl text-text-1" style={{ fontFamily: 'var(--font-display)' }}>Unlock passwords</h2>
-              <input type="password" value={passphrase} onChange={(event) => setPassphrase(event.target.value)} placeholder="Vault passphrase" className="mt-4 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1" />
+              <h2 className="text-2xl text-text-1" style={{ fontFamily: 'var(--font-display)' }}>{t('Vault.unlockPasswords')}</h2>
+              <input type="password" value={passphrase} onChange={(event) => setPassphrase(event.target.value)} placeholder={t('Vault.vaultPassphrase')} className="mt-4 w-full rounded-btn border border-accent-1/20 bg-soft-tint px-4 py-3 text-sm text-text-1" />
               {passwordVaultError ? <p className="mt-2 text-sm text-error">{passwordVaultError}</p> : null}
               <div className="mt-4 flex flex-wrap gap-2">
-                <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to unlock passwords.'))} disabled={passphrase.length < 8} className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50">Unlock</button>
-                <button type="button" onClick={() => void unlockWithBiometric().catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Biometric unlock is unavailable.'))} className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1"><Fingerprint className="h-4 w-4" />Biometric</button>
-                <button type="button" onClick={() => { setShowRecovery((value) => !value); setPasswordVaultError('') }} className="rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1">Use recovery phrase</button>
+                <button type="button" onClick={() => void unlockWithPassphrase(passphrase).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : t('Vault.unableUnlockPasswords')))} disabled={passphrase.length < 8} className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50">{t('Vault.unlock')}</button>
+                <button type="button" onClick={() => void unlockWithBiometric().catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : t('Vault.biometricUnavailable')))} className="inline-flex items-center gap-2 rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1"><Fingerprint className="h-4 w-4" />{t('Vault.biometric')}</button>
+                <button type="button" onClick={() => { setShowRecovery((value) => !value); setPasswordVaultError('') }} className="rounded-btn border border-accent-1/20 px-4 py-2 text-sm text-text-1">{t('Vault.useRecoveryPhrase')}</button>
                 {showRecovery ? (
                   <div className="mt-3 space-y-2">
-                    <label htmlFor="vault-recovery-phrase" className="text-xs text-text-2">Enter all 12 recovery words in order</label>
-                    <textarea id="vault-recovery-phrase" value={recoveryPhrase} onChange={(event) => setRecoveryPhrase(event.target.value)} rows={3} className="w-full rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" placeholder="word1 word2 word3 ..." />
+                    <label htmlFor="vault-recovery-phrase" className="text-xs text-text-2">{t('Vault.recoveryWords')}</label>
+                    <textarea id="vault-recovery-phrase" value={recoveryPhrase} onChange={(event) => setRecoveryPhrase(event.target.value)} rows={3} className="w-full rounded-btn border border-accent-1/20 bg-soft-tint px-3 py-2 text-sm text-text-1" placeholder={t('Vault.recoveryPlaceholder')} />
                     <button
                       type="button"
-                      onClick={() => void unlockWithBackupPhrase(recoveryPhrase.trim().split(/\\s+/)).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : 'Unable to recover the vault.'))}
+                      onClick={() => void unlockWithBackupPhrase(recoveryPhrase.trim().split(/\\s+/)).catch((cause) => setPasswordVaultError(cause instanceof Error ? cause.message : t('Vault.unableRecoverVault')))}
                       disabled={recoveryPhrase.trim().split(/\\s+/).length !== 12}
                       className="rounded-btn bg-accent-1 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:opacity-90 transition disabled:opacity-50"
                     >

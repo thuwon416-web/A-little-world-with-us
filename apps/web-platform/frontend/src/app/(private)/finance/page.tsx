@@ -1,6 +1,7 @@
 'use client'
 
 import { DollarSign } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { useCallback, useEffect, useState } from 'react'
 import { getCoupleStatus } from '@/lib/couples'
 import { getCurrentUserId, supabase } from '@/lib/supabase'
@@ -19,9 +20,10 @@ interface FinancialGoal {
   current_amount: number
 }
 
-const formatMmk = (amount: number) => `${amount.toLocaleString()} MMK`
+const formatMmk = (amount: number, locale: string = 'en-US') => `${amount.toLocaleString(locale)} MMK`
 
 export default function FinancialGoals() {
+  const { t, language } = useLanguage()
   const [goals, setGoals] = useState<FinancialGoal[]>([])
   const [newGoal, setNewGoal] = useState({ title: '', target: '', current: '' })
   const [userId, setUserId] = useState<string | null>(null)
@@ -48,11 +50,11 @@ export default function FinancialGoals() {
       setExpenses(await getExpenses())
     } catch (error_) {
       setExpenses([])
-      setExpensesError(error_ instanceof Error ? error_.message : 'Unable to load expenses.')
+      setExpensesError(error_ instanceof Error ? error_.message : t('Finance.loadExpensesError'))
     } finally {
       setLoadingExpenses(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     void loadExpenses()
@@ -123,28 +125,28 @@ export default function FinancialGoals() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-8 animate-fade-in">
-      <section className="rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
-        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Goals</p>
+      <section className="rounded-panel border border-accent-1/20 bg-card p-6 shadow-[0_18px_42px_rgba(0,0,0,0.12)]">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">{t('Finance.goals')}</p>
         <h1 className="mt-3 flex items-center gap-3 text-3xl font-serif text-text-1">
           <DollarSign className="h-7 w-7 text-accent-1" />
-          <span>Financial Goals</span>
+          <span>{t('Finance.financialGoals')}</span>
         </h1>
       </section>
 
       <ExplicitAdviceControl
-        title="Talk through a money decision"
-        description="Ask for a neutral conversation starter. AI never sees your finance records unless you type them here."
-        placeholder="How can we discuss a shared goal or budget difference respectfully?"
+        title={t('Finance.talkMoney')}
+        description={t('Finance.neutralConversation')}
+        placeholder={t('Finance.moneyPlaceholder')}
       />
       <BalanceSummary />
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h2 className="text-2xl font-serif text-text-1">Shared Expenses</h2>
+          <h2 className="text-2xl font-serif text-text-1">{t('Finance.sharedExpenses')}</h2>
           <button
             type="button"
             onClick={() => setShowAddExpense(true)}
             disabled={!userId || !partnerId}
-            className="glass-button inline-flex items-center gap-2 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+            className="glass-button inline-flex min-h-11 items-center gap-2 px-4 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50"
           >
             + Add Expense
           </button>
@@ -152,13 +154,13 @@ export default function FinancialGoals() {
         <CategoryFilter active={expenseFilter} onChange={setExpenseFilter} />
         {loadingExpenses ? (
           <div className="rounded-btn border border-accent-1/20 bg-card p-6 text-sm text-text-2">
-            Loading expenses…
+            {t('Finance.loadingExpenses')}
           </div>
         ) : expensesError ? (
           <div className="rounded-btn border border-error/30 bg-error/10 p-6 text-sm text-text-2">
-            <p className="text-error">Unable to load expenses</p>
+            <p className="text-error">{t('Finance.loadExpensesError')}</p>
             <p className="mt-1">{expensesError}</p>
-            <button type="button" onClick={() => void loadExpenses()} className="glass-button mt-4 px-4 py-2 text-sm font-semibold">Retry</button>
+            <button type="button" onClick={() => void loadExpenses()} className="glass-button mt-4 px-4 py-2 text-sm font-semibold">{t('Finance.retry')}</button>
           </div>
         ) : (
           <ExpenseList
@@ -174,23 +176,23 @@ export default function FinancialGoals() {
       </section>
       <AdvancedFinancePanel />
 
-      {!coupleId && <p className="rounded-btn border border-warning/30 bg-warning/10 p-4 text-sm text-warning">Link and accept a partner before creating shared financial goals.</p>}
+      {!coupleId && <p className="rounded-btn border border-warning/30 bg-warning/10 p-4 text-sm text-warning">{t('Finance.linkPartnerFirst')}</p>}
 
-      <section className="grid gap-4 rounded-modal border border-accent-1/20 bg-card p-5 sm:grid-cols-2 md:grid-cols-4">
-        <input value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} placeholder="Goal name (e.g., Vacation)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
-        <input type="number" min="0" value={newGoal.target} onChange={(event) => setNewGoal({ ...newGoal, target: event.target.value })} placeholder="Target (MMK)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
-        <input type="number" min="0" value={newGoal.current} onChange={(event) => setNewGoal({ ...newGoal, current: event.target.value })} placeholder="Current (MMK)" className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
-        <button type="button" onClick={addGoal} className="rounded-xl bg-accent-1 px-4 py-3 font-medium text-white font-semibold shadow-sm">+ Add Goal</button>
+      <section className="grid gap-4 rounded-panel border border-accent-1/20 bg-card p-5 sm:grid-cols-2 md:grid-cols-4">
+        <input value={newGoal.title} onChange={(event) => setNewGoal({ ...newGoal, title: event.target.value })} placeholder={t('Finance.goalNamePlaceholder')} className="min-h-11 rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
+        <input type="number" min="0" value={newGoal.target} onChange={(event) => setNewGoal({ ...newGoal, target: event.target.value })} placeholder={t('Finance.targetPlaceholder')} className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
+        <input type="number" min="0" value={newGoal.current} onChange={(event) => setNewGoal({ ...newGoal, current: event.target.value })} placeholder={t('Finance.currentPlaceholder')} className="rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" />
+        <button type="button" onClick={addGoal} className="min-h-11 rounded-xl bg-accent-1 px-4 py-3 font-medium text-white font-semibold shadow-sm">+ {t('Finance.addGoal')}</button>
       </section>
 
       <div className="space-y-4">
         {goals.map((goal) => {
           const progress = Math.min(100, Math.max(0, (goal.current_amount / goal.target_amount) * 100))
           return (
-            <section key={goal.id} className="rounded-[24px] border border-accent-1/20 bg-card p-5">
-              <div className="mb-3 flex items-center justify-between gap-4"><h2 className="text-xl font-bold text-text-1">{goal.title}</h2><span className="text-sm text-text-2">{formatMmk(goal.current_amount)} / {formatMmk(goal.target_amount)}</span></div>
+            <section key={goal.id} className="rounded-card border border-accent-1/20 bg-card p-5">
+              <div className="mb-3 flex items-center justify-between gap-4"><h2 className="text-xl font-bold text-text-1">{goal.title}</h2><span className="text-sm text-text-2">{formatMmk(goal.current_amount, language === 'my' ? 'my-MM' : 'en-US')} / {formatMmk(goal.target_amount, language === 'my' ? 'my-MM' : 'en-US')}</span></div>
               <div className="mb-4 h-3 w-full overflow-hidden rounded-full bg-accent-1/10"><div className="h-full rounded-full bg-accent-1 transition-all" style={{ width: `${progress}%` }} /></div>
-              <input type="number" min="0" placeholder="Add amount" className="w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" onBlur={(event) => { void updateProgress(goal, event.target.value); event.target.value = '' }} />
+              <input type="number" min="0" placeholder={t('Finance.addAmount')} className="w-full rounded-xl border border-accent-1/20 bg-card px-4 py-3 text-text-1 placeholder:text-text-2" onBlur={(event) => { void updateProgress(goal, event.target.value); event.target.value = '' }} />
             </section>
           )
         })}

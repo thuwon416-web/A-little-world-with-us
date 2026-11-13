@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
 import { AnimatedIcon } from '@/components/ui/animated-icon'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { getCoupleStatus } from '@/lib/couples'
 import TelegramImport from '@/features/our-story/TelegramImport'
 
@@ -14,6 +15,7 @@ const Categories = dynamic(() => import('@/features/our-story/Categories'), { lo
 const ImportedTelegramMessages = dynamic(() => import('@/features/our-story/ImportedTelegramMessages'), { loading: TabSkeleton })
 
 export default function OurStoryContent() {
+  const { t } = useLanguage()
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -21,7 +23,7 @@ export default function OurStoryContent() {
   useEffect(() => {
     getCoupleStatus()
       .then((status) => setCoupleId(status.couple?.id ?? null))
-      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : 'Unable to load your shared story.'))
+      .catch((loadError) => setError(loadError instanceof Error ? loadError.message : t('OurStory.loadError')))
       .finally(() => setLoading(false))
   }, [])
 
@@ -36,16 +38,16 @@ export default function OurStoryContent() {
         <div className="flex items-center gap-3">
           <AnimatedIcon name="BookHeart" animation="bounce" trigger="hover" size={24} className="text-accent-1" />
           <div>
-            <h1 className="text-2xl font-semibold text-text-1">Our Story</h1>
-            <p className="mt-1 text-sm text-text-2">Every memory we&apos;ve made together</p>
+            <h1 className="text-2xl font-semibold text-text-1">{t('OurStory.title')}</h1>
+            <p className="mt-1 text-sm text-text-2">{t('OurStory.subtitle')}</p>
           </div>
         </div>
       </header>
 
-      {loading ? <div className="h-64 animate-pulse rounded-panel bg-card" /> : error ? (
-        <div className="rounded-panel border border-rose-400/30 p-6 text-rose-300">{error}</div>
+      {loading ? <div role="status" aria-label={t('OurStory.loading')} className="h-64 animate-pulse rounded-panel bg-card" /> : error ? (
+        <div className="rounded-panel border border-error/30 p-6 text-error" role="alert">{error}</div>
       ) : !coupleId ? (
-        <div className="rounded-panel border border-dashed border-accent-1/25 p-10 text-center text-text-2">Link with your partner to see your shared story.</div>
+        <div className="rounded-panel border border-dashed border-accent-1/25 p-10 text-center text-text-2">{t('OurStory.linkPartner')}</div>
       ) : (
         <>
           <TelegramImport coupleId={coupleId} />
@@ -53,8 +55,8 @@ export default function OurStoryContent() {
           <AllMemories coupleId={coupleId} initialCategory="all" />
           <Categories coupleId={coupleId} onOpenCategory={() => undefined} />
           <details className="rounded-panel border border-accent-1/15 bg-card p-5">
-            <summary className="cursor-pointer font-semibold text-text-1">Telegram archive</summary>
-            <p className="mt-2 text-sm text-text-2">Imported Telegram messages stay available here without crowding the shared timeline.</p>
+            <summary className="cursor-pointer font-semibold text-text-1">{t('OurStory.telegramArchive')}</summary>
+            <p className="mt-2 text-sm text-text-2">{t('OurStory.archiveDescription')}</p>
             <div className="mt-4"><ImportedTelegramMessages coupleId={coupleId} /></div>
           </details>
         </>

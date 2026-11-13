@@ -109,9 +109,9 @@
     --chart-4: 340 80% 75%;
     --chart-5: 210 60% 60%;
     --radius: 1.5rem;
-    --font-display: var(--font-playfair);
-    --font-body: var(--font-poppins);
-    --font-accent: var(--font-dancing);
+    --font-display: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
+    --font-body: var(--font-inter), var(--font-myanmar), "Noto Sans Myanmar", "Pyidaungsu", "Padauk", system-ui, sans-serif;
+    --font-accent: var(--font-playfair), "Cormorant Garamond", Georgia, serif;
 
     /* B2 Size Variables */
     --text-ui-xs: 12px;
@@ -151,56 +151,63 @@
 
   @layer components {
     .ui-card {
-      border: 1px solid rgb(var(--ui-border-soft));
+      border: 1px solid rgb(var(--border) / 0.8);
       border-radius: var(--ui-radius-card);
-      background: rgb(var(--ui-surface));
-      box-shadow: var(--ui-shadow-card);
+      background: rgb(var(--card));
+      color: rgb(var(--text-1));
+      box-shadow: 0 10px 30px rgb(var(--text-1) / 0.08);
     }
 
     .ui-panel {
-      border: 1px solid rgb(var(--ui-border));
+      border: 1px solid rgb(var(--border));
       border-radius: var(--ui-radius-panel);
-      background: rgb(var(--ui-surface-soft));
+      background: rgb(var(--soft-tint));
+      color: rgb(var(--text-1));
     }
 
     .ui-control {
-      border: 1px solid rgb(var(--ui-border));
+      border: 1px solid rgb(var(--border));
       border-radius: var(--ui-radius-control);
-      background: rgb(var(--ui-surface));
-      color: rgb(var(--ui-ink));
+      background: rgb(var(--card));
+      color: rgb(var(--text-1));
     }
 
-    .ui-control::placeholder { color: rgb(var(--ui-ink-muted) / 0.72); }
+    .ui-control::placeholder { color: rgb(var(--text-2) / 0.72); }
 
     .ui-control:focus-visible {
-      border-color: rgb(var(--ui-accent) / 0.62);
-      box-shadow: 0 0 0 3px rgb(var(--ui-accent) / 0.12);
+      border-color: rgb(var(--accent-1) / 0.62);
+      box-shadow: 0 0 0 3px rgb(var(--accent-1) / 0.12);
     }
 
     .ui-button-primary {
-      border: 1px solid rgb(var(--ui-accent) / 0.82);
+      border: 1px solid rgb(var(--accent-1) / 0.82);
       border-radius: 999px;
-      background: rgb(var(--ui-accent));
-      color: #fff;
-      box-shadow: 0 6px 18px rgb(var(--ui-accent) / 0.18);
+      background: rgb(var(--accent-1));
+      color: var(--accent-foreground);
+      box-shadow: 0 6px 18px rgb(var(--accent-1) / 0.18);
     }
 
     .ui-button-secondary {
-      border: 1px solid rgb(var(--ui-border));
+      border: 1px solid rgb(var(--border));
       border-radius: 999px;
-      background: rgb(var(--ui-surface-soft));
-      color: rgb(var(--ui-ink));
+      background: rgb(var(--soft-tint));
+      color: rgb(var(--text-1));
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    html:focus-within { scroll-behavior: auto; }
+    .animate-float-gentle,
+    .animate-heart-beat,
+    .animate-glow-pulse,
+    .animate-twinkle,
+    .animate-breathe,
+    .skeleton-shimmer {
+      animation: none !important;
+    }
+    *, *::before, *::after {
+      transition-duration: 120ms !important;
       scroll-behavior: auto !important;
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
     }
   }
 
@@ -210,12 +217,10 @@
       transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
     }
 
-    button:not(:disabled):hover,
     .glass-button:hover {
       transform: translateY(-1px);
     }
 
-    button:not(:disabled):active,
     .glass-button:active {
       transform: translateY(0);
     }
@@ -283,8 +288,8 @@
   --card: 255 255 255;
   --border: 221 200 234;
   --text-1: 74 56 96;
-  --text-2: 107 82 132;
-  --label: 168 142 196;
+  --text-2: 93 71 119;
+  --label: 127 95 156;
   --accent-1: 125 92 168;
   --accent-2: 188 160 212;
   --accent-3: 220 200 232;
@@ -295,9 +300,9 @@
   --stat-label: 168 142 196;
   --stat-value: 125 92 168;
   --soft-tint: 237 224 245;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 208 138 138;
+  --success: 53 121 74;
+  --warning: 135 103 31;
+  --error: 158 88 88;
 }
 
 /* ===== PEACH CREAM THEME MODE ===== */
@@ -309,9 +314,9 @@
   --card-border: rgb(var(--border));
   --text-primary: rgb(var(--text-1));
   --text-secondary: rgb(var(--text-2));
-  --success: #3a8a4a;
-  --warning: #d9a03a;
-  --error: #c95050;
+  --success: 47 127 63;
+  --warning: 156 99 0;
+  --error: 191 70 70;
   --glass-alpha: 0.7;
   --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(247, 184, 168, 0.12);
@@ -325,21 +330,21 @@
   --card: 255 255 255;
   --border: 240 208 176;
   --text-1: 95 59 42;
-  --text-2: 138 100 80;
-  --label: 216 154 120;
-  --accent-1: 204 111 69;
+  --text-2: 121 83 63;
+  --label: 158 96 62;
+  --accent-1: 178 85 43;
   --accent-2: 239 176 144;
   --accent-3: 248 213 192;
-  --accent-foreground: #2a170e;
+  --accent-foreground: #fff;
   --card-title: 179 90 52;
   --stat-bg: 255 250 245;
   --stat-border: 245 221 196;
   --stat-label: 216 154 120;
   --stat-value: 204 111 69;
   --soft-tint: 251 228 208;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 208 138 138;
+  --success: 47 127 63;
+  --warning: 156 99 0;
+  --error: 191 70 70;
 }
 
 /* ===== MINT WHISPER THEME MODE ===== */
@@ -351,9 +356,9 @@
   --card-border: rgb(var(--border));
   --text-primary: rgb(var(--text-1));
   --text-secondary: rgb(var(--text-2));
-  --success: #2c8a5c;
-  --warning: #e0a84a;
-  --error: #c97070;
+  --success: 33 127 81;
+  --warning: 155 99 5;
+  --error: 173 84 84;
   --glass-alpha: 0.72;
   --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(77, 184, 138, 0.1);
@@ -367,21 +372,21 @@
   --card: 255 255 255;
   --border: 196 220 205;
   --text-1: 38 72 56;
-  --text-2: 80 120 102;
-  --label: 120 184 144;
-  --accent-1: 61 144 104;
+  --text-2: 69 106 89;
+  --label: 60 124 84;
+  --accent-1: 42 125 85;
   --accent-2: 130 196 152;
   --accent-3: 178 220 194;
-  --accent-foreground: #122d21;
+  --accent-foreground: #fff;
   --card-title: 46 114 80;
   --stat-bg: 245 251 247;
   --stat-border: 212 235 220;
   --stat-label: 120 184 144;
   --stat-value: 61 144 104;
   --soft-tint: 216 235 222;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 208 138 138;
+  --success: 33 127 81;
+  --warning: 155 99 5;
+  --error: 173 84 84;
 }
 
 /* ===== OCEAN CALM THEME MODE ===== */
@@ -393,9 +398,9 @@
   --card-border: rgb(var(--border));
   --text-primary: rgb(var(--text-1));
   --text-secondary: rgb(var(--text-2));
-  --success: #5cc3d5;
-  --warning: #e6b84a;
-  --error: #d97070;
+  --success: 18 121 139;
+  --warning: 147 101 0;
+  --error: 181 76 76;
   --glass-alpha: 0.72;
   --bg-1: linear-gradient(135deg, rgb(var(--bg)) 0%, rgb(var(--soft-tint)) 38%, rgb(var(--bg)) 100%);
   --bg-2: rgba(92, 195, 213, 0.1);
@@ -409,9 +414,9 @@
   --card: 255 255 255;
   --border: 192 216 236;
   --text-1: 31 58 84;
-  --text-2: 78 118 148;
-  --label: 109 160 204;
-  --accent-1: 61 122 180;
+  --text-2: 65 101 126;
+  --label: 63 114 158;
+  --accent-1: 53 114 172;
   --accent-2: 136 184 218;
   --accent-3: 184 216 234;
   --accent-foreground: #fff;
@@ -421,9 +426,9 @@
   --stat-label: 109 160 204;
   --stat-value: 61 122 180;
   --soft-tint: 212 230 242;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 208 138 138;
+  --success: 18 121 139;
+  --warning: 147 101 0;
+  --error: 181 76 76;
 }
 
 :root[data-theme-mode='monochrome'] {
@@ -450,8 +455,8 @@
   --card: 26 26 30;
   --border: 42 42 48;
   --text-1: 240 240 244;
-  --text-2: 190 190 198;
-  --label: 184 184 192;
+  --text-2: 184 184 194;
+  --label: 176 176 184;
   --accent-1: 224 224 228;
   --accent-2: 136 136 144;
   --accent-3: 58 58 69;
@@ -462,9 +467,9 @@
   --stat-label: 160 160 168;
   --stat-value: 240 240 244;
   --soft-tint: 34 34 42;
-  --success: 133 201 154;
-  --warning: 224 192 120;
-  --error: 216 136 136; /* Monochrome-specific error override */
+  --success: 163 197 134;
+  --warning: 230 184 74;
+  --error: 217 112 112; /* Monochrome-specific error override */
 }
 
 :root[data-theme-mode='monochrome'] .glass-input:focus {
@@ -543,17 +548,23 @@ html {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  html { scroll-behavior: auto; }
+
+  /* Remove decorative movement without globally collapsing all state feedback. */
+  .glass-card,
+  .glass-button,
+  .dashboard-card-interactive,
+  .dashboard-mini-card,
+  .ui-card {
+    transition: none !important;
   }
 
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
+  .glass-card:hover,
+  .glass-button:hover,
+  .glass-button:active,
+  .dashboard-card-interactive:hover,
+  .dashboard-card-interactive:active {
+    transform: none !important;
   }
 }
 
@@ -1181,17 +1192,11 @@ p {
 }
 
 .glass-card {
-  background: rgb(var(--card) / 0.72);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgb(var(--border) / 0.6);
-  border-radius: 1.5rem;
-  box-shadow:
-    0 8px 32px -8px rgba(26, 11, 46, 0.5),
-    inset 0 1px 1px rgba(255, 255, 255, 0.1);
-  transition:
-    transform 180ms ease,
-    box-shadow 180ms ease;
+  background: rgb(var(--card) / 0.96);
+  border: 1px solid rgb(var(--border) / 0.8);
+  border-radius: var(--ui-radius-card, 20px);
+  box-shadow: 0 8px 24px -12px rgb(var(--text-1) / 0.16);
+  transition: border-color 180ms ease, transform 180ms ease, box-shadow 180ms ease;
 }
 
 /* Card density variants:
@@ -1207,10 +1212,12 @@ p {
   padding: 28px;
 }
 
-.glass-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 40px -8px rgb(var(--text-1) / 0.12);
-  border-color: rgb(var(--border));
+@media (hover: hover) and (pointer: fine) {
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -12px rgb(var(--text-1) / 0.22);
+    border-color: rgb(var(--accent-1) / 0.35);
+  }
 }
 
 .glass-card-solid {
@@ -1659,4 +1666,30 @@ button.micro-interaction:active {
   .ui-card {
     transition: none;
   }
+}
+
+
+@layer components {
+  /* Shared card baseline: utilities such as p-4 can override this component-layer default. */
+  .glass-card { padding: 24px; }
+  .glass-card--compact { padding: 16px; }
+  .glass-card--hero { padding: 28px; }
+}
+
+
+@layer utilities {
+  /* Normalize legacy 9–11px labels to a readable 12px floor. */
+  .text-\[9px\],
+  .text-\[10px\],
+  .text-\[11px\] {
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+}
+
+
+@layer utilities {
+  /* Accent-2/3 are intentionally pale surfaces; use readable ink when used as text. */
+  .text-accent-2 { color: rgb(var(--text-2)); }
+  .text-accent-3 { color: rgb(var(--accent-1)); }
 }

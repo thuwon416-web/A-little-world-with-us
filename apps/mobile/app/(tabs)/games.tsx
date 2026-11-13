@@ -63,7 +63,7 @@ export default function GamesScreen() {
               onPress={() => play(index)}
               style={[styles.cell, { borderColor: colors.cardBorder }]}
             >
-              <Text style={[styles.cellText, { color: colors.accent2 }]}>{value}</Text>
+              <Text style={[styles.cellText, { color: colors.textSecondary }]}>{value}</Text>
             </TouchableOpacity>
           ))}
         </View>

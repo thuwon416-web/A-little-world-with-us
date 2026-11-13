@@ -9,6 +9,7 @@ import { ThemeProvider, useTheme } from '@/context/ThemeContext'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { I18nProvider } from '@/i18n/config'
+import { useTranslation } from '@/i18n/useTranslation'
 import { AuthProvider, useAuth } from '@/lib/auth'
 import { supabase } from '@/lib/supabase'
 import { getSharingStatus, startLocationTracking } from '@/services/location'
@@ -47,29 +48,41 @@ class ErrorBoundary extends React.Component<
 
   render() {
     if (this.state.hasError) {
-      return <ErrorFallback message={this.state.error?.message || 'An unexpected error occurred'} />
+      return <ErrorFallback />
     }
 
     return this.props.children
   }
 }
 
-function ErrorFallback({ message }: { message: string }) {
+function ErrorFallback() {
   const { colors } = useTheme()
+  const { t } = useTranslation()
   const styles = createStyles(colors, sizes)
   return (
     <View style={[styles.errorContainer, { backgroundColor: colors.background }]}>
-      <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>Something went wrong</Text>
-      <Text style={[styles.errorMessage, { color: colors.textSecondary }]}>{message}</Text>
+      <Text style={[styles.errorTitle, { color: colors.textPrimary }]}>{t('common.errorTitle')}</Text>
+      <Text style={[styles.errorMessage, { color: colors.textSecondary }]}>{t('common.errorMessage')}</Text>
     </View>
   )
 }
 
 function ThemedStatusBar() {
   const { theme } = useTheme()
-  const isDark = theme === 'lavender-mist' || theme === 'monochrome'
+  const isDark = theme === 'monochrome'
 
   return <StatusBar style={isDark ? 'light' : 'dark'} />
+}
+
+function LocalizedStack() {
+  const { t } = useTranslation()
+  return (
+    <Stack>
+      <Stack.Screen name="login" options={{ title: t('common.login') }} />
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="+not-found" options={{ title: t('common.notFound') }} />
+    </Stack>
+  )
 }
 
 function MfaGate({ children }: { children: ReactNode }) {
@@ -140,22 +153,18 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <ErrorBoundary>
-        <AuthProvider>
-          <I18nProvider>
-            <ThemeProvider>
+      <AuthProvider>
+        <I18nProvider>
+          <ThemeProvider>
+            <ErrorBoundary>
               <ThemedStatusBar />
               <MfaGate>
-                <Stack>
-                  <Stack.Screen name="login" options={{ title: 'Login' }} />
-                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                  <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
-                </Stack>
+                <LocalizedStack />
               </MfaGate>
-            </ThemeProvider>
-          </I18nProvider>
-        </AuthProvider>
-      </ErrorBoundary>
+            </ErrorBoundary>
+          </ThemeProvider>
+        </I18nProvider>
+      </AuthProvider>
     </SafeAreaProvider>
   )
 }

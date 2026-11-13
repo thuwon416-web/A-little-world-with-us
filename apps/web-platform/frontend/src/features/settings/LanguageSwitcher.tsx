@@ -4,13 +4,13 @@ import { useLanguage } from '@/contexts/LanguageContext'
 import { Globe } from 'lucide-react'
 
 export default function LanguageSwitcher() {
-  const { language, setLanguage } = useLanguage()
+  const { language, setLanguage, t } = useLanguage()
 
   return (
     <div className="glass-card p-5">
       <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
         <Globe className="h-5 w-5 text-accent-1" />
-        Language / ဘာသာစကား
+        {t('Settings.language')}
       </h3>
 
       <div className="flex gap-2">

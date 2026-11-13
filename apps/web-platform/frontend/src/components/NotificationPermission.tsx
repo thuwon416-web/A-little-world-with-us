@@ -3,8 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Bell } from 'lucide-react'
 import { requestNotificationPermission } from '@/lib/notifications'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function NotificationPermission() {
+  const { t } = useLanguage()
   const [permissionGranted, setPermissionGranted] = useState(false)
 
   useEffect(() => {
@@ -24,9 +26,9 @@ export default function NotificationPermission() {
 
   return (
     <div className="p-4 bg-accent-1/10 rounded-btn border border-accent-1/20">
-      <h3 className="mb-2 flex items-center gap-2 font-medium text-text-1"><Bell className="icon-wiggle-once h-4 w-4" /> Enable Notifications</h3>
+      <h3 className="mb-2 flex items-center gap-2 font-medium text-text-1"><Bell className="icon-wiggle-once h-4 w-4" /> {t('Settings.enableNotifications')}</h3>
       <p className="text-sm text-text-2 mb-4">
-        Stay updated with reminders and important alerts
+        {t('Settings.notificationDescription')}
       </p>
       <button
         onClick={handleRequest}

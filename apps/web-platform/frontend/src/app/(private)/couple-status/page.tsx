@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import { motion } from 'framer-motion'
 import { Heart, Users, Clock, CheckCircle2, XCircle } from 'lucide-react'
 import { supabase, getCurrentUserId } from '@/lib/supabase'
@@ -19,6 +20,7 @@ type CoupleInfo = {
 }
 
 export default function CoupleLinkStatusPage() {
+  const { language, t } = useLanguage()
   const [coupleInfo, setCoupleInfo] = useState<CoupleInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -26,7 +28,7 @@ export default function CoupleLinkStatusPage() {
 
   useEffect(() => {
     loadCoupleInfo()
-  }, [])
+  }, [t])
 
   const loadCoupleInfo = async () => {
     try {
@@ -37,7 +39,7 @@ export default function CoupleLinkStatusPage() {
       const status = await getPairStatus()
       
       if (!status) {
-        setError('No couple link found')
+        setError(t('CoupleStatus.noLink'))
         setLoading(false)
         return
       }
@@ -52,7 +54,7 @@ export default function CoupleLinkStatusPage() {
         .single()
 
       if (fetchError) {
-        setError('Failed to load couple link details')
+        setError(t('CoupleStatus.fetchError'))
         setLoading(false)
         return
       }
@@ -80,7 +82,7 @@ export default function CoupleLinkStatusPage() {
         acceptor_email: acceptorData?.email,
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load couple info')
+      setError(err instanceof Error ? err.message : t('CoupleStatus.loadError'))
     } finally {
       setLoading(false)
     }
@@ -99,7 +101,7 @@ export default function CoupleLinkStatusPage() {
         >
           <div className="flex items-center justify-center gap-2 mb-4">
             <Heart className="h-8 w-8 text-accent-1" />
-            <h1 className="text-3xl md:text-4xl font-bold text-text-1">Link Status</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-text-1">{t('CoupleStatus.title')}</h1>
           </div>
         </motion.div>
 
@@ -118,11 +120,12 @@ export default function CoupleLinkStatusPage() {
 }
 
 function LoadingState() {
+  const { t } = useLanguage()
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex items-center justify-center py-16"
+      role="status" aria-label={t('CoupleStatus.loading')} className="flex items-center justify-center py-16"
     >
       <div className="h-8 w-8 rounded-full border-2 border-accent-1 border-t-transparent animate-spin" />
     </motion.div>
@@ -136,20 +139,21 @@ function ErrorState({
   readonly error: string
   readonly onRetry: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="rounded-btn border border-accent-1/20 bg-card p-8 text-center"
+      className="rounded-card border border-accent-1/20 bg-card p-8 text-center"
     >
       <div className="mb-6 flex justify-center">
         <XCircle className="h-16 w-16 text-accent-1" />
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-text-1">Error</h2>
+      <h2 className="mb-2 text-2xl font-bold text-text-1">{t('CoupleStatus.error')}</h2>
       <p className="mb-6 text-text-2">{error}</p>
       <button
         onClick={onRetry}
-        className="rounded-lg bg-accent-1 px-6 py-2 font-semibold text-white font-semibold shadow-sm hover:shadow-lg hover:shadow-accent-1/20 transition"
+        className="min-h-11 rounded-lg bg-accent-1 px-6 py-2 font-semibold text-white font-semibold shadow-sm hover:shadow-lg hover:shadow-accent-1/20 transition"
       >
         Try Again
       </button>
@@ -164,6 +168,7 @@ function StatusCards({
   readonly coupleInfo: CoupleInfo
   readonly isInviter: boolean
 }) {
+  const { language, t } = useLanguage()
   const statusColors = {
     pending: { bg: 'var(--card-bg)', border: 'rgb(var(--accent-1))', text: 'rgb(var(--accent-2))', icon: Clock },
     accepted: { bg: 'var(--card-bg)', border: 'var(--success)', text: 'var(--success)', icon: CheckCircle2 },
@@ -189,37 +194,37 @@ function StatusCards({
           <StatusIcon className="h-12 w-12" style={{ color: statusConfig.text }} />
         </div>
         <h2 className="mb-2 text-2xl font-bold text-text-1">
-          {coupleInfo.status === 'pending' && 'Waiting for Acceptance'}
-          {coupleInfo.status === 'accepted' && 'Connected!'}
-          {coupleInfo.status === 'declined' && 'Invite Declined'}
-          {coupleInfo.status === 'revoked' && 'Link Revoked'}
+          {coupleInfo.status === 'pending' && t('CoupleStatus.waiting')}
+          {coupleInfo.status === 'accepted' && t('CoupleStatus.connected')}
+          {coupleInfo.status === 'declined' && t('CoupleStatus.declined')}
+          {coupleInfo.status === 'revoked' && t('CoupleStatus.revoked')}
         </h2>
         <p style={{ color: statusConfig.text }}>
-          {coupleInfo.status === 'pending' && 'Your partner hasn\'t accepted yet'}
-          {coupleInfo.status === 'accepted' && 'You\'re now linked together'}
-          {coupleInfo.status === 'declined' && 'This invite was declined'}
-          {coupleInfo.status === 'revoked' && 'This link has been revoked'}
+          {coupleInfo.status === 'pending' && t('CoupleStatus.waitingDescription')}
+          {coupleInfo.status === 'accepted' && t('CoupleStatus.connectedDescription')}
+          {coupleInfo.status === 'declined' && t('CoupleStatus.declinedDescription')}
+          {coupleInfo.status === 'revoked' && t('CoupleStatus.revokedDescription')}
         </p>
       </div>
 
       {/* Details */}
       <div className="rounded-btn border border-accent-1/20 bg-card/50 p-6 space-y-4">
         <div>
-          <h3 className="text-sm font-semibold text-accent-2 mb-1">Invite Code</h3>
+          <h3 className="text-sm font-semibold text-accent-2 mb-1">{t('CoupleStatus.inviteCode')}</h3>
           <p className="font-mono text-lg text-accent-1">{coupleInfo.invite_code}</p>
         </div>
 
         <div>
-          <h3 className="text-sm font-semibold text-accent-2 mb-1">Created</h3>
+          <h3 className="text-sm font-semibold text-accent-2 mb-1">{t('CoupleStatus.created')}</h3>
           <p className="text-text-2">
-            {new Date(coupleInfo.created_at).toLocaleDateString()} at{' '}
-            {new Date(coupleInfo.created_at).toLocaleTimeString()}
+            {new Date(coupleInfo.created_at).toLocaleDateString(language === 'my' ? 'my-MM' : 'en-US')} at{' '}
+            {new Date(coupleInfo.created_at).toLocaleTimeString(language === 'my' ? 'my-MM' : 'en-US')}
           </p>
         </div>
 
         {coupleInfo.accepted_at && (
           <div>
-            <h3 className="text-sm font-semibold text-success mb-1">Accepted</h3>
+            <h3 className="text-sm font-semibold text-success mb-1">{t('CoupleStatus.accepted')}</h3>
             <p className="text-text-2">
               {new Date(coupleInfo.accepted_at).toLocaleDateString()} at{' '}
               {new Date(coupleInfo.accepted_at).toLocaleTimeString()}
@@ -237,16 +242,16 @@ function StatusCards({
         <div className="space-y-3">
           <div className="flex items-center justify-between rounded-lg bg-card/30 p-3">
             <div>
-              <p className="text-sm text-text-2">Inviter</p>
-              <p className="text-text-1">{coupleInfo.inviter_email || 'Unknown'}</p>
+              <p className="text-sm text-text-2">{t('CoupleStatus.inviter')}</p>
+              <p className="text-text-1">{coupleInfo.inviter_email || t('CoupleStatus.unknown')}</p>
             </div>
-            {isInviter && <span className="text-xs font-semibold text-accent-1">You</span>}
+            {isInviter && <span className="text-xs font-semibold text-accent-1">{t('CoupleStatus.you')}</span>}
           </div>
 
           {coupleInfo.accepted_by && coupleInfo.acceptor_email && (
             <div className="flex items-center justify-between rounded-lg bg-card/30 p-3">
               <div>
-                <p className="text-sm text-text-2">Acceptor</p>
+                <p className="text-sm text-text-2">{t('CoupleStatus.acceptor')}</p>
                 <p className="text-text-1">{coupleInfo.acceptor_email}</p>
               </div>
               {!isInviter && <span className="text-xs font-semibold text-success">You</span>}
@@ -259,13 +264,13 @@ function StatusCards({
       <div className="flex gap-3">
         <a
           href="/couple-linking"
-          className="flex-1 rounded-lg bg-accent-1 px-4 py-3 text-center font-semibold text-white font-semibold shadow-sm hover:shadow-lg hover:shadow-accent-1/20 transition"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-accent-1 px-4 py-3 text-center font-semibold text-white font-semibold shadow-sm hover:shadow-lg hover:shadow-accent-1/20 transition"
         >
           Back to Linking
         </a>
         <a
           href="/chat"
-          className="flex-1 rounded-lg bg-card px-4 py-3 text-center font-semibold text-text-1 hover:bg-card transition"
+          className="flex min-h-11 flex-1 items-center justify-center rounded-lg bg-card px-4 py-3 text-center font-semibold text-text-1 hover:bg-card transition"
         >
           Send Message
         </a>

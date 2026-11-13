@@ -127,11 +127,11 @@ const createStyles = (colors: ThemeColors) =>
     },
     progressLabel: {
       color: colors.textSecondary,
-      fontSize: 10,
+      fontSize: 12,
       letterSpacing: 1.1,
       textTransform: 'uppercase',
     },
-    progressValue: { color: colors.accent2, fontSize: 11, fontWeight: '700' },
+    progressValue: { color: colors.textSecondary, fontSize: 12, fontWeight: '700' },
     barTrack: { height: 8, backgroundColor: colors.surface, borderRadius: 999, overflow: 'hidden' },
     barFill: { height: '100%', borderRadius: 999, backgroundColor: colors.accent1 },
     grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 14 },
@@ -156,7 +156,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     sliderLabel: {
       color: colors.textSecondary,
-      fontSize: 10,
+      fontSize: 12,
       letterSpacing: 1.1,
       textTransform: 'uppercase',
       marginBottom: 8,
@@ -168,7 +168,7 @@ const createStyles = (colors: ThemeColors) =>
       gap: 12,
     },
     intensityValue: {
-      color: colors.accent2,
+      color: colors.textSecondary,
       fontSize: 16,
       fontWeight: '700',
       flex: 1,
@@ -194,7 +194,7 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    buttonText: { color: colors.textPrimary, fontWeight: '700', fontSize: 16 },
+    buttonText: { color: colors.accentForeground, fontWeight: '700', fontSize: 16 },
     featureCard: {
       backgroundColor: colors.cardBg,
       borderRadius: 14,
@@ -203,8 +203,8 @@ const createStyles = (colors: ThemeColors) =>
       borderColor: colors.accent1,
     },
     featureLabel: {
-      color: colors.accent2,
-      fontSize: 10,
+      color: colors.textSecondary,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
       marginBottom: 6,

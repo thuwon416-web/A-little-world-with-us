@@ -4,8 +4,10 @@ import { AlertTriangle, RefreshCw } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
 import { clearErrorLog, getErrorLog, logError } from '@/lib/errorLogger'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function ErrorReport() {
+  const { t } = useLanguage()
   const [errors, setErrors] = useState(getErrorLog())
 
   useEffect(() => {
@@ -25,22 +27,22 @@ export default function ErrorReport() {
   }
 
   return (
-    <div className="rounded-modal border border-amber-300/20 bg-card p-5">
+    <div className="rounded-panel border border-warning/20 bg-card p-5">
       <div className="mb-4 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-200/10 text-amber-300">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-warning/10 text-warning">
             <AlertTriangle className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-text-2">Diagnostics</p>
-            <h3 className="text-lg font-semibold text-text-1">Error reports</h3>
+            <p className="text-xs uppercase tracking-[0.16em] text-text-2">{t('Settings.diagnostics')}</p>
+            <h3 className="text-lg font-semibold text-text-1">{t('Settings.errorReports')}</h3>
           </div>
         </div>
 
         <button
           type="button"
           onClick={handleGenerateReport}
-          className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1"
+          className="inline-flex min-h-11 items-center gap-2 rounded-full border border-accent-1/20 bg-card px-3 py-2 text-sm text-text-1"
         >
           <RefreshCw className="h-4 w-4" />
           Refresh
@@ -68,7 +70,7 @@ export default function ErrorReport() {
       <button
         type="button"
         onClick={handleClear}
-        className="mt-4 text-sm text-text-2 underline underline-offset-4"
+        className="mt-4 min-h-11 text-sm text-text-2 underline underline-offset-4"
       >
         Clear local error log
       </button>

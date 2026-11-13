@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Flame, Heart } from 'lucide-react'
 import { getLoveStreak, checkInLoveStreak, type LoveStreakData } from '@/services/love-streak'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 interface LoveStreakBadgeProps {
   coupleId?: string | null
@@ -15,6 +16,7 @@ export default function LoveStreakBadge({
   className = '',
   compact = false,
 }: LoveStreakBadgeProps) {
+  const { t } = useLanguage()
   const [streakData, setStreakData] = useState<LoveStreakData>({
     current_streak: 0,
     last_check_in: null,
@@ -60,7 +62,7 @@ export default function LoveStreakBadge({
         className={`inline-flex items-center gap-1.5 rounded-full border border-accent-1/25 bg-accent-1/10 px-3 py-1 text-xs font-medium text-text-1 backdrop-blur-sm ${className}`}
       >
         <Flame className="h-3.5 w-3.5 text-accent-1 animate-pulse" />
-        <span>{streakData.current_streak} {streakData.current_streak === 1 ? 'day' : 'days'}</span>
+        <span>{streakData.current_streak} {streakData.current_streak === 1 ? t('dashboard.streak.day') : t('dashboard.streak.days')}</span>
         {streakData.checkedInToday ? (
           <span className="text-[10px] text-accent-1">❤️</span>
         ) : (
@@ -70,7 +72,7 @@ export default function LoveStreakBadge({
             disabled={loading}
             className="ml-1 text-[11px] font-semibold text-accent-1 underline hover:opacity-80 active:scale-95"
           >
-            {loading ? '...' : 'Check-in'}
+            {loading ? '...' : t('dashboard.streak.checkIn')}
           </button>
         )}
       </div>
@@ -90,18 +92,18 @@ export default function LoveStreakBadge({
       <div className="min-w-0">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-bold text-text-1">
-            {streakData.current_streak} {streakData.current_streak === 1 ? 'Day' : 'Days'} Streak
+            {streakData.current_streak} {streakData.current_streak === 1 ? t('dashboard.streak.day') : t('dashboard.streak.days')} {t('dashboard.streak.label')}
           </span>
           {justCheckedIn && (
             <span className="animate-bounce text-xs font-semibold text-accent-1">
-              +1 Day! 🎉
+              {t('dashboard.streak.plusOne')}
             </span>
           )}
         </div>
         <p className="text-[11px] text-text-2">
           {streakData.checkedInToday
-            ? 'Checked in together today ❤️'
-            : 'Keep your couple love streak alive'}
+            ? t('dashboard.streak.checkedInTogether')
+            : t('dashboard.streak.keepAlive')}
         </p>
       </div>
 
@@ -113,12 +115,12 @@ export default function LoveStreakBadge({
           className="ml-auto inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-accent-1 to-accent-2 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-95 disabled:opacity-50"
         >
           <Heart className="h-3.5 w-3.5 fill-current" />
-          <span>{loading ? 'Checking in…' : 'Check-in today'}</span>
+          <span>{loading ? t('dashboard.streak.checkingIn') : t('dashboard.streak.checkInToday')}</span>
         </button>
       ) : (
         <span className="ml-auto inline-flex items-center gap-1 rounded-full border border-accent-1/30 bg-accent-1/10 px-2.5 py-1 text-[11px] font-medium text-accent-1">
           <Heart className="h-3 w-3 fill-current" />
-          Done
+          {t('dashboard.streak.done')}
         </span>
       )}
     </div>

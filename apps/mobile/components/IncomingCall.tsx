@@ -63,7 +63,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
       marginBottom: 6,
     },
     subtitle: {
-      color: colors.accent2,
+      color: colors.textSecondary,
       fontSize: 14,
       marginBottom: 12,
     },

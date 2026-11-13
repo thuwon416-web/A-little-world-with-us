@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useMemo } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   Play,
   Square,
@@ -156,6 +157,7 @@ const AVAILABLE_MODULES = [
 ];
 
 export default function AutomationPipelinePage() {
+  const { t } = useLanguage()
   const [nodes, setNodes] = useState<WorkflowNode[]>(DEFAULT_PIPELINE_NODES);
   const [connections, setConnections] = useState<WorkflowConnection[]>(DEFAULT_CONNECTIONS);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -189,8 +191,8 @@ export default function AutomationPipelinePage() {
           setLogs(logList => [
             {
               timestamp: new Date().toLocaleTimeString(),
-              nodeTitle: node.title,
-              message: nextState ? 'Routine enabled and linked to pipeline.' : 'Routine paused.',
+              nodeTitle: t('Automations.nodes.' + node.id),
+              message: nextState ? t('Automations.enabled') : t('Automations.paused'),
               type: nextState ? 'success' : 'warn',
             },
             ...logList,
@@ -208,7 +210,7 @@ export default function AutomationPipelinePage() {
       {
         timestamp: new Date().toLocaleTimeString(),
         nodeTitle: 'PIPELINE',
-        message: enable ? 'All 5 couple routines enabled.' : 'All couple routines paused.',
+        message: enable ? t('Automations.enabled') : t('Automations.paused'),
         type: enable ? 'success' : 'warn',
       },
       ...logList,
@@ -385,9 +387,9 @@ export default function AutomationPipelinePage() {
             fill="none"
             stroke={
               isPulse
-                ? '#ec4899'
+                ? 'rgb(var(--accent-2))'
                 : isSuccess
-                ? '#10b981'
+                ? 'rgb(var(--success))'
                 : isBothActive
                 ? 'rgb(var(--accent-1) / 0.55)'
                 : 'rgba(170, 160, 190, 0.25)'
@@ -400,7 +402,7 @@ export default function AutomationPipelinePage() {
             cx={startX}
             cy={startY}
             r="4.5"
-            fill={isBothActive ? 'rgb(var(--accent-1))' : 'rgba(170, 160, 190, 0.4)'}
+            fill={isBothActive ? 'rgb(var(--accent-1))' : 'rgb(var(--text-2) / 0.35)'}
           />
           <circle
             cx={endX}
@@ -414,7 +416,7 @@ export default function AutomationPipelinePage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-125px)] bg-card text-text-1 overflow-hidden select-none rounded-3xl border border-border/70 shadow-sm">
+    <div className="flex min-h-[70dvh] flex-col bg-card text-text-1 overflow-hidden select-none rounded-panel border border-border/70 shadow-sm md:h-[calc(100dvh-125px)]">
       {/* Top Header */}
       <header className="h-16 border-b border-border/50 bg-card px-4 sm:px-6 flex items-center justify-between z-20 gap-3">
         <div className="flex items-center gap-3 min-w-0">
@@ -423,9 +425,9 @@ export default function AutomationPipelinePage() {
           </span>
           <div className="min-w-0">
             <h1 className="text-sm sm:text-base font-serif font-semibold text-text-1 tracking-wide flex items-center gap-2 truncate">
-              Couple Smart Automation Pipeline
-              <span className="hidden sm:inline-block text-[10px] font-mono px-2 py-0.5 rounded-full bg-accent-1/10 text-accent-1 border border-accent-1/20 font-medium">
-                {activeCount} of {nodes.length} Active
+              {t('Automations.title')}
+              <span className="hidden sm:inline-block text-xs font-mono px-2 py-0.5 rounded-full bg-accent-1/10 text-accent-1 border border-accent-1/20 font-medium">
+                {activeCount} / {nodes.length} {t('Automations.active')}
               </span>
             </h1>
             <p className="text-xs text-text-2 truncate hidden sm:block">
@@ -446,7 +448,7 @@ export default function AutomationPipelinePage() {
                   ? 'bg-card text-accent-1 shadow-xs'
                   : 'text-text-2 hover:text-text-1'
               }`}
-              title="Visual Workflow Canvas"
+              title={t('Automations.canvasView')} aria-label={t('Automations.canvasView')}
             >
               <Workflow className="h-4 w-4" />
             </button>
@@ -458,7 +460,7 @@ export default function AutomationPipelinePage() {
                   ? 'bg-card text-accent-1 shadow-xs'
                   : 'text-text-2 hover:text-text-1'
               }`}
-              title="Routines List View"
+              title={t('Automations.listView')} aria-label={t('Automations.listView')}
             >
               <Layers className="h-4 w-4" />
             </button>
@@ -468,10 +470,10 @@ export default function AutomationPipelinePage() {
             type="button"
             onClick={handleResetLayout}
             className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-full bg-card hover:bg-soft-tint text-text-2 border border-border/80 transition shadow-xs"
-            title="Reset Pipeline Positions"
+            title={t('Automations.resetPipelinePositions')}
           >
             <RotateCcw className="h-3.5 w-3.5" />
-            Reset Layout
+            {t('Automations.resetLayout')}
           </button>
 
           <button
@@ -480,7 +482,7 @@ export default function AutomationPipelinePage() {
             className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-full bg-card hover:bg-soft-tint text-text-1 border border-border/80 transition-all shadow-xs"
           >
             <Plus className="h-3.5 w-3.5 text-accent-1" />
-            <span className="hidden sm:inline">Add Routine</span>
+            <span className="hidden sm:inline">{t('Automations.addRoutine')}</span>
           </button>
 
           <button
@@ -489,17 +491,17 @@ export default function AutomationPipelinePage() {
             disabled={isRunning}
             className={`flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded-full shadow-sm transition-all ${
               isRunning
-                ? 'bg-amber-500/20 text-amber-600 border border-amber-500/30 animate-pulse'
+                ? 'bg-warning/10 text-warning border border-warning/20 animate-pulse'
                 : 'bg-accent-1 hover:opacity-90 text-white font-medium shadow-sm'
             }`}
           >
             {isRunning ? (
               <>
-                <Square className="h-3.5 w-3.5 animate-spin" /> Executing Pipeline...
+                <Square className="h-3.5 w-3.5 animate-spin" /> {t('Automations.executing')}
               </>
             ) : (
               <>
-                <Play className="h-3.5 w-3.5 fill-current" /> Run Pipeline Now
+                <Play className="h-3.5 w-3.5 fill-current" /> {t('Automations.runPipeline')}
               </>
             )}
           </button>
@@ -512,9 +514,9 @@ export default function AutomationPipelinePage() {
           <div
             ref={canvasRef}
             onClick={() => setSelectedNodeId(null)}
-            className="flex-1 h-full relative cursor-grab active:cursor-grabbing overflow-auto bg-[#faf7fd]"
+            className="flex-1 h-full relative cursor-grab active:cursor-grabbing overflow-auto bg-card"
             style={{
-              backgroundImage: 'radial-gradient(rgba(140, 100, 180, 0.16) 1.5px, transparent 1.5px)',
+              backgroundImage: 'radial-gradient(rgb(var(--border) / 0.45) 1.5px, transparent 1.5px)',
               backgroundSize: '24px 24px',
             }}
           >
@@ -569,7 +571,7 @@ export default function AutomationPipelinePage() {
                         {node.category === 'notify' && <Send className="h-3.5 w-3.5" />}
                       </div>
                       <div>
-                        <span className="text-[10px] font-mono uppercase tracking-wider text-text-2">
+                        <span className="text-xs font-mono uppercase tracking-wider text-text-2">
                           {node.category}
                         </span>
                       </div>
@@ -595,19 +597,19 @@ export default function AutomationPipelinePage() {
                   </div>
 
                   {/* Title & Type */}
-                  <h3 className="text-xs font-semibold text-text-1 leading-tight">{node.title}</h3>
-                  <p className="text-[10px] text-text-2 line-clamp-1 mb-2 font-mono">{node.type}</p>
+                  <h3 className="text-xs font-semibold text-text-1 leading-tight">{t('Automations.nodes.' + node.id)}</h3>
+                  <p className="text-xs text-text-2 line-clamp-1 mb-2 font-mono">{node.type}</p>
 
                   {/* Bottom Info & Setting link */}
                   <div className="pt-2 border-t border-border/40 flex items-center justify-between text-[10px] text-text-2">
                     <span className="truncate max-w-[140px] font-medium">
                       {node.enabled ? (
                         <span className="inline-flex items-center gap-1 text-emerald-600">
-                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
                           {node.config.cron || node.config.model || node.config.threshold || 'Active'}
                         </span>
                       ) : (
-                        <span className="text-text-2/70 italic">Paused</span>
+                        <span className="text-text-2/70 italic">{t('Automations.paused')}</span>
                       )}
                     </span>
                     <button
@@ -635,12 +637,12 @@ export default function AutomationPipelinePage() {
                   <span className="text-[10px] font-mono text-accent-1 uppercase font-semibold">
                     Routine Inspector
                   </span>
-                  <h3 className="text-sm font-semibold text-text-1">{selectedNode.title}</h3>
+                  <h3 className="text-sm font-semibold text-text-1">{t('Automations.nodes.' + selectedNode.id)}</h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setSelectedNodeId(null)}
-                  className="p-1 rounded-full text-text-2 hover:bg-soft-tint hover:text-text-1"
+                  className="min-h-11 min-w-11 rounded-full p-1 text-text-2 hover:bg-soft-tint hover:text-text-1"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -649,9 +651,9 @@ export default function AutomationPipelinePage() {
               {/* Status & Enable Switch */}
               <div className="p-3 rounded-2xl border border-border/60 bg-soft-tint mb-4 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-semibold text-text-1">Routine Status</p>
+                  <p className="text-xs font-semibold text-text-1">{t('Automations.routineStatus')}</p>
                   <p className="text-[10px] text-text-2">
-                    {selectedNode.enabled ? 'Enabled in automated pipeline' : 'Paused — will skip on execution'}
+                    {selectedNode.enabled ? t('Automations.enabledInPipeline') : t('Automations.pausedSkip')}
                   </p>
                 </div>
                 <button
@@ -672,7 +674,7 @@ export default function AutomationPipelinePage() {
               {/* Node Config Fields */}
               <div className="space-y-3 flex-1 text-xs">
                 <div>
-                  <label className="text-text-2 font-medium block mb-1">Routine Title</label>
+                  <label className="text-text-2 font-medium block mb-1">{t('Automations.routineTitle')}</label>
                   <input
                     type="text"
                     value={selectedNode.title}
@@ -687,15 +689,15 @@ export default function AutomationPipelinePage() {
                 </div>
 
                 <div>
-                  <label className="text-text-2 font-medium block mb-1">Module Type</label>
-                  <div className="px-3 py-2 rounded-xl bg-soft-tint border border-border/60 text-text-1 font-mono text-[11px]">
+                  <label className="text-text-2 font-medium block mb-1">{t('Automations.moduleType')}</label>
+                  <div className="px-3 py-2 rounded-xl bg-soft-tint border border-border/60 text-text-1 font-mono text-xs">
                     {selectedNode.type}
                   </div>
                 </div>
 
                 {selectedNode.category === 'schedule' && (
                   <div>
-                    <label className="text-text-2 font-medium block mb-1">Alarm / Schedule Time</label>
+                    <label className="text-text-2 font-medium block mb-1">{t('Automations.alarmTime')}</label>
                     <input
                       type="text"
                       value={selectedNode.config.cron || '07:00 AM Daily'}
@@ -717,7 +719,7 @@ export default function AutomationPipelinePage() {
                 {selectedNode.category === 'ai' && (
                   <div className="space-y-2">
                     <div>
-                      <label className="text-text-2 font-medium block mb-1">AI Model</label>
+                      <label className="text-text-2 font-medium block mb-1">{t('Automations.aiModel')}</label>
                       <select
                         value={selectedNode.config.model || 'gemini-2.5-flash'}
                         onChange={e => {
@@ -732,13 +734,13 @@ export default function AutomationPipelinePage() {
                         }}
                         className="w-full px-3 py-1.5 rounded-xl bg-card border border-border text-text-1 focus:outline-none focus:ring-1 focus:ring-accent-1"
                       >
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Free)</option>
+                        <option value="gemini-2.5-flash">{`Gemini 2.5 Flash (${t('Automations.fastFree')})`}</option>
                         <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="text-text-2 font-medium block mb-1">Prompt Instruction</label>
+                      <label className="text-text-2 font-medium block mb-1">{t('Automations.promptInstruction')}</label>
                       <textarea
                         rows={3}
                         value={selectedNode.config.prompt || ''}
@@ -760,7 +762,7 @@ export default function AutomationPipelinePage() {
 
                 {selectedNode.category === 'wellness' && (
                   <div>
-                    <label className="text-text-2 font-medium block mb-1">Water Reminder Frequency</label>
+                    <label className="text-text-2 font-medium block mb-1">{t('Automations.waterFrequency')}</label>
                     <select
                       value={selectedNode.config.remindWaterIntake || 'Every 2 Hours'}
                       onChange={e => {
@@ -775,16 +777,16 @@ export default function AutomationPipelinePage() {
                       }}
                       className="w-full px-3 py-1.5 rounded-xl bg-card border border-border text-text-1 focus:outline-none focus:ring-1 focus:ring-accent-1"
                     >
-                      <option value="Every 1 Hour">Every 1 Hour</option>
-                      <option value="Every 2 Hours">Every 2 Hours</option>
-                      <option value="Every 3 Hours">Every 3 Hours</option>
+                      <option value="Every 1 Hour">{t('Automations.every1Hour')}</option>
+                      <option value="Every 2 Hours">{t('Automations.every2Hours')}</option>
+                      <option value="Every 3 Hours">{t('Automations.every3Hours')}</option>
                     </select>
                   </div>
                 )}
 
                 {selectedNode.category === 'finance' && (
                   <div>
-                    <label className="text-text-2 font-medium block mb-1">Monthly Budget Limit</label>
+                    <label className="text-text-2 font-medium block mb-1">{t('Automations.monthlyBudget')}</label>
                     <input
                       type="text"
                       value={selectedNode.config.threshold || '$500 Monthly Limit'}
@@ -805,7 +807,7 @@ export default function AutomationPipelinePage() {
 
                 {selectedNode.category === 'notify' && (
                   <div>
-                    <label className="text-text-2 font-medium block mb-1">Telegram Dispatch Target</label>
+                    <label className="text-text-2 font-medium block mb-1">{t('Automations.telegramTarget')}</label>
                     <input
                       type="text"
                       value={selectedNode.config.destination || 'Telegram Bot & In-App'}
@@ -839,11 +841,11 @@ export default function AutomationPipelinePage() {
         </div>
       ) : (
         /* Routines List Mode (Clean cards with instant toggle switches) */
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-[#faf7fd]">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-3 bg-card">
           <div className="flex items-center justify-between pb-2">
             <div>
-              <h2 className="font-serif text-lg font-semibold text-text-1">All 5 Pre-Wired Routines</h2>
-              <p className="text-xs text-text-2">Toggle any routine on or off. Active routines run in harmony.</p>
+              <h2 className="font-serif text-lg font-semibold text-text-1">{t('Automations.prewiredRoutines')}</h2>
+              <p className="text-xs text-text-2">{t('Automations.routineDescription')}</p>
             </div>
             <div className="flex items-center gap-2">
               <button
@@ -906,7 +908,7 @@ export default function AutomationPipelinePage() {
                         {node.config.cron || node.config.model || node.config.threshold || 'Active'}
                       </span>
                     ) : (
-                      <span className="italic text-text-2/70">Paused</span>
+                      <span className="italic text-text-2/70">{t('Automations.paused')}</span>
                     )}
                   </span>
                   <button
@@ -928,11 +930,11 @@ export default function AutomationPipelinePage() {
 
       {/* Add Module Modal / Drawer */}
       {showAddDrawer && (
-        <div className="absolute top-4 left-6 w-80 bg-card border border-border/80 rounded-3xl shadow-2xl p-4 z-30 text-text-1">
+        <div className="absolute top-4 left-6 w-80 bg-card border border-border/80 rounded-panel shadow-xl p-4 z-30 text-text-1">
           <div className="flex items-center justify-between pb-3 border-b border-border/40 mb-3">
             <div>
-              <h4 className="text-sm font-serif font-semibold text-text-1">Add Routine Module</h4>
-              <p className="text-[10px] text-text-2">Pre-configured couple automation routines</p>
+              <h4 className="text-sm font-serif font-semibold text-text-1">{t('Automations.addRoutineModule')}</h4>
+              <p className="text-[10px] text-text-2">{t('Automations.preconfigured')}</p>
             </div>
             <button
               type="button"
@@ -946,20 +948,20 @@ export default function AutomationPipelinePage() {
           <div className="space-y-2">
             {AVAILABLE_MODULES.map(mod => (
               <button
-                key={mod.title}
+                key={t('Automations.modules.' + (mod.category === 'ai' ? 'datePlanner' : mod.category === 'schedule' ? 'anniversary' : 'gratitude'))}
                 type="button"
                 onClick={() => handleAddModule(mod)}
-                className="w-full text-left p-3 rounded-2xl bg-soft-tint hover:bg-card border border-border/60 hover:border-accent-1/30 transition-all flex flex-col gap-1 group shadow-xs"
+                className="w-full min-h-11 text-left p-3 rounded-card bg-soft-tint hover:bg-card border border-border/60 hover:border-accent-1/30 transition-all flex flex-col gap-1 group shadow-xs"
               >
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-text-1 group-hover:text-accent-1 transition">
                     {mod.title}
                   </span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-card text-text-2 uppercase">
-                    {mod.category}
+                  <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-card text-text-2 uppercase">
+                    {t('Automations.categories.' + mod.category)}
                   </span>
                 </div>
-                <p className="text-[11px] text-text-2 leading-relaxed">{mod.desc}</p>
+                <p className="text-[11px] text-text-2 leading-relaxed">{t('Automations.modules.' + (mod.category === 'ai' ? 'datePlannerDescription' : mod.category === 'schedule' ? 'anniversaryDescription' : 'gratitudeDescription'))}</p>
               </button>
             ))}
           </div>
@@ -972,12 +974,12 @@ export default function AutomationPipelinePage() {
           <div className="flex items-center gap-2">
             <Activity className="h-3.5 w-3.5 text-accent-1" />
             <span className="text-[11px] font-mono uppercase tracking-wider text-text-2 font-semibold">
-              Live Pipeline Telemetry & Telegram Feed
+              {t('Automations.liveTelemetry')}
             </span>
           </div>
           <div className="flex items-center gap-2 text-[10px] font-mono text-text-2">
             <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>{isRunning ? 'PIPELINE ACTIVE' : 'SYSTEM STANDBY'}</span>
+            <span>{isRunning ? t('Automations.pipelineActive') : t('Automations.systemStandby')}</span>
           </div>
         </div>
 
@@ -988,9 +990,9 @@ export default function AutomationPipelinePage() {
               <span
                 className={`px-1.5 py-0.2 rounded font-semibold text-[10px] shrink-0 ${
                   log.type === 'success'
-                    ? 'bg-emerald-500/10 text-emerald-600'
+                    ? 'bg-success/10 text-success'
                     : log.type === 'warn'
-                    ? 'bg-amber-500/10 text-amber-600'
+                    ? 'bg-warning/10 text-warning'
                     : 'bg-accent-1/10 text-accent-1'
                 }`}
               >

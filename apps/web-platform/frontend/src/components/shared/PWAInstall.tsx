@@ -2,6 +2,7 @@
 
 import { Download, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -9,6 +10,7 @@ type BeforeInstallPromptEvent = Event & {
 }
 
 export default function PWAInstall() {
+  const { t } = useLanguage()
   const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null)
   const [isInstalled, setIsInstalled] = useState(false)
 
@@ -47,7 +49,7 @@ export default function PWAInstall() {
     <button
       type="button"
       onClick={handleInstall}
-      className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm font-medium text-text-1 shadow-[0_14px_30px_rgba(0,0,0,0.12)] transition hover:border-accent-1/40"
+      className="inline-flex min-h-11 items-center gap-2 rounded-full border border-accent-1/20 bg-card px-4 py-2 text-sm font-medium text-text-1 shadow-sm transition hover:border-accent-1/40"
     >
       <Sparkles className="h-4 w-4 text-accent-2" />
       <Download className="h-4 w-4" />

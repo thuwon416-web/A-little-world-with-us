@@ -5,6 +5,8 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Download, Image as ImageIcon } from 'lucide-react'
 import { exportPhotosAsZIP, getStorageQuotaUsage } from '@/lib/photoPipeline'
+import { useLanguage } from '@/contexts/LanguageContext'
+import { EmptyState } from '@/components/ui/empty-state'
 
 interface Photo {
   id: string
@@ -18,6 +20,8 @@ interface Props {
 }
 
 export default function PhotoExport({ photos }: Props) {
+  const { t } = useLanguage()
+  const [error, setError] = useState('')
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
   const [exporting, setExporting] = useState(false)
   const [quotaUsage, setQuotaUsage] = useState<{ usage: number; quota: number; percentUsed: number } | null>(null)
@@ -42,70 +46,69 @@ export default function PhotoExport({ photos }: Props) {
 
   const handleExport = async () => {
     if (selectedPhotos.size === 0) return
-
     setExporting(true)
-
-    const selectedPhotosData = photos.filter(p => selectedPhotos.has(p.id))
-    const zipBlob = await exportPhotosAsZIP(
-      selectedPhotosData.map(p => ({
-        url: p.url,
-        filename: p.filename,
-      }))
-    )
-
-    const url = URL.createObjectURL(zipBlob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `memories-${new Date().toISOString().split('T')[0]}.zip`
-    a.click()
-    URL.revokeObjectURL(url)
-
-    setExporting(false)
+    setError('')
+    try {
+      const selectedPhotosData = photos.filter((photo) => selectedPhotos.has(photo.id))
+      const zipBlob = await exportPhotosAsZIP(
+        selectedPhotosData.map((photo) => ({ url: photo.url, filename: photo.filename }))
+      )
+      const url = URL.createObjectURL(zipBlob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = `memories-${new Date().toISOString().split('T')[0]}.zip`
+      anchor.click()
+      URL.revokeObjectURL(url)
+    } catch (caughtError) {
+      console.error('Photo export error:', caughtError)
+      setError(t('Settings.photoExportError'))
+    } finally {
+      setExporting(false)
+    }
   }
 
   const checkQuota = async () => {
-    const usage = await getStorageQuotaUsage()
-    setQuotaUsage(usage)
+    setError('')
+    try {
+      const usage = await getStorageQuotaUsage()
+      setQuotaUsage(usage)
+    } catch (caughtError) {
+      console.error('Storage quota check error:', caughtError)
+      setError(t('Settings.quotaError'))
+    }
   }
 
   return (
     <div className="glass-card p-5">
       <h3 className="text-lg font-semibold text-text-1 mb-4 flex items-center gap-2">
         <Download className="h-5 w-5 text-accent-1" />
-        Export Photos
+        {t('Settings.photoExportTitle')}
       </h3>
 
       {/* Quota Info */}
       <div className="mb-4">
         <button
           onClick={checkQuota}
-          className="text-xs text-text-2 hover:text-text-1"
+          className="min-h-11 text-xs text-text-2 hover:text-text-1"
         >
-          Check Storage Usage
+          {t('Settings.checkStorageUsage')}
         </button>
         {quotaUsage && (
           <div className="mt-2 text-xs text-text-2">
-            Storage: {(quotaUsage.usage / 1024 / 1024).toFixed(2)} MB / {(quotaUsage.quota / 1024 / 1024).toFixed(0)} MB ({quotaUsage.percentUsed.toFixed(1)}%)
+            {t('Settings.storage')}: {(quotaUsage.usage / 1024 / 1024).toFixed(2)} MB / {(quotaUsage.quota / 1024 / 1024).toFixed(0)} MB ({quotaUsage.percentUsed.toFixed(1)}%)
           </div>
         )}
       </div>
 
       {/* Photo Grid */}
-      <div className="grid grid-cols-3 gap-2 mb-4 max-h-64 overflow-y-auto">
+      {photos.length === 0 ? <EmptyState icon={ImageIcon} title={t('Settings.noPhotosToExport')} /> : <div className="grid grid-cols-3 gap-2 mb-4 max-h-64 overflow-y-auto">
         {photos.map(photo => (
-          <div
+          <button
+            type="button"
             key={photo.id}
-            role="button"
-            tabIndex={0}
             aria-pressed={selectedPhotos.has(photo.id)}
             onClick={() => togglePhoto(photo.id)}
-            onKeyDown={(event) => {
-              if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault()
-                togglePhoto(photo.id)
-              }
-            }}
-            className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer ${
+            className={`relative aspect-square w-full overflow-hidden rounded-lg border-0 bg-transparent p-0 text-left cursor-pointer ${
               selectedPhotos.has(photo.id)
                 ? 'ring-2 ring-accent-1'
                 : 'ring-1 ring-accent-1/20'
@@ -123,27 +126,28 @@ export default function PhotoExport({ photos }: Props) {
                 <ImageIcon className="h-3 w-3" />
               </div>
             )}
-          </div>
+          </button>
         ))}
-      </div>
+      </div>}
 
+      {photos.length > 0 ? <>
       {/* Selection Controls */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
         <button
           onClick={selectAll}
-          className="text-xs text-text-2 hover:text-text-1"
+          className="min-h-11 text-xs text-text-2 hover:text-text-1"
         >
-          Select All
+          {t('Settings.selectAll')}
         </button>
         <span className="text-xs text-text-2">|</span>
         <button
           onClick={deselectAll}
-          className="text-xs text-text-2 hover:text-text-1"
+          className="min-h-11 text-xs text-text-2 hover:text-text-1"
         >
-          Deselect All
+          {t('Settings.deselectAll')}
         </button>
         <span className="text-xs text-text-2 flex-1 text-right">
-          {selectedPhotos.size} / {photos.length} selected
+          {selectedPhotos.size} / {photos.length} {t('Settings.selected')}
         </span>
       </div>
 
@@ -151,11 +155,13 @@ export default function PhotoExport({ photos }: Props) {
       <button
         onClick={handleExport}
         disabled={selectedPhotos.size === 0 || exporting}
-        className="w-full rounded-input bg-accent-1 px-4 py-2 text-sm font-medium text-white font-semibold shadow-sm disabled:opacity-50 flex items-center justify-center gap-2"
+        className="ui-button-primary min-h-11 w-full rounded-input px-4 py-2 text-sm disabled:opacity-50 flex items-center justify-center gap-2"
       >
         <Download className="h-4 w-4" />
-        {exporting ? 'Exporting...' : `Export ${selectedPhotos.size} Photos as ZIP`}
+        {exporting ? t('Settings.exporting') : `${t('Settings.exportPhotosZip')} (${selectedPhotos.size})`}
       </button>
+      </> : null}
+      {error ? <p role="alert" className="mt-3 text-sm text-error">{error}</p> : null}
     </div>
   )
 }

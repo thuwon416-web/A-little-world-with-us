@@ -52,12 +52,15 @@ export default function TicTacToe() {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-3 gap-2 w-48">
+      <div role="group" aria-label="Tic-tac-toe board" className="grid w-full max-w-48 grid-cols-3 gap-2">
         {board.map((c, i) => (
           <button
             key={i}
+            type="button"
             onClick={() => play(i)}
-            className="h-12 bg-card/80 rounded shadow flex items-center justify-center text-lg font-bold"
+            disabled={Boolean(c) || Boolean(winner)}
+            aria-label={`Row ${Math.floor(i / 3) + 1}, column ${(i % 3) + 1}: ${c ?? 'empty'}`}
+            className="flex h-12 items-center justify-center rounded bg-card/80 text-lg font-bold shadow transition hover:bg-soft-tint focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1 focus-visible:ring-offset-2 disabled:cursor-not-allowed"
           >
             {c}
           </button>
@@ -65,9 +68,9 @@ export default function TicTacToe() {
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="text-sm opacity-70">Turn: {winner ? '-' : xTurn ? 'X' : 'O'}</div>
-        {winner && <div className="font-medium">Result: {winner}</div>}
-        <button onClick={reset} className="glass-button px-3 py-1">
+        <div className="text-sm opacity-70" aria-live="polite">Turn: {winner ? '-' : xTurn ? 'X' : 'O'}</div>
+        {winner && <div className="font-medium" role="status">Result: {winner}</div>}
+        <button type="button" onClick={reset} className="glass-button rounded-btn px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-1" aria-label="Reset tic-tac-toe game">
           Reset
         </button>
       </div>

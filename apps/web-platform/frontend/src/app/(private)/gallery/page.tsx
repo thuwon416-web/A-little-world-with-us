@@ -12,8 +12,10 @@ import { deleteGalleryImage, listGalleryImages, type GalleryImage } from '@/lib/
 import { supabase } from '@/lib/supabase'
 import { getDecryptedObjectUrl, revokeDecryptedUrl } from '@/lib/mediaEncryption'
 import PhotoMediaCalendar from '@/components/shared/PhotoMediaCalendar'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function GalleryContent({ showUpload = true }: { showUpload?: boolean }) {
+  const { t } = useLanguage()
   const [images, setImages] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -37,7 +39,7 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
       setImages(decryptedItems)
       setError('')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unable to load gallery.')
+      setError(err instanceof Error ? err.message : t('Gallery.loadError'))
     } finally {
       setLoading(false)
     }
@@ -57,7 +59,7 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
     setCoupleId(activeCoupleId)
     if (activeCoupleId) await loadGallery(activeCoupleId)
     else {
-      setError('Link with your partner to see shared photos.')
+      setError(t('Gallery.linkPartner'))
       setLoading(false)
     }
   }
@@ -78,7 +80,7 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
     try {
       const isDeleted = await deleteGalleryImage(image.path, 'gallery')
       if (!isDeleted) {
-        setError('Unable to delete this image.')
+        setError(t('Gallery.deleteError'))
         return
       }
       revokeDecryptedUrl('gallery', image.path)
@@ -94,30 +96,30 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
 
   return (
     <div className={showUpload ? 'space-y-6 p-4 md:p-6' : 'space-y-4'}>
-      <div className="rounded-modal border border-accent-1/20 bg-card p-6">
-        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Our Gallery</p>
-        <h1 className="mt-2 text-xl font-serif text-text-1">Photos we keep close</h1>
+      <div className="rounded-panel border border-accent-1/20 bg-card p-6">
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">{t('Gallery.title')}</p>
+        <h1 className="mt-2 text-xl font-serif text-text-1">{t('Gallery.subtitle')}</h1>
       </div>
       {showUpload && coupleId && <ImageUpload onUpload={handleUpload} coupleId={coupleId} />}
       {error && <div className="rounded-btn border border-error/20 bg-error/10 p-4 text-sm text-error">{error}</div>}
-      {loading ? <><GallerySkeleton /><LoadingState label="Fetching gallery..." /></> : images.length === 0 ? (
-        <EmptyState icon={ImageIcon} title="Your gallery is ready for its first photo" description="Add a memory to begin building your shared gallery." action={{ label: 'Add your first memory', onClick: () => router.push('/memories') }} />
+      {loading ? <><GallerySkeleton /><LoadingState label={t('Gallery.loading')} /></> : images.length === 0 ? (
+        <EmptyState icon={ImageIcon} title={t('Gallery.noFirstPhoto')} description={t('Gallery.firstPhotoDescription')} action={{ label: t('Gallery.addFirstMemory'), onClick: () => router.push('/memories') }} />
       ) : <>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <p className="text-sm text-text-2">{visibleImages.length} photos</p>
+            <p className="text-sm text-text-2">{visibleImages.length} {t('Gallery.photos')}</p>
             <div className="inline-flex rounded-full border border-accent-1/20 p-0.5 bg-card">
               <button
                 type="button"
                 onClick={() => setViewMode('grid')}
-                className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
+                className={`inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition ${
                   viewMode === 'grid'
                     ? 'bg-accent-1 text-white font-semibold shadow-sm shadow-sm'
                     : 'text-text-2 hover:text-text-1'
                 }`}
               >
                 <LayoutGrid className="h-3.5 w-3.5" />
-                <span>Grid</span>
+                <span>{t('Gallery.grid')}</span>
               </button>
               <button
                 type="button"
@@ -129,20 +131,20 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
                 }`}
               >
                 <CalendarIcon className="h-3.5 w-3.5" />
-                <span>Calendar</span>
+                <span>{t('Gallery.calendar')}</span>
               </button>
             </div>
           </div>
           {viewMode === 'grid' && (
             <label className="flex items-center gap-2 text-sm text-text-2">
-              <span>Year</span>
+              <span>{t('Gallery.year')}</span>
               <select
                 value={yearFilter}
                 onChange={(event) => setYearFilter(event.target.value)}
-                className="rounded-full border border-accent-1/20 bg-card px-3 py-2 text-text-1"
-                aria-label="Filter gallery by year"
+                className="min-h-11 rounded-full border border-accent-1/20 bg-card px-3 py-2 text-text-1"
+                aria-label={t('Gallery.filterYear')}
               >
-                <option value="all">All years</option>
+                <option value="all">{t('Gallery.allYears')}</option>
                 {years.map((year) => (
                   <option key={year} value={year}>
                     {year}
@@ -157,15 +159,15 @@ export default function GalleryContent({ showUpload = true }: { showUpload?: boo
           <PhotoMediaCalendar coupleId={coupleId} />
         ) : (
           <>
-            {visibleImages.length === 0 ? <p className="rounded-btn border border-dashed border-border bg-card p-6 text-center text-text-2">No photos from this year.</p> : null}
+            {visibleImages.length === 0 ? <p className="rounded-btn border border-dashed border-border bg-card p-6 text-center text-text-2">{t('Gallery.noPhotosYear')}</p> : null}
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
               {visibleImages.map((image) => (
-                <div key={image.id} className="overflow-hidden rounded-btn border border-border bg-card shadow-[0_18px_40px_rgba(0,0,0,0.14)]">
-                  <Image src={image.url} alt={`Shared photo from ${new Date(image.created_at).toLocaleDateString()}`} width={256} height={256} unoptimized className="h-36 w-full object-cover sm:h-40 lg:h-44" />
+                <div key={image.id} className="overflow-hidden rounded-card border border-border bg-card shadow-sm">
+                  <Image src={image.url} alt={`${t('Gallery.title')} · ${new Date(image.created_at).toLocaleDateString()}`} width={256} height={256} unoptimized className="h-36 w-full object-cover sm:h-40 lg:h-44" />
                   <div className="flex items-center justify-between gap-3 p-4">
                     <span className="text-xs uppercase tracking-[0.16em] text-text-2">{new Date(image.created_at).toLocaleDateString()}</span>
                     {image.ownerId === currentUserId && (
-                      <button type="button" onClick={() => void handleDelete(image)} className="rounded-pill border border-error/30 bg-error/10 px-3 py-1 text-xs font-medium text-error">
+                      <button type="button" onClick={() => void handleDelete(image)} className="min-h-11 min-w-11 rounded-pill border border-error/30 bg-error/10 px-3 py-1 text-xs font-medium text-error">
                         Delete
                       </button>
                     )}

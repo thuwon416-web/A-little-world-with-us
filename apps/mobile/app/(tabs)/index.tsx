@@ -34,6 +34,7 @@ import OnThisDay from '@/components/dashboard/OnThisDay'
 import OurStats from '@/components/dashboard/OurStats'
 import { ConnectedCoupleAvatars } from '@/components/ConnectedCoupleAvatars'
 import { useTheme } from '@/context/ThemeContext'
+import { useTranslation } from '@/i18n/useTranslation'
 import type { ThemeColors } from '@/context/ThemeContext'
 import { sizes, type Sizes } from '@/design-tokens'
 import { supabase } from '@/lib/supabase'
@@ -51,45 +52,31 @@ import {
 
 type CareData = { logs: CareLog[]; settings: CareSettings }
 
-const FOCUS_ITEMS = [
-  'Slow down and enjoy the quiet rhythm of us.',
-  'Make space for a little softness and calm today.',
-  'Choose gentleness, even in the smallest moments.',
-  'Be extra present with each other today.',
-  'Hold each other with patience and warmth.',
-]
-
-const RITUAL_ITEMS = [
-  'Share one thing that made your heart feel full today.',
-  'Hold hands for a minute without talking.',
-  'Send a warm voice note or sweet message.',
-  'Take a slow walk and notice one beautiful thing together.',
-  'Make tea or coffee and sit in the same quiet moment.',
-]
-
-function getDailyFocus(): string {
-  return FOCUS_ITEMS[new Date().getDate() % FOCUS_ITEMS.length]
+function getDailyFocus(t: (key: string) => string): string {
+  const key = ['one', 'two', 'three', 'four', 'five'][new Date().getDate() % 5]
+  return t(`dashboard.focusItems.${key}`)
 }
 
-function getLittleRitual(): string {
-  return RITUAL_ITEMS[new Date().getDate() % RITUAL_ITEMS.length]
+function getLittleRitual(t: (key: string) => string): string {
+  const key = ['one', 'two', 'three', 'four', 'five'][new Date().getDate() % 5]
+  return t(`dashboard.ritualItems.${key}`)
 }
 
 const quickActions = [
-  { label: 'Love Note', icon: Heart, route: '/chat' },
-  { label: 'Log Mood', icon: Smile, route: '/care' },
-  { label: 'Add Memory', icon: ImageIcon, route: '/memories' },
-  { label: 'Start Timer', icon: Clock3, route: '/wellness' },
-  { label: 'Calendar', icon: CalendarDays, route: '/plans' },
-  { label: 'Open Chat', icon: MessageCircle, route: '/chat' },
+  { key: 'loveNote', icon: Heart, route: '/chat' },
+  { key: 'logMood', icon: Smile, route: '/care' },
+  { key: 'addMemory', icon: ImageIcon, route: '/memories' },
+  { key: 'startTimer', icon: Clock3, route: '/wellness' },
+  { key: 'calendar', icon: CalendarDays, route: '/plans' },
+  { key: 'openChat', icon: MessageCircle, route: '/chat' },
 ] as const
 
 const widgetLabels: Record<DashboardWidgetId, string> = {
-  'days-counter': 'Days Together',
-  countdown: 'Countdown',
-  'memory-of-the-day': 'Memory of the Day',
-  'mini-care-check': 'Mini Care Check',
-  'music-player': 'Music Player',
+  'days-counter': 'dashboard.widgets.daysTogether',
+  countdown: 'dashboard.widgets.countdown',
+  'memory-of-the-day': 'dashboard.widgets.memoryOfDay',
+  'mini-care-check': 'dashboard.widgets.miniCare',
+  'music-player': 'dashboard.widgets.musicPlayer',
 }
 
 function dateOnly(value: Date) {
@@ -127,6 +114,8 @@ function StatCard({ title, value }: { readonly title: string; readonly value: nu
 // Pass the couple's start date ISO string; renders a romantic day counter.
 // No network calls needed -- pure date math.
 function DaysTogetherBanner({ startDateISO }: { startDateISO: string | null }) {
+  const { colors } = useTheme()
+  const { t } = useTranslation()
   if (!startDateISO) return null;
   const start = new Date(startDateISO);
   if (isNaN(start.getTime())) return null;
@@ -134,9 +123,9 @@ function DaysTogetherBanner({ startDateISO }: { startDateISO: string | null }) {
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   if (days < 0) return null;
   return (
-    <View style={daysBannerSt.container}>
-      <Text style={daysBannerSt.days}>{days}</Text>
-      <Text style={daysBannerSt.label}>days together</Text>
+    <View style={[daysBannerSt.container, { backgroundColor: colors.cardBg, borderColor: colors.cardBorder }]}>
+      <Text style={[daysBannerSt.days, { color: colors.accent1 }]}>{days}</Text>
+      <Text style={[daysBannerSt.label, { color: colors.textSecondary }]}>{t('dashboard.daysTogether')}</Text>
     </View>
   );
 }
@@ -147,18 +136,19 @@ const daysBannerSt = StyleSheet.create({
     marginHorizontal: 16,
     marginBottom: 12,
     borderRadius: 16,
-    backgroundColor: 'rgba(236,72,153,0.10)',
+    backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(236,72,153,0.22)',
+    borderColor: 'transparent',
   },
-  days:  { fontSize: 36, fontWeight: '800', color: '#ec4899' },
-  label: { fontSize: 13, color: '#f9a8d4', marginTop: 2, fontWeight: '500' },
+  days:  { fontSize: 36, fontWeight: '800' },
+  label: { fontSize: 13, marginTop: 2, fontWeight: '500' },
 });
 
 
 export default function DashboardScreen() {
   const router = useRouter()
   const { colors } = useTheme()
+  const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const styles = useMemo(() => createStyles(colors, sizes), [colors])
   const [dashboard, setDashboard] = useState<DashboardData | null>(null)
@@ -227,11 +217,11 @@ export default function DashboardScreen() {
         }
       }
     } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Unable to load your dashboard.')
+      setError(t('dashboard.unavailable'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   const handleStreakCheckIn = async () => {
     if (!coupleId || streakCheckingIn || streakCheckedInToday) return
@@ -285,25 +275,25 @@ export default function DashboardScreen() {
     nextPeriodDays === null
       ? null
       : nextPeriodDays === 0
-        ? 'Period expected today'
+        ? t('dashboard.periodExpectedToday')
         : nextPeriodDays < 0
-          ? `Period overdue by ${Math.abs(nextPeriodDays)} days`
-          : `Next period in ${nextPeriodDays} days`
+          ? t('dashboard.periodOverdue').replace('{count}', String(Math.abs(nextPeriodDays)))
+          : t('dashboard.nextPeriodIn').replace('{count}', String(nextPeriodDays))
   const countdown =
     nextPeriodText && nextPeriodDays !== null && anniversaryDays !== null && nextPeriodDays < anniversaryDays
       ? nextPeriodText
       : anniversaryDays !== null
-        ? `${anniversaryDays} days until Anniversary`
-        : 'Add your anniversary to start a countdown'
+        ? `${anniversaryDays} ${t('dashboard.untilAnniversary')}`
+        : t('dashboard.addAnniversary')
   const yearsTogether = dashboard?.anniversary
     ? Math.max(0, new Date().getFullYear() - new Date(`${dashboard.anniversary}T12:00:00`).getFullYear())
     : 0
-  const todaysFocus = getDailyFocus()
-  const littleRitual = getLittleRitual()
+  const todaysFocus = getDailyFocus(t)
+  const littleRitual = getLittleRitual(t)
   const updateLayout = (next: DashboardLayout) => {
     setDashboardLayout(next)
     void saveDashboardLayout(next).catch((error_) =>
-      setLayoutError(error_ instanceof Error ? error_.message : 'Unable to save dashboard layout.')
+      setLayoutError(t('dashboard.layoutSaveFailed'))
     )
   }
   const moveWidget = (id: DashboardWidgetId, direction: -1 | 1) => {
@@ -318,18 +308,18 @@ export default function DashboardScreen() {
     if (id === 'days-counter') {
       return (
         <View style={styles.heroCard}>
-          <Text style={styles.heroLabel}>DAYS TOGETHER</Text>
+          <Text style={styles.heroLabel}>{t('dashboard.widgets.daysTogether').toUpperCase()}</Text>
           <Text style={styles.heroValue}>{calculateDaysTogether()}</Text>
-          <Text style={styles.heroText}>days of choosing each other</Text>
+          <Text style={styles.heroText}>{t('dashboard.daysOfChoosing')}</Text>
         </View>
       )
     }
     if (id === 'countdown') {
       return (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Countdown</Text>
+          <Text style={styles.cardTitle}>{t('dashboard.widgets.countdown')}</Text>
           <Text style={styles.countdown}>{countdown}</Text>
-          <Text style={styles.muted}>Your next meaningful date, gently held.</Text>
+          <Text style={styles.muted}>{t('dashboard.subtitle')}</Text>
         </View>
       )
     }
@@ -337,10 +327,10 @@ export default function DashboardScreen() {
       return (
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.cardTitle}>Memory of the day</Text>
+            <Text style={styles.cardTitle}>{t('dashboard.widgets.memoryOfDay')}</Text>
             <TouchableOpacity
               accessibilityRole="button"
-              accessibilityLabel="Refresh memory of the day"
+              accessibilityLabel={t('dashboard.memoryRefresh')}
               onPress={() => void load()}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
@@ -351,10 +341,10 @@ export default function DashboardScreen() {
             <Image source={{ uri: dashboard.memory.image_url }} style={styles.memoryImage} />
           ) : null}
           <Text style={styles.memoryTitle}>
-            {dashboard?.memory?.title ?? 'A new memory is waiting'}
+            {dashboard?.memory?.title ?? t('dashboard.newMemory')}
           </Text>
           <Text style={styles.muted}>
-            {dashboard?.memory?.caption ?? 'Add a memory to make this space yours.'}
+            {dashboard?.memory?.caption ?? t('dashboard.addMemory')}
           </Text>
         </View>
       )
@@ -362,19 +352,19 @@ export default function DashboardScreen() {
     if (id === 'mini-care-check') {
       return (
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Mini Care check</Text>
+          <Text style={styles.cardTitle}>{t('dashboard.miniCare')}</Text>
           <Text style={styles.careValue}>
-            {summary?.day ? `Cycle day ${summary.day}` : 'No cycle day yet'}
+            {summary?.day ? `${t('dashboard.cycleDay')} ${summary.day}` : t('dashboard.noCycleDay')}
           </Text>
-          <Text style={styles.muted}>{nextPeriodText ?? 'Log a period to begin forecasting.'}</Text>
+          <Text style={styles.muted}>{nextPeriodText ?? t('dashboard.logPeriod')}</Text>
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel="Open Care"
+            accessibilityLabel={t('dashboard.openCare')}
             style={styles.secondaryButton}
             onPress={() => router.push('/care')}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={styles.secondaryText}>Open Care</Text>
+            <Text style={styles.secondaryText}>{t('dashboard.openCare')}</Text>
           </TouchableOpacity>
         </View>
       )
@@ -382,25 +372,25 @@ export default function DashboardScreen() {
     return (
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>Our playlist</Text>
+          <Text style={styles.cardTitle}>{t('dashboard.playlist')}</Text>
           <TouchableOpacity
             accessibilityRole="button"
-            accessibilityLabel="Open Music"
+            accessibilityLabel={t('dashboard.openMusic')}
             onPress={() => router.push('/music')}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Text style={styles.link}>Open Music</Text>
+            <Text style={styles.link}>{t('dashboard.openMusic')}</Text>
           </TouchableOpacity>
         </View>
         <Text style={styles.musicTitle}>
-          {dashboard?.playlistSong?.title ?? 'Add your first shared song'}
+          {dashboard?.playlistSong?.title ?? t('dashboard.addSong')}
         </Text>
         <Text style={styles.muted}>
-          {dashboard?.playlistSong?.artist ?? 'A soundtrack for your little world.'}
+          {dashboard?.playlistSong?.artist ?? t('dashboard.soundtrack')}
         </Text>
         <TouchableOpacity
           accessibilityRole="button"
-          accessibilityLabel={playing ? 'Pause playlist' : 'Play playlist'}
+          accessibilityLabel={playing ? t('dashboard.pause') : t('dashboard.play')}
           style={styles.playButton}
           onPress={() => {
             setPlaying((value) => !value)
@@ -412,11 +402,11 @@ export default function DashboardScreen() {
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
           {playing ? (
-            <Pause color={colors.background} size={18} />
+            <Pause color={colors.accentForeground} size={18} />
           ) : (
-            <Play color={colors.background} size={18} />
+            <Play color={colors.accentForeground} size={18} />
           )}
-          <Text style={styles.primaryText}>{playing ? 'Pause' : 'Play'}</Text>
+          <Text style={styles.primaryText}>{playing ? t('dashboard.pause') : t('dashboard.play')}</Text>
         </TouchableOpacity>
       </View>
     )
@@ -426,21 +416,21 @@ export default function DashboardScreen() {
     return (
       <View style={styles.center}>
         <RefreshCw color={colors.accent2} size={24} />
-        <Text style={styles.muted}>Loading your little world...</Text>
+        <Text style={styles.muted}>{t('dashboard.loading')}</Text>
       </View>
     )
   if (!dashboard || !care || !summary)
     return (
       <View style={styles.center}>
-        <Text style={styles.error}>{error ?? 'Dashboard data is unavailable.'}</Text>
+        <Text style={styles.error}>{error ?? t('dashboard.unavailable')}</Text>
         <TouchableOpacity
           accessibilityRole="button"
-          accessibilityLabel="Retry loading dashboard"
+          accessibilityLabel={t('dashboard.retry')}
           accessibilityHint="Loads the dashboard data again"
           style={styles.primaryButton}
           onPress={() => void load()}
         >
-          <Text style={styles.primaryText}>Retry</Text>
+          <Text style={styles.primaryText}>{t('dashboard.retry')}</Text>
         </TouchableOpacity>
       </View>
     )
@@ -449,9 +439,9 @@ export default function DashboardScreen() {
     <ScrollView contentContainerStyle={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.heroRow}>
         <View style={styles.heroTextWrap}>
-          <Text style={styles.eyebrow}>Love dashboard</Text>
+          <Text style={styles.eyebrow}>{t('dashboard.loveDashboard')}</Text>
           <Text style={styles.title}>{dashboard.coupleName}</Text>
-          <Text style={styles.subtitle}>Today is a good day to notice the little things.</Text>
+          <Text style={styles.subtitle}>{t('dashboard.subtitle')}</Text>
         </View>
         <ConnectedCoupleAvatars
           size="lg"
@@ -473,15 +463,15 @@ export default function DashboardScreen() {
         <View style={styles.streakLeft}>
           <Flame color={colors.accent1} size={18} />
           <Text style={[styles.streakCount, { color: colors.textPrimary }]}>
-            {streak} {streak === 1 ? 'day' : 'days'} streak
+            {streak} {streak === 1 ? t('dashboard.streakDay') : t('dashboard.streakDays')}
           </Text>
         </View>
         <Text style={[styles.streakAction, { color: colors.accent1 }]}>
           {streakCheckedInToday
-            ? 'Checked in today ❤️'
+            ? `${t('dashboard.checkedInToday')} ❤️`
             : streakCheckingIn
-              ? 'Checking in…'
-              : 'Tap to check-in ❤️'}
+              ? t('dashboard.checkingIn')
+              : `${t('dashboard.tapToCheckIn')} ❤️`}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -490,7 +480,7 @@ export default function DashboardScreen() {
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Settings2 color={colors.accent1} size={18} />
-        <Text style={[styles.customizeText, { color: colors.textPrimary }]}>Customize home</Text>
+        <Text style={[styles.customizeText, { color: colors.textPrimary }]}>{t('dashboard.customizeHome')}</Text>
       </TouchableOpacity>
       <View
         style={[
@@ -498,7 +488,7 @@ export default function DashboardScreen() {
           { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
         ]}
       >
-        <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>TODAY&apos;S FOCUS</Text>
+        <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('dashboard.focus').toUpperCase()}</Text>
         <Text style={[styles.infoText, { color: colors.textPrimary }]}>{todaysFocus}</Text>
       </View>
       <View
@@ -507,7 +497,7 @@ export default function DashboardScreen() {
           { backgroundColor: colors.cardBg, borderColor: colors.cardBorder },
         ]}
       >
-        <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>LITTLE RITUAL</Text>
+        <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>{t('dashboard.ritual').toUpperCase()}</Text>
         <Text style={[styles.infoText, { color: colors.textPrimary }]}>{littleRitual}</Text>
       </View>
       {dashboardLayout.order
@@ -516,48 +506,48 @@ export default function DashboardScreen() {
           <View key={id}>{renderWidget(id)}</View>
         ))}
       {coupleId ? <OnThisDay coupleId={coupleId} /> : null}
-      <Text style={styles.sectionTitle}>Relationship stats</Text>
+      <Text style={styles.sectionTitle}>{t('dashboard.relationshipStats')}</Text>
       <View style={styles.stats}>
-        <StatCard title="Messages" value={dashboard.messageCount} />
-        <StatCard title="Memories" value={dashboard.memoryCount} />
-        <StatCard title="Vault" value={dashboard.vaultCount} />
-        <StatCard title="Longest streak" value={dashboard.longestStreak} />
+        <StatCard title={t('dashboard.stats.messages')} value={dashboard.messageCount} />
+        <StatCard title={t('dashboard.stats.memories')} value={dashboard.memoryCount} />
+        <StatCard title={t('dashboard.stats.vault')} value={dashboard.vaultCount} />
+        <StatCard title={t('dashboard.stats.longestStreak')} value={dashboard.longestStreak} />
       </View>
       {coupleId ? <OurStats coupleId={coupleId} /> : null}
-      <Text style={styles.sectionTitle}>Quick actions</Text>
+      <Text style={styles.sectionTitle}>{t('dashboard.quickActions')}</Text>
       <View style={styles.actions}>
-        {quickActions.map(({ label, icon: Icon, route }) => (
+        {quickActions.map(({ key, icon: Icon, route }) => (
           <TouchableOpacity
-            key={label}
+            key={key}
             accessibilityRole="button"
-            accessibilityLabel={label}
-            accessibilityHint={`Opens ${label}`}
+            accessibilityLabel={t(`dashboard.actions.${key}`)}
+            accessibilityHint={t('dashboard.openAction')}
             style={styles.action}
             onPress={() => router.push(route)}
           >
             <Icon color={colors.accent1} size={22} />
-            <Text style={styles.actionText}>{label}</Text>
+            <Text style={styles.actionText}>{t(`dashboard.actions.${key}`)}</Text>
           </TouchableOpacity>
         ))}
       </View>
       <View style={styles.shareCard}>
-        <Text style={styles.cardTitle}>Anniversary</Text>
-        <Text style={styles.anniversary}>{yearsTogether} years together</Text>
+        <Text style={styles.cardTitle}>{t('dashboard.anniversary')}</Text>
+        <Text style={styles.anniversary}>{yearsTogether} {t('dashboard.yearsTogether')}</Text>
         <Text style={styles.muted}>
-          {dashboard.anniversary ? `Every ${dashboard.anniversary.slice(5)} · ${anniversaryDays} days until the next one` : 'Set your anniversary in couple settings to see the countdown.'}
+          {dashboard.anniversary ? t('dashboard.anniversaryDateLine').replace('{date}', dashboard.anniversary.slice(5)).replace('{days}', String(anniversaryDays ?? 0)) : t('dashboard.setAnniversary')}
         </Text>
         <TouchableOpacity
           accessibilityRole="button"
-          accessibilityLabel="Share our love"
+          accessibilityLabel={t('dashboard.shareOurLove')}
           accessibilityHint="Opens the device sharing options"
           style={styles.secondaryButton}
           onPress={() =>
             void Share.share({
-              message: `Celebrating ${yearsTogether} years together with ${dashboard.coupleName}.`,
+              message: t('dashboard.shareMessage').replace('{years}', String(yearsTogether)).replace('{name}', dashboard.coupleName),
             })
           }
         >
-          <Text style={styles.secondaryText}>Share our love</Text>
+          <Text style={styles.secondaryText}>{t('dashboard.shareOurLove')}</Text>
         </TouchableOpacity>
       </View>
       <Modal
@@ -569,10 +559,10 @@ export default function DashboardScreen() {
         <View style={styles.modalBackdrop}>
           <View style={[styles.customizeModal, { backgroundColor: colors.cardBg }]}>
             <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>Customize home</Text>
+              <Text style={[styles.modalTitle, { color: colors.textPrimary }]}>{t('dashboard.customizeHome')}</Text>
               <TouchableOpacity
                 onPress={() => setCustomizing(false)}
-                accessibilityLabel="Close customization"
+                accessibilityLabel={t('dashboard.closeCustomization')}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <X color={colors.textPrimary} size={22} />
@@ -602,20 +592,20 @@ export default function DashboardScreen() {
                   <Text
                     style={{
                       color: dashboardLayout.visibility[id]
-                        ? colors.background
+                        ? colors.accentForeground
                         : colors.textSecondary,
                     }}
                   >
-                    {dashboardLayout.visibility[id] ? 'Shown' : 'Hidden'}
+                    {dashboardLayout.visibility[id] ? t('dashboard.shown') : t('dashboard.hidden')}
                   </Text>
                 </TouchableOpacity>
                 <Text style={[styles.widgetLabel, { color: colors.textPrimary }]}>
-                  {widgetLabels[id]}
+                  {t(widgetLabels[id])}
                 </Text>
                 <TouchableOpacity
                   onPress={() => moveWidget(id, -1)}
                   disabled={index === 0}
-                  accessibilityLabel={`Move ${widgetLabels[id]} up`}
+                  accessibilityLabel={`${t('dashboard.moveWidgetUp')}: ${t(widgetLabels[id])}`}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <ChevronUp
@@ -626,7 +616,7 @@ export default function DashboardScreen() {
                 <TouchableOpacity
                   onPress={() => moveWidget(id, 1)}
                   disabled={index === dashboardLayout.order.length - 1}
-                  accessibilityLabel={`Move ${widgetLabels[id]} down`}
+                  accessibilityLabel={`${t('dashboard.moveWidgetDown')}: ${t(widgetLabels[id])}`}
                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 >
                   <ChevronDown
@@ -692,8 +682,8 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderColor: `${colors.accent1}66`,
       alignItems: 'center',
     },
-    heroLabel: { color: colors.accent2, fontSize: sizes.text.xs, letterSpacing: 1.6 },
-    heroValue: { color: colors.accent3, fontSize: 42, fontWeight: '800', marginTop: 6 },
+    heroLabel: { color: colors.textSecondary, fontSize: sizes.text.xs, letterSpacing: 1.6 },
+    heroValue: { color: colors.accent1, fontSize: 42, fontWeight: '800', marginTop: 6 },
     heroText: { color: colors.textPrimary, fontSize: sizes.text.body },
     infoCard: {
       borderWidth: 1,
@@ -755,7 +745,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
     cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
     cardTitle: { color: colors.textPrimary, fontSize: sizes.text.bodyLg, fontWeight: '800' },
     countdown: {
-      color: colors.accent3,
+      color: colors.accent1,
       fontSize: sizes.text.hMd,
       fontWeight: '800',
       marginTop: 12,
@@ -780,7 +770,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       marginTop: 12,
     },
     anniversary: {
-      color: colors.accent3,
+      color: colors.accent1,
       fontSize: sizes.text.hMd,
       fontWeight: '800',
       marginTop: 10,
@@ -793,7 +783,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       paddingVertical: 12,
       borderRadius: sizes.radius.input,
     },
-    primaryText: { color: colors.background, fontWeight: '800' },
+    primaryText: { color: colors.accentForeground, fontWeight: '800' },
     secondaryButton: {
       alignSelf: 'flex-start',
       backgroundColor: colors.accent2,
@@ -802,7 +792,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       borderRadius: sizes.radius.input,
       marginTop: 14,
     },
-    secondaryText: { color: colors.background, fontWeight: '800' },
+    secondaryText: { color: colors.textPrimary, fontWeight: '800' },
     playButton: {
       flexDirection: 'row',
       alignItems: 'center',

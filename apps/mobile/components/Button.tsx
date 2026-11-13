@@ -19,6 +19,9 @@ export function Button({ title, onPress }: ButtonProps) {
 const styles = StyleSheet.create({
   button: {
     borderRadius: 999,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
   },

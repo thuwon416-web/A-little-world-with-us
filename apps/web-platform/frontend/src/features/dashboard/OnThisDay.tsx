@@ -3,11 +3,13 @@
 
 import { BookHeart, Cake, Camera, Heart, HeartCrack, Handshake, MessageCircle, Sparkles, Star, type LucideIcon } from 'lucide-react'
 import { memo, useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { EmptyState } from '@/components/ui/empty-state'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
 import { supabase, type Memory } from '@/lib/supabase'
 import type { RelationshipMemory } from '@/shared-types'
 import { getCachedDecryptedUrl } from '@/lib/mediaEncryption'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 function isExternalUrl(v?: string | null) {
   return !!v && (v.startsWith('http://') || v.startsWith('https://'))
@@ -40,6 +42,8 @@ type UnifiedMemory = {
 }
 
 function OnThisDay({ coupleId }: { coupleId: string }) {
+  const router = useRouter()
+  const { t } = useLanguage()
   const [memories, setMemories] = useState<UnifiedMemory[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -95,7 +99,7 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
             return {
               source: 'photo',
               id: memory.id,
-              title: memory.title ?? memory.caption ?? 'A memory together',
+              title: memory.title ?? memory.caption ?? t('dashboard.memoryTogether'),
               date: memory.date,
               yearsAgo: yearsAgo(memory.date),
               imageUrl,
@@ -118,15 +122,16 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
 
   return (
     <section className="glass-card dashboard-panel rounded-btn p-6">
-      <p className="dashboard-kicker">On This Day</p>
+      <p className="dashboard-kicker">{t('dashboard.onThisDay')}</p>
       {loading ? (
         <div className="mt-3 h-20 animate-pulse rounded-btn bg-card" />
       ) : memories.length === 0 ? (
         <div className="mt-3">
           <EmptyState
             icon={BookHeart}
-            title="No memories from this day yet"
-            description="Add more shared moments to keep the timeline alive."
+            title={t('dashboard.noMemoriesYet')}
+            description={t('dashboard.noMemoriesToday')}
+            action={{ label: t('dashboard.quickActionsMenu.addMemory'), onClick: () => router.push("/memories") }}
           />
         </div>
       ) : (
@@ -134,7 +139,7 @@ function OnThisDay({ coupleId }: { coupleId: string }) {
           {visibleMemories.map((memory) => (
             <article key={memory.id} className="border-l-2 border-accent-1/40 pl-3">
               <p className="text-xs text-text-2">
-                  {memory.yearsAgo} years ago today
+                  {t('dashboard.yearsAgoToday').replace('{years}', String(memory.yearsAgo))}
               </p>
               {(() => {
                   const Icon = memory.source === 'photo' ? Camera : icons[memory.category ?? ''] ?? MessageCircle

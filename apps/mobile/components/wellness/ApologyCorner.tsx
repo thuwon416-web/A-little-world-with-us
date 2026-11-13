@@ -90,8 +90,7 @@ const createStyles = (colors: ThemeColors) =>
       paddingVertical: 12,
       alignItems: 'center',
     },
-    buttonText: {
-      color: colors.background,
+    buttonText: { color: colors.accentForeground,
       fontWeight: '700',
       fontSize: 14,
     },

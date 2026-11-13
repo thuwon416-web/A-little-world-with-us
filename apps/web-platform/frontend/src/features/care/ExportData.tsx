@@ -2,15 +2,17 @@
 
 import { Download } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type CsvRow = Record<string, unknown>
 
 export default function ExportData() {
+  const { t } = useLanguage()
   const handleExport = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
-        alert('Please log in to export data')
+        alert(t('Settings.loginToExport'))
         return
       }
 
@@ -22,7 +24,7 @@ export default function ExportData() {
         .order('log_date', { ascending: false })
 
       if (!logs || logs.length === 0) {
-        alert('No data to export')
+        alert(t('Settings.noDataToExport'))
         return
       }
 
@@ -40,7 +42,7 @@ export default function ExportData() {
 
     } catch (error) {
       console.error('Export error:', error)
-      alert('Failed to export data')
+      alert(t('Settings.exportDataError'))
     }
   }
 
@@ -59,12 +61,12 @@ export default function ExportData() {
 
   return (
     <div className="p-4 bg-soft-tint/20 rounded-lg">
-      <h3 className="font-medium mb-2">Export Data</h3>
-      <p className="text-sm text-gray-400 mb-3">Download your care data as CSV</p>
+      <h3 className="font-medium mb-2">{t('Settings.exportDataTitle')}</h3>
+      <p className="text-sm text-text-2 mb-3">{t('Settings.exportDataDescription')}</p>
       <button
         type="button"
         onClick={handleExport}
-        className="px-4 py-2 bg-accent-1 hover:bg-accent-1/90 text-white font-semibold shadow-sm rounded-lg text-sm transition"
+        className="ui-button-primary min-h-11 px-4 py-2 text-sm transition"
       >
         <Download className="mr-2 inline h-4 w-4" /> Download CSV
       </button>

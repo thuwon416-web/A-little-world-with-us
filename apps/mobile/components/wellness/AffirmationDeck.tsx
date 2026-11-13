@@ -109,7 +109,7 @@ const createStyles = (colors: ThemeColors) =>
     },
     pillText: {
       color: colors.textPrimary,
-      fontSize: 9,
+      fontSize: 12,
       letterSpacing: 1.2,
       textTransform: 'uppercase',
     },
@@ -120,8 +120,8 @@ const createStyles = (colors: ThemeColors) =>
       padding: 12,
     },
     featureLabel: {
-      color: colors.accent2,
-      fontSize: 11,
+      color: colors.textSecondary,
+      fontSize: 12,
       letterSpacing: 1.3,
       textTransform: 'uppercase',
       marginBottom: 6,

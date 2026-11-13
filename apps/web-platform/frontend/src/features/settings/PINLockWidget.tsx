@@ -3,6 +3,7 @@
 import { useId, useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { Lock, X } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 export default function PINLockWidget({
   modalBlocked,
@@ -19,6 +20,7 @@ export default function PINLockWidget({
   const [pin, setPin] = useState('')
   const [confirmPin, setConfirmPin] = useState('')
   const [error, setError] = useState('')
+  const { t } = useLanguage()
   const pinInputId = useId()
   const confirmPinInputId = useId()
 
@@ -40,7 +42,7 @@ export default function PINLockWidget({
           body: JSON.stringify({ action: 'status' }),
         })
         const result = await response.json() as { hasPIN?: boolean; error?: string }
-        if (!response.ok) throw new Error(result.error || 'Unable to load PIN status')
+        if (!response.ok) throw new Error(result.error || t('Settings.loadPINError'))
         setHasPin(Boolean(result.hasPIN))
       } catch (error_) {
         setError(error_ instanceof Error ? error_.message : 'Unable to load PIN status')
@@ -57,11 +59,11 @@ export default function PINLockWidget({
 
   const handleSetPIN = async () => {
     if (!/^\d{4,6}$/.test(pin)) {
-      setError('PIN must be 4 to 6 digits')
+      setError(t('Settings.pinDigitsError'))
       return
     }
     if (pin !== confirmPin) {
-      setError('PINs do not match')
+      setError(t('Settings.pinMismatch'))
       return
     }
 
@@ -73,7 +75,7 @@ export default function PINLockWidget({
       })
       const result = await response.json() as { error?: string }
       if (!response.ok) {
-        setError(result.error || 'Failed to save PIN')
+        setError(result.error || t('Settings.savePINError'))
         return
       }
       setHasPin(true)
@@ -84,8 +86,8 @@ export default function PINLockWidget({
   }
 
   const handleRemovePIN = async () => {
-    if (!window.confirm('Are you sure you want to remove PIN lock?')) return
-    const current = window.prompt('Enter your current PIN to remove PIN lock.') ?? ''
+    if (!window.confirm(t('Settings.removePINConfirm'))) return
+    const current = window.prompt(t('Settings.enterCurrentPIN')) ?? ''
     if (!/^\d{4,6}$/.test(current)) return
 
     try {
@@ -96,7 +98,7 @@ export default function PINLockWidget({
       })
       const result = await response.json() as { error?: string }
       if (!response.ok) {
-        setError(result.error || 'Failed to remove PIN')
+        setError(result.error || t('Settings.removePINError'))
         return
       }
       setHasPin(false)
@@ -125,12 +127,12 @@ export default function PINLockWidget({
       <div className="my-8 w-full max-w-sm rounded-modal border border-accent-1/20 bg-card/95 p-6 shadow-2xl backdrop-blur-xl">
         <div className="mb-5 flex items-center justify-between gap-4">
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-text-2">Private protection</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-text-2">{t('Settings.privateProtection')}</p>
             <h3 id="pin-lock-title" className="mt-1 text-lg font-semibold text-text-1">
-              {hasPin ? 'Change PIN' : 'Set PIN'}
+              {hasPin ? t('Settings.changePIN') : t('Settings.setPIN')}
             </h3>
           </div>
-          <button type="button" onClick={closeModal} className="rounded-full p-2 text-text-2 transition hover:bg-soft-tint hover:text-text-1" aria-label="Close PIN setup">
+          <button type="button" onClick={closeModal} className="min-h-11 min-w-11 rounded-full p-2 text-text-2 transition hover:bg-soft-tint hover:text-text-1" aria-label={t('Settings.closePINSetup')}>
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -138,7 +140,7 @@ export default function PINLockWidget({
         <div className="space-y-4">
           {hasPin ? (
             <div>
-              <label htmlFor="current-pin" className="text-sm font-medium text-text-1">Current PIN *</label>
+              <label htmlFor="current-pin" className="text-sm font-medium text-text-1">{t('Settings.currentPIN')} *</label>
               <input
                 id="current-pin"
                 type="password"
@@ -155,7 +157,7 @@ export default function PINLockWidget({
 
           <div>
             <label htmlFor={pinInputId} className="text-sm font-medium text-text-1">
-              {hasPin ? 'New PIN' : 'PIN'} (4-6 digits) *
+              {hasPin ? t('Settings.newPIN') : t('Settings.pin')} ({t('Settings.pinDigits')}) *
             </label>
             <input
               id={pinInputId}
@@ -172,7 +174,7 @@ export default function PINLockWidget({
           </div>
 
           <div>
-            <label htmlFor={confirmPinInputId} className="text-sm font-medium text-text-1">Confirm PIN *</label>
+            <label htmlFor={confirmPinInputId} className="text-sm font-medium text-text-1">{t('Settings.confirmPIN')} *</label>
             <input
               id={confirmPinInputId}
               type="password"
@@ -198,7 +200,7 @@ export default function PINLockWidget({
             disabled={!/^\d{4,6}$/.test(pin) || pin !== confirmPin || (hasPin && !/^\d{4,6}$/.test(currentPin))}
             className="w-full rounded-pill bg-accent-1 px-4 py-3 text-sm font-semibold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {hasPin ? 'Change PIN' : 'Set PIN'}
+            {hasPin ? t('Settings.changePIN') : t('Settings.setPIN')}
           </button>
         </div>
       </div>
@@ -215,7 +217,7 @@ export default function PINLockWidget({
       {hasPin ? (
         <div className="space-y-3">
           <p className="text-sm text-text-2">
-            PIN lock is enabled. Your current PIN is required before changing or removing it.
+            {t('Settings.pinEnabled')}
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
             <button
@@ -238,7 +240,7 @@ export default function PINLockWidget({
       ) : (
         <div className="space-y-3">
           <p className="text-sm text-text-2">
-            Set a PIN to protect your app and private vault.
+            {t('Settings.setPINDescription')}
           </p>
           <button
             type="button"

@@ -151,7 +151,7 @@ export default function MusicScreen() {
         { backgroundColor: colors.background, paddingTop: insets.top },
       ]}
     >
-      <Text style={[styles.eyebrow, { color: colors.accent2 }]}>Music</Text>
+      <Text style={[styles.eyebrow, { color: colors.textSecondary }]}>Music</Text>
       <Text style={[styles.title, { color: colors.textPrimary }]}>Sounds for us</Text>
       <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
         Keep the songs that feel like you two close at hand.
@@ -261,7 +261,7 @@ export default function MusicScreen() {
                 </Text>
               </TouchableOpacity>
               {song.why_added ? (
-                <Text style={[styles.note, { color: colors.accent2 }]}>“{song.why_added}”</Text>
+                <Text style={[styles.note, { color: colors.textSecondary }]}>“{song.why_added}”</Text>
               ) : null}
               <View style={styles.actions}>
                 <TouchableOpacity
@@ -275,7 +275,7 @@ export default function MusicScreen() {
                       fill={song.is_anniversary_song ? colors.accent2 : 'none'}
                       size={16}
                     />
-                    <Text style={[styles.action, { color: colors.accent2 }]}>
+                    <Text style={[styles.action, { color: colors.textSecondary }]}>
                       {song.is_anniversary_song ? 'Anniversary song' : 'Make anniversary song'}
                     </Text>
                   </View>

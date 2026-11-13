@@ -21,18 +21,17 @@ const tabs = [
 ]
 
 const workouts = [
-  { name: 'Morning Stretch', duration: 10, calories: 50 },
-  { name: 'Yoga Flow', duration: 30, calories: 150 },
-  { name: 'HIIT', duration: 20, calories: 250 },
-  { name: 'Couple Workout', duration: 25, calories: 200 },
-  { name: 'Evening Walk', duration: 30, calories: 120 },
+  { key: 'morningStretch', name: 'Morning Stretch', duration: 10, calories: 50 },
+  { key: 'yogaFlow', name: 'Yoga Flow', duration: 30, calories: 150 },
+  { key: 'hiit', name: 'HIIT', duration: 20, calories: 250 },
+  { key: 'coupleWorkout', name: 'Couple Workout', duration: 25, calories: 200 },
+  { key: 'eveningWalk', name: 'Evening Walk', duration: 30, calories: 120 },
 ]
 type Workout = (typeof workouts)[number]
 type CompletedWorkout = Workout & { completedAt: string }
 
 export default function WellnessPage() {
-  const { language } = useLanguage()
-  const isMm = language === 'my'
+  const { t } = useLanguage()
 
   const [activeTab, setActiveTab] = useState<TabId>('physical')
   const [completedWorkouts, setCompletedWorkouts] = useState<CompletedWorkout[]>([])
@@ -55,7 +54,7 @@ export default function WellnessPage() {
       setSelectedWorkout(null)
     } catch (error_) {
       console.error('[wellness] log failed:', error_)
-      setActionError(error_ instanceof Error ? error_.message : 'Failed to save activity')
+      setActionError(t('wellness.saveFailed'))
     }
   }
 
@@ -91,10 +90,10 @@ export default function WellnessPage() {
           className="text-4xl text-text-1"
           style={{ fontFamily: 'var(--font-display)' }}
         >
-          Wellness Boards
+          {t('wellness.title')}
         </h1>
         <p className="mt-2 text-sm text-text-2">
-          21 curated boards for emotional wellness
+          {t('wellness.subtitle')}
         </p>
       </header>
 
@@ -102,12 +101,12 @@ export default function WellnessPage() {
         <div className="flex items-center justify-between gap-4 rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-sm text-error" role="alert">
           <span>{actionError}</span>
           <button type="button" onClick={() => setActionError(null)} className="underline">
-            Dismiss
+            {t('wellness.dismiss')}
           </button>
         </div>
       ) : null}
 
-      <nav className="flex gap-2 overflow-x-auto pb-2" aria-label="Wellness categories">
+      <nav className="flex gap-2 overflow-x-auto pb-2" aria-label={t('Wellness.categories')}>
         {tabs.map((tab) => (
           <button
             key={tab.id}
@@ -121,7 +120,7 @@ export default function WellnessPage() {
             }`}
             aria-selected={activeTab === tab.id}
           >
-            {isMm ? tab.labelMy : tab.label}
+            {t(`wellness.tabs.${tab.id}`)}
           </button>
         ))}
       </nav>
@@ -132,23 +131,23 @@ export default function WellnessPage() {
         <section className="rounded-panel border border-accent-1/20 bg-card p-6">
           <div className="flex items-center gap-3">
             <Gamepad2 className="h-6 w-6 text-accent-1" />
-            <h2 className="text-2xl font-bold text-text-1">Games</h2>
+            <h2 className="text-2xl font-bold text-text-1">{t('wellness.games')}</h2>
           </div>
-          <p className="mt-2 text-text-2">Playful ways to reconnect are coming together here.</p>
+          <p className="mt-2 text-text-2">{t('wellness.gameDescription')}</p>
           <button
             type="button"
             onClick={() => void completeGame()}
             disabled={completedGame}
             className="mt-4 rounded-pill bg-accent-1 px-4 py-3 font-bold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98] disabled:opacity-60"
           >
-            {completedGame ? 'Game completed' : 'Complete a game'}
+            {completedGame ? t('wellness.gameCompleted') : t('wellness.completeGame')}
           </button>
         </section>
       ) : activeTab === 'physical' ? (
         <div className="space-y-6">
           <h2 className="flex items-center gap-3 text-2xl font-bold text-text-1">
             <Dumbbell className="h-6 w-6 text-accent-1" />
-            <span>Health & movement</span>
+            <span>{t('wellness.healthMovement')}</span>
           </h2>
 
           {/* Workout Selection */}
@@ -159,9 +158,9 @@ export default function WellnessPage() {
                 onClick={() => setSelectedWorkout(workout)}
                 className="border border-accent-1/20 rounded-card p-4 text-left bg-card hover:border-accent-1/40 hover:bg-accent-1/5 transition active:scale-[0.98]"
               >
-                <h3 className="font-bold text-lg text-text-1">{workout.name}</h3>
+                <h3 className="font-bold text-lg text-text-1">{t(`wellness.workouts.${workout.key}`)}</h3>
                 <p className="text-text-2 text-sm">
-                  {workout.duration} min -  {workout.calories} cal
+                  {workout.duration} {t('wellness.minutes')} · {workout.calories} {t('wellness.calories')}
                 </p>
               </button>
             ))}
@@ -170,9 +169,9 @@ export default function WellnessPage() {
           {/* Selected Workout */}
           {selectedWorkout && (
             <div className="border border-accent-1/20 rounded-card p-6 bg-card shadow-card">
-              <h2 className="font-bold text-xl mb-4 text-text-1">{selectedWorkout.name}</h2>
+              <h2 className="font-bold text-xl mb-4 text-text-1">{t(`wellness.workouts.${selectedWorkout.key}`)}</h2>
               <p className="text-text-2 mb-4">
-                Duration: {selectedWorkout.duration} min -  Calories: {selectedWorkout.calories}
+                {t('wellness.minutes')}: {selectedWorkout.duration} · {t('wellness.calories')}: {selectedWorkout.calories}
               </p>
               <div className="flex gap-2">
                 <button
@@ -180,13 +179,13 @@ export default function WellnessPage() {
                   className="flex flex-1 items-center justify-center gap-2 rounded-pill bg-accent-1 py-3 font-bold text-white font-semibold shadow-sm shadow-sm transition hover:opacity-95 active:scale-[0.98]"
                 >
                   <Check className="h-4 w-4" />
-                  <span>Complete Workout</span>
+                  <span>{t('wellness.completeWorkout')}</span>
                 </button>
                 <button
                   onClick={() => setSelectedWorkout(null)}
                   className="px-6 py-3 border border-border rounded-pill text-text-1 hover:bg-card-hover transition active:scale-[0.98]"
                 >
-                  Cancel
+                  {t('wellness.cancel')}
                 </button>
               </div>
             </div>
@@ -195,11 +194,11 @@ export default function WellnessPage() {
           {/* Completed Workouts */}
           {completedWorkouts.length > 0 && (
             <div>
-              <h2 className="font-bold text-xl mb-4 text-text-1">Completed Today</h2>
+              <h2 className="font-bold text-xl mb-4 text-text-1">{t('wellness.completedToday')}</h2>
               <div className="space-y-2">
                 {completedWorkouts.map((workout, i) => (
                   <div key={i} className="flex justify-between items-center p-3 bg-accent-1/10 rounded-xl">
-                    <span className="text-text-1">{workout.name}</span>
+                    <span className="text-text-1">{t(`wellness.workouts.${workout.key}`)}</span>
                     <span className="text-text-2 text-sm">
                       {workout.duration} min -  {workout.calories} cal
                     </span>
@@ -217,9 +216,9 @@ export default function WellnessPage() {
         </section>
       )}
       <ExplicitAdviceControl
-        title="Ask for a gentle reset"
-        description="Get one small, practical step for reconnecting. Nothing is sent automatically."
-        placeholder="What feels difficult for us today?"
+        title={t("wellness.askTitle")}
+        description={t("wellness.askDescription")}
+        placeholder={t("wellness.askPlaceholder")}
       />
     </div>
   )

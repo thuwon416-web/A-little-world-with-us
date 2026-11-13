@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import {
   Phone,
   Video,
@@ -21,6 +22,7 @@ function formatDuration(seconds: number) {
 }
 
 export default function CallsPage() {
+  const { t } = useLanguage()
   const {
     partnerId,
     partnerName,
@@ -57,21 +59,21 @@ export default function CallsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       <header>
-        <p className="text-xs uppercase tracking-[0.22em] text-text-2">Calls</p>
-        <h1 className="mt-2 text-3xl font-serif text-text-1">Stay close, even apart</h1>
+        <p className="text-xs uppercase tracking-[0.22em] text-text-2">{t('Calls.title')}</p>
+        <h1 className="mt-2 text-3xl font-serif text-text-1">{t('Calls.subtitle')}</h1>
       </header>
 
       {/* Ringing (Incoming Call Modal/Banner) */}
       {callStatus === 'ringing' && (
-        <section className="max-w-xl rounded-[28px] border-2 border-accent-1/50 bg-card p-6 shadow-xl animate-bounce-subtle">
+        <section className="max-w-xl rounded-panel border-2 border-accent-1/50 bg-card p-6 shadow-xl animate-bounce-subtle">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-1/20 text-accent-1 animate-pulse">
               <PhoneCall className="h-6 w-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <h2 className="text-lg font-bold text-text-1">{partnerName} is calling…</h2>
+              <h2 className="text-lg font-bold text-text-1">{t('Calls.incomingCall').replace('{name}', partnerName)}</h2>
               <p className="text-sm text-text-2">
-                Incoming {callType === 'video' ? 'video' : 'audio'} call
+                {callType === 'video' ? t('Calls.incomingVideo') : t('Calls.incomingAudio')}
               </p>
             </div>
           </div>
@@ -79,14 +81,14 @@ export default function CallsPage() {
             <button
               type="button"
               onClick={() => void rejectCall()}
-              className="inline-flex items-center gap-2 rounded-xl bg-error/15 px-4 py-2.5 text-sm font-semibold text-error hover:bg-error/25 active:scale-95"
+              className="inline-flex items-center gap-2 min-h-11 rounded-xl bg-error/15 px-4 py-2.5 text-sm font-semibold text-error hover:bg-error/25 active:scale-95"
             >
               <PhoneOff className="h-4 w-4" /> Decline
             </button>
             <button
               type="button"
               onClick={() => void answerCall()}
-              className="inline-flex items-center gap-2 rounded-xl bg-success px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-90 active:scale-95"
+              className="inline-flex items-center gap-2 min-h-11 rounded-xl bg-success px-5 py-2.5 text-sm font-semibold text-white shadow-md hover:opacity-90 active:scale-95"
             >
               <Phone className="h-4 w-4" /> Answer
             </button>
@@ -96,12 +98,12 @@ export default function CallsPage() {
 
       {/* In-Call Active Stage */}
       {(callStatus === 'in_call' || callStatus === 'calling') && (
-        <section className="relative overflow-hidden rounded-[32px] border border-accent-1/20 bg-card p-6 shadow-2xl">
+        <section className="relative overflow-hidden rounded-panel border border-accent-1/20 bg-card p-6 shadow-2xl">
           <div className="flex items-center justify-between border-b border-border/50 pb-4">
             <div>
               <span className="inline-flex items-center gap-2 text-xs uppercase tracking-wider text-accent-1 font-semibold">
                 <Heart className="h-3.5 w-3.5 fill-current animate-pulse" />
-                {callStatus === 'calling' ? 'Calling…' : 'Connected'}
+                {callStatus === 'calling' ? t('Calls.calling') : t('Calls.connected')}
               </span>
               <h2 className="text-2xl font-serif text-text-1">{partnerName}</h2>
             </div>
@@ -136,7 +138,7 @@ export default function CallsPage() {
                   {partnerName.slice(0, 1)}
                 </div>
                 <p className="text-lg font-medium">
-                  {callStatus === 'calling' ? `Calling ${partnerName}…` : `Connected with ${partnerName}`}
+                  {callStatus === 'calling' ? t('Calls.callingWith').replace('{name}', partnerName) : t('Calls.connectedWith').replace('{name}', partnerName)}
                 </p>
               </div>
             )}
@@ -165,7 +167,7 @@ export default function CallsPage() {
                   ? 'border-error/40 bg-error/15 text-error'
                   : 'border-border bg-card/70 text-text-1 hover:bg-card'
               }`}
-              title={isMuted ? 'Unmute microphone' : 'Mute microphone'}
+              title={isMuted ? t('Calls.unmute') : t('Calls.mute')} aria-label={isMuted ? t('Calls.unmute') : t('Calls.mute')}
             >
               {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5" />}
             </button>
@@ -179,7 +181,7 @@ export default function CallsPage() {
                     ? 'border-error/40 bg-error/15 text-error'
                     : 'border-border bg-card/70 text-text-1 hover:bg-card'
                 }`}
-                title={isVideoDisabled ? 'Enable camera' : 'Disable camera'}
+                title={isVideoDisabled ? t('Calls.enableCamera') : t('Calls.disableCamera')} aria-label={isVideoDisabled ? t('Calls.enableCamera') : t('Calls.disableCamera')}
               >
                 {isVideoDisabled ? <VideoOff className="h-5 w-5" /> : <Video className="h-5 w-5" />}
               </button>
@@ -189,7 +191,7 @@ export default function CallsPage() {
               type="button"
               onClick={() => void endCall()}
               className="flex h-12 w-12 items-center justify-center rounded-full bg-error text-white shadow-lg transition hover:opacity-90 active:scale-95"
-              title="End call"
+              title={t('Calls.endCall')} aria-label={t('Calls.endCall')}
             >
               <PhoneOff className="h-5 w-5" />
             </button>
@@ -199,10 +201,10 @@ export default function CallsPage() {
 
       {/* Idle / Call Options */}
       {callStatus === 'idle' && (
-        <section className="max-w-2xl rounded-[30px] border border-accent-1/20 bg-card p-6 shadow-sm">
-          <h2 className="text-xl font-serif text-text-1">Call with your partner</h2>
+        <section className="max-w-2xl rounded-panel border border-accent-1/20 bg-card p-6 shadow-sm">
+          <h2 className="text-xl font-serif text-text-1">{t('Calls.callWithPartner')}</h2>
           <p className="mt-2 text-sm text-text-2">
-            Start a live, private audio or video conversation anytime directly from your browser.
+            {t('Calls.callDescription')}
           </p>
 
           <div className="mt-6 flex flex-wrap gap-4">
@@ -210,7 +212,7 @@ export default function CallsPage() {
               type="button"
               disabled={!partnerId}
               onClick={() => void startCall('audio')}
-              className="inline-flex items-center gap-2 rounded-xl bg-accent-1 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 min-h-11 rounded-xl bg-accent-1 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Phone className="h-4 w-4" /> Start Audio Call
             </button>
@@ -219,7 +221,7 @@ export default function CallsPage() {
               type="button"
               disabled={!partnerId}
               onClick={() => void startCall('video')}
-              className="inline-flex items-center gap-2 rounded-xl border border-accent-1/30 bg-accent-1/10 px-5 py-3 text-sm font-semibold text-text-1 transition hover:bg-accent-1/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 min-h-11 rounded-xl border border-accent-1/30 bg-accent-1/10 px-5 py-3 text-sm font-semibold text-text-1 transition hover:bg-accent-1/20 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Video className="h-4 w-4" /> Start Video Call
             </button>
@@ -227,7 +229,7 @@ export default function CallsPage() {
 
           {!partnerId && (
             <p className="mt-4 text-xs text-warning">
-              Please link with your partner first to place live calls.
+              {t('Calls.linkPartnerFirst')}
             </p>
           )}
         </section>

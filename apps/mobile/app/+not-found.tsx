@@ -38,7 +38,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes) =>
       marginBottom: 8,
     },
     eyebrow: {
-      color: colors.accent2,
+      color: colors.textSecondary,
       fontSize: sizes.text.xs,
       letterSpacing: 2,
       marginBottom: 12,

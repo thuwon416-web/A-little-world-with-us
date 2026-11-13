@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element -- Supabase signed image URLs are user-provided and can expire. */
 
 import { type ChangeEvent, useEffect, useMemo, useState } from 'react'
+import { useLanguage } from '@/contexts/LanguageContext'
 import dynamic from 'next/dynamic'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -108,6 +109,7 @@ export default function MemoriesPage() {
 }
 
 function MemoriesPageContent() {
+  const { t } = useLanguage()
   const [activeTab, setActiveTab] = useState<MemoryTab>('photos')
   const [memories, setMemories] = useState<JournalMemory[]>([])
   const [caption, setCaption] = useState('')
@@ -743,7 +745,7 @@ function MemoriesPageContent() {
           <div className="space-y-1.5">
             <div className="inline-flex items-center gap-2 rounded-full border border-accent-1/25 bg-accent-1/10 px-3 py-1 text-xs font-semibold text-accent-1">
               <Heart className="h-3.5 w-3.5 fill-current text-accent-1" />
-              <span>A Little World, Just For Us</span>
+              <span>{t('Memories.brand')}</span>
               <span className="opacity-40">•</span>
               <span>{memories.length} Keepsakes</span>
             </div>
@@ -763,7 +765,7 @@ function MemoriesPageContent() {
               className="inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:opacity-90 active:scale-95"
             >
               <Plus className="h-4 w-4" />
-              <span>Add Memory</span>
+              <span>{t('Memories.addMemory')}</span>
             </button>
 
             <button
@@ -772,7 +774,7 @@ function MemoriesPageContent() {
               className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card px-3.5 py-2.5 text-sm font-medium text-text-1 transition hover:bg-soft-tint active:scale-95"
             >
               <Pencil className="h-4 w-4 text-accent-1" />
-              <span className="hidden sm:inline">Write Journal</span>
+              <span className="hidden sm:inline">{t('Memories.writeJournal')}</span>
             </button>
 
             <SlideshowLaunchButton memories={memories} onClick={() => setIsSlideshowOpen(true)} />
@@ -809,7 +811,7 @@ function MemoriesPageContent() {
       </header>
 
       {/* Navigation Sub-Tabs */}
-      <nav aria-label="Memories navigation" className="flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-border/70 bg-card p-1.5 shadow-xs">
+      <nav aria-label={t('Memories.memoriesNavigation')} className="flex items-center gap-1.5 overflow-x-auto rounded-2xl border border-border/70 bg-card p-1.5 shadow-xs">
         {tabs.map((tab) => {
           const Icon = tab.icon
           const isActive = activeTab === tab.id
@@ -865,8 +867,8 @@ function MemoriesPageContent() {
                 onChange={(event) => setSortBy(event.target.value as MemorySort)}
                 className="rounded-xl border border-border/70 bg-card px-3 py-1.5 text-xs font-medium text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
               >
-                <option value="newest">Newest First</option>
-                <option value="oldest">Oldest First</option>
+                <option value="newest">{t('Memories.newestFirst')}</option>
+                <option value="oldest">{t('Memories.oldestFirst')}</option>
               </select>
             </div>
           </div>
@@ -876,7 +878,7 @@ function MemoriesPageContent() {
           {isLoading && (
             <div className="flex items-center justify-center gap-2 py-12 text-sm text-text-2">
               <RefreshCw className="h-4 w-4 animate-spin text-accent-1" />
-              <span>Loading our memories...</span>
+              <span>{t('Memories.loading')}</span>
             </div>
           )}
 
@@ -892,7 +894,7 @@ function MemoriesPageContent() {
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-accent-1/10 text-accent-1">
                 <Heart className="h-7 w-7" />
               </div>
-              <h3 className="mt-4 font-serif text-lg font-semibold text-text-1">No memories in this view</h3>
+              <h3 className="mt-4 font-serif text-lg font-semibold text-text-1">{t('Memories.noMemoriesInView')}</h3>
               <p className="mt-1 max-w-sm text-xs text-text-2">
                 Capture your special days, date nights, and heartfelt journals together.
               </p>
@@ -902,7 +904,7 @@ function MemoriesPageContent() {
                 className="mt-4 inline-flex items-center gap-2 rounded-full bg-accent-1 px-4 py-2 text-xs font-semibold text-white transition hover:opacity-90"
               >
                 <Plus className="h-3.5 w-3.5" />
-                <span>Upload First Memory</span>
+                <span>{t('Memories.uploadFirstMemory')}</span>
               </button>
             </div>
           )}
@@ -943,8 +945,8 @@ function MemoriesPageContent() {
               <Compass className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-text-1">Places We Remember</h2>
-              <p className="text-xs text-text-2">Pins, coordinates, and scenic spots from all our adventures.</p>
+              <h2 className="font-serif text-xl font-semibold text-text-1">{t('Memories.placesRemembered')}</h2>
+              <p className="text-xs text-text-2">{t('Memories.placesDescription')}</p>
             </div>
           </div>
           <div className="overflow-hidden rounded-2xl border border-border/60 bg-card">
@@ -961,8 +963,8 @@ function MemoriesPageContent() {
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-text-1">Our Story Timeline</h2>
-              <p className="text-xs text-text-2">Every milestone and memory woven into a chronological journey.</p>
+              <h2 className="font-serif text-xl font-semibold text-text-1">{t('Memories.storyTimeline')}</h2>
+              <p className="text-xs text-text-2">{t('Memories.storyDescription')}</p>
             </div>
           </div>
           <OurStoryContent />
@@ -977,8 +979,8 @@ function MemoriesPageContent() {
               <Hourglass className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-text-1">Time Capsules</h2>
-              <p className="text-xs text-text-2">Letters, photos, and secrets locked until a special future date.</p>
+              <h2 className="font-serif text-xl font-semibold text-text-1">{t('Memories.timeCapsules')}</h2>
+              <p className="text-xs text-text-2">{t('Memories.timeCapsulesDescription')}</p>
             </div>
           </div>
           <TimeCapsulesContent />
@@ -993,8 +995,8 @@ function MemoriesPageContent() {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-text-1">AI Companion & Memory Reflection</h2>
-              <p className="text-xs text-text-2">Turn moments into romantic stories, poetic highlights, or gentle reflections.</p>
+              <h2 className="font-serif text-xl font-semibold text-text-1">{t('Memories.aiCompanion')}</h2>
+              <p className="text-xs text-text-2">{t('Memories.aiDescription')}</p>
             </div>
           </div>
           <MemoryCurationAI
@@ -1008,7 +1010,7 @@ function MemoriesPageContent() {
             <ExplicitAdviceControl
               title="Talk Through a Memory"
               description="Ask for a gentle, loving reflection about any shared experience."
-              placeholder="What happened, and what would you like help understanding?"
+              placeholder={t('Memories.reflectionPlaceholder')}
             />
           </div>
         </section>
@@ -1022,7 +1024,7 @@ function MemoriesPageContent() {
               <FolderArchive className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-semibold text-text-1">Previously Saved Gallery Photos</h2>
+              <h2 className="font-serif text-xl font-semibold text-text-1">{t('Memories.legacyPhotos')}</h2>
               <p className="text-xs text-text-2">
                 Photos stored in original encrypted Gallery storage. Safely preserved without alteration.
               </p>
@@ -1039,7 +1041,7 @@ function MemoriesPageContent() {
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
             role="dialog"
             aria-modal="true"
-            aria-label="Add Memory"
+            aria-label={t('Memories.addMemory')}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -1052,7 +1054,7 @@ function MemoriesPageContent() {
                   <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent-1/10 text-accent-1">
                     <Plus className="h-4 w-4" />
                   </div>
-                  <h3 className="font-serif text-lg font-semibold text-text-1">Add a Shared Memory</h3>
+                  <h3 className="font-serif text-lg font-semibold text-text-1">{t('Memories.addSharedMemory')}</h3>
                 </div>
                 <button
                   type="button"
@@ -1154,6 +1156,7 @@ function JournalEntryModal({
   readonly onClose: () => void
   readonly onSave: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
@@ -1170,7 +1173,7 @@ function JournalEntryModal({
             type="button"
             onClick={onClose}
             className="rounded-full p-1.5 text-text-2 hover:bg-soft-tint hover:text-text-1"
-            aria-label="Close journal modal"
+            aria-label={t('Memories.closeJournalModal')}
           >
             <X className="h-5 w-5" />
           </button>
@@ -1178,18 +1181,18 @@ function JournalEntryModal({
         <input
           value={title}
           onChange={(event) => onTitleChange(event.target.value)}
-          placeholder="Journal Title..."
+          placeholder={t('Memories.journalTitlePlaceholder')}
           className="w-full rounded-2xl border border-border/70 bg-card px-4 py-2.5 text-sm text-text-1 placeholder:text-text-2/60 outline-none focus:ring-1 focus:ring-accent-1"
         />
         <textarea
           value={body}
           onChange={(event) => onBodyChange(event.target.value)}
-          placeholder="Pour your heartfelt thoughts, intimate memories, or feelings here..."
+          placeholder={t('Memories.journalBodyPlaceholder')}
           rows={5}
           className="w-full resize-y rounded-2xl border border-border/70 bg-card px-4 py-2.5 text-sm text-text-1 placeholder:text-text-2/60 outline-none focus:ring-1 focus:ring-accent-1"
         />
         <div>
-          <p className="mb-2 text-xs font-semibold text-text-2">How are you feeling today?</p>
+          <p className="mb-2 text-xs font-semibold text-text-2">{t('Memories.feelingToday')}</p>
           <div className="flex flex-wrap gap-2">
             {JOURNAL_MOODS.map(({ id, label, Icon }) => {
               const selected = mood === id
@@ -1205,7 +1208,7 @@ function JournalEntryModal({
                   }`}
                 >
                   <Icon className="h-3.5 w-3.5" />
-                  <span>{label}</span>
+                  <span>{t(`Memories.moods.${id}`)}</span>
                 </button>
               )
             })}
@@ -1274,11 +1277,12 @@ function MemoryUploadPanel({
   readonly onFileChange: (event: ChangeEvent<HTMLInputElement>) => void
   readonly onUpload: (event: React.FormEvent<HTMLFormElement>) => void
 }) {
+  const { t } = useLanguage()
   return (
     <div className="space-y-4 pt-3">
       <form className="space-y-3.5" onSubmit={onUpload}>
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-text-2">Select Photos</label>
+          <label className="text-xs font-semibold text-text-2">{t('Memories.selectPhotos')}</label>
           <input
             type="file"
             accept="image/jpeg,image/png,image/webp"
@@ -1289,39 +1293,39 @@ function MemoryUploadPanel({
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-semibold text-text-2">Caption or Title</label>
+          <label className="text-xs font-semibold text-text-2">{t('Memories.captionOrTitle')}</label>
           <input
             type="text"
             value={caption}
             onChange={(event) => onCaptionChange(event.target.value)}
-            placeholder="e.g. Coffee date at the corner cafe"
+            placeholder={t('Memories.captionOrTitle')}
             className="w-full rounded-2xl border border-border/70 bg-card px-3.5 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-2.5">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-text-2">Category</label>
+            <label className="text-xs font-semibold text-text-2">{t('Memories.category')}</label>
             <select
               value={memoryCategory}
               onChange={(event) => onMemoryCategoryChange(event.target.value as MemoryCategory)}
               className="w-full rounded-2xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
             >
-              <option value="favorite">Favorite</option>
-              <option value="travel">Travel</option>
-              <option value="ritual">Ritual</option>
-              <option value="journal">Journal</option>
+              <option value="favorite">{t('Memories.favorite')}</option>
+              <option value="travel">{t('Memories.travel')}</option>
+              <option value="ritual">{t('Memories.ritual')}</option>
+              <option value="journal">{t('Memories.journal')}</option>
             </select>
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-text-2">Date</label>
+            <label className="text-xs font-semibold text-text-2">{t('Memories.date')}</label>
             <input
               type="date"
               value={memoryDate}
               onChange={(event) => onMemoryDateChange(event.target.value)}
               className="w-full rounded-2xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
-              aria-label="Memory date"
+              aria-label={t('Memories.memoryDate')}
             />
           </div>
         </div>
@@ -1340,7 +1344,7 @@ function MemoryUploadPanel({
         {isUploading && (
           <div className="space-y-1.5 pt-2">
             <div className="flex justify-between text-xs text-text-2">
-              <span>Uploading & encrypting...</span>
+              <span>{t('Memories.uploadingEncrypting')}</span>
               <span>{uploadProgress}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-soft-tint">
@@ -1370,7 +1374,7 @@ function MemoryUploadPanel({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
           <div className="w-full max-w-md space-y-3.5 rounded-3xl border border-border bg-card p-5 shadow-2xl">
             <div className="flex items-center justify-between">
-              <h4 className="font-serif text-sm font-semibold text-text-1">Pick Location</h4>
+              <h4 className="font-serif text-sm font-semibold text-text-1">{t('Memories.pickLocation')}</h4>
               <button type="button" onClick={() => onLocationOpenChange(false)} className="text-xs text-text-2 hover:text-text-1">
                 Close
               </button>
@@ -1391,7 +1395,7 @@ function MemoryUploadPanel({
             <input
               value={locationLabel}
               onChange={(event) => onLocationLabelChange(event.target.value)}
-              placeholder="Place label (e.g. Cozy Cafe, Riverside Park)"
+              placeholder={t('Memories.locationPlaceholder')}
               className="w-full rounded-xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
             />
             <button
@@ -1429,6 +1433,7 @@ function MemoryGrid({
   readonly onOpenMemory: (memory: DisplayMemory) => void
   readonly onDeleteMemory: (memory: DisplayMemory) => void
 }) {
+  const { t } = useLanguage()
   return (
     <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {memories.map((memory, index) =>
@@ -1442,7 +1447,7 @@ function MemoryGrid({
                 <div className="min-w-0">
                   <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-accent-1">
                     <Pencil className="h-3 w-3" />
-                    <span>Journal</span>
+                    <span>{t('Memories.journal')}</span>
                   </span>
                   <h3 className="line-clamp-1 font-serif text-base font-semibold text-text-1">
                     {memory.title}
@@ -1457,13 +1462,13 @@ function MemoryGrid({
                       JOURNAL_MOODS.find((item) => item.id === 'okay')
                     if (!mood) return null
                     const MoodIcon = mood.Icon
-                    return <MoodIcon className="h-4 w-4 text-accent-1" aria-label={mood.label} />
+                    return <MoodIcon className="h-4 w-4 text-accent-1" aria-label={t(`Memories.moods.${mood.id}`)} />
                   })() : null}
                   <button
                     type="button"
                     onClick={() => onEditJournal(memory)}
                     className="rounded-full p-1 text-text-2 hover:bg-soft-tint hover:text-text-1"
-                    aria-label="Edit journal entry"
+                    aria-label={t('Memories.editJournal')}
                   >
                     <Pencil className="h-3.5 w-3.5" />
                   </button>
@@ -1471,7 +1476,7 @@ function MemoryGrid({
                     type="button"
                     onClick={() => onDeleteJournal(memory)}
                     className="rounded-full p-1 text-text-2 hover:bg-error/10 hover:text-error"
-                    aria-label="Delete journal entry"
+                    aria-label={t('Memories.deleteJournal')}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -1494,7 +1499,7 @@ function MemoryGrid({
                     <button
                       type="button"
                       onClick={() => onSpeakReflection(memory)}
-                      aria-label="Read reflection aloud"
+                      aria-label={t('Memories.readReflection')}
                       className="rounded-full p-1 hover:bg-accent-1/10"
                     >
                       {speakingJournalId === memory.id ? (
@@ -1567,6 +1572,7 @@ function MemoryDetail({
   readonly onClose: () => void
   readonly onSaved: (memory: Partial<DisplayMemory> & { id: string }) => void
 }) {
+  const { t } = useLanguage()
   const [title, setTitle] = useState(memory.title ?? memory.caption ?? '')
   const [date, setDate] = useState(memory.date)
   const [category, setCategory] = useState<Exclude<MemoryCategory, 'all'>>(
@@ -1597,7 +1603,7 @@ function MemoryDetail({
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
       role="dialog"
       aria-modal="true"
-      aria-label="Memory details"
+      aria-label={t('Memories.memoryDetails')}
     >
       <motion.section
         initial={{ opacity: 0, scale: 0.95 }}
@@ -1605,12 +1611,12 @@ function MemoryDetail({
         className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border/80 bg-card/95 p-5 backdrop-blur-2xl shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-border/40 pb-3">
-          <span className="text-xs font-semibold text-text-2">Memory Details</span>
+          <span className="text-xs font-semibold text-text-2">{t('Memories.memoryDetails')}</span>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full p-1.5 text-text-2 hover:bg-soft-tint hover:text-text-1"
-            aria-label="Close"
+            aria-label={t('Memories.close')}
           >
             <X className="h-5 w-5" />
           </button>
@@ -1634,18 +1640,18 @@ function MemoryDetail({
 
         <div className="space-y-3.5 pt-4">
           <div className="space-y-1">
-            <label className="text-xs font-semibold text-text-2">Title</label>
+            <label className="text-xs font-semibold text-text-2">{t('Memories.title')}</label>
             <input
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              aria-label="Memory title"
+              aria-label={t('Memories.memoryTitle')}
               className="w-full rounded-2xl border border-border/70 bg-card px-3.5 py-2 text-sm text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-text-2">Date</label>
+              <label className="text-xs font-semibold text-text-2">{t('Memories.date')}</label>
               <input
                 type="date"
                 value={date}
@@ -1654,16 +1660,16 @@ function MemoryDetail({
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs font-semibold text-text-2">Category</label>
+              <label className="text-xs font-semibold text-text-2">{t('Memories.category')}</label>
               <select
                 value={category}
                 onChange={(event) => setCategory(event.target.value as Exclude<MemoryCategory, 'all'>)}
                 className="w-full rounded-2xl border border-border/70 bg-card px-3 py-2 text-xs text-text-1 outline-none focus:ring-1 focus:ring-accent-1"
               >
-                <option value="favorite">Favorite</option>
-                <option value="travel">Travel</option>
-                <option value="ritual">Ritual</option>
-                <option value="journal">Journal</option>
+                <option value="favorite">{t('Memories.favorite')}</option>
+                <option value="travel">{t('Memories.travel')}</option>
+                <option value="ritual">{t('Memories.ritual')}</option>
+                <option value="journal">{t('Memories.journal')}</option>
               </select>
             </div>
           </div>

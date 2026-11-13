@@ -14,6 +14,7 @@ import { supabase } from '@/lib/supabase'
 import ConnectedCoupleAvatars from '@/components/shared/ConnectedCoupleAvatars'
 import LoveStreakBadge from '@/components/shared/LoveStreakBadge'
 import { SlidersHorizontal } from 'lucide-react'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const DaysCounter = dynamic(() => import('@/features/dashboard/DaysCounter'), { loading: () => <DashboardPanelSkeleton /> })
 const Countdown = dynamic(() => import('@/features/dashboard/Countdown'), { loading: () => <DashboardPanelSkeleton /> })
@@ -39,28 +40,28 @@ const defaultVisibility: Record<DashboardWidgetId, boolean> = {
 
 const widgetMap: Record<DashboardWidgetId, { label: string; render: () => JSX.Element }> = {
   'days-counter': {
-    label: 'Days together',
+    label: 'dashboard.widgets.daysTogether',
     render: () => <DaysCounter />,
   },
   countdown: {
-    label: 'Countdown',
+    label: 'dashboard.widgets.countdown',
     render: () => <Countdown targetDate={new Date().toISOString()} label="Next occasion" />,
   },
   'memory-of-the-day': {
-    label: 'Memory of the day',
+    label: 'dashboard.widgets.memoryOfDay',
     render: () => <MemoryOfTheDay />,
   },
   'mini-care-check': {
-    label: 'Mini care check',
+    label: 'dashboard.widgets.miniCare',
     render: () => <MiniCareCheck />,
   },
   'music-player': {
-    label: 'Music player',
+    label: 'dashboard.widgets.musicPlayer',
     render: () => <MusicPlayer />,
   },
   'our-stats': {
-    label: 'Our stats',
-    render: () => <div className="p-4 text-xs text-text-2">Loading stats...</div>,
+    label: 'dashboard.widgets.ourStats',
+    render: () => <DashboardPanelSkeleton />,
   },
 }
 
@@ -74,36 +75,24 @@ function DashboardPanelSkeleton() {
   )
 }
 
-function getTimeGreeting() {
+function getTimeGreeting(t: (key: string) => string) {
   const hour = new Date().getHours()
-  if (hour >= 5 && hour < 12) return 'Good morning'
-  if (hour >= 12 && hour < 18) return 'Good afternoon'
-  if (hour >= 18 && hour < 22) return 'Good evening'
-  return 'Good night'
+  if (hour >= 5 && hour < 12) return t('dashboard.morning')
+  if (hour >= 12 && hour < 18) return t('dashboard.afternoon')
+  if (hour >= 18 && hour < 22) return t('dashboard.evening')
+  return t('dashboard.night')
 }
 
-function getDailyFocus() {
+function getDailyFocus(t: (key: string) => string) {
   const daySeed = new Date().getDate()
-  const focuses = [
-    'Slow down and enjoy the quiet rhythm of us.',
-    'Make space for a little softness and calm today.',
-    'Choose gentleness, even in the smallest moments.',
-    'Be extra present with each other today.',
-    'Hold each other with patience and warmth.',
-  ]
-  return focuses[daySeed % focuses.length]
+  const key = ['one', 'two', 'three', 'four', 'five'][daySeed % 5]
+  return t(`dashboard.focusItems.${key}`)
 }
 
-function getLittleRitual() {
+function getLittleRitual(t: (key: string) => string) {
   const daySeed = new Date().getDate()
-  const rituals = [
-    'Hold hands for a minute without talking.',
-    'Say one little thing you appreciate about them before sleeping.',
-    'Send a 10-second voice note of your favorite inside joke.',
-    'Brew a warm drink and share the first sip together.',
-    'Take a slow deep breath together.',
-  ]
-  return rituals[daySeed % rituals.length]
+  const key = ['one', 'two', 'three', 'four', 'five'][daySeed % 5]
+  return t(`dashboard.ritualItems.${key}`)
 }
 
 type ActiveOccasion = {
@@ -112,6 +101,7 @@ type ActiveOccasion = {
 }
 
 export default function DashboardPage() {
+  const { t } = useLanguage()
   const [coupleId, setCoupleId] = useState<string | null>(null)
   const [coupleName, setCoupleName] = useState('Our World')
   const [anniversary, setAnniversary] = useState<string | null>(null)
@@ -126,12 +116,12 @@ export default function DashboardPage() {
 
   const heroCopy = useMemo(
     () => ({
-      greeting: getTimeGreeting(),
-      focus: getDailyFocus(),
-      ritual: getLittleRitual(),
-      occasion: 'Today is another beautiful day to love each other softly and fully.',
+      greeting: getTimeGreeting(t),
+      focus: getDailyFocus(t),
+      ritual: getLittleRitual(t),
+      occasion: t('dashboard.occasion'),
     }),
-    []
+    [t]
   )
 
   useEffect(() => {
@@ -228,10 +218,10 @@ export default function DashboardPage() {
               <p className="mt-1 text-sm text-text-2 font-medium">
                 {coupleName} · {activeOccasion
                   ? activeOccasion.kind === 'anniversary'
-                    ? `Happy anniversary — ${activeOccasion.title}.`
+                    ? t('dashboard.happyAnniversary').replace('{title}', activeOccasion.title)
                     : activeOccasion.kind === 'birthday'
-                      ? `Happy birthday — ${activeOccasion.title}.`
-                      : `A little love day: ${activeOccasion.title}.`
+                      ? t('dashboard.happyBirthday').replace('{title}', activeOccasion.title)
+                      : t('dashboard.loveDay').replace('{title}', activeOccasion.title)
                   : heroCopy.occasion}
               </p>
 
@@ -243,10 +233,10 @@ export default function DashboardPage() {
                   type="button"
                   onClick={() => setShowCustomize((prev) => !prev)}
                   className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-card/60 px-3 py-1.5 text-xs text-text-2 hover:text-text-1 hover:bg-card transition"
-                  title="Customize Home Widgets"
+                  title={t("dashboard.customizeTitle")}
                 >
                   <SlidersHorizontal className="h-3.5 w-3.5" />
-                  Customize
+                  {t('dashboard.customize')}
                 </button>
               </div>
             </div>
@@ -257,8 +247,8 @@ export default function DashboardPage() {
                 size="xl"
                 userAvatarUrl={userProfile?.avatar_url}
                 partnerAvatarUrl={partnerProfile?.avatar_url}
-                userName={userProfile?.full_name ?? 'You'}
-                partnerName={partnerProfile?.full_name ?? 'My Love'}
+                userName={userProfile?.full_name ?? t('dashboard.you')}
+                partnerName={partnerProfile?.full_name ?? t('dashboard.myLove')}
                 priority
               />
             </div>
@@ -267,11 +257,11 @@ export default function DashboardPage() {
           {/* Today's Focus & Little Ritual side-by-side */}
           <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 pt-2 border-t border-border/40">
             <div className="min-w-0 rounded-xl border border-border/50 bg-card/60 p-3 shadow-xs">
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-accent-1 block mb-0.5">Today&apos;s Focus</span>
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-accent-1 block mb-0.5">{t('dashboard.focus')}</span>
               <p className="text-xs text-text-1 leading-relaxed">{heroCopy.focus}</p>
             </div>
             <div className="min-w-0 rounded-xl border border-border/50 bg-card/60 p-3 shadow-xs">
-              <span className="text-[10px] uppercase font-semibold tracking-wider text-accent-2 block mb-0.5">Little Ritual</span>
+              <span className="text-[10px] uppercase font-semibold tracking-wider text-text-2 block mb-0.5">{t('dashboard.ritual')}</span>
               <p className="text-xs text-text-1 leading-relaxed">{heroCopy.ritual}</p>
             </div>
           </div>
@@ -281,7 +271,7 @@ export default function DashboardPage() {
       {/* Collapsible Customize Toolbar */}
       {showCustomize && (
         <div className="rounded-2xl border border-accent-1/25 bg-card/90 p-4 backdrop-blur-md shadow-card animate-fade-in space-y-2">
-          <p className="text-xs uppercase font-semibold tracking-wider text-accent-1">Customize Home Layout</p>
+          <p className="text-xs uppercase font-semibold tracking-wider text-accent-1">{t('dashboard.customizeLayout')}</p>
           <div className="flex flex-wrap gap-2">
             {DEFAULT_WIDGETS.map((widgetId) => (
               <button
@@ -295,7 +285,7 @@ export default function DashboardPage() {
                 }
                 className={`dashboard-layout-chip ${widgetVisibility[widgetId] ? 'is-active' : ''}`}
               >
-                {widgetMap[widgetId].label}
+                {t(widgetMap[widgetId].label)}
               </button>
             ))}
           </div>
@@ -329,10 +319,10 @@ export default function DashboardPage() {
               {widgetId === 'countdown' ? (
                 <Countdown
                   targetDate={anniversary ?? new Date().toISOString()}
-                  label={anniversary ? 'Anniversary' : 'Next occasion'}
+                  label={t(anniversary ? 'dashboard.anniversary' : 'dashboard.nextOccasion')}
                 />
               ) : widgetId === 'our-stats' ? (
-                coupleId ? <OurStats coupleId={coupleId} /> : <div className="p-5 text-center text-xs text-text-2">Link with partner to view stats</div>
+                coupleId ? <OurStats coupleId={coupleId} /> : <div className="p-5 text-center text-xs text-text-2">{t('dashboard.partnerStats')}</div>
               ) : (
                 widget.render()
               )}
@@ -350,7 +340,7 @@ export default function DashboardPage() {
       {/* Secondary Relationship Stats & Scoreboard */}
       <RelationshipStats />
 
-      <section className="dashboard-panel ui-card min-w-0 rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-card" aria-label="Couple scoreboard">
+      <section className="dashboard-panel ui-card min-w-0 rounded-2xl border border-border/70 bg-card p-4 sm:p-5 shadow-card" aria-label={t("dashboard.scoreboard")}>
         <CoupleScoreboard />
       </section>
 

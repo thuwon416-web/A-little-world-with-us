@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import Script from 'next/script'
-import { randomInt } from 'node:crypto'
-import { Inter, Playfair_Display } from 'next/font/google'
+import { Inter, Noto_Sans_Myanmar, Playfair_Display } from 'next/font/google'
 
 import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -14,24 +13,17 @@ import AIChatWidget from '@/components/AIChatWidget'
 import OfflineBanner from '@/components/shared/OfflineBanner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-body' })
-const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-display' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
+const notoMyanmar = Noto_Sans_Myanmar({ subsets: ['myanmar', 'latin'], variable: '--font-myanmar', display: 'swap' })
 
-const descriptions = [
-  'A private little world for KoKo and Pu Tuu — memories, love, and every day in between',
-  'Our little world — where every moment together matters',
-  'Two souls, one little world — love, care, and everything in between',
-  'A quiet space for us — memories, moods, and everyday love',
-  'Just us, our world, and all the little things that make it ours',
-]
-
-const randomDescription = descriptions[randomInt(descriptions.length)]
+const description = 'A private shared space for memories, care, plans, and everyday moments together.'
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 export const metadata: Metadata = {
   metadataBase: new URL(appUrl),
   title: 'A little world with us',
-  description: randomDescription,
+  description,
   manifest: '/manifest.json',
   icons: {
     icon: '/favicon.svg',
@@ -39,7 +31,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'A little world with us',
-    description: randomDescription,
+    description,
     images: ['/og-image.png'],
   },
 }
@@ -55,7 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${inter.variable} ${playfair.variable}`}
+      className={`${inter.variable} ${playfair.variable} ${notoMyanmar.variable}`}
     >
       <head>
         <meta charSet="UTF-8" />
@@ -83,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   }
                   document.documentElement.dataset.themeMode = resolved;
                   document.documentElement.style.colorScheme =
-                    (resolved === 'peach-cream' || resolved === 'mint-whisper' || resolved === 'ocean-calm') ? 'light' : 'dark';
+                    resolved === 'monochrome' ? 'dark' : 'light';
                 } catch (e) {}
               })();
             `,

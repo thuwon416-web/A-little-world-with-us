@@ -15,6 +15,7 @@ import { Image, StyleSheet, Text, View } from 'react-native'
 
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useTheme } from '@/context/ThemeContext'
+import { useTranslation } from '@/i18n/useTranslation'
 import { downloadDecryptAndCache, downloadDriveMemoryAndCache } from '@/lib/mediaEncryption'
 import { getMemories } from '@/services/memories'
 import { relationshipMemoriesService } from '@/services/relationship-memories'
@@ -44,6 +45,7 @@ type UnifiedMemory = {
 
 export default function OnThisDay({ coupleId }: { coupleId: string }) {
   const { colors } = useTheme()
+  const { t } = useTranslation()
   const styles = createStyles(colors)
   const [memories, setMemories] = useState<UnifiedMemory[]>([])
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({})
@@ -93,7 +95,7 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
       const photoItems: UnifiedMemory[] = photos.map((memory) => ({
         source: 'photo',
         id: memory.id,
-        title: memory.title ?? memory.caption ?? 'A memory together',
+        title: memory.title ?? memory.caption ?? t('dashboard.memoryTogether'),
         date: memory.date,
         yearsAgo: Math.max(1, today.getFullYear() - new Date(memory.date).getFullYear()),
         imageUrl: resolvedPhotos.find(([id]) => id === memory.id)?.[1] || undefined,
@@ -114,20 +116,20 @@ export default function OnThisDay({ coupleId }: { coupleId: string }) {
   }, [coupleId])
   return (
     <View style={styles.card}>
-      <Text style={[styles.kicker, { color: colors.textSecondary }]}>On This Day</Text>
+      <Text style={[styles.kicker, { color: colors.textSecondary }]}>{t('dashboard.onThisDay')}</Text>
       {loading ? (
         <View style={styles.skeleton} />
       ) : memories.length === 0 ? (
         <EmptyState
           icon={BookHeart}
-          title="No memories yet"
-          description="No memories from this day yet. Add more shared moments to keep the timeline alive."
+          title={t('dashboard.noMemoriesYet')}
+          description={t('dashboard.noMemoriesToday')}
         />
       ) : (
         memories.map((memory) => (
           <View key={memory.id} style={styles.item}>
             <Text style={[styles.meta, { color: colors.textSecondary }]}>
-              {memory.yearsAgo} years ago today
+              {t('dashboard.yearsAgoToday').replace('{years}', String(memory.yearsAgo))}
             </Text>
             {(() => {
               const Icon =
@@ -161,12 +163,12 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) =>
   StyleSheet.create({
     card: {
       backgroundColor: colors.surface,
-      borderColor: colors.accent1,
-      borderRadius: 16,
+      borderColor: colors.cardBorder,
+      borderRadius: 20,
       borderWidth: 1,
       gap: 10,
-      padding: 24,
-      shadowColor: colors.accent1,
+      padding: 20,
+      shadowColor: colors.textPrimary,
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.12,
       shadowRadius: 14,

@@ -8,10 +8,12 @@ import { acceptPairInvite, createPairInvite, getPairStatus, type CoupleLinkStatu
 import { getCurrentUserId } from '@/lib/supabase'
 import { useRealtimeSync } from '@/hooks/useRealtimeSync'
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 type PageState = 'loading' | 'linked' | 'pending' | 'create' | 'error'
 
 export default function CoupleLinkingPage() {
+  const { t } = useLanguage()
   const [state, setState] = useState<PageState>('loading')
   const [inviteCode, setInviteCode] = useState('')
   const [copied, setCopied] = useState(false)
@@ -64,7 +66,7 @@ export default function CoupleLinkingPage() {
         setState('create')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to check link status')
+      setError(err instanceof Error ? err.message : t('CoupleLink.checkError'))
       setState('error')
     }
   }
@@ -79,7 +81,7 @@ export default function CoupleLinkingPage() {
       setLastStatusUpdatedAt(new Date().toISOString())
       setState('pending')
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to create invite'
+      const message = err instanceof Error ? err.message : t('CoupleLink.createError')
       setError(message)
       setState('error')
     } finally {
@@ -104,9 +106,9 @@ export default function CoupleLinkingPage() {
         >
           <div className="flex items-center justify-center gap-2 mb-4">
             <Heart className="h-8 w-8 text-accent-1" />
-            <h1 className="text-3xl md:text-4xl font-bold text-text-1">Couple Link</h1>
+            <h1 className="text-3xl md:text-4xl font-bold text-text-1">{t('CoupleLink.title')}</h1>
           </div>
-          <p className="text-text-2">Connect with your partner to share experiences</p>
+          <p className="text-text-2">{t('CoupleLink.subtitle')}</p>
         </motion.div>
 
         {/* States */}
@@ -126,7 +128,7 @@ export default function CoupleLinkingPage() {
                 setAcceptCode('')
                 await checkLinkStatus()
               } catch (err) {
-                setError(err instanceof Error ? err.message : 'Failed to accept invite')
+                setError(err instanceof Error ? err.message : t('CoupleLink.acceptError'))
               } finally {
                 setIsAccepting(false)
               }
@@ -153,13 +155,14 @@ export default function CoupleLinkingPage() {
 }
 
 function LoadingStateCard() {
+  const { t } = useLanguage()
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="py-16"
     >
-      <LoadingState label="Checking your link status..." />
+      <LoadingState label={t('CoupleLink.loading')} />
     </motion.div>
   )
 }
@@ -179,56 +182,54 @@ function CreateInviteState({
   readonly isAccepting: boolean
   readonly onAccept: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className="space-y-6"
     >
-      <div className="rounded-btn border border-accent-1/20 bg-card p-8 text-center">
+      <div className="rounded-panel border border-accent-1/20 bg-card p-8 text-center">
         <div className="mb-6 flex justify-center">
           <div className="rounded-full bg-accent-1/10 p-4">
             <Heart className="h-8 w-8 text-accent-1" />
           </div>
         </div>
-        <h2 className="mb-2 text-2xl font-bold text-text-1">Ready to connect?</h2>
+        <h2 className="mb-2 text-2xl font-bold text-text-1">{t('CoupleLink.ready')}</h2>
         <p className="mb-6 text-text-2">
-          Create an invite code to share with your partner. They can use it to link their account to yours.
+          {t('CoupleLink.createDescription')}
         </p>
         <button
           onClick={onCreateInvite}
           disabled={isCreating}
-          className="inline-flex items-center gap-2 rounded-lg bg-accent-1 px-8 py-3 font-semibold text-white font-semibold shadow-sm transition hover:shadow-lg hover:shadow-accent-1/20 disabled:opacity-50"
+          className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-accent-1 px-8 py-3 font-semibold text-white font-semibold shadow-sm transition hover:shadow-lg hover:shadow-accent-1/20 disabled:opacity-50"
         >
           {isCreating ? (
             <>
               <div className="h-4 w-4 rounded-full border-2 border-white border-t-transparent animate-spin" />
-              Creating...
+              {t('CoupleLink.creating')}
             </>
           ) : (
             <>
               <Heart className="h-5 w-5" />
-              Create Invite Code
+              {t('CoupleLink.createCode')}
             </>
           )}
         </button>
       </div>
 
       <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">
-        <h3 className="font-semibold text-accent-2 mb-3">Already have a code?</h3>
+        <h3 className="font-semibold text-accent-2 mb-3">{t('CoupleLink.alreadyHaveCode')}</h3>
         <div className="flex gap-2">
-          <input value={acceptCode} onChange={(event) => setAcceptCode(event.target.value.toUpperCase().replace(/[^A-F0-9]/g, ''))} maxLength={16} placeholder="8- or 16-character code" className="min-w-0 flex-1 rounded-lg border border-accent-1/20 bg-card px-3 py-2 text-text-1" />
-          <button type="button" onClick={onAccept} disabled={isAccepting || !/^(?:[A-F0-9]{8}|[A-F0-9]{16})$/.test(acceptCode)} className="rounded-lg bg-accent-1 px-4 py-2 font-semibold text-white font-semibold shadow-sm disabled:opacity-50">{isAccepting ? 'Linking…' : 'Accept'}</button>
+          <input value={acceptCode} onChange={(event) => setAcceptCode(event.target.value.toUpperCase().replace(/[^A-F0-9]/g, ''))} maxLength={16} placeholder={t('CoupleLink.codePlaceholder')} className="min-w-0 flex-1 rounded-lg border border-accent-1/20 bg-card px-3 py-2 text-text-1" />
+          <button type="button" onClick={onAccept} disabled={isAccepting || !/^(?:[A-F0-9]{8}|[A-F0-9]{16})$/.test(acceptCode)} className="min-h-11 rounded-lg bg-accent-1 px-4 py-2 font-semibold text-white font-semibold shadow-sm disabled:opacity-50">{isAccepting ? t('CoupleLink.linking') : t('CoupleLink.accept')}</button>
         </div>
       </div>
 
       <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">
-        <h3 className="font-semibold text-accent-2 mb-3">How it works:</h3>
+        <h3 className="font-semibold text-accent-2 mb-3">{t('CoupleLink.howItWorks')}:</h3>
         <ol className="space-y-2 text-sm text-text-2">
-          <li>1. Click &quot;Create Invite Code&quot; to generate a unique code</li>
-          <li>2. Share the code with your partner</li>
-          <li>3. They&apos;ll accept the link from their app</li>
-          <li>4. Your accounts will be connected!</li>
+          <li>1. {t('CoupleLink.steps.0')}</li><li>2. {t('CoupleLink.steps.1')}</li><li>3. {t('CoupleLink.steps.2')}</li><li>4. {t('CoupleLink.steps.3')}</li>
         </ol>
       </div>
     </motion.div>
@@ -244,6 +245,7 @@ function PendingState({
   readonly onCopyCode: () => void
   readonly copied: boolean
 }) {
+  const { t } = useLanguage()
   const _prefersReduced = usePrefersReducedMotion()
   return (
     <motion.div
@@ -261,18 +263,18 @@ function PendingState({
             <Heart className="h-8 w-8 text-accent-1" />
           </motion.div>
         </div>
-        <h2 className="mb-2 text-2xl font-bold text-text-1">Invite Code Ready!</h2>
+        <h2 className="mb-2 text-2xl font-bold text-text-1">{t('CoupleLink.inviteReady')}</h2>
         <p className="mb-6 text-text-2">
-          Share this code with your partner to complete the connection.
+          {t('CoupleLink.shareCode')}
         </p>
 
         {/* Code Display */}
         <div className="mb-6 space-y-3">
           <button
             type="button"
-            aria-label="Copy invite code"
+            aria-label={t('CoupleLink.copyInviteCode')}
             onClick={onCopyCode}
-            className="relative rounded-xl border-2 border-accent-1 bg-card/50 p-6 cursor-pointer transition hover:bg-card/80"
+            className="relative min-h-11 rounded-xl border-2 border-accent-1 bg-card/50 p-6 cursor-pointer transition hover:bg-card/80"
           >
             <span className="block font-mono text-4xl font-bold tracking-widest text-accent-1">
               {inviteCode}
@@ -280,25 +282,22 @@ function PendingState({
           </button>
           <button
             onClick={onCopyCode}
-            className="w-full flex items-center justify-center gap-2 rounded-lg bg-card hover:bg-card px-4 py-3 text-text-1 transition"
+            className="min-h-11 w-full flex items-center justify-center gap-2 rounded-lg bg-card hover:bg-card px-4 py-3 text-text-1 transition"
           >
             <Copy className="h-4 w-4" />
-            {copied ? 'Copied!' : 'Copy Code'}
+            {copied ? t('CoupleLink.copied') : t('CoupleLink.copyCode')}
           </button>
         </div>
 
         <div className="rounded-lg bg-card/50 border border-success/20 p-4 text-sm text-success">
-          <p>Waiting for your partner to accept...</p>
+          <p>{t('CoupleLink.waiting')}</p>
         </div>
       </div>
 
       <div className="rounded-btn border border-accent-2/20 bg-card/50 p-6">
-        <h3 className="font-semibold text-accent-2 mb-3">Sharing tips:</h3>
+        <h3 className="font-semibold text-accent-2 mb-3">{t('CoupleLink.sharingTips')}:</h3>
         <ul className="space-y-2 text-sm text-text-2">
-          <li>• Share via message, email, or in person</li>
-          <li>• The code is case-insensitive</li>
-          <li>• Each code can only be used once</li>
-          <li>• You&apos;ll be notified when they accept</li>
+          <li>• {t('CoupleLink.tips.0')}</li><li>• {t('CoupleLink.tips.1')}</li><li>• {t('CoupleLink.tips.2')}</li><li>• {t('CoupleLink.tips.3')}</li>
         </ul>
       </div>
     </motion.div>
@@ -306,6 +305,7 @@ function PendingState({
 }
 
 function LinkedState() {
+  const { t } = useLanguage()
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -320,9 +320,9 @@ function LinkedState() {
           <CheckCircle className="h-16 w-16 text-success" />
         </motion.div>
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-text-1">Connected!</h2>
+      <h2 className="mb-2 text-2xl font-bold text-text-1">{t('CoupleLink.connected')}</h2>
       <p className="mb-6 text-text-2">
-        You&apos;re now linked with your partner. Start sharing experiences together.
+        {t('CoupleLink.connectedDescription')}
       </p>
       <div className="flex gap-3 justify-center">
         <a
@@ -349,6 +349,7 @@ function ErrorState({
   readonly error: string
   readonly onRetry: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -358,7 +359,7 @@ function ErrorState({
       <div className="mb-6 flex justify-center">
         <AlertCircle className="h-16 w-16 text-accent-1" />
       </div>
-      <h2 className="mb-2 text-2xl font-bold text-text-1">Something went wrong</h2>
+      <h2 className="mb-2 text-2xl font-bold text-text-1">{t('CoupleLink.somethingWrong')}</h2>
       <p className="mb-6 text-text-2">{error}</p>
       <button
         onClick={onRetry}

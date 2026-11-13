@@ -70,7 +70,7 @@ const createStyles = (colors: ThemeColors, sizes: Sizes, paddingTop: number) =>
       paddingHorizontal: 20,
     },
     eyebrow: {
-      color: colors.accent2,
+      color: colors.textSecondary,
       fontSize: sizes.text.xs,
       letterSpacing: 2,
       textTransform: 'uppercase',
