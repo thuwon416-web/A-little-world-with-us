@@ -110,7 +110,8 @@ export default function BottomNav() {
             <Link
               key={href}
               href={href}
-              className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[10px] transition ${
+              aria-current={active ? 'page' : undefined}
+              className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs transition ${
                 active ? 'text-accent-1' : 'text-text-2'
               }`}
             >
@@ -123,7 +124,9 @@ export default function BottomNav() {
         <button
           type="button"
           onClick={() => setMoreMenuOpen(true)}
-          className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[10px] transition ${
+          aria-haspopup="dialog"
+          aria-expanded={moreMenuOpen}
+          className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs transition ${
             pathname === '/planning' ? 'text-accent-1' : 'text-text-2'
           }`}
           aria-label="More menu"
@@ -135,7 +138,7 @@ export default function BottomNav() {
         <button
           type="button"
           onClick={handleExit}
-          className="flex min-w-12 flex-col items-center gap-1 rounded-xl px-2 py-1 text-[10px] text-text-2 transition hover:text-accent-1"
+          className="flex min-w-12 flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs text-text-2 transition hover:text-accent-1"
           aria-label="Lock and exit"
         >
           <LogOut size={18} />
@@ -145,10 +148,10 @@ export default function BottomNav() {
 
       {/* More Menu Modal */}
       {moreMenuOpen && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm">
-          <div className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-card p-6 pb-8">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-2 backdrop-blur-sm" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setMoreMenuOpen(false) }}>
+          <section role="dialog" aria-modal="true" aria-labelledby="mobile-more-title" className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-card p-6 pb-8">
             <div className="mb-6 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-1">More</h2>
+              <h2 id="mobile-more-title" className="text-lg font-semibold text-text-1">More</h2>
               <button
                 onClick={() => setMoreMenuOpen(false)}
                 className="rounded-full p-2 hover:bg-accent-1/10"
@@ -189,7 +192,7 @@ export default function BottomNav() {
               <LogOut size={16} />
               Exit App
             </button>
-          </div>
+          </section>
         </div>
       )}
     </>
