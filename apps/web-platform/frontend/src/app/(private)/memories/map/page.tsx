@@ -19,6 +19,21 @@ function getReadableError(error: unknown, fallback: string): string {
   return fallback
 }
 
+function hasValidCoordinates(
+  memory: Memory
+): memory is Memory & { latitude: number; longitude: number } {
+  return (
+    typeof memory.latitude === 'number' &&
+    Number.isFinite(memory.latitude) &&
+    memory.latitude >= -90 &&
+    memory.latitude <= 90 &&
+    typeof memory.longitude === 'number' &&
+    Number.isFinite(memory.longitude) &&
+    memory.longitude >= -180 &&
+    memory.longitude <= 180
+  )
+}
+
 export default function MemoryMapContent({ embedded = false }: { embedded?: boolean }) {
   const { t } = useLanguage()
   const router = useRouter()
@@ -58,25 +73,26 @@ export default function MemoryMapContent({ embedded = false }: { embedded?: bool
     void loadData()
     return () => { active = false }
   }, [t])
+
+  const locatedMemories = memories.filter(hasValidCoordinates)
+  const hasNamedPlaces = memories.some((memory) => memory.location_label?.trim())
+
   return (
     <div className={embedded ? "space-y-4" : "mx-auto max-w-6xl space-y-5 px-4 py-8"}>
       {!embedded ? <h1 className="text-3xl font-serif text-text-1">{t('MemoryMap.title')}</h1> : null}
       {error ? <p className="rounded-card border border-error/20 bg-error/10 p-4 text-sm text-error" role="alert">{error}</p> : null}
       {loading ? <div className="h-96 animate-pulse rounded-panel bg-card" aria-label={t('MemoryMap.loading')} /> : !coupleId ? (
         <EmptyState icon={MapPin} title={t('MemoryMap.linkPartner')} description={t('MemoryMap.linkDescription')} action={{ label: t('MemoryMap.linkAction'), onClick: () => router.push('/couple-linking') }} />
-      ) : memories.some((memory) => memory.latitude != null && memory.longitude != null) || memories.some((memory) => memory.location_label?.trim()) ? (
+      ) : locatedMemories.length > 0 || hasNamedPlaces ? (
         <div className="space-y-4">
-          {memories.some((memory) => memory.latitude != null && memory.longitude != null) ? (
-            <MemoryMapView
-              memories={memories.filter((memory) => memory.latitude != null && memory.longitude != null)}
-              coupleId={coupleId}
-            />
+          {locatedMemories.length > 0 ? (
+            <MemoryMapView memories={locatedMemories} coupleId={coupleId} />
           ) : (
             <div className="rounded-panel border border-accent-1/15 bg-card p-5">
               <p className="text-sm text-text-2">{t('MemoryMap.noCoordinates')}</p>
             </div>
           )}
-          {memories.some((memory) => memory.location_label?.trim()) ? (
+          {hasNamedPlaces ? (
             <section aria-labelledby="remembered-place-list" className="rounded-panel border border-accent-1/15 bg-card p-5">
               <div className="mb-3">
                 <p className="text-xs uppercase tracking-[0.18em] text-text-2">{t('MemoryMap.savedPlaceNames')}</p>
