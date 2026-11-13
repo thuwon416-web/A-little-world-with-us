@@ -499,7 +499,7 @@ export default function SettingsScreen() {
       <Section title={t('settings.screen.couple')}>
         <View style={{ backgroundColor: colors.background, borderRadius: sizes.radius.input, padding: 12, borderWidth: 1, borderColor: colors.cardBorder, gap: 3 }}>
           <Text style={styles.label}>{t('settings.screen.connectedWith')} {data.partnerEmail ?? t('settings.screen.partner')}</Text>
-          <Text style={styles.muted}>{t('settings.screen.status')}: {data.relationshipStatus === 'accepted' ? t('settings.screen.connected') : data.relationshipStatus}</Text>
+          <Text style={styles.muted}>{t('settings.screen.status')}: {data.relationshipStatus === 'Linked and accepted' ? t('settings.screen.linkedAccepted') : t('settings.screen.notLinked')}</Text>
           <Text style={styles.muted}>{t('settings.screen.manageRelationship')}</Text>
         </View>
         <TextInput
