@@ -734,7 +734,7 @@ export default function AutomationPipelinePage() {
                         }}
                         className="w-full px-3 py-1.5 rounded-xl bg-card border border-border text-text-1 focus:outline-none focus:ring-1 focus:ring-accent-1"
                       >
-                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Fast & Free)</option>
+                        <option value="gemini-2.5-flash">{`Gemini 2.5 Flash (${t('Automations.fastFree')})`}</option>
                         <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
                       </select>
                     </div>
