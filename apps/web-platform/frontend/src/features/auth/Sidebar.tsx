@@ -163,7 +163,7 @@ export default function Sidebar() {
       </button>
 
       <div className="mt-5 rounded-btn border border-accent-1/15 bg-card p-3">
-        <div className="mb-1 flex items-center gap-1 text-[10px] text-text-2">
+        <div className="mb-1 flex items-center gap-1 text-xs text-text-2">
           <Sparkles size={11} />
           {t('nav.todaysWhisper')}
         </div>
