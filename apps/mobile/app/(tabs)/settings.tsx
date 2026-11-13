@@ -432,7 +432,7 @@ export default function SettingsScreen() {
                 const token = await registerForPushNotifications()
                 if (!token)
                   return Alert.alert(
-                    'Notifications',
+                    t('settings.screen.notificationsTitle'),
                     t('settings.screen.notificationsUnavailable')
                   )
                 await sendLocalNotification(
