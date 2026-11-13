@@ -113,7 +113,7 @@ export default function AIFeaturePage() {
           <h1 className="mt-2 text-3xl font-serif text-text-1">{t('AI.title')}</h1>
           <p className="mt-2 max-w-xl text-sm text-text-2">{t('AI.description')}</p>
         </div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 bg-card px-3 py-2 text-sm text-accent-1"><Sparkles className="h-4 w-4" /> AI assisted</div>
+        <div className="inline-flex items-center gap-2 rounded-full border border-accent-1/20 bg-card px-3 py-2 text-sm text-accent-1"><Sparkles className="h-4 w-4" /> {t('AI.assisted')}</div>
       </header>
 
       <div className="grid gap-4 lg:grid-cols-[0.7fr_1.3fr]">
