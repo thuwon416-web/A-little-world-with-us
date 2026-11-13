@@ -268,7 +268,11 @@
       "noBiometrics": "ဤစက်တွင် ဇီဝအချက်အလက် အတည်ပြုမှု မပံ့ပိုးပါ။",
       "setupPinHint": "အောက်တွင် PIN ထည့်ပြီး PIN သတ်မှတ်ရန်ကို နှိပ်ပါ။",
       "pinPrompt": "PIN သတ်မှတ်ရန်",
-      "mfaSetupHint": "ပြင်ဆင်မှု မအောင်မြင်ပါ"
+      "mfaSetupHint": "ပြင်ဆင်မှု မအောင်မြင်ပါ",
+      "notificationsTitle": "အသိပေးချက်များ",
+      "unableLoad": "ဆက်တင်များ ဖွင့်၍ မရပါ။",
+      "unableSavePreference": "ရွေးချယ်မှုကို သိမ်းဆည်း၍ မရပါ။",
+      "notificationsUpdate": "အသိပေးချက်များ အပ်ဒိတ်လုပ်၍ မရပါ။"
     }
   }
 }
