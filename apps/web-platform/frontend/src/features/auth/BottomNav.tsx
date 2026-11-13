@@ -23,42 +23,43 @@ import {
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { removeBrowserPushSubscription } from '@/lib/notifications'
+import { useLanguage } from '@/contexts/LanguageContext'
 
 const navItems = [
-  { href: '/dashboard', label: 'Home', icon: Home },
-  { href: '/memories', label: 'Memories', icon: Heart },
-  { href: '/care', label: 'Care', icon: Sparkles },
-  { href: '/chat', label: 'Chat', icon: MessageCircleHeart },
+  { href: '/dashboard', labelKey: 'home', icon: Home },
+  { href: '/memories', labelKey: 'memories', icon: Heart },
+  { href: '/care', labelKey: 'care', icon: Sparkles },
+  { href: '/chat', labelKey: 'whispers', icon: MessageCircleHeart },
 ]
 
 const moreGroups = [
   {
-    name: 'Daily',
+    nameKey: 'groupPlans',
     pages: [
-      { name: 'Calls', href: '/calls', icon: Phone },
-      { name: 'Plans', href: '/calendar', icon: Calendar },
-      { name: 'Wellness', href: '/wellness', icon: Sparkles },
+      { labelKey: 'calls', href: '/calls', icon: Phone },
+      { labelKey: 'plans', href: '/calendar', icon: Calendar },
+      { labelKey: 'wellness', href: '/wellness', icon: Sparkles },
     ],
   },
   {
-    name: 'Play and Explore',
+    nameKey: 'groupCarePlay',
     pages: [
-      { name: 'AI Companion', href: '/ai', icon: Cpu },
-      { name: 'Watch Together', href: '/watch-together', icon: MonitorPlay },
-      { name: 'Learning', href: '/learning', icon: Sparkles },
-      { name: 'Games', href: '/games', icon: Heart },
-      { name: 'Music', href: '/music', icon: Heart },
-      { name: 'Astrology', href: '/astrology', icon: Sparkles },
+      { labelKey: 'ai', href: '/ai', icon: Cpu },
+      { labelKey: 'watchTogether', href: '/watch-together', icon: MonitorPlay },
+      { labelKey: 'learning', href: '/learning', icon: Sparkles },
+      { labelKey: 'games', href: '/games', icon: Heart },
+      { labelKey: 'music', href: '/music', icon: Heart },
+      { labelKey: 'astrology', href: '/astrology', icon: Sparkles },
     ],
   },
   {
-    name: 'Settings and Help',
+    nameKey: 'groupAccount',
     pages: [
-      { name: 'Vault', href: '/vault', icon: Lock },
-      { name: 'Settings', href: '/settings', icon: Settings },
-      { name: 'About', href: '/about', icon: Info },
-      { name: 'Help', href: '/help', icon: HelpCircle },
-      { name: 'Location', href: '/location', icon: MapPin },
+      { labelKey: 'vault', href: '/vault', icon: Lock },
+      { labelKey: 'settings', href: '/settings', icon: Settings },
+      { labelKey: 'about', href: '/about', icon: Info },
+      { labelKey: 'help', href: '/help', icon: HelpCircle },
+      { labelKey: 'location', href: '/location', icon: MapPin },
     ],
   },
 ]
@@ -66,6 +67,7 @@ const moreGroups = [
 export default function BottomNav() {
   const pathname = usePathname()
   const router = useRouter()
+  const { t } = useLanguage()
   const [moreMenuOpen, setMoreMenuOpen] = useState(false)
   const [canViewLocation, setCanViewLocation] = useState(false)
 
@@ -102,8 +104,8 @@ export default function BottomNav() {
 
   return (
     <>
-      <nav aria-label="Primary navigation" className="flex items-center justify-around border-t border-accent-1/20 bg-card px-2 py-2.5 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur-xl">
-        {navItems.map(({ href, label, icon: Icon }) => {
+      <nav aria-label={t('nav.navigationLabel')} className="flex items-center justify-around border-t border-accent-1/20 bg-card px-2 py-2.5 shadow-[0_-8px_24px_rgba(0,0,0,0.08)] backdrop-blur-xl">
+        {navItems.map(({ href, labelKey, icon: Icon }) => {
           const active = pathname === href
 
           return (
@@ -116,7 +118,7 @@ export default function BottomNav() {
               }`}
             >
               <Icon size={19} />
-              <span>{label}</span>
+              <span>{t(`nav.${labelKey}`)}</span>
             </Link>
           )
         })}
@@ -129,33 +131,33 @@ export default function BottomNav() {
           className={`flex min-w-14 flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs transition ${
             pathname === '/planning' ? 'text-accent-1' : 'text-text-2'
           }`}
-          aria-label="More menu"
+          aria-label={t('nav.more')}
         >
           <MoreHorizontal size={20} />
-          <span>More</span>
+          <span>{t('nav.more')}</span>
         </button>
 
         <button
           type="button"
           onClick={handleExit}
           className="flex min-w-12 flex-col items-center gap-1 rounded-xl px-2 py-1 text-xs text-text-2 transition hover:text-accent-1"
-          aria-label="Lock and exit"
+          aria-label={t('nav.logout')}
         >
           <LogOut size={18} />
-          <span>Exit</span>
+          <span>{t('nav.logout')}</span>
         </button>
       </nav>
 
-      {/* More Menu Modal */}
       {moreMenuOpen && (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 p-2 backdrop-blur-sm" role="presentation" onClick={(event) => { if (event.target === event.currentTarget) setMoreMenuOpen(false) }}>
           <section role="dialog" aria-modal="true" aria-labelledby="mobile-more-title" className="max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-t-3xl bg-card p-6 pb-8">
             <div className="mb-6 flex items-center justify-between">
-              <h2 id="mobile-more-title" className="text-lg font-semibold text-text-1">More</h2>
+              <h2 id="mobile-more-title" className="text-lg font-semibold text-text-1">{t('nav.more')}</h2>
               <button
+                type="button"
                 onClick={() => setMoreMenuOpen(false)}
                 className="rounded-full p-2 hover:bg-accent-1/10"
-                aria-label="Close menu"
+                aria-label={t('Common.close')}
               >
                 <X size={20} className="text-text-1" />
               </button>
@@ -165,18 +167,19 @@ export default function BottomNav() {
               {moreGroups.map((group) => {
                 const pages = group.pages.filter((page) => page.href !== '/location' || canViewLocation)
                 return (
-                  <details key={group.name} open={pages.some((page) => pathname === page.href)} className="rounded-xl border border-accent-1/15">
-                    <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-text-1">{group.name}</summary>
+                  <details key={group.nameKey} open={pages.some((page) => pathname === page.href)} className="rounded-xl border border-accent-1/15">
+                    <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-text-1">{t(`nav.${group.nameKey}`)}</summary>
                     <div className="grid grid-cols-2 gap-2 px-3 pb-3">
                       {pages.map((page) => (
                         <Link
-                          key={page.name}
+                          key={page.href}
                           href={page.href}
                           onClick={() => setMoreMenuOpen(false)}
+                          aria-current={pathname === page.href ? 'page' : undefined}
                           className="flex min-h-16 items-center gap-2 rounded-btn border border-accent-1/20 bg-card p-3 transition hover:bg-card/60"
                         >
                           <page.icon size={20} className="shrink-0 text-accent-1" />
-                          <span className="text-xs font-medium text-text-1">{page.name}</span>
+                          <span className="text-xs font-medium text-text-1">{t(`nav.${page.labelKey}`)}</span>
                         </Link>
                       ))}
                     </div>
@@ -186,11 +189,12 @@ export default function BottomNav() {
             </div>
 
             <button
+              type="button"
               onClick={handleExit}
               className="mt-6 w-full flex items-center justify-center gap-2 rounded-xl bg-error/20 py-3 text-sm font-medium text-error transition hover:bg-error/30"
             >
               <LogOut size={16} />
-              Exit App
+              {t('nav.logout')}
             </button>
           </section>
         </div>
