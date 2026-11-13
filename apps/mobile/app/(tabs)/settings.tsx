@@ -190,7 +190,7 @@ export default function SettingsScreen() {
       if (savedNotifications) setNotifications({ ...defaults, ...JSON.parse(savedNotifications) })
       setSafetyNotifications(savedSafetyNotifications)
     } catch (error_) {
-      setError(error_ instanceof Error ? error_.message : 'Unable to load settings.')
+      setError(error_ instanceof Error ? error_.message : t('settings.screen.unableLoad'))
     } finally {
       setLoading(false)
     }
@@ -220,7 +220,7 @@ export default function SettingsScreen() {
       setSafetyNotifications((current) => ({ ...current, [key]: !value }))
       Alert.alert(
         'Notifications',
-        error_ instanceof Error ? error_.message : 'Unable to save preference.'
+        error_ instanceof Error ? error_.message : t('settings.screen.unableSavePreference')
       )
     }
   }
@@ -228,11 +228,11 @@ export default function SettingsScreen() {
     if (!user) return
     try {
       await saveHealthProfile(user.id, health)
-      Alert.alert('Saved', 'Health profile updated.')
+      Alert.alert(t('settings.screen.saved'), t('settings.screen.healthUpdated'))
     } catch (error_) {
       Alert.alert(
-        'Unable to save',
-        error_ instanceof Error ? error_.message : 'Please check your values.'
+        t('settings.screen.unableSave'),
+        error_ instanceof Error ? error_.message : t('settings.screen.pleaseCheck')
       )
     }
   }
@@ -240,18 +240,18 @@ export default function SettingsScreen() {
     if (!user) return
     try {
       await savePrivacy(user.id, privacy)
-      Alert.alert('Saved', 'Privacy settings updated.')
+      Alert.alert(t('settings.screen.saved'), t('settings.screen.privacyUpdated'))
     } catch (error_) {
-      Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
+      Alert.alert(t('settings.screen.unableSave'), error_ instanceof Error ? error_.message : t('settings.screen.pleaseTry'))
     }
   }
   const saveCoupleSettings = async () => {
     if (!data?.coupleId) return
     try {
       await saveCouple(data.coupleId, anniversary, name)
-      Alert.alert('Saved', 'Couple settings updated.')
+      Alert.alert(t('settings.screen.saved'), t('settings.screen.coupleUpdated'))
     } catch (error_) {
-      Alert.alert('Unable to save', error_ instanceof Error ? error_.message : 'Please try again.')
+      Alert.alert(t('settings.screen.unableSave'), error_ instanceof Error ? error_.message : t('settings.screen.pleaseTry'))
     }
   }
   const exportData = async (kind: 'photos' | 'chat' | 'care' | 'finance') => {
@@ -264,8 +264,8 @@ export default function SettingsScreen() {
       })
     } catch (error_) {
       Alert.alert(
-        'Export failed',
-        error_ instanceof Error ? error_.message : 'Unable to export data.'
+        t('settings.screen.exportFailed'),
+        error_ instanceof Error ? error_.message : t('settings.screen.unableExport')
       )
     }
   }
@@ -280,7 +280,7 @@ export default function SettingsScreen() {
       )
       setData((current) => (current ? { ...current, pinEnabled: enabled } : current))
     } catch (error_) {
-      Alert.alert('Security', error_ instanceof Error ? error_.message : 'Unable to update PIN.')
+      Alert.alert(t('settings.screen.securityTitle'), error_ instanceof Error ? error_.message : t('settings.screen.unablePin'))
     }
   }
   const startMfaSetup = async () => {
@@ -292,8 +292,8 @@ export default function SettingsScreen() {
       if (verified) {
         setMfaEnabled(true)
         Alert.alert(
-          'Already enabled',
-          'Two-factor authentication is already enabled for this account.'
+          t('settings.screen.alreadyEnabled'),
+          t('settings.screen.mfaAlready')
         )
         return
       }
@@ -315,7 +315,7 @@ export default function SettingsScreen() {
       setMfaCode('')
       setMfaVisible(true)
     } catch (error_) {
-      Alert.alert('Setup failed', error_ instanceof Error ? error_.message : 'Please try again.')
+      Alert.alert(t('settings.screen.setupFailed'), error_ instanceof Error ? error_.message : t('settings.screen.pleaseTry'))
     } finally {
       setMfaBusy(false)
     }
@@ -340,11 +340,11 @@ export default function SettingsScreen() {
       setMfaQrCode('')
       setMfaSecret('')
       setMfaCode('')
-      Alert.alert('Complete', 'Two-factor authentication has been enabled.')
+      Alert.alert(t('settings.screen.complete'), t('settings.screen.mfaEnabled'))
     } catch (error_) {
       Alert.alert(
-        'Code verification failed',
-        error_ instanceof Error ? error_.message : 'Please check the code and try again.'
+        t('settings.screen.verifyFailed'),
+        error_ instanceof Error ? error_.message : t('settings.screen.checkCode')
       )
     } finally {
       setMfaBusy(false)
@@ -360,12 +360,12 @@ export default function SettingsScreen() {
   }
   const disableMfa = () => {
     Alert.alert(
-      'Disable two-factor authentication?',
-      'The authenticator app code will no longer be required when signing in.',
+      t('settings.screen.disableMfaTitle'),
+      t('settings.screen.disableMfaBody'),
       [
-        { text: 'Keep enabled', style: 'cancel' },
+        { text: t('settings.screen.keepEnabled'), style: 'cancel' },
         {
-          text: 'Disable',
+          text: t('settings.screen.disable'),
           style: 'destructive',
           onPress: () => {
             void (async () => {
@@ -374,17 +374,17 @@ export default function SettingsScreen() {
                 const { data: factors, error: factorsError } = await supabase.auth.mfa.listFactors()
                 if (factorsError) throw factorsError
                 const verified = factors?.totp.find((factor) => factor.status === 'verified')
-                if (!verified) throw new Error('No verified authenticator found.')
+                if (!verified) throw new Error(t('settings.screen.noAuthenticator'))
                 const { error: removeError } = await supabase.auth.mfa.unenroll({
                   factorId: verified.id,
                 })
                 if (removeError) throw removeError
                 setMfaEnabled(false)
-                Alert.alert('Complete', 'Two-factor authentication has been disabled.')
+                Alert.alert(t('settings.screen.complete'), t('settings.screen.mfaDisabled'))
               } catch (error_) {
                 Alert.alert(
-                  'Unable to disable',
-                  error_ instanceof Error ? error_.message : 'Please try again.'
+                  t('settings.screen.unableDisable'),
+                  error_ instanceof Error ? error_.message : t('settings.screen.pleaseTry')
                 )
               } finally {
                 setMfaBusy(false)
@@ -398,7 +398,7 @@ export default function SettingsScreen() {
   const biometric = async (enabled: boolean) => {
     if (!user) return
     if (enabled && !(await LocalAuthentication.hasHardwareAsync())) {
-      Alert.alert('Biometrics', 'This device does not support biometric authentication.')
+      Alert.alert(t('settings.screen.biometricsTitle'), t('settings.screen.noBiometrics'))
       return
     }
     await saveLocalSecurity(user.id, data?.pinEnabled ?? false, enabled)
@@ -407,7 +407,7 @@ export default function SettingsScreen() {
   if (loading)
     return (
       <View style={styles.center}>
-        <Text style={styles.muted}>Loading settings...</Text>
+        <Text style={styles.muted}>{t('settings.screen.loading')}</Text>
       </View>
     )
   if (!data)
@@ -433,18 +433,18 @@ export default function SettingsScreen() {
                 if (!token)
                   return Alert.alert(
                     'Notifications',
-                    'Push notifications are unavailable on this device.'
+                    t('settings.screen.notificationsUnavailable')
                   )
                 await sendLocalNotification(
-                  'Love reminders ready',
-                  'Your gentle connection nudges are enabled.'
+                  t('settings.screen.loveReady'),
+                  t('settings.screen.loveEnabled')
                 )
               } else {
                 await unregisterForPushNotifications()
               }
               setNotifications((current) => ({ ...current, pushEnabled: value }))
             } catch (error_) {
-              Alert.alert('Notifications', error_ instanceof Error ? error_.message : 'Unable to update notifications.')
+              Alert.alert('Notifications', error_ instanceof Error ? error_.message : t('settings.screen.notificationsUpdate'))
             }
           }}
         />
