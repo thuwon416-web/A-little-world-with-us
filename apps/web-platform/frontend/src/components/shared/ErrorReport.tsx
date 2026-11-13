@@ -59,6 +59,15 @@ export default function ErrorReport() {
               <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-text-2">
                 {new Date(error.timestamp).toLocaleString()}
               </p>
+              {(error.context?.source || error.context?.component || error.context?.componentStack || error.stack) ? (
+                <details className="mt-3 rounded-lg border border-border/40 bg-soft-tint p-3">
+                  <summary className="cursor-pointer text-xs font-medium text-text-2">{t('Settings.errorDetails')}</summary>
+                  {typeof error.context?.source === 'string' ? <p className="mt-2 text-xs text-text-2">{t('Settings.errorSource')}: {error.context.source}</p> : null}
+                  {typeof error.context?.component === 'string' ? <p className="mt-1 text-xs text-text-2">{t('Settings.errorComponent')}: {error.context.component}</p> : null}
+                  {typeof error.context?.componentStack === 'string' ? <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words text-[10px] text-text-2">{error.context.componentStack.split('\n').slice(0, 8).join('\n')}</pre> : null}
+                  {typeof error.stack === 'string' ? <pre className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap break-words text-[10px] text-text-2">{error.stack.split('\n').slice(0, 10).join('\n')}</pre> : null}
+                </details>
+              ) : null}
             </div>
           ))
         )}
