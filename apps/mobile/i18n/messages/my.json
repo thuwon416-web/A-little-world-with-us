@@ -272,7 +272,8 @@
       "notificationsTitle": "အသိပေးချက်များ",
       "unableLoad": "ဆက်တင်များ ဖွင့်၍ မရပါ။",
       "unableSavePreference": "ရွေးချယ်မှုကို သိမ်းဆည်း၍ မရပါ။",
-      "notificationsUpdate": "အသိပေးချက်များ အပ်ဒိတ်လုပ်၍ မရပါ။"
+      "notificationsUpdate": "အသိပေးချက်များ အပ်ဒိတ်လုပ်၍ မရပါ။",
+      "unableUnlink": "ချိတ်ဆက်မှု ဖြုတ်၍ မရပါ။"
     }
   }
 }
