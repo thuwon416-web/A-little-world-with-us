@@ -273,7 +273,9 @@
       "unableLoad": "Unable to load settings.",
       "unableSavePreference": "Unable to save preference.",
       "notificationsUpdate": "Unable to update notifications.",
-      "unableUnlink": "Unable to unlink."
+      "unableUnlink": "Unable to unlink.",
+      "linkedAccepted": "Linked and accepted",
+      "notLinked": "Not linked"
     }
   }
 }
