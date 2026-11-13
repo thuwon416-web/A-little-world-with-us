@@ -223,3 +223,8 @@ SCRATCH.md
 Thumbs.db
 apps/web-platform/frontend/AGENTS.md
 apps/web-platform/frontend/CLAUDE.md
+
+# Nexus Suite Inspector - never commit these
+inspector_credentials.env
+auth_sessions/
+*.session.json
