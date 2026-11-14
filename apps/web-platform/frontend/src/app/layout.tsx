@@ -12,6 +12,7 @@ import { WebVitalsReporter } from '@/components/WebVitalsReporter'
 import AIChatWidget from '@/components/AIChatWidget'
 import OfflineBanner from '@/components/shared/OfflineBanner'
 import { SpeedInsights } from '@vercel/speed-insights/next'
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' })
@@ -107,6 +108,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <AIChatWidget />
               <Script src="https://telegram.org/js/telegram-web-app.js" strategy="lazyOnload" />
               <SpeedInsights />
+              <Analytics />
               <WebVitalsReporter />
             </ThemeProvider>
           </LanguageProvider>
